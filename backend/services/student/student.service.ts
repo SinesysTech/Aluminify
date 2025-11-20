@@ -11,6 +11,8 @@ import {
   StudentNotFoundError,
   StudentValidationError,
 } from './errors';
+import { getDatabaseClient } from '@/backend/clients/database';
+import { randomBytes } from 'crypto';
 
 const FULL_NAME_MIN_LENGTH = 3;
 const FULL_NAME_MAX_LENGTH = 200;
@@ -60,8 +62,35 @@ export class StudentService {
     const instagram = payload.instagram ? this.validateSocialHandle(payload.instagram) : null;
     const twitter = payload.twitter ? this.validateSocialHandle(payload.twitter) : null;
 
+    // Se o ID não foi fornecido, precisamos criar o usuário no auth.users primeiro
+    // usando o Admin API do Supabase
+    let studentId = payload.id;
+    if (!studentId) {
+      const adminClient = getDatabaseClient();
+      
+      // Gerar uma senha temporária aleatória
+      const tempPassword = randomBytes(16).toString('hex');
+      
+      // Criar o usuário no auth.users usando Admin API
+      const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
+        email: email,
+        password: tempPassword,
+        email_confirm: true, // Confirmar email automaticamente
+        user_metadata: {
+          role: 'aluno',
+          full_name: fullName,
+        },
+      });
+
+      if (authError || !authUser?.user) {
+        throw new Error(`Failed to create auth user: ${authError?.message || 'Unknown error'}`);
+      }
+
+      studentId = authUser.user.id;
+    }
+
     return this.repository.create({
-      id: payload.id,
+      id: studentId,
       fullName,
       email,
       cpf: payload.cpf ? this.validateCpf(payload.cpf) : null,

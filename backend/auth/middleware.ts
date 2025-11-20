@@ -12,6 +12,7 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
   const authHeader = request.headers.get('authorization');
   
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    console.log('[Auth] No authorization header found');
     return null;
   }
 
@@ -22,11 +23,20 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
     const { data: { user }, error } = await client.auth.getUser(token);
 
     if (error || !user) {
+      console.log('[Auth] Error getting user:', error?.message || 'No user found');
       return null;
     }
 
     const role = (user.user_metadata?.role as UserRole) || 'aluno';
     const isSuperAdmin = role === 'superadmin' || user.user_metadata?.is_superadmin === true;
+
+    console.log('[Auth] User authenticated:', {
+      id: user.id,
+      email: user.email,
+      user_metadata: user.user_metadata,
+      role,
+      isSuperAdmin,
+    });
 
     return {
       id: user.id,
@@ -34,7 +44,8 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
       role: isSuperAdmin ? 'superadmin' : role,
       isSuperAdmin,
     };
-  } catch {
+  } catch (err) {
+    console.error('[Auth] Exception getting user:', err);
     return null;
   }
 }

@@ -11,6 +11,8 @@ import {
   TeacherNotFoundError,
   TeacherValidationError,
 } from './errors';
+import { getDatabaseClient } from '@/backend/clients/database';
+import { randomBytes } from 'crypto';
 
 const FULL_NAME_MIN_LENGTH = 3;
 const FULL_NAME_MAX_LENGTH = 200;
@@ -49,8 +51,35 @@ export class TeacherService {
     const biography = payload.biography ? this.validateBiography(payload.biography) : null;
     const specialty = payload.specialty ? this.validateSpecialty(payload.specialty) : null;
 
+    // Se o ID não foi fornecido, precisamos criar o usuário no auth.users primeiro
+    // usando o Admin API do Supabase
+    let teacherId = payload.id;
+    if (!teacherId) {
+      const adminClient = getDatabaseClient();
+      
+      // Gerar uma senha temporária aleatória
+      const tempPassword = randomBytes(16).toString('hex');
+      
+      // Criar o usuário no auth.users usando Admin API
+      const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
+        email: email,
+        password: tempPassword,
+        email_confirm: true, // Confirmar email automaticamente
+        user_metadata: {
+          role: 'professor',
+          full_name: fullName,
+        },
+      });
+
+      if (authError || !authUser?.user) {
+        throw new Error(`Failed to create auth user: ${authError?.message || 'Unknown error'}`);
+      }
+
+      teacherId = authUser.user.id;
+    }
+
     return this.repository.create({
-      id: payload.id,
+      id: teacherId,
       fullName,
       email,
       cpf: payload.cpf ? this.validateCpf(payload.cpf) : null,

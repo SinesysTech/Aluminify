@@ -102,9 +102,11 @@ export class TeacherRepositoryImpl implements TeacherRepository {
       especialidade: payload.specialty ?? null,
     };
 
-    if (payload.id) {
-      insertData.id = payload.id;
+    // O ID deve sempre ser fornecido (vem do auth.users criado no service)
+    if (!payload.id) {
+      throw new Error('Teacher ID is required. User must be created in auth.users first.');
     }
+    insertData.id = payload.id;
 
     const { data, error } = await this.client
       .from(TABLE)

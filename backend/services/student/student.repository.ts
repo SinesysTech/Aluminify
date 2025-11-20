@@ -126,10 +126,11 @@ export class StudentRepositoryImpl implements StudentRepository {
       twitter: payload.twitter ?? null,
     };
 
-    // Se o ID foi fornecido, usar ele (caso venha do auth.users)
-    if (payload.id) {
-      insertData.id = payload.id;
+    // O ID deve sempre ser fornecido (vem do auth.users criado no service)
+    if (!payload.id) {
+      throw new Error('Student ID is required. User must be created in auth.users first.');
     }
+    insertData.id = payload.id;
 
     const { data, error } = await this.client
       .from(TABLE)

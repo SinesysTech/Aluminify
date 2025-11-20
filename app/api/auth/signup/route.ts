@@ -5,11 +5,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
+    // Frontend sempre cria professores (não alunos)
+    // O primeiro professor será automaticamente superadmin via trigger
     const result = await authService.signUp({
       email: body?.email,
       password: body?.password,
       fullName: body?.fullName,
-      role: body?.role,
+      role: 'professor', // Sempre professor quando vem do frontend
     });
 
     return NextResponse.json({ data: result }, { status: 201 });

@@ -27,8 +27,24 @@ function handleError(error: unknown) {
     return NextResponse.json({ error: error.message }, { status: 409 });
   }
 
-  console.error(error);
-  return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  // Log detalhado do erro
+  console.error('Teacher API Error:', error);
+  
+  // Extrair mensagem de erro mais detalhada
+  let errorMessage = 'Internal server error';
+  if (error instanceof Error) {
+    errorMessage = error.message || errorMessage;
+    console.error('Error stack:', error.stack);
+  } else if (typeof error === 'string') {
+    errorMessage = error;
+  } else if (error && typeof error === 'object' && 'message' in error) {
+    errorMessage = String(error.message);
+  }
+  
+  return NextResponse.json({ 
+    error: errorMessage,
+    details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : String(error)) : undefined
+  }, { status: 500 });
 }
 
 export async function GET() {
@@ -43,6 +59,14 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+    console.log('[Teacher POST] Request body:', body);
+    
+    if (!body?.fullName || !body?.email) {
+      return NextResponse.json({ 
+        error: 'Campos obrigatórios: fullName e email são necessários' 
+      }, { status: 400 });
+    }
+    
     const teacher = await teacherService.create({
       id: body?.id,
       fullName: body?.fullName,
@@ -53,8 +77,10 @@ export async function POST(request: NextRequest) {
       photoUrl: body?.photoUrl,
       specialty: body?.specialty,
     });
+    console.log('[Teacher POST] Teacher created:', teacher.id);
     return NextResponse.json({ data: serializeTeacher(teacher) }, { status: 201 });
   } catch (error) {
+    console.error('[Teacher POST] Error creating teacher:', error);
     return handleError(error);
   }
 }
