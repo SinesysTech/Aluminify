@@ -126,17 +126,28 @@ export default function TobIAsPage() {
     })
   }, [sessionId, userId])
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, sendMessage, status, error, isLoading: chatLoading } = useChat({
     transport,
     onError: (error) => {
-      console.error('[Chat Client] Error:', error)
+      console.error('[Chat Client] ❌ Error:', error)
+      console.error('[Chat Client] Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      })
     },
     onFinish: (result) => {
-      console.log('[Chat Client] Message finished:', result.message.id, result.message.role)
+      console.log('[Chat Client] ✅ Message finished:', result.message.id, result.message.role)
       console.log('[Chat Client] Message parts:', result.message.parts?.length || 0)
+      console.log('[Chat Client] Message content:', result.message.parts)
       console.log('[Chat Client] Finish reason:', result.finishReason)
     },
   })
+
+  // Log status changes
+  useEffect(() => {
+    console.log('[Chat Client] 📊 Status changed:', status)
+  }, [status])
   
   // Log messages changes
   useEffect(() => {
