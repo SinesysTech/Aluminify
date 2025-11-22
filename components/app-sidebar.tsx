@@ -9,6 +9,7 @@ import {
   Users,
   FileText,
   MessageSquare,
+  Calendar,
 } from "lucide-react"
 import { usePathname } from "next/navigation"
 
@@ -59,6 +60,12 @@ const navMainData = [
       title: "Segmentos",
       url: "/segmento",
       icon: Layers,
+      isActive: false,
+    },
+    {
+      title: "Conteúdo Programático",
+      url: "/conteudos",
+      icon: Calendar,
       isActive: false,
     },
 ]
