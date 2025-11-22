@@ -25,7 +25,6 @@ interface ChatMessage {
 }
 
 export default function TobIAsPage() {
-  const [sessionId, setSessionId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -34,18 +33,10 @@ export default function TobIAsPage() {
   const [isInitializing, setIsInitializing] = useState(true)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Inicializar sessionId, userId e accessToken
+  // Inicializar userId e accessToken
   useEffect(() => {
     const initializeChat = async () => {
       try {
-        // Gerar ou recuperar sessionId do localStorage
-        let storedSessionId = localStorage.getItem('tobias-session-id')
-        if (!storedSessionId) {
-          storedSessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-          localStorage.setItem('tobias-session-id', storedSessionId)
-        }
-        setSessionId(storedSessionId)
-
         // Obter userId e accessToken do usuário autenticado
         const supabase = createClient()
         const { data: { session } } = await supabase.auth.getSession()
@@ -75,7 +66,7 @@ export default function TobIAsPage() {
   }, [])
 
   const sendMessage = async (text: string) => {
-    if (!text.trim() || !sessionId || !userId || isLoading) {
+    if (!text.trim() || !userId || isLoading) {
       return
     }
 
@@ -100,7 +91,6 @@ export default function TobIAsPage() {
         },
         body: JSON.stringify({
           message: text,
-          sessionId,
           userId,
         }),
       })
@@ -233,11 +223,11 @@ export default function TobIAsPage() {
             <PromptInputTextarea
               ref={inputRef}
               placeholder="Digite sua mensagem..."
-              disabled={isLoading || !sessionId || !userId}
+              disabled={isLoading || !userId}
             />
             <PromptInputToolbar>
               <PromptInputSubmit
-                disabled={isLoading || !sessionId || !userId}
+                disabled={isLoading || !userId}
               />
             </PromptInputToolbar>
           </PromptInput>
