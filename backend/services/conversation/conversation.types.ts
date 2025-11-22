@@ -1,8 +1,16 @@
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
+
 export interface Conversation {
   id: string;
   user_id: string;
   session_id: string;
   title: string;
+  messages: ChatMessage[];
   created_at: string;
   updated_at: string;
   is_active: boolean;
@@ -33,4 +41,10 @@ export interface DeleteConversationRequest {
 
 export interface GetActiveConversationRequest {
   userId: string;
+}
+
+export interface AddMessageToConversationRequest {
+  conversationId: string;
+  userId: string;
+  message: ChatMessage;
 }

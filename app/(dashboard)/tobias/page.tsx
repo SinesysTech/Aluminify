@@ -33,18 +33,47 @@ export default function TobIAsPage() {
   const [isInitializing, setIsInitializing] = useState(true)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Inicializar userId e accessToken
+  // Inicializar userId, accessToken e carregar histórico
   useEffect(() => {
     const initializeChat = async () => {
       try {
         // Obter userId e accessToken do usuário autenticado
         const supabase = createClient()
         const { data: { session } } = await supabase.auth.getSession()
+
+        let currentUserId: string | null = null
+        let currentAccessToken: string | null = null
+
         if (session?.user?.id) {
-          setUserId(session.user.id)
+          currentUserId = session.user.id
+          setUserId(currentUserId)
         }
         if (session?.access_token) {
-          setAccessToken(session.access_token)
+          currentAccessToken = session.access_token
+          setAccessToken(currentAccessToken)
+        }
+
+        // Carregar histórico da conversa ativa
+        if (currentUserId && currentAccessToken) {
+          try {
+            const response = await fetch('/api/conversations?active=true', {
+              headers: {
+                'Authorization': `Bearer ${currentAccessToken}`,
+              },
+            })
+
+            if (response.ok) {
+              const data = await response.json()
+              const activeConversation = data.conversations?.[0]
+
+              if (activeConversation?.messages && activeConversation.messages.length > 0) {
+                console.log('[TobIAs] Loaded', activeConversation.messages.length, 'messages from history')
+                setMessages(activeConversation.messages)
+              }
+            }
+          } catch (error) {
+            console.error('[TobIAs] Error loading conversation history:', error)
+          }
         }
 
         // Configurar listener para atualizar o token quando a sessão mudar

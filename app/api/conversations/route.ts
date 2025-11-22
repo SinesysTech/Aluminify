@@ -5,6 +5,7 @@ import { requireAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
 /**
  * GET /api/conversations
  * Listar todas as conversas do usuário
+ * Query params: ?active=true para retornar apenas a conversa ativa
  */
 async function getHandler(request: AuthenticatedRequest) {
   try {
@@ -13,9 +14,20 @@ async function getHandler(request: AuthenticatedRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Verificar se está pedindo apenas a conversa ativa
+    const url = new URL(request.url);
+    const activeOnly = url.searchParams.get('active') === 'true';
+
+    if (activeOnly) {
+      const activeConversation = await conversationService.getActiveConversation({ userId });
+      return NextResponse.json({
+        conversations: activeConversation ? [activeConversation] : []
+      });
+    }
+
     const conversations = await conversationService.listConversations({ userId });
 
-    return NextResponse.json({ data: conversations });
+    return NextResponse.json({ conversations });
   } catch (error) {
     console.error('[Conversations API] Error listing conversations:', error);
     return NextResponse.json(
@@ -45,7 +57,7 @@ async function postHandler(request: AuthenticatedRequest) {
       title: body.title,
     });
 
-    return NextResponse.json({ data: conversation }, { status: 201 });
+    return NextResponse.json({ conversation }, { status: 201 });
   } catch (error) {
     console.error('[Conversations API] Error creating conversation:', error);
     return NextResponse.json(

@@ -94,6 +94,30 @@ async function postHandler(request: AuthenticatedRequest) {
     console.log('[Chat API] ✅ Resposta recebida do N8N');
     console.log('[Chat API] Output length:', response.output?.length || 0);
     console.log('[Chat API] Output preview:', response.output?.substring(0, 100));
+
+    // Salvar mensagens no histórico da conversa
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user' as const,
+      content: body.message,
+      timestamp: Date.now(),
+    };
+
+    const assistantMessage = {
+      id: `assistant-${Date.now()}`,
+      role: 'assistant' as const,
+      content: response.output || '',
+      timestamp: Date.now(),
+    };
+
+    await conversationService.addMessagesToConversation(
+      conversation.id,
+      userId,
+      userMessage,
+      assistantMessage
+    );
+
+    console.log('[Chat API] ✅ Messages saved to conversation history');
     console.log('[Chat API] ==========================================');
 
     return NextResponse.json({

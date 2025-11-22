@@ -197,6 +197,52 @@ export class ConversationService {
 
     return active;
   }
+
+  /**
+   * Adicionar mensagens à conversa
+   */
+  async addMessagesToConversation(
+    conversationId: string,
+    userId: string,
+    userMessage: { id: string; role: 'user'; content: string; timestamp: number },
+    assistantMessage: { id: string; role: 'assistant'; content: string; timestamp: number }
+  ): Promise<Conversation> {
+    const supabase = await createClient();
+
+    // Obter conversa atual
+    const { data: conversation, error: fetchError } = await supabase
+      .from('chat_conversations')
+      .select('messages')
+      .eq('id', conversationId)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError || !conversation) {
+      console.error('[Conversation Service] Error fetching conversation:', fetchError);
+      throw new Error(`Failed to fetch conversation: ${fetchError?.message}`);
+    }
+
+    // Adicionar novas mensagens ao array existente
+    const currentMessages = conversation.messages || [];
+    const updatedMessages = [...currentMessages, userMessage, assistantMessage];
+
+    // Atualizar conversa com novas mensagens
+    const { data, error } = await supabase
+      .from('chat_conversations')
+      .update({ messages: updatedMessages })
+      .eq('id', conversationId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[Conversation Service] Error updating messages:', error);
+      throw new Error(`Failed to update messages: ${error.message}`);
+    }
+
+    console.log('[Conversation Service] ✅ Messages added to conversation:', conversationId);
+    return data;
+  }
 }
 
 export const conversationService = new ConversationService();

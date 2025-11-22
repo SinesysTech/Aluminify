@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS chat_conversations (
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   session_id TEXT NOT NULL UNIQUE,
   title TEXT NOT NULL DEFAULT 'Nova Conversa',
+  messages JSONB DEFAULT '[]'::jsonb,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   is_active BOOLEAN DEFAULT FALSE
@@ -17,6 +18,7 @@ CREATE TABLE IF NOT EXISTS chat_conversations (
 -- Comentários na tabela e colunas
 COMMENT ON TABLE chat_conversations IS 'Gerenciamento de sessões de chat do TobIAs';
 COMMENT ON COLUMN chat_conversations.session_id IS 'ID único usado para comunicação com N8N (memória do agente)';
+COMMENT ON COLUMN chat_conversations.messages IS 'Histórico completo de mensagens da conversa em formato JSON';
 COMMENT ON COLUMN chat_conversations.is_active IS 'Indica a conversa atualmente ativa do usuário (apenas uma por usuário)';
 
 -- Índices para performance
