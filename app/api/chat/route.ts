@@ -4,6 +4,7 @@ import {
   ChatValidationError,
   ChatServiceError,
 } from '@/backend/services/chat';
+import { conversationService } from '@/backend/services/conversation';
 import { requireAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
 
 function handleError(error: unknown) {
@@ -59,8 +60,6 @@ async function postHandler(request: AuthenticatedRequest) {
 
     console.log('[Chat API] ========== POST REQUEST ==========');
     console.log('[Chat API] Message:', body.message?.substring(0, 100));
-    console.log('[Chat API] SessionId:', body.sessionId);
-    console.log('[Chat API] UserId:', body.userId);
 
     if (!body?.message) {
       return NextResponse.json({
@@ -76,29 +75,55 @@ async function postHandler(request: AuthenticatedRequest) {
       }, { status: 400 });
     }
 
-    // Usar sessionId do body
-    const sessionId = body.sessionId;
-    if (!sessionId) {
-      return NextResponse.json({
-        error: 'Session ID é necessário'
-      }, { status: 400 });
-    }
+    console.log('[Chat API] UserId:', userId);
 
+    // Obter ou criar conversa ativa para o usuário
+    const conversation = await conversationService.getOrCreateActiveConversation(userId);
+
+    console.log('[Chat API] Conversation ID:', conversation.id);
+    console.log('[Chat API] SessionId:', conversation.session_id);
     console.log('[Chat API] ➡️  Enviando para N8N webhook...');
 
     // Enviar para o N8N e aguardar resposta
     const response = await chatService.sendMessage({
       message: body.message,
-      sessionId: sessionId,
+      sessionId: conversation.session_id,
       userId: userId,
     });
 
     console.log('[Chat API] ✅ Resposta recebida do N8N');
     console.log('[Chat API] Output length:', response.output?.length || 0);
     console.log('[Chat API] Output preview:', response.output?.substring(0, 100));
+
+    // Salvar mensagens no histórico da conversa
+    const userMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user' as const,
+      content: body.message,
+      timestamp: Date.now(),
+    };
+
+    const assistantMessage = {
+      id: `assistant-${Date.now()}`,
+      role: 'assistant' as const,
+      content: response.output || '',
+      timestamp: Date.now(),
+    };
+
+    await conversationService.addMessagesToConversation(
+      conversation.id,
+      userId,
+      userMessage,
+      assistantMessage
+    );
+
+    console.log('[Chat API] ✅ Messages saved to conversation history');
     console.log('[Chat API] ==========================================');
 
-    return NextResponse.json({ data: response });
+    return NextResponse.json({
+      data: response,
+      conversationId: conversation.id
+    });
   } catch (error) {
     return handleError(error);
   }

@@ -25,7 +25,6 @@ interface ChatMessage {
 }
 
 export default function TobIAsPage() {
-  const [sessionId, setSessionId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -34,26 +33,47 @@ export default function TobIAsPage() {
   const [isInitializing, setIsInitializing] = useState(true)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Inicializar sessionId, userId e accessToken
+  // Inicializar userId, accessToken e carregar histórico
   useEffect(() => {
     const initializeChat = async () => {
       try {
-        // Gerar ou recuperar sessionId do localStorage
-        let storedSessionId = localStorage.getItem('tobias-session-id')
-        if (!storedSessionId) {
-          storedSessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-          localStorage.setItem('tobias-session-id', storedSessionId)
-        }
-        setSessionId(storedSessionId)
-
         // Obter userId e accessToken do usuário autenticado
         const supabase = createClient()
         const { data: { session } } = await supabase.auth.getSession()
+
+        let currentUserId: string | null = null
+        let currentAccessToken: string | null = null
+
         if (session?.user?.id) {
-          setUserId(session.user.id)
+          currentUserId = session.user.id
+          setUserId(currentUserId)
         }
         if (session?.access_token) {
-          setAccessToken(session.access_token)
+          currentAccessToken = session.access_token
+          setAccessToken(currentAccessToken)
+        }
+
+        // Carregar histórico da conversa ativa
+        if (currentUserId && currentAccessToken) {
+          try {
+            const response = await fetch('/api/conversations?active=true', {
+              headers: {
+                'Authorization': `Bearer ${currentAccessToken}`,
+              },
+            })
+
+            if (response.ok) {
+              const data = await response.json()
+              const activeConversation = data.conversations?.[0]
+
+              if (activeConversation?.messages && activeConversation.messages.length > 0) {
+                console.log('[TobIAs] Loaded', activeConversation.messages.length, 'messages from history')
+                setMessages(activeConversation.messages)
+              }
+            }
+          } catch (error) {
+            console.error('[TobIAs] Error loading conversation history:', error)
+          }
         }
 
         // Configurar listener para atualizar o token quando a sessão mudar
@@ -75,7 +95,7 @@ export default function TobIAsPage() {
   }, [])
 
   const sendMessage = async (text: string) => {
-    if (!text.trim() || !sessionId || !userId || isLoading) {
+    if (!text.trim() || !userId || isLoading) {
       return
     }
 
@@ -100,7 +120,6 @@ export default function TobIAsPage() {
         },
         body: JSON.stringify({
           message: text,
-          sessionId,
           userId,
         }),
       })
@@ -233,11 +252,11 @@ export default function TobIAsPage() {
             <PromptInputTextarea
               ref={inputRef}
               placeholder="Digite sua mensagem..."
-              disabled={isLoading || !sessionId || !userId}
+              disabled={isLoading || !userId}
             />
             <PromptInputToolbar>
               <PromptInputSubmit
-                disabled={isLoading || !sessionId || !userId}
+                disabled={isLoading || !userId}
               />
             </PromptInputToolbar>
           </PromptInput>
