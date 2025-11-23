@@ -58,10 +58,21 @@ export default function TobIAsPage() {
 
   // Inicializar userId, accessToken e carregar histórico
   useEffect(() => {
+    const supabase = createClient()
+    
+    // Configurar listener para atualizar o token quando a sessão mudar
+    // Criar a subscription de forma síncrona para garantir que o cleanup funcione
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.access_token) {
+        setAccessToken(session.access_token)
+      } else {
+        setAccessToken(null)
+      }
+    })
+
     const initializeChat = async () => {
       try {
         // Obter userId e accessToken do usuário autenticado
-        const supabase = createClient()
         const { data: { session } } = await supabase.auth.getSession()
 
         let currentUserId: string | null = null
@@ -97,15 +108,6 @@ export default function TobIAsPage() {
             console.error('[TobIAs] Error loading conversation history:', error)
           }
         }
-
-        // Configurar listener para atualizar o token quando a sessão mudar
-        supabase.auth.onAuthStateChange((_event, session) => {
-          if (session?.access_token) {
-            setAccessToken(session.access_token)
-          } else {
-            setAccessToken(null)
-          }
-        })
       } catch (error) {
         console.error('Error initializing chat:', error)
       } finally {
@@ -114,6 +116,11 @@ export default function TobIAsPage() {
     }
 
     initializeChat()
+
+    // Retornar função de cleanup para desinscrever o listener quando o componente desmontar
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   // Handler para selecionar conversa
