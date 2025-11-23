@@ -5,4 +5,10 @@
 [functions.gerar-cronograma]
 verify_jwt = false
 
+# Configuração do Storage
+# Desabilitando Storage temporariamente para evitar erro de migração
+[storage]
+enabled = false
+
+
 

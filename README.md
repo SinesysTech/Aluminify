@@ -56,11 +56,17 @@ Crie um arquivo `.env.local`:
 
 ```env
 # Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=your-publishable-or-anon-key
 SUPABASE_URL=your-project-url
 SUPABASE_SECRET_KEY=sb_secret_...  # Recomendado para backend
-# ou
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key  # Legacy
+
+# Upstash Redis (opcional, mas recomendado para produção)
+UPSTASH_REDIS_REST_URL=https://your-redis-instance.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-redis-token
 ```
+
+Para mais detalhes sobre as variáveis de ambiente, consulte [ENV_VARIABLES.md](./ENV_VARIABLES.md).
 
 ### Instalação
 
@@ -130,6 +136,23 @@ O banco de dados está configurado no Supabase com:
 ```bash
 npm run lint
 ```
+
+## 🚀 Deploy
+
+### Deploy na Vercel
+
+O projeto está configurado para deploy na Vercel. Consulte o guia completo em [DEPLOY.md](./DEPLOY.md).
+
+**Arquivos de configuração:**
+- `vercel.json` - Configurações do Vercel
+- `middleware.ts` - Middleware de autenticação Next.js
+- `next.config.ts` - Configurações do Next.js
+
+**Pré-requisitos:**
+- Conta na Vercel
+- Variáveis de ambiente configuradas (veja [ENV_VARIABLES.md](./ENV_VARIABLES.md))
+- Projeto Supabase configurado
+- Upstash Redis (opcional, mas recomendado)
 
 ## 📝 Estrutura de um Serviço
 

@@ -30,8 +30,8 @@ const wizardSchema = z.object({
   dias_semana: z.number().min(1).max(7),
   horas_dia: z.number().min(1),
   ferias: z.array(z.object({
-    inicio: z.string(),
-    fim: z.string(),
+    inicio: z.date().optional(),
+    fim: z.date().optional(),
   })).default([]),
   curso_alvo_id: z.string().optional(),
   disciplinas_ids: z.array(z.string()).min(1, 'Selecione pelo menos uma disciplina'),
@@ -165,7 +165,10 @@ export function ScheduleWizard() {
         aluno_id: user.id,
         data_inicio: format(data.data_inicio, 'yyyy-MM-dd'),
         data_fim: format(data.data_fim, 'yyyy-MM-dd'),
-        ferias: data.ferias,
+        ferias: data.ferias.map((periodo) => ({
+          inicio: periodo.inicio ? format(periodo.inicio, 'yyyy-MM-dd') : '',
+          fim: periodo.fim ? format(periodo.fim, 'yyyy-MM-dd') : '',
+        })),
         horas_dia: data.horas_dia,
         dias_semana: data.dias_semana,
         prioridade_minima: data.prioridade_minima,
@@ -176,35 +179,78 @@ export function ScheduleWizard() {
         ordem_frentes_preferencia: data.ordem_frentes_preferencia,
       }
 
-      // Chamar Edge Function usando o cliente Supabase
-      console.log('Invocando Edge Function com body:', requestBody)
+      // Obter token de autenticação
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session?.access_token) {
+        throw new Error('Sessão não encontrada')
+      }
+
+      // Chamar API local
+      console.log('Invocando API local com body:', requestBody)
       
-      const { data: result, error: functionError } = await supabase.functions.invoke('gerar-cronograma', {
-        body: requestBody,
-      })
-
-      console.log('Resultado da Edge Function:', { result, functionError })
-
-      if (functionError) {
-        console.error('Erro na Edge Function:', functionError)
-        // Se o erro contém detalhes, mostrar mensagem mais específica
-        if (functionError.context?.statusCode) {
-          setError(`Erro ${functionError.context.statusCode}: ${functionError.message || 'Erro ao gerar cronograma'}`)
-        } else {
-          setError(functionError.message || 'Erro ao gerar cronograma. Verifique sua conexão e tente novamente.')
-        }
+      let response: Response
+      try {
+        response = await fetch('/api/cronograma', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify(requestBody),
+        })
+      } catch (fetchError) {
+        console.error('Erro ao fazer fetch:', fetchError)
+        setError('Erro de conexão. Verifique sua internet e tente novamente.')
         setLoading(false)
         return
       }
 
-      if (result?.error) {
-        if (result.error === 'Tempo insuficiente' && result.detalhes) {
+      console.log('Status da resposta:', response.status, response.statusText)
+      console.log('Headers da resposta:', Object.fromEntries(response.headers.entries()))
+
+      let result: any = {}
+      const contentType = response.headers.get('content-type')
+      
+      try {
+        const responseText = await response.text()
+        console.log('Texto bruto da resposta:', responseText)
+        
+        if (contentType?.includes('application/json') && responseText) {
+          try {
+            result = JSON.parse(responseText)
+            console.log('JSON parseado:', result)
+          } catch (jsonError) {
+            console.error('Erro ao fazer parse do JSON:', jsonError)
+            result = { error: `Resposta inválida do servidor: ${responseText.substring(0, 100)}` }
+          }
+        } else if (responseText) {
+          console.error('Resposta não é JSON:', responseText)
+          result = { error: responseText || `Erro ${response.status}: ${response.statusText}` }
+        } else {
+          result = { error: `Erro ${response.status}: ${response.statusText || 'Resposta vazia do servidor'}` }
+        }
+      } catch (parseError) {
+        console.error('Erro ao processar resposta:', parseError)
+        result = { error: `Erro ao processar resposta do servidor (${response.status})` }
+      }
+
+      console.log('Resultado final da API:', { result, status: response.status, ok: response.ok })
+
+      if (!response.ok) {
+        console.error('Erro na API - Status:', response.status)
+        console.error('Erro na API - Result:', result)
+        console.error('Erro na API - Keys:', result ? Object.keys(result) : 'result é null/undefined')
+        
+        // Se o erro contém detalhes, mostrar mensagem mais específica
+        if (result?.error === 'Tempo insuficiente' && result?.detalhes) {
           setError(
             `Tempo insuficiente! Necessário ${result.detalhes.horas_necessarias}h, disponível ${result.detalhes.horas_disponiveis}h. ` +
             `Sugestão: ${result.detalhes.horas_dia_necessarias}h por dia.`
           )
         } else {
-          setError(result.error || 'Erro ao gerar cronograma')
+          const errorMessage = result?.error || result?.message || result?.details || `Erro ${response.status}: ${response.statusText || 'Erro ao gerar cronograma'}`
+          console.error('Mensagem de erro final:', errorMessage)
+          setError(errorMessage)
         }
         setLoading(false)
         return
@@ -257,7 +303,7 @@ export function ScheduleWizard() {
     const ferias = form.getValues('ferias')
     form.setValue('ferias', [
       ...ferias,
-      { inicio: '', fim: '' },
+      { inicio: undefined, fim: undefined },
     ])
   }
 
@@ -406,27 +452,69 @@ export function ScheduleWizard() {
                     <div key={index} className="flex gap-2 items-end">
                       <div className="flex-1 space-y-2">
                         <Label className="text-xs">Início</Label>
-                        <Input
-                          type="date"
-                          value={periodo.inicio}
-                          onChange={(e) => {
-                            const ferias = form.getValues('ferias')
-                            ferias[index].inicio = e.target.value
-                            form.setValue('ferias', ferias)
-                          }}
-                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal text-xs",
+                                !periodo.inicio && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {periodo.inicio ? (
+                                format(periodo.inicio, "PPP", { locale: ptBR })
+                              ) : (
+                                <span>Selecione a data</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={periodo.inicio}
+                              onSelect={(date) => {
+                                const ferias = form.getValues('ferias')
+                                ferias[index].inicio = date
+                                form.setValue('ferias', ferias)
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                       </div>
                       <div className="flex-1 space-y-2">
                         <Label className="text-xs">Fim</Label>
-                        <Input
-                          type="date"
-                          value={periodo.fim}
-                          onChange={(e) => {
-                            const ferias = form.getValues('ferias')
-                            ferias[index].fim = e.target.value
-                            form.setValue('ferias', ferias)
-                          }}
-                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal text-xs",
+                                !periodo.fim && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {periodo.fim ? (
+                                format(periodo.fim, "PPP", { locale: ptBR })
+                              ) : (
+                                <span>Selecione a data</span>
+                              )}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={periodo.fim}
+                              onSelect={(date) => {
+                                const ferias = form.getValues('ferias')
+                                ferias[index].fim = date
+                                form.setValue('ferias', ferias)
+                              }}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
                       </div>
                       <Button
                         type="button"

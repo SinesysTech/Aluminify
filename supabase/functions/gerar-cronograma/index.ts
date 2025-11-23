@@ -738,6 +738,14 @@ Deno.serve(async (req: Request) => {
     // ============================================
 
     // Criar registro do cronograma
+    console.log("Criando registro do cronograma com dados:", {
+      aluno_id: input.aluno_id,
+      nome: input.nome,
+      data_inicio: input.data_inicio,
+      data_fim: input.data_fim,
+      curso_alvo_id: input.curso_alvo_id,
+    });
+    
     const { data: cronograma, error: cronogramaError } = await supabaseAdmin
       .from("cronogramas")
       .insert({
@@ -758,13 +766,25 @@ Deno.serve(async (req: Request) => {
       .single();
 
     if (cronogramaError || !cronograma) {
-      console.error("Erro ao criar cronograma:", cronogramaError);
+      console.error("=== ERRO AO CRIAR CRONOGRAMA ===");
+      console.error("Erro completo:", JSON.stringify(cronogramaError, null, 2));
+      console.error("Código:", cronogramaError?.code);
+      console.error("Mensagem:", cronogramaError?.message);
+      console.error("Detalhes:", cronogramaError?.details);
+      console.error("Hint:", cronogramaError?.hint);
+      
+      // Se for erro 409 (Conflict), retornar status 409
+      const statusCode = cronogramaError?.code === '23505' || cronogramaError?.code === 'PGRST116' ? 409 : 500;
+      
       return new Response(
         JSON.stringify({
           error: "Erro ao criar cronograma: " + (cronogramaError?.message || "Desconhecido"),
+          detalhes: cronogramaError?.details || null,
+          hint: cronogramaError?.hint || null,
+          codigo: cronogramaError?.code || null,
         }),
         {
-          status: 500,
+          status: statusCode,
           headers: { 
             "Content-Type": "application/json",
             ...corsHeaders,
@@ -772,6 +792,8 @@ Deno.serve(async (req: Request) => {
         }
       );
     }
+    
+    console.log("Cronograma criado com sucesso:", cronograma.id);
 
     // Preencher cronograma_id nos itens
     const itensCompleto = itens.map((item) => ({

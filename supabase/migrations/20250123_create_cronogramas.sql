@@ -8,7 +8,7 @@
 CREATE TABLE IF NOT EXISTS public.cronogramas (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     aluno_id UUID NOT NULL REFERENCES public.alunos(id) ON DELETE CASCADE,
-    curso_alvo_id UUID REFERENCES public.cursos(id) ON DELETE SET NULL,
+    curso_alvo_id UUID, -- Referência opcional a cursos (pode ser adicionada depois se necessário)
     
     nome TEXT DEFAULT 'Meu Cronograma',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS public.cronogramas (
 CREATE TABLE IF NOT EXISTS public.cronograma_itens (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     cronograma_id UUID NOT NULL REFERENCES public.cronogramas(id) ON DELETE CASCADE,
-    aula_id UUID NOT NULL REFERENCES public.aulas(id) ON DELETE CASCADE,
+    aula_id UUID NOT NULL, -- Referência a aulas (foreign key será adicionada quando a tabela aulas existir)
     
     -- Organização Temporal
     semana_numero INTEGER NOT NULL, -- Semana 1, Semana 2, etc.
@@ -91,5 +91,6 @@ CREATE POLICY "Aluno gerencia itens do seu cronograma"
             AND c.aluno_id = auth.uid()
         )
     );
+
 
 

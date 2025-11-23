@@ -15,6 +15,7 @@ import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
+  arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { createClient } from '@/lib/client'
@@ -39,6 +40,19 @@ interface CronogramaItem {
     nome: string
     numero_aula: number | null
     tempo_estimado_minutos: number | null
+    modulos: {
+      id: string
+      nome: string
+      numero_modulo: number | null
+      frentes: {
+        id: string
+        nome: string
+        disciplinas: {
+          id: string
+          nome: string
+        }
+      }
+    }
   }
 }
 
@@ -46,6 +60,7 @@ interface ScheduleKanbanProps {
   itensPorSemana: Record<number, CronogramaItem[]>
   cronogramaId: string
   dataInicio: string
+  modalidadeEstudo: 'paralelo' | 'sequencial'
   onToggleConcluido: (itemId: string, concluido: boolean) => void
   onUpdate: (updater: (prev: any) => any) => void
 }
@@ -90,8 +105,8 @@ function AulaCard({
           >
             <GripVertical className="h-4 w-4 text-muted-foreground" />
           </div>
-          <div className="flex-1 space-y-2">
-            <div className="flex items-center gap-2">
+          <div className="flex-1 space-y-2 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
               <Checkbox
                 checked={item.concluido}
                 onCheckedChange={(checked) =>
@@ -102,6 +117,16 @@ function AulaCard({
               <Badge variant="outline" className="text-xs">
                 Aula {item.aulas.numero_aula || 'N/A'}
               </Badge>
+              {item.aulas.modulos?.numero_modulo && (
+                <Badge variant="secondary" className="text-xs">
+                  Módulo {item.aulas.modulos.numero_modulo}
+                </Badge>
+              )}
+              {item.aulas.modulos?.frentes?.nome && (
+                <Badge variant="outline" className="text-xs">
+                  {item.aulas.modulos.frentes.nome}
+                </Badge>
+              )}
             </div>
             <p className="text-sm font-medium line-clamp-2">
               {item.aulas.nome}
@@ -122,6 +147,7 @@ export function ScheduleKanban({
   itensPorSemana,
   cronogramaId,
   dataInicio,
+  modalidadeEstudo,
   onToggleConcluido,
   onUpdate,
 }: ScheduleKanbanProps) {
@@ -156,7 +182,7 @@ export function ScheduleKanban({
     if (!over) return
 
     const itemId = active.id as string
-    const novaSemana = Number(over.id.toString().replace('semana-', ''))
+    const overId = over.id as string
 
     // Encontrar o item atual
     let itemAtual: CronogramaItem | null = null
@@ -171,87 +197,95 @@ export function ScheduleKanban({
       }
     }
 
-    if (!itemAtual || semanaAtual === novaSemana) {
-      // Apenas reordenar dentro da mesma semana
-      if (semanaAtual === novaSemana) {
-        const itens = [...itensPorSemana[novaSemana]]
-        const oldIndex = itens.findIndex((i) => i.id === itemId)
-        const newIndex = itens.length - 1 // Simplificado: sempre coloca no final
+    if (!itemAtual) return
 
-        if (oldIndex !== newIndex) {
-          // Reordenar
-          const [removed] = itens.splice(oldIndex, 1)
-          itens.splice(newIndex, 0, removed)
+    // Verificar se está sendo arrastado para outra semana (coluna)
+    const novaSemana = overId.toString().startsWith('semana-')
+      ? Number(overId.toString().replace('semana-', ''))
+      : null
 
-          // Atualizar ordens
-          const itensAtualizados = itens.map((item, index) => ({
-            ...item,
-            ordem_na_semana: index + 1,
-          }))
+    // Verificar se está sendo arrastado para outro item (reordenação)
+    const itemSobre = Object.values(itensPorSemana)
+      .flat()
+      .find((i) => i.id === overId)
 
-          // Atualizar no banco
-          const supabase = createClient()
-          for (const item of itensAtualizados) {
-            await supabase
-              .from('cronograma_itens')
-              .update({ ordem_na_semana: item.ordem_na_semana })
-              .eq('id', item.id)
-          }
+    if (itemSobre && itemSobre.semana_numero === semanaAtual) {
+      // Reordenação dentro da mesma semana
+      const itens = [...itensPorSemana[semanaAtual]]
+      const oldIndex = itens.findIndex((i) => i.id === itemId)
+      const newIndex = itens.findIndex((i) => i.id === overId)
 
-          // Atualizar estado local
-          onUpdate((prev: any) => {
-            if (!prev) return prev
-            return {
-              ...prev,
-              cronograma_itens: prev.cronograma_itens.map((item: CronogramaItem) => {
-                const updated = itensAtualizados.find((i) => i.id === item.id)
-                return updated || item
-              }),
-            }
-          })
+      if (oldIndex !== newIndex && newIndex !== -1) {
+        const newItems = arrayMove(itens, oldIndex, newIndex)
+        const itensAtualizados = newItems.map((item, index) => ({
+          ...item,
+          ordem_na_semana: index + 1,
+        }))
+
+        // Atualizar no banco
+        const supabase = createClient()
+        for (const item of itensAtualizados) {
+          await supabase
+            .from('cronograma_itens')
+            .update({ ordem_na_semana: item.ordem_na_semana })
+            .eq('id', item.id)
         }
-      }
-      return
-    }
 
-    // Mover para outra semana
-    const itensNovaSemana = [...(itensPorSemana[novaSemana] || [])]
-    const novaOrdem = itensNovaSemana.length + 1
-
-    // Atualizar no banco
-    const supabase = createClient()
-    const { error } = await supabase
-      .from('cronograma_itens')
-      .update({
-        semana_numero: novaSemana,
-        ordem_na_semana: novaOrdem,
-      })
-      .eq('id', itemId)
-
-    if (error) {
-      console.error('Erro ao atualizar item:', error)
-      return
-    }
-
-    // Atualizar estado local (optimistic update)
-    onUpdate((prev: any) => {
-      if (!prev) return prev
-      const itens = prev.cronograma_itens.map((item: CronogramaItem) => {
-        if (item.id === itemId) {
+        // Atualizar estado local
+        onUpdate((prev: any) => {
+          if (!prev) return prev
           return {
-            ...item,
-            semana_numero: novaSemana,
-            ordem_na_semana: novaOrdem,
+            ...prev,
+            cronograma_itens: prev.cronograma_itens.map((item: CronogramaItem) => {
+              const updated = itensAtualizados.find((i) => i.id === item.id)
+              return updated || item
+            }),
           }
-        }
-        return item
-      })
-
-      return {
-        ...prev,
-        cronograma_itens: itens,
+        })
       }
-    })
+      return
+    }
+
+    // Mover para outra semana (arrastar para a coluna)
+    if (novaSemana && novaSemana !== semanaAtual) {
+      const itensNovaSemana = [...(itensPorSemana[novaSemana] || [])]
+      const novaOrdem = itensNovaSemana.length + 1
+
+      // Atualizar no banco
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('cronograma_itens')
+        .update({
+          semana_numero: novaSemana,
+          ordem_na_semana: novaOrdem,
+        })
+        .eq('id', itemId)
+
+      if (error) {
+        console.error('Erro ao atualizar item:', error)
+        return
+      }
+
+      // Atualizar estado local (optimistic update)
+      onUpdate((prev: any) => {
+        if (!prev) return prev
+        const itens = prev.cronograma_itens.map((item: CronogramaItem) => {
+          if (item.id === itemId) {
+            return {
+              ...item,
+              semana_numero: novaSemana,
+              ordem_na_semana: novaOrdem,
+            }
+          }
+          return item
+        })
+
+        return {
+          ...prev,
+          cronograma_itens: itens,
+        }
+      })
+    }
   }
 
   const activeItem = activeId
@@ -280,14 +314,44 @@ export function ScheduleKanban({
             >
               <Card>
                 <CardContent className="p-4">
-                  <div className="mb-4">
-                    <h3 className="font-semibold text-sm">
-                      Semana {semana}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {format(inicioSemana, 'dd/MM', { locale: ptBR })} -{' '}
-                      {format(fimSemana, 'dd/MM', { locale: ptBR })}
-                    </p>
+                  <div className="mb-4 space-y-2">
+                    <div>
+                      <h3 className="font-semibold text-sm">
+                        Semana {semana}
+                      </h3>
+                      <p className="text-xs text-muted-foreground">
+                        {format(inicioSemana, 'dd/MM', { locale: ptBR })} -{' '}
+                        {format(fimSemana, 'dd/MM', { locale: ptBR })}
+                      </p>
+                    </div>
+                    {itens.length > 0 && (
+                      <div className="text-xs space-y-1 pt-2 border-t">
+                        {(() => {
+                          const tempoAulas = itens.reduce((acc, item) => {
+                            return acc + (item.aulas.tempo_estimado_minutos || 0)
+                          }, 0)
+                          const tempoAnotacoesExercicios = tempoAulas * 0.5 // 50% do tempo de aulas para anotações e exercícios
+                          const tempoTotal = tempoAulas + tempoAnotacoesExercicios
+                          
+                          return (
+                            <>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Aulas:</span>
+                                <span className="font-medium">{Math.round(tempoAulas)} min</span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-muted-foreground">Anotações/Exercícios:</span>
+                                <span className="font-medium">{Math.round(tempoAnotacoesExercicios)} min</span>
+                              </div>
+                              <div className="flex justify-between pt-1 border-t">
+                                <span className="font-semibold">Total:</span>
+                                <span className="font-semibold">{Math.round(tempoTotal)} min ({Math.round(tempoTotal / 60)}h)</span>
+                              </div>
+                            </>
+                          )
+                        })()}
+                      </div>
+                    )}
                   </div>
                   <ScrollArea className="h-[600px]">
                     <SortableContext
@@ -317,11 +381,28 @@ export function ScheduleKanban({
             <CardContent className="p-3">
               <div className="flex items-start gap-2">
                 <GripVertical className="h-4 w-4 text-muted-foreground mt-1" />
-                <div className="flex-1 space-y-2">
-                  <Badge variant="outline" className="text-xs">
-                    Aula {activeItem.aulas.numero_aula || 'N/A'}
-                  </Badge>
+                <div className="flex-1 space-y-2 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Badge variant="outline" className="text-xs">
+                      Aula {activeItem.aulas.numero_aula || 'N/A'}
+                    </Badge>
+                    {activeItem.aulas.modulos?.numero_modulo && (
+                      <Badge variant="secondary" className="text-xs">
+                        Módulo {activeItem.aulas.modulos.numero_modulo}
+                      </Badge>
+                    )}
+                    {activeItem.aulas.modulos?.frentes?.nome && (
+                      <Badge variant="outline" className="text-xs">
+                        {activeItem.aulas.modulos.frentes.nome}
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-sm font-medium">{activeItem.aulas.nome}</p>
+                  {activeItem.aulas.tempo_estimado_minutos && (
+                    <p className="text-xs text-muted-foreground">
+                      {activeItem.aulas.tempo_estimado_minutos} min
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -331,4 +412,3 @@ export function ScheduleKanban({
     </DndContext>
   )
 }
-

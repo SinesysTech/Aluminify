@@ -13,7 +13,18 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Skeleton } from '@/components/ui/skeleton'
 import { ScheduleKanban } from '@/components/schedule-kanban'
 import { ScheduleList } from '@/components/schedule-list'
-import { CalendarCheck, Download, Plus } from 'lucide-react'
+import { CalendarCheck, Download, Plus, RefreshCw } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 
@@ -29,6 +40,19 @@ interface CronogramaItem {
     nome: string
     numero_aula: number | null
     tempo_estimado_minutos: number | null
+    modulos: {
+      id: string
+      nome: string
+      numero_modulo: number | null
+      frentes: {
+        id: string
+        nome: string
+        disciplinas: {
+          id: string
+          nome: string
+        }
+      }
+    }
   }
 }
 
@@ -39,6 +63,7 @@ interface Cronograma {
   data_fim: string
   dias_estudo_semana: number
   horas_estudo_dia: number
+  modalidade_estudo: 'paralelo' | 'sequencial'
   cronograma_itens: CronogramaItem[]
 }
 
@@ -46,6 +71,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [cronograma, setCronograma] = useState<Cronograma | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   useEffect(() => {
     async function loadCronograma() {
@@ -66,7 +92,20 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
               id,
               nome,
               numero_aula,
-              tempo_estimado_minutos
+              tempo_estimado_minutos,
+              modulos!inner(
+                id,
+                nome,
+                numero_modulo,
+                frentes!inner(
+                  id,
+                  nome,
+                  disciplinas!inner(
+                    id,
+                    nome
+                  )
+                )
+              )
             )
           )
         `)
@@ -159,10 +198,23 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
 
   // Calcular semana atual
   const hoje = new Date()
-  const dataInicio = new Date(cronograma.data_inicio)
-  const diffTime = hoje.getTime() - dataInicio.getTime()
+  const dataInicioCalc = new Date(cronograma.data_inicio)
+  const diffTime = hoje.getTime() - dataInicioCalc.getTime()
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
   const semanaAtual = Math.floor(diffDays / 7) + 1
+
+  // Calcular todas as semanas do cronograma (incluindo férias)
+  const dataInicio = new Date(cronograma.data_inicio)
+  const dataFim = new Date(cronograma.data_fim)
+  const todasSemanas: number[] = []
+  let semanaNumero = 1
+  let dataAtual = new Date(dataInicio)
+  
+  while (dataAtual <= dataFim) {
+    todasSemanas.push(semanaNumero)
+    dataAtual.setDate(dataAtual.getDate() + 7)
+    semanaNumero = semanaNumero + 1
+  }
 
   // Agrupar itens por semana
   const itensPorSemana = cronograma.cronograma_itens.reduce((acc, item) => {
@@ -172,6 +224,13 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
     acc[item.semana_numero].push(item)
     return acc
   }, {} as Record<number, CronogramaItem[]>)
+
+  // Garantir que todas as semanas tenham uma entrada (mesmo que vazia)
+  todasSemanas.forEach((semana) => {
+    if (!itensPorSemana[semana]) {
+      itensPorSemana[semana] = []
+    }
+  })
 
   // Ordenar itens dentro de cada semana
   Object.keys(itensPorSemana).forEach((semana) => {
@@ -192,10 +251,42 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
                 {format(new Date(cronograma.data_fim), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
               </CardDescription>
             </div>
-            <Button variant="outline" disabled>
-              <Download className="mr-2 h-4 w-4" />
-              Exportar PDF
-            </Button>
+            <div className="flex gap-2">
+              <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline">
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Criar Novo Cronograma
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Criar Novo Cronograma?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Ao criar um novo cronograma, o cronograma atual será <strong>permanentemente excluído</strong> e não poderá ser recuperado.
+                      <br />
+                      <br />
+                      Tem certeza que deseja continuar?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => {
+                        setShowDeleteDialog(false)
+                        router.push('/aluno/cronograma/novo')
+                      }}
+                    >
+                      Sim, criar novo cronograma
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <Button variant="outline" disabled>
+                <Download className="mr-2 h-4 w-4" />
+                Exportar PDF
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -222,7 +313,14 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
           <ScheduleList
             itensPorSemana={itensPorSemana}
             dataInicio={cronograma.data_inicio}
+            modalidade={cronograma.modalidade_estudo}
+            cronogramaId={cronogramaId}
             onToggleConcluido={toggleConcluido}
+            onUpdate={(updater) => {
+              if (cronograma) {
+                setCronograma(updater(cronograma))
+              }
+            }}
           />
         </TabsContent>
         <TabsContent value="kanban" className="mt-4">
@@ -230,6 +328,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             itensPorSemana={itensPorSemana}
             cronogramaId={cronogramaId}
             dataInicio={cronograma.data_inicio}
+            modalidadeEstudo={cronograma.modalidade_estudo}
             onToggleConcluido={toggleConcluido}
             onUpdate={(updater) => {
               if (cronograma) {
