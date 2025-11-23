@@ -16,6 +16,10 @@ import {
   PromptInputSubmit,
 } from '@/components/ui/shadcn-io/ai/prompt-input'
 import { Loader } from '@/components/ui/shadcn-io/ai/loader'
+import { ConversationsPanel } from '@/components/conversations-panel'
+import { Button } from '@/components/ui/button'
+import { MessageSquare } from 'lucide-react'
+import type { Conversation as ConversationType } from '@/backend/services/conversation/conversation.types'
 
 interface ChatMessage {
   id: string
@@ -28,10 +32,29 @@ export default function TobIAsPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [currentConversation, setCurrentConversation] = useState<ConversationType | null>(null)
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isInitializing, setIsInitializing] = useState(true)
+  const [conversationsPanelOpen, setConversationsPanelOpen] = useState(true)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+
+  // Função para carregar conversa
+  const loadConversation = async (conversation: ConversationType) => {
+    if (!accessToken) return
+
+    setCurrentConversation(conversation)
+    setSelectedConversationId(conversation.id)
+
+    // Carregar mensagens da conversa
+    if (conversation.messages && conversation.messages.length > 0) {
+      console.log('[TobIAs] Loaded', conversation.messages.length, 'messages from conversation')
+      setMessages(conversation.messages)
+    } else {
+      setMessages([])
+    }
+  }
 
   // Inicializar userId, accessToken e carregar histórico
   useEffect(() => {
@@ -66,9 +89,8 @@ export default function TobIAsPage() {
               const data = await response.json()
               const activeConversation = data.conversations?.[0]
 
-              if (activeConversation?.messages && activeConversation.messages.length > 0) {
-                console.log('[TobIAs] Loaded', activeConversation.messages.length, 'messages from history')
-                setMessages(activeConversation.messages)
+              if (activeConversation) {
+                await loadConversation(activeConversation)
               }
             }
           } catch (error) {
@@ -94,9 +116,102 @@ export default function TobIAsPage() {
     initializeChat()
   }, [])
 
+  // Handler para selecionar conversa
+  const handleSelectConversation = async (conversation: ConversationType | null) => {
+    if (!conversation || !accessToken) {
+      setCurrentConversation(null)
+      setSelectedConversationId(null)
+      setMessages([])
+      return
+    }
+
+    try {
+      // Buscar conversa completa por ID
+      const response = await fetch(`/api/conversations/${conversation.id}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.data) {
+          await loadConversation(data.data)
+        }
+      }
+    } catch (error) {
+      console.error('[TobIAs] Error loading conversation:', error)
+    }
+  }
+
+  // Handler para quando conversas são atualizadas
+  const handleConversationUpdated = async () => {
+    if (!accessToken || !selectedConversationId) return
+
+    try {
+      // Recarregar conversa atual
+      const response = await fetch(`/api/conversations/${selectedConversationId}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data.data) {
+          await loadConversation(data.data)
+        }
+      }
+    } catch (error) {
+      console.error('[TobIAs] Error reloading conversation:', error)
+    }
+  }
+
   const sendMessage = async (text: string) => {
     if (!text.trim() || !userId || isLoading) {
       return
+    }
+
+    // Se não há conversa selecionada, criar ou obter uma ativa
+    if (!currentConversation) {
+      try {
+        const response = await fetch('/api/conversations?active=true', {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          const activeConversation = data.conversations?.[0]
+          
+          if (activeConversation) {
+            await loadConversation(activeConversation)
+          } else {
+            // Criar nova conversa se não houver nenhuma ativa
+            const createResponse = await fetch('/api/conversations', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`,
+              },
+              body: JSON.stringify({
+                title: 'Nova Conversa',
+              }),
+            })
+
+            if (createResponse.ok) {
+              const createData = await createResponse.json()
+              if (createData.conversation) {
+                await loadConversation(createData.conversation)
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('[TobIAs] Error getting/creating conversation:', error)
+        return
+      }
     }
 
     const userMessage: ChatMessage = {
@@ -140,6 +255,11 @@ export default function TobIAsPage() {
       }
 
       setMessages(prev => [...prev, assistantMessage])
+
+      // Recarregar conversa para ter os dados atualizados
+      if (currentConversation) {
+        await handleConversationUpdated()
+      }
     } catch (err) {
       console.error('Error sending message:', err)
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
@@ -175,91 +295,116 @@ export default function TobIAsPage() {
 
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col">
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold">TobIAs</h1>
-        <p className="text-muted-foreground text-sm">
-          Sua monitora de curso. Tire suas dúvidas e receba ajuda personalizada.
-        </p>
+      <div className="mb-4 flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setConversationsPanelOpen(!conversationsPanelOpen)}
+        >
+          <MessageSquare className="h-4 w-4" />
+          <span className="sr-only">Toggle conversas</span>
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold">TobIAs</h1>
+          <p className="text-muted-foreground text-sm">
+            Sua monitora de curso. Tire suas dúvidas e receba ajuda personalizada.
+          </p>
+        </div>
       </div>
 
-      <div className="relative flex flex-1 flex-col overflow-hidden rounded-lg border">
-        <Conversation>
-          <ConversationContent>
-            {messages.length === 0 && (
-              <div className="flex h-full items-center justify-center">
-                <div className="text-center">
-                  <p className="text-muted-foreground mb-2 text-lg">
-                    Olá! Eu sou a TobIAs, sua monitora de curso.
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    Como posso ajudá-lo hoje?
-                  </p>
-                </div>
-              </div>
-            )}
+      <div className="flex flex-1 gap-4 overflow-hidden">
+        {/* Painel de conversas */}
+        <ConversationsPanel
+          selectedConversationId={selectedConversationId}
+          onSelectConversation={(conv) => {
+            handleSelectConversation(conv)
+          }}
+          onConversationUpdated={handleConversationUpdated}
+          accessToken={accessToken}
+          open={conversationsPanelOpen}
+          onOpenChange={setConversationsPanelOpen}
+        />
 
-            {messages.map((message) => (
-              <Message key={message.id} from={message.role}>
-                {message.role === 'assistant' && (
+        {/* Área do chat */}
+        <div className="relative flex flex-1 flex-col overflow-hidden rounded-lg border">
+          <Conversation>
+            <ConversationContent>
+              {messages.length === 0 && (
+                <div className="flex h-full items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-muted-foreground mb-2 text-lg">
+                      Olá! Eu sou a TobIAs, sua monitora de curso.
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      Como posso ajudá-lo hoje?
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {messages.map((message) => (
+                <Message key={message.id} from={message.role}>
+                  {message.role === 'assistant' && (
+                    <MessageAvatar
+                      src=""
+                      name="TobIAs"
+                      className="mr-2"
+                    />
+                  )}
+                  <MessageContent>
+                    {message.role === 'user' ? (
+                      <div className="whitespace-pre-wrap">{message.content}</div>
+                    ) : (
+                      <Response>{message.content}</Response>
+                    )}
+                  </MessageContent>
+                  {message.role === 'user' && (
+                    <MessageAvatar
+                      src=""
+                      name="Você"
+                      className="ml-2"
+                    />
+                  )}
+                </Message>
+              ))}
+
+              {isLoading && (
+                <Message from="assistant">
                   <MessageAvatar
                     src=""
                     name="TobIAs"
                     className="mr-2"
                   />
-                )}
-                <MessageContent>
-                  {message.role === 'user' ? (
-                    <div className="whitespace-pre-wrap">{message.content}</div>
-                  ) : (
-                    <Response>{message.content}</Response>
-                  )}
-                </MessageContent>
-                {message.role === 'user' && (
-                  <MessageAvatar
-                    src=""
-                    name="Você"
-                    className="ml-2"
-                  />
-                )}
-              </Message>
-            ))}
+                  <MessageContent>
+                    <Loader />
+                  </MessageContent>
+                </Message>
+              )}
 
-            {isLoading && (
-              <Message from="assistant">
-                <MessageAvatar
-                  src=""
-                  name="TobIAs"
-                  className="mr-2"
-                />
-                <MessageContent>
-                  <Loader />
-                </MessageContent>
-              </Message>
-            )}
+              {error && (
+                <div className="bg-destructive/10 text-destructive rounded-lg p-4">
+                  <p className="font-medium">Erro ao enviar mensagem</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
+            </ConversationContent>
+            <ConversationScrollButton />
+          </Conversation>
 
-            {error && (
-              <div className="bg-destructive/10 text-destructive rounded-lg p-4">
-                <p className="font-medium">Erro ao enviar mensagem</p>
-                <p className="text-sm">{error}</p>
-              </div>
-            )}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
-
-        <div className="border-t bg-background p-4">
-          <PromptInput onSubmit={handleSubmit}>
-            <PromptInputTextarea
-              ref={inputRef}
-              placeholder="Digite sua mensagem..."
-              disabled={isLoading || !userId}
-            />
-            <PromptInputToolbar>
-              <PromptInputSubmit
+          <div className="border-t bg-background p-4">
+            <PromptInput onSubmit={handleSubmit}>
+              <PromptInputTextarea
+                ref={inputRef}
+                placeholder="Digite sua mensagem..."
                 disabled={isLoading || !userId}
               />
-            </PromptInputToolbar>
-          </PromptInput>
+              <PromptInputToolbar>
+                <PromptInputSubmit
+                  disabled={isLoading || !userId}
+                />
+              </PromptInputToolbar>
+            </PromptInput>
+          </div>
         </div>
       </div>
     </div>

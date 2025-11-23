@@ -51,7 +51,19 @@ async function putHandler(
     }
 
     const { id } = await params;
-    const body = await request.json();
+    
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      console.error('[Conversations API] Error parsing request body:', parseError);
+      return NextResponse.json(
+        { error: 'Invalid request body' },
+        { status: 400 }
+      );
+    }
+
+    console.log('[Conversations API] Updating conversation:', id, 'with body:', body);
 
     const conversation = await conversationService.updateConversation({
       id,
@@ -63,8 +75,15 @@ async function putHandler(
     return NextResponse.json({ data: conversation });
   } catch (error) {
     console.error('[Conversations API] Error updating conversation:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
+    if (errorStack) {
+      console.error('[Conversations API] Error stack:', errorStack);
+    }
+    
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

@@ -125,13 +125,30 @@ export class ConversationService {
 
     const updates: Partial<Conversation> = {};
 
-    if (request.title !== undefined) {
-      updates.title = request.title;
+    if (request.title !== undefined && request.title !== null) {
+      const trimmedTitle = String(request.title).trim();
+      if (trimmedTitle.length > 0) {
+        updates.title = trimmedTitle;
+      } else {
+        throw new Error('Title cannot be empty');
+      }
     }
 
     if (request.is_active !== undefined) {
-      updates.is_active = request.is_active;
+      updates.is_active = Boolean(request.is_active);
     }
+
+    // Verificar se há campos para atualizar
+    if (Object.keys(updates).length === 0) {
+      console.log('[Conversation Service] No fields to update, returning existing conversation');
+      const existing = await this.getConversationById(request.id, request.userId);
+      if (!existing) {
+        throw new Error('Conversation not found');
+      }
+      return existing;
+    }
+
+    console.log('[Conversation Service] Updating conversation:', request.id, 'with:', updates);
 
     const { data, error } = await supabase
       .from('chat_conversations')
@@ -143,7 +160,13 @@ export class ConversationService {
 
     if (error) {
       console.error('[Conversation Service] Error updating conversation:', error);
+      console.error('[Conversation Service] Error details:', JSON.stringify(error, null, 2));
       throw new Error(`Failed to update conversation: ${error.message}`);
+    }
+
+    if (!data) {
+      console.error('[Conversation Service] No data returned after update');
+      throw new Error('Conversation not found or unauthorized');
     }
 
     console.log('[Conversation Service] ✅ Conversation updated:', data.id);
