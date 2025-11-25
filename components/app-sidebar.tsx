@@ -1,21 +1,22 @@
 "use client"
 
-import * as React from "react"
 import {
   BookOpen,
-  Command,
-  GraduationCap,
-  Layers,
-  Users,
-  FileText,
-  MessageSquare,
   Calendar,
   CalendarCheck,
+  Command,
+  FileText,
+  GraduationCap,
+  Layers,
+  MessageSquare,
+  Users,
 } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
+import { useCurrentUser } from "@/components/providers/user-provider"
 import {
   Sidebar,
   SidebarContent,
@@ -25,63 +26,79 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { hasRequiredRole } from "@/lib/roles"
+import type { AppUserRole } from "@/types/user"
 
-const navMainData = [
-    {
-      title: "TobIAs",
-      url: "/tobias",
-      icon: MessageSquare,
-      isActive: false,
-    },
-    {
-      title: "Professores",
-      url: "/professor",
-      icon: GraduationCap,
-      isActive: false,
-    },
-    {
-      title: "Alunos",
-      url: "/aluno",
-      icon: Users,
-      isActive: false,
-    },
-    {
-      title: "Cursos",
-      url: "/curso",
-      icon: BookOpen,
-      isActive: false,
-    },
-    {
-      title: "Disciplinas",
-      url: "/disciplina",
-      icon: FileText,
-      isActive: false,
-    },
-    {
-      title: "Segmentos",
-      url: "/segmento",
-      icon: Layers,
-      isActive: false,
-    },
-    {
-      title: "Conteúdo Programático",
-      url: "/conteudos",
-      icon: Calendar,
-      isActive: false,
-    },
-    {
-      title: "Meu Cronograma",
-      url: "/aluno/cronograma",
-      icon: CalendarCheck,
-      isActive: false,
-    },
+type NavItem = {
+  title: string
+  url: string
+  icon: LucideIcon
+  roles: AppUserRole[]
+}
+
+const ALL_ROLES: AppUserRole[] = ["aluno", "professor", "superadmin"]
+const PROFESSOR_ONLY: AppUserRole[] = ["professor", "superadmin"]
+
+const navMainData: NavItem[] = [
+  {
+    title: "TobIAs",
+    url: "/tobias",
+    icon: MessageSquare,
+    roles: ALL_ROLES,
+  },
+  {
+    title: "Professores",
+    url: "/professor",
+    icon: GraduationCap,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Alunos",
+    url: "/aluno",
+    icon: Users,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Cursos",
+    url: "/curso",
+    icon: BookOpen,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Disciplinas",
+    url: "/disciplina",
+    icon: FileText,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Segmentos",
+    url: "/segmento",
+    icon: Layers,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Conteúdo Programático",
+    url: "/conteudos",
+    icon: Calendar,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Meu Cronograma",
+    url: "/aluno/cronograma",
+    icon: CalendarCheck,
+    roles: ALL_ROLES,
+  },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
-  
-  // Update active state based on current pathname
-  const navMainWithActive = navMainData.map((item) => ({
+  const user = useCurrentUser()
+
+  const filteredNav = navMainData.filter((item) =>
+    hasRequiredRole(user.role, item.roles)
+  )
+
+  const navMainWithActive = filteredNav.map((item) => ({
     ...item,
     isActive: pathname === item.url || pathname?.startsWith(item.url + "/"),
   }))

@@ -1,7 +1,7 @@
 import { SegmentoTable } from '@/components/segmento-table'
+import { requireUser } from '@/lib/auth'
 
-export default function SegmentoPage() {
+export default async function SegmentoPage() {
+  await requireUser({ allowedRoles: ['professor'] })
   return <SegmentoTable />
 }
-
-

@@ -1,14 +1,18 @@
 import { redirect } from 'next/navigation'
 
-import { createClient } from '@/lib/server'
+import { getAuthenticatedUser } from '@/lib/auth'
+import { getDefaultRouteForRole } from '@/lib/roles'
 
 export default async function ProtectedPage() {
-  const supabase = await createClient()
+  const user = await getAuthenticatedUser()
 
-  const { data, error } = await supabase.auth.getClaims()
-  if (error || !data?.claims) {
+  if (!user) {
     redirect('/auth/login')
   }
 
-  redirect('/dashboard')
+  if (user.mustChangePassword) {
+    redirect('/primeiro-acesso')
+  }
+
+  redirect(getDefaultRouteForRole(user.role))
 }

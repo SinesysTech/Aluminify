@@ -1,5 +1,10 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { Student, CreateStudentInput, UpdateStudentInput } from './student.types';
+import {
+  Student,
+  CreateStudentInput,
+  UpdateStudentInput,
+  StudentCourseSummary,
+} from './student.types';
 
 export interface StudentRepository {
   list(): Promise<Student[]>;
@@ -13,6 +18,8 @@ export interface StudentRepository {
 }
 
 const TABLE = 'alunos';
+const COURSE_LINK_TABLE = 'alunos_cursos';
+const COURSES_TABLE = 'cursos';
 
 type StudentRow = {
   id: string;
@@ -26,11 +33,23 @@ type StudentRow = {
   numero_matricula: string | null;
   instagram: string | null;
   twitter: string | null;
+  must_change_password: boolean;
+  senha_temporaria: string | null;
   created_at: string;
   updated_at: string;
 };
 
-function mapRow(row: StudentRow): Student {
+type CourseLinkRow = {
+  aluno_id: string;
+  curso_id: string;
+};
+
+type CourseRow = {
+  id: string;
+  nome: string;
+};
+
+function mapRow(row: StudentRow, courses: StudentCourseSummary[] = []): Student {
   return {
     id: row.id,
     fullName: row.nome_completo,
@@ -43,6 +62,9 @@ function mapRow(row: StudentRow): Student {
     enrollmentNumber: row.numero_matricula,
     instagram: row.instagram,
     twitter: row.twitter,
+    courses,
+    mustChangePassword: row.must_change_password,
+    temporaryPassword: row.senha_temporaria,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
   };
@@ -61,7 +83,7 @@ export class StudentRepositoryImpl implements StudentRepository {
       throw new Error(`Failed to list students: ${error.message}`);
     }
 
-    return (data ?? []).map(mapRow);
+    return this.attachCourses(data ?? []);
   }
 
   async findById(id: string): Promise<Student | null> {
@@ -71,7 +93,12 @@ export class StudentRepositoryImpl implements StudentRepository {
       throw new Error(`Failed to fetch student: ${error.message}`);
     }
 
-    return data ? mapRow(data) : null;
+    if (!data) {
+      return null;
+    }
+
+    const [student] = await this.attachCourses([data]);
+    return student ?? null;
   }
 
   async findByEmail(email: string): Promise<Student | null> {
@@ -85,7 +112,12 @@ export class StudentRepositoryImpl implements StudentRepository {
       throw new Error(`Failed to fetch student by email: ${error.message}`);
     }
 
-    return data ? mapRow(data) : null;
+    if (!data) {
+      return null;
+    }
+
+    const [student] = await this.attachCourses([data]);
+    return student ?? null;
   }
 
   async findByCpf(cpf: string): Promise<Student | null> {
@@ -95,7 +127,12 @@ export class StudentRepositoryImpl implements StudentRepository {
       throw new Error(`Failed to fetch student by CPF: ${error.message}`);
     }
 
-    return data ? mapRow(data) : null;
+    if (!data) {
+      return null;
+    }
+
+    const [student] = await this.attachCourses([data]);
+    return student ?? null;
   }
 
   async findByEnrollmentNumber(enrollmentNumber: string): Promise<Student | null> {
@@ -109,7 +146,12 @@ export class StudentRepositoryImpl implements StudentRepository {
       throw new Error(`Failed to fetch student by enrollment number: ${error.message}`);
     }
 
-    return data ? mapRow(data) : null;
+    if (!data) {
+      return null;
+    }
+
+    const [student] = await this.attachCourses([data]);
+    return student ?? null;
   }
 
   async create(payload: CreateStudentInput): Promise<Student> {
@@ -124,6 +166,8 @@ export class StudentRepositoryImpl implements StudentRepository {
       numero_matricula: payload.enrollmentNumber ?? null,
       instagram: payload.instagram ?? null,
       twitter: payload.twitter ?? null,
+      must_change_password: payload.mustChangePassword ?? false,
+      senha_temporaria: payload.temporaryPassword ?? null,
     };
 
     // O ID deve sempre ser fornecido (vem do auth.users criado no service)
@@ -142,7 +186,10 @@ export class StudentRepositoryImpl implements StudentRepository {
       throw new Error(`Failed to create student: ${error.message}`);
     }
 
-    return mapRow(data);
+    await this.setCourses(payload.id, payload.courseIds ?? []);
+
+    const [student] = await this.attachCourses([data]);
+    return student;
   }
 
   async update(id: string, payload: UpdateStudentInput): Promise<Student> {
@@ -188,6 +235,14 @@ export class StudentRepositoryImpl implements StudentRepository {
       updateData.twitter = payload.twitter;
     }
 
+    if (payload.mustChangePassword !== undefined) {
+      updateData.must_change_password = payload.mustChangePassword;
+    }
+
+    if (payload.temporaryPassword !== undefined) {
+      updateData.senha_temporaria = payload.temporaryPassword;
+    }
+
     const { data, error } = await this.client
       .from(TABLE)
       .update(updateData)
@@ -199,7 +254,12 @@ export class StudentRepositoryImpl implements StudentRepository {
       throw new Error(`Failed to update student: ${error.message}`);
     }
 
-    return mapRow(data);
+    if (payload.courseIds) {
+      await this.setCourses(id, payload.courseIds);
+    }
+
+    const [student] = await this.attachCourses([data]);
+    return student;
   }
 
   async delete(id: string): Promise<void> {
@@ -207,6 +267,92 @@ export class StudentRepositoryImpl implements StudentRepository {
 
     if (error) {
       throw new Error(`Failed to delete student: ${error.message}`);
+    }
+  }
+
+  private async attachCourses(rows: StudentRow[]): Promise<Student[]> {
+    if (!rows.length) {
+      return [];
+    }
+
+    const studentIds = rows.map((row) => row.id);
+    const courseMap = await this.fetchCourses(studentIds);
+
+    return rows.map((row) => mapRow(row, courseMap.get(row.id) ?? []));
+  }
+
+  private async fetchCourses(
+    studentIds: string[],
+  ): Promise<Map<string, StudentCourseSummary[]>> {
+    const map = new Map<string, StudentCourseSummary[]>();
+    if (!studentIds.length) {
+      return map;
+    }
+
+    const { data: links, error: linksError } = await this.client
+      .from<CourseLinkRow>(COURSE_LINK_TABLE)
+      .select('aluno_id, curso_id')
+      .in('aluno_id', studentIds);
+
+    if (linksError) {
+      throw new Error(`Failed to fetch student courses: ${linksError.message}`);
+    }
+
+    const courseIds = Array.from(new Set((links ?? []).map((link) => link.curso_id)));
+    if (!courseIds.length) {
+      return map;
+    }
+
+    const { data: courses, error: courseError } = await this.client
+      .from<CourseRow>(COURSES_TABLE)
+      .select('id, nome')
+      .in('id', courseIds);
+
+    if (courseError) {
+      throw new Error(`Failed to fetch courses: ${courseError.message}`);
+    }
+
+    const courseLookup = new Map<string, StudentCourseSummary>(
+      (courses ?? []).map((course) => [course.id, { id: course.id, name: course.nome }]),
+    );
+
+    (links ?? []).forEach((link) => {
+      const course = courseLookup.get(link.curso_id);
+      if (!course) {
+        return;
+      }
+
+      if (!map.has(link.aluno_id)) {
+        map.set(link.aluno_id, []);
+      }
+      map.get(link.aluno_id)!.push(course);
+    });
+
+    return map;
+  }
+
+  private async setCourses(studentId: string, courseIds: string[]): Promise<void> {
+    const { error: deleteError } = await this.client
+      .from(COURSE_LINK_TABLE)
+      .delete()
+      .eq('aluno_id', studentId);
+
+    if (deleteError) {
+      throw new Error(`Failed to clear student courses: ${deleteError.message}`);
+    }
+
+    if (!courseIds || !courseIds.length) {
+      return;
+    }
+
+    const rows = courseIds.map((courseId) => ({
+      aluno_id: studentId,
+      curso_id: courseId,
+    }));
+
+    const { error: insertError } = await this.client.from(COURSE_LINK_TABLE).insert(rows);
+    if (insertError) {
+      throw new Error(`Failed to link student to courses: ${insertError.message}`);
     }
   }
 }

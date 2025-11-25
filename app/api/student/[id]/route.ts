@@ -19,6 +19,10 @@ const serializeStudent = (student: Awaited<ReturnType<typeof studentService.getB
   enrollmentNumber: student.enrollmentNumber,
   instagram: student.instagram,
   twitter: student.twitter,
+  courses: student.courses,
+  courseIds: student.courses.map((course) => course.id),
+  mustChangePassword: student.mustChangePassword,
+  temporaryPassword: student.temporaryPassword,
   createdAt: student.createdAt.toISOString(),
   updatedAt: student.updatedAt.toISOString(),
 });
@@ -69,6 +73,8 @@ async function putHandler(request: AuthenticatedRequest, params: { id: string })
       enrollmentNumber: body?.enrollmentNumber,
       instagram: body?.instagram,
       twitter: body?.twitter,
+      courseIds: body?.courseIds,
+      temporaryPassword: body?.temporaryPassword,
     });
     return NextResponse.json({ data: serializeStudent(student) });
   } catch (error) {

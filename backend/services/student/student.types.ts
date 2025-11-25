@@ -1,3 +1,8 @@
+export interface StudentCourseSummary {
+  id: string;
+  name: string;
+}
+
 export interface Student {
   id: string;
   fullName: string | null;
@@ -10,6 +15,9 @@ export interface Student {
   enrollmentNumber: string | null;
   instagram: string | null;
   twitter: string | null;
+  courses: StudentCourseSummary[];
+  mustChangePassword: boolean;
+  temporaryPassword: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,6 +34,9 @@ export interface CreateStudentInput {
   enrollmentNumber?: string;
   instagram?: string;
   twitter?: string;
+  courseIds: string[];
+  temporaryPassword?: string;
+  mustChangePassword?: boolean;
 }
 
 export interface UpdateStudentInput {
@@ -39,5 +50,8 @@ export interface UpdateStudentInput {
   enrollmentNumber?: string | null;
   instagram?: string | null;
   twitter?: string | null;
+  courseIds?: string[];
+  temporaryPassword?: string | null;
+  mustChangePassword?: boolean;
 }
 

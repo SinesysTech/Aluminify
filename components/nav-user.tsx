@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import {
   BadgeCheck,
@@ -176,9 +177,11 @@ export function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Conta
+              <DropdownMenuItem asChild>
+                <Link href="/perfil">
+                  <BadgeCheck />
+                  Conta
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <Bell />

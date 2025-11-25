@@ -72,7 +72,14 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
 import { apiClient, ApiClientError } from '@/lib/api-client'
+
+export type CourseOption = {
+  id: string
+  name: string
+}
 
 export type Aluno = {
   id: string
@@ -86,6 +93,9 @@ export type Aluno = {
   enrollmentNumber: string | null
   instagram: string | null
   twitter: string | null
+  courses: CourseOption[]
+  mustChangePassword: boolean
+  temporaryPassword: string | null
   createdAt: string
   updatedAt: string
 }
@@ -101,9 +111,22 @@ const alunoSchema = z.object({
   enrollmentNumber: z.string().optional().nullable(),
   instagram: z.string().optional().nullable(),
   twitter: z.string().optional().nullable(),
+  courseIds: z.array(z.string()).min(1, 'Selecione pelo menos um curso'),
+  temporaryPassword: z.string().min(8, 'A senha temporária deve ter pelo menos 8 caracteres'),
 })
 
 type AlunoFormValues = z.infer<typeof alunoSchema>
+
+const normalizeCourseName = (name: string) =>
+  name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 32)
+    .toUpperCase()
+
+const generateDefaultPassword = (cpf: string, courseName: string) =>
+  `${cpf}@${normalizeCourseName(courseName)}`
 
 export function AlunoTable() {
   const [data, setData] = React.useState<Aluno[]>([])
@@ -114,6 +137,10 @@ export function AlunoTable() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [mounted, setMounted] = React.useState(false)
+  const [courseOptions, setCourseOptions] = React.useState<CourseOption[]>([])
+  const [coursesLoading, setCoursesLoading] = React.useState(false)
+  const [createPasswordTouched, setCreatePasswordTouched] = React.useState(false)
+  const [editPasswordTouched, setEditPasswordTouched] = React.useState(false)
   
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
@@ -125,6 +152,25 @@ export function AlunoTable() {
 
   React.useEffect(() => {
     setMounted(true)
+  }, [])
+
+  React.useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        setCoursesLoading(true)
+        const response = await apiClient.get<{ data: { id: string; name: string }[] }>('/api/course')
+        if (response && 'data' in response) {
+          setCourseOptions(response.data.map((course) => ({ id: course.id, name: course.name })))
+        }
+      } catch (err) {
+        console.error('Erro ao carregar cursos:', err)
+        setError('Erro ao carregar lista de cursos')
+      } finally {
+        setCoursesLoading(false)
+      }
+    }
+
+    fetchCourses()
   }, [])
 
   const createForm = useForm<AlunoFormValues>({
@@ -140,8 +186,13 @@ export function AlunoTable() {
       enrollmentNumber: null,
       instagram: null,
       twitter: null,
+      courseIds: [],
+      temporaryPassword: '',
     },
   })
+
+  const createCpfValue = createForm.watch('cpf')
+  const createCourseIds = createForm.watch('courseIds')
 
   const editForm = useForm<AlunoFormValues>({
     resolver: zodResolver(alunoSchema),
@@ -156,8 +207,53 @@ export function AlunoTable() {
       enrollmentNumber: null,
       instagram: null,
       twitter: null,
+      courseIds: [],
+      temporaryPassword: '',
     },
   })
+
+  const editCpfValue = editForm.watch('cpf')
+  const editCourseIds = editForm.watch('courseIds')
+
+  React.useEffect(() => {
+    if (createPasswordTouched) {
+      return
+    }
+    const cpfDigits = (createCpfValue || '').replace(/\D/g, '')
+    const primaryCourseName = courseOptions.find((course) => course.id === createCourseIds?.[0])?.name
+
+    if (cpfDigits && primaryCourseName) {
+      createForm.setValue('temporaryPassword', generateDefaultPassword(cpfDigits, primaryCourseName))
+    }
+  }, [createCpfValue, createCourseIds, courseOptions, createPasswordTouched, createForm])
+
+  const handleGenerateCreatePassword = React.useCallback(() => {
+    const cpfDigits = (createCpfValue || '').replace(/\D/g, '')
+    const primaryCourseName = courseOptions.find((course) => course.id === createCourseIds?.[0])?.name
+
+    if (!cpfDigits || !primaryCourseName) {
+      setError('Informe o CPF e selecione pelo menos um curso para gerar a senha padrão.')
+      setTimeout(() => setError(null), 4000)
+      return
+    }
+
+    createForm.setValue('temporaryPassword', generateDefaultPassword(cpfDigits, primaryCourseName))
+    setCreatePasswordTouched(true)
+  }, [createCpfValue, createCourseIds, courseOptions, createForm])
+
+  const handleGenerateEditPassword = React.useCallback(() => {
+    const cpfDigits = (editCpfValue || '').replace(/\D/g, '')
+    const primaryCourseName = courseOptions.find((course) => course.id === editCourseIds?.[0])?.name
+
+    if (!cpfDigits || !primaryCourseName) {
+      setError('Informe o CPF e selecione pelo menos um curso para gerar a senha padrão.')
+      setTimeout(() => setError(null), 4000)
+      return
+    }
+
+    editForm.setValue('temporaryPassword', generateDefaultPassword(cpfDigits, primaryCourseName))
+    setEditPasswordTouched(true)
+  }, [courseOptions, editCpfValue, editCourseIds, editForm])
 
   const fetchAlunos = React.useCallback(async () => {
     try {
@@ -213,7 +309,21 @@ export function AlunoTable() {
       })
       setSuccessMessage('Aluno criado com sucesso!')
       setCreateDialogOpen(false)
-      createForm.reset()
+      createForm.reset({
+        fullName: null,
+        email: '',
+        cpf: null,
+        phone: null,
+        birthDate: null,
+        address: null,
+        zipCode: null,
+        enrollmentNumber: null,
+        instagram: null,
+        twitter: null,
+        courseIds: [],
+        temporaryPassword: '',
+      })
+      setCreatePasswordTouched(false)
       await fetchAlunos()
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
@@ -251,7 +361,10 @@ export function AlunoTable() {
       enrollmentNumber: aluno.enrollmentNumber,
       instagram: aluno.instagram,
       twitter: aluno.twitter,
+      courseIds: aluno.courses.map((course) => course.id),
+      temporaryPassword: aluno.temporaryPassword || '',
     })
+    setEditPasswordTouched(false)
     setEditDialogOpen(true)
   }
 
@@ -272,11 +385,27 @@ export function AlunoTable() {
         enrollmentNumber: values.enrollmentNumber || null,
         instagram: values.instagram || null,
         twitter: values.twitter || null,
+        courseIds: values.courseIds,
+        temporaryPassword: editPasswordTouched ? values.temporaryPassword : undefined,
       })
       setSuccessMessage('Aluno atualizado com sucesso!')
       setEditDialogOpen(false)
       setEditingAluno(null)
-      editForm.reset()
+      editForm.reset({
+        fullName: null,
+        email: '',
+        cpf: null,
+        phone: null,
+        birthDate: null,
+        address: null,
+        zipCode: null,
+        enrollmentNumber: null,
+        instagram: null,
+        twitter: null,
+        courseIds: [],
+        temporaryPassword: '',
+      })
+      setEditPasswordTouched(false)
       await fetchAlunos()
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
@@ -363,6 +492,45 @@ export function AlunoTable() {
       accessorKey: 'enrollmentNumber',
       header: 'Matrícula',
       cell: ({ row }) => <div>{row.getValue('enrollmentNumber') || '-'}</div>,
+    },
+    {
+      id: 'courses',
+      header: 'Cursos',
+      cell: ({ row }) => {
+        const courses = row.original.courses
+        if (!courses.length) {
+          return <span className="text-muted-foreground text-sm">-</span>
+        }
+        return (
+          <div className="flex flex-wrap gap-1">
+            {courses.map((course) => (
+              <Badge key={course.id} variant="outline">
+                {course.name}
+              </Badge>
+            ))}
+          </div>
+        )
+      },
+    },
+    {
+      accessorKey: 'temporaryPassword',
+      header: 'Senha temporária',
+      cell: ({ row }) =>
+        row.original.temporaryPassword ? (
+          <code className="rounded bg-muted px-2 py-1 text-xs">{row.original.temporaryPassword}</code>
+        ) : (
+          <span className="text-muted-foreground text-sm">-</span>
+        ),
+    },
+    {
+      accessorKey: 'mustChangePassword',
+      header: 'Troca obrigatória',
+      cell: ({ row }) =>
+        row.original.mustChangePassword ? (
+          <Badge variant="secondary">Sim</Badge>
+        ) : (
+          <Badge variant="outline">Não</Badge>
+        ),
     },
     {
       accessorKey: 'createdAt',
@@ -596,6 +764,75 @@ export function AlunoTable() {
                           )}
                         />
                       </div>
+                      <FormField
+                        control={createForm.control}
+                        name="courseIds"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Cursos *</FormLabel>
+                            <div className="space-y-2 rounded-md border p-3">
+                              {coursesLoading ? (
+                                <p className="text-sm text-muted-foreground">Carregando cursos...</p>
+                              ) : courseOptions.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">
+                                  Nenhum curso disponível. Cadastre um curso antes de adicionar alunos.
+                                </p>
+                              ) : (
+                                courseOptions.map((course) => {
+                                  const selected = field.value?.includes(course.id)
+                                  return (
+                                    <label key={course.id} className="flex items-center gap-2 text-sm">
+                                      <Checkbox
+                                        checked={selected}
+                                        onCheckedChange={(checked) => {
+                                          const current = field.value ?? []
+                                          if (checked) {
+                                            field.onChange([...current, course.id])
+                                          } else {
+                                            field.onChange(current.filter((id) => id !== course.id))
+                                          }
+                                          setCreatePasswordTouched(false)
+                                        }}
+                                      />
+                                      {course.name}
+                                    </label>
+                                  )
+                                })
+                              )}
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={createForm.control}
+                        name="temporaryPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Senha Temporária *</FormLabel>
+                            <div className="flex gap-2">
+                              <FormControl>
+                                <Input
+                                  placeholder="Senha provisória do aluno"
+                                  {...field}
+                                  value={field.value || ''}
+                                  onChange={(event) => {
+                                    setCreatePasswordTouched(true)
+                                    field.onChange(event.target.value)
+                                  }}
+                                />
+                              </FormControl>
+                              <Button type="button" variant="outline" onClick={handleGenerateCreatePassword}>
+                                Gerar
+                              </Button>
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              Esta senha será exibida ao professor e o aluno precisará alterá-la no primeiro acesso.
+                            </p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                       <DialogFooter>
                         <Button
                           type="button"
@@ -848,6 +1085,74 @@ export function AlunoTable() {
                     )}
                   />
                 </div>
+                <FormField
+                  control={editForm.control}
+                  name="courseIds"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cursos *</FormLabel>
+                      <div className="space-y-2 rounded-md border p-3">
+                        {coursesLoading ? (
+                          <p className="text-sm text-muted-foreground">Carregando cursos...</p>
+                        ) : courseOptions.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">
+                            Nenhum curso disponível. Cadastre um curso antes de adicionar alunos.
+                          </p>
+                        ) : (
+                          courseOptions.map((course) => {
+                            const selected = field.value?.includes(course.id)
+                            return (
+                              <label key={course.id} className="flex items-center gap-2 text-sm">
+                                <Checkbox
+                                  checked={selected}
+                                  onCheckedChange={(checked) => {
+                                    const current = field.value ?? []
+                                    if (checked) {
+                                      field.onChange([...current, course.id])
+                                    } else {
+                                      field.onChange(current.filter((id) => id !== course.id))
+                                    }
+                                  }}
+                                />
+                                {course.name}
+                              </label>
+                            )
+                          })
+                        )}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="temporaryPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Senha Temporária</FormLabel>
+                      <div className="flex gap-2">
+                        <FormControl>
+                          <Input
+                            placeholder="Senha provisória do aluno"
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(event) => {
+                              setEditPasswordTouched(true)
+                              field.onChange(event.target.value)
+                            }}
+                          />
+                        </FormControl>
+                        <Button type="button" variant="outline" onClick={handleGenerateEditPassword}>
+                          Gerar
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Atualizar esta senha forçará o aluno a definir uma senha nova no próximo login.
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={editForm.control}

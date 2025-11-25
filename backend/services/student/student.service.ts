@@ -1,18 +1,11 @@
-import {
-  Student,
-  CreateStudentInput,
-  UpdateStudentInput,
-} from './student.types';
-import {
-  StudentRepository,
-} from './student.repository';
+import { Student, CreateStudentInput, UpdateStudentInput } from './student.types';
+import { StudentRepository } from './student.repository';
 import {
   StudentConflictError,
   StudentNotFoundError,
   StudentValidationError,
 } from './errors';
 import { getDatabaseClient } from '@/backend/clients/database';
-import { randomBytes } from 'crypto';
 
 const FULL_NAME_MIN_LENGTH = 3;
 const FULL_NAME_MAX_LENGTH = 200;
@@ -23,6 +16,10 @@ const PHONE_MAX_LENGTH = 15;
 const ZIP_CODE_LENGTH = 8;
 const ENROLLMENT_NUMBER_MAX_LENGTH = 50;
 const SOCIAL_HANDLE_MAX_LENGTH = 100;
+const COURSE_MIN_SELECTION = 1;
+const COURSE_NAME_MAX_LENGTH_FOR_PASSWORD = 32;
+
+const adminClient = getDatabaseClient();
 
 export class StudentService {
   constructor(private readonly repository: StudentRepository) {}
@@ -38,6 +35,14 @@ export class StudentService {
     if (existingByEmail) {
       throw new StudentConflictError(`Student with email "${email}" already exists`);
     }
+
+    const courseIds = this.validateCourseIds(payload.courseIds);
+    const courses = await this.fetchCourses(courseIds);
+    if (courses.length !== courseIds.length) {
+      throw new StudentValidationError('Um ou mais cursos selecionados são inválidos.');
+    }
+
+    const primaryCourse = courses[0];
 
     if (payload.cpf) {
       const cpf = this.validateCpf(payload.cpf);
@@ -62,23 +67,35 @@ export class StudentService {
     const instagram = payload.instagram ? this.validateSocialHandle(payload.instagram) : null;
     const twitter = payload.twitter ? this.validateSocialHandle(payload.twitter) : null;
 
+    const cpf = payload.cpf ? this.validateCpf(payload.cpf) : null;
+    let temporaryPassword = payload.temporaryPassword?.trim();
+
+    if (!temporaryPassword) {
+      if (!cpf) {
+        throw new StudentValidationError(
+          'Informe o CPF ou defina manualmente a senha temporária para o aluno.',
+        );
+      }
+      temporaryPassword = this.generateDefaultPassword(cpf, primaryCourse.name);
+    }
+
+    if (temporaryPassword.length < 8) {
+      throw new StudentValidationError('A senha temporária deve ter pelo menos 8 caracteres.');
+    }
+
     // Se o ID não foi fornecido, precisamos criar o usuário no auth.users primeiro
     // usando o Admin API do Supabase
     let studentId = payload.id;
     if (!studentId) {
-      const adminClient = getDatabaseClient();
-      
-      // Gerar uma senha temporária aleatória
-      const tempPassword = randomBytes(16).toString('hex');
-      
       // Criar o usuário no auth.users usando Admin API
       const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
         email: email,
-        password: tempPassword,
+        password: temporaryPassword,
         email_confirm: true, // Confirmar email automaticamente
         user_metadata: {
           role: 'aluno',
           full_name: fullName,
+          must_change_password: true,
         },
       });
 
@@ -93,7 +110,7 @@ export class StudentService {
       id: studentId,
       fullName,
       email,
-      cpf: payload.cpf ? this.validateCpf(payload.cpf) : null,
+      cpf,
       phone,
       birthDate,
       address: payload.address?.trim() || null,
@@ -101,6 +118,9 @@ export class StudentService {
       enrollmentNumber: payload.enrollmentNumber ? this.validateEnrollmentNumber(payload.enrollmentNumber) : null,
       instagram,
       twitter,
+      courseIds,
+      mustChangePassword: true,
+      temporaryPassword,
     });
   }
 
@@ -170,6 +190,29 @@ export class StudentService {
 
     if (payload.twitter !== undefined) {
       updateData.twitter = payload.twitter ? this.validateSocialHandle(payload.twitter) : null;
+    }
+
+    if (payload.courseIds !== undefined) {
+      const courseIds = this.validateCourseIds(payload.courseIds);
+      const courses = await this.fetchCourses(courseIds);
+      if (courses.length !== courseIds.length) {
+        throw new StudentValidationError('Um ou mais cursos selecionados são inválidos.');
+      }
+      updateData.courseIds = courseIds;
+    }
+
+    if (payload.temporaryPassword !== undefined) {
+      if (!payload.temporaryPassword) {
+        throw new StudentValidationError('A senha temporária não pode ser vazia.');
+      }
+      const sanitizedPassword = payload.temporaryPassword.trim();
+      if (sanitizedPassword.length < 8) {
+        throw new StudentValidationError('A senha temporária deve ter pelo menos 8 caracteres.');
+      }
+
+      await this.updateAuthPassword(id, sanitizedPassword, true);
+      updateData.temporaryPassword = sanitizedPassword;
+      updateData.mustChangePassword = true;
     }
 
     return this.repository.update(id, updateData);
@@ -312,6 +355,71 @@ export class StudentService {
     }
 
     return student;
+  }
+
+  private validateCourseIds(courseIds?: string[]): string[] {
+    if (!courseIds || courseIds.length < COURSE_MIN_SELECTION) {
+      throw new StudentValidationError('Selecione pelo menos um curso para o aluno.');
+    }
+
+    const unique = Array.from(new Set(courseIds));
+    const sanitized = unique.map((id) => id.trim()).filter(Boolean);
+
+    if (!sanitized.length) {
+      throw new StudentValidationError('Selecione pelo menos um curso para o aluno.');
+    }
+
+    return sanitized;
+  }
+
+  private async fetchCourses(courseIds: string[]): Promise<{ id: string; name: string }[]> {
+    if (!courseIds.length) {
+      return [];
+    }
+
+    const { data, error } = await adminClient
+      .from('cursos')
+      .select('id, nome')
+      .in('id', courseIds);
+
+    if (error) {
+      throw new Error(`Failed to fetch courses: ${error.message}`);
+    }
+
+    return (
+      data?.map((course) => ({
+        id: course.id,
+        name: course.nome,
+      })) ?? []
+    );
+  }
+
+  private generateDefaultPassword(cpf: string, courseName: string): string {
+    const sanitizedCourse = courseName
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(0, COURSE_NAME_MAX_LENGTH_FOR_PASSWORD)
+      .toUpperCase();
+
+    return `${cpf}@${sanitizedCourse}`;
+  }
+
+  private async updateAuthPassword(
+    userId: string,
+    newPassword: string,
+    mustChangePassword: boolean,
+  ): Promise<void> {
+    const { error } = await adminClient.auth.admin.updateUserById(userId, {
+      password: newPassword,
+      user_metadata: {
+        must_change_password: mustChangePassword,
+      },
+    });
+
+    if (error) {
+      throw new Error(`Failed to update auth password: ${error.message}`);
+    }
   }
 }
 

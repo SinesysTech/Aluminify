@@ -16,9 +16,18 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { CalendarIcon, Loader2, X, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
@@ -48,7 +57,7 @@ type WizardFormData = z.infer<typeof wizardSchema>
 
 const STEPS = [
   { id: 1, title: 'Definições de Tempo' },
-  { id: 2, title: 'Conteúdo e Prioridade' },
+  { id: 2, title: 'Disciplinas e Modalidade' },
   { id: 3, title: 'Estratégia de Estudo' },
   { id: 4, title: 'Revisão e Geração' },
 ]
@@ -62,12 +71,18 @@ export function ScheduleWizard() {
   const [disciplinas, setDisciplinas] = useState<any[]>([])
   const [frentes, setFrentes] = useState<any[]>([])
   const [loadingData, setLoadingData] = useState(true)
+  const [showTempoInsuficienteDialog, setShowTempoInsuficienteDialog] = useState(false)
+  const [tempoInsuficienteDetalhes, setTempoInsuficienteDetalhes] = useState<{
+    horasNecessarias: number
+    horasDisponiveis: number
+    horasDiaNecessarias: number
+  } | null>(null)
 
   const form = useForm<WizardFormData>({
     resolver: zodResolver(wizardSchema),
     defaultValues: {
-      dias_semana: 5,
-      horas_dia: 4,
+      dias_semana: 3,
+      horas_dia: 2,
       prioridade_minima: 4,
       modalidade: 'paralelo',
       disciplinas_ids: [],
@@ -243,9 +258,19 @@ export function ScheduleWizard() {
         
         // Se o erro contém detalhes, mostrar mensagem mais específica
         if (result?.error === 'Tempo insuficiente' && result?.detalhes) {
+          const horasNecessarias = Number(result.detalhes.horas_necessarias) || 0
+          const horasDisponiveis = Number(result.detalhes.horas_disponiveis) || 0
+          const horasDiaNecessarias = Number(result.detalhes.horas_dia_necessarias) || 0
+
+          setTempoInsuficienteDetalhes({
+            horasNecessarias,
+            horasDisponiveis,
+            horasDiaNecessarias,
+          })
+          setShowTempoInsuficienteDialog(true)
           setError(
-            `Tempo insuficiente! Necessário ${result.detalhes.horas_necessarias}h, disponível ${result.detalhes.horas_disponiveis}h. ` +
-            `Sugestão: ${result.detalhes.horas_dia_necessarias}h por dia.`
+            `Tempo insuficiente! Necessário ${horasNecessarias}h, disponível ${horasDisponiveis}h. ` +
+            `Sugestão: ${horasDiaNecessarias}h por dia.`
           )
         } else {
           const errorMessage = result?.error || result?.message || result?.details || `Erro ${response.status}: ${response.statusText || 'Erro ao gerar cronograma'}`
@@ -312,7 +337,55 @@ export function ScheduleWizard() {
     form.setValue('ferias', ferias.filter((_, i) => i !== index))
   }
 
-  const progress = (currentStep / STEPS.length) * 100
+  const resetAfterSuggestion = (step: number) => {
+    setShowTempoInsuficienteDialog(false)
+    setCurrentStep(step)
+    setError(null)
+  }
+
+  const handleAjustarDiasSemana = () => {
+    if (!tempoInsuficienteDetalhes) return
+    const horasDiaAtual = form.getValues('horas_dia') || 1
+    const diasSemanaAtual = form.getValues('dias_semana') || 1
+    const fator = horasDiaAtual > 0 ? tempoInsuficienteDetalhes.horasDiaNecessarias / horasDiaAtual : 1
+    const novaQuantidade = Math.min(7, Math.max(diasSemanaAtual + 1, Math.ceil(diasSemanaAtual * fator)))
+    form.setValue('dias_semana', Math.max(1, Math.min(7, novaQuantidade)))
+    resetAfterSuggestion(1)
+  }
+
+  const handleAjustarHorasDia = () => {
+    if (!tempoInsuficienteDetalhes) return
+    const sugestao = Math.max(tempoInsuficienteDetalhes.horasDiaNecessarias, form.getValues('horas_dia'))
+    form.setValue('horas_dia', Math.ceil(Math.max(1, sugestao)))
+    resetAfterSuggestion(1)
+  }
+
+  const handleAjustarPrioridade = () => {
+    const prioridadeAtual = form.getValues('prioridade_minima')
+    if (prioridadeAtual > 1) {
+      form.setValue('prioridade_minima', prioridadeAtual - 1)
+    }
+    resetAfterSuggestion(2)
+  }
+
+  const diasSemanaAtual = form.watch('dias_semana')
+  const horasDiaAtual = form.watch('horas_dia')
+  const prioridadeAtual = form.watch('prioridade_minima')
+  const sugestaoDiasSemana = tempoInsuficienteDetalhes
+    ? Math.min(
+        7,
+        Math.max(
+          diasSemanaAtual + 1,
+          Math.ceil(
+            (tempoInsuficienteDetalhes.horasDiaNecessarias / Math.max(1, horasDiaAtual)) * Math.max(1, diasSemanaAtual),
+          ),
+        ),
+      )
+    : diasSemanaAtual
+  const sugestaoHorasDia = tempoInsuficienteDetalhes
+    ? Math.ceil(Math.max(horasDiaAtual, tempoInsuficienteDetalhes.horasDiaNecessarias))
+    : horasDiaAtual
+  const prioridadeSugerida = Math.max(1, prioridadeAtual - 1)
 
   if (loadingData) {
     return <div className="container mx-auto py-6">Carregando...</div>
@@ -321,12 +394,45 @@ export function ScheduleWizard() {
   return (
     <div className="container mx-auto py-6 max-w-4xl">
       <Card>
-        <CardHeader>
-          <CardTitle>Criar Cronograma de Estudos</CardTitle>
-          <CardDescription>
-            Configure seu plano de estudos personalizado em {STEPS.length} passos
-          </CardDescription>
-          <Progress value={progress} className="mt-4" />
+        <CardHeader className="space-y-4">
+          <div>
+            <CardTitle>Criar Cronograma de Estudos</CardTitle>
+            <CardDescription>
+              Configure seu plano de estudos personalizado em {STEPS.length} passos
+            </CardDescription>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+            {STEPS.map((step) => {
+              const completed = currentStep > step.id
+              const active = currentStep === step.id
+              return (
+                <div
+                  key={step.id}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg border p-3 text-sm transition',
+                    completed
+                      ? 'border-emerald-200 bg-emerald-50'
+                      : active
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border',
+                  )}
+                >
+                  <Checkbox
+                    checked={completed}
+                    disabled
+                    className={cn(
+                      'pointer-events-none',
+                      active && !completed && 'data-[state=unchecked]:border-primary',
+                    )}
+                  />
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Passo {step.id}</p>
+                    <p className={cn('font-medium', active && 'text-primary')}>{step.title}</p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </CardHeader>
         <CardContent>
           <form 
@@ -368,6 +474,7 @@ export function ScheduleWizard() {
                           selected={form.watch('data_inicio')}
                           onSelect={(date) => form.setValue('data_inicio', date!)}
                           initialFocus
+                          locale={ptBR}
                         />
                       </PopoverContent>
                     </Popover>
@@ -403,6 +510,7 @@ export function ScheduleWizard() {
                           selected={form.watch('data_fim')}
                           onSelect={(date) => form.setValue('data_fim', date!)}
                           initialFocus
+                          locale={ptBR}
                         />
                       </PopoverContent>
                     </Popover>
@@ -479,6 +587,7 @@ export function ScheduleWizard() {
                                 form.setValue('ferias', ferias)
                               }}
                               initialFocus
+                              locale={ptBR}
                             />
                           </PopoverContent>
                         </Popover>
@@ -512,6 +621,7 @@ export function ScheduleWizard() {
                                 form.setValue('ferias', ferias)
                               }}
                               initialFocus
+                              locale={ptBR}
                             />
                           </PopoverContent>
                         </Popover>
@@ -530,7 +640,7 @@ export function ScheduleWizard() {
               </div>
             )}
 
-            {/* Step 2: Conteúdo e Prioridade */}
+            {/* Step 2: Disciplinas e Modalidade */}
             {currentStep === 2 && (
               <div className="space-y-6">
                 {cursos.length > 0 && (
@@ -585,9 +695,15 @@ export function ScheduleWizard() {
                 </div>
 
                 <div className="space-y-4">
-                  <Label>Nível de Prioridade Mínima</Label>
+                  <Label>Modalidade</Label>
                   <div className="grid grid-cols-5 gap-2">
-                    {[1, 2, 3, 4, 5].map((nivel) => (
+                    {[
+                      { nivel: 1, label: 'Super Extensivo' },
+                      { nivel: 2, label: 'Extensivo' },
+                      { nivel: 3, label: 'Semi Extensivo' },
+                      { nivel: 4, label: 'Intensivo' },
+                      { nivel: 5, label: 'Superintensivo' },
+                    ].map(({ nivel, label }) => (
                       <Card
                         key={nivel}
                         className={cn(
@@ -599,14 +715,7 @@ export function ScheduleWizard() {
                         onClick={() => form.setValue('prioridade_minima', nivel)}
                       >
                         <CardContent className="p-4 text-center">
-                          <div className="font-bold text-lg">{nivel}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {nivel === 1 && 'Super Extensivo'}
-                            {nivel === 2 && 'Extensivo'}
-                            {nivel === 3 && 'Intensivo'}
-                            {nivel === 4 && 'Super Intensivo'}
-                            {nivel === 5 && 'Revisão'}
-                          </div>
+                          <div className="font-bold text-sm">{label}</div>
                         </CardContent>
                       </Card>
                     ))}
@@ -619,7 +728,7 @@ export function ScheduleWizard() {
             {currentStep === 3 && (
               <div className="space-y-6">
                 <div className="space-y-4">
-                  <Label>Modalidade de Estudo</Label>
+                  <Label>Tipo de Estudo</Label>
                   <RadioGroup
                     value={form.watch('modalidade')}
                     onValueChange={(value) => form.setValue('modalidade', value as 'paralelo' | 'sequencial')}
@@ -699,13 +808,37 @@ export function ScheduleWizard() {
                       <span>{form.watch('disciplinas_ids').length}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Prioridade mínima:</span>
-                      <span>{form.watch('prioridade_minima')}</span>
+                      <span className="text-muted-foreground">Modalidade:</span>
+                      <span>
+                        {{
+                          1: 'Super Extensivo',
+                          2: 'Extensivo',
+                          3: 'Semi Extensivo',
+                          4: 'Intensivo',
+                          5: 'Superintensivo',
+                        }[form.watch('prioridade_minima')] || 'Não definida'}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Modalidade:</span>
+                      <span className="text-muted-foreground">Tipo de Estudo:</span>
                       <span className="capitalize">{form.watch('modalidade')}</span>
                     </div>
+                    {form.watch('ferias').length > 0 && (
+                      <div className="space-y-1 pt-2">
+                        <span className="text-muted-foreground">Pausas e Recessos:</span>
+                        <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                          {form.watch('ferias').map((periodo, index) => {
+                            if (!periodo.inicio || !periodo.fim) return null
+                            return (
+                              <li key={index}>
+                                {format(periodo.inicio, "dd/MM/yyyy", { locale: ptBR })} -{' '}
+                                {format(periodo.fim, "dd/MM/yyyy", { locale: ptBR })}
+                              </li>
+                            )
+                          })}
+                        </ul>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -751,6 +884,75 @@ export function ScheduleWizard() {
           </form>
         </CardContent>
       </Card>
+      <AlertDialog
+        open={showTempoInsuficienteDialog}
+        onOpenChange={(open) => {
+          setShowTempoInsuficienteDialog(open)
+          if (!open) {
+            setCurrentStep(1)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Vamos ajustar seu cronograma</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2 [&>*]:block">
+              <span>
+                Detectamos tempo insuficiente para cobrir todo o conteúdo ({tempoInsuficienteDetalhes?.horasDisponiveis ?? 0}h
+                disponíveis contra {tempoInsuficienteDetalhes?.horasNecessarias ?? 0}h necessárias).
+              </span>
+              <span>Escolha uma das sugestões abaixo para voltar e ajustar suas preferências:</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 text-sm">
+            <div className="border rounded-md p-4 space-y-2">
+              <p className="font-medium">1. Aumentar dias de estudo na semana</p>
+              <p className="text-muted-foreground">
+                Mantenha as {horasDiaAtual}h/dia e tente estudar cerca de {sugestaoDiasSemana} dias por semana (máximo 7).
+              </p>
+              <Button variant="outline" onClick={handleAjustarDiasSemana}>
+                Ajustar dias e voltar para o passo 1
+              </Button>
+            </div>
+            <div className="border rounded-md p-4 space-y-2">
+              <p className="font-medium">2. Aumentar horas por dia</p>
+              <p className="text-muted-foreground">
+                Considere elevar sua carga diária para aproximadamente {sugestaoHorasDia}h/dia mantendo {diasSemanaAtual} dias.
+              </p>
+              <Button variant="outline" onClick={handleAjustarHorasDia}>
+                Ajustar horas e voltar para o passo 1
+              </Button>
+            </div>
+            <div className="border rounded-md p-4 space-y-2">
+              <p className="font-medium">3. Reduzir prioridade mínima</p>
+              <p className="text-muted-foreground">
+                Ao diminuir a prioridade para {prioridadeSugerida}, menos conteúdos obrigatórios serão incluídos.
+              </p>
+              <Button variant="outline" onClick={handleAjustarPrioridade}>
+                Ajustar prioridade e voltar para o passo 2
+              </Button>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowTempoInsuficienteDialog(false)
+                setCurrentStep(1)
+              }}
+            >
+              Ajustarei manualmente
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowTempoInsuficienteDialog(false)
+                setCurrentStep(1)
+              }}
+            >
+              Voltar para configurações
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -358,7 +358,7 @@ export default function TobIAsPage() {
                 <Message key={message.id} from={message.role}>
                   {message.role === 'assistant' && (
                     <MessageAvatar
-                      src=""
+                      src="/tobiasavatar.png"
                       name="TobIAs"
                       className="mr-2"
                     />

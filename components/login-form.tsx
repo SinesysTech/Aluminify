@@ -12,15 +12,22 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from '@/components/ui/radio-group'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import type { AppUserRole } from '@/types/user'
+import { getDefaultRouteForRole, isProfessorRole } from '@/lib/roles'
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [roleSelection, setRoleSelection] = useState<'aluno' | 'professor'>('aluno')
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -35,8 +42,37 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         password,
       })
       if (error) throw error
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push('/protected')
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser()
+
+      if (userError || !user) {
+        throw userError || new Error('Não foi possível carregar os dados do usuário')
+      }
+
+      const role = (user.user_metadata?.role as AppUserRole) || 'aluno'
+      const matchesSelection =
+        (roleSelection === 'aluno' && role === 'aluno') ||
+        (roleSelection === 'professor' && isProfessorRole(role))
+
+      if (!matchesSelection) {
+        await supabase.auth.signOut()
+        setError(
+          role === 'aluno'
+            ? 'Este login está vinculado a um perfil de estudante. Escolha "Estudante" para acessar.'
+            : 'Este login está vinculado a um perfil de professor. Escolha "Professor" para acessar.'
+        )
+        return
+      }
+
+      if (user.user_metadata?.must_change_password) {
+        router.push('/primeiro-acesso')
+        return
+      }
+
+      router.push(getDefaultRouteForRole(role))
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
@@ -48,8 +84,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>Enter your email below to login to your account</CardDescription>
+          <CardTitle className="text-2xl">Acesse sua conta</CardTitle>
+          <CardDescription>Escolha o tipo de acesso e informe suas credenciais</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
@@ -67,12 +103,12 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Senha</Label>
                   <Link
                     href="/auth/forgot-password"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
+                    Esqueceu sua senha?
                   </Link>
                 </div>
                 <Input
@@ -83,15 +119,44 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
+              <div className="grid gap-2">
+                <Label>Selecione o tipo de acesso</Label>
+                <RadioGroup
+                  className="grid gap-3 md:grid-cols-2"
+                  value={roleSelection}
+                  onValueChange={(value) => setRoleSelection(value as 'aluno' | 'professor')}
+                >
+                  <Label
+                    htmlFor="role-aluno"
+                    className={cn(
+                      'border-input hover:bg-accent/50 flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm',
+                      roleSelection === 'aluno' && 'border-primary bg-primary/5'
+                    )}
+                  >
+                    <RadioGroupItem id="role-aluno" value="aluno" />
+                    Estudante
+                  </Label>
+                  <Label
+                    htmlFor="role-professor"
+                    className={cn(
+                      'border-input hover:bg-accent/50 flex cursor-pointer items-center gap-2 rounded-lg border p-3 text-sm',
+                      roleSelection === 'professor' && 'border-primary bg-primary/5'
+                    )}
+                  >
+                    <RadioGroupItem id="role-professor" value="professor" />
+                    Professor(a)
+                  </Label>
+                </RadioGroup>
+              </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Logging in...' : 'Login'}
+                {isLoading ? 'Entrando...' : 'Entrar'}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{' '}
+              Ainda não possui uma conta?{' '}
               <Link href="/auth/sign-up" className="underline underline-offset-4">
-                Sign up
+                Cadastre-se
               </Link>
             </div>
           </form>

@@ -18,6 +18,10 @@ const serializeStudent = (student: Awaited<ReturnType<typeof studentService.getB
   enrollmentNumber: student.enrollmentNumber ?? null,
   instagram: student.instagram ?? null,
   twitter: student.twitter ?? null,
+  courses: student.courses,
+  courseIds: student.courses.map((course) => course.id),
+  mustChangePassword: student.mustChangePassword,
+  temporaryPassword: student.temporaryPassword,
   createdAt: student.createdAt.toISOString(),
   updatedAt: student.updatedAt.toISOString(),
 });
@@ -92,6 +96,8 @@ async function postHandler(request: AuthenticatedRequest) {
       enrollmentNumber: body?.enrollmentNumber,
       instagram: body?.instagram,
       twitter: body?.twitter,
+      courseIds: body?.courseIds ?? [],
+      temporaryPassword: body?.temporaryPassword,
     });
     console.log('[Student POST] Student created:', student.id);
     return NextResponse.json({ data: serializeStudent(student) }, { status: 201 });
