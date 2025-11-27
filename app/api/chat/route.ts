@@ -142,10 +142,14 @@ async function postHandler(request: AuthenticatedRequest) {
       attachments = await saveChatAttachments(uploadedFiles);
       const baseUrl = new URL(request.url);
 
-      attachments = attachments.map((attachment) => ({
-        ...attachment,
-        downloadUrl: `${baseUrl.protocol}//${baseUrl.host}/api/chat/attachments/${attachment.id}?token=${attachment.token}`,
-      }));
+      attachments = attachments.map((attachment) => {
+        // Incluir nome do arquivo na URL para o analyzer do N8N conseguir identificar o formato
+        const encodedFileName = encodeURIComponent(attachment.name);
+        return {
+          ...attachment,
+          downloadUrl: `${baseUrl.protocol}//${baseUrl.host}/api/chat/attachments/${attachment.id}/${encodedFileName}?token=${attachment.token}`,
+        };
+      });
 
       console.log('[Chat API] Attachments salvos:', attachments.map((file) => file.name));
     }
