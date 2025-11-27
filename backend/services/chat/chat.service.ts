@@ -1,4 +1,4 @@
-import { ChatMessage, ChatResponse, ChatRequest, ChatIds } from './chat.types';
+import { ChatResponse, ChatRequest, ChatIds, ChatAttachment } from './chat.types';
 import { ChatValidationError, ChatServiceError } from './errors';
 
 const WEBHOOK_URL = 'https://webhook.sinesys.app/webhook/013bad97-160b-4f20-9a2b-e9f3fa8bfa52';
@@ -11,16 +11,7 @@ export class ChatService {
     const ids = this.validateIds(request.sessionId, request.userId);
 
     try {
-      const response = await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          input: message,
-          ids: ids,
-        }),
-      });
+      const response = await this.dispatchToWebhook(message, ids, request.attachments);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -49,7 +40,7 @@ export class ChatService {
       try {
         data = JSON.parse(text);
         console.log('[Chat Service] Parsed JSON:', JSON.stringify(data).substring(0, 200));
-      } catch (parseError) {
+      } catch {
         // Se não for JSON, tratar como texto simples
         console.log('[Chat Service] Não é JSON, tratando como texto');
         return {
@@ -118,16 +109,7 @@ export class ChatService {
     const ids = this.validateIds(request.sessionId, request.userId);
 
     try {
-      const response = await fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          input: message,
-          ids: ids,
-        }),
-      });
+      const response = await this.dispatchToWebhook(message, ids, request.attachments);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -283,6 +265,32 @@ export class ChatService {
 
       throw new ChatServiceError('Unknown error occurred while communicating with chat service');
     }
+  }
+
+  private async dispatchToWebhook(message: string, ids: ChatIds, attachments?: ChatAttachment[]) {
+    const payload: Record<string, unknown> = {
+      input: message,
+      ids,
+    };
+
+    if (attachments && attachments.length > 0) {
+      payload.attachments_metadata = attachments.map((attachment) => ({
+        id: attachment.id,
+        name: attachment.name,
+        mimeType: attachment.mimeType,
+        size: attachment.size,
+        url: attachment.downloadUrl,
+        expiresAt: attachment.expiresAt,
+      }));
+    }
+
+    return fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
   }
 
   private validateMessage(message?: string): string {

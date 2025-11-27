@@ -6,6 +6,10 @@ import {
 } from '@/backend/services/chat';
 import { conversationService } from '@/backend/services/conversation';
 import { requireAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
+import { saveChatAttachments, cleanupChatAttachments } from '@/backend/services/chat/attachments.service';
+import type { ChatAttachment } from '@/backend/services/chat/chat.types';
+
+export const runtime = 'nodejs';
 
 function handleError(error: unknown) {
   if (error instanceof ChatValidationError) {
@@ -55,20 +59,47 @@ function handleError(error: unknown) {
  * }
  */
 async function postHandler(request: AuthenticatedRequest) {
+  let attachments: ChatAttachment[] = [];
+
   try {
-    const body = await request.json();
+    const contentType = request.headers.get('content-type') || '';
+    let message: string | null = null;
+    let rawUserId: string | null = null;
+    const uploadedFiles: File[] = [];
+
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      const formMessage = formData.get('message');
+      message = typeof formMessage === 'string' ? formMessage : null;
+      const formUserId = formData.get('userId');
+      rawUserId = typeof formUserId === 'string' ? formUserId : null;
+
+      const attachmentFields = ['attachments', 'files'];
+      for (const field of attachmentFields) {
+        const values = formData.getAll(field);
+        for (const value of values) {
+          if (value instanceof File && value.size > 0) {
+            uploadedFiles.push(value);
+          }
+        }
+      }
+    } else {
+      const body = await request.json();
+      message = body?.message ?? null;
+      rawUserId = body?.userId ?? null;
+    }
 
     console.log('[Chat API] ========== POST REQUEST ==========');
-    console.log('[Chat API] Message:', body.message?.substring(0, 100));
+    console.log('[Chat API] Message:', message?.substring(0, 100));
 
-    if (!body?.message) {
+    if (!message) {
       return NextResponse.json({
         error: 'Campo obrigatório: message é necessário'
       }, { status: 400 });
     }
 
-    // Usar userId do usuário autenticado ou do body
-    const userId = body.userId || request.user?.id;
+    // Usar userId do usuário autenticado ou do payload
+    const userId = rawUserId || request.user?.id;
     if (!userId) {
       return NextResponse.json({
         error: 'User ID é necessário (fornecido no body ou via autenticação)'
@@ -84,11 +115,24 @@ async function postHandler(request: AuthenticatedRequest) {
     console.log('[Chat API] SessionId:', conversation.session_id);
     console.log('[Chat API] ➡️  Enviando para N8N webhook...');
 
+    if (uploadedFiles.length > 0) {
+      attachments = await saveChatAttachments(uploadedFiles);
+      const baseUrl = new URL(request.url);
+
+      attachments = attachments.map((attachment) => ({
+        ...attachment,
+        downloadUrl: `${baseUrl.protocol}//${baseUrl.host}/api/chat/attachments/${attachment.id}?token=${attachment.token}`,
+      }));
+
+      console.log('[Chat API] Attachments salvos:', attachments.map((file) => file.name));
+    }
+
     // Enviar para o N8N e aguardar resposta
     const response = await chatService.sendMessage({
-      message: body.message,
+      message,
       sessionId: conversation.session_id,
       userId: userId,
+      attachments,
     });
 
     console.log('[Chat API] ✅ Resposta recebida do N8N');
@@ -99,7 +143,9 @@ async function postHandler(request: AuthenticatedRequest) {
     const userMessage = {
       id: `user-${Date.now()}`,
       role: 'user' as const,
-      content: body.message,
+      content: attachments.length
+        ? `${message}\n\n[Anexo enviado: ${attachments.map((attachment) => `${attachment.name} (${attachment.downloadUrl})`).join(', ')}]`
+        : message,
       timestamp: Date.now(),
     };
 
@@ -125,6 +171,9 @@ async function postHandler(request: AuthenticatedRequest) {
       conversationId: conversation.id
     });
   } catch (error) {
+    if (attachments.length > 0) {
+      await cleanupChatAttachments(attachments);
+    }
     return handleError(error);
   }
 }

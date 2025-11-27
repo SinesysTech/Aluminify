@@ -15,3 +15,5 @@ CHECK (velocidade_reproducao IN (1.00, 1.25, 1.50, 2.00));
 -- Comentário na coluna
 COMMENT ON COLUMN public.cronogramas.velocidade_reproducao IS 'Velocidade de reprodução das aulas: 1.00x (ideal), 1.25x (até que vai...), 1.50x (não recomendo, mas você que sabe...), 2.00x (ver rápido pra ver duas vezes, né?)';
 
+
+

@@ -48,6 +48,28 @@ Criado um serviço de cache (`backend/services/cache/response-store.ts`) que:
 - 🔧 [`app/api/chat/callback/route.ts`](../app/api/chat/callback/route.ts) - Usa responseStore ao invés de Map
 - 🔧 [`app/api/chat/route.ts`](../app/api/chat/route.ts) - Polling async com responseStore
 - 🔧 [`app/(dashboard)/tobias/page.tsx`](../app/(dashboard)/tobias/page.tsx) - Correções no useChat v5.x
+- 🔧 **27/11/2025** [`app/api/chat/route.ts`](../app/api/chat/route.ts) e [`backend/services/chat/*`](../backend/services/chat) agora aceitam uploads de imagens/PDF, encaminham os binários ao webhook e limpam os arquivos temporários após o envio.
+- 🔧 **27/11/2025** [`app/(dashboard)/tobias/page.tsx`](../app/(dashboard)/tobias/page.tsx) ganhou UI para anexar arquivos, pré-visualizar e remover anexos antes do envio.
+## 📎 Suporte a Anexos (27/11/2025)
+
+- Implementado serviço de armazenamento temporário em [`backend/services/chat/attachments.service.ts`](../backend/services/chat/attachments.service.ts) com validação de tipo/tamanho, limite de 5MB por arquivo e 15MB por mensagem.
+- Apenas **um** anexo (imagem ou PDF) é permitido por mensagem.
+- O endpoint [`/api/chat`](../app/api/chat/route.ts) aceita `multipart/form-data`, salva anexos temporariamente e envia ao webhook um payload JSON com `attachments_metadata` contendo nome, tipo, tamanho, URL temporária e expiração.
+- A URL entregue ao webhook aponta para [`/api/chat/attachments/[id]`](../app/api/chat/attachments/%5Bid%5D/route.ts), que exige token e remove o arquivo após o primeiro download (ou automaticamente após 10 minutos).
+- As mensagens registradas no histórico incluem uma anotação textual com os nomes dos anexos enviados, preservando contexto.
+
+### Teste manual rápido
+1. Autentique-se e abra a página TobIAs.
+2. Anexe uma imagem ou PDF (botão de clipe) e envie uma mensagem.
+3. Verifique no log do servidor:
+   - `[Chat API] Attachments salvos: [...]`
+   - Upload temporário criado em `tmp/chat-uploads`.
+   - `[Chat Service]` enviando `FormData` para o webhook.
+4. Confirme que a pasta `tmp/chat-uploads` é limpa após a resposta.
+5. No front, confirme que a mensagem do usuário exibe `[Anexos enviados: ...]`.
+
+> Não há suíte automatizada de testes ainda para esse fluxo porque o projeto não possui infraestrutura de testes para rotas Next.js/Node.
+
 - 🔧 [`proxy.ts`](../proxy.ts) - Exceção de autenticação para callback do N8N
 - 🔧 [`.env.local`](.../.env.local) - Credenciais do Upstash Redis
 - 🔧 [`package.json`](../package.json) - Dependência @upstash/redis@^1.35.6

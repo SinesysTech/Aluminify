@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import type { ChangeEvent } from 'react'
 import { createClient } from '@/lib/client'
 import {
   Conversation,
@@ -18,7 +19,7 @@ import {
 import { Loader } from '@/components/ui/shadcn-io/ai/loader'
 import { ConversationsPanel } from '@/components/conversations-panel'
 import { Button } from '@/components/ui/button'
-import { MessageSquare } from 'lucide-react'
+import { MessageSquare, Paperclip, X } from 'lucide-react'
 import type { Conversation as ConversationType } from '@/backend/services/conversation/conversation.types'
 
 interface ChatMessage {
@@ -38,10 +39,18 @@ export default function TobIAsPage() {
   const [error, setError] = useState<string | null>(null)
   const [isInitializing, setIsInitializing] = useState(true)
   const [conversationsPanelOpen, setConversationsPanelOpen] = useState(true)
+  const [attachments, setAttachments] = useState<File[]>([])
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const ATTACHMENT_LIMITS = {
+    allowedTypes: ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'application/pdf'],
+    maxFileSizeMb: 5,
+    maxTotalSizeMb: 15,
+  }
 
   // Função para carregar conversa
-  const loadConversation = async (conversation: ConversationType) => {
+  const loadConversation = useCallback(async (conversation: ConversationType) => {
     if (!accessToken) return
 
     setCurrentConversation(conversation)
@@ -54,7 +63,7 @@ export default function TobIAsPage() {
     } else {
       setMessages([])
     }
-  }
+  }, [accessToken])
 
   // Inicializar userId, accessToken e carregar histórico
   useEffect(() => {
@@ -121,7 +130,7 @@ export default function TobIAsPage() {
     return () => {
       subscription.unsubscribe()
     }
-  }, [])
+  }, [loadConversation])
 
   // Handler para selecionar conversa
   const handleSelectConversation = async (conversation: ConversationType | null) => {
@@ -172,6 +181,55 @@ export default function TobIAsPage() {
     } catch (error) {
       console.error('[TobIAs] Error reloading conversation:', error)
     }
+  }
+
+  const totalAttachmentsSize = attachments.reduce((acc, file) => acc + file.size, 0)
+
+  const validateAttachments = (files: FileList | File[]) => {
+    const accepted: File[] = []
+
+    if (attachments.length >= 1) {
+      setError('Envie apenas um arquivo por mensagem. Remova o anexo atual antes de adicionar outro.')
+      return []
+    }
+
+    for (const file of Array.from(files)) {
+      if (!ATTACHMENT_LIMITS.allowedTypes.includes(file.type)) {
+        setError('Somente imagens (PNG, JPG, WEBP, GIF) ou PDF são permitidos.')
+        continue
+      }
+
+      if (file.size > ATTACHMENT_LIMITS.maxFileSizeMb * 1024 * 1024) {
+        setError(`Arquivos devem ter no máximo ${ATTACHMENT_LIMITS.maxFileSizeMb}MB.`)
+        continue
+      }
+
+      accepted.push(file)
+    }
+
+    const newTotal = totalAttachmentsSize + accepted.reduce((acc, file) => acc + file.size, 0)
+    if (newTotal > ATTACHMENT_LIMITS.maxTotalSizeMb * 1024 * 1024) {
+      setError(`Soma dos arquivos deve ter no máximo ${ATTACHMENT_LIMITS.maxTotalSizeMb}MB.`)
+      return []
+    }
+
+    return accepted
+  }
+
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+
+    const validFiles = validateAttachments([files[0]])
+    if (validFiles.length > 0) {
+      setAttachments((prev) => [...prev, ...validFiles])
+      setError(null)
+    }
+    event.target.value = ''
+  }
+
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, idx) => idx !== index))
   }
 
   const sendMessage = async (text: string) => {
@@ -226,10 +284,14 @@ export default function TobIAsPage() {
       }
     }
 
+    const attachmentNote = attachments.length
+      ? `\n\n[Anexos enviados: ${attachments.map((file) => file.name).join(', ')}]`
+      : ''
+
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
       role: 'user',
-      content: text,
+      content: `${text}${attachmentNote}`,
       timestamp: Date.now(),
     }
 
@@ -239,16 +301,27 @@ export default function TobIAsPage() {
     setError(null)
 
     try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      const authToken = session?.access_token
+
+      if (!authToken) {
+        setError('Sessão expirada. Faça login novamente.')
+        setIsLoading(false)
+        return
+      }
+
+      const formData = new FormData()
+      formData.append('message', text)
+      formData.append('userId', userId)
+      attachments.forEach((file) => formData.append('attachments', file))
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+          'Authorization': `Bearer ${authToken}`,
         },
-        body: JSON.stringify({
-          message: text,
-          userId,
-        }),
+        body: formData,
       })
 
       if (!response.ok) {
@@ -267,6 +340,7 @@ export default function TobIAsPage() {
       }
 
       setMessages(prev => [...prev, assistantMessage])
+      setAttachments([])
 
       // Recarregar conversa para ter os dados atualizados
       if (currentConversation) {
@@ -404,18 +478,59 @@ export default function TobIAsPage() {
           </Conversation>
 
           <div className="border-t bg-background p-2 md:p-4">
-            <PromptInput onSubmit={handleSubmit}>
-              <PromptInputTextarea
-                ref={inputRef}
-                placeholder="Digite sua mensagem..."
-                disabled={isLoading || !userId}
-              />
-              <PromptInputToolbar>
-                <PromptInputSubmit
+            <div className="space-y-2">
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 rounded-md border border-dashed border-muted-foreground/40 p-2 text-xs">
+                  {attachments.map((file, index) => (
+                    <div
+                      key={`${file.name}-${index}`}
+                      className="flex items-center gap-2 rounded bg-muted px-2 py-1"
+                    >
+                      <span className="truncate max-w-[150px]">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(index)}
+                        className="text-muted-foreground hover:text-foreground"
+                        aria-label="Remover anexo"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <PromptInput onSubmit={handleSubmit}>
+                <PromptInputTextarea
+                  ref={inputRef}
+                  placeholder="Digite sua mensagem..."
                   disabled={isLoading || !userId}
                 />
-              </PromptInputToolbar>
-            </PromptInput>
+                <PromptInputToolbar>
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif,application/pdf"
+                    multiple
+                    hidden
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    disabled={isLoading || !userId}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Paperclip className="h-4 w-4" />
+                    <span className="sr-only">Adicionar anexos</span>
+                  </Button>
+                  <PromptInputSubmit
+                    disabled={isLoading || !userId}
+                  />
+                </PromptInputToolbar>
+              </PromptInput>
+            </div>
           </div>
         </div>
       </div>
