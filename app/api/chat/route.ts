@@ -143,11 +143,34 @@ async function postHandler(request: AuthenticatedRequest) {
       const baseUrl = new URL(request.url);
 
       attachments = attachments.map((attachment) => {
-        // Incluir nome do arquivo na URL para o analyzer do N8N conseguir identificar o formato
-        const encodedFileName = encodeURIComponent(attachment.name);
+        // Garantir que o nome do arquivo sempre tenha extensão
+        let fileName = attachment.name;
+        if (!fileName.includes('.')) {
+          // Se não tiver extensão, adicionar baseado no mimeType
+          const extMap: Record<string, string> = {
+            'image/png': '.png',
+            'image/jpeg': '.jpg',
+            'image/jpg': '.jpg',
+            'image/webp': '.webp',
+            'image/gif': '.gif',
+            'application/pdf': '.pdf',
+          };
+          const ext = extMap[attachment.mimeType] || '';
+          fileName = `${fileName}${ext}`;
+        }
+        
+        // Incluir nome do arquivo com extensão na URL para o analyzer do N8N conseguir identificar o formato
+        const encodedFileName = encodeURIComponent(fileName);
+        const downloadUrl = `${baseUrl.protocol}//${baseUrl.host}/api/chat/attachments/${attachment.id}/${encodedFileName}?token=${attachment.token}`;
+        
+        console.log('[Chat API] URL do anexo gerada:', downloadUrl);
+        console.log('[Chat API] Nome do arquivo:', fileName);
+        console.log('[Chat API] Tipo MIME:', attachment.mimeType);
+        
         return {
           ...attachment,
-          downloadUrl: `${baseUrl.protocol}//${baseUrl.host}/api/chat/attachments/${attachment.id}/${encodedFileName}?token=${attachment.token}`,
+          name: fileName, // Atualizar nome se foi adicionada extensão
+          downloadUrl,
         };
       });
 

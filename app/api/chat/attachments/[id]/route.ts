@@ -30,15 +30,25 @@ export async function GET(
     return NextResponse.json({ error: 'Arquivo expirado' }, { status: 410 });
   }
 
+  // Verificar se o arquivo existe
+  try {
+    await fs.access(attachment.path);
+  } catch (error) {
+    console.error('[Chat Attachments] Arquivo não encontrado no caminho:', attachment.path);
+    return NextResponse.json({ error: 'Arquivo não encontrado no servidor' }, { status: 404 });
+  }
+
   const buffer = await fs.readFile(attachment.path);
 
-  const response = new NextResponse(buffer, {
-    headers: {
-      'Content-Type': attachment.mimeType || 'application/octet-stream',
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(attachment.name) || 'arquivo'}"`,
-      'Cache-Control': 'private, max-age=0, must-revalidate',
-    },
-  });
+  // Headers otimizados para permitir leitura direta pelo agente
+  const headers: HeadersInit = {
+    'Content-Type': attachment.mimeType || 'application/octet-stream',
+    'Content-Length': buffer.length.toString(),
+    'Cache-Control': 'private, max-age=0, must-revalidate',
+    'Access-Control-Allow-Origin': '*', // Permitir CORS para o agente acessar
+  };
+
+  const response = new NextResponse(buffer, { headers });
 
   // Remover arquivo após o download ser iniciado
   cleanupChatAttachments([attachment]).catch((error) => {
