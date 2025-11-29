@@ -1049,7 +1049,7 @@ export function ScheduleWizard() {
     if (prioridadeAtual > 1) {
       form.setValue('prioridade_minima', prioridadeAtual - 1)
     }
-    resetAfterSuggestion(2)
+    resetAfterSuggestion(3)
   }
 
   const diasSemanaAtual = form.watch('dias_semana')
@@ -1528,58 +1528,18 @@ export function ScheduleWizard() {
                         )}
                         onClick={() => form.setValue('prioridade_minima', nivel)}
                       >
-                        <CardContent className="p-4 text-center space-y-3">
+                        <CardContent className="p-4 text-center">
                           <div className="font-bold text-sm">{label}</div>
-                          <div className="space-y-2 text-xs">
-                            {form.watch('disciplinas_ids').length === 0 ? (
-                              <p className="text-muted-foreground">
-                                Selecione disciplinas para estimar o tempo.
-                              </p>
-                            ) : modalidadeStatsLoading ? (
-                              <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                                <Loader2 className="h-3 w-3 animate-spin" />
-                                Calculando...
-                              </div>
-                            ) : modalidadeStatsError ? (
-                              <p className="text-destructive text-[11px]">
-                                {modalidadeStatsError}
-                              </p>
-                            ) : (
-                              <>
-                                <div className="space-y-1">
-                                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                                    Tempo de aula
-                                  </p>
-                                  <p className="text-base font-semibold">
-                                    {formatHorasFromMinutes(modalidadeStats[nivel]?.tempoAulaMinutos)}
-                                  </p>
-                                </div>
-                                <div className="space-y-1">
-                                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                                    Tempo de estudo
-                                  </p>
-                                  <p className="text-base font-semibold">
-                                    {formatHorasFromMinutes(Math.round((modalidadeStats[nivel]?.tempoAulaMinutos || 0) * (FATOR_MULTIPLICADOR - 1)))}
-                                  </p>
-                                </div>
-                              </>
-                            )}
-                          </div>
                         </CardContent>
                       </Card>
                     ))}
                   </div>
-                  {form.watch('disciplinas_ids').length > 0 && !modalidadeStatsLoading && !modalidadeStatsError && (
-                    <p className="text-[12px] text-muted-foreground">
-                      O tempo de estudo exibido considera apenas anotações e exercícios (tempo extra calculado além do tempo de assistir as gravações).
-                    </p>
-                  )}
                 </div>
               </div>
             )}
 
             {/* Step 4: Estratégia de Estudo */}
-            {currentStep === 3 && (
+            {currentStep === 4 && (
               <div className="space-y-6">
                 <div className="space-y-4">
                   <Label>Tipo de Estudo</Label>
@@ -1647,13 +1607,15 @@ export function ScheduleWizard() {
                   </RadioGroup>
                 </div>
 
-                {/* Exibir tempos recalculados */}
+                <Separator />
+
+                {/* Exibir tempos recalculados baseados na velocidade */}
                 {form.watch('disciplinas_ids').length > 0 && (
                   <Card>
                     <CardHeader>
                       <CardTitle className="text-base">Tempos Recalculados</CardTitle>
                       <CardDescription className="text-xs">
-                        Valores ajustados considerando a velocidade de reprodução selecionada
+                        Valores ajustados considerando a velocidade de reprodução selecionada e o tempo de estudo
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
