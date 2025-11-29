@@ -194,7 +194,7 @@ async function postHandler(request: AuthenticatedRequest) {
       id: `user-${Date.now()}`,
       role: 'user' as const,
       content: attachments.length
-        ? `${message}\n\n[Anexo enviado: ${attachments.map((attachment) => `${attachment.name} (${attachment.downloadUrl})`).join(', ')}]`
+        ? `${message}\n\n[ANEXO:${attachments.map((attachment) => attachment.name).join(',')}]`
         : message,
       timestamp: Date.now(),
     };

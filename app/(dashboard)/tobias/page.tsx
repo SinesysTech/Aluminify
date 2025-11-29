@@ -234,6 +234,88 @@ export default function TobIAsPage() {
     setAttachments((prev) => prev.filter((_, idx) => idx !== index))
   }
 
+  // Função para processar mensagens com anexos e renderizar de forma limpa
+  const renderUserMessage = (content: string) => {
+    // Primeiro, normalizar formato antigo para o novo formato
+    // Formato antigo: [Anexo enviado: nome (url)] ou [Anexos enviados: nome1, nome2]
+    let normalizedContent = content.replace(
+      /\[Anexo[s]? enviado[s]?: ([^\]]+)\]/g,
+      (match, attachmentInfo) => {
+        // Extrair apenas os nomes dos arquivos (remover URLs entre parênteses)
+        const names = attachmentInfo
+          .split(',')
+          .map((item: string) => {
+            // Se contém parênteses, extrair apenas o nome antes do parêntese
+            const nameMatch = item.trim().match(/^([^(]+)/)
+            return nameMatch ? nameMatch[1].trim() : item.trim()
+          })
+          .filter(Boolean)
+        return `[ANEXO:${names.join(',')}]`
+      }
+    )
+
+    // Padrão: [ANEXO:nome1,nome2,...]
+    const attachmentPattern = /\[ANEXO:([^\]]+)\]/g
+    const parts: Array<{ type: 'text' | 'attachment'; content: string }> = []
+    let lastIndex = 0
+    let match
+
+    while ((match = attachmentPattern.exec(normalizedContent)) !== null) {
+      // Adicionar texto antes do anexo
+      if (match.index > lastIndex) {
+        const textBefore = normalizedContent.substring(lastIndex, match.index).trim()
+        if (textBefore) {
+          parts.push({ type: 'text', content: textBefore })
+        }
+      }
+
+      // Adicionar anexos
+      const attachmentNames = match[1].split(',').map(name => name.trim()).filter(Boolean)
+      attachmentNames.forEach(name => {
+        parts.push({ type: 'attachment', content: name })
+      })
+
+      lastIndex = match.index + match[0].length
+    }
+
+    // Adicionar texto restante
+    if (lastIndex < normalizedContent.length) {
+      const textAfter = normalizedContent.substring(lastIndex).trim()
+      if (textAfter) {
+        parts.push({ type: 'text', content: textAfter })
+      }
+    }
+
+    // Se não encontrou padrão de anexo, retorna o conteúdo original
+    if (parts.length === 0) {
+      return <div className="whitespace-pre-wrap">{content}</div>
+    }
+
+    return (
+      <div className="flex flex-col gap-2">
+        {parts.map((part, index) => {
+          if (part.type === 'text') {
+            return (
+              <div key={index} className="whitespace-pre-wrap">
+                {part.content}
+              </div>
+            )
+          } else {
+            return (
+              <div
+                key={index}
+                className="flex items-center gap-2 rounded-md bg-primary/20 px-3 py-2 text-sm"
+              >
+                <Paperclip className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{part.content}</span>
+              </div>
+            )
+          }
+        })}
+      </div>
+    )
+  }
+
   const sendMessage = async (text: string) => {
     if (!text.trim() || !userId || !accessToken || isLoading) {
       return
@@ -287,7 +369,7 @@ export default function TobIAsPage() {
     }
 
     const attachmentNote = attachments.length
-      ? `\n\n[Anexos enviados: ${attachments.map((file) => file.name).join(', ')}]`
+      ? `\n\n[ANEXO:${attachments.map((file) => file.name).join(',')}]`
       : ''
 
     const userMessage: ChatMessage = {
@@ -445,7 +527,7 @@ export default function TobIAsPage() {
                   )}
                   <MessageContent>
                     {message.role === 'user' ? (
-                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      renderUserMessage(message.content)
                     ) : (
                       <Response>{message.content}</Response>
                     )}
