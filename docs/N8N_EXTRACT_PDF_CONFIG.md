@@ -146,3 +146,4 @@ return item;
 4. **Verifique versão do N8N:** Versões antigas podem ter sintaxe diferente para binary data
 
 
+

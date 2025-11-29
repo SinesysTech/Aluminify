@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { format } from 'date-fns'
+import { format, addDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 
 interface CronogramaItem {
@@ -67,6 +67,10 @@ interface Cronograma {
   modalidade_estudo: 'paralelo' | 'sequencial'
   cronograma_itens: CronogramaItem[]
   curso_alvo_id?: string | null
+  periodos_ferias?: Array<{ inicio: string; fim: string }>
+  prioridade_minima?: number
+  disciplinas_selecionadas?: string[]
+  velocidade_reproducao?: number
 }
 
 export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
@@ -77,6 +81,8 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const [curso, setCurso] = useState<{ id: string; nome: string } | null>(null)
+  const [disciplinas, setDisciplinas] = useState<Array<{ id: string; nome: string }>>([])
 
   useEffect(() => {
     async function loadCronograma() {
@@ -118,6 +124,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
         }
 
         // Now load the items first without nested relationships
+        console.log('[ScheduleDashboard] Buscando itens do cronograma:', cronogramaId)
         const { data: itensData, error: itensError } = await supabase
           .from('cronograma_itens')
           .select('id, aula_id, semana_numero, ordem_na_semana, concluido, data_conclusao')
@@ -126,7 +133,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
           .order('ordem_na_semana', { ascending: true })
 
         if (itensError) {
-          console.error('Erro ao carregar itens do cronograma:', {
+          console.error('[ScheduleDashboard] Erro ao carregar itens do cronograma:', {
             message: itensError.message,
             details: itensError.details,
             hint: itensError.hint,
@@ -134,6 +141,16 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             cronogramaId,
           })
           // Continue anyway with empty items
+        } else {
+          console.log('[ScheduleDashboard] Itens carregados:', {
+            total: itensData?.length || 0,
+            primeirosItens: itensData?.slice(0, 3).map(i => ({
+              id: i.id,
+              aula_id: i.aula_id,
+              semana_numero: i.semana_numero,
+              ordem_na_semana: i.ordem_na_semana,
+            })),
+          })
         }
 
         // Load aulas separately and map them to items
@@ -375,6 +392,31 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
         }
 
         setCronograma(data as Cronograma)
+
+        // Buscar informações do curso e disciplinas
+        if (data.curso_alvo_id) {
+          const { data: cursoData } = await supabase
+            .from('cursos')
+            .select('id, nome')
+            .eq('id', data.curso_alvo_id)
+            .single()
+          
+          if (cursoData) {
+            setCurso(cursoData)
+          }
+        }
+
+        if (data.disciplinas_selecionadas && data.disciplinas_selecionadas.length > 0) {
+          const { data: disciplinasData } = await supabase
+            .from('disciplinas')
+            .select('id, nome')
+            .in('id', data.disciplinas_selecionadas)
+            .order('nome', { ascending: true })
+          
+          if (disciplinasData) {
+            setDisciplinas(disciplinasData)
+          }
+        }
       } catch (err) {
         console.error('Erro inesperado ao carregar cronograma:', {
           error: err,
@@ -547,6 +589,48 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
   const itensConcluidos = cronograma.cronograma_itens.filter((item) => item.concluido).length
   const progressoPercentual = totalItens > 0 ? (itensConcluidos / totalItens) * 100 : 0
 
+  // Função para calcular semanas disponibilizadas (período entre data início e fim, descontando férias)
+  const calcularSemanasDisponibilizadas = (
+    dataInicio: string,
+    dataFim: string,
+    ferias: Array<{ inicio: string; fim: string }>,
+  ): number => {
+    const inicio = new Date(dataInicio)
+    const fim = new Date(dataFim)
+    let semanas = 0
+    let dataAtual = new Date(inicio)
+
+    while (dataAtual <= fim) {
+      const fimSemana = addDays(dataAtual, 6) // 7 dias (0-6)
+
+      // Verificar se a semana cai em período de férias
+      let isFerias = false
+      for (const periodo of ferias || []) {
+        const inicioFerias = new Date(periodo.inicio)
+        const fimFerias = new Date(periodo.fim)
+        if (
+          (dataAtual >= inicioFerias && dataAtual <= fimFerias) ||
+          (fimSemana >= inicioFerias && fimSemana <= fimFerias) ||
+          (dataAtual <= inicioFerias && fimSemana >= fimFerias)
+        ) {
+          isFerias = true
+          break
+        }
+      }
+
+      if (!isFerias) {
+        semanas++
+      }
+
+      dataAtual = addDays(dataAtual, 7)
+    }
+
+    return semanas
+  }
+
+  // Calcular semanas com aulas (semanas que têm pelo menos um item)
+  const semanasComAulas = new Set(cronograma.cronograma_itens.map(item => item.semana_numero)).size
+
   // Calcular semana atual
   const hoje = new Date()
   const dataInicioCalc = new Date(cronograma.data_inicio)
@@ -577,6 +661,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
   }, {} as Record<number, CronogramaItem[]>)
 
   // Garantir que todas as semanas tenham uma entrada (mesmo que vazia)
+  // Isso é importante para exibir todas as semanas do período, mesmo sem aulas
   todasSemanas.forEach((semana) => {
     if (!itensPorSemana[semana]) {
       itensPorSemana[semana] = []
@@ -700,6 +785,99 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
         </CardContent>
       </Card>
 
+      {/* Card de Resumo das Configurações */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Resumo da Configuração</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Período:</span>
+            <span>
+              {format(new Date(cronograma.data_inicio), "dd/MM/yyyy", { locale: ptBR })} - {' '}
+              {format(new Date(cronograma.data_fim), "dd/MM/yyyy", { locale: ptBR })}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Dias por semana:</span>
+            <span>{cronograma.dias_estudo_semana}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Horas por dia:</span>
+            <span>{cronograma.horas_estudo_dia}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Total de semanas disponibilizadas:</span>
+            <span>
+              {calcularSemanasDisponibilizadas(
+                cronograma.data_inicio,
+                cronograma.data_fim,
+                cronograma.periodos_ferias || []
+              )}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Total de semanas do cronograma:</span>
+            <span>{semanasComAulas}</span>
+          </div>
+          {curso && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Curso:</span>
+              <span className="font-medium">{curso.nome}</span>
+            </div>
+          )}
+          {disciplinas.length > 0 && (
+            <div className="space-y-1 pt-2">
+              <span className="text-muted-foreground">Disciplinas:</span>
+              <ul className="list-disc pl-5 space-y-1">
+                {disciplinas.map((disciplina) => (
+                  <li key={disciplina.id} className="text-muted-foreground">
+                    {disciplina.nome}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Modalidade:</span>
+            <span>
+              {{
+                1: 'Super Extensivo',
+                2: 'Extensivo',
+                3: 'Semi Extensivo',
+                4: 'Intensivo',
+                5: 'Superintensivo',
+              }[cronograma.prioridade_minima || 2] || 'Não definida'}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Tipo de Estudo:</span>
+            <span className="capitalize">
+              {cronograma.modalidade_estudo === 'paralelo' ? 'Frentes em Paralelo' : 'Estudo Sequencial'}
+            </span>
+          </div>
+          {cronograma.velocidade_reproducao && (
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Velocidade de Reprodução:</span>
+              <span>{cronograma.velocidade_reproducao.toFixed(2)}x</span>
+            </div>
+          )}
+          {cronograma.periodos_ferias && cronograma.periodos_ferias.length > 0 && (
+            <div className="space-y-1 pt-2">
+              <span className="text-muted-foreground">Pausas e Recessos:</span>
+              <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                {cronograma.periodos_ferias.map((periodo, index) => (
+                  <li key={index}>
+                    {format(new Date(periodo.inicio), "dd/MM/yyyy", { locale: ptBR })} -{' '}
+                    {format(new Date(periodo.fim), "dd/MM/yyyy", { locale: ptBR })}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Tabs: Lista e Kanban */}
       <Tabs defaultValue="lista" className="w-full">
         <TabsList>
@@ -710,6 +888,8 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
           <ScheduleList
             itensPorSemana={itensPorSemana}
             dataInicio={cronograma.data_inicio}
+            dataFim={cronograma.data_fim}
+            periodosFerias={cronograma.periodos_ferias || []}
             modalidade={cronograma.modalidade_estudo}
             cronogramaId={cronogramaId}
             onToggleConcluido={toggleConcluido}

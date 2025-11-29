@@ -81,8 +81,21 @@ export default function CalendarioPage() {
     )
   }
 
-  return <ScheduleCalendarView cronogramaId={cronogramaId!} />
+  if (!cronogramaId) {
+    return (
+      <div className="container mx-auto py-6">
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Carregando...</CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+    )
+  }
+
+  return <ScheduleCalendarView cronogramaId={cronogramaId} />
 }
+
 
 
 

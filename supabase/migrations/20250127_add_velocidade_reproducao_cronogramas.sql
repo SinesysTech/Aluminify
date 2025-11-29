@@ -19,3 +19,4 @@ COMMENT ON COLUMN public.cronogramas.velocidade_reproducao IS 'Velocidade de rep
 
 
 
+

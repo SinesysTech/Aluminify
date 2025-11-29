@@ -60,6 +60,8 @@ interface CronogramaItem {
 interface ScheduleListProps {
   itensPorSemana: Record<number, CronogramaItem[]>
   dataInicio: string
+  dataFim: string
+  periodosFerias: Array<{ inicio: string; fim: string }>
   modalidade: 'paralelo' | 'sequencial'
   cronogramaId: string
   onToggleConcluido: (itemId: string, concluido: boolean) => void
@@ -172,6 +174,8 @@ function AulaItem({
 export function ScheduleList({
   itensPorSemana,
   dataInicio,
+  dataFim,
+  periodosFerias,
   modalidade,
   cronogramaId,
   onToggleConcluido,
@@ -186,9 +190,21 @@ export function ScheduleList({
     })
   )
 
-  const semanas = Object.keys(itensPorSemana)
-    .map(Number)
-    .sort((a, b) => a - b)
+  // Calcular todas as semanas do período (data_inicio até data_fim)
+  const dataInicioDate = new Date(dataInicio)
+  const dataFimDate = new Date(dataFim)
+  const todasSemanas: number[] = []
+  let semanaNumero = 1
+  let dataAtual = new Date(dataInicioDate)
+  
+  while (dataAtual <= dataFimDate) {
+    todasSemanas.push(semanaNumero)
+    dataAtual.setDate(dataAtual.getDate() + 7)
+    semanaNumero++
+  }
+
+  // Usar todas as semanas, não apenas as que têm itens
+  const semanas = todasSemanas
 
   const getSemanaDates = (semanaNumero: number) => {
     const inicio = new Date(dataInicio)
@@ -196,6 +212,38 @@ export function ScheduleList({
     const fimSemana = addDays(inicioSemana, 6)
     return { inicioSemana, fimSemana }
   }
+
+  // Verificar se uma semana é período de férias
+  const isSemanaFerias = (semanaNumero: number): boolean => {
+    const { inicioSemana, fimSemana } = getSemanaDates(semanaNumero)
+    
+    for (const periodo of periodosFerias || []) {
+      const inicioFerias = new Date(periodo.inicio)
+      const fimFerias = new Date(periodo.fim)
+      
+      // Verificar se a semana se sobrepõe ao período de férias
+      if (
+        (inicioSemana >= inicioFerias && inicioSemana <= fimFerias) ||
+        (fimSemana >= inicioFerias && fimSemana <= fimFerias) ||
+        (inicioSemana <= inicioFerias && fimSemana >= fimFerias)
+      ) {
+        return true
+      }
+    }
+    return false
+  }
+
+  // Encontrar a última semana com aulas
+  const semanasComAulas = Object.keys(itensPorSemana)
+    .map(Number)
+    .filter(semana => (itensPorSemana[semana] || []).length > 0)
+  
+  const ultimaSemanaComAulas = semanasComAulas.length > 0 
+    ? Math.max(...semanasComAulas) 
+    : 0
+
+  // Verificar se o cronograma terminou antes do tempo disponível
+  const cronogramaTerminouAntes = ultimaSemanaComAulas > 0 && ultimaSemanaComAulas < semanas.length
 
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string)
@@ -287,6 +335,8 @@ export function ScheduleList({
           const { inicioSemana, fimSemana } = getSemanaDates(semana)
 
           const temAulas = itens && itens.length > 0
+          const isFerias = isSemanaFerias(semana)
+          const isAposTermino = cronogramaTerminouAntes && semana > ultimaSemanaComAulas
 
           // Para modo sequencial, não agrupar por frente
           const itensOrdenados = [...itens].sort((a, b) => a.ordem_na_semana - b.ordem_na_semana)
@@ -299,9 +349,14 @@ export function ScheduleList({
                     <span className="font-semibold">
                       Semana {semana} ({format(inicioSemana, 'dd/MM')} - {format(fimSemana, 'dd/MM')})
                     </span>
-                    {!temAulas && (
+                    {!temAulas && isFerias && (
                       <Badge variant="secondary" className="text-xs">
                         Período de Descanso
+                      </Badge>
+                    )}
+                    {!temAulas && isAposTermino && (
+                      <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                        Já acabou? Então bora pra revisão!
                       </Badge>
                     )}
                   </div>
@@ -376,7 +431,16 @@ export function ScheduleList({
                   )}
                   {!temAulas ? (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p>Período de descanso - Nenhuma aula agendada</p>
+                      {isFerias ? (
+                        <p>Período de descanso - Nenhuma aula agendada</p>
+                      ) : isAposTermino ? (
+                        <div className="space-y-2">
+                          <p className="font-semibold text-green-700">Já acabou? Então bora pra revisão!</p>
+                          <p className="text-sm">Você concluiu todas as aulas do cronograma antes do previsto. Use este tempo para revisar o conteúdo estudado!</p>
+                        </div>
+                      ) : (
+                        <p>Nenhuma aula agendada para esta semana</p>
+                      )}
                     </div>
                   ) : modalidade === 'sequencial' ? (
                     // Modo sequencial: lista simples sem divisões de frentes

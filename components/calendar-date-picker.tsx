@@ -16,6 +16,7 @@ import {
 import { toDate, formatInTimeZone } from "date-fns-tz";
 import { DateRange } from "react-day-picker";
 import { cva, VariantProps } from "class-variance-authority";
+import { ptBR } from "date-fns/locale/pt-BR";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,18 +35,18 @@ import {
 } from "@/components/ui/select";
 
 const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
 ];
 
 const multiSelectVariants = cva(
@@ -128,6 +129,47 @@ export const CalendarDatePicker = React.forwardRef<
     };
 
     const handleDateSelect = (range: DateRange | undefined) => {
+      // Se já temos um range completo (from e to) e o usuário clicou em uma nova data,
+      // resetar o range e começar um novo com a data clicada como from
+      if (date?.from && date?.to && range?.from) {
+        // Temos um range completo e o usuário clicou em uma nova data
+        const clickedDate = range.from;
+        const currentFrom = date.from;
+        const currentTo = date.to;
+        
+        // Normalizar datas para comparar apenas dia/mês/ano (sem hora)
+        const normalizeDate = (d: Date) => {
+          const normalized = new Date(d);
+          normalized.setHours(0, 0, 0, 0);
+          return normalized;
+        };
+        
+        const clickedNormalized = normalizeDate(clickedDate);
+        const fromNormalized = normalizeDate(currentFrom);
+        const toNormalized = normalizeDate(currentTo);
+        
+        // Se a data clicada é diferente de ambas as datas do range atual, resetar
+        if (
+          clickedNormalized.getTime() !== fromNormalized.getTime() &&
+          clickedNormalized.getTime() !== toNormalized.getTime()
+        ) {
+          // Resetar e começar um novo range com a data clicada
+          const newRange: DateRange = {
+            from: clickedDate,
+            to: undefined,
+          };
+          if (onDateSelect) {
+            onDateSelect(newRange);
+          }
+          setSelectedRange(null);
+          // Atualizar o mês para mostrar a nova data selecionada
+          setMonthFrom(clickedDate);
+          setYearFrom(clickedDate.getFullYear());
+          return;
+        }
+      }
+      
+      // Comportamento normal
       if (onDateSelect) {
         onDateSelect(range);
       }
@@ -160,9 +202,11 @@ export const CalendarDatePicker = React.forwardRef<
     };
 
     const handleMonthChange = (
-      monthIndex: number,
+      monthName: string,
       type: "from" | "to"
     ) => {
+      const monthIndex = months.indexOf(monthName);
+      if (monthIndex === -1) return;
       const newDate = new Date(type === "from" ? monthFrom : monthTo);
       newDate.setMonth(monthIndex);
       if (type === "from") {
@@ -186,32 +230,32 @@ export const CalendarDatePicker = React.forwardRef<
 
     const dateRanges = [
       {
-        label: "Today",
+        label: "Hoje",
         start: startOfDay(new Date()),
         end: endOfDay(new Date()),
       },
       {
-        label: "This Week",
-        start: startOfWeek(new Date()),
-        end: endOfWeek(new Date()),
+        label: "Esta Semana",
+        start: startOfWeek(new Date(), { locale: ptBR }),
+        end: endOfWeek(new Date(), { locale: ptBR }),
       },
       {
-        label: "This Month",
+        label: "Este Mês",
         start: startOfMonth(new Date()),
         end: endOfMonth(new Date()),
       },
       {
-        label: "This Year",
+        label: "Este Ano",
         start: startOfYear(new Date()),
         end: endOfYear(new Date()),
       },
       {
-        label: "Last 7 Days",
+        label: "Últimos 7 Dias",
         start: subDays(new Date(), 6),
         end: new Date(),
       },
       {
-        label: "Last 30 Days",
+        label: "Últimos 30 Dias",
         start: subDays(new Date(), 29),
         end: new Date(),
       },
@@ -343,7 +387,7 @@ export const CalendarDatePicker = React.forwardRef<
                     </>
                   )
                 ) : (
-                  <span>Pick a date</span>
+                  <span>Selecione uma data</span>
                 )}
               </span>
             </Button>
@@ -391,7 +435,7 @@ export const CalendarDatePicker = React.forwardRef<
                     <div className="flex gap-2 ml-3">
                       <Select
                         onValueChange={(value) => {
-                          handleMonthChange(months.indexOf(value), "from");
+                          handleMonthChange(value, "from");
                           setSelectedRange(null);
                         }}
                         value={
@@ -399,7 +443,7 @@ export const CalendarDatePicker = React.forwardRef<
                         }
                       >
                         <SelectTrigger className="hidden sm:flex w-[122px] focus:ring-0 focus:ring-offset-0 font-medium hover:bg-accent hover:text-accent-foreground">
-                          <SelectValue placeholder="Month" />
+                          <SelectValue placeholder="Mês" />
                         </SelectTrigger>
                         <SelectContent>
                           {months.map((month, idx) => (
@@ -417,7 +461,7 @@ export const CalendarDatePicker = React.forwardRef<
                         value={yearFrom ? yearFrom.toString() : undefined}
                       >
                         <SelectTrigger className="hidden sm:flex w-[122px] focus:ring-0 focus:ring-offset-0 font-medium hover:bg-accent hover:text-accent-foreground">
-                          <SelectValue placeholder="Year" />
+                          <SelectValue placeholder="Ano" />
                         </SelectTrigger>
                         <SelectContent>
                           {years.map((year, idx) => (
@@ -432,7 +476,7 @@ export const CalendarDatePicker = React.forwardRef<
                       <div className="flex gap-2">
                         <Select
                           onValueChange={(value) => {
-                            handleMonthChange(months.indexOf(value), "to");
+                            handleMonthChange(value, "to");
                             setSelectedRange(null);
                           }}
                           value={
@@ -482,6 +526,7 @@ export const CalendarDatePicker = React.forwardRef<
                       numberOfMonths={numberOfMonths}
                       showOutsideDays={false}
                       className={className}
+                      locale={ptBR}
                     />
                   </div>
                 </div>

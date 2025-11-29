@@ -81,3 +81,21 @@ export interface TempoInsuficienteDetalhes {
   horas_dia_atual: number;
 }
 
+export interface CronogramaSemanasDias {
+  id: string;
+  cronograma_id: string;
+  dias_semana: number[]; // Array de 0-6 (0=domingo, 1=segunda, ..., 6=sábado)
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface AtualizarDistribuicaoDiasInput {
+  cronograma_id: string;
+  dias_semana: number[]; // Array de 0-6
+}
+
+export interface RecalcularDatasResult {
+  success: true;
+  itens_atualizados: number;
+}
+
