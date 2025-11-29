@@ -76,11 +76,41 @@ const STEPS = [
 ]
 
 const MODALIDADES = [
-  { nivel: 1, label: 'Super Extensivo' },
-  { nivel: 2, label: 'Extensivo' },
-  { nivel: 3, label: 'Semi Extensivo' },
-  { nivel: 4, label: 'Intensivo' },
-  { nivel: 5, label: 'Superintensivo' },
+  { 
+    nivel: 1, 
+    label: 'Super Extensivo',
+    descricao: 'Aprofundamento Total',
+    texto: 'Domine a física de ponta a ponta. Do zero ao nível mais avançado, com todos os aprofundamentos possíveis. Perfeito para cursos de alta concorrência e provas específicas que exigem o máximo de detalhe.',
+    tempo: '⏱️ Recomendado para: +12 meses de estudo.'
+  },
+  { 
+    nivel: 2, 
+    label: 'Extensivo',
+    descricao: 'O Mais Popular',
+    texto: 'A preparação completa para 99% dos vestibulares. Cobre todo o edital do ENEM, FUVEST, UNICAMP e UERJ, filtrando apenas excessos desnecessários. É a rota segura para a aprovação.',
+    tempo: '⏱️ Recomendado para: 9 a 12 meses de estudo.'
+  },
+  { 
+    nivel: 3, 
+    label: 'Semi Extensivo',
+    descricao: 'Otimizado',
+    texto: 'Todo o conteúdo, sem enrolação. Mantemos a jornada do básico ao avançado, mas focamos nos aprofundamentos e exercícios que realmente fazem a diferença na nota. Eficiência máxima.',
+    tempo: '⏱️ Recomendado para: 6 a 9 meses de estudo.'
+  },
+  { 
+    nivel: 4, 
+    label: 'Intensivo',
+    descricao: 'Foco no que Cai',
+    texto: 'Não perca tempo. Priorizamos os assuntos com maior recorrência histórica nas provas. Você verá do básico ao avançado apenas no que tem alta probabilidade de cair.',
+    tempo: '⏱️ Recomendado para: 3 a 6 meses de estudo.'
+  },
+  { 
+    nivel: 5, 
+    label: 'Superintensivo',
+    descricao: 'Reta Final',
+    texto: 'A base sólida para salvar seu ano. O mínimo conteúdo viável (MCV) e essencial condensado para dar segurança nas questões fáceis e médias. É o "kit de sobrevivência" para quem tem pouco tempo.',
+    tempo: '⏱️ Recomendado para: 1 a 3 meses de estudo.'
+  },
 ]
 
 const TEMPO_PADRAO_MINUTOS = 10
@@ -1516,20 +1546,27 @@ export function ScheduleWizard() {
               <div className="space-y-6">
                 <div className="space-y-4">
                   <Label>Modalidade</Label>
-                  <div className="grid grid-cols-5 gap-2">
-                    {MODALIDADES.map(({ nivel, label }) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {MODALIDADES.map(({ nivel, label, descricao, texto, tempo }) => (
                       <Card
                         key={nivel}
                         className={cn(
-                          "cursor-pointer transition-colors",
+                          "cursor-pointer transition-colors h-full",
                           form.watch('prioridade_minima') === nivel
                             ? "border-primary bg-primary/5"
                             : "hover:bg-muted"
                         )}
                         onClick={() => form.setValue('prioridade_minima', nivel)}
                       >
-                        <CardContent className="p-4 text-center">
-                          <div className="font-bold text-sm">{label}</div>
+                        <CardContent className="p-4 space-y-3">
+                          <div className="text-center space-y-1">
+                            <div className="font-bold text-base">{label}</div>
+                            <div className="text-xs font-medium text-muted-foreground">({descricao})</div>
+                          </div>
+                          <div className="space-y-2 text-xs text-muted-foreground">
+                            <p>{texto}</p>
+                            <p className="font-medium text-primary">{tempo}</p>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
