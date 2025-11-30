@@ -370,6 +370,26 @@ Content-Type: application/json
 }
 ```
 
+### Frentes
+
+#### Deletar Frente
+```http
+DELETE /api/frente/{id}
+Authorization: Bearer <token> (professor ou superadmin)
+```
+
+**Nota:** Deleta em cascata: aulas → módulos → frente. Verifica se há cronogramas que referenciam aulas desta frente.
+
+**Resposta:**
+```json
+{
+  "success": true,
+  "message": "Frente deleted successfully",
+  "hasCronogramas": false,
+  "cronogramasCount": 0
+}
+```
+
 ### Materiais de Curso
 
 #### Listar Materiais
@@ -393,9 +413,115 @@ Content-Type: application/json
 }
 ```
 
+### Chat e Conversas
+
+#### Enviar Mensagem ao Chat
+```http
+POST /api/chat
+Authorization: Bearer <token>
+Content-Type: application/json | multipart/form-data
+
+{
+  "message": "Qual é a fórmula do teorema de Pitágoras?",
+  "userId": "uuid-do-usuario", // opcional se autenticado
+  "attachments": [] // opcional
+}
+```
+
+**Com anexos (multipart/form-data):**
+```http
+POST /api/chat
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+FormData:
+  - message: "Analise este documento"
+  - attachments: [File, File, ...]
+```
+
+**Resposta:**
+```json
+{
+  "data": {
+    "output": "A fórmula do teorema de Pitágoras é...",
+    "history": []
+  },
+  "conversationId": "uuid-da-conversa",
+  "history": [...]
+}
+```
+
+#### Listar Conversas
+```http
+GET /api/conversations
+Authorization: Bearer <token>
+```
+
+**Resposta:**
+```json
+{
+  "data": [
+    {
+      "id": "...",
+      "session_id": "...",
+      "user_id": "...",
+      "title": "Conversa sobre Matemática",
+      "active": true,
+      "created_at": "2025-01-20T10:00:00Z"
+    }
+  ]
+}
+```
+
+#### Obter Conversa Específica
+```http
+GET /api/conversations/{id}
+Authorization: Bearer <token>
+```
+
+**Resposta:**
+```json
+{
+  "data": {
+    "id": "...",
+    "session_id": "...",
+    "user_id": "...",
+    "title": "...",
+    "active": true,
+    "history": [
+      {
+        "id": "...",
+        "role": "user" | "assistant",
+        "content": "...",
+        "timestamp": 1234567890
+      }
+    ],
+    "created_at": "..."
+  }
+}
+```
+
+#### Atualizar Conversa (Renomear)
+```http
+PUT /api/conversations/{id}
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "title": "Novo título da conversa"
+}
+```
+
+#### Anexos do Chat
+
+**Obter anexo:**
+```http
+GET /api/chat/attachments/{attachmentId}/{filename}?token={token}
+```
+
 ### Cronogramas
 
-#### Gerar cronograma personalizado
+#### Criar Cronograma
 ```http
 POST /api/cronograma
 Authorization: Bearer <token>
@@ -411,10 +537,34 @@ Content-Type: application/json
   "ferias": [{ "inicio": "2025-04-01", "fim": "2025-04-07" }],
   "disciplinas_ids": ["uuid-disciplina"],
   "prioridade_minima": 3,
-  "modalidade": "paralelo",
+  "modalidade": "paralelo" | "sequencial",
   "curso_alvo_id": "uuid-curso",
   "modulos_ids": ["uuid-modulo-1", "uuid-modulo-2"],
-  "excluir_aulas_concluidas": true
+  "excluir_aulas_concluidas": true,
+  "ordem_frentes_preferencia": ["Frente A", "Frente B"] // opcional, para sequencial
+}
+```
+
+#### Obter Cronograma
+```http
+GET /api/cronograma/{id}
+Authorization: Bearer <token>
+```
+
+#### Atualizar Distribuição de Dias
+```http
+PUT /api/cronograma/{id}/distribuicao-dias
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "itens": [
+    {
+      "id": "uuid-item",
+      "semana_numero": 1,
+      "ordem_na_semana": 1
+    }
+  ]
 }
 ```
 

@@ -67,6 +67,38 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         return
       }
 
+      // Ensure professor record exists immediately after login
+      // This is best-effort - the handle_new_user trigger should have created it
+      if (isProfessorRole(role)) {
+        try {
+          // Silently check and create if needed - errors are expected if RLS policy isn't set
+          const { data: existingProfessor } = await supabase
+            .from('professores')
+            .select('id, email')
+            .eq('id', user.id)
+            .maybeSingle()
+
+          if (!existingProfessor) {
+            // Try to create, but don't fail if it doesn't work
+            // The record should have been created by handle_new_user trigger
+            await supabase
+              .from('professores')
+              .insert({
+                id: user.id,
+                email: user.email || '',
+                nome_completo: user.user_metadata?.full_name || 
+                              user.user_metadata?.name || 
+                              user.email?.split('@')[0] || 
+                              'Novo Professor'
+              })
+            // Ignore errors - they're expected if RLS policy isn't set up yet
+          }
+        } catch (error) {
+          // Silently ignore - non-critical operation
+          // The record should already exist from the trigger
+        }
+      }
+
       if (user.user_metadata?.must_change_password) {
         router.push('/primeiro-acesso')
         return

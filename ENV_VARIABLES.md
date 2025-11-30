@@ -106,6 +106,19 @@ Adicione todas as variáveis listadas acima. Você pode configurar diferentes va
 
 ---
 
+### Chat - N8N Webhook (Opcional)
+
+Para configurar o chat com IA, é necessário ter um webhook do N8N configurado. Atualmente, a URL do webhook está hardcoded no código. Para produção, recomenda-se mover para variável de ambiente.
+
+```env
+# URL do webhook do N8N para chat com IA (opcional)
+N8N_WEBHOOK_URL=https://webhook.sinesys.app/webhook/...
+```
+
+**Nota:** Atualmente a URL está configurada em `backend/services/chat/chat.service.ts`. Para maior flexibilidade, considere mover para variável de ambiente.
+
+---
+
 **Última atualização:** Janeiro 2025
 
 

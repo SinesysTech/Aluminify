@@ -51,31 +51,84 @@ export class TeacherService {
     const biography = payload.biography ? this.validateBiography(payload.biography) : undefined;
     const specialty = payload.specialty ? this.validateSpecialty(payload.specialty) : undefined;
 
-    // Se o ID não foi fornecido, precisamos criar o usuário no auth.users primeiro
-    // usando o Admin API do Supabase
+    // Se o ID não foi fornecido, precisamos verificar se o usuário já existe no auth.users
+    // ou criar um novo usuário se não existir
     let teacherId = payload.id;
     if (!teacherId) {
       const adminClient = getDatabaseClient();
       
-      // Gerar uma senha temporária aleatória
+      // Tentar criar um novo usuário
       const tempPassword = randomBytes(16).toString('hex');
-      
-      // Criar o usuário no auth.users usando Admin API
       const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
         email: email,
         password: tempPassword,
-        email_confirm: true, // Confirmar email automaticamente
+        email_confirm: true,
         user_metadata: {
           role: 'professor',
           full_name: fullName,
         },
       });
 
-      if (authError || !authUser?.user) {
-        throw new Error(`Failed to create auth user: ${authError?.message || 'Unknown error'}`);
+      if (authError) {
+        // Se o erro for de email já existente, buscar o usuário existente
+        if (authError.message?.includes('already registered') || 
+            authError.message?.includes('already exists') ||
+            authError.status === 422) {
+          
+          // Buscar usuário existente por email usando paginação para eficiência
+          let existingUser = null;
+          let page = 1;
+          const perPage = 1000; // Máximo por página
+          
+          while (!existingUser) {
+            const { data: usersData, error: listError } = await adminClient.auth.admin.listUsers({
+              page,
+              perPage,
+            });
+            
+            if (listError || !usersData) {
+              throw new Error(`Failed to list users: ${listError?.message || 'Unknown error'}`);
+            }
+            
+            existingUser = usersData.users.find(
+              (u) => u.email?.toLowerCase() === email.toLowerCase()
+            );
+            
+            // Se encontrou ou não há mais páginas, sair do loop
+            if (existingUser || usersData.users.length < perPage) {
+              break;
+            }
+            
+            page++;
+            
+            // Limite de segurança: não buscar mais que 10 páginas (10k usuários)
+            if (page > 10) {
+              break;
+            }
+          }
+          
+          if (existingUser) {
+            teacherId = existingUser.id;
+            
+            // Atualizar metadata para garantir que o role está correto
+            await adminClient.auth.admin.updateUserById(existingUser.id, {
+              user_metadata: {
+                ...existingUser.user_metadata,
+                role: 'professor',
+                full_name: fullName,
+              },
+            });
+          } else {
+            throw new Error(`User with email "${email}" exists but could not be found`);
+          }
+        } else {
+          throw new Error(`Failed to create auth user: ${authError.message || 'Unknown error'}`);
+        }
+      } else if (authUser?.user) {
+        teacherId = authUser.user.id;
+      } else {
+        throw new Error('Failed to create auth user: No user returned');
       }
-
-      teacherId = authUser.user.id;
     }
 
     return this.repository.create({

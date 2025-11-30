@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ScheduleKanban } from '@/components/schedule-kanban'
 import { ScheduleList } from '@/components/schedule-list'
@@ -27,6 +28,20 @@ import {
 } from '@/components/ui/alert-dialog'
 import { format, addDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
+
+const formatHorasFromMinutes = (minutos?: number | null) => {
+  if (!minutos || minutos <= 0) {
+    return '--'
+  }
+
+  const horas = minutos / 60
+  const isInt = Number.isInteger(horas)
+
+  return `${horas.toLocaleString('pt-BR', {
+    minimumFractionDigits: isInt ? 0 : 1,
+    maximumFractionDigits: 1,
+  })}h`
+}
 
 interface CronogramaItem {
   id: string
@@ -789,6 +804,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
       <Card>
         <CardHeader>
           <CardTitle>Resumo da Configuração</CardTitle>
+          <Separator className="mt-2" />
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <div className="flex justify-between">
@@ -820,24 +836,39 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             <span className="text-muted-foreground">Total de semanas do cronograma:</span>
             <span>{semanasComAulas}</span>
           </div>
+          <Separator />
           {curso && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Curso:</span>
-              <span className="font-medium">{curso.nome}</span>
-            </div>
+            <>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Curso:</span>
+                <span className="font-medium">{curso.nome}</span>
+              </div>
+              <Separator />
+            </>
           )}
           {disciplinas.length > 0 && (
-            <div className="space-y-1 pt-2">
-              <span className="text-muted-foreground">Disciplinas:</span>
-              <ul className="list-disc pl-5 space-y-1">
-                {disciplinas.map((disciplina) => (
-                  <li key={disciplina.id} className="text-muted-foreground">
-                    {disciplina.nome}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <>
+              {disciplinas.map((disciplina) => {
+                // Calcular horas totais da disciplina baseado nos itens do cronograma
+                let horasTotais = 0
+                if (cronograma?.cronograma_itens) {
+                  cronograma.cronograma_itens.forEach((item) => {
+                    const disciplinaId = item.aulas?.modulos?.frentes?.disciplinas?.id
+                    if (disciplinaId === disciplina.id && item.aulas?.tempo_estimado_minutos) {
+                      horasTotais += item.aulas.tempo_estimado_minutos
+                    }
+                  })
+                }
+                return (
+                  <div key={disciplina.id} className="flex justify-between">
+                    <span className="text-muted-foreground">{disciplina.nome}:</span>
+                    <span>{horasTotais > 0 ? formatHorasFromMinutes(horasTotais) : '--'}</span>
+                  </div>
+                )
+              })}
+            </>
           )}
+          <Separator />
           <div className="flex justify-between">
             <span className="text-muted-foreground">Modalidade:</span>
             <span>
@@ -850,12 +881,14 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
               }[cronograma.prioridade_minima || 2] || 'Não definida'}
             </span>
           </div>
+          <Separator />
           <div className="flex justify-between">
             <span className="text-muted-foreground">Tipo de Estudo:</span>
             <span className="capitalize">
               {cronograma.modalidade_estudo === 'paralelo' ? 'Frentes em Paralelo' : 'Estudo Sequencial'}
             </span>
           </div>
+          <Separator />
           {cronograma.velocidade_reproducao && (
             <div className="flex justify-between">
               <span className="text-muted-foreground">Velocidade de Reprodução:</span>

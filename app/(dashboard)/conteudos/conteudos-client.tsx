@@ -32,7 +32,17 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
-import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2 } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react'
 import Papa from 'papaparse'
 import * as XLSX from 'xlsx'
 import { useRouter } from 'next/navigation'
@@ -106,6 +116,12 @@ export default function ConteudosClientPage() {
   const [modulos, setModulos] = React.useState<Modulo[]>([])
   const [isProfessor, setIsProfessor] = React.useState<boolean | null>(null)
   const [modulosAbertos, setModulosAbertos] = React.useState<Set<string>>(new Set())
+  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
+  const [isDeleting, setIsDeleting] = React.useState(false)
+  const [deleteCronogramasInfo, setDeleteCronogramasInfo] = React.useState<{
+    hasCronogramas: boolean
+    count: number
+  } | null>(null)
 
   // Verificar se o usuário é professor
   React.useEffect(() => {
@@ -1035,6 +1051,127 @@ export default function ConteudosClientPage() {
     }
   }
 
+  const checkCronogramasBeforeDelete = async () => {
+    if (!frenteSelecionada) return
+
+    try {
+      // Buscar módulos da frente
+      const { data: modulosData } = await supabase
+        .from('modulos')
+        .select('id')
+        .eq('frente_id', frenteSelecionada)
+
+      if (!modulosData || modulosData.length === 0) {
+        setDeleteCronogramasInfo({ hasCronogramas: false, count: 0 })
+        setShowDeleteDialog(true)
+        return
+      }
+
+      const moduloIds = modulosData.map(m => m.id)
+
+      // Buscar aulas dos módulos
+      const { data: aulasData } = await supabase
+        .from('aulas')
+        .select('id')
+        .in('modulo_id', moduloIds)
+
+      if (!aulasData || aulasData.length === 0) {
+        setDeleteCronogramasInfo({ hasCronogramas: false, count: 0 })
+        setShowDeleteDialog(true)
+        return
+      }
+
+      const aulaIds = aulasData.map(a => a.id)
+
+      // Verificar se há cronogramas que referenciam essas aulas
+      const { data: cronogramasData } = await supabase
+        .from('cronograma_itens')
+        .select('cronograma_id')
+        .in('aula_id', aulaIds)
+        .limit(100) // Limitar para performance
+
+      if (cronogramasData && cronogramasData.length > 0) {
+        const cronogramaIds = new Set(cronogramasData.map(c => c.cronograma_id))
+        setDeleteCronogramasInfo({
+          hasCronogramas: true,
+          count: cronogramaIds.size,
+        })
+      } else {
+        setDeleteCronogramasInfo({ hasCronogramas: false, count: 0 })
+      }
+
+      setShowDeleteDialog(true)
+    } catch (err) {
+      console.error('Erro ao verificar cronogramas:', err)
+      // Continuar mesmo com erro
+      setDeleteCronogramasInfo({ hasCronogramas: false, count: 0 })
+      setShowDeleteDialog(true)
+    }
+  }
+
+  const handleDeleteFrente = async () => {
+    if (!frenteSelecionada) {
+      setError('Nenhuma frente selecionada')
+      return
+    }
+
+    try {
+      setIsDeleting(true)
+      setError(null)
+      setSuccessMessage(null)
+
+      // Buscar token de autenticação
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setError('Sessão expirada. Por favor, faça login novamente.')
+        return
+      }
+
+      // Chamar API para deletar
+      const response = await fetch(`/api/frente/${frenteSelecionada}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao deletar frente')
+      }
+
+      setSuccessMessage('Frente deletada com sucesso!')
+      
+      // Limpar estado
+      setFrenteSelecionada('')
+      setModulos([])
+      setShowDeleteDialog(false)
+      setDeleteCronogramasInfo(null)
+
+      // Recarregar frentes
+      if (disciplinaSelecionada && cursoSelecionado) {
+        const { data: frentesData, error: frentesError } = await supabase
+          .from('frentes')
+          .select('id, nome, disciplina_id, curso_id')
+          .eq('disciplina_id', disciplinaSelecionada)
+          .or(`curso_id.eq.${cursoSelecionado},curso_id.is.null`)
+          .order('nome', { ascending: true })
+
+        if (!frentesError && frentesData) {
+          setFrentes(frentesData)
+        }
+      }
+    } catch (err) {
+      console.error('Erro ao deletar frente:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Erro ao deletar frente'
+      setError(errorMessage)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   if (isProfessor === null) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -1285,15 +1422,27 @@ export default function ConteudosClientPage() {
                   return (
                     <div className="rounded-lg border-2 bg-primary/5 p-4">
                       <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold">
-                            Resumo: {frenteSelecionadaData?.nome || 'N/A'}
-                          </h3>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold">
+                              Resumo: {frenteSelecionadaData?.nome || 'N/A'}
+                            </h3>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={checkCronogramasBeforeDelete}
+                              disabled={isDeleting}
+                              className="ml-4"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Deletar Frente
+                            </Button>
+                          </div>
                           <p className="text-sm text-muted-foreground mt-1">
                             {modulos.length} módulo{modulos.length !== 1 ? 's' : ''} cadastrado{modulos.length !== 1 ? 's' : ''}
                           </p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right ml-4">
                           <div className="text-2xl font-bold">
                             {totalAulas} aula{totalAulas !== 1 ? 's' : ''}
                           </div>
@@ -1425,6 +1574,51 @@ export default function ConteudosClientPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Dialog de confirmação de deleção */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar Frente Completa?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <p>
+                  Esta ação irá deletar permanentemente a frente <strong>{frentes.find(f => f.id === frenteSelecionada)?.nome}</strong> e todo o seu conteúdo:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>Todos os módulos da frente</li>
+                  <li>Todas as aulas dos módulos</li>
+                  <li>A própria frente</li>
+                </ul>
+                {deleteCronogramasInfo?.hasCronogramas && (
+                  <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                    <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                      <AlertCircle className="h-4 w-4 inline mr-1" />
+                      Atenção: Esta frente possui {deleteCronogramasInfo.count} cronograma(s) associado(s).
+                    </p>
+                    <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                      Os itens do cronograma que referenciam estas aulas podem ficar órfãos após a deleção.
+                    </p>
+                  </div>
+                )}
+                <p className="text-sm font-medium text-destructive mt-3">
+                  Esta ação não pode ser desfeita.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteFrente}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Deletando...' : 'Deletar Frente'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -57,6 +57,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { DatePicker } from '@/components/ui/date-picker'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -663,12 +664,32 @@ export function AlunoTable() {
         } else if (err.status === 403) {
           errorMessage = 'Acesso negado.'
         } else if (err.status === 500) {
-          errorMessage = `Erro interno do servidor: ${err.data?.error || err.message || 'Erro desconhecido'}`
+          // Verificar se é erro de email duplicado
+          const errorText = err.data?.error || err.message || ''
+          if (errorText.includes('email address has already been registered') || 
+              errorText.includes('email já está registrado') ||
+              errorText.includes('email já cadastrado') ||
+              errorText.includes('already been registered')) {
+            errorMessage = 'Este email já está cadastrado no sistema. Por favor, use outro email.'
+          } else {
+            errorMessage = `Erro interno do servidor: ${errorText || 'Erro desconhecido'}`
+          }
+        } else if (err.status === 409) {
+          // Status 409 (Conflict) geralmente indica conflito de dados
+          errorMessage = err.data?.error || 'Este email já está cadastrado no sistema. Por favor, use outro email.'
         } else {
           errorMessage = err.data?.error || err.message || errorMessage
         }
       } else if (err instanceof Error) {
-        errorMessage = err.message
+        // Verificar se a mensagem de erro contém informação sobre email duplicado
+        if (err.message.includes('email address has already been registered') || 
+            err.message.includes('email já está registrado') ||
+            err.message.includes('email já cadastrado') ||
+            err.message.includes('already been registered')) {
+          errorMessage = 'Este email já está cadastrado no sistema. Por favor, use outro email.'
+        } else {
+          errorMessage = err.message
+        }
       }
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
@@ -1020,7 +1041,25 @@ export function AlunoTable() {
                             <FormItem>
                               <FormLabel>Data de Nascimento</FormLabel>
                               <FormControl>
-                                <Input type="date" {...field} value={field.value || ''} />
+                                <DatePicker
+                                  value={field.value ? (() => {
+                                    // Converter string YYYY-MM-DD para Date sem problemas de timezone
+                                    const [year, month, day] = field.value.split('-').map(Number)
+                                    return new Date(year, month - 1, day)
+                                  })() : null}
+                                  onChange={(date) => {
+                                    if (date) {
+                                      // Converter Date para string YYYY-MM-DD sem problemas de timezone
+                                      const year = date.getFullYear()
+                                      const month = String(date.getMonth() + 1).padStart(2, '0')
+                                      const day = String(date.getDate()).padStart(2, '0')
+                                      field.onChange(`${year}-${month}-${day}`)
+                                    } else {
+                                      field.onChange(null)
+                                    }
+                                  }}
+                                  placeholder="dd/mm/yyyy"
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -1612,7 +1651,25 @@ export function AlunoTable() {
                       <FormItem>
                         <FormLabel>Data de Nascimento</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} value={field.value || ''} />
+                          <DatePicker
+                            value={field.value ? (() => {
+                              // Converter string YYYY-MM-DD para Date sem problemas de timezone
+                              const [year, month, day] = field.value.split('-').map(Number)
+                              return new Date(year, month - 1, day)
+                            })() : null}
+                            onChange={(date) => {
+                              if (date) {
+                                // Converter Date para string YYYY-MM-DD sem problemas de timezone
+                                const year = date.getFullYear()
+                                const month = String(date.getMonth() + 1).padStart(2, '0')
+                                const day = String(date.getDate()).padStart(2, '0')
+                                field.onChange(`${year}-${month}-${day}`)
+                              } else {
+                                field.onChange(null)
+                              }
+                            }}
+                            placeholder="dd/mm/yyyy"
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

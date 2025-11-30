@@ -16,7 +16,8 @@ import { ptBR } from 'date-fns/locale/pt-BR'
 import { DateRange } from 'react-day-picker'
 import { cn } from '@/lib/utils'
 import { Calendar } from '@/components/ui/calendar'
-import { Loader2, Save } from 'lucide-react'
+import { Loader2, Save, ChevronDown, ChevronUp, CheckSquare2 } from 'lucide-react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 
 interface CronogramaItem {
   id: string
@@ -137,6 +138,9 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
   }
   const [userId, setUserId] = useState<string | null>(null)
   const [diasSelecionados, setDiasSelecionados] = useState<number[]>([1, 2, 3, 4, 5]) // Padrão: segunda a sexta
+  const [diasSalvos, setDiasSalvos] = useState<number[]>([1, 2, 3, 4, 5]) // Dias salvos no banco
+  const [manterDiasAtuais, setManterDiasAtuais] = useState(true) // Checkbox "Manter dias atuais"
+  const [cardsExpandidos, setCardsExpandidos] = useState<Set<string>>(new Set()) // Cards expandidos (padrão: nenhum)
   const [salvandoDistribuicao, setSalvandoDistribuicao] = useState(false)
   const [itensCompletosCache, setItensCompletosCache] = useState<any[]>([])
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
@@ -347,6 +351,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
 
         if (!distError && distribuicaoData?.dias_semana) {
           setDiasSelecionados(distribuicaoData.dias_semana)
+          setDiasSalvos(distribuicaoData.dias_semana) // Salvar também os dias salvos
         }
       } catch (err) {
         console.error('Erro inesperado ao carregar cronograma:', err)
@@ -508,25 +513,250 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
     return parts.length === 0 ? '0 min' : parts.join(' ')
   }
 
+  const toggleTodasAulasDoDia = async (itensDoDia: ItemComData[]) => {
+    console.log('[toggleTodasAulasDoDia] Iniciando, itens recebidos:', itensDoDia.length)
+    
+    if (!cronograma) {
+      console.error('[toggleTodasAulasDoDia] Cronograma não encontrado')
+      return
+    }
+    
+    if (itensDoDia.length === 0) {
+      console.warn('[toggleTodasAulasDoDia] Nenhum item recebido')
+      return
+    }
+    
+    const supabase = createClient()
+    
+    // Verificar se todas já estão concluídas
+    const todasConcluidas = itensDoDia.every(item => item.concluido)
+    
+    // Se todas estão concluídas, desmarcar todas; senão, marcar todas como concluídas
+    const novoEstado = !todasConcluidas
+    const dataConclusao = novoEstado ? new Date().toISOString() : null
+    
+    console.log('[toggleTodasAulasDoDia] Estado atual:', { todasConcluidas, novoEstado, totalItens: itensDoDia.length })
+    
+    // Obter IDs dos itens
+    const itemIds = itensDoDia.map(item => item.id)
+    console.log('[toggleTodasAulasDoDia] IDs dos itens:', itemIds)
+    
+    // Atualizar todos os itens no banco de uma vez
+    const { error: updateError, data: updateData } = await supabase
+      .from('cronograma_itens')
+      .update({ 
+        concluido: novoEstado,
+        data_conclusao: dataConclusao
+      })
+      .in('id', itemIds)
+      .select()
+    
+    if (updateError) {
+      console.error('[toggleTodasAulasDoDia] Erro ao atualizar itens:', updateError)
+      alert('Erro ao marcar aulas. Tente novamente.')
+      return
+    }
+    
+    console.log('[toggleTodasAulasDoDia] Itens atualizados no banco:', updateData?.length || 0)
+    
+    // Obter aluno atual
+    const alunoAtual = userId || (await supabase.auth.getUser()).data?.user?.id || null
+    
+    // Atualizar tabela aulas_concluidas para cada item
+    if (alunoAtual) {
+      const operacoes = itensDoDia.map(async (item) => {
+        const itemAlvo = cronograma.cronograma_itens.find((i) => i.id === item.id)
+        const cursoDaAula = itemAlvo?.aulas?.curso_id || cronograma.curso_alvo_id || null
+        
+        if (itemAlvo?.aula_id && cursoDaAula) {
+          if (novoEstado) {
+            await supabase
+              .from('aulas_concluidas')
+              .upsert(
+                {
+                  aluno_id: alunoAtual,
+                  aula_id: itemAlvo.aula_id,
+                  curso_id: cursoDaAula,
+                },
+                { onConflict: 'aluno_id,aula_id' },
+              )
+          } else {
+            await supabase
+              .from('aulas_concluidas')
+              .delete()
+              .eq('aluno_id', alunoAtual)
+              .eq('aula_id', itemAlvo.aula_id)
+          }
+        }
+      })
+      
+      await Promise.all(operacoes)
+    }
+    
+    // Atualizar estado local de uma vez
+    const updatedItems = itensCompletosCache.map((item) => {
+      if (itemIds.includes(item.id)) {
+        return { ...item, concluido: novoEstado, data_conclusao: dataConclusao }
+      }
+      return item
+    })
+    
+    // Criar cronograma atualizado ANTES de usar no calcularDatasItens
+    const cronogramaAtualizado = { ...cronograma, cronograma_itens: updatedItems }
+    
+    setItensCompletosCache(updatedItems)
+    setCronograma(cronogramaAtualizado)
+    
+    // Atualizar mapa de itens por data usando o cronograma atualizado
+    const itensComData = calcularDatasItens(cronogramaAtualizado, updatedItems)
+    const mapaPorData = new Map<string, ItemComData[]>()
+    
+    itensComData.forEach(item => {
+      const dataKey = normalizarDataParaKey(item.data)
+      if (!mapaPorData.has(dataKey)) {
+        mapaPorData.set(dataKey, [])
+      }
+      mapaPorData.get(dataKey)!.push(item)
+    })
+    
+    // Verificar se os itens foram atualizados corretamente
+    const itensAtualizadosNoMapa = Array.from(mapaPorData.values()).flat()
+    const concluidasNoMapa = itensAtualizadosNoMapa.filter(item => itemIds.includes(item.id) && item.concluido === novoEstado).length
+    console.log('[toggleTodasAulasDoDia] Verificação:', {
+      totalItensAtualizados: concluidasNoMapa,
+      esperado: itemIds.length,
+      novoEstado
+    })
+    
+    setItensPorData(mapaPorData)
+    
+    console.log('[toggleTodasAulasDoDia] Concluído com sucesso')
+  }
+
+  const toggleTodasAulasDaFrente = async (itensDaFrente: ItemComData[]) => {
+    if (!cronograma || itensDaFrente.length === 0) return
+    
+    const supabase = createClient()
+    
+    // Verificar se todas já estão concluídas
+    const todasConcluidas = itensDaFrente.every(item => item.concluido)
+    
+    // Se todas estão concluídas, desmarcar todas; senão, marcar todas como concluídas
+    const novoEstado = !todasConcluidas
+    const dataConclusao = novoEstado ? new Date().toISOString() : null
+    
+    // Obter IDs dos itens
+    const itemIds = itensDaFrente.map(item => item.id)
+    
+    // Atualizar todos os itens no banco de uma vez
+    const { error: updateError } = await supabase
+      .from('cronograma_itens')
+      .update({ 
+        concluido: novoEstado,
+        data_conclusao: dataConclusao
+      })
+      .in('id', itemIds)
+    
+    if (updateError) {
+      console.error('Erro ao atualizar itens:', updateError)
+      return
+    }
+    
+    // Obter aluno atual
+    const alunoAtual = userId || (await supabase.auth.getUser()).data?.user?.id || null
+    
+    // Atualizar tabela aulas_concluidas para cada item
+    if (alunoAtual) {
+      const operacoes = itensDaFrente.map(async (item) => {
+        const itemAlvo = cronograma.cronograma_itens.find((i) => i.id === item.id)
+        const cursoDaAula = itemAlvo?.aulas?.curso_id || cronograma.curso_alvo_id || null
+        
+        if (itemAlvo?.aula_id && cursoDaAula) {
+          if (novoEstado) {
+            await supabase
+              .from('aulas_concluidas')
+              .upsert(
+                {
+                  aluno_id: alunoAtual,
+                  aula_id: itemAlvo.aula_id,
+                  curso_id: cursoDaAula,
+                },
+                { onConflict: 'aluno_id,aula_id' },
+              )
+          } else {
+            await supabase
+              .from('aulas_concluidas')
+              .delete()
+              .eq('aluno_id', alunoAtual)
+              .eq('aula_id', itemAlvo.aula_id)
+          }
+        }
+      })
+      
+      await Promise.all(operacoes)
+    }
+    
+    // Atualizar estado local de uma vez
+    const updatedItems = itensCompletosCache.map((item) => {
+      if (itemIds.includes(item.id)) {
+        return { ...item, concluido: novoEstado, data_conclusao: dataConclusao }
+      }
+      return item
+    })
+    
+    // Criar cronograma atualizado ANTES de usar no calcularDatasItens
+    const cronogramaAtualizado = { ...cronograma, cronograma_itens: updatedItems }
+    
+    setItensCompletosCache(updatedItems)
+    setCronograma(cronogramaAtualizado)
+    
+    // Atualizar mapa de itens por data usando o cronograma atualizado
+    const itensComData = calcularDatasItens(cronogramaAtualizado, updatedItems)
+    const mapaPorData = new Map<string, ItemComData[]>()
+    
+    itensComData.forEach(item => {
+      const dataKey = normalizarDataParaKey(item.data)
+      if (!mapaPorData.has(dataKey)) {
+        mapaPorData.set(dataKey, [])
+      }
+      mapaPorData.get(dataKey)!.push(item)
+    })
+    
+    setItensPorData(mapaPorData)
+  }
+
   const handleToggleDia = (dia: number) => {
+    // Se "manter dias atuais" estiver marcado, desmarcar automaticamente ao editar
+    if (manterDiasAtuais) {
+      setManterDiasAtuais(false)
+    }
+    
     setDiasSelecionados((prev) => {
       if (prev.includes(dia)) {
-        // Remover dia (mas garantir que pelo menos um dia fique selecionado)
+        // Remover dia (permitir remover todos se necessário)
         const novo = prev.filter((d) => d !== dia)
-        console.log(`[ToggleDia] Removendo dia ${dia}, novos dias:`, novo.length > 0 ? novo : prev)
-        const resultado = novo.length > 0 ? novo : prev
-        // Forçar atualização do calendário
+        console.log(`[ToggleDia] Removendo dia ${dia}, novos dias:`, novo)
+        // Forçar atualização imediata do calendário
         setCalendarForceUpdate(v => v + 1)
-        return resultado
+        return novo
       } else {
         // Adicionar dia
         const novo = [...prev, dia].sort((a, b) => a - b)
         console.log(`[ToggleDia] Adicionando dia ${dia}, novos dias:`, novo)
-        // Forçar atualização do calendário
+        // Forçar atualização imediata do calendário
         setCalendarForceUpdate(v => v + 1)
         return novo
       }
     })
+  }
+
+  const handleToggleManterDiasAtuais = (checked: boolean) => {
+    setManterDiasAtuais(checked)
+    if (checked) {
+      // Se marcar "manter dias atuais", restaurar os dias salvos
+      setDiasSelecionados(diasSalvos)
+      setCalendarForceUpdate(v => v + 1)
+    }
   }
 
 
@@ -795,6 +1025,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
 
       if (!distError && distribuicaoData?.dias_semana) {
         setDiasSelecionados(distribuicaoData.dias_semana)
+        setDiasSalvos(distribuicaoData.dias_semana) // Atualizar dias salvos
         console.log('[RecarregarCronograma] Dias selecionados recarregados:', distribuicaoData.dias_semana)
       }
     } catch (err) {
@@ -836,73 +1067,80 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
 
       const responseData = await response.json()
       
-      // Atualizar dias selecionados com o que foi salvo no banco
+      // Atualizar dias selecionados e dias salvos com o que foi salvo no banco
       if (responseData.distribuicao?.dias_semana) {
         setDiasSelecionados(responseData.distribuicao.dias_semana)
+        setDiasSalvos(responseData.distribuicao.dias_semana) // Atualizar dias salvos
+        setManterDiasAtuais(true) // Voltar para "manter dias atuais" após salvar
         console.log('[SalvarDistribuicao] Dias selecionados atualizados:', responseData.distribuicao.dias_semana)
       }
 
-      // Recarregar dados do cronograma para atualizar as datas sem recarregar a página
-      // Aguardar mais tempo para garantir que o backend terminou de processar todas as atualizações
-      // O backend pode levar alguns segundos para atualizar 998 itens
-      console.log('[SalvarDistribuicao] Aguardando backend finalizar atualizações...')
+      // Verificar atualização usando polling
+      console.log('[SalvarDistribuicao] Iniciando verificação de atualização...')
       
-      // Aguardar um tempo baseado no número de dias selecionados e número de itens
-      // Estimativa: ~100ms por dia selecionado + tempo base de 3 segundos
-      const tempoEstimado = Math.max(3000, diasSelecionados.length * 1000)
-      console.log('[SalvarDistribuicao] Aguardando', tempoEstimado, 'ms para backend processar...')
-      await new Promise(resolve => setTimeout(resolve, tempoEstimado))
-      
-      // Fazer verificações progressivas para ver se as datas foram atualizadas
-      const supabaseCheck = createClient()
-      let tentativas = 0
-      const maxTentativas = 10
-      let datasAtualizadas = false
-      
-      while (tentativas < maxTentativas && !datasAtualizadas) {
-        // Buscar uma amostra maior de itens para verificar distribuição
-        const { data: amostraItens } = await supabaseCheck
+      const verificarAtualizacaoCompleta = async (): Promise<boolean> => {
+        const supabaseCheck = createClient()
+        
+        // Buscar amostra representativa de itens (aumentar para 200 para melhor verificação)
+        const { data: amostraItens, error: amostraError } = await supabaseCheck
           .from('cronograma_itens')
           .select('data_prevista')
           .eq('cronograma_id', cronogramaId)
-          .limit(100) // Amostra maior para verificar melhor
-      
-        if (amostraItens && amostraItens.length > 0) {
-          const amostraDias = amostraItens
-            .filter(i => i.data_prevista)
-            .map(i => {
-              const [year, month, day] = i.data_prevista.split('-').map(Number)
-              return new Date(year, month - 1, day).getDay()
-            })
-          const amostraDiasUnicos = [...new Set(amostraDias)]
-          
-          // Verificar se todos os dias selecionados aparecem na amostra
-          const todosDiasPresentes = diasSelecionados.every(d => amostraDiasUnicos.includes(d))
-          
-          console.log('[SalvarDistribuicao] Tentativa', tentativas + 1, '- Amostra de datas:', {
-            amostraDias: amostraDiasUnicos,
-            diasSelecionados,
-            todosDiasPresentes,
-            totalItensNaAmostra: amostraItens.length,
+          .limit(200)
+        
+        if (amostraError) {
+          console.error('[SalvarDistribuicao] Erro ao verificar atualização:', amostraError)
+          return false
+        }
+        
+        if (!amostraItens || amostraItens.length === 0) {
+          return false
+        }
+        
+        // Verificar distribuição de dias na amostra
+        const amostraDias = amostraItens
+          .filter(i => i.data_prevista)
+          .map(i => {
+            const [year, month, day] = i.data_prevista.split('-').map(Number)
+            return new Date(year, month - 1, day).getDay()
           })
-          
-          if (todosDiasPresentes && amostraDiasUnicos.length >= diasSelecionados.length) {
-            datasAtualizadas = true
-            console.log('[SalvarDistribuicao] ✅ Datas atualizadas confirmadas!')
-          } else {
-            // Aguardar mais um pouco antes da próxima tentativa
-            await new Promise(resolve => setTimeout(resolve, 500))
-            tentativas++
-          }
+        const amostraDiasUnicos = [...new Set(amostraDias)]
+        
+        // Verificar se todos os dias selecionados aparecem na amostra
+        const todosDiasPresentes = diasSelecionados.every(d => amostraDiasUnicos.includes(d))
+        const percentualComDataPrevista = (amostraItens.filter(i => i.data_prevista).length / amostraItens.length) * 100
+        
+        // Considerar atualizado se:
+        // 1. Todos os dias selecionados aparecem na amostra
+        // 2. Pelo menos 90% dos itens têm data_prevista
+        // 3. A amostra tem pelo menos os dias selecionados
+        const atualizado = todosDiasPresentes && 
+                          percentualComDataPrevista >= 90 && 
+                          amostraDiasUnicos.length >= diasSelecionados.length
+        
+        return atualizado
+      }
+      
+      // Polling: verificar a cada 500ms, máximo 20 tentativas (10 segundos)
+      const POLLING_INTERVAL = 500
+      const MAX_TENTATIVAS = 20
+      let tentativas = 0
+      let datasAtualizadas = false
+      
+      while (tentativas < MAX_TENTATIVAS && !datasAtualizadas) {
+        tentativas++
+        datasAtualizadas = await verificarAtualizacaoCompleta()
+        
+        if (!datasAtualizadas) {
+          console.log(`[SalvarDistribuicao] Tentativa ${tentativas}/${MAX_TENTATIVAS} - Aguardando atualização...`)
+          await new Promise(resolve => setTimeout(resolve, POLLING_INTERVAL))
         } else {
-          // Se não há itens, aguardar um pouco mais
-          await new Promise(resolve => setTimeout(resolve, 500))
-          tentativas++
+          console.log('[SalvarDistribuicao] ✅ Datas atualizadas confirmadas!')
         }
       }
       
       if (!datasAtualizadas) {
-        console.warn('[SalvarDistribuicao] ⚠️ Não foi possível confirmar atualização das datas após', maxTentativas, 'tentativas. Continuando mesmo assim...')
+        console.warn('[SalvarDistribuicao] ⚠️ Não foi possível confirmar atualização das datas após', MAX_TENTATIVAS, 'tentativas. Continuando mesmo assim...')
       }
       
       // Recarregar cronograma com cache desabilitado
@@ -922,7 +1160,26 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
       console.log('[SalvarDistribuicao] Atualização completa')
     } catch (error) {
       console.error('Erro ao salvar distribuição:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao salvar distribuição de dias. Tente novamente.'
+      
+      // Tratamento de erro mais robusto
+      let errorMessage = 'Erro ao salvar distribuição de dias. Tente novamente.'
+      
+      if (error instanceof Error) {
+        errorMessage = error.message
+        
+        // Mensagens de erro mais amigáveis
+        if (error.message.includes('Sessão não encontrada')) {
+          errorMessage = 'Sua sessão expirou. Por favor, faça login novamente.'
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.'
+        } else if (error.message.includes('timeout')) {
+          errorMessage = 'A operação demorou muito. Tente novamente.'
+        }
+      } else if (typeof error === 'string') {
+        errorMessage = error
+      }
+      
+      // Usar alert por enquanto, mas pode ser substituído por toast/notificação
       alert(errorMessage)
     } finally {
       setSalvandoDistribuicao(false)
@@ -1025,83 +1282,83 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
   // Isso garante que o objeto seja recriado sempre que as dependências mudarem
   // IMPORTANTE: Este hook deve ser chamado ANTES de qualquer return condicional
   const modifiers = useMemo(() => {
-    // Criar uma cópia do mapa para garantir que temos acesso aos dados mais recentes
-    const filtradosMap = new Map(itensPorDataFiltrados)
+    // Usar mapa original (não filtrado) para hasAulas e hasConcluidas
+    // Essas marcações devem sempre aparecer, independente da seleção de dias
+    const itensPorDataMap = new Map(itensPorData)
     const diasSelecionadosSorted = [...diasSelecionados].sort((a, b) => a - b)
-    const itensPorDataCopy = new Map(itensPorData) // Capturar cópia para evitar stale closure
     
-    // Calcular estatísticas de distribuição por dia
-    const distribuicaoFiltrados: Record<number, { total: number; datas: number }> = {
-      0: { total: 0, datas: 0 },
-      1: { total: 0, datas: 0 },
-      2: { total: 0, datas: 0 },
-      3: { total: 0, datas: 0 },
-      4: { total: 0, datas: 0 },
-      5: { total: 0, datas: 0 },
-      6: { total: 0, datas: 0 },
-    }
-    
-    filtradosMap.forEach((itens, dataKey) => {
-      const [year, month, day] = dataKey.split('-').map(Number)
-      const data = new Date(year, month - 1, day)
-      const diaSemana = data.getDay()
-      distribuicaoFiltrados[diaSemana].total += itens.length
-      distribuicaoFiltrados[diaSemana].datas += 1
-    })
-    
-    console.log('[Modifiers] Recriando modifiers com dias:', diasSelecionadosSorted.join(','))
-    console.log('[Modifiers] Total de datas filtradas:', filtradosMap.size)
-    console.log('[Modifiers] Distribuição de itens por dia (filtrados):', {
-      domingo: `${distribuicaoFiltrados[0].total} itens em ${distribuicaoFiltrados[0].datas} datas`,
-      segunda: `${distribuicaoFiltrados[1].total} itens em ${distribuicaoFiltrados[1].datas} datas`,
-      terca: `${distribuicaoFiltrados[2].total} itens em ${distribuicaoFiltrados[2].datas} datas`,
-      quarta: `${distribuicaoFiltrados[3].total} itens em ${distribuicaoFiltrados[3].datas} datas`,
-      quinta: `${distribuicaoFiltrados[4].total} itens em ${distribuicaoFiltrados[4].datas} datas`,
-      sexta: `${distribuicaoFiltrados[5].total} itens em ${distribuicaoFiltrados[5].datas} datas`,
-      sabado: `${distribuicaoFiltrados[6].total} itens em ${distribuicaoFiltrados[6].datas} datas`,
-    })
-    
-    // Verificar se todos os dias selecionados têm itens
-    const diasSemItens: number[] = []
-    diasSelecionadosSorted.forEach(dia => {
-      if (distribuicaoFiltrados[dia].total === 0) {
-        diasSemItens.push(dia)
-      }
-    })
-    if (diasSemItens.length > 0) {
-      const nomesDiasSemItens = diasSemItens.map(d => ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][d])
-      console.warn('[Modifiers] ⚠️ Dias selecionados sem itens:', nomesDiasSemItens.join(', '))
-    } else {
-      console.log('[Modifiers] ✅ Todos os dias selecionados têm itens')
-    }
+    console.log('[Modifiers] Recriando modifiers com dias selecionados:', diasSelecionadosSorted.join(','))
+    console.log('[Modifiers] Total de datas no mapa original:', itensPorDataMap.size)
+    console.log('[Modifiers] Manter dias atuais:', manterDiasAtuais)
     
     return {
       hasAulas: (date: Date) => {
         // Normalizar data para dataKey usando a função helper
         const dataKey = normalizarDataParaKey(date)
-        const diaSemana = date.getDay()
         
-        // Verificar diretamente se há itens nessa data específica no mapa filtrado
-        const temAulas = filtradosMap.has(dataKey) && (filtradosMap.get(dataKey)?.length || 0) > 0
+        // Verificar diretamente se há itens nessa data específica no mapa ORIGINAL (não filtrado)
+        // Isso garante que as marcações de aulas sempre apareçam, independente da seleção de dias
+        const temAulas = itensPorDataMap.has(dataKey) && (itensPorDataMap.get(dataKey)?.length || 0) > 0
         
-        // Se há itens nessa data específica, retornar true
-        if (temAulas) {
-          return true
-        }
-        
-        // Se não há itens nessa data específica, retornar false
-        // Não tentar inferir baseado em outras datas do mesmo dia da semana,
-        // pois isso pode causar marcações incorretas
-        return false
+        return temAulas
       },
       hasConcluidas: (date: Date) => {
         // Normalizar data para dataKey usando a função helper
         const dataKey = normalizarDataParaKey(date)
-        const itens = filtradosMap.get(dataKey) || []
-        return itens.some(item => item.concluido)
+        
+        // Usar mapa ORIGINAL (não filtrado) para garantir que sempre apareça
+        const itens = itensPorDataMap.get(dataKey) || []
+        // Verificar se TODAS as aulas do dia estão concluídas
+        return itens.length > 0 && itens.every(item => item.concluido)
+      },
+      hasPendentes: (date: Date) => {
+        // Normalizar data para dataKey usando a função helper
+        const dataKey = normalizarDataParaKey(date)
+        
+        // Usar mapa ORIGINAL (não filtrado) para garantir que sempre apareça
+        const itens = itensPorDataMap.get(dataKey) || []
+        
+        if (itens.length === 0) return false // Sem aulas, não é pendente
+        
+        const concluidas = itens.filter(item => item.concluido).length
+        const temConcluidas = concluidas > 0
+        const todasConcluidas = concluidas === itens.length
+        
+        // Pendente = tem aulas, tem pelo menos uma concluída, mas nem todas
+        return temConcluidas && !todasConcluidas
+      },
+      hasDiasSelecionados: (date: Date) => {
+        // Se "manter dias atuais" estiver selecionado, não mostrar marcação amarela
+        if (manterDiasAtuais) {
+          return false
+        }
+        
+        // Verificar se a data corresponde a um dos dias da semana selecionados
+        // Aparece apenas se houver pelo menos um dia selecionado no card
+        // E se for um dia selecionado (independente de ter aulas ou não)
+        if (diasSelecionadosSorted.length === 0) {
+          return false // Se nenhum dia estiver selecionado, não mostrar marcação amarela
+        }
+        
+        const diaSemana = date.getDay()
+        return diasSelecionadosSorted.includes(diaSemana)
+      },
+      hasFerias: (date: Date) => {
+        // Verificar se a data está dentro de algum período de férias
+        if (!cronograma?.periodos_ferias || cronograma.periodos_ferias.length === 0) {
+          return false
+        }
+        
+        const dataKey = normalizarDataParaKey(date)
+        
+        return cronograma.periodos_ferias.some(periodo => {
+          const inicio = normalizarDataParaKey(new Date(periodo.inicio))
+          const fim = normalizarDataParaKey(new Date(periodo.fim))
+          return dataKey >= inicio && dataKey <= fim
+        })
       },
     }
-  }, [itensPorDataFiltrados, diasSelecionados, itensPorData])
+  }, [itensPorData, diasSelecionados, manterDiasAtuais, cronograma])
 
   // Log quando os dias selecionados mudarem para debug e forçar atualização
   // IMPORTANTE: Este hook deve ser chamado DEPOIS de itensPorDataFiltrados e modifiers
@@ -1115,10 +1372,10 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
     console.log('[Effect] Total de itens no mapa original:', itensPorDataSize)
     console.log('[Effect] Forçando atualização do calendário...')
     
-    // Forçar atualização do calendário quando os dias selecionados mudarem
+    // Forçar atualização imediata do calendário quando os dias selecionados mudarem
     // Isso garante que o react-day-picker detecte as mudanças nos modifiers
-    // Usamos um pequeno delay para garantir que o estado foi atualizado
-    const timeoutId = setTimeout(() => {
+    // Usar requestAnimationFrame para garantir que o estado foi atualizado antes do re-render
+    const frameId = requestAnimationFrame(() => {
       // Forçar re-render do calendário atualizando o mês atual
       // (mas mantendo o mesmo mês para não resetar a visualização)
       setCurrentMonth(prev => {
@@ -1131,9 +1388,9 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
       })
       // Também incrementar o contador de força de atualização
       setCalendarForceUpdate(v => v + 1)
-    }, 50)
+    })
     
-    return () => clearTimeout(timeoutId)
+    return () => cancelAnimationFrame(frameId)
   }, [diasSelecionados, itensPorDataFiltradosSize, itensPorDataSize])
 
   // Returns condicionais DEVEM vir DEPOIS de todos os hooks
@@ -1199,9 +1456,9 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
             Visualize suas aulas agendadas e marque as concluídas
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           {/* Seletor de Range */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3">
             <CalendarDatePicker
               date={dateRange}
               onDateSelect={handleDateRangeSelect}
@@ -1210,38 +1467,114 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
           </div>
 
           {/* Calendário com marcações e painel de filtros */}
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-3 lg:items-stretch w-full">
             {/* Calendário */}
-            <div className="flex-1 flex flex-col w-full">
-              <div className="flex flex-col">
-                <Calendar
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={handleDateRangeSelect}
-                  month={currentMonth}
-                  onMonthChange={setCurrentMonth}
-                  modifiers={modifiers}
-                  modifiersClassNames={{
-                    hasAulas: 'bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800',
-                    hasConcluidas: 'bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800',
-                  }}
-                  numberOfMonths={2}
-                  className="rounded-md border"
-                  locale={ptBR}
-                  // Forçar atualização preservando o mês
-                  defaultMonth={currentMonth}
-                />
-                <p className="text-xs text-muted-foreground mt-2 text-left">
-                  💡 Dica: Dê um duplo clique em qualquer data para alterar a data inicial a qualquer momento
-                </p>
-              </div>
+            <div className="flex flex-col w-full lg:flex-1">
+              <Calendar
+                mode="range"
+                selected={dateRange}
+                onSelect={handleDateRangeSelect}
+                month={currentMonth}
+                onMonthChange={setCurrentMonth}
+                modifiers={modifiers}
+                modifiersClassNames={{
+                  // hasConcluidas: verde (prioridade máxima - todas as aulas concluídas)
+                  hasConcluidas: 'bg-green-50 dark:bg-green-950 border-2 border-green-300 dark:border-green-700',
+                  // hasPendentes: laranja (prioridade média - algumas aulas concluídas mas não todas)
+                  hasPendentes: 'bg-orange-50 dark:bg-orange-950 border-2 border-orange-300 dark:border-orange-700',
+                  // hasAulas: azul (prioridade baixa - tem aulas mas nenhuma concluída)
+                  hasAulas: 'bg-blue-50 dark:bg-blue-950 border-2 border-blue-300 dark:border-blue-700',
+                  // hasDiasSelecionados: amarelo (prioridade baixa - dia selecionado sem aulas ainda)
+                  hasDiasSelecionados: 'bg-yellow-50/50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800',
+                  // hasFerias: rosa (períodos de férias e recesso)
+                  hasFerias: 'bg-pink-50 dark:bg-pink-950 border-2 border-pink-300 dark:border-pink-700',
+                }}
+                numberOfMonths={2}
+                className="rounded-md border w-full"
+                locale={ptBR}
+                // Forçar atualização preservando o mês
+                defaultMonth={currentMonth}
+              />
+              <p className="text-xs text-muted-foreground mt-1.5 text-left">
+                💡 Dica: Dê um duplo clique em qualquer data para alterar a data inicial a qualquer momento
+              </p>
+              
+              {/* Legenda e Instruções */}
+              <Card className="mt-3 w-full py-1">
+                <div className="flex flex-col md:flex-row gap-3 items-start">
+                  {/* Primeira parte: Legendas */}
+                  <div className="md:w-64 flex-shrink-0">
+                    <CardHeader className="pb-1 pt-1.5 px-3">
+                      <CardTitle className="text-base font-bold">Legendas</CardTitle>
+                    </CardHeader>
+                    <CardContent className="px-3 pb-1.5 pt-0">
+                      <div className="flex flex-col gap-1.5 text-sm">
+                        <div className="flex items-center gap-2 h-5">
+                          <div className="w-4 h-4 rounded bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 flex-shrink-0" />
+                          <span className="text-xs">Dias selecionados para estudo</span>
+                        </div>
+                        <div className="flex items-center gap-2 h-5">
+                          <div className="w-4 h-4 rounded bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 flex-shrink-0" />
+                          <span className="text-xs">Dia com aulas</span>
+                        </div>
+                        <div className="flex items-center gap-2 h-5">
+                          <div className="w-4 h-4 rounded bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 flex-shrink-0" />
+                          <span className="text-xs">Dia com aulas concluídas</span>
+                        </div>
+                        <div className="flex items-center gap-2 h-5">
+                          <div className="w-4 h-4 rounded bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 flex-shrink-0" />
+                          <span className="text-xs">Dia com aulas pendentes</span>
+                        </div>
+                        <div className="flex items-center gap-2 h-5">
+                          <div className="w-4 h-4 rounded bg-pink-50 dark:bg-pink-950 border border-pink-200 dark:border-pink-800 flex-shrink-0" />
+                          <span className="text-xs">Períodos de férias e recesso</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </div>
+                  
+                  {/* Divisor vertical */}
+                  <Separator orientation="vertical" className="hidden md:block" />
+                  
+                  {/* Segunda parte: Instruções */}
+                  <div className="md:w-[500px] flex-shrink-0">
+                    <CardHeader className="pb-1 pt-1.5 px-3">
+                      <CardTitle className="text-base font-bold">Como usar</CardTitle>
+                    </CardHeader>
+                    <CardContent className="px-3 pb-1.5 pt-0">
+                      <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-2 whitespace-nowrap h-5">
+                          <span className="font-medium flex-shrink-0">•</span>
+                          <span>Selecione os dias da semana em que deseja estudar no painel lateral</span>
+                        </div>
+                        <div className="flex items-center gap-2 whitespace-nowrap h-5">
+                          <span className="font-medium flex-shrink-0">•</span>
+                          <span>Clique em "Salvar e Atualizar Calendário" para recalcular as datas das aulas</span>
+                        </div>
+                        <div className="flex items-center gap-2 whitespace-nowrap h-5">
+                          <span className="font-medium flex-shrink-0">•</span>
+                          <span>Use o botão de data para selecionar um período e ver as aulas agendadas</span>
+                        </div>
+                        <div className="flex items-center gap-2 whitespace-nowrap h-5">
+                          <span className="font-medium flex-shrink-0">•</span>
+                          <span>Marque as aulas como concluídas usando os checkboxes na lista</span>
+                        </div>
+                        <div className="flex items-center gap-2 whitespace-nowrap h-5">
+                          <span className="font-medium flex-shrink-0">•</span>
+                          <span>Dê um duplo clique em qualquer data do calendário para alterar o período selecionado</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </div>
+                </div>
+              </Card>
             </div>
 
             {/* Painel de Filtros - Lado Direito - Alinhado com o calendário */}
-            <Card className="w-full lg:w-80 flex-shrink-0 flex flex-col border rounded-md shadow-sm self-start">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-base font-semibold">Selecionar dias para ver a aula</CardTitle>
-                <CardDescription className="text-xs mt-1">
+            <Card className="w-full lg:w-80 flex-shrink-0 flex flex-col border rounded-md shadow-sm py-2">
+              <CardHeader className="pb-1 pt-2 px-3">
+                <CardTitle className="text-base font-bold leading-tight">Selecionar dias para ver a aula</CardTitle>
+                <CardDescription className="text-xs mt-0.5 leading-tight mb-0">
                   Selecione os dias em que deseja ver as aulas no calendário
                 </CardDescription>
                 {(() => {
@@ -1260,7 +1593,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                   if (diasSemItens.length > 0 && diasSelecionados.length < 7) {
                     const nomesDiasSemItens = diasSemItens.map(d => ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][d])
                     return (
-                      <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200">
+                      <div className="mt-1.5 p-1.5 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200 leading-tight">
                         <p className="font-medium">Atenção:</p>
                         <p>Os dias {nomesDiasSemItens.join(', ')} estão selecionados mas não têm aulas ainda. Clique em "Salvar e Atualizar Calendário" para recalcular as datas.</p>
                       </div>
@@ -1269,39 +1602,73 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                   return null
                 })()}
               </CardHeader>
-              <CardContent className="flex-1 flex flex-col px-4 pb-4 pt-0">
-                <div className="space-y-2.5 flex-1">
-                  {DIAS_SEMANA.map((dia) => (
-                    <div key={dia.valor} className="flex items-center space-x-2.5 py-1">
-                      <Checkbox
-                        id={`dia-${dia.valor}`}
-                        checked={diasSelecionados.includes(dia.valor)}
-                        onCheckedChange={() => handleToggleDia(dia.valor)}
-                        className="h-4 w-4"
-                      />
-                      <Label
-                        htmlFor={`dia-${dia.valor}`}
-                        className="text-sm font-normal cursor-pointer flex-1 leading-5"
-                      >
-                        {dia.nome}
-                      </Label>
-                    </div>
-                  ))}
+              <CardContent className="flex flex-col px-3 pb-1 pt-1">
+                {/* Divisão visual antes do checkbox */}
+                <Separator className="mb-2" />
+                
+                {/* Checkbox "Manter dias atuais" e dias da semana em grid compacto */}
+                <div className="mb-2 pb-2 border-b">
+                  <div className="flex items-center space-x-2 py-0.5 mb-1">
+                    <Checkbox
+                      id="manter-dias-atuais"
+                      checked={manterDiasAtuais}
+                      onCheckedChange={handleToggleManterDiasAtuais}
+                      className="h-4 w-4"
+                    />
+                    <Label
+                      htmlFor="manter-dias-atuais"
+                      className="text-sm font-medium cursor-pointer flex-1 leading-tight"
+                    >
+                      Manter dias atuais
+                    </Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground ml-6 mb-1.5 leading-tight">
+                    {manterDiasAtuais 
+                      ? 'Usando os dias salvos no calendário. Desmarque para editar.'
+                      : 'Edite os dias selecionados ou desmarque todos para ver apenas as aulas.'}
+                  </p>
+                  
+                  {/* Divisão visual */}
+                  <Separator className="my-2" />
+                  
+                  {/* Lista de dias da semana - vertical */}
+                  <div className="flex flex-col gap-1">
+                    {DIAS_SEMANA.map((dia) => (
+                      <div key={dia.valor} className="flex items-center space-x-2 py-0.5">
+                        <Checkbox
+                          id={`dia-${dia.valor}`}
+                          checked={diasSelecionados.includes(dia.valor)}
+                          onCheckedChange={() => handleToggleDia(dia.valor)}
+                          disabled={manterDiasAtuais}
+                          className="h-4 w-4"
+                        />
+                        <Label
+                          htmlFor={`dia-${dia.valor}`}
+                          className={cn(
+                            "text-sm font-normal flex-1 leading-tight",
+                            manterDiasAtuais ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                          )}
+                        >
+                          {dia.nome}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                <Separator className="my-4" />
-
-                <div className="space-y-2">
+                {/* Botão de salvar */}
+                <div className="space-y-1 mt-2">
+                  <Separator className="my-1" />
                   <Button
                     onClick={handleSalvarDistribuicao}
-                    disabled={salvandoDistribuicao || diasSelecionados.length === 0}
+                    disabled={salvandoDistribuicao || (diasSelecionados.length === 0 && !manterDiasAtuais)}
                     className="w-full"
                     size="sm"
                   >
                     {salvandoDistribuicao ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Salvando...
+                        Processando...
                       </>
                     ) : (
                       <>
@@ -1310,24 +1677,19 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                       </>
                     )}
                   </Button>
-                  <p className="text-xs text-muted-foreground text-center">
-                    Ao salvar, as datas das aulas serão recalculadas automaticamente
-                  </p>
+                  {salvandoDistribuicao && (
+                    <p className="text-xs text-muted-foreground text-center animate-pulse leading-tight mt-1">
+                      Recalculando datas das aulas...
+                    </p>
+                  )}
+                  {!salvandoDistribuicao && (
+                    <p className="text-xs text-muted-foreground text-center leading-tight mt-1 mb-0">
+                      Ao salvar, as datas das aulas serão recalculadas automaticamente
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
-          </div>
-
-          {/* Legenda */}
-          <div className="flex flex-wrap gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800" />
-              <span>Dia com aulas</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800" />
-              <span>Dia com aulas concluídas</span>
-            </div>
           </div>
 
           {/* Lista de itens por data (quando uma data é selecionada) */}
@@ -1510,53 +1872,248 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                     // Criar data no horário local para formatação
                     const [year, month, day] = dataKey.split('-').map(Number)
                     const data = new Date(year, month - 1, day)
+                    
+                    // Agrupar itens por disciplina e frente
+                    const itensAgrupados = new Map<string, typeof itens>()
+                    
+                    itens.forEach((item) => {
+                      const disciplinaNome = item.aulas?.modulos?.frentes?.disciplinas?.nome || 'Sem disciplina'
+                      const frenteNome = item.aulas?.modulos?.frentes?.nome || 'Sem frente'
+                      const chave = `${disciplinaNome}|||${frenteNome}`
+                      
+                      if (!itensAgrupados.has(chave)) {
+                        itensAgrupados.set(chave, [])
+                      }
+                      itensAgrupados.get(chave)!.push(item)
+                    })
+                    
+                    // Ordenar grupos por disciplina e depois por frente
+                    const gruposOrdenados = Array.from(itensAgrupados.entries()).sort(([chaveA], [chaveB]) => {
+                      return chaveA.localeCompare(chaveB)
+                    })
+                    
+                    // Verificar se todas as aulas do dia estão concluídas
+                    const todasAulasDoDiaConcluidas = itens.every(item => item.concluido)
+                    const peloMenosUmaAulaDoDia = itens.length > 0
+                    // Criar chave única que inclui o estado de conclusão para forçar re-render
+                    const concluidasCount = itens.filter(item => item.concluido).length
+                    const cardKey = `${dataKey}-${concluidasCount}-${itens.length}`
+                    
                     return (
-                      <Card key={dataKey}>
+                      <Card key={cardKey}>
                         <CardHeader>
-                          <CardTitle className="text-base">
-                            {format(data, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                          </CardTitle>
+                          <div className="flex items-center justify-between gap-2">
+                            <CardTitle className="text-base">
+                              {format(data, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                            </CardTitle>
+                            {peloMenosUmaAulaDoDia && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={async (e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  console.log('[Button] Clicado, itens:', itens.length)
+                                  await toggleTodasAulasDoDia(itens)
+                                }}
+                                className="flex items-center gap-2"
+                              >
+                                <CheckSquare2 className="h-4 w-4" />
+                                {todasAulasDoDiaConcluidas ? 'Desmarcar todas' : 'Marcar todas'}
+                              </Button>
+                            )}
+                          </div>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-2">
-                            {itens.map((item) => (
-                              <div
-                                key={item.id}
-                                className="flex items-start gap-3 p-3 rounded-md border hover:bg-accent/50 transition-colors"
-                              >
-                                <Checkbox
-                                  checked={item.concluido}
-                                  onCheckedChange={(checked) =>
-                                    toggleConcluido(item.id, checked === true)
-                                  }
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-start justify-between gap-2">
-                                    <div className="flex-1">
-                                      <p className="font-medium text-sm">
-                                        {item.aulas?.nome || 'Aula sem nome'}
-                                      </p>
-                                      {item.aulas?.modulos?.frentes?.disciplinas && (
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                          {item.aulas.modulos.frentes.disciplinas.nome}
-                                          {item.aulas.modulos.nome && ` • ${item.aulas.modulos.nome}`}
-                                        </p>
-                                      )}
-                                      {item.aulas?.tempo_estimado_minutos && (
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                          Tempo estimado: {formatTempo(item.aulas.tempo_estimado_minutos)}
-                                        </p>
-                                      )}
+                          <div className="space-y-4">
+                            {gruposOrdenados.map(([chave, itensGrupo]) => {
+                              const [disciplinaNome, frenteNome] = chave.split('|||')
+                              const disciplinaId = itensGrupo[0]?.aulas?.modulos?.frentes?.disciplinas?.id || ''
+                              const frenteId = itensGrupo[0]?.aulas?.modulos?.frentes?.id || ''
+                              
+                              // Gerar cor única baseada no ID da disciplina e frente para diferenciação visual
+                              const hash = (disciplinaId + frenteId).split('').reduce((acc, char) => {
+                                return char.charCodeAt(0) + ((acc << 5) - acc)
+                              }, 0)
+                              const hue = Math.abs(hash) % 360
+                              const borderColor = `hsl(${hue}, 70%, 50%)`
+                              
+                              // Estilo dinâmico para borda colorida (cores geradas dinamicamente)
+                              const borderStyle: React.CSSProperties & { '--border-color'?: string } = {
+                                '--border-color': borderColor,
+                                borderLeftColor: 'var(--border-color)',
+                              }
+                              
+                              const estaExpandido = cardsExpandidos.has(chave)
+                              
+                              return (
+                                <Collapsible
+                                  key={chave}
+                                  open={estaExpandido}
+                                  onOpenChange={(open) => {
+                                    setCardsExpandidos(prev => {
+                                      const novo = new Set(prev)
+                                      if (open) {
+                                        novo.add(chave)
+                                      } else {
+                                        novo.delete(chave)
+                                      }
+                                      return novo
+                                    })
+                                  }}
+                                >
+                                  {/* eslint-disable-next-line react/forbid-dom-props -- Cores dinâmicas geradas por hash não podem ser pré-definidas */}
+                                  <div
+                                    className="border rounded-lg p-4 bg-card space-y-2 border-l-4"
+                                    style={borderStyle}
+                                  >
+                                    {/* Cabeçalho do grupo: Disciplina e Frente */}
+                                    <div className="mb-3 pb-2 border-b">
+                                      <CollapsibleTrigger asChild>
+                                        <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
+                                          <div className="flex-1">
+                                            <h4 className="font-semibold text-sm">{disciplinaNome}</h4>
+                                            <p className="text-xs text-muted-foreground mt-0.5">{frenteNome}</p>
+                                            
+                                            {/* Informações agregadas do grupo */}
+                                            <div className="flex flex-wrap gap-3 mt-2 text-xs text-muted-foreground">
+                                              <span>
+                                                <span className="font-medium">Número de aulas:</span> {itensGrupo.length}
+                                              </span>
+                                              {(() => {
+                                                const tempoAulas = itensGrupo.reduce((acc, item) => {
+                                                  return acc + (item.aulas?.tempo_estimado_minutos || 0)
+                                                }, 0)
+                                                const tempoAnotacoesExercicios = tempoAulas * 0.5 // 50% do tempo de aulas para anotações e exercícios
+                                                
+                                                return (
+                                                  <>
+                                                    {tempoAulas > 0 && (
+                                                      <span>
+                                                        <span className="font-medium">Tempo estimado de aula:</span> {formatTempo(tempoAulas)}
+                                                      </span>
+                                                    )}
+                                                    {tempoAnotacoesExercicios > 0 && (
+                                                      <span>
+                                                        <span className="font-medium">Tempo estimado de Anotações/Exercícios:</span> {formatTempo(tempoAnotacoesExercicios)}
+                                                      </span>
+                                                    )}
+                                                  </>
+                                                )
+                                              })()}
+                                            </div>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            {/* Estilo dinâmico para badge colorido (cores geradas dinamicamente) */}
+                                            {/* eslint-disable-next-line react/forbid-dom-props */}
+                                            <Badge 
+                                              variant="outline" 
+                                              className="text-xs"
+                                              style={{
+                                                '--badge-border-color': borderColor,
+                                                '--badge-text-color': borderColor,
+                                                borderColor: 'var(--badge-border-color)',
+                                                color: 'var(--badge-text-color)',
+                                              } as React.CSSProperties & { '--badge-border-color': string; '--badge-text-color': string }}
+                                            >
+                                              {itensGrupo.length} {itensGrupo.length === 1 ? 'aula' : 'aulas'}
+                                            </Badge>
+                                            {estaExpandido ? (
+                                              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                                            ) : (
+                                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                                            )}
+                                          </div>
+                                        </div>
+                                      </CollapsibleTrigger>
+                                      {/* Botão para marcar todas as aulas da frente */}
+                                      <div className="mt-2 flex justify-end">
+                                        {(() => {
+                                          const todasAulasDaFrenteConcluidas = itensGrupo.every(item => item.concluido)
+                                          return (
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={(e) => {
+                                                e.stopPropagation()
+                                                toggleTodasAulasDaFrente(itensGrupo)
+                                              }}
+                                              className="flex items-center gap-2 text-xs h-7"
+                                            >
+                                              <CheckSquare2 className="h-3.5 w-3.5" />
+                                              {todasAulasDaFrenteConcluidas ? 'Desmarcar todas' : 'Marcar todas'}
+                                            </Button>
+                                          )
+                                        })()}
+                                      </div>
                                     </div>
-                                    {item.concluido && (
-                                      <Badge variant="default" className="text-xs">
-                                        Concluída
-                                      </Badge>
-                                    )}
+                                    
+                                    {/* Lista de aulas do grupo */}
+                                    <CollapsibleContent>
+                                      <div className="space-y-2">
+                                    {itensGrupo.map((item) => (
+                                      <div
+                                        key={item.id}
+                                        className="flex items-start gap-3 p-2 rounded-md border hover:bg-accent/50 transition-colors"
+                                      >
+                                        <Checkbox
+                                          checked={item.concluido}
+                                          onCheckedChange={(checked) =>
+                                            toggleConcluido(item.id, checked === true)
+                                          }
+                                          className="mt-1"
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-start justify-between gap-2">
+                                            <div className="flex-1">
+                                              {/* Badges: Aula, Módulo, Frente */}
+                                              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                                {item.aulas?.numero_aula && (
+                                                  <Badge variant="outline" className="text-xs">
+                                                    Aula {item.aulas.numero_aula}
+                                                  </Badge>
+                                                )}
+                                                {item.aulas?.modulos?.numero_modulo && (
+                                                  <Badge variant="secondary" className="text-xs">
+                                                    Módulo {item.aulas.modulos.numero_modulo}
+                                                  </Badge>
+                                                )}
+                                                {item.aulas?.modulos?.frentes?.nome && (
+                                                  <Badge variant="outline" className="text-xs">
+                                                    {item.aulas.modulos.frentes.nome}
+                                                  </Badge>
+                                                )}
+                                              </div>
+                                              
+                                              {/* Nome da aula */}
+                                              <p className="font-medium text-sm mb-1">
+                                                {item.aulas?.nome || 'Aula sem nome'}
+                                              </p>
+                                              
+                                              {/* Tempo estimado */}
+                                              {item.aulas?.tempo_estimado_minutos && (
+                                                <p className="text-xs text-muted-foreground">
+                                                  {formatTempo(item.aulas.tempo_estimado_minutos)}
+                                                </p>
+                                              )}
+                                            </div>
+                                            
+                                            {/* Badge de concluída */}
+                                            {item.concluido && (
+                                              <Badge variant="default" className="text-xs shrink-0">
+                                                Concluída
+                                              </Badge>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                      </div>
+                                    </CollapsibleContent>
                                   </div>
-                                </div>
-                              </div>
-                            ))}
+                                </Collapsible>
+                              )
+                            })}
                           </div>
                         </CardContent>
                       </Card>

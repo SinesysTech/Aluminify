@@ -89,6 +89,13 @@ async function postHandler(request: AuthenticatedRequest) {
           : true,
     };
 
+    console.log('[Cronograma API] Payload preparado:', {
+      disciplinas_ids: payload.disciplinas_ids?.length || 0,
+      modulos_ids: payload.modulos_ids?.length || 0,
+      curso_alvo_id: payload.curso_alvo_id,
+      prioridade_minima: payload.prioridade_minima,
+    });
+
     console.log('[Cronograma API] Chamando serviço...');
     const result = await cronogramaService.gerarCronograma(payload, request.user.id, request.user.email);
     console.log('[Cronograma API] Cronograma gerado com sucesso:', result.cronograma?.id);

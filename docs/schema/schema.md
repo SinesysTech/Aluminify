@@ -250,6 +250,18 @@ ADD COLUMN created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL;
 -- Adicionar coluna created_by em Materiais
 ALTER TABLE public.materiais_curso 
 ADD COLUMN created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+
+-- Adicionar coluna created_by em Frentes
+ALTER TABLE public.frentes 
+ADD COLUMN created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+
+-- Adicionar coluna created_by em Modulos
+ALTER TABLE public.modulos 
+ADD COLUMN created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL;
+
+-- Adicionar coluna created_by em Aulas
+ALTER TABLE public.aulas 
+ADD COLUMN created_by UUID REFERENCES auth.users(id) ON DELETE SET NULL;
 ```
 
 ### Parte 3: Automação de Autoria (Auto-fill `created_by`)
@@ -274,6 +286,9 @@ CREATE TRIGGER set_created_by_segmentos BEFORE INSERT ON public.segmentos FOR EA
 CREATE TRIGGER set_created_by_disciplinas BEFORE INSERT ON public.disciplinas FOR EACH ROW EXECUTE PROCEDURE public.handle_created_by();
 CREATE TRIGGER set_created_by_cursos BEFORE INSERT ON public.cursos FOR EACH ROW EXECUTE PROCEDURE public.handle_created_by();
 CREATE TRIGGER set_created_by_materiais BEFORE INSERT ON public.materiais_curso FOR EACH ROW EXECUTE PROCEDURE public.handle_created_by();
+CREATE TRIGGER set_created_by_frentes BEFORE INSERT ON public.frentes FOR EACH ROW EXECUTE PROCEDURE public.handle_created_by();
+CREATE TRIGGER set_created_by_modulos BEFORE INSERT ON public.modulos FOR EACH ROW EXECUTE PROCEDURE public.handle_created_by();
+CREATE TRIGGER set_created_by_aulas BEFORE INSERT ON public.aulas FOR EACH ROW EXECUTE PROCEDURE public.handle_created_by();
 ```
 
 ### Parte 4: Atualizar a Lógica de Cadastro (Aluno vs Professor)
@@ -350,4 +365,32 @@ CREATE POLICY "Professores criam disciplinas" ON public.disciplinas
 
 CREATE POLICY "Professores criam segmentos" ON public.segmentos 
     FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM public.professores WHERE id = auth.uid()));
+
+-- Frentes, Modulos e Aulas
+CREATE POLICY "Professores criam frentes" ON public.frentes 
+    FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM public.professores WHERE id = auth.uid()));
+
+CREATE POLICY "Professores editam suas frentes" ON public.frentes 
+    FOR UPDATE USING (created_by = auth.uid() OR EXISTS (SELECT 1 FROM public.cursos WHERE cursos.id = frentes.curso_id AND cursos.created_by = auth.uid()));
+
+CREATE POLICY "Professores deletam suas frentes" ON public.frentes 
+    FOR DELETE USING (created_by = auth.uid() OR EXISTS (SELECT 1 FROM public.cursos WHERE cursos.id = frentes.curso_id AND cursos.created_by = auth.uid()));
+
+CREATE POLICY "Professores criam modulos" ON public.modulos 
+    FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM public.professores WHERE id = auth.uid()));
+
+CREATE POLICY "Professores editam seus modulos" ON public.modulos 
+    FOR UPDATE USING (created_by = auth.uid() OR EXISTS (SELECT 1 FROM public.frentes JOIN public.cursos ON cursos.id = frentes.curso_id WHERE frentes.id = modulos.frente_id AND cursos.created_by = auth.uid()));
+
+CREATE POLICY "Professores deletam seus modulos" ON public.modulos 
+    FOR DELETE USING (created_by = auth.uid() OR EXISTS (SELECT 1 FROM public.frentes JOIN public.cursos ON cursos.id = frentes.curso_id WHERE frentes.id = modulos.frente_id AND cursos.created_by = auth.uid()));
+
+CREATE POLICY "Professores criam aulas" ON public.aulas 
+    FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM public.professores WHERE id = auth.uid()));
+
+CREATE POLICY "Professores editam suas aulas" ON public.aulas 
+    FOR UPDATE USING (created_by = auth.uid() OR EXISTS (SELECT 1 FROM public.modulos JOIN public.frentes ON frentes.id = modulos.frente_id JOIN public.cursos ON cursos.id = frentes.curso_id WHERE modulos.id = aulas.modulo_id AND cursos.created_by = auth.uid()));
+
+CREATE POLICY "Professores deletam suas aulas" ON public.aulas 
+    FOR DELETE USING (created_by = auth.uid() OR EXISTS (SELECT 1 FROM public.modulos JOIN public.frentes ON frentes.id = modulos.frente_id JOIN public.cursos ON cursos.id = frentes.curso_id WHERE modulos.id = aulas.modulo_id AND cursos.created_by = auth.uid()));
 ```

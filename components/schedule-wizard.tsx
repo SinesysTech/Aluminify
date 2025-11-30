@@ -334,15 +334,19 @@ export function ScheduleWizard() {
         cursosData = cursosUnicos
         console.log(`Professor ${user.id} encontrou ${cursosUnicos.length} curso(s):`, cursosUnicos.map((c: any) => c.nome))
       } else {
-        // Aluno vê cursos através de matrículas
-        const { data: matriculas } = await supabase
-          .from('matriculas')
+        // Aluno vê cursos através da tabela alunos_cursos
+        const { data: alunosCursos, error: alunosCursosError } = await supabase
+          .from('alunos_cursos')
           .select('curso_id, cursos(*)')
           .eq('aluno_id', user.id)
-          .eq('ativo', true)
 
-        if (matriculas) {
-          cursosData = matriculas.map((m: any) => m.cursos).filter(Boolean)
+        if (alunosCursosError) {
+          console.error('Erro ao carregar cursos do aluno:', alunosCursosError)
+        }
+
+        if (alunosCursos) {
+          cursosData = alunosCursos.map((ac: any) => ac.cursos).filter(Boolean)
+          console.log(`Aluno ${user.id} encontrou ${cursosData.length} curso(s):`, cursosData.map((c: any) => c?.nome))
         }
       }
 
@@ -656,8 +660,31 @@ export function ScheduleWizard() {
           return
         }
 
+        // Log detalhado antes de filtrar
+        console.log('[ScheduleWizard] Frentes ANTES do filtro de módulos:', arvore.map(f => ({
+          frente_id: f.id,
+          frente_nome: f.nome,
+          total_modulos: f.modulos.length,
+          modulo_ids: f.modulos.map((m: any) => m.id)
+        })))
+
         // Filtrar frentes que têm pelo menos um módulo
         const arvoreComModulos = arvore.filter((frente) => frente.modulos.length > 0)
+
+        // Log de frentes excluídas
+        const frentesExcluidas = arvore.filter((frente) => frente.modulos.length === 0)
+        if (frentesExcluidas.length > 0) {
+          console.warn('[ScheduleWizard] ⚠️⚠️⚠️ Frentes EXCLUÍDAS por não terem módulos:', frentesExcluidas.map(f => ({
+            frente_id: f.id,
+            frente_nome: f.nome
+          })))
+        }
+
+        console.log('[ScheduleWizard] Frentes DEPOIS do filtro de módulos:', arvoreComModulos.map(f => ({
+          frente_id: f.id,
+          frente_nome: f.nome,
+          total_modulos: f.modulos.length
+        })))
 
         // Agrupar por disciplina
         const agrupadosPorDisciplina: Record<string, { disciplinaNome: string; frentes: FrenteResumo[] }> = {}
@@ -677,6 +704,17 @@ export function ScheduleWizard() {
         setModulosCurso(arvoreComModulos)
         setModulosCursoAgrupadosPorDisciplina(agrupadosPorDisciplina)
         const todosModulos = arvoreComModulos.flatMap((frente) => frente.modulos.map((modulo: any) => modulo.id))
+        
+        console.log('[ScheduleWizard] Total de módulos selecionados:', todosModulos.length)
+        console.log('[ScheduleWizard] Módulos selecionados por frente:', 
+          arvoreComModulos.map(f => ({
+            frente_id: f.id,
+            frente_nome: f.nome,
+            total_modulos: f.modulos.length,
+            modulo_ids: f.modulos.map((m: any) => m.id)
+          }))
+        )
+        
         setModulosSelecionados(todosModulos)
         setCompletedLessonsCount(concluidasSet.size)
         setError(null)
@@ -860,6 +898,30 @@ export function ScheduleWizard() {
         velocidade_reproducao: data.velocidade_reproducao ?? 1.0,
       }
 
+      // Log detalhado dos módulos sendo enviados
+      console.log('[ScheduleWizard] ========== ENVIANDO PARA API ==========')
+      console.log('[ScheduleWizard] Disciplinas selecionadas:', data.disciplinas_ids)
+      console.log('[ScheduleWizard] Total de módulos selecionados:', data.modulos_ids?.length || 0)
+      console.log('[ScheduleWizard] Módulos selecionados (primeiros 20):', data.modulos_ids?.slice(0, 20))
+      
+      // Verificar módulos por frente
+      if (modulosCurso.length > 0 && data.modulos_ids) {
+        const modulosPorFrenteEnvio = modulosCurso.map(frente => ({
+          frente_id: frente.id,
+          frente_nome: frente.nome,
+          total_modulos_frente: frente.modulos.length,
+          modulos_selecionados: frente.modulos.filter((m: any) => data.modulos_ids?.includes(m.id)).length,
+          todos_selecionados: frente.modulos.every((m: any) => data.modulos_ids?.includes(m.id))
+        }))
+        console.log('[ScheduleWizard] Status de módulos por frente:', modulosPorFrenteEnvio)
+        
+        const frentesIncompletas = modulosPorFrenteEnvio.filter(f => !f.todos_selecionados || f.modulos_selecionados === 0)
+        if (frentesIncompletas.length > 0) {
+          console.warn('[ScheduleWizard] ⚠️⚠️⚠️ Frentes com módulos NÃO selecionados:', frentesIncompletas)
+        }
+      }
+      console.log('[ScheduleWizard] =======================================')
+
       // Obter token de autenticação
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) {
@@ -918,9 +980,12 @@ export function ScheduleWizard() {
       console.log('Resultado final da API:', { result, status: response.status, ok: response.ok })
 
       if (!response.ok) {
-        console.error('Erro na API - Status:', response.status)
-        console.error('Erro na API - Result:', result)
-        console.error('Erro na API - Keys:', result ? Object.keys(result) : 'result é null/undefined')
+        // Log apenas em desenvolvimento para reduzir ruído no console
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Erro na API - Status:', response.status)
+          console.error('Erro na API - Result:', result)
+          console.error('Erro na API - Keys:', result ? Object.keys(result) : 'result é null/undefined')
+        }
         
         // Verificar se é erro de tempo insuficiente (comparação mais flexível)
         const errorText = result?.error ? String(result.error).toLowerCase() : ''
@@ -967,8 +1032,11 @@ export function ScheduleWizard() {
             (typeof result === 'string' ? result : null) ||
             `Erro ${response.status}: ${response.statusText || 'Erro ao gerar cronograma'}`
           
-          console.error('Mensagem de erro final:', errorMessage)
-          console.error('Result completo para debug:', JSON.stringify(result, null, 2))
+          // Log apenas em desenvolvimento
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Mensagem de erro final:', errorMessage)
+            console.error('Result completo para debug:', JSON.stringify(result, null, 2))
+          }
           setError(errorMessage)
         }
         setLoading(false)
@@ -1800,6 +1868,7 @@ export function ScheduleWizard() {
                 <Card>
                   <CardHeader>
                     <CardTitle>Resumo da Configuração</CardTitle>
+                    <Separator className="mt-2" />
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
                     <div className="flex justify-between">
@@ -1839,28 +1908,46 @@ export function ScheduleWizard() {
                         )}
                       </span>
                     </div>
+                    <Separator />
                     {cursoAtual?.nome && (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Curso:</span>
-                        <span className="font-medium">{cursoAtual.nome}</span>
-                      </div>
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Curso:</span>
+                          <span className="font-medium">{cursoAtual.nome}</span>
+                        </div>
+                        <Separator />
+                      </>
                     )}
-                    <div className="space-y-1 pt-2">
-                      <span className="text-muted-foreground">Disciplinas:</span>
-                      {form.watch('disciplinas_ids').length === 0 ? (
-                        <p className="text-muted-foreground pl-5">Nenhuma disciplina selecionada</p>
-                      ) : (
-                        <ul className="list-disc pl-5 space-y-1">
-                          {disciplinasDoCurso
-                            .filter((d) => form.watch('disciplinas_ids').includes(d.id))
-                            .map((disciplina) => (
-                              <li key={disciplina.id} className="text-muted-foreground">
-                                {disciplina.nome}
-                              </li>
-                            ))}
-                        </ul>
-                      )}
-                    </div>
+                    {form.watch('disciplinas_ids').length === 0 ? (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Disciplinas:</span>
+                        <span className="text-muted-foreground">Nenhuma disciplina selecionada</span>
+                      </div>
+                    ) : (
+                      disciplinasDoCurso
+                        .filter((d) => form.watch('disciplinas_ids').includes(d.id))
+                        .map((disciplina) => {
+                          // Calcular horas totais da disciplina baseado nos módulos selecionados
+                          const grupoDisciplina = modulosCursoAgrupadosPorDisciplina[disciplina.id]
+                          let horasTotais = 0
+                          if (grupoDisciplina) {
+                            grupoDisciplina.frentes.forEach((frente) => {
+                              frente.modulos.forEach((modulo) => {
+                                if (modulosSelecionados.includes(modulo.id)) {
+                                  horasTotais += modulo.tempoTotal || 0
+                                }
+                              })
+                            })
+                          }
+                          return (
+                            <div key={disciplina.id} className="flex justify-between">
+                              <span className="text-muted-foreground">{disciplina.nome}:</span>
+                              <span>{horasTotais > 0 ? formatHorasFromMinutes(horasTotais) : '--'}</span>
+                            </div>
+                          )
+                        })
+                    )}
+                    <Separator />
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Modalidade:</span>
                       <span>
@@ -1873,10 +1960,12 @@ export function ScheduleWizard() {
                         }[form.watch('prioridade_minima')] || 'Não definida'}
                       </span>
                     </div>
+                    <Separator />
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Tipo de Estudo:</span>
                       <span className="capitalize">{form.watch('modalidade')}</span>
                     </div>
+                    <Separator />
                     {form.watch('ferias').length > 0 && (
                       <div className="space-y-1 pt-2">
                         <span className="text-muted-foreground">Pausas e Recessos:</span>

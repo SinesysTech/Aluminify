@@ -19,13 +19,28 @@ import {
 const TEMPO_PADRAO_MINUTOS = 10;
 const FATOR_MULTIPLICADOR = 1.5;
 
+// Helper para logs que só aparecem em desenvolvimento
+const logDebug = (...args: any[]) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(...args);
+  }
+};
+
+const logWarn = (...args: any[]) => {
+  console.warn(...args);
+};
+
+const logError = (...args: any[]) => {
+  console.error(...args);
+};
+
 export class CronogramaService {
   async gerarCronograma(
     input: GerarCronogramaInput,
     userId: string,
     userEmail?: string,
   ): Promise<GerarCronogramaResult> {
-    console.log('[CronogramaService] Iniciando geração de cronograma:', {
+    logDebug('[CronogramaService] Iniciando geração de cronograma:', {
       aluno_id: input.aluno_id,
       userId,
       userEmail,
@@ -115,7 +130,7 @@ export class CronogramaService {
     
     if (!frentesError && todasFrentes && todasFrentes.length > 0) {
       const frentesComAulas = new Set(aulas.map(a => a.frente_id));
-      const frentesSemAulas = todasFrentes.filter((f: any) => !frentesComAulas.has(f.id));
+      const frentesSemAulas = todasFrentes.filter((f) => !frentesComAulas.has((f as any).id));
       
       if (frentesSemAulas.length > 0) {
         console.warn('[CronogramaService] ⚠️ Frentes sem aulas no cronograma gerado:', {
@@ -202,7 +217,7 @@ export class CronogramaService {
       );
     }
 
-    console.log('[CronogramaService] Distribuição concluída:', {
+    logDebug('[CronogramaService] Distribuição concluída:', {
       totalItens: itens.length,
       semanasComItens: new Set(itens.map((i) => i.semana_numero)).size,
     });
@@ -799,6 +814,78 @@ export class CronogramaService {
       throw new CronogramaValidationError('Nenhum módulo encontrado para as frentes selecionadas');
     }
 
+    // PRIMEIRO: Buscar TODAS as aulas (sem filtro de prioridade) para diagnóstico
+    console.log('🔍 [CronogramaService] Buscando TODAS as aulas (sem filtro de prioridade) para diagnóstico...');
+    const { data: todasAulasSemFiltro, error: todasAulasError } = await client
+      .from('aulas')
+      .select(
+        `
+        id,
+        nome,
+        prioridade,
+        modulo_id,
+        modulos!inner(
+          id,
+          frente_id,
+          frentes!inner(
+            id,
+            nome,
+            curso_id
+          )
+        )
+      `,
+      )
+      .in('modulo_id', moduloIds);
+
+    if (!todasAulasError && todasAulasSemFiltro) {
+      // Agrupar por frente
+      const aulasPorFrente = new Map<string, { total: number; prioridade_0: number; prioridade_null: number; prioridade_menor_1: number; prioridade_maior_igual_1: number }>();
+      
+      todasAulasSemFiltro.forEach((aula: any) => {
+        const frenteId = aula.modulos?.frentes?.id;
+        if (!frenteId) return;
+        
+        if (!aulasPorFrente.has(frenteId)) {
+          aulasPorFrente.set(frenteId, {
+            total: 0,
+            prioridade_0: 0,
+            prioridade_null: 0,
+            prioridade_menor_1: 0,
+            prioridade_maior_igual_1: 0
+          });
+        }
+        
+        const stats = aulasPorFrente.get(frenteId)!;
+        stats.total++;
+        
+        if (aula.prioridade === null || aula.prioridade === undefined) {
+          stats.prioridade_null++;
+        } else if (aula.prioridade === 0) {
+          stats.prioridade_0++;
+        } else if (aula.prioridade < 1) {
+          stats.prioridade_menor_1++;
+        } else if (aula.prioridade >= 1) {
+          stats.prioridade_maior_igual_1++;
+        }
+      });
+      
+      console.log('🔍 [CronogramaService] Diagnóstico de aulas por frente (ANTES do filtro de prioridade):', 
+        Array.from(aulasPorFrente.entries()).map(([frenteId, stats]) => {
+          const frente = frentesData?.find((f: any) => f.id === frenteId);
+          return {
+            frente_id: frenteId,
+            frente_nome: frente?.nome || 'Desconhecida',
+            total_aulas: stats.total,
+            prioridade_0: stats.prioridade_0,
+            prioridade_null: stats.prioridade_null,
+            prioridade_menor_1: stats.prioridade_menor_1,
+            prioridade_maior_igual_1: stats.prioridade_maior_igual_1,
+            sera_incluida: stats.prioridade_maior_igual_1 > 0
+          };
+        })
+      );
+    }
+
     // Buscar aulas dos módulos com filtro de prioridade
     // Não usamos curso_id direto de aulas para evitar problemas de cache/sincronização
     // Filtramos via join com frentes após buscar
@@ -921,15 +1008,70 @@ export class CronogramaService {
       throw new CronogramaValidationError('Nenhuma aula encontrada com os critérios fornecidos');
     }
 
+    console.log('🔍 [CronogramaService] Aulas encontradas ANTES do filtro de curso:', {
+      total: aulasDataRaw.length,
+      por_frente: aulasDataRaw.reduce((acc: any, aula: any) => {
+        const frenteId = aula.modulos?.frentes?.id;
+        const frenteNome = aula.modulos?.frentes?.nome;
+        if (!acc[frenteId]) {
+          acc[frenteId] = { frente_nome: frenteNome, total: 0, curso_ids: new Set() };
+        }
+        acc[frenteId].total++;
+        if (aula.modulos?.frentes?.curso_id) {
+          acc[frenteId].curso_ids.add(aula.modulos.frentes.curso_id);
+        }
+        return acc;
+      }, {} as Record<string, { frente_nome: string; total: number; curso_ids: Set<string> }>)
+    });
+
     // Filtrar por curso_id usando o join com frentes (se fornecido)
     let aulasData = aulasDataRaw;
     if (cursoId) {
+      const aulasAntesFiltro = aulasDataRaw.length;
       aulasData = aulasDataRaw.filter((aula: any) => {
         const frenteCursoId = aula.modulos?.frentes?.curso_id;
         return frenteCursoId === cursoId;
       });
       
+      console.log('🔍 [CronogramaService] Filtro de curso aplicado:', {
+        curso_id: cursoId,
+        aulas_antes: aulasAntesFiltro,
+        aulas_depois: aulasData.length,
+        aulas_removidas: aulasAntesFiltro - aulasData.length,
+        por_frente: aulasData.reduce((acc: any, aula: any) => {
+          const frenteId = aula.modulos?.frentes?.id;
+          const frenteNome = aula.modulos?.frentes?.nome;
+          if (!acc[frenteId]) {
+            acc[frenteId] = { frente_nome: frenteNome, total: 0 };
+          }
+          acc[frenteId].total++;
+          return acc;
+        }, {} as Record<string, { frente_nome: string; total: number }>)
+      });
+      
       if (aulasData.length === 0) {
+        // Log detalhado antes de lançar erro
+        const frentesComCursoDiferente = aulasDataRaw.reduce((acc: any, aula: any) => {
+          const frenteId = aula.modulos?.frentes?.id;
+          const frenteNome = aula.modulos?.frentes?.nome;
+          const frenteCursoId = aula.modulos?.frentes?.curso_id;
+          if (!acc[frenteId]) {
+            acc[frenteId] = { frente_nome: frenteNome, curso_id: frenteCursoId, total: 0 };
+          }
+          acc[frenteId].total++;
+          return acc;
+        }, {} as Record<string, { frente_nome: string; curso_id: string | null; total: number }>);
+        
+        console.error('🔍 [CronogramaService] ❌❌❌ Nenhuma aula encontrada após filtro de curso:', {
+          curso_id_esperado: cursoId,
+          frentes_encontradas: Object.values(frentesComCursoDiferente).map((f: any) => ({
+            frente_nome: f.frente_nome,
+            curso_id: f.curso_id,
+            total_aulas: f.total,
+            curso_id_correto: f.curso_id === cursoId
+          }))
+        });
+        
         throw new CronogramaValidationError('Nenhuma aula encontrada para o curso selecionado');
       }
     }
@@ -1655,10 +1797,31 @@ export class CronogramaService {
       diasSemanaIsArray: Array.isArray(diasSemana),
     });
 
-    // Buscar todos os itens do cronograma
+    // Buscar todos os itens do cronograma com informações de disciplina e frente
+    // Necessário para ordenar por disciplina → frente → ordem
     const { data: itens, error: itensError } = await client
       .from('cronograma_itens')
-      .select('id, semana_numero, ordem_na_semana')
+      .select(`
+        id, 
+        semana_numero, 
+        ordem_na_semana,
+        aula_id,
+        aulas!inner(
+          id,
+          modulos!inner(
+            id,
+            frentes!inner(
+              id,
+              nome,
+              disciplina_id,
+              disciplinas!inner(
+                id,
+                nome
+              )
+            )
+          )
+        )
+      `)
       .eq('cronograma_id', cronogramaId)
       .order('semana_numero', { ascending: true })
       .order('ordem_na_semana', { ascending: true });
@@ -1672,7 +1835,7 @@ export class CronogramaService {
       return { success: true, itens_atualizados: 0 };
     }
 
-    // Calcular datas
+    // Calcular datas agrupando por semana
     const dataInicio = new Date(cronograma.data_inicio);
     const atualizacoes: Array<{ id: string; data_prevista: string }> = [];
 
@@ -1680,142 +1843,254 @@ export class CronogramaService {
     const diasOrdenados = [...diasSemana].sort((a, b) => a - b);
     const numDiasSelecionados = diasOrdenados.length;
 
-    // Ordenar todos os itens por semana e ordem para garantir distribuição sequencial
-    const itensOrdenados = [...itens].sort((a, b) => {
-      if (a.semana_numero !== b.semana_numero) {
-        return a.semana_numero - b.semana_numero;
+    // Função helper para extrair informações de disciplina e frente de um item
+    const extrairInfoItem = (item: any) => {
+      // Supabase pode retornar dados aninhados de diferentes formas
+      const aula = item.aulas;
+      const modulo = aula?.modulos || (aula && Array.isArray(aula.modulos) ? aula.modulos[0] : null);
+      const frente = modulo?.frentes || (modulo && Array.isArray(modulo.frentes) ? modulo.frentes[0] : null);
+      const disciplina = frente?.disciplinas || (frente && Array.isArray(frente.disciplinas) ? frente.disciplinas[0] : null);
+      
+      return {
+        disciplinaId: disciplina?.id || '',
+        disciplinaNome: disciplina?.nome || '',
+        frenteId: frente?.id || '',
+        frenteNome: frente?.nome || '',
+      };
+    };
+
+    // Agrupar itens por semana primeiro
+    const itensPorSemana = new Map<number, typeof itens>();
+    itens.forEach((item) => {
+      const semana = item.semana_numero;
+      if (!itensPorSemana.has(semana)) {
+        itensPorSemana.set(semana, []);
       }
-      return a.ordem_na_semana - b.ordem_na_semana;
+      itensPorSemana.get(semana)!.push(item);
     });
 
-    // Contador para debug: distribuição de itens por dia da semana
-    const contadorPorDia: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
-    
-    // Encontrar o primeiro dia útil a partir da data de início
-    const diaSemanaInicio = dataInicio.getDay();
-    let primeiroDiaUtilIndex = diasOrdenados.findIndex(dia => dia >= diaSemanaInicio);
-    let dataAtual = new Date(dataInicio);
-    
-    if (primeiroDiaUtilIndex === -1) {
-      // Se não encontrou, usar o primeiro dia útil da próxima semana
-      primeiroDiaUtilIndex = 0;
-      const diasParaProximaSemana = 7 - diaSemanaInicio + diasOrdenados[0];
-      dataAtual.setDate(dataAtual.getDate() + diasParaProximaSemana);
-    } else {
-      // Ajustar para o primeiro dia útil
-      const diasParaPrimeiroDiaUtil = diasOrdenados[primeiroDiaUtilIndex] - diaSemanaInicio;
-      dataAtual.setDate(dataAtual.getDate() + diasParaPrimeiroDiaUtil);
-    }
+    // Função para reorganizar itens de uma semana: alternar entre disciplinas e frentes
+    const reorganizarItensPorSemana = (itensDaSemana: typeof itens) => {
+      // Extrair informações de cada item
+      const itensComInfo = itensDaSemana.map(item => ({
+        ...item,
+        info: extrairInfoItem(item),
+      }));
 
-    // Distribuir itens de forma round-robin entre os dias selecionados
-    // Isso garante distribuição igual ao longo de todo o cronograma
-    let indiceDiaAtual = primeiroDiaUtilIndex;
-    let contadorItemGlobal = 0;
-
-    console.log(`[CronogramaService] Iniciando distribuição round-robin:`, {
-      totalItens: itensOrdenados.length,
-      diasSelecionados: diasOrdenados,
-      primeiroDiaUtilIndex,
-      dataInicio: dataInicio.toISOString().split('T')[0],
-      dataAtualInicial: dataAtual.toISOString().split('T')[0],
-    });
-
-    itensOrdenados.forEach((item, index) => {
-      // Usar round-robin: distribuir sequencialmente entre os dias selecionados
-      const diaSemanaEscolhido = diasOrdenados[indiceDiaAtual];
-      
-      // Calcular a data: partir da data atual e ajustar para o dia da semana escolhido
-      const dataItem = new Date(dataAtual);
-      const diaSemanaAtual = dataItem.getDay();
-      
-      // Calcular quantos dias adicionar para chegar ao dia escolhido
-      let diasParaAdicionar = diaSemanaEscolhido - diaSemanaAtual;
-      if (diasParaAdicionar < 0) {
-        diasParaAdicionar += 7; // Próxima semana
-      }
-      
-      dataItem.setDate(dataItem.getDate() + diasParaAdicionar);
-      
-      // Verificar se a data calculada está correta
-      const diaSemanaCalculado = dataItem.getDay();
-      if (diaSemanaCalculado !== diaSemanaEscolhido) {
-        console.error(`[CronogramaService] Erro no cálculo de data para item ${item.id}:`, {
-          semana_numero: item.semana_numero,
-          ordem_na_semana: item.ordem_na_semana,
-          indiceDiaAtual,
-          diaSemanaEscolhido,
-          diaSemanaCalculado,
-          data_prevista: dataItem.toISOString().split('T')[0],
-          diasOrdenados,
-        });
-      }
-
-      // Contar itens por dia da semana para debug
-      contadorPorDia[diaSemanaCalculado] += 1;
-
-      // Log detalhado para os primeiros itens e quando há mudança de semana
-      if (index < 10 || (index > 0 && index % 50 === 0)) {
-        console.log(`[CronogramaService] Item ${index + 1}/${itensOrdenados.length}:`, {
-          itemId: item.id,
-          semana_numero: item.semana_numero,
-          ordem_na_semana: item.ordem_na_semana,
-          indiceDiaAtual,
-          diaSemanaEscolhido,
-          data_prevista: dataItem.toISOString().split('T')[0],
-          dataAtualAntes: dataAtual.toISOString().split('T')[0],
-        });
-      }
-
-      atualizacoes.push({
-        id: item.id,
-        data_prevista: dataItem.toISOString().split('T')[0], // Formato YYYY-MM-DD
+      // Agrupar por frente (todas as Frentes A, depois todas as Frentes B, etc.)
+      const itensPorFrente = new Map<string, typeof itensComInfo>();
+      itensComInfo.forEach(item => {
+        const frenteKey = `${item.info.disciplinaNome}_${item.info.frenteNome}`;
+        if (!itensPorFrente.has(frenteKey)) {
+          itensPorFrente.set(frenteKey, []);
+        }
+        itensPorFrente.get(frenteKey)!.push(item);
       });
 
-      // Avançar para o próximo dia (round-robin)
-      const indiceDiaAnterior = indiceDiaAtual;
-      indiceDiaAtual = (indiceDiaAtual + 1) % numDiasSelecionados;
-      contadorItemGlobal++;
-      
-      // Atualizar dataAtual para a data do item processado
-      dataAtual = new Date(dataItem);
-      
-      // Se completou uma rodada completa pelos dias selecionados, avançar para a próxima semana
-      if (indiceDiaAtual === 0) {
-        // Avançar 7 dias para começar a próxima semana
-        dataAtual.setDate(dataAtual.getDate() + 7);
-        // Ajustar para o primeiro dia útil da próxima semana
-        const diaSemanaAtualAposAvanco = dataAtual.getDay();
-        const primeiroDiaUtilProximaSemana = diasOrdenados[0];
-        
-        // Ajustar para o primeiro dia útil
-        let diasParaAjustar = primeiroDiaUtilProximaSemana - diaSemanaAtualAposAvanco;
-        if (diasParaAjustar < 0) {
-          diasParaAjustar += 7;
+      // Ordenar itens dentro de cada grupo por ordem_na_semana
+      itensPorFrente.forEach((itensGrupo) => {
+        itensGrupo.sort((a, b) => a.ordem_na_semana - b.ordem_na_semana);
+      });
+
+      // Agrupar por nome da frente (todas as Frentes A, depois todas as Frentes B, etc.)
+      // Isso permite alternar entre disciplinas dentro da mesma frente
+      const frentesPorNome = new Map<string, typeof itensComInfo[]>();
+      itensPorFrente.forEach((itens, frenteKey) => {
+        const frenteNome = itens[0].info.frenteNome;
+        if (!frentesPorNome.has(frenteNome)) {
+          frentesPorNome.set(frenteNome, []);
         }
-        dataAtual.setDate(dataAtual.getDate() + diasParaAjustar);
+        frentesPorNome.get(frenteNome)!.push(itens);
+      });
+
+      // Ordenar nomes das frentes alfabeticamente (Frente A, Frente B, etc.)
+      const frentesNomes = Array.from(frentesPorNome.keys()).sort();
+
+      // Reorganizar: distribuir round-robin entre disciplinas dentro de cada frente
+      // Processar todas as Frentes A primeiro, depois todas as Frentes B, etc.
+      const itensReorganizados: typeof itensComInfo = [];
+      
+      for (const frenteNome of frentesNomes) {
+        const gruposFrente = frentesPorNome.get(frenteNome)!;
         
-        if (index < 10 || (index > 0 && index % 50 === 0)) {
-          console.log(`[CronogramaService] Rodada completa, avançando para próxima semana:`, {
-            itemIndex: index + 1,
-            dataAtualAposAvanco: dataAtual.toISOString().split('T')[0],
+        // Ordenar grupos por disciplina para garantir ordem consistente
+        gruposFrente.sort((grupoA, grupoB) => {
+          const disciplinaA = grupoA[0].info.disciplinaNome;
+          const disciplinaB = grupoB[0].info.disciplinaNome;
+          return disciplinaA.localeCompare(disciplinaB);
+        });
+        
+        // Encontrar o máximo de itens em qualquer grupo desta frente
+        const maxItens = Math.max(...gruposFrente.map(grupo => grupo.length));
+        
+        // Distribuir round-robin: pegar um item de cada disciplina por vez
+        // Exemplo: Disc1 Aula1, Disc2 Aula1, Disc3 Aula1, Disc1 Aula2, Disc2 Aula2, etc.
+        for (let i = 0; i < maxItens; i++) {
+          for (const grupo of gruposFrente) {
+            if (i < grupo.length) {
+              const item = grupo[i];
+              itensReorganizados.push(item);
+            }
+          }
+        }
+      }
+
+      return itensReorganizados;
+    };
+
+    // Contador para debug: distribuição de itens por dia da semana e por semana
+    const contadorPorDia: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    const contadorPorSemana: Record<number, Record<number, number>> = {};
+
+    logDebug(`[CronogramaService] Iniciando distribuição por semana:`, {
+      totalItens: itens.length,
+      totalSemanas: itensPorSemana.size,
+      diasSelecionados: diasOrdenados,
+      itensPorSemana: Array.from(itensPorSemana.entries()).map(([semana, itens]) => ({
+        semana,
+        totalItens: itens.length,
+      })),
+    });
+
+    // Processar cada semana separadamente
+    Array.from(itensPorSemana.entries())
+      .sort(([a], [b]) => a - b) // Ordenar por número da semana
+      .forEach(([semanaNumero, itensDaSemanaOriginal]) => {
+        // Reorganizar itens para alternar entre disciplinas e frentes
+        const itensDaSemana = reorganizarItensPorSemana(itensDaSemanaOriginal);
+        // Calcular data base da semana: data_inicio + (semana_numero - 1) * 7 dias
+        const dataBaseSemana = new Date(dataInicio);
+        dataBaseSemana.setDate(dataBaseSemana.getDate() + (semanaNumero - 1) * 7);
+        
+        // Calcular o período da semana do cronograma (7 dias a partir da data base)
+        const dataFimSemana = new Date(dataBaseSemana);
+        dataFimSemana.setDate(dataFimSemana.getDate() + 6);
+        
+        const diaSemanaBase = dataBaseSemana.getDay();
+        
+        // Encontrar quais dias selecionados caem dentro desta semana do cronograma
+        // A semana do cronograma vai de dataBaseSemana até dataFimSemana (7 dias)
+        const diasNaSemana: number[] = [];
+        for (let d = 0; d < 7; d++) {
+          const diaSemana = (diaSemanaBase + d) % 7;
+          if (diasOrdenados.includes(diaSemana)) {
+            diasNaSemana.push(diaSemana);
+          }
+        }
+        
+        // Se não houver dias selecionados nesta semana, usar todos os dias selecionados
+        // (mas isso não deveria acontecer)
+        const diasParaUsar = diasNaSemana.length > 0 ? diasNaSemana : diasOrdenados;
+        const numDiasParaUsar = diasParaUsar.length;
+        
+        // Ordenar os dias para usar na ordem correta
+        const diasParaUsarOrdenados = [...diasParaUsar].sort((a, b) => {
+          const indexA = diasOrdenados.indexOf(a);
+          const indexB = diasOrdenados.indexOf(b);
+          return indexA - indexB;
+        });
+
+        // Dividir itens da semana igualmente entre os dias selecionados desta semana
+        const totalItensSemana = itensDaSemana.length;
+        const itensPorDia = Math.floor(totalItensSemana / numDiasParaUsar);
+        const itensRestantes = totalItensSemana % numDiasParaUsar;
+
+        logDebug(`[CronogramaService] Processando semana ${semanaNumero}:`, {
+          totalItens: totalItensSemana,
+          itensPorDia,
+          itensRestantes,
+          dataBaseSemana: dataBaseSemana.toISOString().split('T')[0],
+          dataFimSemana: dataFimSemana.toISOString().split('T')[0],
+          diaSemanaBase,
+          diasNaSemana,
+          diasParaUsar: diasParaUsarOrdenados,
+          numDiasParaUsar,
+        });
+
+        // Inicializar contador para esta semana
+        contadorPorSemana[semanaNumero] = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+
+        let indiceItem = 0;
+        
+        // Distribuir itens para cada dia selecionado que cai nesta semana
+        for (let i = 0; i < numDiasParaUsar; i++) {
+          const diaSemanaEscolhido = diasParaUsarOrdenados[i];
+          
+          // Calcular quantos itens este dia receberá
+          // Os primeiros dias recebem um item extra se houver resto
+          const quantidadeItensParaEsteDia = itensPorDia + (i < itensRestantes ? 1 : 0);
+          
+          // Calcular a data deste dia na semana
+          // Encontrar a primeira ocorrência do dia escolhido dentro do período de 7 dias
+          const dataDiaSemana = new Date(dataBaseSemana);
+          let diasParaAdicionar = diaSemanaEscolhido - diaSemanaBase;
+          
+          // Se o dia escolhido já passou na semana base, está na próxima semana do calendário
+          // mas ainda dentro do período de 7 dias da semana do cronograma
+          if (diasParaAdicionar < 0) {
+            diasParaAdicionar += 7;
+          }
+          
+          dataDiaSemana.setDate(dataDiaSemana.getDate() + diasParaAdicionar);
+          
+          // Verificar se a data está dentro do período de 7 dias da semana do cronograma
+          if (dataDiaSemana < dataBaseSemana || dataDiaSemana > dataFimSemana) {
+            logError(`[CronogramaService] ⚠️ Data calculada está fora do período da semana ${semanaNumero}:`, {
+              dataBaseSemana: dataBaseSemana.toISOString().split('T')[0],
+              dataFimSemana: dataFimSemana.toISOString().split('T')[0],
+              dataCalculada: dataDiaSemana.toISOString().split('T')[0],
+              diaSemanaEscolhido,
+              diaSemanaBase,
+              diasParaAdicionar,
+            });
+            // Ajustar para ficar dentro do período (usar data base como fallback)
+            dataDiaSemana.setTime(dataBaseSemana.getTime());
+          }
+
+          // Atribuir itens a este dia
+          for (let j = 0; j < quantidadeItensParaEsteDia && indiceItem < totalItensSemana; j++) {
+            const item = itensDaSemana[indiceItem];
+            
+            // Garantir formato YYYY-MM-DD consistente (sem conversão UTC)
+            const year = dataDiaSemana.getFullYear();
+            const month = String(dataDiaSemana.getMonth() + 1).padStart(2, '0');
+            const day = String(dataDiaSemana.getDate()).padStart(2, '0');
+            const dataPrevistaFormatada = `${year}-${month}-${day}`;
+            
+            atualizacoes.push({
+              id: item.id,
+              data_prevista: dataPrevistaFormatada,
+            });
+
+            // Contar para debug
+            contadorPorDia[diaSemanaEscolhido] += 1;
+            contadorPorSemana[semanaNumero][diaSemanaEscolhido] += 1;
+
+            indiceItem++;
+
+            // Log detalhado para primeiros itens de cada semana
+            if (indiceItem <= 3 || j === 0) {
+              logDebug(`[CronogramaService] Semana ${semanaNumero}, Item ${indiceItem}/${totalItensSemana}:`, {
+                itemId: item.id,
+                ordem_na_semana: item.ordem_na_semana,
+                diaSemana: diaSemanaEscolhido,
+                data_prevista: dataPrevistaFormatada,
+                quantidadeItensParaEsteDia,
+              });
+            }
+          }
+        }
+
+        // Verificar se todos os itens da semana foram distribuídos
+        if (indiceItem !== totalItensSemana) {
+          logError(`[CronogramaService] ⚠️ Erro: Nem todos os itens da semana ${semanaNumero} foram distribuídos!`, {
+            esperado: totalItensSemana,
+            distribuido: indiceItem,
           });
         }
-      } else {
-        // Se não completou uma rodada, avançar para o próximo dia selecionado
-        const proximoDiaSemanaEscolhido = diasOrdenados[indiceDiaAtual];
-        const diaSemanaAtualData = dataAtual.getDay();
-        
-        // Calcular quantos dias adicionar para chegar ao próximo dia selecionado
-        let diasParaProximoDia = proximoDiaSemanaEscolhido - diaSemanaAtualData;
-        if (diasParaProximoDia <= 0) {
-          // Se o próximo dia já passou nesta semana, avançar para a próxima semana
-          diasParaProximoDia += 7;
-        }
-        dataAtual.setDate(dataAtual.getDate() + diasParaProximoDia);
-      }
-    });
+      });
     
-    // Log da distribuição final por dia da semana
+    // Log da distribuição final por dia da semana e por semana
     const totalItens = Object.values(contadorPorDia).reduce((a, b) => a + b, 0);
     const itensPorDiaSelecionado = diasOrdenados.map(dia => ({
       dia: ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'][dia],
@@ -1824,44 +2099,80 @@ export class CronogramaService {
       percentual: totalItens > 0 ? ((contadorPorDia[dia] / totalItens) * 100).toFixed(1) + '%' : '0%',
     }));
     
-    // Calcular se a distribuição está igual (diferença máxima de 1 item)
-    const quantidades = itensPorDiaSelecionado.map(d => d.quantidade);
-    const minQuantidade = Math.min(...quantidades);
-    const maxQuantidade = Math.max(...quantidades);
-    const distribuicaoIgual = (maxQuantidade - minQuantidade) <= 1;
-    
-    console.log(`[CronogramaService] Distribuição de itens por dia da semana:`, {
+    logDebug(`[CronogramaService] Distribuição final por dia da semana:`, {
       total: totalItens,
       dias_selecionados: diasOrdenados,
       distribuicao_por_dia: itensPorDiaSelecionado,
-      distribuicao_igual: distribuicaoIgual,
-      min: minQuantidade,
-      max: maxQuantidade,
-      diferenca: maxQuantidade - minQuantidade,
     });
-    
-    if (!distribuicaoIgual && totalItens > 0) {
-      console.warn(`[CronogramaService] ⚠️ Distribuição não está completamente igual. Diferença: ${maxQuantidade - minQuantidade} itens`);
-    } else if (distribuicaoIgual) {
-      console.log(`[CronogramaService] ✅ Distribuição igual entre todos os dias selecionados`);
+
+    // Log da distribuição por semana
+    logDebug(`[CronogramaService] Distribuição por semana:`, 
+      Array.from(Object.entries(contadorPorSemana)).map(([semana, contadores]) => ({
+        semana: Number(semana),
+        totalItens: Object.values(contadores).reduce((a, b) => a + b, 0),
+        porDia: diasOrdenados.map(dia => ({
+          dia: ['domingo', 'segunda', 'terca', 'quarta', 'quinta', 'sexta', 'sabado'][dia],
+          quantidade: contadores[dia] || 0,
+        })),
+      }))
+    );
+
+    // Atualizar itens em lote usando chunks para melhor performance
+    // Processar em lotes de 100 itens por vez
+    const CHUNK_SIZE = 100;
+    let itensAtualizados = 0;
+    const erros: Array<{ id: string; error: string }> = [];
+
+    // Processar em chunks
+    for (let i = 0; i < atualizacoes.length; i += CHUNK_SIZE) {
+      const chunk = atualizacoes.slice(i, i + CHUNK_SIZE);
+      
+      // Usar Promise.all para processar chunk em paralelo
+      const resultados = await Promise.allSettled(
+        chunk.map(async (atualizacao) => {
+          const { error: updateError } = await client
+            .from('cronograma_itens')
+            .update({ data_prevista: atualizacao.data_prevista })
+            .eq('id', atualizacao.id);
+
+          if (updateError) {
+            throw new Error(`Item ${atualizacao.id}: ${updateError.message}`);
+          }
+          return atualizacao.id;
+        })
+      );
+
+      // Contar sucessos e erros
+      resultados.forEach((resultado, index) => {
+        if (resultado.status === 'fulfilled') {
+          itensAtualizados++;
+        } else {
+          const atualizacao = chunk[index];
+          erros.push({
+            id: atualizacao.id,
+            error: resultado.reason?.message || 'Erro desconhecido',
+          });
+          console.error(`[CronogramaService] Erro ao atualizar item ${atualizacao.id}:`, resultado.reason);
+        }
+      });
     }
 
-    // Atualizar itens em lote
-    let itensAtualizados = 0;
-    for (const atualizacao of atualizacoes) {
-      const { error: updateError } = await client
-        .from('cronograma_itens')
-        .update({ data_prevista: atualizacao.data_prevista })
-        .eq('id', atualizacao.id);
-
-      if (updateError) {
-        console.error(`[CronogramaService] Erro ao atualizar item ${atualizacao.id}:`, updateError);
-      } else {
-        itensAtualizados++;
+    // Validação de integridade: verificar se todos os itens foram atualizados
+    if (itensAtualizados < atualizacoes.length) {
+      console.warn(`[CronogramaService] ⚠️ Apenas ${itensAtualizados} de ${atualizacoes.length} itens foram atualizados`);
+      console.warn(`[CronogramaService] Erros encontrados:`, erros.slice(0, 10)); // Logar apenas primeiros 10 erros
+      
+      // Se menos de 90% dos itens foram atualizados, considerar como falha crítica
+      const taxaSucesso = itensAtualizados / atualizacoes.length;
+      if (taxaSucesso < 0.9) {
+        logError(`[CronogramaService] Falha crítica: apenas ${itensAtualizados} de ${atualizacoes.length} itens foram atualizados (${(taxaSucesso * 100).toFixed(1)}%)`);
+        throw new Error(
+          `Falha ao atualizar datas: apenas ${itensAtualizados} de ${atualizacoes.length} itens foram atualizados (${(taxaSucesso * 100).toFixed(1)}%)`
+        );
       }
     }
 
-    console.log(`[CronogramaService] Datas recalculadas: ${itensAtualizados} de ${atualizacoes.length} itens`);
+    logDebug(`[CronogramaService] Datas recalculadas: ${itensAtualizados} de ${atualizacoes.length} itens`);
 
     return { success: true, itens_atualizados: itensAtualizados };
   }

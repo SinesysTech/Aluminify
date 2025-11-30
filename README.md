@@ -1,6 +1,6 @@
-# Área do Aluno - Backend API
+# Área do Aluno
 
-Sistema de gerenciamento educacional com arquitetura API-First, modularizada e baseada em princípios SOLID, KISS e YAGNI.
+Sistema completo de gerenciamento educacional com arquitetura API-First, modularizada e baseada em princípios SOLID, KISS e YAGNI. Inclui plataforma web completa para alunos, professores e administradores.
 
 ## 🏗️ Arquitetura
 
@@ -22,25 +22,67 @@ backend/
 └── swagger/            # Documentação Swagger
 
 app/
-└── api/                # Rotas Next.js API Routes
-    ├── auth/           # Autenticação
-    ├── api-key/        # Gerenciamento de API Keys
-    ├── discipline/     # Disciplinas
-    ├── segment/        # Segmentos
-    ├── course/         # Cursos
-    ├── student/        # Alunos
-    ├── teacher/        # Professores
-    ├── enrollment/     # Matrículas
-    ├── course-material/ # Materiais
-    └── docs/           # Documentação OpenAPI
+├── api/                # Rotas Next.js API Routes
+│   ├── auth/           # Autenticação
+│   ├── api-key/        # Gerenciamento de API Keys
+│   ├── chat/           # Chat com IA
+│   ├── conversations/  # Gerenciamento de conversas
+│   ├── cronograma/     # Cronogramas de estudo
+│   ├── discipline/     # Disciplinas
+│   ├── segment/        # Segmentos
+│   ├── course/         # Cursos
+│   ├── student/        # Alunos
+│   ├── teacher/        # Professores
+│   ├── enrollment/     # Matrículas
+│   ├── course-material/ # Materiais
+│   ├── frente/         # Frentes (módulos)
+│   └── docs/           # Documentação OpenAPI
+├── (dashboard)/        # Rotas protegidas do dashboard
+│   ├── aluno/          # Dashboard do aluno
+│   ├── professor/      # Dashboard do professor
+│   ├── curso/          # Gerenciamento de cursos
+│   ├── disciplina/     # Gerenciamento de disciplinas
+│   └── ...
+└── auth/               # Páginas de autenticação
+
+components/             # Componentes React reutilizáveis
+hooks/                  # React hooks customizados
+lib/                    # Utilitários e clientes
+backend/                # Lógica de negócio
+├── services/           # Serviços modulares
+├── auth/               # Sistema de autenticação
+├── clients/            # Clientes de banco de dados
+└── swagger/            # Documentação Swagger
+
+supabase/
+├── migrations/         # Migrations do banco de dados
+└── functions/          # Edge Functions do Supabase
 ```
 
 ## 🚀 Tecnologias
 
-- **Next.js 16** - Framework React com App Router
-- **TypeScript** - Tipagem estática
-- **Supabase** - Banco de dados PostgreSQL
+### Core
+- **Next.js 16.0.3** - Framework React com App Router
+- **TypeScript 5** - Tipagem estática
+- **React 19.2.0** - Biblioteca UI
+- **Tailwind CSS 4** - Estilização
+
+### Backend
+- **Supabase** - Banco de dados PostgreSQL + Auth
+- **Row Level Security (RLS)** - Segurança em nível de banco
+- **Upstash Redis** - Cache distribuído (opcional)
+
+### Integrações
+- **N8N** - Workflow automation para chat com IA
 - **Swagger/OpenAPI** - Documentação de API
+- **Shadcn/ui** - Componentes UI
+
+### Bibliotecas Principais
+- **@tanstack/react-query** - Gerenciamento de estado servidor
+- **@tanstack/react-table** - Tabelas de dados
+- **react-hook-form + zod** - Validação de formulários
+- **date-fns** - Manipulação de datas
+- **papaparse/xlsx** - Importação de dados
 
 ## 📋 Pré-requisitos
 
@@ -84,17 +126,35 @@ A API estará disponível em `http://localhost:3000`
 
 ## 📚 Documentação
 
-### Swagger UI
+### Documentação Interativa
 
-Acesse a documentação interativa em:
-- **Swagger UI**: `http://localhost:3000/swagger`
-- **OpenAPI JSON**: `http://localhost:3000/api/docs`
+- **Swagger UI**: `http://localhost:3000/swagger` - Documentação interativa da API
+- **OpenAPI JSON**: `http://localhost:3000/api/docs` - Especificação OpenAPI completa
 
-### Documentação Adicional
+### Guias e Documentação
 
-- [Sistema de Autenticação](./docs/authentication.md)
-- [Documentação da API](./docs/API.md)
-- [Schema do Banco de Dados](./docs/schema/schema.md)
+📖 **[Ver Índice Completo de Documentação](./docs/README.md)** - Navegue por toda a documentação do projeto
+
+#### Configuração e Setup
+- [Variáveis de Ambiente](./ENV_VARIABLES.md) - Todas as variáveis necessárias
+- [Guia de Deploy](./DEPLOY.md) - Como fazer deploy na Vercel
+- [Guia de Instalação do Supabase CLI](./GUIA_INSTALACAO_SUPABASE_CLI.md)
+
+#### API e Autenticação
+- [Sistema de Autenticação](./docs/authentication.md) - JWT, API Keys, tipos de usuários
+- [Documentação da API](./docs/API.md) - Todos os endpoints disponíveis
+- [Schema do Banco de Dados](./docs/schema/schema.md) - Estrutura do banco
+
+#### Funcionalidades Específicas
+- [Fluxo de Geração de Cronograma](./FLUXO_GERACAO_CRONOGRAMA.md)
+- [Fluxo de Calendário](./FLUXO_CALENDARIO.md)
+- [Primeiro Professor Superadmin](./docs/first-professor-superadmin.md)
+
+#### Integrações
+- [Configuração do N8N](./docs/N8N_SETUP.md) - Chat com IA
+- [Acesso a Anexos no N8N](./docs/N8N_ATTACHMENT_ACCESS.md)
+- [Configuração do Redis Upstash](./docs/UPSTASH_REDIS_SETUP.md)
+- [Simplificação do Chat](./docs/SIMPLIFICACAO_CHAT.md)
 
 ## 🔐 Autenticação
 
@@ -111,8 +171,10 @@ Veja [docs/authentication.md](./docs/authentication.md) para mais detalhes.
 2. **Professor** - Pode criar e gerenciar recursos educacionais
 3. **Superadmin** - Acesso total ao sistema
 
-## 📦 Serviços Implementados
+## 📦 Funcionalidades Implementadas
 
+### Backend API
+- ✅ Autenticação (JWT + API Keys)
 - ✅ Disciplinas
 - ✅ Segmentos
 - ✅ Cursos
@@ -121,7 +183,20 @@ Veja [docs/authentication.md](./docs/authentication.md) para mais detalhes.
 - ✅ Matrículas
 - ✅ Materiais de Curso
 - ✅ API Keys
-- ✅ Autenticação
+- ✅ Chat com IA (integrado com N8N)
+- ✅ Conversas e histórico de chat
+- ✅ Cronogramas de estudo
+- ✅ Gerenciamento de frentes/módulos/aulas
+
+### Frontend
+- ✅ Interface web completa (Next.js 16)
+- ✅ Autenticação e autorização
+- ✅ Dashboard para alunos e professores
+- ✅ Gerenciamento de cursos e conteúdo
+- ✅ Sistema de chat com IA
+- ✅ Geração e visualização de cronogramas
+- ✅ Calendário de estudos
+- ✅ Importação de alunos via CSV/Excel
 
 ## 🗄️ Banco de Dados
 
@@ -131,11 +206,57 @@ O banco de dados está configurado no Supabase com:
 - Triggers para auditoria (`created_by`, `updated_at`)
 - Políticas de acesso por tipo de usuário
 
-## 🧪 Testes
+## 🧪 Scripts Disponíveis
 
 ```bash
-npm run lint
+# Desenvolvimento
+npm run dev          # Inicia servidor de desenvolvimento
+
+# Build e Produção
+npm run build        # Cria build de produção
+npm run start        # Inicia servidor de produção
+
+# Qualidade de Código
+npm run lint         # Executa linter ESLint
 ```
+
+## 🔄 Rotas da API Principais
+
+### Autenticação
+- `POST /api/auth/signup` - Cadastro de usuário
+- `POST /api/auth/signin` - Login
+- `POST /api/auth/signout` - Logout
+- `GET /api/auth/me` - Obter usuário atual
+- `POST /api/auth/refresh` - Atualizar token
+
+### Chat e IA
+- `POST /api/chat` - Enviar mensagem ao chat
+- `GET /api/conversations` - Listar conversas
+- `GET /api/conversations/[id]` - Obter conversa específica
+- `PUT /api/conversations/[id]` - Atualizar conversa
+
+### Cronogramas
+- `POST /api/cronograma` - Criar cronograma
+- `GET /api/cronograma/[id]` - Obter cronograma
+- `PUT /api/cronograma/[id]/distribuicao-dias` - Atualizar distribuição
+
+### Cursos e Conteúdo
+- `GET /api/course` - Listar cursos
+- `POST /api/course` - Criar curso
+- `GET /api/discipline` - Listar disciplinas
+- `GET /api/segment` - Listar segmentos
+- `GET /api/course-material` - Listar materiais
+
+### Usuários
+- `GET /api/student` - Listar alunos
+- `POST /api/student/import` - Importar alunos (CSV/Excel)
+- `GET /api/teacher` - Listar professores
+
+### API Keys
+- `POST /api/api-key` - Criar API Key
+- `GET /api/api-key` - Listar suas API Keys
+
+Veja a [documentação completa da API](./docs/API.md) para detalhes de todos os endpoints.
 
 ## 🚀 Deploy
 
@@ -175,6 +296,22 @@ service-name/
 - **API-First** - Backend independente do frontend
 - **Modularização** - Serviços independentes e reutilizáveis
 
+## 📝 Changelog e Atualizações
+
+### Janeiro 2025
+
+- ✅ Sistema completo de cronogramas de estudo
+- ✅ Chat com IA integrado via N8N
+- ✅ Importação de alunos via CSV/Excel
+- ✅ Gerenciamento completo de cursos, disciplinas e materiais
+- ✅ Sistema de autenticação robusto (JWT + API Keys)
+- ✅ Interface web completa para alunos e professores
+- ✅ Documentação completa atualizada
+
 ## 📄 Licença
 
 Este projeto é privado e proprietário.
+
+---
+
+**Última atualização:** Janeiro 2025
