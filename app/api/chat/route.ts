@@ -83,6 +83,7 @@ function handleError(error: unknown) {
  */
 async function postHandler(request: AuthenticatedRequest) {
   let attachments: ChatAttachment[] = [];
+  let newConversation = false;
 
   try {
     const contentType = request.headers.get('content-type') || '';
@@ -96,6 +97,11 @@ async function postHandler(request: AuthenticatedRequest) {
       message = typeof formMessage === 'string' ? formMessage : null;
       const formUserId = formData.get('userId');
       rawUserId = typeof formUserId === 'string' ? formUserId : null;
+      const formNew = formData.get('newConversation');
+      if (typeof formNew === 'string') {
+        const v = formNew.toLowerCase();
+        newConversation = v === 'true' || v === '1' || v === 'yes';
+      }
 
       const attachmentFields = ['attachments', 'files'];
       for (const field of attachmentFields) {
@@ -110,6 +116,8 @@ async function postHandler(request: AuthenticatedRequest) {
       const body = await request.json();
       message = body?.message ?? null;
       rawUserId = body?.userId ?? null;
+      const v = String(body?.newConversation ?? '').toLowerCase();
+      newConversation = v === 'true' || v === '1' || v === 'yes';
     }
 
     console.log('[Chat API] ========== POST REQUEST ==========');
@@ -132,7 +140,9 @@ async function postHandler(request: AuthenticatedRequest) {
     console.log('[Chat API] UserId:', userId);
 
     // Obter ou criar conversa ativa para o usuário
-    const conversation = await conversationService.getOrCreateActiveConversation(userId);
+    const conversation = newConversation
+      ? await conversationService.createConversation({ userId })
+      : await conversationService.getOrCreateActiveConversation(userId);
 
     console.log('[Chat API] Conversation ID:', conversation.id);
     console.log('[Chat API] SessionId:', conversation.session_id);

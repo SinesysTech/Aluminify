@@ -288,6 +288,7 @@ export class ChatService {
       }));
     }
 
+    console.log('[Chat Service] Dispatch payload ids:', ids);
     return fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: {
