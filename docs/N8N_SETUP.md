@@ -46,7 +46,7 @@ Este documento explica como configurar o workflow no N8N para integrar o chat co
 1. Adicione um nó **Webhook**
 2. Configure:
    - **HTTP Method:** POST
-   - **Path:** `/webhook/013bad97-160b-4f20-9a2b-e9f3fa8bfa52`
+   - **Path:** `/webhook/9e35cb81-5314-4f09-bbde-0d587a8eb6db`
    - **Response Mode:** Respond to Webhook (IMPORTANTE!)
    - **Response Code:** 200
 
@@ -92,7 +92,7 @@ Ou apenas:
 ### Teste Manual do Webhook
 
 ```bash
-curl -X POST https://webhook.sinesys.app/webhook/013bad97-160b-4f20-9a2b-e9f3fa8bfa52 \
+curl -X POST https://webhook.sinesys.app/webhook/9e35cb81-5314-4f09-bbde-0d587a8eb6db \
   -H "Content-Type: application/json" \
   -d '{
     "input": "Olá, como você está?",
