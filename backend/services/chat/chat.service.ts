@@ -1,7 +1,7 @@
 import { ChatResponse, ChatRequest, ChatIds, ChatAttachment } from './chat.types';
 import { ChatValidationError, ChatServiceError } from './errors';
 
-const WEBHOOK_URL = 'https://webhook.sinesys.app/webhook/83afbb4f-6f9f-410d-aa17-7e3e301e2db6/chat';
+const WEBHOOK_URL = 'https://webhook.sinesys.app/webhook/9e35cb81-5314-4f09-bbde-0d587a8eb6db';
 const MESSAGE_MIN_LENGTH = 1;
 const MESSAGE_MAX_LENGTH = 5000;
 
