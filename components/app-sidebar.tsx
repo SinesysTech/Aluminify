@@ -26,6 +26,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { hasRequiredRole } from "@/lib/roles"
 import type { AppUserRole } from "@/types/user"
 
@@ -41,27 +42,33 @@ const PROFESSOR_ONLY: AppUserRole[] = ["professor", "superadmin"]
 
 const navMainData: NavItem[] = [
   {
-    title: "Calendário",
-    url: "/aluno/cronograma/calendario",
-    icon: Calendar,
-    roles: ALL_ROLES,
-  },
-  {
     title: "TobIAs",
     url: "/tobias",
     icon: MessageSquare,
     roles: ALL_ROLES,
   },
   {
-    title: "Professores",
-    url: "/professor",
-    icon: GraduationCap,
-    roles: PROFESSOR_ONLY,
+    title: "Calendário",
+    url: "/aluno/cronograma/calendario",
+    icon: Calendar,
+    roles: ALL_ROLES,
+  },
+  {
+    title: "Meu Cronograma",
+    url: "/aluno/cronograma",
+    icon: CalendarCheck,
+    roles: ALL_ROLES,
   },
   {
     title: "Alunos",
     url: "/aluno",
     icon: Users,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Professores",
+    url: "/professor",
+    icon: GraduationCap,
     roles: PROFESSOR_ONLY,
   },
   {
@@ -77,22 +84,16 @@ const navMainData: NavItem[] = [
     roles: PROFESSOR_ONLY,
   },
   {
-    title: "Segmentos",
-    url: "/segmento",
-    icon: Layers,
-    roles: PROFESSOR_ONLY,
-  },
-  {
     title: "Conteúdo Programático",
     url: "/conteudos",
     icon: Calendar,
     roles: PROFESSOR_ONLY,
   },
   {
-    title: "Meu Cronograma",
-    url: "/aluno/cronograma",
-    icon: CalendarCheck,
-    roles: ALL_ROLES,
+    title: "Segmentos",
+    url: "/segmento",
+    icon: Layers,
+    roles: PROFESSOR_ONLY,
   },
 ]
 
@@ -125,6 +126,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
               </a>
             </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <ThemeToggle />
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>

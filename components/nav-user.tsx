@@ -48,6 +48,23 @@ export function NavUser() {
   useEffect(() => {
     setMounted(true)
     loadUser()
+    
+    // Listener para atualizar quando o avatar mudar
+    const supabase = createClient()
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      loadUser()
+    })
+    
+    // Listener customizado para atualização de avatar
+    const handleAvatarUpdate = () => {
+      loadUser()
+    }
+    window.addEventListener('avatar-updated', handleAvatarUpdate)
+    
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener('avatar-updated', handleAvatarUpdate)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -78,10 +95,13 @@ export function NavUser() {
           // Se não encontrar na tabela professores, usar o nome do metadata
         }
         
+        // Buscar avatar do user_metadata
+        const avatarUrl = session.user.user_metadata?.avatar_url || null
+        
         setUser({
           name,
           email,
-          avatar: session.user.user_metadata?.avatar_url,
+          avatar: avatarUrl,
         })
       }
     } catch (error) {
@@ -180,7 +200,7 @@ export function NavUser() {
               <DropdownMenuItem asChild>
                 <Link href="/perfil">
                   <BadgeCheck />
-                  Conta
+                  Meu Perfil
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>

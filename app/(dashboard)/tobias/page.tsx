@@ -53,6 +53,9 @@ export default function TobIAsPage() {
   const loadConversation = useCallback(async (conversation: ConversationType) => {
     if (!accessToken) return
 
+    // Limpar mensagens primeiro para evitar mostrar mensagens da conversa anterior
+    setMessages([])
+    
     setCurrentConversation(conversation)
     setSelectedConversationId(conversation.id)
 
@@ -62,9 +65,11 @@ export default function TobIAsPage() {
 
     if (history.length > 0) {
       console.log('[TobIAs] Loaded', history.length, 'messages from conversation')
+      setMessages(history)
+    } else {
+      // Garantir que mensagens estejam vazias para nova conversa
+      setMessages([])
     }
-
-    setMessages(history)
   }, [accessToken])
 
   // Inicializar userId, accessToken e carregar histórico
@@ -136,6 +141,9 @@ export default function TobIAsPage() {
 
   // Handler para selecionar conversa
   const handleSelectConversation = async (conversation: ConversationType | null) => {
+    // Limpar mensagens imediatamente ao trocar de conversa
+    setMessages([])
+    
     if (!conversation || !accessToken) {
       setCurrentConversation(null)
       setSelectedConversationId(null)
@@ -155,10 +163,15 @@ export default function TobIAsPage() {
         const data = await response.json()
         if (data.data) {
           await loadConversation(data.data)
+        } else {
+          // Se não houver dados, garantir que mensagens estejam vazias
+          setMessages([])
         }
       }
     } catch (error) {
       console.error('[TobIAs] Error loading conversation:', error)
+      // Em caso de erro, garantir que mensagens estejam vazias
+      setMessages([])
     }
   }
 

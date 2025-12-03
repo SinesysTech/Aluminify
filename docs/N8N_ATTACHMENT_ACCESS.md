@@ -114,6 +114,7 @@ Configurações:
 - **Binary Property:** Deixe como `data` (padrão) ou o nome da propriedade binária que vem do HTTP Request
 - **Options → Pages:** Deixe vazio para extrair todas as páginas, ou especifique (ex: `1-3` para páginas 1 a 3)
 - **Options → Include Page Numbers:** Marque se quiser incluir números de página
+- **Options → Password:** ⚠️ **DEIXE COMPLETAMENTE VAZIO** (não preencha nada, nem espaços!)
 
 **3. Verificação do Fluxo de Dados:**
 
@@ -128,6 +129,21 @@ Webhook → HTTP Request (Response Format: File) → Extract from PDF → Proces
 ```
 
 **5. Troubleshooting Específico para Extract from PDF:**
+
+**Erro: "No password given"**
+
+Este é um erro comum que ocorre quando o campo Password está configurado incorretamente:
+- ✅ **Solução:** Deixe o campo **Password completamente vazio** no nó "Extract from PDF"
+- ✅ **Solução:** Não coloque espaços, aspas vazias, ou qualquer valor no campo Password
+- ✅ **Solução:** Se o PDF não tem senha (que é o caso da maioria), não é necessário preencher nada
+- ✅ **Solução:** Verifique nas opções avançadas se há alguma configuração de senha que precisa ser desabilitada
+
+**Como corrigir:**
+1. Abra o nó "Extract from PDF" no N8N
+2. Expanda a seção "Options" ou "Advanced"
+3. Localize o campo "Password" ou "PDF Password"
+4. **Remova qualquer valor** que esteja lá (deixe completamente vazio)
+5. Salve o nó e teste novamente
 
 **Erro: "This operation expects the node's input data to contain a binary file"**
 

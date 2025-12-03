@@ -28,6 +28,9 @@ Este diretório contém toda a documentação técnica do projeto Área do Aluno
 - [Acesso a Anexos no N8N](./N8N_ATTACHMENT_ACCESS.md) - Como acessar anexos no workflow
 - [Debug de Erros PDF no N8N](./N8N_DEBUG_PDF_ERROR.md) - Troubleshooting
 - [Configuração do Extract from PDF](./N8N_EXTRACT_PDF_CONFIG.md) - Configuração avançada
+- [Correção Rápida: Erro "No password given"](./N8N_PDF_QUICK_FIX.md) - ⚡ Solução rápida passo a passo
+- [Erro "No password given" no Extract from PDF](./N8N_PDF_PASSWORD_ERROR.md) - Solução detalhada para erro de senha
+- [Solução Alternativa: Extrair PDF sem Extract from File](./N8N_EXTRACT_PDF_ALTERNATIVE.md) - Workarounds quando Extract from File não funciona
 
 ### ⚙️ Infraestrutura
 
@@ -60,6 +63,9 @@ Este diretório contém toda a documentação técnica do projeto Área do Aluno
 - Como funciona? → [SIMPLIFICACAO_CHAT.md](./SIMPLIFICACAO_CHAT.md)
 - Como configurar N8N? → [N8N_SETUP.md](./N8N_SETUP.md)
 - Problemas com PDF? → [N8N_DEBUG_PDF_ERROR.md](./N8N_DEBUG_PDF_ERROR.md)
+- Erro "No password given"? → [N8N_PDF_QUICK_FIX.md](./N8N_PDF_QUICK_FIX.md) ⚡ **COMECE AQUI**
+- Mais detalhes sobre o erro → [N8N_PDF_PASSWORD_ERROR.md](./N8N_PDF_PASSWORD_ERROR.md)
+- Extract from File não funciona? → [N8N_EXTRACT_PDF_ALTERNATIVE.md](./N8N_EXTRACT_PDF_ALTERNATIVE.md)
 
 **Cronogramas**
 - Como funciona? → [FLUXO_GERACAO_CRONOGRAMA.md](../FLUXO_GERACAO_CRONOGRAMA.md)
@@ -90,6 +96,7 @@ Ao atualizar ou criar nova funcionalidade:
 ---
 
 **Última atualização:** Janeiro 2025
+
 
 
 

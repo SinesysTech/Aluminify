@@ -53,12 +53,20 @@ export const MessageAvatar = ({
   name,
   className,
   ...props
-}: MessageAvatarProps) => (
-  <Avatar
-    className={cn('size-8 ring ring-1 ring-border', className)}
-    {...props}
-  >
-    <AvatarImage alt="" className="mt-0 mb-0" src={src} />
-    <AvatarFallback>{name?.slice(0, 2) || 'ME'}</AvatarFallback>
-  </Avatar>
-);
+}: MessageAvatarProps) => {
+  // Aumentar tamanho do avatar do agente (TobIAs)
+  const isAgent = name === 'TobIAs'
+  return (
+    <Avatar
+      className={cn(
+        'ring ring-1 ring-border',
+        isAgent ? 'size-10' : 'size-8',
+        className
+      )}
+      {...props}
+    >
+      <AvatarImage alt="" className="mt-0 mb-0" src={src} />
+      <AvatarFallback>{name?.slice(0, 2) || 'ME'}</AvatarFallback>
+    </Avatar>
+  )
+}

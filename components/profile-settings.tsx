@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { AvatarUpload } from '@/components/avatar-upload'
 
 type ProfileSettingsProps = {
   user: AppUser
@@ -79,13 +80,19 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
         throw error
       }
 
-      const { error: alunoError } = await supabase
-        .from('alunos')
-        .update({ must_change_password: false, senha_temporaria: null })
-        .eq('id', user.id)
+      // Atualizar must_change_password apenas se o usuário for aluno
+      // Para professores, o flag está no user_metadata e já foi atualizado acima
+      if (user.role === 'aluno') {
+        const { error: alunoError } = await supabase
+          .from('alunos')
+          .update({ must_change_password: false, senha_temporaria: null })
+          .eq('id', user.id)
 
-      if (alunoError) {
-        throw alunoError
+        if (alunoError) {
+          // Não falhar se a atualização na tabela alunos falhar
+          // O importante é que a senha foi atualizada no auth
+          console.warn('Erro ao atualizar flag must_change_password na tabela alunos:', alunoError)
+        }
       }
 
       setPassword('')
@@ -198,13 +205,22 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
         <CardHeader>
           <CardTitle>Avatar e imagem de perfil</CardTitle>
           <CardDescription>
-            Em breve você poderá enviar fotos e personalizar seu avatar diretamente por aqui.
+            Envie uma foto para personalizar seu avatar. A foto aparecerá em toda a plataforma.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="outline" disabled>
-            Upload de avatar (em breve)
-          </Button>
+          <AvatarUpload
+            currentAvatarUrl={user.avatarUrl}
+            userName={user.fullName || user.email}
+            onUploadSuccess={() => {
+              setProfileMessage('Avatar atualizado com sucesso.')
+              setProfileError(null)
+              // Recarregar página após um breve delay para atualizar a UI
+              setTimeout(() => {
+                window.location.reload()
+              }, 1000)
+            }}
+          />
         </CardContent>
       </Card>
     </div>

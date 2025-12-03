@@ -22,7 +22,10 @@ Options → Response → Response Format: File
 ```
 Binary Property: data
 Options → Pages: (deixe vazio para todas as páginas)
+Options → Password: (DEIXE VAZIO - não preencha nada!)
 ```
+
+**⚠️ CRÍTICO:** O campo **Password** deve estar **VAZIO** ou **desabilitado**. Se você preencher qualquer valor (mesmo que seja uma string vazia ou espaço), o N8N tentará usar essa senha e pode gerar o erro "No password given".
 
 ### 3. Fluxo Correto
 
@@ -69,6 +72,21 @@ return item;
 
 ## ❌ Erros Comuns e Soluções
 
+### Erro: "No password given"
+
+**Causa:** O campo Password no nó "Extract from PDF" está configurado incorretamente
+- ✅ **Solução:** Deixe o campo **Password completamente vazio** (não preencha nada, nem espaços)
+- ✅ **Solução:** Se houver uma opção para desabilitar senha, desabilite
+- ✅ **Solução:** Verifique nas opções avançadas se há alguma configuração de senha ativa
+- ✅ **Solução:** Se o PDF realmente não tem senha, não é necessário preencher nada
+
+**Como verificar:**
+1. Abra o nó "Extract from PDF" no N8N
+2. Vá até a seção "Options" ou "Advanced"
+3. Procure pelo campo "Password" ou "PDF Password"
+4. **Deixe completamente vazio** (não coloque espaços, não coloque aspas vazias, não coloque nada)
+5. Salve o nó
+
 ### Erro: "This operation expects the node's input data to contain a binary file"
 
 **Causa 1:** HTTP Request retornando JSON ao invés de File
@@ -92,6 +110,7 @@ return item;
 - [ ] HTTP Request URL = URL completa com token
 - [ ] HTTP Request Response Format = `File` (não JSON!)
 - [ ] Extract from PDF Binary Property = `data`
+- [ ] Extract from PDF Password = **VAZIO** (não preencher nada!)
 - [ ] URL testada no navegador e funciona
 - [ ] Arquivo não expirou (menos de 10 minutos)
 
@@ -134,6 +153,7 @@ return item;
    ↓
 4. Extract from PDF
    - Binary Property: data
+   - Password: (DEIXE VAZIO - não preencher!)
    ↓
 5. Process Text (usa o texto extraído)
 ```
@@ -144,6 +164,7 @@ return item;
 2. **Teste a URL:** Cole no navegador e veja se baixa o PDF
 3. **Verifique logs do servidor:** Veja se a requisição está chegando
 4. **Verifique versão do N8N:** Versões antigas podem ter sintaxe diferente para binary data
+
 
 
 
