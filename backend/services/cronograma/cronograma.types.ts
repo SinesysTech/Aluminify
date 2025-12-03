@@ -99,3 +99,34 @@ export interface RecalcularDatasResult {
   itens_atualizados: number;
 }
 
+export interface SemanaEstatisticas {
+  semana_numero: number;
+  data_inicio: string; // ISO string
+  data_fim: string; // ISO string
+  capacidade_minutos: number; // Tempo disponível (horas_dia * dias_semana * 60)
+  tempo_usado_minutos: number; // Tempo usado (soma dos custos das aulas)
+  tempo_disponivel_minutos: number; // Tempo restante (capacidade - usado)
+  percentual_usado: number; // Percentual de uso (0-100+)
+  is_ferias: boolean;
+  total_aulas: number;
+  aulas_concluidas: number;
+  aulas_pendentes: number;
+}
+
+export interface EstatisticasSemanasResult {
+  success: true;
+  semanas: SemanaEstatisticas[];
+  resumo: {
+    total_semanas: number;
+    semanas_uteis: number;
+    semanas_ferias: number;
+    capacidade_total_minutos: number;
+    tempo_total_usado_minutos: number;
+    tempo_total_disponivel_minutos: number;
+    percentual_medio_usado: number;
+    total_aulas: number;
+    total_aulas_concluidas: number;
+    semanas_sobrecarregadas: number; // Semanas com percentual > 100%
+  };
+}
+

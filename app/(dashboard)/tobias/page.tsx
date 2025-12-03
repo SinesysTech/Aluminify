@@ -21,6 +21,7 @@ import { ConversationsPanel } from '@/components/conversations-panel'
 import { Button } from '@/components/ui/button'
 import { MessageSquare, Paperclip, X } from 'lucide-react'
 import type { Conversation as ConversationType } from '@/backend/services/conversation/conversation.types'
+import { cn } from '@/lib/utils'
 
 interface ChatMessage {
   id: string
@@ -481,12 +482,13 @@ export default function TobIAsPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] flex-col">
+    <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-8rem)] flex-col">
       <div className="mb-2 md:mb-4 flex items-center gap-2">
         <Button
           variant="outline"
           size="icon"
           onClick={() => setConversationsPanelOpen(!conversationsPanelOpen)}
+          className="h-10 w-10 md:h-9 md:w-9"
         >
           <MessageSquare className="h-4 w-4" />
           <span className="sr-only">Toggle conversas</span>
@@ -494,7 +496,7 @@ export default function TobIAsPage() {
         <div>
           <h1 className="text-xl md:text-2xl font-bold">TobIAs</h1>
           <p className="text-muted-foreground text-xs md:text-sm">
-            Sua monitora de curso. Tire suas dúvidas e receba ajuda personalizada.
+            Tire suas dúvidas e receba ajuda personalizada
           </p>
         </div>
       </div>
@@ -512,15 +514,18 @@ export default function TobIAsPage() {
           onOpenChange={setConversationsPanelOpen}
         />
 
-        {/* Área do chat */}
-        <div className="relative flex flex-1 flex-col overflow-hidden rounded-lg border">
+        {/* Área do chat - full width em mobile quando painel fechado */}
+        <div className={cn(
+          "relative flex flex-1 flex-col overflow-hidden rounded-lg border",
+          "transition-all duration-300"
+        )}>
           <Conversation>
             <ConversationContent>
               {messages.length === 0 && (
                 <div className="flex h-full items-center justify-center">
                   <div className="text-center">
                     <p className="text-muted-foreground mb-2 text-lg">
-                      Olá! Eu sou a TobIAs, sua monitora de curso.
+                      Olá! Eu sou @ TobIAs, responsável pela monitoria do curso CDF.
                     </p>
                     <p className="text-muted-foreground text-sm">
                       Como posso ajudá-lo hoje?
@@ -578,23 +583,23 @@ export default function TobIAsPage() {
             <ConversationScrollButton />
           </Conversation>
 
-          <div className="border-t bg-background p-2 md:p-4">
+          <div className="border-t bg-background p-2 md:p-4 sticky bottom-0">
             <div className="space-y-2">
               {attachments.length > 0 && (
                 <div className="flex flex-wrap gap-2 rounded-md border border-dashed border-muted-foreground/40 p-2 text-xs">
                   {attachments.map((file, index) => (
                     <div
                       key={`${file.name}-${index}`}
-                      className="flex items-center gap-2 rounded bg-muted px-2 py-1"
+                      className="flex items-center gap-2 rounded bg-muted px-2 py-1.5"
                     >
-                      <span className="truncate max-w-[150px]">{file.name}</span>
+                      <span className="truncate max-w-[120px] md:max-w-[150px] text-xs">{file.name}</span>
                       <button
                         type="button"
                         onClick={() => removeAttachment(index)}
-                        className="text-muted-foreground hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground h-5 w-5 flex items-center justify-center"
                         aria-label="Remover anexo"
                       >
-                        <X className="h-3 w-3" />
+                        <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   ))}
@@ -606,6 +611,7 @@ export default function TobIAsPage() {
                   ref={inputRef}
                   placeholder="Digite sua mensagem..."
                   disabled={isLoading || !userId}
+                  className="min-h-[44px] text-sm md:text-base"
                 />
                 <PromptInputToolbar>
                   <input
@@ -622,12 +628,14 @@ export default function TobIAsPage() {
                     size="icon"
                     disabled={isLoading || !userId}
                     onClick={() => fileInputRef.current?.click()}
+                    className="h-10 w-10 md:h-9 md:w-9"
                   >
                     <Paperclip className="h-4 w-4" />
                     <span className="sr-only">Adicionar anexos</span>
                   </Button>
                   <PromptInputSubmit
                     disabled={isLoading || !userId}
+                    className="h-10 w-10 md:h-9 md:w-9"
                   />
                 </PromptInputToolbar>
               </PromptInput>

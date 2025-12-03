@@ -9,6 +9,8 @@ import {
   CronogramaSemanasDias,
   AtualizarDistribuicaoDiasInput,
   RecalcularDatasResult,
+  SemanaEstatisticas,
+  EstatisticasSemanasResult,
 } from './cronograma.types';
 import {
   CronogramaValidationError,
@@ -2175,6 +2177,148 @@ export class CronogramaService {
     logDebug(`[CronogramaService] Datas recalculadas: ${itensAtualizados} de ${atualizacoes.length} itens`);
 
     return { success: true, itens_atualizados: itensAtualizados };
+  }
+
+  /**
+   * Calcula estatísticas detalhadas por semana do cronograma
+   */
+  async calcularEstatisticasPorSemana(
+    cronogramaId: string,
+    userId: string,
+  ): Promise<EstatisticasSemanasResult> {
+    const client = getDatabaseClient();
+
+    // Verificar se o cronograma pertence ao usuário
+    const { data: cronograma, error: cronogramaError } = await client
+      .from('cronogramas')
+      .select('id, aluno_id, data_inicio, data_fim, horas_estudo_dia, dias_estudo_semana, periodos_ferias, velocidade_reproducao')
+      .eq('id', cronogramaId)
+      .single();
+
+    if (cronogramaError || !cronograma) {
+      throw new CronogramaValidationError('Cronograma não encontrado');
+    }
+
+    if (cronograma.aluno_id !== userId) {
+      throw new CronogramaValidationError('Você só pode acessar seus próprios cronogramas');
+    }
+
+    // Buscar todos os itens do cronograma com suas aulas
+    const { data: itens, error: itensError } = await client
+      .from('cronograma_itens')
+      .select(`
+        id,
+        semana_numero,
+        ordem_na_semana,
+        concluido,
+        aula_id,
+        aulas(
+          id,
+          tempo_estimado_minutos
+        )
+      `)
+      .eq('cronograma_id', cronogramaId)
+      .order('semana_numero', { ascending: true })
+      .order('ordem_na_semana', { ascending: true });
+
+    if (itensError) {
+      console.error('[CronogramaService] Erro ao buscar itens:', itensError);
+      throw new Error(`Erro ao buscar itens: ${itensError.message}`);
+    }
+
+    // Calcular semanas (mesma lógica do calcularSemanas)
+    const dataInicio = new Date(cronograma.data_inicio);
+    const dataFim = new Date(cronograma.data_fim);
+    const ferias = cronograma.periodos_ferias || [];
+    const horasDia = cronograma.horas_estudo_dia || 0;
+    const diasSemana = cronograma.dias_estudo_semana || 0;
+    const velocidadeReproducao = cronograma.velocidade_reproducao ?? 1.0;
+
+    const semanas = this.calcularSemanas(dataInicio, dataFim, ferias, horasDia, diasSemana);
+
+    // Agrupar itens por semana
+    const itensPorSemana = new Map<number, typeof itens>();
+    (itens || []).forEach((item: any) => {
+      const semanaNum = item.semana_numero;
+      if (!itensPorSemana.has(semanaNum)) {
+        itensPorSemana.set(semanaNum, []);
+      }
+      itensPorSemana.get(semanaNum)!.push(item);
+    });
+
+    // Calcular estatísticas para cada semana
+    const semanasEstatisticas: SemanaEstatisticas[] = semanas.map((semana) => {
+      const itensDaSemana = itensPorSemana.get(semana.numero) || [];
+
+      // Calcular tempo usado (soma dos custos das aulas)
+      let tempoUsado = 0;
+      let totalAulas = 0;
+      let aulasConcluidas = 0;
+
+      itensDaSemana.forEach((item: any) => {
+        const aula = item.aulas;
+        if (!aula) return;
+
+        totalAulas++;
+        if (item.concluido) {
+          aulasConcluidas++;
+        }
+
+        // Calcular custo (mesma lógica do gerarCronograma)
+        const tempoOriginal = aula.tempo_estimado_minutos ?? TEMPO_PADRAO_MINUTOS;
+        const tempoAulaAjustado = tempoOriginal / velocidadeReproducao;
+        const custo = tempoAulaAjustado * FATOR_MULTIPLICADOR;
+        tempoUsado += custo;
+      });
+
+      const capacidade = semana.capacidade_minutos;
+      const tempoDisponivel = Math.max(0, capacidade - tempoUsado);
+      const percentualUsado = capacidade > 0 ? (tempoUsado / capacidade) * 100 : 0;
+      const aulasPendentes = totalAulas - aulasConcluidas;
+
+      return {
+        semana_numero: semana.numero,
+        data_inicio: semana.data_inicio.toISOString(),
+        data_fim: semana.data_fim.toISOString(),
+        capacidade_minutos: capacidade,
+        tempo_usado_minutos: Math.round(tempoUsado * 100) / 100, // Arredondar para 2 casas decimais
+        tempo_disponivel_minutos: Math.round(tempoDisponivel * 100) / 100,
+        percentual_usado: Math.round(percentualUsado * 100) / 100,
+        is_ferias: semana.is_ferias,
+        total_aulas: totalAulas,
+        aulas_concluidas: aulasConcluidas,
+        aulas_pendentes: aulasPendentes,
+      };
+    });
+
+    // Calcular resumo geral
+    const semanasUteis = semanasEstatisticas.filter((s) => !s.is_ferias);
+    const capacidadeTotal = semanasUteis.reduce((acc, s) => acc + s.capacidade_minutos, 0);
+    const tempoTotalUsado = semanasEstatisticas.reduce((acc, s) => acc + s.tempo_usado_minutos, 0);
+    const tempoTotalDisponivel = semanasEstatisticas.reduce((acc, s) => acc + s.tempo_disponivel_minutos, 0);
+    const percentualMedioUsado = semanasUteis.length > 0
+      ? semanasUteis.reduce((acc, s) => acc + s.percentual_usado, 0) / semanasUteis.length
+      : 0;
+    const totalAulas = semanasEstatisticas.reduce((acc, s) => acc + s.total_aulas, 0);
+    const totalAulasConcluidas = semanasEstatisticas.reduce((acc, s) => acc + s.aulas_concluidas, 0);
+    const semanasSobrecarregadas = semanasEstatisticas.filter((s) => s.percentual_usado > 100).length;
+
+    return {
+      success: true,
+      semanas: semanasEstatisticas,
+      resumo: {
+        total_semanas: semanasEstatisticas.length,
+        semanas_uteis: semanasUteis.length,
+        semanas_ferias: semanasEstatisticas.length - semanasUteis.length,
+        capacidade_total_minutos: Math.round(capacidadeTotal * 100) / 100,
+        tempo_total_usado_minutos: Math.round(tempoTotalUsado * 100) / 100,
+        tempo_total_disponivel_minutos: Math.round(tempoTotalDisponivel * 100) / 100,
+        percentual_medio_usado: Math.round(percentualMedioUsado * 100) / 100,
+        total_aulas: totalAulas,
+        total_aulas_concluidas: totalAulasConcluidas,
+        semanas_sobrecarregadas: semanasSobrecarregadas,
+      },
+    };
   }
 
   /**

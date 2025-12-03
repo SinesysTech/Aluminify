@@ -11,13 +11,15 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { format, addDays, startOfWeek, isSameDay, isWithinInterval } from 'date-fns'
+import { format, addDays, startOfWeek, isSameDay, isWithinInterval, addMonths, subMonths } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import { DateRange } from 'react-day-picker'
 import { cn } from '@/lib/utils'
 import { Calendar } from '@/components/ui/calendar'
-import { Loader2, Save, ChevronDown, ChevronUp, CheckSquare2 } from 'lucide-react'
+import { Loader2, Save, ChevronDown, ChevronUp, CheckSquare2, ChevronLeft, ChevronRight, CalendarCheck } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { useSwipe } from '@/hooks/use-swipe'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface CronogramaItem {
   id: string
@@ -59,6 +61,7 @@ interface Cronograma {
   cronograma_itens: CronogramaItem[]
   curso_alvo_id?: string | null
   periodos_ferias?: Array<{ inicio: string; fim: string }>
+  velocidade_reproducao?: number
 }
 
 interface ScheduleCalendarViewProps {
@@ -67,6 +70,37 @@ interface ScheduleCalendarViewProps {
 
 interface ItemComData extends CronogramaItem {
   data: Date
+}
+
+interface SemanaEstatisticas {
+  semana_numero: number
+  data_inicio: string
+  data_fim: string
+  capacidade_minutos: number
+  tempo_usado_minutos: number
+  tempo_disponivel_minutos: number
+  percentual_usado: number
+  is_ferias: boolean
+  total_aulas: number
+  aulas_concluidas: number
+  aulas_pendentes: number
+}
+
+interface EstatisticasSemanasResult {
+  success: true
+  semanas: SemanaEstatisticas[]
+  resumo: {
+    total_semanas: number
+    semanas_uteis: number
+    semanas_ferias: number
+    capacidade_total_minutos: number
+    tempo_total_usado_minutos: number
+    tempo_total_disponivel_minutos: number
+    percentual_medio_usado: number
+    total_aulas: number
+    total_aulas_concluidas: number
+    semanas_sobrecarregadas: number
+  }
 }
 
 const DIAS_SEMANA = [
@@ -87,7 +121,42 @@ const normalizarDataParaKey = (date: Date): string => {
   return `${year}-${month}-${day}`
 }
 
+// Helper para obter o número da semana de uma data baseado na data_inicio do cronograma
+const getSemanaNumero = (date: Date, dataInicio?: string | null): number | null => {
+  if (!dataInicio) return null
+  
+  const inicio = new Date(dataInicio)
+  const data = new Date(date)
+  
+  // Normalizar para meia-noite para comparação
+  inicio.setHours(0, 0, 0, 0)
+  data.setHours(0, 0, 0, 0)
+  
+  // Calcular diferença em dias
+  const diffTime = data.getTime() - inicio.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  
+  // Calcular número da semana (semana 1 começa na data_inicio)
+  const semanaNumero = Math.floor(diffDays / 7) + 1
+  
+  return semanaNumero
+}
+
+// Helper para formatar minutos em horas e minutos
+const formatarMinutos = (minutos: number): string => {
+  const horas = Math.floor(minutos / 60)
+  const mins = Math.round(minutos % 60)
+  if (horas === 0) {
+    return `${mins}min`
+  }
+  if (mins === 0) {
+    return `${horas}h`
+  }
+  return `${horas}h ${mins}min`
+}
+
 export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps) {
+  const isMobile = useIsMobile()
   const [loading, setLoading] = useState(true)
   const [cronograma, setCronograma] = useState<Cronograma | null>(null)
   const [itensPorData, setItensPorData] = useState<Map<string, ItemComData[]>>(new Map())
@@ -145,6 +214,24 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
   const [itensCompletosCache, setItensCompletosCache] = useState<any[]>([])
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
   const [calendarForceUpdate, setCalendarForceUpdate] = useState(0)
+  const [estatisticasSemanas, setEstatisticasSemanas] = useState<EstatisticasSemanasResult | null>(null)
+  const [loadingEstatisticas, setLoadingEstatisticas] = useState(false)
+  const [tempoEstudosConcluidos, setTempoEstudosConcluidos] = useState<Map<string, boolean>>(new Map()) // Key: "data|disciplina_id|frente_id"
+
+  // Gestos swipe para navegar entre meses
+  const handleSwipeLeft = useCallback(() => {
+    setCurrentMonth((prev) => addMonths(prev, 1))
+  }, [])
+
+  const handleSwipeRight = useCallback(() => {
+    setCurrentMonth((prev) => subMonths(prev, 1))
+  }, [])
+
+  const { handlers: swipeHandlers } = useSwipe({
+    onSwipeLeft: handleSwipeLeft,
+    onSwipeRight: handleSwipeRight,
+    threshold: 50,
+  })
 
   useEffect(() => {
     async function loadCronograma() {
@@ -353,10 +440,111 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
           setDiasSelecionados(distribuicaoData.dias_semana)
           setDiasSalvos(distribuicaoData.dias_semana) // Salvar também os dias salvos
         }
+
+        // Carregar estatísticas por semana - só depois de confirmar que o cronograma existe e tem itens
+        // As estatísticas só fazem sentido se houver itens no cronograma
+        if (cronogramaData && cronogramaData.id && itensCompletos.length > 0) {
+          await carregarEstatisticasSemanas(cronogramaData.id)
+          await carregarTempoEstudosConcluidos(cronogramaData.id)
+        } else if (cronogramaData && cronogramaData.id && itensCompletos.length === 0) {
+          console.log('[Estatísticas] Cronograma existe mas não tem itens ainda, pulando carregamento de estatísticas')
+        }
       } catch (err) {
         console.error('Erro inesperado ao carregar cronograma:', err)
       } finally {
         setLoading(false)
+      }
+    }
+
+    async function carregarEstatisticasSemanas(id: string) {
+      if (!id) {
+        console.warn('[Estatísticas] ID do cronograma não fornecido')
+        return
+      }
+
+      try {
+        setLoadingEstatisticas(true)
+        const supabase = createClient()
+        const { data: session } = await supabase.auth.getSession()
+
+        if (!session?.session?.access_token) {
+          console.warn('[Estatísticas] Sessão não encontrada')
+          return
+        }
+
+        console.log('[Estatísticas] Buscando estatísticas para cronograma:', id)
+        const response = await fetch(`/api/cronograma/${id}/estatisticas-semanas`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.session.access_token}`,
+          },
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+          const errorMessage = errorData.error || 'Erro desconhecido'
+          
+          // Se o cronograma não foi encontrado, pode ser que ainda esteja sendo criado
+          // Nesse caso, apenas logar como warning em vez de error
+          if (errorMessage.includes('não encontrado') || errorMessage.includes('não existe')) {
+            console.warn('[Estatísticas] Cronograma ainda não disponível para estatísticas:', errorMessage)
+          } else {
+            console.error('[Estatísticas] Erro ao buscar estatísticas:', errorMessage)
+          }
+          // Não lançar erro, apenas logar - as estatísticas são opcionais
+          return
+        }
+
+        const data: EstatisticasSemanasResult = await response.json()
+        setEstatisticasSemanas(data)
+        console.log('[Estatísticas] Estatísticas carregadas:', data.resumo)
+      } catch (error) {
+        console.error('[Estatísticas] Erro ao carregar estatísticas:', error)
+        // Não lançar erro, apenas logar - as estatísticas são opcionais
+      } finally {
+        setLoadingEstatisticas(false)
+      }
+    }
+
+    async function carregarTempoEstudosConcluidos(id: string) {
+      if (!id) return
+
+      try {
+        const supabase = createClient()
+        const { data: session } = await supabase.auth.getSession()
+
+        if (!session?.session?.access_token) {
+          console.warn('[Tempo Estudos] Sessão não encontrada')
+          return
+        }
+
+        const response = await fetch(`/api/cronograma/${id}/tempo-estudos`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.session.access_token}`,
+          },
+        })
+
+        if (!response.ok) {
+          console.warn('[Tempo Estudos] Erro ao buscar tempo de estudos concluídos')
+          return
+        }
+
+        const data: { success: true; tempo_estudos: any[] } = await response.json()
+        
+        // Criar mapa: "data|disciplina_id|frente_id" -> boolean
+        const mapa = new Map<string, boolean>()
+        data.tempo_estudos.forEach((item: any) => {
+          const key = `${item.data}|${item.disciplina_id}|${item.frente_id}`
+          mapa.set(key, item.tempo_estudos_concluido)
+        })
+        
+        setTempoEstudosConcluidos(mapa)
+        console.log('[Tempo Estudos] Tempo de estudos carregado:', mapa.size, 'registros')
+      } catch (error) {
+        console.error('[Tempo Estudos] Erro ao carregar tempo de estudos:', error)
       }
     }
 
@@ -511,6 +699,60 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
     if (hours > 0) parts.push(`${hours}h`)
     if (mins > 0) parts.push(`${mins} min`)
     return parts.length === 0 ? '0 min' : parts.join(' ')
+  }
+
+  const toggleTempoEstudosConcluido = async (
+    data: string,
+    disciplinaId: string,
+    frenteId: string,
+    concluido: boolean
+  ) => {
+    if (!cronogramaId) return
+
+    try {
+      const supabase = createClient()
+      const { data: session } = await supabase.auth.getSession()
+
+      if (!session?.session?.access_token) {
+        console.warn('[Tempo Estudos] Sessão não encontrada')
+        return
+      }
+
+      const response = await fetch(`/api/cronograma/${cronogramaId}/tempo-estudos`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.session.access_token}`,
+        },
+        body: JSON.stringify({
+          data,
+          disciplina_id: disciplinaId,
+          frente_id: frenteId,
+          tempo_estudos_concluido: concluido,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+        console.error('[Tempo Estudos] Erro ao atualizar:', errorData.error)
+        return
+      }
+
+      // Atualizar estado local
+      const key = `${data}|${disciplinaId}|${frenteId}`
+      setTempoEstudosConcluidos(prev => {
+        const novo = new Map(prev)
+        novo.set(key, concluido)
+        return novo
+      })
+
+      // Forçar atualização do calendário para refletir mudanças nos modificadores
+      setCalendarForceUpdate(v => v + 1)
+
+      console.log('[Tempo Estudos] Tempo de estudos atualizado:', { data, disciplinaId, frenteId, concluido })
+    } catch (error) {
+      console.error('[Tempo Estudos] Erro ao atualizar tempo de estudos:', error)
+    }
   }
 
   const toggleTodasAulasDoDia = async (itensDoDia: ItemComData[]) => {
@@ -1286,10 +1528,21 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
     // Essas marcações devem sempre aparecer, independente da seleção de dias
     const itensPorDataMap = new Map(itensPorData)
     const diasSelecionadosSorted = [...diasSelecionados].sort((a, b) => a - b)
+    const tempoEstudosMap = new Map(tempoEstudosConcluidos)
+    
+    // Criar mapa de estatísticas por semana para acesso rápido
+    const statsPorSemana = new Map<number, SemanaEstatisticas>()
+    if (estatisticasSemanas) {
+      estatisticasSemanas.semanas.forEach(semana => {
+        statsPorSemana.set(semana.semana_numero, semana)
+      })
+    }
     
     console.log('[Modifiers] Recriando modifiers com dias selecionados:', diasSelecionadosSorted.join(','))
     console.log('[Modifiers] Total de datas no mapa original:', itensPorDataMap.size)
     console.log('[Modifiers] Manter dias atuais:', manterDiasAtuais)
+    console.log('[Modifiers] Estatísticas disponíveis:', statsPorSemana.size, 'semanas')
+    console.log('[Modifiers] Tempo de estudos concluídos:', tempoEstudosMap.size, 'registros')
     
     return {
       hasAulas: (date: Date) => {
@@ -1308,8 +1561,51 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
         
         // Usar mapa ORIGINAL (não filtrado) para garantir que sempre apareça
         const itens = itensPorDataMap.get(dataKey) || []
+        
         // Verificar se TODAS as aulas do dia estão concluídas
-        return itens.length > 0 && itens.every(item => item.concluido)
+        const todasAulasConcluidas = itens.length > 0 && itens.every(item => item.concluido)
+        
+        if (!todasAulasConcluidas) {
+          return false
+        }
+        
+        // Se todas as aulas estão concluídas, verificar se o tempo de estudos também está concluído
+        // Agrupar itens por disciplina/frente para verificar tempo de estudos
+        const gruposPorDisciplinaFrente = new Map<string, typeof itens>()
+        itens.forEach((item) => {
+          const disciplinaId = item.aulas?.modulos?.frentes?.disciplinas?.id || ''
+          const frenteId = item.aulas?.modulos?.frentes?.id || ''
+          const chave = `${disciplinaId}|${frenteId}`
+          
+          if (disciplinaId && frenteId) {
+            if (!gruposPorDisciplinaFrente.has(chave)) {
+              gruposPorDisciplinaFrente.set(chave, [])
+            }
+            gruposPorDisciplinaFrente.get(chave)!.push(item)
+          }
+        })
+        
+        // Verificar se todos os grupos têm tempo de estudos concluído
+        let todosTemposEstudosConcluidos = true
+        gruposPorDisciplinaFrente.forEach((itensGrupo, chave) => {
+          const [disciplinaId, frenteId] = chave.split('|')
+          const key = `${dataKey}|${disciplinaId}|${frenteId}`
+          const tempoEstudosConcluido = tempoEstudosMap.get(key) || false
+          
+          // Só considerar se o grupo tem aulas com tempo estimado (tempo de estudos > 0)
+          const velocidadeReproducao = cronograma?.velocidade_reproducao ?? 1.0
+          const tempoAulasOriginal = itensGrupo.reduce((acc, item) => {
+            return acc + (item.aulas?.tempo_estimado_minutos || 0)
+          }, 0)
+          const tempoAulasAjustado = tempoAulasOriginal / velocidadeReproducao
+          const tempoEstudosExercicios = tempoAulasAjustado * 0.5
+          
+          if (tempoEstudosExercicios > 0 && !tempoEstudosConcluido) {
+            todosTemposEstudosConcluidos = false
+          }
+        })
+        
+        return todasAulasConcluidas && todosTemposEstudosConcluidos
       },
       hasPendentes: (date: Date) => {
         // Normalizar data para dataKey usando a função helper
@@ -1326,6 +1622,27 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
         
         // Pendente = tem aulas, tem pelo menos uma concluída, mas nem todas
         return temConcluidas && !todasConcluidas
+      },
+      hasSemanaSobrecarregada: (date: Date) => {
+        if (!estatisticasSemanas || !cronograma) return false
+        const semanaNum = getSemanaNumero(date, cronograma.data_inicio)
+        if (!semanaNum) return false
+        const stats = statsPorSemana.get(semanaNum)
+        return stats ? stats.percentual_usado > 100 : false
+      },
+      hasSemanaCompleta: (date: Date) => {
+        if (!estatisticasSemanas || !cronograma) return false
+        const semanaNum = getSemanaNumero(date, cronograma.data_inicio)
+        if (!semanaNum) return false
+        const stats = statsPorSemana.get(semanaNum)
+        return stats ? stats.percentual_usado >= 95 && stats.percentual_usado <= 100 : false
+      },
+      hasSemanaParcial: (date: Date) => {
+        if (!estatisticasSemanas || !cronograma) return false
+        const semanaNum = getSemanaNumero(date, cronograma.data_inicio)
+        if (!semanaNum) return false
+        const stats = statsPorSemana.get(semanaNum)
+        return stats ? stats.percentual_usado > 0 && stats.percentual_usado < 95 : false
       },
       hasDiasSelecionados: (date: Date) => {
         // Se "manter dias atuais" estiver selecionado, não mostrar marcação amarela
@@ -1358,7 +1675,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
         })
       },
     }
-  }, [itensPorData, diasSelecionados, manterDiasAtuais, cronograma])
+  }, [itensPorData, diasSelecionados, manterDiasAtuais, cronograma, estatisticasSemanas, tempoEstudosConcluidos])
 
   // Log quando os dias selecionados mudarem para debug e forçar atualização
   // IMPORTANTE: Este hook deve ser chamado DEPOIS de itensPorDataFiltrados e modifiers
@@ -1451,14 +1768,57 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
       {/* Calendário */}
       <Card>
         <CardHeader>
-          <CardTitle>Calendário de Estudos</CardTitle>
-          <CardDescription>
-            Visualize suas aulas agendadas e marque as concluídas
-          </CardDescription>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div>
+              <CardTitle>Calendário de Estudos</CardTitle>
+              <CardDescription>
+                Visualize suas aulas agendadas e marque as concluídas
+              </CardDescription>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+              onClick={async () => {
+                try {
+                  const supabase = createClient()
+                  const { data: { session } } = await supabase.auth.getSession()
+                  if (!session?.access_token) {
+                    alert('Sessão expirada. Faça login novamente.')
+                    return
+                  }
+                  const res = await fetch(`/api/cronograma/${cronogramaId}/export/ics`, {
+                    headers: { Authorization: `Bearer ${session.access_token}` },
+                  })
+                  if (!res.ok) {
+                    const err = await res.json().catch(() => ({ error: 'Erro ao exportar calendário' }))
+                    alert(err.error || 'Erro ao exportar calendário')
+                    return
+                  }
+                  const blob = await res.blob()
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `cronograma_${cronogramaId}.ics`
+                  document.body.appendChild(a)
+                  a.click()
+                  a.remove()
+                  URL.revokeObjectURL(url)
+                } catch (e) {
+                  console.error('Erro ao exportar calendário:', e)
+                  alert('Erro ao exportar calendário')
+                }
+              }}
+            >
+              <CalendarCheck className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Exportar Calendário</span>
+              <span className="sm:hidden">Exportar</span>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {/* Seletor de Range */}
-          <div className="flex flex-col gap-3">
+          {/* Seletor de Range - Oculto em mobile */}
+          <div className="hidden md:flex flex-col gap-3">
             <CalendarDatePicker
               date={dateRange}
               onDateSelect={handleDateRangeSelect}
@@ -1469,7 +1829,40 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
           {/* Calendário com marcações e painel de filtros */}
           <div className="flex flex-col lg:flex-row gap-3 lg:items-stretch w-full">
             {/* Calendário */}
-            <div className="flex flex-col w-full lg:flex-1">
+            <div 
+              className="flex flex-col w-full lg:flex-1"
+              {...swipeHandlers}
+            >
+              {/* Navegação de mês em mobile */}
+              <div className="md:hidden flex items-center justify-between mb-2 px-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentMonth((prev) => subMonths(prev, 1))}
+                  className="h-10 w-10"
+                  aria-label="Mês anterior"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+                <div className="flex-1 text-center">
+                  <p className="text-sm font-medium">
+                    {format(currentMonth, "MMMM 'de' yyyy", { locale: ptBR })}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Deslize para navegar
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setCurrentMonth((prev) => addMonths(prev, 1))}
+                  className="h-10 w-10"
+                  aria-label="Próximo mês"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </div>
+
               <Calendar
                 mode="range"
                 selected={dateRange}
@@ -1488,15 +1881,24 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                   hasDiasSelecionados: 'bg-yellow-50/50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800',
                   // hasFerias: rosa (períodos de férias e recesso)
                   hasFerias: 'bg-pink-50 dark:bg-pink-950 border-2 border-pink-300 dark:border-pink-700',
+                  // hasSemanaSobrecarregada: vermelho (semana acima de 100% de capacidade)
+                  hasSemanaSobrecarregada: 'ring-2 ring-red-500 dark:ring-red-400',
+                  // hasSemanaCompleta: laranja (semana entre 95-100% de capacidade)
+                  hasSemanaCompleta: 'ring-2 ring-orange-500 dark:ring-orange-400',
+                  // hasSemanaParcial: amarelo (semana com uso parcial)
+                  hasSemanaParcial: 'ring-1 ring-yellow-400 dark:ring-yellow-500',
                 }}
-                numberOfMonths={2}
+                numberOfMonths={isMobile ? 1 : 2}
                 className="rounded-md border w-full"
                 locale={ptBR}
                 // Forçar atualização preservando o mês
                 defaultMonth={currentMonth}
               />
               <p className="text-xs text-muted-foreground mt-1.5 text-left">
-                💡 Dica: Dê um duplo clique em qualquer data para alterar a data inicial a qualquer momento
+                {isMobile 
+                  ? '💡 Dica: Deslize horizontalmente para navegar entre meses ou toque em uma data para selecionar'
+                  : '💡 Dica: Dê um duplo clique em qualquer data para alterar a data inicial a qualquer momento'
+                }
               </p>
               
               {/* Legenda e Instruções */}
@@ -1570,8 +1972,95 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
               </Card>
             </div>
 
+            {/* Painel de Resumo Semanal - Colapsável */}
+            {estatisticasSemanas && (
+              <Card className="w-full lg:w-80 flex-shrink-0">
+                <Collapsible defaultOpen={false}>
+                  <CollapsibleTrigger asChild>
+                    <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-base">Resumo por Semana</CardTitle>
+                        <ChevronDown className="h-4 w-4 transition-transform data-[state=open]:rotate-180" />
+                      </div>
+                      <CardDescription className="text-xs">
+                        {estatisticasSemanas.resumo.semanas_uteis} semanas úteis • {estatisticasSemanas.resumo.semanas_sobrecarregadas > 0 && (
+                          <span className="text-red-600 dark:text-red-400 font-medium">
+                            {estatisticasSemanas.resumo.semanas_sobrecarregadas} sobrecarregada(s)
+                          </span>
+                        )}
+                      </CardDescription>
+                    </CardHeader>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <CardContent className="max-h-[600px] overflow-y-auto space-y-2">
+                      {estatisticasSemanas.semanas
+                        .sort((a, b) => a.semana_numero - b.semana_numero)
+                        .map((semana) => (
+                          <Card key={semana.semana_numero} className="border">
+                            <CardHeader className="pb-2">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <CardTitle className="text-sm">Semana {semana.semana_numero}</CardTitle>
+                                  <CardDescription className="text-xs">
+                                    {format(new Date(semana.data_inicio), 'dd/MM')} - {format(new Date(semana.data_fim), 'dd/MM')}
+                                  </CardDescription>
+                                </div>
+                                {semana.is_ferias && (
+                                  <Badge variant="outline" className="text-xs">Férias</Badge>
+                                )}
+                              </div>
+                            </CardHeader>
+                            <CardContent className="pt-0">
+                              <div className="space-y-2">
+                                <Progress 
+                                  value={Math.min(100, semana.percentual_usado)} 
+                                  className={cn(
+                                    semana.percentual_usado > 100 && "bg-red-500",
+                                    semana.percentual_usado >= 95 && semana.percentual_usado <= 100 && "bg-orange-500",
+                                    semana.percentual_usado >= 80 && semana.percentual_usado < 95 && "bg-yellow-500",
+                                    semana.percentual_usado < 80 && "bg-green-500"
+                                  )}
+                                />
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                  <div>
+                                    <span className="text-muted-foreground">Disponível:</span>
+                                    <span className="ml-1 font-medium">{formatarMinutos(semana.capacidade_minutos)}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Usado:</span>
+                                    <span className="ml-1 font-medium">{formatarMinutos(semana.tempo_usado_minutos)}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Restante:</span>
+                                    <span className="ml-1 font-medium">{formatarMinutos(semana.tempo_disponivel_minutos)}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-muted-foreground">Aulas:</span>
+                                    <span className="ml-1 font-medium">
+                                      {semana.aulas_concluidas}/{semana.total_aulas}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="text-xs text-muted-foreground">
+                                  {semana.percentual_usado.toFixed(1)}% da capacidade
+                                </div>
+                                {semana.percentual_usado > 100 && (
+                                  <div className="text-xs text-red-600 dark:text-red-400 font-medium">
+                                    ⚠️ Semana sobrecarregada! Excede {((semana.percentual_usado - 100) * 100).toFixed(0)}% da capacidade.
+                                  </div>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                    </CardContent>
+                  </CollapsibleContent>
+                </Collapsible>
+              </Card>
+            )}
+
             {/* Painel de Filtros - Lado Direito - Alinhado com o calendário */}
-            <Card className="w-full lg:w-80 flex-shrink-0 flex flex-col border rounded-md shadow-sm py-2">
+            <Card className="w-full lg:w-80 flex-shrink-0 flex flex-col border rounded-md shadow-sm py-2 mt-0 md:mt-0">
               <CardHeader className="pb-1 pt-2 px-3">
                 <CardTitle className="text-base font-bold leading-tight">Selecionar dias para ver a aula</CardTitle>
                 <CardDescription className="text-xs mt-0.5 leading-tight mb-0">
@@ -1981,16 +2470,24 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                                                 <span className="font-medium">Número de aulas:</span> {itensGrupo.length}
                                               </span>
                                               {(() => {
-                                                const tempoAulas = itensGrupo.reduce((acc, item) => {
+                                                const velocidadeReproducao = cronograma?.velocidade_reproducao ?? 1.0
+                                                
+                                                // Calcular tempo de aulas ajustado pela velocidade
+                                                const tempoAulasOriginal = itensGrupo.reduce((acc, item) => {
                                                   return acc + (item.aulas?.tempo_estimado_minutos || 0)
                                                 }, 0)
-                                                const tempoAnotacoesExercicios = tempoAulas * 0.5 // 50% do tempo de aulas para anotações e exercícios
+                                                
+                                                // Tempo de aula ajustado pela velocidade (se assistir em 1.5x, o tempo real é reduzido)
+                                                const tempoAulasAjustado = tempoAulasOriginal / velocidadeReproducao
+                                                
+                                                // Tempo de estudos = 50% do tempo de aula ajustado (mesma lógica do backend)
+                                                const tempoAnotacoesExercicios = tempoAulasAjustado * 0.5
                                                 
                                                 return (
                                                   <>
-                                                    {tempoAulas > 0 && (
+                                                    {tempoAulasAjustado > 0 && (
                                                       <span>
-                                                        <span className="font-medium">Tempo estimado de aula:</span> {formatTempo(tempoAulas)}
+                                                        <span className="font-medium">Tempo estimado de aula:</span> {formatTempo(tempoAulasAjustado)}
                                                       </span>
                                                     )}
                                                     {tempoAnotacoesExercicios > 0 && (
@@ -2109,6 +2606,59 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                                       </div>
                                     ))}
                                       </div>
+                                      
+                                      {/* Checkbox para marcar tempo de estudos e exercícios */}
+                                      {(() => {
+                                        const velocidadeReproducao = cronograma?.velocidade_reproducao ?? 1.0
+                                        
+                                        // Calcular tempo de aulas ajustado pela velocidade
+                                        const tempoAulasOriginal = itensGrupo.reduce((acc, item) => {
+                                          return acc + (item.aulas?.tempo_estimado_minutos || 0)
+                                        }, 0)
+                                        
+                                        // Tempo de aula ajustado pela velocidade
+                                        const tempoAulasAjustado = tempoAulasOriginal / velocidadeReproducao
+                                        
+                                        // Tempo de estudos = 50% do tempo de aula ajustado (mesma lógica do backend)
+                                        const tempoEstudosExercicios = tempoAulasAjustado * 0.5
+                                        
+                                        if (tempoEstudosExercicios <= 0) return null
+                                        
+                                        const key = `${dataKey}|${disciplinaId}|${frenteId}`
+                                        const tempoEstudosConcluido = tempoEstudosConcluidos.get(key) || false
+                                        
+                                        return (
+                                          <div className="mt-3 pt-3 border-t">
+                                            <div className="flex items-center gap-3 p-3 rounded-md bg-muted/50">
+                                              <Checkbox
+                                                checked={tempoEstudosConcluido}
+                                                onCheckedChange={(checked) =>
+                                                  toggleTempoEstudosConcluido(
+                                                    dataKey,
+                                                    disciplinaId,
+                                                    frenteId,
+                                                    checked === true
+                                                  )
+                                                }
+                                                className="mt-0.5"
+                                              />
+                                              <div className="flex-1">
+                                                <Label htmlFor={`tempo-estudos-${key}`} className="text-sm font-medium cursor-pointer">
+                                                  Tempo de Estudos + Exercícios
+                                                </Label>
+                                                <p className="text-xs text-muted-foreground mt-0.5">
+                                                  {formatTempo(tempoEstudosExercicios)} de tempo dedicado para anotações e exercícios
+                                                </p>
+                                              </div>
+                                              {tempoEstudosConcluido && (
+                                                <Badge variant="default" className="text-xs shrink-0">
+                                                  Concluído
+                                                </Badge>
+                                              )}
+                                            </div>
+                                          </div>
+                                        )
+                                      })()}
                                     </CollapsibleContent>
                                   </div>
                                 </Collapsible>

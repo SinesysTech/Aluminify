@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Plus, MessageSquare, X } from 'lucide-react'
 import { ConversationListItem } from './conversation-list-item'
 import { RenameConversationDialog } from './rename-conversation-dialog'
 import type { Conversation } from '@/backend/services/conversation/conversation.types'
 import { cn } from '@/lib/utils'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface ConversationsPanelProps {
   selectedConversationId: string | null
@@ -27,10 +29,19 @@ export function ConversationsPanel({
   open = true,
   onOpenChange,
 }: ConversationsPanelProps) {
+  const isMobile = useIsMobile()
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [renameDialogOpen, setRenameDialogOpen] = useState(false)
   const [conversationToRename, setConversationToRename] = useState<Conversation | null>(null)
+
+  const handleSelectConversation = (conversation: Conversation | null) => {
+    onSelectConversation(conversation)
+    // Fechar painel em mobile após selecionar
+    if (isMobile && onOpenChange) {
+      onOpenChange(false)
+    }
+  }
 
   const loadConversations = async () => {
     if (!accessToken) return
@@ -147,73 +158,102 @@ export function ConversationsPanel({
     onConversationUpdated()
   }
 
+  const panelContent = (
+    <>
+      <div className="flex items-center justify-between p-4 border-b">
+        <h2 className="text-lg font-semibold">Conversas</h2>
+        <div className="flex items-center gap-2">
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={handleCreateConversation}
+            className="h-8 w-8"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="sr-only">Nova conversa</span>
+          </Button>
+          {onOpenChange && isMobile && (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => onOpenChange(false)}
+              className="h-8 w-8"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Fechar</span>
+            </Button>
+          )}
+        </div>
+      </div>
+      <ScrollArea className="flex-1">
+        <div className="p-2">
+          {isLoading ? (
+            <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
+              <MessageSquare className="h-4 w-4" />
+              <span>Carregando...</span>
+            </div>
+          ) : conversations.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-4 text-center text-sm text-muted-foreground">
+              <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
+              <p>Nenhuma conversa ainda</p>
+              <p className="text-xs mt-1">Crie uma nova conversa para começar</p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              {conversations.map((conversation) => (
+                <ConversationListItem
+                  key={conversation.id}
+                  conversation={conversation}
+                  isSelected={selectedConversationId === conversation.id}
+                  onSelect={() => handleSelectConversation(conversation)}
+                  onRename={() => handleRename(conversation)}
+                  onDelete={() => handleDelete(conversation.id)}
+                  onPin={() => handlePin(conversation.id)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </ScrollArea>
+    </>
+  )
+
+  // Mobile: usar Sheet
+  if (isMobile) {
+    return (
+      <>
+        <Sheet open={open} onOpenChange={onOpenChange}>
+          <SheetContent side="left" className="w-full sm:w-80 p-0 flex flex-col">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Conversas</SheetTitle>
+            </SheetHeader>
+            {panelContent}
+          </SheetContent>
+        </Sheet>
+
+        {conversationToRename && (
+          <RenameConversationDialog
+            open={renameDialogOpen}
+            onOpenChange={setRenameDialogOpen}
+            conversation={conversationToRename}
+            accessToken={accessToken}
+            onRenameComplete={handleRenameComplete}
+          />
+        )}
+      </>
+    )
+  }
+
+  // Desktop: painel lateral tradicional
   return (
     <>
       <div
         className={cn(
           'flex flex-col h-full border-r bg-background transition-all duration-300',
-          open ? 'w-full md:w-64' : 'w-0 overflow-hidden'
+          open ? 'w-64' : 'w-0 overflow-hidden'
         )}
       >
-        {open && (
-          <>
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-semibold">Conversas</h2>
-              <div className="flex items-center gap-2">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleCreateConversation}
-                  className="h-8 w-8"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span className="sr-only">Nova conversa</span>
-                </Button>
-                {onOpenChange && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => onOpenChange(false)}
-                    className="h-8 w-8"
-                  >
-                    <X className="h-4 w-4" />
-                    <span className="sr-only">Fechar</span>
-                  </Button>
-                )}
-              </div>
-            </div>
-            <ScrollArea className="flex-1">
-              <div className="p-2">
-                {isLoading ? (
-                  <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
-                    <MessageSquare className="h-4 w-4" />
-                    <span>Carregando...</span>
-                  </div>
-                ) : conversations.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center p-4 text-center text-sm text-muted-foreground">
-                    <MessageSquare className="h-8 w-8 mb-2 opacity-50" />
-                    <p>Nenhuma conversa ainda</p>
-                    <p className="text-xs mt-1">Crie uma nova conversa para começar</p>
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    {conversations.map((conversation) => (
-                      <ConversationListItem
-                        key={conversation.id}
-                        conversation={conversation}
-                        isSelected={selectedConversationId === conversation.id}
-                        onSelect={() => onSelectConversation(conversation)}
-                        onRename={() => handleRename(conversation)}
-                        onDelete={() => handleDelete(conversation.id)}
-                        onPin={() => handlePin(conversation.id)}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          </>
-        )}
+        {open && panelContent}
       </div>
 
       {conversationToRename && (

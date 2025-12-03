@@ -50,6 +50,7 @@
     "date-fns-tz": "^3.0.0",
     "exceljs": "^4.4.0",
     "harden-react-markdown": "^1.1.5",
+    "ical-generator": "^10.0.0",
     "katex": "^0.16.25",
     "lucide-react": "^0.554.0",
     "motion": "^12.23.24",

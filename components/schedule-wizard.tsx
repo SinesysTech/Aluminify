@@ -1221,7 +1221,7 @@ export function ScheduleWizard() {
                   className={cn(
                     'flex items-center gap-3 rounded-lg border p-3 text-sm transition',
                     completed
-                      ? 'border-emerald-200 bg-emerald-50'
+                      ? 'border-emerald-200 bg-emerald-50 text-foreground'
                       : active
                         ? 'border-primary bg-primary/5'
                         : 'border-border',
@@ -1236,8 +1236,8 @@ export function ScheduleWizard() {
                     )}
                   />
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Passo {step.id}</p>
-                    <p className={cn('font-medium', active && 'text-primary')}>{step.title}</p>
+                    <p className={cn('text-xs', completed ? 'text-foreground' : 'text-muted-foreground')}>Passo {step.id}</p>
+                    <p className={cn('font-medium', active && 'text-primary', completed && 'text-foreground')}>{step.title}</p>
                   </div>
                 </div>
               )
@@ -1266,7 +1266,7 @@ export function ScheduleWizard() {
             {currentStep === 1 && (
               <div className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
+                  <div className="space-y-2">
                     <Label>Data de Início</Label>
                     <DatePicker
                       value={form.watch('data_inicio') || null}
@@ -1280,7 +1280,7 @@ export function ScheduleWizard() {
                     />
                   </div>
 
-                  <div>
+                  <div className="space-y-2">
                     <Label>Data de Término</Label>
                     <DatePicker
                       value={form.watch('data_fim') || null}

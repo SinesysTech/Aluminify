@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/client'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -12,9 +11,8 @@ import { Badge } from '@/components/ui/badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
-import { ScheduleKanban } from '@/components/schedule-kanban'
 import { ScheduleList } from '@/components/schedule-list'
-import { CalendarCheck, Download, Plus, RefreshCw, Trash2 } from 'lucide-react'
+import { Download, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -982,43 +980,21 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
         </CardContent>
       </Card>
 
-      {/* Tabs: Lista e Kanban */}
-      <Tabs defaultValue="lista" className="w-full">
-        <TabsList>
-          <TabsTrigger value="lista">Lista</TabsTrigger>
-          <TabsTrigger value="kanban">Quadro (Kanban)</TabsTrigger>
-        </TabsList>
-        <TabsContent value="lista" className="mt-4">
-          <ScheduleList
-            itensPorSemana={itensPorSemana}
-            dataInicio={cronograma.data_inicio}
-            dataFim={cronograma.data_fim}
-            periodosFerias={cronograma.periodos_ferias || []}
-            modalidade={cronograma.modalidade_estudo}
-            cronogramaId={cronogramaId}
-            onToggleConcluido={toggleConcluido}
-            onUpdate={(updater) => {
-              if (cronograma) {
-                setCronograma(updater(cronograma))
-              }
-            }}
-          />
-        </TabsContent>
-        <TabsContent value="kanban" className="mt-4">
-          <ScheduleKanban
-            itensPorSemana={itensPorSemana}
-            cronogramaId={cronogramaId}
-            dataInicio={cronograma.data_inicio}
-            modalidadeEstudo={cronograma.modalidade_estudo}
-            onToggleConcluido={toggleConcluido}
-            onUpdate={(updater) => {
-              if (cronograma) {
-                setCronograma(updater(cronograma))
-              }
-            }}
-          />
-        </TabsContent>
-      </Tabs>
+      {/* Lista de Itens */}
+      <ScheduleList
+        itensPorSemana={itensPorSemana}
+        dataInicio={cronograma.data_inicio}
+        dataFim={cronograma.data_fim}
+        periodosFerias={cronograma.periodos_ferias || []}
+        modalidade={cronograma.modalidade_estudo}
+        cronogramaId={cronogramaId}
+        onToggleConcluido={toggleConcluido}
+        onUpdate={(updater) => {
+          if (cronograma) {
+            setCronograma(updater(cronograma))
+          }
+        }}
+      />
     </div>
   )
 }

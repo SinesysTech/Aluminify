@@ -1,6 +1,7 @@
 import { AppSidebar } from '@/components/app-sidebar'
 import { UserProvider } from '@/components/providers/user-provider'
 import { DynamicBreadcrumb } from '@/components/dynamic-breadcrumb'
+import { BottomNavigation } from '@/components/bottom-navigation'
 import { Separator } from '@/components/ui/separator'
 import {
   SidebarInset,
@@ -31,7 +32,8 @@ export default async function DashboardLayout({
               <DynamicBreadcrumb />
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-2 md:gap-4 p-2 md:p-4 pt-0">{children}</div>
+          <div className="flex flex-1 flex-col gap-2 md:gap-4 p-2 md:p-4 pt-0 pb-16 md:pb-0">{children}</div>
+          <BottomNavigation />
         </SidebarInset>
       </SidebarProvider>
     </UserProvider>

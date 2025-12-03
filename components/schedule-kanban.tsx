@@ -23,10 +23,13 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Progress } from '@/components/ui/progress'
 import { format, addDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import { GripVertical } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 
 interface CronogramaItem {
   id: string
@@ -173,6 +176,7 @@ export function ScheduleKanban({
   onToggleConcluido,
   onUpdate,
 }: ScheduleKanbanProps) {
+  const isMobile = useIsMobile()
   const [activeId, setActiveId] = useState<string | null>(null)
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -233,6 +237,124 @@ export function ScheduleKanban({
     const inicioSemana = addDays(inicio, (semanaNumero - 1) * 7)
     const fimSemana = addDays(inicioSemana, 6)
     return { inicioSemana, fimSemana }
+  }
+
+  // Versão mobile: lista vertical com accordions
+  if (isMobile) {
+    const semanas = Object.keys(itensPorSemana)
+      .map(Number)
+      .sort((a, b) => a - b)
+
+    return (
+      <div className="space-y-2">
+        <Accordion type="multiple" className="w-full">
+          {semanas.map((semana) => {
+            const itens = itensPorSemana[semana] || []
+            const { inicioSemana, fimSemana } = getSemanaDates(semana)
+            const concluidas = itens.filter((item) => item.concluido).length
+            const progresso = itens.length > 0 ? (concluidas / itens.length) * 100 : 0
+
+            return (
+              <AccordionItem key={semana} value={`semana-${semana}`} className="border rounded-lg">
+                <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                  <div className="flex flex-col items-start gap-1 flex-1">
+                    <div className="flex items-center justify-between w-full">
+                      <div>
+                        <h3 className="font-semibold text-sm text-left">
+                          Semana {semana}
+                        </h3>
+                        <p className="text-xs text-muted-foreground text-left">
+                          {format(inicioSemana, 'dd/MM', { locale: ptBR })} -{' '}
+                          {format(fimSemana, 'dd/MM', { locale: ptBR })}
+                        </p>
+                      </div>
+                      <Badge variant="outline" className="ml-2">
+                        {itens.length} {itens.length === 1 ? 'aula' : 'aulas'}
+                      </Badge>
+                    </div>
+                    {itens.length > 0 && (
+                      <div className="w-full mt-2">
+                        <div className="flex items-center justify-between text-xs mb-1">
+                          <span className="text-muted-foreground">
+                            {concluidas} de {itens.length} concluídas
+                          </span>
+                          <span className="font-medium">{Math.round(progresso)}%</span>
+                        </div>
+                        <Progress value={progresso} className="h-2" />
+                      </div>
+                    )}
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pb-4">
+                  <div className="space-y-2 mt-2">
+                    {itens.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        Nenhuma aula nesta semana
+                      </p>
+                    ) : (
+                      itens.map((item) => (
+                        <Card
+                          key={item.id}
+                          className={cn(
+                            "transition-colors",
+                            item.concluido && "opacity-60 bg-muted/50"
+                          )}
+                        >
+                          <CardContent className="p-3">
+                            <div className="flex items-start gap-3">
+                              <Checkbox
+                                checked={item.concluido}
+                                onCheckedChange={(checked) =>
+                                  onToggleConcluido(item.id, checked as boolean)
+                                }
+                                className="mt-0.5 h-5 w-5"
+                              />
+                              <div className="flex-1 space-y-2 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  {item.aulas ? (
+                                    <>
+                                      <Badge variant="outline" className="text-xs">
+                                        Aula {item.aulas.numero_aula || 'N/A'}
+                                      </Badge>
+                                      {item.aulas.modulos?.numero_modulo && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          Módulo {item.aulas.modulos.numero_modulo}
+                                        </Badge>
+                                      )}
+                                      {item.aulas.modulos?.frentes?.nome && (
+                                        <Badge variant="outline" className="text-xs">
+                                          {item.aulas.modulos.frentes.nome}
+                                        </Badge>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <Badge variant="outline" className="text-xs">
+                                      Aula não disponível
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-sm font-medium leading-tight">
+                                  {item.aulas?.nome || `Aula ID: ${item.aula_id}`}
+                                </p>
+                                {item.aulas?.tempo_estimado_minutos && item.aulas.tempo_estimado_minutos > 0 && (
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatTempo(item.aulas.tempo_estimado_minutos)}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))
+                    )}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )
+          })}
+        </Accordion>
+      </div>
+    )
   }
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -358,6 +480,7 @@ export function ScheduleKanban({
         .find((item) => item.id === activeId)
     : null
 
+  // Versão desktop: Kanban tradicional
   return (
     <DndContext
       sensors={sensors}

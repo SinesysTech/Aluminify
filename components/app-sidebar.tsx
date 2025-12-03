@@ -10,6 +10,7 @@ import {
   Layers,
   MessageSquare,
   Users,
+  LayoutGrid,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
@@ -57,6 +58,12 @@ const navMainData: NavItem[] = [
     title: "Meu Cronograma",
     url: "/aluno/cronograma",
     icon: CalendarCheck,
+    roles: ALL_ROLES,
+  },
+  {
+    title: "Quadro Kanban",
+    url: "/aluno/cronograma/kanban",
+    icon: LayoutGrid,
     roles: ALL_ROLES,
   },
   {
