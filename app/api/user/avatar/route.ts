@@ -73,17 +73,13 @@ export async function POST(request: Request) {
       console.error('Upload error:', uploadError)
       console.error('Upload error details:', {
         message: uploadError.message,
-        statusCode: uploadError.statusCode,
-        error: uploadError.error,
         name: uploadError.name
       })
       
       // Se o erro for relacionado ao bucket não existir ou permissão
       if (uploadError.message?.includes('Bucket not found') || 
           uploadError.message?.includes('does not exist') ||
-          uploadError.message?.includes('not found') ||
-          uploadError.statusCode === '404' ||
-          uploadError.statusCode === 404) {
+          uploadError.message?.includes('not found')) {
         return NextResponse.json(
           { 
             error: 'Bucket de armazenamento não configurado',
@@ -93,8 +89,7 @@ export async function POST(request: Request) {
               '2. Se não existir, crie: Storage > Create bucket > Nome: "avatars" > Public: true',
               '3. Verifique se as políticas RLS foram aplicadas corretamente'
             ],
-            details: uploadError.message,
-            errorCode: uploadError.statusCode
+            details: uploadError.message
           },
           { status: 500 }
         )
@@ -102,9 +97,7 @@ export async function POST(request: Request) {
       
       // Se for erro de permissão
       if (uploadError.message?.includes('permission') || 
-          uploadError.message?.includes('policy') ||
-          uploadError.statusCode === '403' ||
-          uploadError.statusCode === 403) {
+          uploadError.message?.includes('policy')) {
         return NextResponse.json(
           { 
             error: 'Erro de permissão',
@@ -120,7 +113,6 @@ export async function POST(request: Request) {
         { 
           error: 'Erro ao fazer upload do arquivo', 
           details: uploadError.message,
-          errorCode: uploadError.statusCode,
           fullError: process.env.NODE_ENV === 'development' ? JSON.stringify(uploadError, null, 2) : undefined
         },
         { status: 500 }
