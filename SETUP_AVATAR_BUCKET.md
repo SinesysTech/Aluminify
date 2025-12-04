@@ -59,3 +59,4 @@ Se ainda tiver problemas:
 3. Verifique se as políticas RLS foram aplicadas: Supabase Dashboard > Storage > Policies
 
 
+

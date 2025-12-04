@@ -79,12 +79,10 @@ function buildIcs(cronograma: any, itens: any[]): string {
 
       // Criar evento no calendário
       calendar.createEvent({
-        uid: `cronograma-item-${item.id}@areadoaluno`,
         start: startDate,
         end: endDate,
         summary: summary,
         description: description,
-        status: 'CONFIRMED',
         categories: [{ name: 'Estudos' }],
         location: 'Área do Aluno',
       })
@@ -150,4 +148,5 @@ async function getHandler(
 }
 
 export const GET = requireUserAuth(getHandler)
+
 

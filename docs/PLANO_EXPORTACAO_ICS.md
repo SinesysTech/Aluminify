@@ -435,3 +435,4 @@ Cada evento no calendário terá:
 - Descrição: Informações completas (disciplina, frente, módulo, aula, tempo)
 - Status: Confirmado
 
+

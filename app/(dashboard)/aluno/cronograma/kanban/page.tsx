@@ -427,3 +427,4 @@ function KanbanView({ cronogramaId }: { cronogramaId: string }) {
   )
 }
 
+

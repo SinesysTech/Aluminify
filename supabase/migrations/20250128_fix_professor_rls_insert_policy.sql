@@ -23,3 +23,4 @@ COMMENT ON POLICY "Professores podem criar seu próprio registro" ON public.prof
 
 
 
+

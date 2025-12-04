@@ -49,3 +49,4 @@ CREATE POLICY "Aluno gerencia tempo de estudos do seu cronograma"
         )
     );
 
+
