@@ -41,6 +41,7 @@ export default function TobIAsPage() {
   const [isInitializing, setIsInitializing] = useState(true)
   const [conversationsPanelOpen, setConversationsPanelOpen] = useState(true)
   const [attachments, setAttachments] = useState<File[]>([])
+  const [isNewConversation, setIsNewConversation] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -51,7 +52,7 @@ export default function TobIAsPage() {
   }
 
   // Função para carregar conversa
-  const loadConversation = useCallback(async (conversation: ConversationType) => {
+  const loadConversation = useCallback(async (conversation: ConversationType, isNew = false) => {
     if (!accessToken) return
 
     // Limpar mensagens primeiro para evitar mostrar mensagens da conversa anterior
@@ -59,12 +60,13 @@ export default function TobIAsPage() {
     
     setCurrentConversation(conversation)
     setSelectedConversationId(conversation.id)
+    setIsNewConversation(isNew)
 
     const history = conversation.history && Array.isArray(conversation.history)
       ? conversation.history
       : conversation.messages || []
 
-    if (history.length > 0) {
+    if (history.length > 0 && !isNew) {
       console.log('[TobIAs] Loaded', history.length, 'messages from conversation')
       setMessages(history)
     } else {
@@ -144,6 +146,7 @@ export default function TobIAsPage() {
   const handleSelectConversation = async (conversation: ConversationType | null) => {
     // Limpar mensagens imediatamente ao trocar de conversa
     setMessages([])
+    setIsNewConversation(false)
     
     if (!conversation || !accessToken) {
       setCurrentConversation(null)
@@ -163,7 +166,15 @@ export default function TobIAsPage() {
       if (response.ok) {
         const data = await response.json()
         if (data.data) {
-          await loadConversation(data.data)
+          // Verificar se é uma conversa nova (sem histórico e criada recentemente)
+          const conversationData = data.data
+          const hasHistory = conversationData.history && Array.isArray(conversationData.history) && conversationData.history.length > 0
+          const createdAt = conversationData.created_at ? new Date(conversationData.created_at).getTime() : 0
+          const now = Date.now()
+          const isRecentlyCreated = (now - createdAt) < 10000 // Criada nos últimos 10 segundos
+          const isNew = !hasHistory && isRecentlyCreated
+          
+          await loadConversation(conversationData, isNew)
         } else {
           // Se não houver dados, garantir que mensagens estejam vazias
           setMessages([])
@@ -371,7 +382,7 @@ export default function TobIAsPage() {
             if (createResponse.ok) {
               const createData = await createResponse.json()
               if (createData.conversation) {
-                await loadConversation(createData.conversation)
+                await loadConversation(createData.conversation, true)
               }
             }
           }
@@ -412,6 +423,10 @@ export default function TobIAsPage() {
       const formData = new FormData()
       formData.append('message', text)
       formData.append('userId', userId)
+      // Enviar newConversation=true se for uma nova conversa (primeira mensagem)
+      if (isNewConversation) {
+        formData.append('newConversation', 'true')
+      }
       attachments.forEach((file) => formData.append('attachments', file))
 
       const response = await fetch('/api/chat', {
@@ -443,6 +458,8 @@ export default function TobIAsPage() {
         setMessages(prev => [...prev, assistantMessage])
       }
       setAttachments([])
+      // Após enviar a primeira mensagem, marcar que não é mais uma nova conversa
+      setIsNewConversation(false)
 
       // Recarregar conversa para ter os dados atualizados
       if (currentConversation) {

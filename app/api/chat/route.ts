@@ -146,6 +146,7 @@ async function postHandler(request: AuthenticatedRequest) {
 
     console.log('[Chat API] Conversation ID:', conversation.id);
     console.log('[Chat API] SessionId:', conversation.session_id);
+    console.log('[Chat API] Is new conversation:', newConversation);
     console.log('[Chat API] ➡️  Enviando para N8N webhook...');
 
     if (uploadedFiles.length > 0) {
@@ -216,9 +217,12 @@ async function postHandler(request: AuthenticatedRequest) {
       timestamp: Date.now(),
     };
 
-    const existingHistory = normalizeHistory(
-      await conversationService.getConversationHistory(conversation.id, userId)
-    );
+    // Para novas conversas, não usar histórico existente (já que é uma conversa nova)
+    const existingHistory = newConversation
+      ? []
+      : normalizeHistory(
+          await conversationService.getConversationHistory(conversation.id, userId)
+        );
     const historyFromAgent = normalizeHistory(response.history);
     const historyToSave =
       historyFromAgent.length > 0
