@@ -44,7 +44,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react'
 import Papa from 'papaparse'
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import { useRouter } from 'next/navigation'
 
 type Disciplina = {
@@ -500,88 +500,58 @@ export default function ConteudosClientPage() {
     }
   }
 
-  const parseXLSX = (file: File): Promise<CSVRow[]> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      
-      reader.onload = (e) => {
-        try {
-          const data = e.target?.result
-          if (!data) {
-            reject(new Error('Erro ao ler arquivo XLSX'))
-            return
-          }
+  const parseXLSX = async (file: File): Promise<CSVRow[]> => {
+    try {
+      const buffer = await file.arrayBuffer()
+      const workbook = new ExcelJS.Workbook()
+      await workbook.xlsx.load(buffer)
 
-          // Usar ArrayBuffer ao invés de binary string (readAsBinaryString está deprecated)
-          const workbook = XLSX.read(data, { type: 'array' })
-          
-          // Pegar a primeira planilha
-          const firstSheetName = workbook.SheetNames[0]
-          if (!firstSheetName) {
-            reject(new Error('O arquivo XLSX não contém planilhas'))
-            return
-          }
+      const worksheet = workbook.worksheets[0]
+      if (!worksheet) {
+        throw new Error('O arquivo XLSX não contém planilhas')
+      }
 
-          const worksheet = workbook.Sheets[firstSheetName]
-          
-          // Converter para JSON (retorna objetos com chaves sendo os nomes das colunas)
-          const jsonData = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, {
-            defval: '', // Valor padrão para células vazias
-            raw: false, // Converter números para strings
-            blankrows: false, // Ignorar linhas vazias
+      const headers: string[] = []
+      const rows: CSVRow[] = []
+
+      worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) {
+          // First row = headers (normalize to lowercase)
+          row.eachCell({ includeEmpty: false }, (cell) => {
+            headers.push(String(cell.value ?? '').trim().toLowerCase())
           })
-
-          if (jsonData.length === 0) {
-            reject(new Error('O arquivo XLSX está vazio'))
-            return
+        } else {
+          // Data rows
+          const rowObj: CSVRow = {} as CSVRow
+          row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+            const header = headers[colNumber - 1]
+            if (header) {
+              const value = cell.value
+              const stringValue = value != null ? String(value).trim() : ''
+              ;(rowObj as Record<string, string>)[header] = stringValue
+            }
+          })
+          // Only add non-empty rows
+          if (Object.values(rowObj).some(val => val && String(val).trim())) {
+            rows.push(rowObj)
           }
-
-          // Normalizar os nomes das colunas (case-insensitive) e converter para CSVRow
-          const rows: CSVRow[] = jsonData
-            .map((row) => {
-              const rowObj: CSVRow = {} as CSVRow
-              
-              // Normalizar todas as chaves para minúsculas
-              Object.keys(row).forEach((key) => {
-                const normalizedKey = key.trim().toLowerCase()
-                const value = row[key]
-                // Converter valor para string, tratando null/undefined
-                const stringValue = value != null ? String(value).trim() : ''
-                // Usar type assertion para permitir qualquer chave
-                ;(rowObj as Record<string, string>)[normalizedKey] = stringValue
-              })
-              
-              return rowObj
-            })
-            .filter(row => {
-              // Filtrar linhas completamente vazias
-              return Object.values(row).some(val => val && String(val).trim())
-            })
-
-          // Log para debug (apenas em desenvolvimento)
-          if (process.env.NODE_ENV === 'development' && rows.length > 0) {
-            console.log('XLSX processado - Primeira linha:', rows[0])
-            console.log('XLSX processado - Chaves disponíveis:', Object.keys(rows[0]))
-          }
-
-          if (rows.length === 0) {
-            reject(new Error('Nenhum dado válido encontrado no arquivo XLSX'))
-            return
-          }
-
-          resolve(rows)
-        } catch (error) {
-          reject(new Error(`Erro ao processar XLSX: ${error instanceof Error ? error.message : 'Erro desconhecido'}`))
         }
+      })
+
+      if (rows.length === 0) {
+        throw new Error('O arquivo XLSX está vazio')
       }
 
-      reader.onerror = () => {
-        reject(new Error('Erro ao ler arquivo XLSX'))
+      // Log para debug (apenas em desenvolvimento)
+      if (process.env.NODE_ENV === 'development' && rows.length > 0) {
+        console.log('XLSX processado - Primeira linha:', rows[0])
+        console.log('XLSX processado - Chaves disponíveis:', Object.keys(rows[0]))
       }
 
-      // Usar readAsArrayBuffer ao invés de readAsBinaryString (deprecated)
-      reader.readAsArrayBuffer(file)
-    })
+      return rows
+    } catch (error) {
+      throw new Error(`Erro ao processar XLSX: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
+    }
   }
 
   const parseCSV = (file: File): Promise<CSVRow[]> => {

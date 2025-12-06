@@ -18,7 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import Papa from 'papaparse'
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -183,46 +183,50 @@ const parseCSVFile = (file: File): Promise<ParsedSpreadsheetRow[]> =>
     })
   })
 
-const parseXLSXFile = (file: File): Promise<ParsedSpreadsheetRow[]> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = (event) => {
-      try {
-        const data = event.target?.result
-        if (!data) {
-          reject(new Error('Erro ao ler arquivo XLSX.'))
-          return
-        }
+const parseXLSXFile = async (file: File): Promise<ParsedSpreadsheetRow[]> => {
+  try {
+    const buffer = await file.arrayBuffer()
+    const workbook = new ExcelJS.Workbook()
+    await workbook.xlsx.load(buffer)
 
-        const workbook = XLSX.read(data, { type: 'array' })
-        const firstSheetName = workbook.SheetNames[0]
-        if (!firstSheetName) {
-          reject(new Error('O arquivo XLSX não contém planilhas.'))
-          return
-        }
-
-        const worksheet = workbook.Sheets[firstSheetName]
-        const jsonData = XLSX.utils.sheet_to_json<ParsedSpreadsheetRow>(worksheet, {
-          defval: '',
-          raw: false,
-          blankrows: false,
-        })
-
-        resolve(filterSpreadsheetRows(jsonData))
-      } catch (error) {
-        reject(
-          new Error(
-            `Erro ao processar XLSX: ${
-              error instanceof Error ? error.message : 'Erro desconhecido'
-            }`,
-          ),
-        )
-      }
+    const worksheet = workbook.worksheets[0]
+    if (!worksheet) {
+      throw new Error('O arquivo XLSX não contém planilhas.')
     }
 
-    reader.onerror = () => reject(new Error('Erro ao ler arquivo XLSX.'))
-    reader.readAsArrayBuffer(file)
-  })
+    const rows: ParsedSpreadsheetRow[] = []
+    const headers: string[] = []
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber === 1) {
+        // First row = headers
+        row.eachCell({ includeEmpty: false }, (cell) => {
+          headers.push(String(cell.value ?? '').trim())
+        })
+      } else {
+        // Data rows
+        const rowData: ParsedSpreadsheetRow = {}
+        row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+          const header = headers[colNumber - 1]
+          if (header) {
+            rowData[header] = String(cell.value ?? '').trim()
+          }
+        })
+        if (Object.keys(rowData).length > 0) {
+          rows.push(rowData)
+        }
+      }
+    })
+
+    return filterSpreadsheetRows(rows)
+  } catch (error) {
+    throw new Error(
+      `Erro ao processar XLSX: ${
+        error instanceof Error ? error.message : 'Erro desconhecido'
+      }`,
+    )
+  }
+}
 
 const alunoSchema = z.object({
   fullName: z.string().optional().nullable(),
