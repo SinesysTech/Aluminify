@@ -117,6 +117,25 @@ export class AtividadeService {
 
     const moduloIds = orderedModules.map((m) => m.id);
 
+    // Limpar referências em sessoes_estudo antes de deletar atividades para evitar FK
+    const { data: atividadesExistentes, error: atividadesFetchError } = await client
+      .from('atividades')
+      .select('id')
+      .in('modulo_id', moduloIds);
+    if (atividadesFetchError) {
+      throw new Error(`Failed to fetch activities before regeneration: ${atividadesFetchError.message}`);
+    }
+    const atividadeIdsParaLimpar = (atividadesExistentes ?? []).map((a) => a.id);
+    if (atividadeIdsParaLimpar.length > 0) {
+      const { error: clearSessaoError } = await client
+        .from('sessoes_estudo')
+        .update({ atividade_relacionada_id: null })
+        .in('atividade_relacionada_id', atividadeIdsParaLimpar);
+      if (clearSessaoError) {
+        throw new Error(`Failed to clear study sessions before regeneration: ${clearSessaoError.message}`);
+      }
+    }
+
     // Limpa atividades existentes da frente antes de gerar novamente (espelha a função SQL)
     const { error: deleteError } = await client.from('atividades').delete().in('modulo_id', moduloIds);
     if (deleteError) {

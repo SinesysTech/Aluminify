@@ -698,7 +698,7 @@ export default function ConteudosClientPage() {
         },
         quoteChar: '"',
         escapeChar: '"',
-        // delimiter e newline omitidos para auto-detecção
+        delimiter: ';', // Padrão Excel PT-BR
         preview: 0, // Processa todo o arquivo
         worker: false, // Não usar worker para melhor compatibilidade
         fastMode: false, // Modo normal para melhor tratamento de erros
@@ -733,7 +733,7 @@ export default function ConteudosClientPage() {
             reject(
               new Error(
                 `Erro ao processar CSV: Não foi possível identificar o delimitador. ` +
-                `Certifique-se de que o arquivo usa vírgula (,) como separador.`
+                `Certifique-se de que o arquivo usa ponto e vírgula (;) como separador (padrão Excel PT-BR).`
               )
             )
             return
@@ -838,6 +838,16 @@ export default function ConteudosClientPage() {
     return null
   }
 
+  const normalizeImportancia = (value?: string | null): 'Alta' | 'Media' | 'Baixa' | 'Base' | null => {
+    if (!value) return null
+    const normalized = value.trim().toLowerCase()
+    if (['alta', 'a'].includes(normalized)) return 'Alta'
+    if (['media', 'média', 'm'].includes(normalized)) return 'Media'
+    if (['baixa', 'b'].includes(normalized)) return 'Baixa'
+    if (['base'].includes(normalized)) return 'Base'
+    return null
+  }
+
   const transformCSVToJSON = (rows: CSVRow[]) => {
     const jsonData: Array<{
       modulo_numero: number
@@ -846,6 +856,7 @@ export default function ConteudosClientPage() {
       aula_nome: string
       tempo?: number | null
       prioridade?: number | null
+      importancia?: 'Alta' | 'Media' | 'Baixa' | 'Base' | null
     }> = []
 
     // Mapear números de módulo e aula para garantir sequência
@@ -987,6 +998,9 @@ export default function ConteudosClientPage() {
 
       const tempo = tempoStr ? parseInt(tempoStr, 10) : null
       const prioridade = prioridadeStr ? parseInt(prioridadeStr, 10) : null
+      const importancia = normalizeImportancia(
+        getColumnValue(row, ['importancia', 'prioridade', 'importância', 'Importancia', 'Prioridade']),
+      )
 
       const aulaData = {
         modulo_numero: moduloNumero,
@@ -998,6 +1012,7 @@ export default function ConteudosClientPage() {
           prioridade !== null && !isNaN(prioridade) && prioridade >= 0 && prioridade <= 5
             ? prioridade
             : null,
+        importancia: importancia ?? null,
       }
 
       // Log para debug (apenas em desenvolvimento) - primeiras 3 linhas
@@ -1599,7 +1614,7 @@ export default function ConteudosClientPage() {
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Formatos aceitos: CSV ou XLSX. O arquivo deve conter colunas: Módulo (ou Nome do Módulo), Aula (ou Nome da Aula), Tempo (opcional), Prioridade (opcional, 0-5 — use 0 para ocultar do cronograma)
+              Formatos aceitos: CSV (padrão ; e UTF-8) ou XLSX. O arquivo deve conter colunas: Módulo (ou Nome do Módulo), Aula (ou Nome da Aula), Tempo (opcional), Prioridade (opcional, 0-5) e Importância (opcional: Alta, Media, Baixa, Base).
             </p>
           </div>
 

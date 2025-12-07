@@ -407,7 +407,15 @@ export default function SalaEstudosClientPage({
           return
         }
 
-        const moduloIds = modulosData.map((m) => m.id)
+        // Deduplicar módulos para evitar nomes repetidos no dropdown
+        const uniqueModulosMap = new Map<string, typeof modulosData[number]>()
+        ;(modulosData || []).forEach((m) => {
+          if (!uniqueModulosMap.has(m.id)) {
+            uniqueModulosMap.set(m.id, m)
+          }
+        })
+        const uniqueModulos = Array.from(uniqueModulosMap.values())
+        const moduloIds = uniqueModulos.map((m) => m.id)
 
         // 5. Buscar atividades
         const { data: atividadesData, error: atividadesError } = await supabase
@@ -504,7 +512,7 @@ export default function SalaEstudosClientPage({
           (cursosDataInfo || []).map((c) => [c.id, c]),
         )
 
-        const modulosMap = new Map(modulosData.map((m) => [m.id, m]))
+        const modulosMap = new Map(uniqueModulos.map((m) => [m.id, m]))
         const frentesMap = new Map(frentesFiltradas.map((f) => [f.id, f]))
 
         // Criar mapa curso-disciplina

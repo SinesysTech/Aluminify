@@ -239,7 +239,14 @@ export default function ModoFocoClient({ searchParams }: Props) {
           .eq('frente_id', frenteId)
           .order('numero_modulo', { ascending: true, nullsFirst: false });
         if (error) throw error;
-        const lista = (data ?? []).map((m) => ({ id: m.id, nome: m.nome, numero_modulo: m.numero_modulo }));
+        // Deduplicar para evitar módulos repetidos no dropdown quando existem múltiplas aulas/atividades vinculadas
+        const listaMap = new Map<string, { id: string; nome: string; numero_modulo: number | null }>();
+        (data ?? []).forEach((m) => {
+          if (!listaMap.has(m.id)) {
+            listaMap.set(m.id, { id: m.id, nome: m.nome, numero_modulo: m.numero_modulo });
+          }
+        });
+        const lista = Array.from(listaMap.values());
         setModulos(lista);
         if (moduloId && !lista.some((m) => m.id === moduloId)) {
           setModuloId('');
