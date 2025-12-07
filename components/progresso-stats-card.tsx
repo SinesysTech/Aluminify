@@ -10,12 +10,18 @@ interface ProgressoStatsCardProps {
   atividades: AtividadeComProgresso[]
   totalGeral?: number
   hasFilters?: boolean
+  contexto?: {
+    curso?: string | null
+    disciplina?: string | null
+    frente?: string | null
+  }
 }
 
 export function ProgressoStatsCard({
   atividades,
   totalGeral,
   hasFilters = false,
+  contexto,
 }: ProgressoStatsCardProps) {
   const stats = React.useMemo(() => {
     const total = atividades.length
@@ -47,6 +53,25 @@ export function ProgressoStatsCard({
             </span>
           )}
         </div>
+        {contexto && (contexto.curso || contexto.disciplina || contexto.frente) && (
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground">
+            {contexto.curso && (
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 bg-muted/50">
+                Curso: <span className="font-medium text-foreground">{contexto.curso}</span>
+              </span>
+            )}
+            {contexto.disciplina && (
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 bg-muted/50">
+                Disciplina: <span className="font-medium text-foreground">{contexto.disciplina}</span>
+              </span>
+            )}
+            {contexto.frente && (
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 bg-muted/50">
+                Frente: <span className="font-medium text-foreground">{contexto.frente}</span>
+              </span>
+            )}
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <div className="space-y-4">

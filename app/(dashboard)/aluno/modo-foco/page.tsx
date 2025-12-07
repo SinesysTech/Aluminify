@@ -5,6 +5,7 @@ type SearchParams = {
   cursoId?: string;
   disciplinaId?: string;
   frenteId?: string;
+  moduloId?: string;
   atividadeId?: string;
 };
 
@@ -13,3 +14,4 @@ export default async function ModoFocoPage({ searchParams }: { searchParams: Sea
 
   return <ModoFocoClient searchParams={searchParams} />;
 }
+

@@ -793,6 +793,19 @@ export default function SalaEstudosClientPage({
     return estrutura
   }, [atividadesFiltradas, estruturaHierarquica, cursoSelecionado, disciplinaSelecionada, frenteSelecionada])
 
+  const cursoSelecionadoNome = React.useMemo(
+    () => cursos.find((c) => c.id === cursoSelecionado)?.nome ?? null,
+    [cursos, cursoSelecionado],
+  )
+  const disciplinaSelecionadaNome = React.useMemo(
+    () => disciplinas.find((d) => d.id === disciplinaSelecionada)?.nome ?? null,
+    [disciplinas, disciplinaSelecionada],
+  )
+  const frenteSelecionadaNome = React.useMemo(
+    () => frentes.find((f) => f.id === frenteSelecionada)?.nome ?? null,
+    [frentes, frenteSelecionada],
+  )
+
   // Handler para atualizar status do progresso (check simples)
   const handleStatusChange = async (atividadeId: string, status: StatusAtividade) => {
     if (!alunoId) return
@@ -973,6 +986,11 @@ export default function SalaEstudosClientPage({
         atividades={atividadesFiltradas}
         totalGeral={atividades.length}
         hasFilters={hasFilters}
+        contexto={{
+          curso: cursoSelecionadoNome,
+          disciplina: disciplinaSelecionadaNome,
+          frente: frenteSelecionadaNome,
+        }}
       />
 
       <SalaEstudosFilters
