@@ -1,19 +1,12 @@
 'use client'
 
-import { Calendar } from "@/components/calendar"; // Assuming this exists from the demo
-import {
-	type CalendarDate,
-	getLocalTimeZone,
-	getWeeksInMonth,
-	today,
-} from "@internationalized/date";
-import type { DateValue } from "@react-aria/calendar";
-import { useLocale } from "@react-aria/i18n";
+import { Calendar } from "@/components/ui/calendar";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 import { FormPanel } from "./form-panel";
 import { LeftPanel } from "./left-panel";
 import { RightPanel } from "./right-panel";
+import { ptBR } from "date-fns/locale";
 
 interface AgendamentoSchedulerProps {
     professorId: string;
@@ -21,7 +14,6 @@ interface AgendamentoSchedulerProps {
 
 export function AgendamentoScheduler({ professorId }: AgendamentoSchedulerProps) {
 	const router = useRouter();
-	const { locale } = useLocale();
 
 	const searchParams = useSearchParams();
 	const dateParam = searchParams.get("date");
@@ -29,19 +21,19 @@ export function AgendamentoScheduler({ professorId }: AgendamentoSchedulerProps)
 
 	// Default timezone to local or hardcoded for now
 	const [timeZone] = React.useState("America/Sao_Paulo"); 
-	const [date, setDate] = React.useState(today(getLocalTimeZone()));
-	const [focusedDate, setFocusedDate] = React.useState<CalendarDate | null>(
-		date,
-	);
+	
+    // Initialize date from URL or today
+    const initialDate = dateParam ? new Date(dateParam + 'T12:00:00') : new Date();
+	const [date, setDate] = React.useState<Date | undefined>(initialDate);
 
-	const weeksInMonth = getWeeksInMonth(focusedDate as DateValue, locale);
-
-	const handleChangeDate = (date: DateValue) => {
-		setDate(date as CalendarDate);
+	const handleChangeDate = (newDate: Date | undefined) => {
+        if (!newDate) return;
+		setDate(newDate);
 		const url = new URL(window.location.href);
+        // Format YYYY-MM-DD
 		url.searchParams.set(
 			"date",
-			date.toDate(timeZone).toISOString().split("T")[0],
+			newDate.toISOString().split("T")[0],
 		);
         // Clear slot when date changes
         url.searchParams.delete("slot");
@@ -66,15 +58,17 @@ export function AgendamentoScheduler({ professorId }: AgendamentoSchedulerProps)
 				{!showForm ? (
 					<>
 						<Calendar
-							minValue={today(getLocalTimeZone())}
-							defaultValue={today(getLocalTimeZone())}
-							value={date}
-							onChange={handleChangeDate}
-							onFocusChange={(focused) => setFocusedDate(focused)}
+							mode="single"
+                            selected={date}
+                            onSelect={handleChangeDate}
+                            locale={ptBR}
+                            className="rounded-md border"
 						/>
-						<RightPanel
-							{...{ date, timeZone, weeksInMonth, handleChangeAvailableTime, professorId }}
-						/>
+                        {date && (
+    						<RightPanel
+	    						{...{ date, timeZone, handleChangeAvailableTime, professorId }}
+		    				/>
+                        )}
 					</>
 				) : (
 					<FormPanel professorId={professorId} />

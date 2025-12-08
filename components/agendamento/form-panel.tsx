@@ -61,7 +61,7 @@ export function FormPanel({ professorId }: FormPanelProps) {
       <div className="flex flex-col space-y-1.5">
         <Label>Data e Hora</Label>
         <div className="text-sm font-medium">
-          {startDate.toLocaleString()}
+          {startDate.toLocaleString('pt-BR')}
         </div>
       </div>
       

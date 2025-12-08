@@ -1,3 +1,12 @@
+-- Create handle_updated_at function if it doesn't exist
+CREATE OR REPLACE FUNCTION handle_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
 -- Create agendamentos table
 CREATE TABLE IF NOT EXISTS agendamentos (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

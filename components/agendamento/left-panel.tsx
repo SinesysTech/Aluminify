@@ -5,7 +5,6 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useLocale } from "@react-aria/i18n";
 import { CalendarIcon, Clock4 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
@@ -14,7 +13,7 @@ interface LeftPanelProps {
 }
 
 export function LeftPanel({ showForm }: LeftPanelProps) {
-	const { locale } = useLocale();
+	const locale = 'pt-BR';
 	const searchParams = useSearchParams();
 	const slotParam = searchParams.get("slot");
 
@@ -38,12 +37,12 @@ export function LeftPanel({ showForm }: LeftPanelProps) {
 						<CalendarIcon className="size-4 mr-2" />
 						<div className="flex flex-col text-sm font-semibold">
 							<p>
-								{new Date(slotParam).toLocaleString(locale, {
+								{new Date(slotParam).toLocaleDateString(locale, {
 									dateStyle: "full",
 								})}
 							</p>
 							<p>
-								{new Date(slotParam).toLocaleString(locale, {
+								{new Date(slotParam).toLocaleTimeString(locale, {
 									timeStyle: "short",
 								})}
 							</p>
