@@ -32,3 +32,6 @@ async function getHandler(request: AuthenticatedRequest) {
 
 export const GET = requireAuth(getHandler);
 
+
+
+

@@ -7,10 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { UserPlus, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PhoneInput } from "../phone-input";
 
 import * as React from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Guest = {
 	email: string;
@@ -47,7 +46,7 @@ export function FormPanel() {
 			</div>
 			<div className="flex flex-col space-y-1.5">
 				<Label htmlFor="phone">Phone number *</Label>
-				<PhoneInput id="phone" />
+				<Input id="phone" type="tel" />
 			</div>
 			<div className="flex flex-col space-y-1.5">
 				<Label htmlFor="email">Additional notes</Label>

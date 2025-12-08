@@ -42,3 +42,6 @@ export interface SRSResult {
   /** Novo número de revisões (incrementado) */
   newRepetitions: number;
 }
+
+
+

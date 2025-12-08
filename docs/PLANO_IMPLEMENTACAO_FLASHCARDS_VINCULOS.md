@@ -246,3 +246,6 @@ ORDER BY c.nome, d.nome, fr.nome, m.numero_modulo;
 **Última atualização:** Janeiro 2025  
 **Status:** ✅ Implementação Completa - Aguardando Testes
 
+
+
+

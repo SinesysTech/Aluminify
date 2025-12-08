@@ -178,3 +178,6 @@ O sistema funciona perfeitamente mesmo sem Redis configurado. Quando Redis não 
 - Cache é thread-safe (Upstash Redis REST API)
 - Suporta JSON nativamente (serialização automática)
 
+
+
+

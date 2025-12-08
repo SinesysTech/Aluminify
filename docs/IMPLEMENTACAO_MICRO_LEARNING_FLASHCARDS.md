@@ -232,3 +232,6 @@ easeFactorInitial: 2.5
 
 **Última atualização:** 2025-01-31  
 **Versão:** 1.0.0
+
+
+
