@@ -75,6 +75,7 @@ type Modulo = {
   nome: string
   numero_modulo: number | null
   frente_id: string
+  importancia?: 'Alta' | 'Media' | 'Baixa' | 'Base' | null
   aulas: Aula[]
 }
 
@@ -161,6 +162,7 @@ export default function ConteudosClientPage() {
   const [regras, setRegras] = React.useState<RegraAtividade[]>([])
   const [isAddingActivity, setIsAddingActivity] = React.useState<string | null>(null)
   const [editingTitle, setEditingTitle] = React.useState<string | null>(null)
+  const [editingImportancia, setEditingImportancia] = React.useState<string | null>(null)
   const [atividadesPorModulo, setAtividadesPorModulo] = React.useState<Record<string, AtividadeItem[]>>({})
   const [isGeneratingEstrutura, setIsGeneratingEstrutura] = React.useState(false)
   const [isCreatingActivity, setIsCreatingActivity] = React.useState(false)
@@ -523,7 +525,7 @@ export default function ConteudosClientPage() {
         setIsLoadingContent(true)
         const { data: modulosData, error: modulosError } = await supabase
           .from('modulos')
-          .select('id, nome, numero_modulo, frente_id')
+          .select('id, nome, numero_modulo, frente_id, importancia')
           .eq('frente_id', frenteSelecionada)
           .order('numero_modulo', { ascending: true })
 
@@ -698,7 +700,7 @@ export default function ConteudosClientPage() {
         },
         quoteChar: '"',
         escapeChar: '"',
-        // delimiter e newline omitidos para auto-detecção
+        delimiter: ';', // Padrão Excel PT-BR
         preview: 0, // Processa todo o arquivo
         worker: false, // Não usar worker para melhor compatibilidade
         fastMode: false, // Modo normal para melhor tratamento de erros
@@ -733,7 +735,7 @@ export default function ConteudosClientPage() {
             reject(
               new Error(
                 `Erro ao processar CSV: Não foi possível identificar o delimitador. ` +
-                `Certifique-se de que o arquivo usa vírgula (,) como separador.`
+                `Certifique-se de que o arquivo usa ponto e vírgula (;) como separador (padrão Excel PT-BR).`
               )
             )
             return
@@ -838,6 +840,16 @@ export default function ConteudosClientPage() {
     return null
   }
 
+  const normalizeImportancia = (value?: string | null): 'Alta' | 'Media' | 'Baixa' | 'Base' | null => {
+    if (!value) return null
+    const normalized = value.trim().toLowerCase()
+    if (['alta', 'a'].includes(normalized)) return 'Alta'
+    if (['media', 'média', 'm'].includes(normalized)) return 'Media'
+    if (['baixa', 'b'].includes(normalized)) return 'Baixa'
+    if (['base'].includes(normalized)) return 'Base'
+    return null
+  }
+
   const transformCSVToJSON = (rows: CSVRow[]) => {
     const jsonData: Array<{
       modulo_numero: number
@@ -846,6 +858,7 @@ export default function ConteudosClientPage() {
       aula_nome: string
       tempo?: number | null
       prioridade?: number | null
+      importancia?: 'Alta' | 'Media' | 'Baixa' | 'Base' | null
     }> = []
 
     // Mapear números de módulo e aula para garantir sequência
@@ -987,6 +1000,9 @@ export default function ConteudosClientPage() {
 
       const tempo = tempoStr ? parseInt(tempoStr, 10) : null
       const prioridade = prioridadeStr ? parseInt(prioridadeStr, 10) : null
+      const importancia = normalizeImportancia(
+        getColumnValue(row, ['importancia', 'prioridade', 'importância', 'Importancia', 'Prioridade']),
+      )
 
       const aulaData = {
         modulo_numero: moduloNumero,
@@ -998,6 +1014,7 @@ export default function ConteudosClientPage() {
           prioridade !== null && !isNaN(prioridade) && prioridade >= 0 && prioridade <= 5
             ? prioridade
             : null,
+        importancia: importancia ?? null,
       }
 
       // Log para debug (apenas em desenvolvimento) - primeiras 3 linhas
@@ -1287,6 +1304,32 @@ export default function ConteudosClientPage() {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar atividade')
     } finally {
       setEditingTitle(null)
+    }
+  }
+
+  const handleUpdateModuloImportancia = async (moduloId: string, importancia: 'Alta' | 'Media' | 'Baixa' | 'Base') => {
+    try {
+      const response = await fetchWithAuth(`/api/modulo/${moduloId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ importancia }),
+      })
+
+      const body = await response.json()
+      if (!response.ok) {
+        throw new Error(body?.error || 'Erro ao atualizar importância do módulo')
+      }
+
+      // Atualizar o módulo na lista local
+      setModulos((prev) =>
+        prev.map((m) => (m.id === moduloId ? { ...m, importancia } : m))
+      )
+
+      setEditingImportancia(null)
+      setSuccessMessage('Importância do módulo atualizada com sucesso!')
+    } catch (err) {
+      console.error('Erro ao atualizar importância:', err)
+      setError(err instanceof Error ? err.message : 'Erro ao atualizar importância do módulo')
+      setEditingImportancia(null)
     }
   }
 
@@ -1599,7 +1642,7 @@ export default function ConteudosClientPage() {
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Formatos aceitos: CSV ou XLSX. O arquivo deve conter colunas: Módulo (ou Nome do Módulo), Aula (ou Nome da Aula), Tempo (opcional), Prioridade (opcional, 0-5 — use 0 para ocultar do cronograma)
+              Formatos aceitos: CSV (padrão ; e UTF-8) ou XLSX. O arquivo deve conter colunas: Módulo (ou Nome do Módulo), Aula (ou Nome da Aula), Tempo (opcional), Prioridade (opcional, 0-5) e Importância (opcional: Alta, Media, Baixa, Base).
             </p>
           </div>
 
@@ -1747,6 +1790,48 @@ export default function ConteudosClientPage() {
                       </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="mt-2 space-y-3">
+                        {/* Seletor de Importância */}
+                        <div className="flex items-center justify-between rounded-md border p-3 bg-muted/50">
+                          <div className="flex items-center gap-3 flex-1">
+                            <Label className="text-sm font-medium whitespace-nowrap">Importância:</Label>
+                            {editingImportancia === modulo.id ? (
+                              <Select
+                                value={modulo.importancia || 'Base'}
+                                onValueChange={(value) => {
+                                  handleUpdateModuloImportancia(modulo.id, value as 'Alta' | 'Media' | 'Baixa' | 'Base')
+                                }}
+                              >
+                                <SelectTrigger className="w-40">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Alta">Alta</SelectItem>
+                                  <SelectItem value="Media">Média</SelectItem>
+                                  <SelectItem value="Baixa">Baixa</SelectItem>
+                                  <SelectItem value="Base">Base</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            ) : (
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="font-normal">
+                                  {modulo.importancia || 'Base'}
+                                </Badge>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => setEditingImportancia(modulo.id)}
+                                  className="h-7 px-2"
+                                >
+                                  Editar
+                                </Button>
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground text-right ml-2">
+                            Usado no modo "Mais Cobrados" dos flashcards
+                          </div>
+                        </div>
+
                         <div className="flex items-center justify-between">
                           <div className="text-sm font-semibold">Atividades</div>
                           <Button

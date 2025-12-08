@@ -12,6 +12,7 @@ import {
   Users,
   FolderOpen,
   School,
+  BrainCircuit,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
@@ -68,6 +69,12 @@ const navMainData: NavItem[] = [
     icon: CalendarCheck,
     roles: ALL_ROLES,
   },
+  {
+    title: "Flashcards",
+    url: "/aluno/flashcards",
+    icon: BrainCircuit,
+    roles: ALL_ROLES,
+  },
   // Professor
   {
     title: "Segmentos",
@@ -96,6 +103,12 @@ const navMainData: NavItem[] = [
   {
     title: "Gestão de Materiais",
     url: "/admin/materiais",
+    icon: FolderOpen,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Gestão de Flashcards",
+    url: "/admin/flashcards",
     icon: FolderOpen,
     roles: PROFESSOR_ONLY,
   },

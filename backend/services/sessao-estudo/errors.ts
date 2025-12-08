@@ -11,3 +11,7 @@ export class SessaoEstudoValidationError extends Error {
     this.name = 'SessaoEstudoValidationError';
   }
 }
+
+
+
+

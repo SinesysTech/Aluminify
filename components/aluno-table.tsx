@@ -172,6 +172,9 @@ const parseCSVFile = (file: File): Promise<ParsedSpreadsheetRow[]> =>
       header: true,
       skipEmptyLines: 'greedy',
       transformHeader: (header: string) => header.trim(),
+      delimiter: ';', // Padrão Excel PT-BR para evitar quebra por vírgulas em textos
+      quoteChar: '"',
+      escapeChar: '"',
       complete: (results) => {
         if (results.errors?.length) {
           reject(new Error(results.errors[0].message ?? 'Erro ao processar CSV.'))

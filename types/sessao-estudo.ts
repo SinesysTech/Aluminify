@@ -47,3 +47,7 @@ export interface CalculoTempoResultado {
   tempoTotalBrutoSegundos: number;
   tempoTotalLiquidoSegundos: number;
 }
+
+
+
+

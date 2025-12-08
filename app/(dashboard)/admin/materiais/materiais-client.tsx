@@ -16,6 +16,8 @@ import RulesPanel from '@/components/rules-panel'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { ModuloComAtividades } from './types'
 import { useRouter } from 'next/navigation'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 type Disciplina = {
   id: string
@@ -57,6 +59,7 @@ type RegraAtividade = {
   acumulativo: boolean
   gerarNoUltimo: boolean
 }
+
 
 export default function MateriaisClientPage() {
   const router = useRouter()
@@ -445,10 +448,17 @@ export default function MateriaisClientPage() {
       })
       const body = await response.json().catch(() => ({}))
       if (!response.ok) {
+        // Se já não existe no backend, removemos localmente para evitar bloqueio da UX
+        if (response.status === 404 || `${body?.error || ''}`.toLowerCase().includes('não encontrada')) {
+          setRegras((prev) => prev.filter((regra) => regra.id !== regraId))
+          setSuccessMessage('Regra já estava ausente e foi removida da lista local.')
+          return
+        }
         throw new Error(body?.error || 'Erro ao remover regra')
       }
 
       setRegras((prev) => prev.filter((regra) => regra.id !== regraId))
+      setSuccessMessage('Regra removida com sucesso.')
     } catch (err) {
       console.error('Erro ao remover regra:', err)
       setError(err instanceof Error ? err.message : 'Erro ao remover regra')
@@ -469,6 +479,7 @@ export default function MateriaisClientPage() {
     const frente = frentes.find((f) => f.id === frenteId)
     setFrenteCursoId(frente?.curso_id ?? null)
   }
+
 
   return (
     <div className="w-full space-y-6">

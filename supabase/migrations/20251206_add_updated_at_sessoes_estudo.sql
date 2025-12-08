@@ -7,3 +7,7 @@ CREATE TRIGGER handle_updated_at_sessoes_estudo
 BEFORE UPDATE ON public.sessoes_estudo
 FOR EACH ROW
 EXECUTE PROCEDURE handle_updated_at();
+
+
+
+

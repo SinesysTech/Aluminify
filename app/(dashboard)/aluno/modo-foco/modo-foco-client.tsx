@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams as useNextSearchParams, useRouter } from 'next/navigation';
-import { Play, Pause, StopCircle, Activity, Star } from 'lucide-react';
+import { Play, Pause, StopCircle, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -19,8 +19,10 @@ import { MetodoEstudo } from '@/types/sessao-estudo';
 
 type Props = {
   searchParams: {
+    cursoId?: string;
     disciplinaId?: string;
     frenteId?: string;
+    moduloId?: string;
     atividadeId?: string;
   };
 };
@@ -60,10 +62,10 @@ export default function ModoFocoClient({ searchParams }: Props) {
   const [metodo, setMetodo] = useState<MetodoEstudo>('cronometro');
   const [timerMin, setTimerMin] = useState<number>(25);
   const [pomodoroConfig, setPomodoroConfig] = useState(POMODORO_DEFAULT);
-  const [cursoId, setCursoId] = useState<string>('');
+  const [cursoId, setCursoId] = useState<string>(searchParams.cursoId ?? '');
   const [disciplinaId, setDisciplinaId] = useState(searchParams.disciplinaId ?? '');
   const [frenteId, setFrenteId] = useState(searchParams.frenteId ?? '');
-  const [moduloId, setModuloId] = useState<string>('');
+  const [moduloId, setModuloId] = useState<string>(searchParams.moduloId ?? '');
   const [atividadeId, setAtividadeId] = useState(searchParams.atividadeId ?? '');
   const [sessaoId, setSessaoId] = useState<string | null>(null);
   const [nivelFoco, setNivelFoco] = useState<number>(3);
@@ -86,6 +88,7 @@ export default function ModoFocoClient({ searchParams }: Props) {
   const [carregandoModulos, setCarregandoModulos] = useState(false);
   const [carregandoAtividades, setCarregandoAtividades] = useState(false);
   const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+  const [timelineReady, setTimelineReady] = useState(false);
   const heartbeatTimerRef = useState<NodeJS.Timeout | null>(null)[0];
 
   const supabase = useMemo(() => createClient(), []);
@@ -93,24 +96,18 @@ export default function ModoFocoClient({ searchParams }: Props) {
   const router = useRouter();
 
   useEffect(() => {
-    const cursoParam = nextSearchParams.get('cursoId') ?? '';
-    const disciplinaParam = nextSearchParams.get('disciplinaId') ?? '';
-    const frenteParam = nextSearchParams.get('frenteId') ?? '';
-    const atividadeParam = nextSearchParams.get('atividadeId') ?? '';
-    setCursoId(cursoParam);
-    setDisciplinaId(disciplinaParam);
-    setFrenteId(frenteParam);
-    setModuloId('');
-    setAtividadeId(atividadeParam);
-  }, [nextSearchParams]);
+    const cursoParam = nextSearchParams.get('cursoId');
+    const disciplinaParam = nextSearchParams.get('disciplinaId');
+    const frenteParam = nextSearchParams.get('frenteId');
+    const moduloParam = nextSearchParams.get('moduloId');
+    const atividadeParam = nextSearchParams.get('atividadeId');
 
-  // Limpar dependentes ao trocar curso
-  useEffect(() => {
-    setDisciplinaId('');
-    setFrenteId('');
-    setModuloId('');
-    setAtividadeId('');
-  }, [cursoId]);
+    if (cursoParam !== null) setCursoId(cursoParam);
+    if (disciplinaParam !== null) setDisciplinaId(disciplinaParam);
+    if (frenteParam !== null) setFrenteId(frenteParam);
+    if (moduloParam !== null) setModuloId(moduloParam);
+    if (atividadeParam !== null) setAtividadeId(atividadeParam);
+  }, [nextSearchParams]);
 
   // Carregar cursos com base no papel
   useEffect(() => {
@@ -229,7 +226,6 @@ export default function ModoFocoClient({ searchParams }: Props) {
   useEffect(() => {
     if (!frenteId) {
       setModulos([]);
-      setModuloId('');
       setAtividades([]);
       setAtividadeId('');
       return;
@@ -243,8 +239,18 @@ export default function ModoFocoClient({ searchParams }: Props) {
           .eq('frente_id', frenteId)
           .order('numero_modulo', { ascending: true, nullsFirst: false });
         if (error) throw error;
-        setModulos((data ?? []).map((m) => ({ id: m.id, nome: m.nome, numero_modulo: m.numero_modulo })));
-        setModuloId('');
+        // Deduplicar para evitar módulos repetidos no dropdown quando existem múltiplas aulas/atividades vinculadas
+        const listaMap = new Map<string, { id: string; nome: string; numero_modulo: number | null }>();
+        (data ?? []).forEach((m) => {
+          if (!listaMap.has(m.id)) {
+            listaMap.set(m.id, { id: m.id, nome: m.nome, numero_modulo: m.numero_modulo });
+          }
+        });
+        const lista = Array.from(listaMap.values());
+        setModulos(lista);
+        if (moduloId && !lista.some((m) => m.id === moduloId)) {
+          setModuloId('');
+        }
         setAtividades([]);
         setAtividadeId('');
       } catch (err) {
@@ -255,7 +261,7 @@ export default function ModoFocoClient({ searchParams }: Props) {
       }
     };
     load();
-  }, [frenteId, supabase]);
+  }, [frenteId, moduloId, supabase]);
 
   // Carregar atividades via API interna usando moduloId
   useEffect(() => {
@@ -497,6 +503,53 @@ export default function ModoFocoClient({ searchParams }: Props) {
 
   const disabledControls = iniciando || finalizando;
 
+  const minutos = (ms: number) => Math.max(0, Math.round(ms / 60000));
+  const cursoNome = cursos.find((c) => c.id === cursoId)?.nome || '—';
+  const disciplinaNome = disciplinas.find((d) => d.id === disciplinaId)?.nome || '—';
+  const frenteNome = frentes.find((f) => f.id === frenteId)?.nome || '—';
+  const moduloNome =
+    modulos.find((m) => m.id === moduloId)?.nome ||
+    (moduloId ? 'Módulo selecionado' : '—');
+  const atividadeNome = atividades.find((a) => a.id === atividadeId)?.nome || '—';
+
+  const focoRatings = [
+    { value: 1, label: 'Socorro' },
+    { value: 2, label: 'Precisa melhorar' },
+    { value: 3, label: 'Tá média' },
+    { value: 4, label: 'Bom foco' },
+    { value: 5, label: 'Eu sou a concentração' },
+  ];
+
+  const timeline = useMemo(() => {
+    if (!timelineReady || metodo !== 'pomodoro') return { segments: [], totalMs: 0 };
+    const cycles = Math.max(1, pomodoroConfig.totalCycles ?? 1);
+    const segments: { type: 'focus' | 'short_break' | 'long_break'; label: string; ms: number }[] = [];
+
+    for (let c = 1; c <= cycles; c += 1) {
+      segments.push({ type: 'focus', label: `Foco ${c}`, ms: pomodoroConfig.focusMs });
+      if (c < cycles) {
+        const useLong =
+          !!pomodoroConfig.longBreakMs &&
+          !!pomodoroConfig.cyclesBeforeLongBreak &&
+          c % pomodoroConfig.cyclesBeforeLongBreak === 0;
+        const breakMs = useLong
+          ? pomodoroConfig.longBreakMs ?? pomodoroConfig.shortBreakMs
+          : pomodoroConfig.shortBreakMs;
+        segments.push({
+          type: useLong ? 'long_break' : 'short_break',
+          label: useLong ? 'Pausa longa' : 'Pausa curta',
+          ms: breakMs,
+        });
+      }
+    }
+    const totalMs = segments.reduce((acc, s) => acc + s.ms, 0);
+    return { segments, totalMs };
+  }, [metodo, pomodoroConfig, timelineReady]);
+
+  useEffect(() => {
+    setTimelineReady(false);
+  }, [pomodoroConfig, metodo]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -516,13 +569,20 @@ export default function ModoFocoClient({ searchParams }: Props) {
           <CardTitle>Contexto</CardTitle>
           <CardDescription>Selecione disciplina/frente ou use os parâmetros da URL.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="curso">Curso</Label>
               <Select
                 value={cursoId || undefined}
-                onValueChange={(v) => setCursoId(v)}
+                onValueChange={(v) => {
+                  setCursoId(v);
+                  // Resetar dependentes somente quando o usuário troca manualmente
+                  setDisciplinaId('');
+                  setFrenteId('');
+                  setModuloId('');
+                  setAtividadeId('');
+                }}
                 disabled={carregandoCursos}
               >
                 <SelectTrigger>
@@ -568,7 +628,13 @@ export default function ModoFocoClient({ searchParams }: Props) {
               <Label htmlFor="frente">Frente (opcional)</Label>
               <Select
                 value={frenteId || undefined}
-                onValueChange={(v) => setFrenteId(v)}
+                onValueChange={(v) => {
+                  setFrenteId(v);
+                  // resetar dependentes apenas na troca manual
+                  setModuloId('');
+                  setAtividades([]);
+                  setAtividadeId('');
+                }}
                 disabled={!disciplinaId || carregandoFrentes}
               >
                 <SelectTrigger>
@@ -595,7 +661,11 @@ export default function ModoFocoClient({ searchParams }: Props) {
               <Label htmlFor="modulo">Módulo (opcional)</Label>
               <Select
                 value={moduloId || undefined}
-                onValueChange={(v) => setModuloId(v)}
+                onValueChange={(v) => {
+                  setModuloId(v);
+                  // resetar atividade ao trocar módulo manualmente
+                  setAtividadeId('');
+                }}
                 disabled={!frenteId || carregandoModulos}
               >
                 <SelectTrigger>
@@ -661,9 +731,9 @@ export default function ModoFocoClient({ searchParams }: Props) {
           <CardDescription>O worker roda fora da main thread.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label>Modo</Label>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+            <Label className="text-sm">Modo</Label>
+            <div className="w-full md:max-w-xs">
               <Select value={metodo} onValueChange={(v) => setMetodo(v as MetodoEstudo)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Escolha o modo" />
@@ -675,9 +745,12 @@ export default function ModoFocoClient({ searchParams }: Props) {
                 </SelectContent>
               </Select>
             </div>
-            {metodo === 'timer' && (
-              <div className="space-y-2">
-                <Label>Minutos (timer)</Label>
+          </div>
+
+          {metodo === 'timer' && (
+            <div className="space-y-2">
+              <Label>Minutos (timer)</Label>
+              <div className="w-full md:max-w-xs">
                 <Input
                   type="number"
                   min={1}
@@ -685,24 +758,124 @@ export default function ModoFocoClient({ searchParams }: Props) {
                   onChange={(e) => setTimerMin(Number(e.target.value))}
                 />
               </div>
-            )}
-            {metodo === 'pomodoro' && (
-              <div className="space-y-2">
-                <Label>Ciclos (pomodoro)</Label>
-                <Slider
-                  defaultValue={[pomodoroConfig.totalCycles ?? 4]}
-                  min={1}
-                  max={8}
-                  step={1}
-                  onValueChange={([v]) => setPomodoroConfig((prev) => ({ ...prev, totalCycles: v }))}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Foco {pomodoroConfig.focusMs / 60000}m / Pausa curta {pomodoroConfig.shortBreakMs / 60000}
-                  m / Longa {pomodoroConfig.longBreakMs! / 60000}m
-                </p>
+            </div>
+          )}
+
+          {metodo === 'pomodoro' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label className="text-xs">Blocos (1 a 5)</Label>
+                  <Slider
+                    value={[pomodoroConfig.totalCycles ?? 1]}
+                    min={1}
+                    max={5}
+                    step={1}
+                    onValueChange={([v]) => setPomodoroConfig((prev) => ({ ...prev, totalCycles: v }))}
+                  />
+                  <p className="text-xs text-muted-foreground">{pomodoroConfig.totalCycles ?? 1} ciclos</p>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Foco (minutos)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={minutos(pomodoroConfig.focusMs)}
+                    onChange={(e) =>
+                      setPomodoroConfig((prev) => ({
+                        ...prev,
+                        focusMs: Math.max(1, Number(e.target.value) || 0) * 60000,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Pausa curta (minutos)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={minutos(pomodoroConfig.shortBreakMs)}
+                    onChange={(e) =>
+                      setPomodoroConfig((prev) => ({
+                        ...prev,
+                        shortBreakMs: Math.max(1, Number(e.target.value) || 0) * 60000,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Pausa longa (minutos)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={minutos(pomodoroConfig.longBreakMs ?? 15 * 60000)}
+                    onChange={(e) =>
+                      setPomodoroConfig((prev) => ({
+                        ...prev,
+                        longBreakMs: Math.max(1, Number(e.target.value) || 0) * 60000,
+                      }))
+                    }
+                  />
+                </div>
               </div>
-            )}
-          </div>
+
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-3">
+                <p className="text-sm text-muted-foreground">
+                  Foco {minutos(pomodoroConfig.focusMs)}m · Pausa curta {minutos(pomodoroConfig.shortBreakMs)}m · Longa{' '}
+                  {minutos(pomodoroConfig.longBreakMs ?? 0)}m
+                </p>
+                <Button variant="secondary" size="sm" onClick={() => setTimelineReady(true)}>
+                  Configuração pronta (gerar linha do tempo)
+                </Button>
+              </div>
+
+              {timeline.segments.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">Linha do tempo</p>
+                    <p className="text-xs text-muted-foreground">Ajuste e gere novamente se mudar valores.</p>
+                  </div>
+                  <div className="rounded-lg border p-4 space-y-3 bg-muted/30">
+                    <div className="flex w-full items-stretch gap-2">
+                      {timeline.segments.map((seg, idx) => {
+                        const width =
+                          timeline.totalMs > 0 ? `${Math.max(8, (seg.ms / timeline.totalMs) * 100)}%` : '20%';
+                        const colors =
+                          seg.type === 'focus'
+                            ? 'bg-primary/80 text-primary-foreground'
+                            : seg.type === 'long_break'
+                              ? 'bg-emerald-200 text-emerald-900'
+                              : 'bg-amber-200 text-amber-900';
+                        return (
+                          <div
+                            key={`${seg.type}-${idx}`}
+                            className={`rounded-sm px-2 py-2 text-xs font-medium text-center truncate ${colors}`}
+                            style={{ width, minHeight: '64px' }}
+                          >
+                            {seg.label} · {minutos(seg.ms)}m
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+                      <span className="inline-flex items-center gap-1">
+                        <span className="inline-block h-2 w-2 rounded-full bg-primary/80" />
+                        Foco
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="inline-block h-2 w-2 rounded-full bg-amber-300" />
+                        Pausa curta
+                      </span>
+                      <span className="inline-flex items-center gap-1">
+                        <span className="inline-block h-2 w-2 rounded-full bg-emerald-300" />
+                        Pausa longa
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <Separator />
 
@@ -765,6 +938,26 @@ export default function ModoFocoClient({ searchParams }: Props) {
           <CardDescription>Feedback rápido antes de salvar.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="rounded-md border px-3 py-2 text-sm">
+            <p className="font-medium">Contexto</p>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs">
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 bg-muted/50">
+                Curso: {cursoNome}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 bg-muted/50">
+                Disciplina: {disciplinaNome}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 bg-muted/50">
+                Frente: {frenteNome}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 bg-muted/50">
+                Módulo: {moduloNome}
+              </span>
+              <span className="inline-flex items-center gap-1 rounded-full border px-2 py-1 bg-muted/50">
+                Atividade: {atividadeNome}
+              </span>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>Status da sessão</Label>
@@ -815,17 +1008,18 @@ export default function ModoFocoClient({ searchParams }: Props) {
           <div className="space-y-4">
             <div>
               <p className="text-sm text-muted-foreground">Como foi o foco?</p>
-              <div className="flex gap-2 mt-2">
-                {[1, 2, 3, 4, 5].map((n) => (
+              <div className="grid grid-cols-5 gap-2 mt-2">
+                {focoRatings.map((opt) => (
                   <Button
-                    key={n}
+                    key={opt.value}
                     type="button"
-                    variant={nivelFoco === n ? 'default' : 'outline'}
-                    size="icon"
-                    onClick={() => setNivelFoco(n)}
-                    aria-label={`Nota ${n}`}
+                    variant={nivelFoco === opt.value ? 'default' : 'outline'}
+                    onClick={() => setNivelFoco(opt.value)}
+                    aria-label={`Nota ${opt.value} - ${opt.label}`}
+                    className="flex flex-col items-center justify-center py-3 px-2 text-xs gap-1 text-center whitespace-normal leading-tight min-h-[80px]"
                   >
-                    <Star className="h-4 w-4" fill={nivelFoco >= n ? 'currentColor' : 'none'} />
+                    <span className="text-base font-semibold">{opt.value}</span>
+                    <span className="text-[11px] leading-tight">{opt.label}</span>
                   </Button>
                 ))}
               </div>
