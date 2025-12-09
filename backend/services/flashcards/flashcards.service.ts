@@ -564,6 +564,9 @@ export class FlashcardsService {
         moduloIds = Array.from(new Set((atividades ?? []).map((a) => a.modulo_id as string)));
       }
     } else {
+      // Modo revisao_geral: buscar módulos de flashcards já vistos OU módulos com atividades concluídas
+      
+      // 1. Buscar flashcards já vistos
       const { data: progFlash, error: progFlashError } = await this.client
         .from('progresso_flashcards')
         .select('flashcard_id')
@@ -582,7 +585,32 @@ export class FlashcardsService {
           new Set((cardsVisitados ?? []).map((c) => c.modulo_id as string)),
         );
       }
-      // Buscar todos os módulos das frentes do aluno (já filtrados acima)
+      
+      // 2. Buscar módulos com atividades concluídas
+      const { data: atividadesConcluidas, error: atividadesError } = await this.client
+        .from('progresso_atividades')
+        .select('atividade_id, atividades(modulo_id)')
+        .eq('aluno_id', alunoId)
+        .eq('status', 'Concluido');
+      
+      if (atividadesError) {
+        console.warn('[flashcards] erro ao buscar atividades concluídas para revisao_geral', atividadesError);
+      }
+      
+      const moduloIdsConcluidos = Array.from(
+        new Set(
+          (atividadesConcluidas ?? [])
+            .map((a: any) => a.atividades?.modulo_id)
+            .filter(Boolean)
+        )
+      );
+      
+      // 3. Combinar módulos de flashcards vistos + módulos com atividades concluídas
+      const moduloIdsCombinados = Array.from(
+        new Set([...moduloIdsVisited, ...moduloIdsConcluidos])
+      );
+      
+      // 4. Se não houver nenhum, usar todos os módulos
       const { data: todosModulos, error: todosModulosError } = await modulosQuery;
       if (todosModulosError) {
         console.warn('[flashcards] erro ao buscar todos os módulos', todosModulosError);
@@ -590,7 +618,8 @@ export class FlashcardsService {
       const moduloIdsAll = Array.from(
         new Set((todosModulos ?? []).map((m: any) => m.id)),
       );
-      moduloIds = moduloIdsVisited.length ? moduloIdsVisited : moduloIdsAll;
+      
+      moduloIds = moduloIdsCombinados.length > 0 ? moduloIdsCombinados : moduloIdsAll;
     }
 
     if (!moduloIds.length) {

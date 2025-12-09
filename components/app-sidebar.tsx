@@ -11,6 +11,7 @@ import {
   FolderOpen,
   School,
   BrainCircuit,
+  LayoutDashboard,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
@@ -28,7 +29,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { hasRequiredRole } from "@/lib/roles"
+import { hasRequiredRole, getDefaultRouteForRole } from "@/lib/roles"
 import type { AppUserRole } from "@/types/user"
 
 type NavItem = {
@@ -43,6 +44,12 @@ const PROFESSOR_ONLY: AppUserRole[] = ["professor", "superadmin"]
 
 const navMainData: NavItem[] = [
   // Estudante
+  {
+    title: "Dashboard",
+    url: "/aluno/dashboard",
+    icon: LayoutDashboard,
+    roles: ALL_ROLES,
+  },
   {
     title: "Calendário",
     url: "/aluno/cronograma/calendario",
@@ -146,7 +153,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="/dashboard">
+              <a href={getDefaultRouteForRole(user.role)}>
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Command className="size-4" />
                 </div>
