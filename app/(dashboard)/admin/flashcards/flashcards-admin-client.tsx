@@ -244,7 +244,7 @@ export default function FlashcardsAdminClient() {
           .order('nome', { ascending: true })
 
         if (error) throw error
-        setFrentes(data || [])
+        setFrentes((data || []).filter((f): f is Frente => f.disciplina_id !== null))
         setFrenteId(undefined)
         setModulos([])
         setModuloId(undefined)
@@ -276,7 +276,7 @@ export default function FlashcardsAdminClient() {
           .order('numero_modulo', { ascending: true })
 
         if (error) throw error
-        setModulos(data || [])
+        setModulos((data || []).filter((m): m is Modulo => m.frente_id !== null))
         setModuloId(undefined)
       } catch (err) {
         console.error('Erro ao carregar módulos:', err)
@@ -510,7 +510,7 @@ export default function FlashcardsAdminClient() {
         .order('nome', { ascending: true })
 
       if (!frentesError) {
-        setFrentes(frentesData || [])
+        setFrentes((frentesData || []).filter((f): f is Frente => f.disciplina_id !== null))
         setFrenteId(frenteIdFromFlashcard)
 
         // Carregar módulos da frente
@@ -521,7 +521,7 @@ export default function FlashcardsAdminClient() {
           .order('numero_modulo', { ascending: true })
 
         if (!modulosError) {
-          setModulos(modulosData || [])
+          setModulos((modulosData || []).filter((m): m is Modulo => m.frente_id !== null))
           setFormModuloId(flashcard.modulo_id)
         }
       }
