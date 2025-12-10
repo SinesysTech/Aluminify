@@ -626,7 +626,7 @@ export default function TobIAsPage() {
                   ref={inputRef}
                   placeholder="Digite sua mensagem..."
                   disabled={isLoading || !userId}
-                  className="min-h-[44px] text-sm md:text-base"
+                  className="min-h-11 text-sm md:text-base"
                 />
                 <PromptInputToolbar>
                   <input

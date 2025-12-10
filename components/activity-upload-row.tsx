@@ -168,6 +168,7 @@ export function ActivityUploadRow({
             onChange={handleFileSelect}
             className="hidden"
             disabled={isUploading}
+            aria-label={`Selecionar arquivo PDF para ${titulo}`}
           />
 
           {hasFile ? (

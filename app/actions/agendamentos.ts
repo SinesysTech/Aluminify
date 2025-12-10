@@ -174,11 +174,14 @@ export async function createAgendamento(data: Omit<Agendamento, 'id' | 'created_
     end: new Date(b.data_fim)
   }))
 
-  // Validate appointment
+  // Validate appointment - filter and map rules to ensure ativo is boolean
+  const validRules = (rules || [])
+    .filter((r): r is typeof r & { ativo: boolean } => r.ativo === true)
+
   const validationResult = validateAppointment(
     { start: dataInicio, end: dataFim },
     {
-      rules: rules || [],
+      rules: validRules,
       existingSlots,
       minAdvanceMinutes
     }
@@ -284,9 +287,12 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
   }))
 
   // Use the validation library to generate available slots
+  // Filter rules to ensure ativo is boolean
+  const validRules = rules.filter((r): r is typeof r & { ativo: boolean } => r.ativo === true)
+
   const slots = generateAvailableSlots(
     date,
-    rules,
+    validRules,
     existingSlots,
     30, // slot duration in minutes
     minAdvanceMinutes
@@ -342,7 +348,8 @@ export async function getAgendamentosProfessor(
   }
 
   // Mapear os campos da tabela alunos para o formato esperado
-  return (data || []).map((agendamento: { aluno?: { id: string; nome_completo?: string; email: string } } & Record<string, unknown>) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data || []).map((agendamento: any) => ({
     ...agendamento,
     aluno: agendamento.aluno ? {
       id: agendamento.aluno.id,
@@ -432,7 +439,8 @@ export async function getAgendamentosAluno(alunoId: string): Promise<Agendamento
   }
 
   // Mapear os campos da tabela professores para o formato esperado
-  return (data || []).map((agendamento: { professor?: { id: string; nome_completo?: string; email: string; foto_url?: string } } & Record<string, unknown>) => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (data || []).map((agendamento: any) => ({
     ...agendamento,
     professor: agendamento.professor ? {
       id: agendamento.professor.id,
@@ -479,7 +487,7 @@ export async function getAgendamentoById(id: string): Promise<AgendamentoComDeta
     aluno?: { id: string; nome_completo?: string; email: string };
     professor?: { id: string; nome_completo?: string; email: string; foto_url?: string };
   } & Record<string, unknown>;
-  const appointment = data as AppointmentData
+  const appointment = data as unknown as AppointmentData
   return {
     ...appointment,
     aluno: appointment.aluno ? {
@@ -695,8 +703,17 @@ export async function updateAgendamento(id: string, data: Partial<Agendamento>) 
     throw new Error('Unauthorized')
   }
 
-  // Remove fields that shouldn't be updated directly
-  const { id: _id, created_at: _created_at, updated_at: _updated_at, ...updateData } = data
+  // Remove fields that shouldn't be updated directly and convert dates to strings
+  const { id: _id, created_at: _created_at, updated_at: _updated_at, ...restData } = data
+  void _id; void _created_at; void _updated_at;
+
+  const updateData: Record<string, unknown> = { ...restData }
+  if (updateData.data_inicio instanceof Date) {
+    updateData.data_inicio = updateData.data_inicio.toISOString()
+  }
+  if (updateData.data_fim instanceof Date) {
+    updateData.data_fim = updateData.data_fim.toISOString()
+  }
 
   const { data: result, error } = await supabase
     .from('agendamentos')
@@ -756,7 +773,18 @@ export async function getConfiguracoesProfessor(professorId: string): Promise<Co
     }
   }
 
-  return data
+  // Map database data to ensure non-nullable fields have defaults
+  return {
+    id: data.id,
+    professor_id: data.professor_id,
+    auto_confirmar: data.auto_confirmar ?? false,
+    tempo_antecedencia_minimo: data.tempo_antecedencia_minimo ?? 60,
+    tempo_lembrete_minutos: data.tempo_lembrete_minutos ?? 1440,
+    link_reuniao_padrao: data.link_reuniao_padrao,
+    mensagem_confirmacao: data.mensagem_confirmacao,
+    created_at: data.created_at ?? undefined,
+    updated_at: data.updated_at ?? undefined
+  }
 }
 
 export async function updateConfiguracoesProfessor(
@@ -771,6 +799,7 @@ export async function updateConfiguracoesProfessor(
   }
 
   const { id: _id, created_at: _created_at, updated_at: _updated_at, ...configData } = config
+  void _id; void _created_at; void _updated_at;
 
   const { data, error } = await supabase
     .from('agendamento_configuracoes')
@@ -815,7 +844,17 @@ export async function getIntegracaoProfessor(professorId: string): Promise<Profe
     }
   }
 
-  return data
+  // Map database data to ProfessorIntegracao type
+  return {
+    id: data.id,
+    professor_id: data.professor_id,
+    provider: data.provider as 'google' | 'zoom' | 'default',
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    token_expiry: data.token_expiry,
+    created_at: data.created_at ?? undefined,
+    updated_at: data.updated_at ?? undefined
+  }
 }
 
 export async function updateIntegracaoProfessor(
@@ -830,12 +869,14 @@ export async function updateIntegracaoProfessor(
   }
 
   const { id: _id, created_at: _created_at, updated_at: _updated_at, ...integrationData } = integration
+  void _id; void _created_at; void _updated_at;
 
   const { data, error } = await supabase
     .from('professor_integracoes')
     .upsert({
       ...integrationData,
-      professor_id: professorId
+      professor_id: professorId,
+      provider: integrationData.provider || 'default'
     })
     .select()
     .single()
@@ -1000,29 +1041,8 @@ export async function validateAgendamento(
   return { valid: true }
 }
 
-// =============================================
-// Notification Helper
-// =============================================
-
-async function _createNotificacao(
-  agendamentoId: string,
-  tipo: AgendamentoNotificacao['tipo'],
-  destinatarioId: string
-) {
-  const supabase = await createClient()
-
-  const { error } = await supabase
-    .from('agendamento_notificacoes')
-    .insert({
-      agendamento_id: agendamentoId,
-      tipo,
-      destinatario_id: destinatarioId
-    })
-
-  if (error) {
-    console.error('Error creating notification:', error)
-  }
-}
+// Note: Notifications are now handled by database trigger notify_agendamento_change()
+// The manual _createNotificacao function was removed to avoid duplicates
 
 // =============================================
 // Statistics

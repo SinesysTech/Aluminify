@@ -176,7 +176,22 @@ export type Database = {
                     status?: string
                     updated_at?: string | null
                 }
-                Relationships: []
+                Relationships: [
+                    {
+                        foreignKeyName: "agendamentos_aluno_id_fkey"
+                        columns: ["aluno_id"]
+                        isOneToOne: false
+                        referencedRelation: "alunos"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "agendamentos_professor_id_fkey"
+                        columns: ["professor_id"]
+                        isOneToOne: false
+                        referencedRelation: "professores"
+                        referencedColumns: ["id"]
+                    },
+                ]
             }
             alunos: {
                 Row: {
@@ -1066,6 +1081,47 @@ export type Database = {
                         columns: ["frente_id"]
                         isOneToOne: false
                         referencedRelation: "frentes"
+                        referencedColumns: ["id"]
+                    },
+                ]
+            }
+            professor_integracoes: {
+                Row: {
+                    id: string
+                    professor_id: string
+                    provider: string
+                    access_token: string | null
+                    refresh_token: string | null
+                    token_expiry: string | null
+                    created_at: string | null
+                    updated_at: string | null
+                }
+                Insert: {
+                    id?: string
+                    professor_id: string
+                    provider: string
+                    access_token?: string | null
+                    refresh_token?: string | null
+                    token_expiry?: string | null
+                    created_at?: string | null
+                    updated_at?: string | null
+                }
+                Update: {
+                    id?: string
+                    professor_id?: string
+                    provider?: string
+                    access_token?: string | null
+                    refresh_token?: string | null
+                    token_expiry?: string | null
+                    created_at?: string | null
+                    updated_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "professor_integracoes_professor_id_fkey"
+                        columns: ["professor_id"]
+                        isOneToOne: true
+                        referencedRelation: "professores"
                         referencedColumns: ["id"]
                     },
                 ]
