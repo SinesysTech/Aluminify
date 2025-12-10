@@ -19,8 +19,6 @@ import {
   FrenteCountAccumulator,
   FrenteComCursoDiferenteAccumulator,
   AulaQueryResult,
-  ItensPorSemanaAccumulator,
-  FrenteComEstatisticas,
   ModuloQueryResult,
   DiagnosticoFrente,
   FrenteInfo,
@@ -148,7 +146,6 @@ export class CronogramaService {
 
     if (!frentesError && todasFrentes && todasFrentes.length > 0) {
       const frentesComAulas = new Set(aulas.map(a => a.frente_id));
-      // @ts-ignore - Supabase retorna tipo com estrutura incompatível
       const frentesSemAulas = todasFrentes.filter(f => !frentesComAulas.has(f.id));
 
       if (frentesSemAulas.length > 0) {
@@ -425,9 +422,9 @@ export class CronogramaService {
 
       // Agrupar por disciplina e curso
       const frentesPorDisciplinaECurso = new Map<string, { disciplina: string; frentes: FrenteInfo[] }>();
-      todasFrentesSemFiltro?.forEach((frente: any) => {
+      todasFrentesSemFiltro?.forEach((frente: FrenteValidacaoResult) => {
         const discId = frente.disciplina_id;
-        const discNome = frente.disciplinas?.[0]?.nome || 'Desconhecida';
+        const discNome = getDisciplinaNome(frente.disciplinas) || 'Desconhecida';
         const key = `${discId}_${frente.curso_id || 'sem-curso'}`;
 
         if (!frentesPorDisciplinaECurso.has(key)) {
@@ -1565,6 +1562,14 @@ export class CronogramaService {
 
         cronograma = cronogramaFallback;
 
+        // Verificar se cronograma foi criado com sucesso
+        if (!cronograma) {
+          throw new Error('Falha ao criar cronograma no fallback');
+        }
+
+        // Cronograma confirmado como não-nulo para este bloco
+        const cronogramaFallbackConfirmado = cronograma;
+
         // Tentar atualizar com as colunas novas separadamente (se existirem)
         try {
           const updateData: Partial<Pick<CronogramaDetalhado, 'modulos_selecionados' | 'excluir_aulas_concluidas'>> = {};
@@ -1579,7 +1584,7 @@ export class CronogramaService {
             const { data: cronogramaUpdated, error: updateError } = await client
               .from('cronogramas')
               .update(updateData)
-              .eq('id', cronograma.id)
+              .eq('id', cronogramaFallbackConfirmado.id)
               .select()
               .single();
 
@@ -1599,16 +1604,24 @@ export class CronogramaService {
       cronograma = cronogramaData;
     }
 
+    // Verificar se cronograma foi criado com sucesso
+    if (!cronograma) {
+      throw new Error('Falha ao criar cronograma');
+    }
+
+    // Agora cronograma é garantidamente não-nulo
+    const cronogramaConfirmado = cronograma;
+
     // IMPORTANTE: Sempre salvar os itens, independente de como o cronograma foi criado
     // Preencher cronograma_id nos itens
     const itensCompleto = itens.map((item) => ({
       ...item,
-      cronograma_id: cronograma.id,
+      cronograma_id: cronogramaConfirmado.id,
     }));
 
     console.log('[CronogramaService] Inserindo itens do cronograma:', {
       totalItens: itensCompleto.length,
-      cronogramaId: cronograma.id,
+      cronogramaId: cronogramaConfirmado.id,
       primeirosItens: itensCompleto.slice(0, 3).map(i => ({
         aula_id: i.aula_id,
         semana_numero: i.semana_numero,
@@ -1631,7 +1644,7 @@ export class CronogramaService {
         totalItens: itensCompleto.length,
       });
       // Tentar deletar o cronograma criado
-      await client.from('cronogramas').delete().eq('id', cronograma.id);
+      await client.from('cronogramas').delete().eq('id', cronogramaConfirmado.id);
       throw new Error(`Erro ao inserir itens do cronograma: ${itensError.message}`);
     }
 
@@ -1641,11 +1654,11 @@ export class CronogramaService {
     });
 
     // Criar distribuição padrão de dias
-    await this.criarDistribuicaoPadrao(client, cronograma.id, input.dias_semana);
+    await this.criarDistribuicaoPadrao(client, cronogramaConfirmado.id, input.dias_semana);
 
     // Recalcular datas dos itens baseado na distribuição padrão
     try {
-      await this.recalcularDatasItens(cronograma.id, input.aluno_id);
+      await this.recalcularDatasItens(cronogramaConfirmado.id, input.aluno_id);
     } catch (recalcError) {
       console.error('[CronogramaService] Erro ao recalcular datas (não crítico):', recalcError);
       // Não falhar a criação do cronograma se o recálculo falhar
@@ -1672,15 +1685,19 @@ export class CronogramaService {
         )
       `,
       )
-      .eq('id', cronograma.id)
+      .eq('id', cronogramaConfirmado.id)
       .single();
 
     if (fetchError) {
       console.error('Erro ao buscar cronograma completo:', fetchError);
-      return cronograma;
+      return cronogramaConfirmado;
     }
 
-    return cronogramaCompleto || cronograma;
+    if (!cronogramaCompleto) {
+      return cronogramaConfirmado;
+    }
+
+    return cronogramaCompleto;
   }
 
   /**
@@ -1911,12 +1928,32 @@ export class CronogramaService {
     const diasOrdenados = [...diasSemana].sort((a, b) => a - b);
 
     // Função helper para extrair informações de disciplina e frente de um item
-    const extrairInfoItem = (item: ItemDistribuicao) => {
+    // Tipo helper para itens com dados aninhados do Supabase
+    type ItemComAula = {
+      id: string;
+      semana_numero: number;
+      ordem_na_semana: number;
+      aula_id: string;
+      aulas?: {
+        id: string;
+        modulos?: {
+          id: string;
+          frentes?: {
+            id: string;
+            nome: string;
+            disciplina_id?: string;
+            disciplinas?: { id: string; nome: string }[];
+          }[];
+        }[];
+      }[];
+    };
+
+    const extrairInfoItem = (item: ItemComAula) => {
       // Supabase pode retornar dados aninhados de diferentes formas
-      const aula = item.aulas;
-      const modulo = aula?.modulos || (aula && Array.isArray(aula.modulos) ? aula.modulos[0] : null);
-      const frente = modulo?.frentes || (modulo && Array.isArray(modulo.frentes) ? modulo.frentes[0] : null);
-      const disciplina = frente?.disciplinas || (frente && Array.isArray(frente.disciplinas) ? frente.disciplinas[0] : null);
+      const aula = Array.isArray(item.aulas) ? item.aulas[0] : item.aulas;
+      const modulo = aula?.modulos ? (Array.isArray(aula.modulos) ? aula.modulos[0] : aula.modulos) : null;
+      const frente = modulo?.frentes ? (Array.isArray(modulo.frentes) ? modulo.frentes[0] : modulo.frentes) : null;
+      const disciplina = frente?.disciplinas ? (Array.isArray(frente.disciplinas) ? frente.disciplinas[0] : frente.disciplinas) : null;
 
       return {
         disciplinaId: disciplina?.id || '',
@@ -1927,7 +1964,7 @@ export class CronogramaService {
     };
 
     // Agrupar itens por semana primeiro
-    const itensPorSemana = new Map<number, typeof itens>();
+    const itensPorSemana = new Map<number, ItemComAula[]>();
     itens.forEach((item) => {
       const semana = item.semana_numero;
       if (!itensPorSemana.has(semana)) {
@@ -1937,15 +1974,18 @@ export class CronogramaService {
     });
 
     // Função para reorganizar itens de uma semana: alternar entre disciplinas e frentes
-    const reorganizarItensPorSemana = (itensDaSemana: typeof itens) => {
+    const reorganizarItensPorSemana = (itensDaSemana: ItemComAula[]) => {
       // Extrair informações de cada item
       const itensComInfo = itensDaSemana.map(item => ({
         ...item,
         info: extrairInfoItem(item),
       }));
 
+      // Usar tipo inferido do array
+      type ItemComInfo = (typeof itensComInfo)[0];
+
       // Agrupar por frente (todas as Frentes A, depois todas as Frentes B, etc.)
-      const itensPorFrente = new Map<string, typeof itensComInfo>();
+      const itensPorFrente = new Map<string, ItemComInfo[]>();
       itensComInfo.forEach(item => {
         const frenteKey = `${item.info.disciplinaNome}_${item.info.frenteNome}`;
         if (!itensPorFrente.has(frenteKey)) {
@@ -1961,7 +2001,7 @@ export class CronogramaService {
 
       // Agrupar por nome da frente (todas as Frentes A, depois todas as Frentes B, etc.)
       // Isso permite alternar entre disciplinas dentro da mesma frente
-      const frentesPorNome = new Map<string, typeof itensComInfo[]>();
+      const frentesPorNome = new Map<string, ItemComInfo[][]>();
       itensPorFrente.forEach((itens) => {
         const frenteNome = itens[0].info.frenteNome;
         if (!frentesPorNome.has(frenteNome)) {
@@ -1975,7 +2015,7 @@ export class CronogramaService {
 
       // Reorganizar: distribuir round-robin entre disciplinas dentro de cada frente
       // Processar todas as Frentes A primeiro, depois todas as Frentes B, etc.
-      const itensReorganizados: typeof itensComInfo = [];
+      const itensReorganizados: ItemComInfo[] = [];
 
       for (const frenteNome of frentesNomes) {
         const gruposFrente = frentesPorNome.get(frenteNome)!;
@@ -2302,8 +2342,21 @@ export class CronogramaService {
     const semanas = this.calcularSemanas(dataInicio, dataFim, ferias, horasDia, diasSemana);
 
     // Agrupar itens por semana
-    const itensPorSemana = new Map<number, typeof itens>();
-    (itens || []).forEach((item: ItemDistribuicao) => {
+    // Tipo helper para itens com dados aninhados do Supabase
+    type ItemComDados = {
+      id: string;
+      semana_numero: number;
+      ordem_na_semana: number;
+      concluido?: boolean;
+      aula_id: string;
+      aulas?: {
+        id: string;
+        tempo_estimado_minutos?: number | null;
+      }[];
+    };
+
+    const itensPorSemana = new Map<number, ItemComDados[]>();
+    (itens as ItemComDados[] || []).forEach((item) => {
       const semanaNum = item.semana_numero;
       if (!itensPorSemana.has(semanaNum)) {
         itensPorSemana.set(semanaNum, []);
@@ -2320,8 +2373,8 @@ export class CronogramaService {
       let totalAulas = 0;
       let aulasConcluidas = 0;
 
-      itensDaSemana.forEach((item: ItemDistribuicao) => {
-        const aula = item.aulas;
+      itensDaSemana.forEach((item) => {
+        const aula = Array.isArray(item.aulas) ? item.aulas[0] : item.aulas;
         if (!aula) return;
 
         totalAulas++;
