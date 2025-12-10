@@ -445,18 +445,22 @@ export default function ConteudosClientPage() {
         return
       }
 
-      const agrupado = (data || []).reduce<Record<string, AtividadeItem[]>>((acc, atividade) => {
-        const lista = acc[atividade.modulo_id] || []
-        lista.push({
-          id: atividade.id,
-          moduloId: atividade.modulo_id,
-          titulo: atividade.titulo,
-          tipo: atividade.tipo as TipoAtividade,
-          ordemExibicao: atividade.ordem_exibicao ?? 0,
-        })
-        acc[atividade.modulo_id] = lista
-        return acc
-      }, {})
+      const agrupado = (data || [])
+        .filter((atividade): atividade is typeof atividade & { modulo_id: string } => 
+          atividade.modulo_id !== null
+        )
+        .reduce<Record<string, AtividadeItem[]>>((acc, atividade) => {
+          const lista = acc[atividade.modulo_id] || []
+          lista.push({
+            id: atividade.id,
+            moduloId: atividade.modulo_id,
+            titulo: atividade.titulo,
+            tipo: atividade.tipo as TipoAtividade,
+            ordemExibicao: atividade.ordem_exibicao ?? 0,
+          })
+          acc[atividade.modulo_id] = lista
+          return acc
+        }, {})
 
       setAtividadesPorModulo(agrupado)
     },
@@ -495,7 +499,11 @@ export default function ConteudosClientPage() {
         }
 
         console.log('Frentes carregadas:', data?.length || 0, data)
-        setFrentes(data || [])
+        setFrentes(
+          (data || [])
+            .filter((f): f is typeof f & { disciplina_id: string } => f.disciplina_id !== null)
+            .map((f) => ({ id: f.id, nome: f.nome, disciplina_id: f.disciplina_id, curso_id: f.curso_id }))
+        )
       } catch (err) {
         console.error('Erro ao carregar frentes:', {
           error: err,
@@ -532,9 +540,14 @@ export default function ConteudosClientPage() {
         if (modulosError) throw modulosError
 
         if (modulosData && modulosData.length > 0) {
+          // Filtrar módulos com frente_id não nulo
+          const modulosValidos = modulosData.filter(
+            (m): m is typeof m & { frente_id: string } => m.frente_id !== null
+          )
+          
           // Buscar aulas para cada módulo
           const modulosComAulas = await Promise.all(
-            modulosData.map(async (modulo) => {
+            modulosValidos.map(async (modulo) => {
               const { data: aulasData, error: aulasError } = await supabase
                 .from('aulas')
                 .select('id, nome, numero_aula, tempo_estimado_minutos, prioridade')
@@ -556,7 +569,7 @@ export default function ConteudosClientPage() {
           )
 
         setModulos(modulosComAulas)
-        await loadAtividadesForModulos(modulosData.map((m) => m.id))
+        await loadAtividadesForModulos(modulosValidos.map((m) => m.id))
         } else {
           setModulos([])
         setAtividadesPorModulo({})
@@ -1242,7 +1255,11 @@ export default function ConteudosClientPage() {
           .order('nome', { ascending: true })
 
         if (!frentesError && frentesData) {
-          setFrentes(frentesData)
+          setFrentes(
+            frentesData
+              .filter((f): f is typeof f & { disciplina_id: string } => f.disciplina_id !== null)
+              .map((f) => ({ id: f.id, nome: f.nome, disciplina_id: f.disciplina_id, curso_id: f.curso_id }))
+          )
         }
       }
     } catch (err) {

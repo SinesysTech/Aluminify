@@ -202,7 +202,7 @@ export default function FlashcardsClient() {
           if (alunosCursos) {
             cursosData = alunosCursos
               .map((ac: { cursos: { id: string; nome: string } | null }) => ac.cursos)
-              .filter(Boolean)
+              .filter((c): c is { id: string; nome: string } => c !== null)
               .map((c) => ({ id: c.id, nome: c.nome }))
           }
         }
@@ -238,7 +238,7 @@ export default function FlashcardsClient() {
             if (cursosDisciplinas) {
               const disciplinasData = cursosDisciplinas
                 .map((cd: { disciplina: { id: string; nome: string } | null }) => cd.disciplina)
-                .filter(Boolean)
+                .filter((d): d is { id: string; nome: string } => d !== null)
                 .map((d) => ({ id: d.id, nome: d.nome }))
               
               // Remover duplicatas
@@ -284,7 +284,9 @@ export default function FlashcardsClient() {
         }
 
         console.log('Frentes carregadas:', frentesData?.length || 0, frentesData)
-        setFrentes((frentesData || []).map((f) => ({ id: f.id, nome: f.nome, disciplina_id: f.disciplina_id })))
+        setFrentes((frentesData || [])
+          .filter(f => f.disciplina_id !== null)
+          .map((f) => ({ id: f.id, nome: f.nome, disciplina_id: f.disciplina_id! })) as Frente[])
       } catch (err) {
         console.error('Erro ao carregar frentes:', err)
         setError('Erro ao carregar frentes. Verifique se a disciplina e o curso estão corretos.')
@@ -318,7 +320,9 @@ export default function FlashcardsClient() {
 
         if (error) throw error
 
-        setModulos(modulosData || [])
+        setModulos((modulosData || [])
+          .filter(m => m.frente_id !== null)
+          .map((m) => ({ id: m.id, nome: m.nome, numero_modulo: m.numero_modulo, frente_id: m.frente_id! })) as Modulo[])
       } catch (err) {
         console.error('Erro ao carregar módulos:', err)
       } finally {

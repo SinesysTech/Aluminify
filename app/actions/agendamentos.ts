@@ -156,11 +156,21 @@ export async function createAgendamento(data: Omit<Agendamento, 'id' | 'created_
   const dataFim = new Date(data.data_fim)
 
   // Get availability rules for validation
-  const { data: rules } = await supabase
+  const { data: rulesData } = await supabase
     .from('agendamento_disponibilidade')
     .select('*')
     .eq('professor_id', data.professor_id)
     .eq('ativo', true)
+
+  // Filter and map rules to ensure ativo is boolean
+  const rules = (rulesData || [])
+    .filter((r): r is typeof r & { ativo: boolean } => r.ativo === true)
+    .map((r) => ({
+      dia_semana: r.dia_semana,
+      hora_inicio: r.hora_inicio,
+      hora_fim: r.hora_fim,
+      ativo: r.ativo,
+    }))
 
   // Get existing bookings for conflict check
   const { data: bookings } = await supabase
@@ -178,7 +188,7 @@ export async function createAgendamento(data: Omit<Agendamento, 'id' | 'created_
   const validationResult = validateAppointment(
     { start: dataInicio, end: dataFim },
     {
-      rules: rules || [],
+      rules: rules,
       existingSlots,
       minAdvanceMinutes
     }
@@ -196,7 +206,9 @@ export async function createAgendamento(data: Omit<Agendamento, 'id' | 'created_
     ...data,
     aluno_id: user.id,
     status: initialStatus,
-    confirmado_em: confirmadoEm
+    confirmado_em: confirmadoEm,
+    data_inicio: typeof data.data_inicio === 'string' ? data.data_inicio : data.data_inicio.toISOString(),
+    data_fim: typeof data.data_fim === 'string' ? data.data_fim : data.data_fim.toISOString(),
   }
 
   const { data: result, error } = await supabase
@@ -247,12 +259,22 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
   const minAdvanceMinutes = config?.tempo_antecedencia_minimo || 60
 
   // Get availability rules
-  const { data: rules } = await supabase
+  const { data: rulesData } = await supabase
     .from('agendamento_disponibilidade')
     .select('*')
     .eq('professor_id', professorId)
     .eq('dia_semana', dayOfWeek)
     .eq('ativo', true)
+
+  // Filter and map rules to ensure ativo is boolean
+  const rules = (rulesData || [])
+    .filter((r): r is typeof r & { ativo: boolean } => r.ativo === true)
+    .map((r) => ({
+      dia_semana: r.dia_semana,
+      hora_inicio: r.hora_inicio,
+      hora_fim: r.hora_fim,
+      ativo: r.ativo,
+    }))
 
   if (!rules || rules.length === 0) {
     return []
@@ -293,6 +315,20 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
 // Professor Dashboard Functions
 // =============================================
 
+// Helper function to check if a value is a valid aluno/professor object
+function isValidUserObject(
+  obj: unknown
+): obj is { id: string; nome: string; email: string; avatar_url?: string | null } {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    !('code' in obj) &&
+    'id' in obj &&
+    'nome' in obj &&
+    'email' in obj
+  )
+}
+
 export async function getAgendamentosProfessor(
   professorId: string,
   filters?: AgendamentoFilters
@@ -331,7 +367,19 @@ export async function getAgendamentosProfessor(
     return []
   }
 
-  return data || []
+  return (data || []).map((item) => {
+    const aluno = isValidUserObject(item.aluno) ? item.aluno : undefined
+    
+    return {
+      ...item,
+      status: item.status as Agendamento['status'],
+      lembrete_enviado: item.lembrete_enviado ?? undefined,
+      created_at: item.created_at ?? undefined,
+      updated_at: item.updated_at ?? undefined,
+      aluno,
+      professor: undefined,
+    }
+  })
 }
 
 export async function getAgendamentosAluno(alunoId: string): Promise<AgendamentoComDetalhes[]> {
@@ -351,7 +399,19 @@ export async function getAgendamentosAluno(alunoId: string): Promise<Agendamento
     return []
   }
 
-  return data || []
+  return (data || []).map((item) => {
+    const professor = isValidUserObject(item.professor) ? item.professor : undefined
+    
+    return {
+      ...item,
+      status: item.status as Agendamento['status'],
+      lembrete_enviado: item.lembrete_enviado ?? undefined,
+      created_at: item.created_at ?? undefined,
+      updated_at: item.updated_at ?? undefined,
+      aluno: undefined,
+      professor,
+    }
+  })
 }
 
 export async function getAgendamentoById(id: string): Promise<AgendamentoComDetalhes | null> {
@@ -372,7 +432,20 @@ export async function getAgendamentoById(id: string): Promise<AgendamentoComDeta
     return null
   }
 
-  return data
+  if (!data) return null
+
+  const aluno = isValidUserObject(data.aluno) ? data.aluno : undefined
+  const professor = isValidUserObject(data.professor) ? data.professor : undefined
+
+  return {
+    ...data,
+    status: data.status as Agendamento['status'],
+    lembrete_enviado: data.lembrete_enviado ?? undefined,
+    created_at: data.created_at ?? undefined,
+    updated_at: data.updated_at ?? undefined,
+    aluno,
+    professor,
+  }
 }
 
 // =============================================
@@ -414,16 +487,17 @@ export async function confirmarAgendamento(id: string, linkReuniao?: string) {
 
     // Load professor integration settings
     const { data: integration } = await supabase
-      .from('professor_integracoes')
+      .from('professor_integracoes' as any)
       .select('*')
       .eq('professor_id', user.id)
       .single()
 
     // Try to generate meeting link if provider is configured
-    if (integration && integration.provider !== 'default' && integration.access_token) {
+    const validIntegration = integration && !('code' in integration) ? (integration as unknown as { provider: string; access_token: string }) : null
+    if (validIntegration && validIntegration.provider !== 'default' && validIntegration.access_token) {
       try {
         const meetingLink = await generateMeetingLink(
-          integration.provider as 'google' | 'zoom' | 'default',
+          validIntegration.provider as 'google' | 'zoom' | 'default',
           {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             title: `Mentoria com ${(agendamento.aluno as any)?.[0]?.nome || 'Aluno'}`,
@@ -434,7 +508,7 @@ export async function confirmarAgendamento(id: string, linkReuniao?: string) {
             attendees: (agendamento.aluno as any)?.[0]?.email ? [(agendamento.aluno as any)[0].email] : []
           },
           {
-            accessToken: integration.access_token,
+            accessToken: validIntegration.access_token,
             defaultLink: config?.link_reuniao_padrao || undefined
           }
         )

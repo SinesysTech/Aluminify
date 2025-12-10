@@ -114,8 +114,6 @@ export default function ModoFocoClient({ searchParams }: Props) {
         if (error || !user) return;
         const role = (user.user_metadata?.role as string) || 'aluno';
         const isSuperAdmin = role === 'superadmin' || user.user_metadata?.is_superadmin === true;
-        setUserRole(isSuperAdmin ? 'superadmin' : role);
-        setUserId(user.id);
 
         if (role === 'professor' && !isSuperAdmin) {
           const { data, error: cursosError } = await supabase

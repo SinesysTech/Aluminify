@@ -15,7 +15,7 @@ import {
   DisciplinaComFrentes,
   CursoComDisciplinas,
 } from './types'
-import { StatusAtividade } from '@/backend/services/progresso-atividade'
+import { StatusAtividade, DificuldadePercebida } from '@/backend/services/progresso-atividade'
 
 // Helper para formatar erros do Supabase
 function formatSupabaseError(error: unknown): string {
@@ -166,7 +166,9 @@ export default function SalaEstudosClientPage({
           }
 
           // Extrair os cursos do resultado (mesmo método do cronograma)
-          const cursosData = alunosCursos.map((ac: { cursos: { id: string } | null }) => ac.cursos).filter(Boolean)
+          const cursosData = alunosCursos
+            .map((ac: { cursos: { id: string } | null }) => ac.cursos)
+            .filter((c): c is { id: string } => c !== null)
           cursoIds = cursosData.map((c) => c.id)
         }
 
@@ -271,7 +273,9 @@ export default function SalaEstudosClientPage({
           throw new Error(`Erro ao buscar frentes: ${errorMsg}`)
         }
 
-        setFrentes(frentesData || [])
+        setFrentes((frentesData || [])
+          .filter(f => f.disciplina_id !== null)
+          .map(f => ({ id: f.id, nome: f.nome, disciplina_id: f.disciplina_id! })))
       } catch (err) {
         console.error('Erro ao carregar disciplinas:', err)
         const errorMessage = formatSupabaseError(err)
@@ -341,7 +345,9 @@ export default function SalaEstudosClientPage({
           }
 
           // Extrair os cursos do resultado (mesmo método do cronograma)
-          const cursosData = alunosCursos.map((ac: { cursos: { id: string } | null }) => ac.cursos).filter(Boolean)
+          const cursosData = alunosCursos
+            .map((ac: { cursos: { id: string } | null }) => ac.cursos)
+            .filter((c): c is { id: string } => c !== null)
           cursoIds = cursosData.map((c) => c.id)
         }
 
@@ -443,7 +449,7 @@ export default function SalaEstudosClientPage({
         const BATCH_SIZE = 100
         const progressosData: {
           atividade_id: string
-          status: string
+          status: string | null
           data_inicio: string | null
           data_conclusao: string | null
           questoes_totais: number | null
@@ -470,7 +476,11 @@ export default function SalaEstudosClientPage({
             }
             
             if (batchData) {
-              progressosData.push(...batchData)
+              // Filtrar apenas registros com atividade_id não nulo
+              const validBatchData = batchData.filter(
+                (p): p is typeof p & { atividade_id: string } => p.atividade_id !== null
+              )
+              progressosData.push(...validBatchData)
             }
           }
         }
@@ -538,11 +548,12 @@ export default function SalaEstudosClientPage({
         const atividadesComProgresso: AtividadeComProgresso[] = []
 
         for (const atividade of atividadesData) {
+          if (!atividade.modulo_id) continue
           const modulo = modulosMap.get(atividade.modulo_id)
-          if (!modulo) continue
+          if (!modulo || !modulo.frente_id) continue
 
           const frente = frentesMap.get(modulo.frente_id)
-          if (!frente) continue
+          if (!frente || !frente.disciplina_id) continue
 
           const disciplina = disciplinasMap.get(frente.disciplina_id)
           if (!disciplina) continue
@@ -585,11 +596,11 @@ export default function SalaEstudosClientPage({
             arquivoUrl: atividade.arquivo_url,
             gabaritoUrl: atividade.gabarito_url,
             linkExterno: atividade.link_externo,
-            obrigatorio: atividade.obrigatorio,
-            ordemExibicao: atividade.ordem_exibicao,
+            obrigatorio: atividade.obrigatorio ?? false,
+            ordemExibicao: atividade.ordem_exibicao ?? 0,
             createdBy: atividade.created_by || null,
-            createdAt: atividade.created_at,
-            updatedAt: atividade.updated_at,
+            createdAt: atividade.created_at || '',
+            updatedAt: atividade.updated_at || '',
             moduloNome: modulo.nome,
             moduloNumero: modulo.numero_modulo,
             frenteNome: frente.nome,
@@ -598,13 +609,13 @@ export default function SalaEstudosClientPage({
             disciplinaId: disciplina.id,
             cursoNome,
             cursoId,
-            progressoStatus: progresso?.status || null,
+            progressoStatus: (progresso?.status as StatusAtividade) || null,
             progressoDataInicio: progresso?.dataInicio || null,
             progressoDataConclusao: progresso?.dataConclusao || null,
             // Campos de desempenho
             questoesTotais: progresso?.questoesTotais ?? null,
             questoesAcertos: progresso?.questoesAcertos ?? null,
-            dificuldadePercebida: progresso?.dificuldadePercebida ?? null,
+            dificuldadePercebida: (progresso?.dificuldadePercebida as DificuldadePercebida) ?? null,
             anotacoesPessoais: progresso?.anotacoesPessoais ?? null,
           })
         }

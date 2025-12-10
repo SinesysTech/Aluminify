@@ -189,7 +189,11 @@ export default function MateriaisClientPage() {
           .order('nome', { ascending: true })
 
         if (error) throw error
-        setFrentes(data || [])
+        setFrentes((data || []).filter(f => f.disciplina_id !== null).map(f => ({
+          ...f,
+          disciplina_id: f.disciplina_id!,
+          curso_id: f.curso_id ?? null
+        })))
         setFrenteSelecionada('')
         setFrenteCursoId(null)
         setModulosComAtividades([])
@@ -242,15 +246,17 @@ export default function MateriaisClientPage() {
         // Agrupar atividades por módulo
         const modulosComAtividadesMap = new Map<string, ModuloComAtividades>()
 
-        modulosData.forEach((modulo) => {
-          modulosComAtividadesMap.set(modulo.id, {
-            id: modulo.id,
-            nome: modulo.nome,
-            numero_modulo: modulo.numero_modulo,
-            frente_id: modulo.frente_id,
-            atividades: [],
+        modulosData
+          .filter(modulo => modulo.frente_id !== null)
+          .forEach((modulo) => {
+            modulosComAtividadesMap.set(modulo.id, {
+              id: modulo.id,
+              nome: modulo.nome,
+              numero_modulo: modulo.numero_modulo,
+              frente_id: modulo.frente_id!,
+              atividades: [],
+            })
           })
-        })
 
         atividadesData.forEach((atividade: any) => {
           const modulo = modulosComAtividadesMap.get(atividade.moduloId)
