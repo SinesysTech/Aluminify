@@ -26,8 +26,8 @@ export default function StudentDashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [isRefreshing, setIsRefreshing] = useState(false)
-  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
+  const [, setIsRefreshing] = useState(false)
+  const [, setLastRefresh] = useState<Date | null>(null)
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const loadDashboardData = useCallback(async (showRefreshing = false) => {
@@ -97,8 +97,8 @@ export default function StudentDashboardPage() {
 
   // Subscription Realtime para atualizar dashboard quando aulas são concluídas
   useEffect(() => {
-    let channel: any = null
-    let supabaseInstance: any = null
+    let channel: ReturnType<typeof import('@supabase/supabase-js').SupabaseClient['channel']> | null = null
+    let supabaseInstance: ReturnType<typeof import('@/lib/client').createClient> | null = null
 
     async function setupRealtimeSubscription() {
       const { createClient } = await import('@/lib/client')
@@ -131,7 +131,7 @@ export default function StudentDashboardPage() {
             table: 'cronograma_itens',
             filter: `cronograma_id=eq.${cronograma.id}`,
           },
-          (payload: any) => {
+          (payload: { new: Record<string, unknown>; old: Record<string, unknown>; eventType: string }) => {
             console.log('[Dashboard Realtime] Mudança detectada em cronograma_itens:', payload)
             // Recarregar dados do dashboard
             loadDashboardData(true)

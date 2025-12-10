@@ -342,7 +342,7 @@ export async function getAgendamentosProfessor(
   }
 
   // Mapear os campos da tabela alunos para o formato esperado
-  return (data || []).map(agendamento => ({
+  return (data || []).map((agendamento: any) => ({
     ...agendamento,
     aluno: agendamento.aluno ? {
       id: agendamento.aluno.id,
@@ -350,7 +350,7 @@ export async function getAgendamentosProfessor(
       email: agendamento.aluno.email,
       avatar_url: null // alunos não têm avatar_url na tabela
     } : undefined
-  }))
+  })) as AgendamentoComDetalhes[]
 }
 
 export async function getAgendamentosAluno(alunoId: string): Promise<AgendamentoComDetalhes[]> {
@@ -371,12 +371,17 @@ export async function getAgendamentosAluno(alunoId: string): Promise<Agendamento
     .order('data_inicio', { ascending: false })
 
   if (error) {
-    console.error('Error fetching student appointments:', error)
+    console.error('Error fetching student appointments:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code
+    })
     return []
   }
 
   // Mapear os campos da tabela professores para o formato esperado
-  return (data || []).map(agendamento => ({
+  return (data || []).map((agendamento: any) => ({
     ...agendamento,
     professor: agendamento.professor ? {
       id: agendamento.professor.id,
@@ -384,7 +389,7 @@ export async function getAgendamentosAluno(alunoId: string): Promise<Agendamento
       email: agendamento.professor.email,
       avatar_url: agendamento.professor.foto_url
     } : undefined
-  }))
+  })) as AgendamentoComDetalhes[]
 }
 
 export async function getAgendamentoById(id: string): Promise<AgendamentoComDetalhes | null> {
@@ -419,21 +424,22 @@ export async function getAgendamentoById(id: string): Promise<AgendamentoComDeta
   }
 
   // Mapear os campos para o formato esperado
+  const appointment = data as any
   return {
-    ...data,
-    aluno: data.aluno ? {
-      id: data.aluno.id,
-      nome: data.aluno.nome_completo || '',
-      email: data.aluno.email,
+    ...appointment,
+    aluno: appointment.aluno ? {
+      id: appointment.aluno.id,
+      nome: appointment.aluno.nome_completo || '',
+      email: appointment.aluno.email,
       avatar_url: null // alunos não têm avatar_url na tabela
     } : undefined,
-    professor: data.professor ? {
-      id: data.professor.id,
-      nome: data.professor.nome_completo,
-      email: data.professor.email,
-      avatar_url: data.professor.foto_url
+    professor: appointment.professor ? {
+      id: appointment.professor.id,
+      nome: appointment.professor.nome_completo,
+      email: appointment.professor.email,
+      avatar_url: appointment.professor.foto_url
     } : undefined
-  }
+  } as AgendamentoComDetalhes
 }
 
 // =============================================

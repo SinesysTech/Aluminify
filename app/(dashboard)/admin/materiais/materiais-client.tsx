@@ -247,7 +247,7 @@ export default function MateriaisClientPage() {
           })
         })
 
-        atividadesData.forEach((atividade: any) => {
+        atividadesData.forEach((atividade: { moduloId: string; ordemExibicao: number; createdAt: string }) => {
           const modulo = modulosComAtividadesMap.get(atividade.moduloId)
           if (modulo) {
             modulo.atividades.push(atividade)
@@ -274,7 +274,7 @@ export default function MateriaisClientPage() {
     }
 
     fetchModulosEAtividades()
-  }, [frenteSelecionada, frentes])
+  }, [frenteSelecionada, frentes, supabase])
 
   React.useEffect(() => {
     const fetchRegras = async () => {
@@ -547,7 +547,7 @@ export default function MateriaisClientPage() {
           <CardHeader>
             <CardTitle>Nenhum conteúdo encontrado</CardTitle>
             <CardDescription>
-              Clique em "Gerar Estrutura" para criar os slots de atividades automaticamente.
+              Clique em &quot;Gerar Estrutura&quot; para criar os slots de atividades automaticamente.
             </CardDescription>
           </CardHeader>
         </Card>
