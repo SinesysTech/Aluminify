@@ -71,6 +71,7 @@ export const CalendarDatePicker = React.forwardRef<
     },
     _ref
   ) => {
+    void _ref; // Forwarded ref intentionally unused in this implementation
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
     const [selectedRange, setSelectedRange] = React.useState<string | null>(
       null

@@ -358,7 +358,7 @@ export async function getAgendamentosAluno(alunoId: string): Promise<Agendamento
 
   // Verificar autenticação do usuário
   const { data: { user }, error: authError } = await supabase.auth.getUser()
-  
+
   if (authError || !user) {
     console.error('Authentication error in getAgendamentosAluno:', authError)
     return []
@@ -369,6 +369,21 @@ export async function getAgendamentosAluno(alunoId: string): Promise<Agendamento
     console.error('User mismatch: authenticated user is not the same as requested aluno_id')
     return []
   }
+
+  // Primeiro, tentar uma query simples para diagnosticar
+  const { data: simpleData, error: simpleError } = await supabase
+    .from('agendamentos')
+    .select('*')
+    .eq('aluno_id', alunoId)
+    .limit(1)
+
+  console.log('Simple query result:', {
+    hasData: !!simpleData,
+    count: simpleData?.length || 0,
+    hasError: !!simpleError,
+    errorCode: simpleError?.code,
+    errorMessage: simpleError?.message
+  })
 
   const { data, error } = await supabase
     .from('agendamentos')
