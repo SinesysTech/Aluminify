@@ -522,11 +522,7 @@ export class CronogramaService {
     console.log('[CronogramaService] Frentes encontradas por disciplina (COM filtro):',
       Array.from(frentesPorDisciplina.entries()).map(([discId, nomes]) => {
         const primeiraFrente = frentesData?.find((f: FrenteValidacaoResult) => f.disciplina_id === discId);
-        const disciplinaNome = primeiraFrente?.disciplinas
-          ? (Array.isArray(primeiraFrente.disciplinas)
-            ? primeiraFrente.disciplinas[0]?.nome
-            : primeiraFrente.disciplinas?.nome)
-          : 'Desconhecida';
+        const disciplinaNome = getDisciplinaNome(primeiraFrente?.disciplinas) || 'Desconhecida';
         return {
           disciplina_id: discId,
           disciplina_nome: disciplinaNome,
@@ -575,14 +571,14 @@ export class CronogramaService {
       // Agrupar módulos por frente
       const modulosPorFrenteSemFiltro = new Map<string, DiagnosticoFrente>();
       todosModulosSemFiltro?.forEach((modulo: ModuloQueryResult) => {
-        const frenteId = modulo.frente_id;
+        const frenteId = modulo.frente_id || '';
         if (!modulosPorFrenteSemFiltro.has(frenteId)) {
-          const frente = modulo.frentes;
+          const frente = getFrenteInfo(modulo.frentes);
           modulosPorFrenteSemFiltro.set(frenteId, {
             frente: {
               id: frente?.id,
               nome: frente?.nome,
-              disciplina: Array.isArray(frente?.disciplinas) ? frente.disciplinas[0]?.nome : frente?.disciplinas?.nome,
+              disciplina: getDisciplinaNome(frente?.disciplinas),
               curso_id: frente?.curso_id
             },
             modulos: []
@@ -590,8 +586,8 @@ export class CronogramaService {
         }
         modulosPorFrenteSemFiltro.get(frenteId)!.modulos.push({
           id: modulo.id,
-          nome: modulo.nome,
-          curso_id: modulo.curso_id
+          nome: modulo.nome || '',
+          curso_id: modulo.curso_id ?? null
         });
       });
 
@@ -652,10 +648,10 @@ export class CronogramaService {
 
     console.log('🔍 [CronogramaService] RESULTADO DA BUSCA DE MÓDULOS:', {
       total_encontrados: modulosData?.length || 0,
-      frentes_com_modulos: new Set(modulosData?.map((m: ModuloQueryResult) => m.frente_id) || []).size,
+      frentes_com_modulos: new Set(modulosData?.map((m: ModuloQueryResult) => m.frente_id || '') || []).size,
       total_frentes_esperadas: frenteIds.length,
       modulos_por_frente: modulosData?.reduce((acc: Record<string, number>, m: ModuloQueryResult) => {
-        const frenteId = m.frente_id;
+        const frenteId = m.frente_id || '';
         if (!acc[frenteId]) {
           acc[frenteId] = 0;
         }
@@ -665,7 +661,7 @@ export class CronogramaService {
     });
 
     // Verificar quais frentes NÃO têm módulos
-    const frentesComModulos = new Set(modulosData?.map((m: ModuloQueryResult) => m.frente_id) || []);
+    const frentesComModulos = new Set(modulosData?.map((m: ModuloQueryResult) => m.frente_id || '') || []);
     const frentesSemModulos = frenteIds.filter(id => !frentesComModulos.has(id));
     if (frentesSemModulos.length > 0) {
       console.error('🔍 [CronogramaService] ❌❌❌ FRENTES SEM MÓDULOS ENCONTRADAS:',
@@ -685,7 +681,7 @@ export class CronogramaService {
 
     // Agrupar módulos por frente para validação
     modulosData?.forEach((modulo: ModuloQueryResult) => {
-      const frenteId = modulo.frente_id;
+      const frenteId = modulo.frente_id || '';
       if (!modulosPorFrente.has(frenteId)) {
         modulosPorFrente.set(frenteId, []);
       }
@@ -696,15 +692,8 @@ export class CronogramaService {
       Array.from(modulosPorFrente.entries()).map(([frenteId, moduloIds]) => {
         const frente = frentesData?.find((f: FrenteValidacaoResult) => f.id === frenteId);
         const moduloComFrente = modulosData?.find((m: ModuloQueryResult) => m.frente_id === frenteId);
-        const frenteInfo = moduloComFrente?.frentes;
-        let disciplinaNome = 'Desconhecida';
-        if (frenteInfo?.disciplinas) {
-          if (Array.isArray(frenteInfo.disciplinas)) {
-            disciplinaNome = frenteInfo.disciplinas[0]?.nome || 'Desconhecida';
-          } else {
-            disciplinaNome = frenteInfo.disciplinas.nome || 'Desconhecida';
-          }
-        }
+        const frenteInfo = getFrenteInfo(moduloComFrente?.frentes);
+        const disciplinaNome = getDisciplinaNome(frenteInfo?.disciplinas) || 'Desconhecida';
         return {
           frente_id: frenteId,
           frente_nome: frente?.nome || frenteInfo?.nome || 'Desconhecida',
@@ -735,7 +724,7 @@ export class CronogramaService {
       // Log detalhado dos módulos antes do filtro
       const modulosPorFrenteAntes = new Map<string, { total: number; ids: string[] }>();
       modulosData?.forEach((modulo: ModuloQueryResult) => {
-        const frenteId = modulo.frente_id;
+        const frenteId = modulo.frente_id || '';
         if (!modulosPorFrenteAntes.has(frenteId)) {
           modulosPorFrenteAntes.set(frenteId, { total: 0, ids: [] });
         }
@@ -771,8 +760,8 @@ export class CronogramaService {
 
       modulosData?.forEach((modulo: ModuloQueryResult) => {
         if (moduloIds.includes(modulo.id)) {
-          frentesComModulosSelecionados.add(modulo.frente_id);
-          const frenteId = modulo.frente_id;
+          const frenteId = modulo.frente_id || '';
+          frentesComModulosSelecionados.add(frenteId);
           if (!modulosPorFrenteDepois.has(frenteId)) {
             modulosPorFrenteDepois.set(frenteId, { total: 0, ids: [] });
           }
@@ -849,14 +838,17 @@ export class CronogramaService {
           cursoId,
           total_modulos_selecionados: modulosSelecionados.length,
           total_modulos_encontrados: modulosSelecionadosData?.length || 0,
-          modulos_fora_das_frentes: modulosForaDasFrentes.map((m: ModuloSelecionadoQueryResult) => ({
-            id: m.id,
-            frente_id: m.frente_id,
-            curso_id: m.curso_id,
-            frente_nome: m.frentes?.nome,
-            frente_curso_id: m.frentes?.curso_id,
-            disciplina_nome: m.frentes?.disciplinas?.nome,
-          })),
+          modulos_fora_das_frentes: modulosForaDasFrentes.map((m: ModuloSelecionadoQueryResult) => {
+            const frenteInfo = getFirst(m.frentes);
+            return {
+              id: m.id,
+              frente_id: m.frente_id,
+              curso_id: m.curso_id,
+              frente_nome: frenteInfo?.nome,
+              frente_curso_id: frenteInfo?.curso_id,
+              disciplina_nome: getFirst(frenteInfo?.disciplinas)?.nome,
+            };
+          }),
         });
       }
 
@@ -897,7 +889,9 @@ export class CronogramaService {
       const aulasPorFrente = new Map<string, { total: number; prioridade_0: number; prioridade_null: number; prioridade_menor_1: number; prioridade_maior_igual_1: number }>();
 
       todasAulasSemFiltro.forEach((aula: AulaQueryResult) => {
-        const frenteId = aula.modulos?.frentes?.id;
+        const modulo = getModuloInfo(aula.modulos);
+        const frente = getFrenteInfo(modulo?.frentes);
+        const frenteId = frente?.id;
         if (!frenteId) return;
 
         if (!aulasPorFrente.has(frenteId)) {
@@ -1022,8 +1016,9 @@ export class CronogramaService {
         // Filtrar por curso_id em memória baseado na frente
         if (aulasDataSemFiltro) {
           const aulasFiltradas = aulasDataSemFiltro.filter((aula: AulaQueryResult) => {
-            const frenteCursoId = aula.modulos?.frentes?.curso_id;
-            return frenteCursoId === cursoId;
+            const modulo = getModuloInfo(aula.modulos);
+            const frente = getFrenteInfo(modulo?.frentes);
+            return frente?.curso_id === cursoId;
           });
 
           if (aulasFiltradas.length === 0) {
@@ -1031,20 +1026,25 @@ export class CronogramaService {
           }
 
           // Continuar com aulasFiltradas
-          const aulas: AulaCompleta[] = aulasFiltradas.map((aula: AulaQueryResult) => ({
-            id: aula.id,
-            nome: aula.nome,
-            numero_aula: aula.numero_aula,
-            tempo_estimado_minutos: aula.tempo_estimado_minutos ?? TEMPO_PADRAO_MINUTOS,
-            prioridade: aula.prioridade ?? 1,
-            modulo_id: aula.modulos.id,
-            modulo_nome: aula.modulos.nome,
-            numero_modulo: aula.modulos.numero_modulo,
-            frente_id: aula.modulos.frentes.id,
-            frente_nome: aula.modulos.frentes.nome,
-            disciplina_id: aula.modulos.frentes.disciplinas.id,
-            disciplina_nome: aula.modulos.frentes.disciplinas.nome,
-          }));
+          const aulas: AulaCompleta[] = aulasFiltradas.map((aula: AulaQueryResult) => {
+            const modulo = getModuloInfo(aula.modulos);
+            const frente = getFrenteInfo(modulo?.frentes);
+            const disciplina = getFirst(frente?.disciplinas);
+            return {
+              id: aula.id,
+              nome: aula.nome,
+              numero_aula: aula.numero_aula ?? null,
+              tempo_estimado_minutos: aula.tempo_estimado_minutos ?? TEMPO_PADRAO_MINUTOS,
+              prioridade: aula.prioridade ?? 1,
+              modulo_id: modulo?.id || '',
+              modulo_nome: modulo?.nome || '',
+              numero_modulo: modulo?.numero_modulo ?? null,
+              frente_id: frente?.id || '',
+              frente_nome: frente?.nome || '',
+              disciplina_id: disciplina?.id || '',
+              disciplina_nome: disciplina?.nome || '',
+            };
+          });
 
           return aulas;
         }
@@ -1066,14 +1066,16 @@ export class CronogramaService {
     console.log('🔍 [CronogramaService] Aulas encontradas ANTES do filtro de curso:', {
       total: aulasDataRaw.length,
       por_frente: aulasDataRaw.reduce((acc: FrenteStatsAccumulator, aula: AulaQueryResult) => {
-        const frenteId = aula.modulos?.frentes?.id;
-        const frenteNome = aula.modulos?.frentes?.nome;
+        const modulo = getModuloInfo(aula.modulos);
+        const frente = getFrenteInfo(modulo?.frentes);
+        const frenteId = frente?.id || '';
+        const frenteNome = frente?.nome || '';
         if (!acc[frenteId]) {
           acc[frenteId] = { frente_nome: frenteNome, total: 0, curso_ids: new Set() };
         }
         acc[frenteId].total++;
-        if (aula.modulos?.frentes?.curso_id) {
-          acc[frenteId].curso_ids.add(aula.modulos.frentes.curso_id);
+        if (frente?.curso_id) {
+          acc[frenteId].curso_ids.add(frente.curso_id);
         }
         return acc;
       }, {} as FrenteStatsAccumulator)
@@ -1084,8 +1086,9 @@ export class CronogramaService {
     if (cursoId) {
       const aulasAntesFiltro = aulasDataRaw.length;
       aulasData = aulasDataRaw.filter((aula: AulaQueryResult) => {
-        const frenteCursoId = aula.modulos?.frentes?.curso_id;
-        return frenteCursoId === cursoId;
+        const modulo = getModuloInfo(aula.modulos);
+        const frente = getFrenteInfo(modulo?.frentes);
+        return frente?.curso_id === cursoId;
       });
 
       console.log('🔍 [CronogramaService] Filtro de curso aplicado:', {
@@ -1094,8 +1097,10 @@ export class CronogramaService {
         aulas_depois: aulasData.length,
         aulas_removidas: aulasAntesFiltro - aulasData.length,
         por_frente: aulasData.reduce((acc: FrenteCountAccumulator, aula: AulaQueryResult) => {
-          const frenteId = aula.modulos?.frentes?.id;
-          const frenteNome = aula.modulos?.frentes?.nome;
+          const modulo = getModuloInfo(aula.modulos);
+          const frente = getFrenteInfo(modulo?.frentes);
+          const frenteId = frente?.id || '';
+          const frenteNome = frente?.nome || '';
           if (!acc[frenteId]) {
             acc[frenteId] = { frente_nome: frenteNome, total: 0 };
           }
@@ -1107,9 +1112,11 @@ export class CronogramaService {
       if (aulasData.length === 0) {
         // Log detalhado antes de lançar erro
         const frentesComCursoDiferente = aulasDataRaw.reduce((acc: FrenteComCursoDiferenteAccumulator, aula: AulaQueryResult) => {
-          const frenteId = aula.modulos?.frentes?.id;
-          const frenteNome = aula.modulos?.frentes?.nome;
-          const frenteCursoId = aula.modulos?.frentes?.curso_id;
+          const modulo = getModuloInfo(aula.modulos);
+          const frente = getFrenteInfo(modulo?.frentes);
+          const frenteId = frente?.id ?? '';
+          const frenteNome = frente?.nome ?? 'Desconhecida';
+          const frenteCursoId = frente?.curso_id ?? null;
           if (!acc[frenteId]) {
             acc[frenteId] = { frente_nome: frenteNome, curso_id: frenteCursoId, total: 0 };
           }
@@ -1132,20 +1139,26 @@ export class CronogramaService {
     }
 
     // Mapear dados para estrutura mais simples
-    const aulas: AulaCompleta[] = aulasData.map((aula: AulaQueryResult) => ({
-      id: aula.id,
-      nome: aula.nome,
-      numero_aula: aula.numero_aula,
-      tempo_estimado_minutos: aula.tempo_estimado_minutos,
-      prioridade: aula.prioridade ?? 0,
-      modulo_id: aula.modulos.id,
-      modulo_nome: aula.modulos.nome,
-      numero_modulo: aula.modulos.numero_modulo,
-      frente_id: aula.modulos.frentes.id,
-      frente_nome: aula.modulos.frentes.nome,
-      disciplina_id: aula.modulos.frentes.disciplinas.id,
-      disciplina_nome: aula.modulos.frentes.disciplinas.nome,
-    }));
+    const aulas: AulaCompleta[] = aulasData.map((aula: AulaQueryResult) => {
+      const modulo = getModuloInfo(aula.modulos);
+      const frente = getFrenteInfo(modulo?.frentes);
+      const disciplina = getFirst(frente?.disciplinas);
+
+      return {
+        id: aula.id,
+        nome: aula.nome,
+        numero_aula: aula.numero_aula ?? null,
+        tempo_estimado_minutos: aula.tempo_estimado_minutos ?? null,
+        prioridade: aula.prioridade ?? 0,
+        modulo_id: modulo?.id ?? '',
+        modulo_nome: modulo?.nome ?? '',
+        numero_modulo: modulo?.numero_modulo ?? null,
+        frente_id: frente?.id ?? '',
+        frente_nome: frente?.nome ?? '',
+        disciplina_id: disciplina?.id ?? '',
+        disciplina_nome: disciplina?.nome ?? '',
+      };
+    });
 
     // Validar que todas as frentes selecionadas têm aulas
     const frentesComAulas = new Set<string>();
