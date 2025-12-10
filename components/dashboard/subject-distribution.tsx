@@ -12,10 +12,15 @@ export function SubjectDistribution({
   data,
   totalHours = 42,
 }: SubjectDistributionProps) {
-  // Calcular os offsets para o stroke-dasharray
-  let currentOffset = 0
   const radius = 15.91549430918954
   const circumference = 2 * Math.PI * radius
+
+  // Pre-compute offsets to avoid mutation during render
+  const itemsWithOffsets = data.map((item, index) => {
+    const previousItems = data.slice(0, index)
+    const offset = previousItems.reduce((acc, prev) => acc + (prev.percentage / 100) * circumference, 0)
+    return { item, offset }
+  })
 
   return (
     <Card>
@@ -37,10 +42,8 @@ export function SubjectDistribution({
                 className="dark:stroke-slate-700"
               />
               {/* Segmentos do gráfico */}
-              {data.map((item, index) => {
+              {itemsWithOffsets.map(({ item, offset }, index) => {
                 const dashArray = `${(item.percentage / 100) * circumference} ${circumference}`
-                const offset = -currentOffset
-                currentOffset += (item.percentage / 100) * circumference
 
                 return (
                   <circle
@@ -51,7 +54,7 @@ export function SubjectDistribution({
                     fill="none"
                     stroke={item.color}
                     strokeDasharray={dashArray}
-                    strokeDashoffset={offset}
+                    strokeDashoffset={-offset}
                     strokeWidth="4"
                     transform="rotate(-90 18 18)"
                   />

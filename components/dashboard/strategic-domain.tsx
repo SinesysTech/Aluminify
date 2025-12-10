@@ -2,8 +2,6 @@
 
 import type { StrategicDomain } from '@/types/dashboard'
 import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { cn } from '@/lib/utils'
 
 interface StrategicDomainProps {
   data: StrategicDomain

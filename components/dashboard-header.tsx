@@ -2,7 +2,6 @@
 
 import { Separator } from '@/components/ui/separator'
 import {
-  SidebarInset,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { ThemeToggle } from '@/components/theme-toggle'

@@ -475,7 +475,11 @@ export async function getAgendamentoById(id: string): Promise<AgendamentoComDeta
   }
 
   // Mapear os campos para o formato esperado
-  const appointment = data as any
+  type AppointmentData = {
+    aluno?: { id: string; nome_completo?: string; email: string };
+    professor?: { id: string; nome_completo?: string; email: string; foto_url?: string };
+  } & Record<string, unknown>;
+  const appointment = data as AppointmentData
   return {
     ...appointment,
     aluno: appointment.aluno ? {
