@@ -98,7 +98,7 @@ type Modulo = {
   id: string
   nome: string
   numero_modulo: number | null
-  frente_id: string
+  frente_id: string | null
 }
 
 
@@ -432,8 +432,8 @@ export default function FlashcardsAdminClient() {
         throw new Error(errorMessage)
       }
 
-      setFlashcards(body.data || [])
-      setTotal(body.total || 0)
+      setFlashcards((body.data as Flashcard[]) || [])
+      setTotal((body.total as number) || 0)
     } catch (err) {
       console.error('[flashcards client] Erro ao carregar flashcards:', err)
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar flashcards'
