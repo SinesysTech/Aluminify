@@ -5,7 +5,7 @@ import { GraduationCap, Users } from 'lucide-react';
 
 export default function AuthPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+    <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-background to-muted p-4">
       <div className="w-full max-w-4xl space-y-8">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold tracking-tight">Bem-vindo!</h1>
