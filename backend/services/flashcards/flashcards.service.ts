@@ -743,7 +743,7 @@ export class FlashcardsService {
         const moduloIdsConcluidos = Array.from(
           new Set(
             (atividadesConcluidas ?? [])
-              .map((a: any) => a.atividades?.modulo_id)
+              .map((a: { atividades?: { modulo_id?: string } }) => a.atividades?.modulo_id)
               .filter(Boolean)
           )
         );
@@ -786,8 +786,8 @@ export class FlashcardsService {
       pergunta: c.pergunta as string,
       resposta: c.resposta as string,
       importancia: Array.isArray(c.modulos)
-        ? (c.modulos as any)[0]?.importancia
-        : (c as any).modulos?.importancia,
+        ? (c.modulos as ModuloRow[])[0]?.importancia
+        : (c.modulos as ModuloRow | undefined)?.importancia,
     }));
 
     const progressMap = await this.fetchProgressMap(
@@ -1120,8 +1120,8 @@ export class FlashcardsService {
     console.log('[flashcards] Buscando módulos com relacionamentos para', moduloIdsFromFlashcards.length, 'módulos');
     console.log('[flashcards] IDs dos módulos a buscar:', moduloIdsFromFlashcards);
     
-    let modulosData: any[] | null = null;
-    let modulosError: any = null;
+    let modulosData: ModuloComFrenteRow[] | null = null;
+    let modulosError: unknown = null;
 
     try {
       console.log('[flashcards] Executando query de módulos com relacionamentos...');
@@ -1197,31 +1197,35 @@ export class FlashcardsService {
     // Criar map de módulos
     const modulosMap = new Map(
       (modulosData || [])
-        .filter((m: any) => {
+        .filter((m: ModuloComFrenteRow) => {
           // Verificar se o módulo tem os relacionamentos necessários
-          return m && m.frentes && m.frentes.disciplinas;
+          const frentes = Array.isArray(m.frentes) ? m.frentes[0] : m.frentes;
+          return m && frentes && frentes.disciplinas;
         })
-        .map((m: any) => [
-          m.id,
-          {
-            id: m.id,
-            nome: m.nome,
-            numero_modulo: m.numero_modulo,
-            frente: {
-              id: m.frentes.id,
-              nome: m.frentes.nome,
-              disciplina: {
-                id: m.frentes.disciplinas.id,
-                nome: m.frentes.disciplinas.nome,
+        .map((m: ModuloComFrenteRow) => {
+          const frentes = Array.isArray(m.frentes) ? m.frentes[0]! : m.frentes!;
+          return [
+            m.id,
+            {
+              id: m.id,
+              nome: m.nome,
+              numero_modulo: m.numero_modulo,
+              frente: {
+                id: frentes.id,
+                nome: frentes.nome,
+                disciplina: {
+                  id: frentes.disciplina_id,
+                  nome: frentes.nome,
+                },
               },
             },
-          },
-        ]),
+          ];
+        }),
     );
 
     // Montar resposta final
     const flashcards = flashcardsData
-      .map((item: any) => {
+      .map((item: FlashcardRow) => {
         const modulo = modulosMap.get(item.modulo_id);
         if (!modulo) return null;
 

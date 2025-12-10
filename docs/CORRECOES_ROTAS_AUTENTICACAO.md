@@ -9,28 +9,32 @@ Implementadas correções críticas no sistema de autenticação conforme coment
 ## ✅ Correção 1: Rotas Públicas no Middleware
 
 ### Problema Identificado
+
 O middleware não marcava explicitamente as novas rotas de login como públicas, podendo causar redirecionamentos inesperados.
 
 ### Solução Implementada
+
 **Arquivo:** `lib/middleware.ts`
 
 Adicionadas as seguintes rotas à constante `publicPaths`:
+
 - `/auth/aluno/login`
 - `/auth/professor/login`
 - `/auth/professor/cadastro`
 
 ```typescript
 const publicPaths = [
-  '/login',
-  '/auth',
-  '/auth/aluno/login',
-  '/auth/professor/login',
-  '/auth/professor/cadastro',
-  '/api/chat/attachments',
-]
+  "/login",
+  "/auth",
+  "/auth/aluno/login",
+  "/auth/professor/login",
+  "/auth/professor/cadastro",
+  "/api/chat/attachments",
+];
 ```
 
 ### Verificação Necessária
+
 - [x] Rotas adicionadas ao array `publicPaths`
 - [x] Lógica `isPublicPath` continua usando `startsWith`
 - [ ] **TESTE MANUAL**: Acessar cada rota sem autenticação e confirmar que não há redirecionamento para `/auth`
@@ -40,9 +44,11 @@ const publicPaths = [
 ## ✅ Correção 2: Deprecação do LoginForm Unificado
 
 ### Problema Identificado
+
 O componente `LoginForm` mantinha o fluxo de login unificado com seleção de tipo, criando potencial confusão com os novos fluxos separados.
 
 ### Solução Implementada
+
 **Arquivo:** `components/login-form.tsx`
 
 - **Marcado como deprecado** com JSDoc completo
@@ -61,10 +67,12 @@ O componente `LoginForm` mantinha o fluxo de login unificado com seleção de ti
 ```
 
 ### Rotas Afetadas
+
 - `/auth/login/page.tsx` - Já redirecionava para `/auth` (não precisa alteração)
 - Nenhuma outra rota importa o `LoginForm` diretamente
 
 ### Verificação Necessária
+
 - [x] Componente marcado como `@deprecated`
 - [x] Lógica de autenticação removida
 - [x] Redirecionamento automático implementado
@@ -76,6 +84,7 @@ O componente `LoginForm` mantinha o fluxo de login unificado com seleção de ti
 ## ✅ Correção 3: Documentação das Rotas de API
 
 ### Problema Identificado
+
 As rotas de API `/api/auth/signin` e `/api/auth/signup` mantinham fluxo genérico sem documentação clara sobre seu propósito e diferença em relação ao frontend.
 
 ### Solução Implementada
@@ -83,6 +92,7 @@ As rotas de API `/api/auth/signin` e `/api/auth/signup` mantinham fluxo genéric
 #### Arquivo: `app/api/auth/signin/route.ts`
 
 **Documentação JSDoc adicionada:**
+
 - **Uso recomendado**: Integrações externas e APIs
 - **Frontend principal**: Usa `createClient().auth.signInWithPassword()` diretamente
 - **Validação de role**: Endpoint não valida role (aceita aluno ou professor)
@@ -91,6 +101,7 @@ As rotas de API `/api/auth/signin` e `/api/auth/signup` mantinham fluxo genéric
 #### Arquivo: `app/api/auth/signup/route.ts`
 
 **Documentação JSDoc adicionada:**
+
 - **Uso recomendado**: Integrações externas, automações administrativas
 - **Frontend principal**: Usa `createClient().auth.signUp()` diretamente
 - **Comportamento**: SEMPRE cria professores, primeiro professor vira superadmin
@@ -99,11 +110,13 @@ As rotas de API `/api/auth/signin` e `/api/auth/signup` mantinham fluxo genéric
 - **Nota importante**: Sugestão de evolução futura para suportar outros tipos de usuário
 
 ### Alinhamento Arquitetural
+
 - **Frontend**: Continua usando Supabase client diretamente
 - **API Routes**: Servem integrações externas e automações
 - **Semântica preservada**: Signup sempre cria professor via frontend
 
 ### Verificação Necessária
+
 - [x] JSDoc completo em `/api/auth/signin/route.ts`
 - [x] JSDoc completo em `/api/auth/signup/route.ts`
 - [x] Documentação alinhada com comportamento real
@@ -114,6 +127,7 @@ As rotas de API `/api/auth/signin` e `/api/auth/signup` mantinham fluxo genéric
 ## 📋 Testes Recomendados
 
 ### Teste 1: Middleware - Rotas Públicas
+
 ```bash
 # Sem autenticação, acessar:
 1. http://localhost:3000/auth/aluno/login
@@ -124,6 +138,7 @@ As rotas de API `/api/auth/signin` e `/api/auth/signup` mantinham fluxo genéric
 ```
 
 ### Teste 2: LoginForm Deprecado
+
 ```bash
 # Se houver alguma rota que ainda renderize LoginForm:
 1. Acessar a rota
@@ -132,6 +147,7 @@ As rotas de API `/api/auth/signin` e `/api/auth/signup` mantinham fluxo genéric
 ```
 
 ### Teste 3: Fluxo Completo de Login
+
 ```bash
 # Fluxo aluno:
 1. Acessar /auth
@@ -156,18 +172,21 @@ As rotas de API `/api/auth/signin` e `/api/auth/signup` mantinham fluxo genéric
 ## 📊 Impacto das Mudanças
 
 ### Componentes Modificados
+
 - ✅ `lib/middleware.ts` - 3 rotas públicas adicionadas
 - ✅ `components/login-form.tsx` - Deprecado e simplificado (169 linhas removidas, 27 adicionadas)
 - ✅ `app/api/auth/signin/route.ts` - 19 linhas de documentação adicionadas
 - ✅ `app/api/auth/signup/route.ts` - 35 linhas de documentação adicionadas
 
 ### Componentes Não Modificados (já estavam corretos)
+
 - ✅ `components/aluno-login-form.tsx` - Fluxo específico de aluno
 - ✅ `components/professor-login-form.tsx` - Fluxo específico de professor
 - ✅ `components/professor-sign-up-form.tsx` - Fluxo de cadastro de professor
 - ✅ `app/auth/login/page.tsx` - Já redirecionava para `/auth`
 
 ### Arquitetura Final
+
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    Usuário Visitante                     │
@@ -227,19 +246,24 @@ As rotas de API `/api/auth/signin` e `/api/auth/signup` mantinham fluxo genéric
 ## 📝 Notas Técnicas
 
 ### Middleware - `startsWith` é seguro?
+
 Sim, a lógica com `startsWith` garante que:
+
 - `/auth/aluno/login` é público
 - `/auth/aluno/login/qualquer-coisa` também seria público (seguro, pois não existe)
 - `/auth` é público (tela de seleção)
 - `/auth/*` todas as subrotas de auth são públicas conforme esperado
 
 ### Por que manter API routes se frontend usa client direto?
+
 **Vantagens da abordagem atual:**
+
 - Frontend tem controle total e experiência otimizada (sem latência de API route)
 - API routes servem casos de uso legítimos (integrações, automações, webhooks)
 - Separação de responsabilidades: frontend não é único cliente do sistema
 
 **Alternativa futura:**
+
 - Migrar frontend para consumir `/api/auth/*` centralizaria lógica de autenticação
 - Facilitaria adição de lógica customizada (rate limiting, logging, analytics)
 - Trade-off: Adiciona latência de rede extra
