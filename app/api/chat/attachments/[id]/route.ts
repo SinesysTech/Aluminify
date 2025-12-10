@@ -33,7 +33,7 @@ export async function GET(
   // Verificar se o arquivo existe
   try {
     await fs.access(attachment.path);
-  } catch (error) {
+  } catch {
     console.error('[Chat Attachments] Arquivo não encontrado no caminho:', attachment.path);
     return NextResponse.json({ error: 'Arquivo não encontrado no servidor' }, { status: 404 });
   }

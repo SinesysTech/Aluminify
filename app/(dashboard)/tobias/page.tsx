@@ -21,7 +21,6 @@ import { ConversationsPanel } from '@/components/conversations-panel'
 import { Button } from '@/components/ui/button'
 import { MessageSquare, Paperclip, X } from 'lucide-react'
 import type { Conversation as ConversationType } from '@/backend/services/conversation/conversation.types'
-import { cn } from '@/lib/utils'
 
 interface ChatMessage {
   id: string
