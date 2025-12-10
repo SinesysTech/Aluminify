@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/client'
 import { Button } from '@/components/ui/button'
 import {
   Sidebar,
@@ -61,6 +60,7 @@ export function ConversationsSidebar({
 
   useEffect(() => {
     loadConversations()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken])
 
   const handleCreateConversation = async () => {

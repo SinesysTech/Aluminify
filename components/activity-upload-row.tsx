@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Upload, FileText, CheckCircle2, X, Loader2, Eye } from 'lucide-react'
+import { Upload, FileText, CheckCircle2, Loader2, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/client'
 import { cn } from '@/lib/utils'
@@ -13,7 +13,7 @@ const ALLOWED_TYPES = ['application/pdf']
 interface ActivityUploadRowProps {
   atividadeId: string
   titulo: string
-  tipo: string
+  tipo?: string
   arquivoUrl: string | null
   onUploadSuccess?: () => void
   className?: string
@@ -22,7 +22,6 @@ interface ActivityUploadRowProps {
 export function ActivityUploadRow({
   atividadeId,
   titulo,
-  tipo,
   arquivoUrl,
   onUploadSuccess,
   className,
@@ -62,13 +61,12 @@ export function ActivityUploadRow({
       }
 
       // Gerar nome único para o arquivo
-      const fileExt = file.name.split('.').pop() || 'pdf'
       const timestamp = Date.now()
       const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
       const filePath = `${atividadeId}/${timestamp}-${sanitizedFileName}`
 
       // Upload direto para o Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from(MATERIAIS_BUCKET)
         .upload(filePath, file, {
           contentType: 'application/pdf',
@@ -170,6 +168,7 @@ export function ActivityUploadRow({
             onChange={handleFileSelect}
             className="hidden"
             disabled={isUploading}
+            aria-label={`Selecionar arquivo PDF para ${titulo}`}
           />
 
           {hasFile ? (

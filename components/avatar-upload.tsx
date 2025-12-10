@@ -65,7 +65,7 @@ export const AvatarUpload = ({
     try {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
-      
+
       if (!session?.access_token) {
         throw new Error('Não autenticado')
       }
@@ -83,29 +83,33 @@ export const AvatarUpload = ({
 
       if (!response.ok) {
         const errorData = await response.json()
-        
+
         // Se for erro de bucket não configurado, mostrar mensagem mais útil
         if (errorData.error === 'Bucket de armazenamento não configurado') {
           const instructions = errorData.instructions || errorData.options || []
           throw new Error(
-            `${errorData.error}\n\n${errorData.message || ''}\n\n${instructions.join('\n')}`
+            `${errorData.error}
+
+${errorData.message || ''}
+
+${instructions.join('\n')}`
           )
         }
-        
+
         throw new Error(errorData.error || errorData.message || 'Erro ao fazer upload')
       }
 
       const data = await response.json()
       setAvatarUrl(data.avatar_url)
       setPreview(null)
-      
+
       // Atualizar sessão para refletir mudanças
-      const { data: { session: newSession } } = await supabase.auth.refreshSession()
-      
+      await supabase.auth.refreshSession()
+
       if (onUploadSuccess) {
         onUploadSuccess(data.avatar_url)
       }
-      
+
       // Forçar atualização do componente pai
       window.dispatchEvent(new Event('avatar-updated'))
     } catch (err) {
@@ -124,7 +128,7 @@ export const AvatarUpload = ({
     try {
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
-      
+
       if (!session?.access_token) {
         throw new Error('Não autenticado')
       }
@@ -142,13 +146,13 @@ export const AvatarUpload = ({
 
       setAvatarUrl(null)
       setPreview(null)
-      
+
       // Atualizar sessão
       await supabase.auth.refreshSession()
-      
+
       // Forçar atualização do componente pai
       window.dispatchEvent(new Event('avatar-updated'))
-      
+
       if (onUploadSuccess) {
         onUploadSuccess('')
       }
@@ -176,15 +180,20 @@ export const AvatarUpload = ({
       </div>
 
       <div className="flex flex-col items-center gap-2 w-full">
+        <label htmlFor="avatar-upload-input" className="sr-only">
+          Upload de foto de perfil
+        </label>
         <input
+          id="avatar-upload-input"
           ref={fileInputRef}
           type="file"
           accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
           onChange={handleFileSelect}
           className="hidden"
           disabled={isUploading}
+          aria-label="Selecionar arquivo de imagem para foto de perfil"
         />
-        
+
         <div className="flex gap-2">
           <Button
             type="button"
@@ -196,7 +205,7 @@ export const AvatarUpload = ({
             <Upload className="h-4 w-4 mr-2" />
             {avatarUrl ? 'Alterar foto' : 'Enviar foto'}
           </Button>
-          
+
           {avatarUrl && (
             <Button
               type="button"
@@ -222,4 +231,3 @@ export const AvatarUpload = ({
     </div>
   )
 }
-

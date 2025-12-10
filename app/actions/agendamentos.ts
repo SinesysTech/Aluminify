@@ -184,11 +184,14 @@ export async function createAgendamento(data: Omit<Agendamento, 'id' | 'created_
     end: new Date(b.data_fim)
   }))
 
-  // Validate appointment
+  // Validate appointment - filter and map rules to ensure ativo is boolean
+  const validRules = (rules || [])
+    .filter((r): r is typeof r & { ativo: boolean } => r.ativo === true)
+
   const validationResult = validateAppointment(
     { start: dataInicio, end: dataFim },
     {
-      rules: rules,
+      rules: validRules,
       existingSlots,
       minAdvanceMinutes
     }
@@ -202,13 +205,17 @@ export async function createAgendamento(data: Omit<Agendamento, 'id' | 'created_
   const initialStatus = config?.auto_confirmar ? 'confirmado' : 'pendente'
   const confirmadoEm = config?.auto_confirmar ? new Date().toISOString() : null
 
+  // Garantir que as datas sejam strings ISO para o banco
   const payload = {
     ...data,
+    professor_id: data.professor_id,
     aluno_id: user.id,
+    data_inicio: typeof data.data_inicio === 'string' ? data.data_inicio : dataInicio.toISOString(),
+    data_fim: typeof data.data_fim === 'string' ? data.data_fim : dataFim.toISOString(),
     status: initialStatus,
     confirmado_em: confirmadoEm,
-    data_inicio: typeof data.data_inicio === 'string' ? data.data_inicio : data.data_inicio.toISOString(),
-    data_fim: typeof data.data_fim === 'string' ? data.data_fim : data.data_fim.toISOString(),
+    observacoes: data.observacoes || null,
+    link_reuniao: data.link_reuniao || null
   }
 
   const { data: result, error } = await supabase
@@ -219,7 +226,7 @@ export async function createAgendamento(data: Omit<Agendamento, 'id' | 'created_
 
   if (error) {
     console.error('Error creating appointment:', error)
-    throw new Error('Failed to create appointment')
+    throw new Error(error.message || 'Falha ao criar agendamento')
   }
 
   revalidatePath('/agendamentos')
@@ -300,9 +307,12 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
   }))
 
   // Use the validation library to generate available slots
+  // Filter rules to ensure ativo is boolean
+  const validRules = rules.filter((r): r is typeof r & { ativo: boolean } => r.ativo === true)
+
   const slots = generateAvailableSlots(
     date,
-    rules,
+    validRules,
     existingSlots,
     30, // slot duration in minutes
     minAdvanceMinutes
@@ -339,7 +349,11 @@ export async function getAgendamentosProfessor(
     .from('agendamentos')
     .select(`
       *,
-      aluno:alunos!agendamentos_aluno_id_fkey(id, nome, email, avatar_url)
+      aluno:alunos!agendamentos_aluno_id_fkey(
+        id, 
+        nome_completo,
+        email
+      )
     `)
     .eq('professor_id', professorId)
     .order('data_inicio', { ascending: true })
@@ -385,17 +399,78 @@ export async function getAgendamentosProfessor(
 export async function getAgendamentosAluno(alunoId: string): Promise<AgendamentoComDetalhes[]> {
   const supabase = await createClient()
 
+  // Verificar autenticação do usuário
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    console.error('Authentication error in getAgendamentosAluno:', authError)
+    return []
+  }
+
+  // Verificar se o usuário autenticado é o mesmo que está buscando os agendamentos
+  if (user.id !== alunoId) {
+    console.error('User mismatch: authenticated user is not the same as requested aluno_id')
+    return []
+  }
+
+  // Primeiro, tentar uma query simples para diagnosticar
+  const { data: simpleData, error: simpleError } = await supabase
+    .from('agendamentos')
+    .select('*')
+    .eq('aluno_id', alunoId)
+    .limit(1)
+
+  console.log('Simple query result:', {
+    hasData: !!simpleData,
+    count: simpleData?.length || 0,
+    hasError: !!simpleError,
+    errorCode: simpleError?.code,
+    errorMessage: simpleError?.message
+  })
+
   const { data, error } = await supabase
     .from('agendamentos')
     .select(`
       *,
-      professor:professores!agendamentos_professor_id_fkey(id, nome, email, avatar_url)
+      professor:professores!agendamentos_professor_id_fkey(
+        id, 
+        nome_completo,
+        email, 
+        foto_url
+      )
     `)
     .eq('aluno_id', alunoId)
     .order('data_inicio', { ascending: false })
 
   if (error) {
-    console.error('Error fetching student appointments:', error)
+    console.error('Error fetching student appointments:', {
+      message: error.message || 'No message',
+      details: error.details || 'No details',
+      hint: error.hint || 'No hint',
+      code: error.code || 'No code',
+      alunoId,
+      userId: user.id,
+      errorObject: JSON.stringify(error)
+    })
+
+    // Se houver erro no join, tentar query simples como fallback
+    if (simpleData && simpleData.length > 0) {
+      console.log('Using simple query fallback, found', simpleData.length, 'appointments')
+
+      // Buscar todos os agendamentos sem join
+      const { data: allSimpleData } = await supabase
+        .from('agendamentos')
+        .select('*')
+        .eq('aluno_id', alunoId)
+        .order('data_inicio', { ascending: false })
+
+      // Retornar dados sem informações do professor
+      return (allSimpleData || []).map((agendamento: Record<string, unknown>) => ({
+        ...agendamento,
+        professor: undefined
+      })) as AgendamentoComDetalhes[]
+    }
+
     return []
   }
 
@@ -421,8 +496,17 @@ export async function getAgendamentoById(id: string): Promise<AgendamentoComDeta
     .from('agendamentos')
     .select(`
       *,
-      aluno:alunos!agendamentos_aluno_id_fkey(id, nome, email, avatar_url),
-      professor:professores!agendamentos_professor_id_fkey(id, nome, email, avatar_url)
+      aluno:alunos!agendamentos_aluno_id_fkey(
+        id, 
+        nome_completo,
+        email
+      ),
+      professor:professores!agendamentos_professor_id_fkey(
+        id, 
+        nome_completo,
+        email, 
+        foto_url
+      )
     `)
     .eq('id', id)
     .single()
@@ -647,8 +731,17 @@ export async function updateAgendamento(id: string, data: Partial<Agendamento>) 
     throw new Error('Unauthorized')
   }
 
-  // Remove fields that shouldn't be updated directly
-  const { id: _id, created_at, updated_at, ...updateData } = data
+  // Remove fields that shouldn't be updated directly and convert dates to strings
+  const { id: _id, created_at: _created_at, updated_at: _updated_at, ...restData } = data
+  void _id; void _created_at; void _updated_at;
+
+  const updateData: Record<string, unknown> = { ...restData }
+  if (updateData.data_inicio instanceof Date) {
+    updateData.data_inicio = updateData.data_inicio.toISOString()
+  }
+  if (updateData.data_fim instanceof Date) {
+    updateData.data_fim = updateData.data_fim.toISOString()
+  }
 
   const { data: result, error } = await supabase
     .from('agendamentos')
@@ -708,7 +801,18 @@ export async function getConfiguracoesProfessor(professorId: string): Promise<Co
     }
   }
 
-  return data
+  // Map database data to ensure non-nullable fields have defaults
+  return {
+    id: data.id,
+    professor_id: data.professor_id,
+    auto_confirmar: data.auto_confirmar ?? false,
+    tempo_antecedencia_minimo: data.tempo_antecedencia_minimo ?? 60,
+    tempo_lembrete_minutos: data.tempo_lembrete_minutos ?? 1440,
+    link_reuniao_padrao: data.link_reuniao_padrao,
+    mensagem_confirmacao: data.mensagem_confirmacao,
+    created_at: data.created_at ?? undefined,
+    updated_at: data.updated_at ?? undefined
+  }
 }
 
 export async function updateConfiguracoesProfessor(
@@ -722,7 +826,8 @@ export async function updateConfiguracoesProfessor(
     throw new Error('Unauthorized')
   }
 
-  const { id, created_at, updated_at, ...configData } = config
+  const { id: _id, created_at: _created_at, updated_at: _updated_at, ...configData } = config
+  void _id; void _created_at; void _updated_at;
 
   const { data, error } = await supabase
     .from('agendamento_configuracoes')
@@ -767,7 +872,17 @@ export async function getIntegracaoProfessor(professorId: string): Promise<Profe
     }
   }
 
-  return data
+  // Map database data to ProfessorIntegracao type
+  return {
+    id: data.id,
+    professor_id: data.professor_id,
+    provider: data.provider as 'google' | 'zoom' | 'default',
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    token_expiry: data.token_expiry,
+    created_at: data.created_at ?? undefined,
+    updated_at: data.updated_at ?? undefined
+  }
 }
 
 export async function updateIntegracaoProfessor(
@@ -781,13 +896,15 @@ export async function updateIntegracaoProfessor(
     throw new Error('Unauthorized')
   }
 
-  const { id, created_at, updated_at, ...integrationData } = integration
+  const { id: _id, created_at: _created_at, updated_at: _updated_at, ...integrationData } = integration
+  void _id; void _created_at; void _updated_at;
 
   const { data, error } = await supabase
     .from('professor_integracoes')
     .upsert({
       ...integrationData,
-      professor_id: professorId
+      professor_id: professorId,
+      provider: integrationData.provider || 'default'
     })
     .select()
     .single()
@@ -952,29 +1069,8 @@ export async function validateAgendamento(
   return { valid: true }
 }
 
-// =============================================
-// Notification Helper
-// =============================================
-
-async function createNotificacao(
-  agendamentoId: string,
-  tipo: AgendamentoNotificacao['tipo'],
-  destinatarioId: string
-) {
-  const supabase = await createClient()
-
-  const { error } = await supabase
-    .from('agendamento_notificacoes')
-    .insert({
-      agendamento_id: agendamentoId,
-      tipo,
-      destinatario_id: destinatarioId
-    })
-
-  if (error) {
-    console.error('Error creating notification:', error)
-  }
-}
+// Note: Notifications are now handled by database trigger notify_agendamento_change()
+// The manual _createNotificacao function was removed to avoid duplicates
 
 // =============================================
 // Statistics

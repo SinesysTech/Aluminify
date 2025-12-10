@@ -162,6 +162,7 @@ export function CursoTable() {
   }, [])
 
   const createForm = useForm<CursoFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(cursoSchema) as any,
     defaultValues: {
       segmentId: null,
@@ -181,6 +182,7 @@ export function CursoTable() {
   })
 
   const editForm = useForm<CursoFormValues>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(cursoSchema) as any,
     defaultValues: {
       segmentId: null,

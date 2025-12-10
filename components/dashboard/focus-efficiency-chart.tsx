@@ -42,7 +42,7 @@ export function FocusEfficiencyChart({ data }: FocusEfficiencyChartProps) {
           <div className="flex h-full items-end justify-between gap-2">
             {data.map((day, index) => {
               const grossHeight = getHeightPercentage(day.grossTime)
-              const netHeight = getHeightPercentage(day.netTime)
+              void getHeightPercentage(day.netTime) // netHeight calculation kept for potential future use
               // Calcular a porcentagem do tempo líquido em relação ao bruto
               const netPercentage = day.grossTime > 0 
                 ? (day.netTime / day.grossTime) * 100 

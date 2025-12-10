@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Plus, MessageSquare, X } from 'lucide-react'
 import { ConversationListItem } from './conversation-list-item'
@@ -67,6 +66,7 @@ export function ConversationsPanel({
 
   useEffect(() => {
     loadConversations()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken])
 
   const handleCreateConversation = async () => {

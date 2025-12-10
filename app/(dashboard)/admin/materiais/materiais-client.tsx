@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { createClient } from '@/lib/client'
-import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -15,9 +14,6 @@ import { ModuleAccordion } from '@/components/module-accordion'
 import RulesPanel from '@/components/rules-panel'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { ModuloComAtividades } from './types'
-import { useRouter } from 'next/navigation'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 
 type Disciplina = {
   id: string
@@ -62,7 +58,6 @@ type RegraAtividade = {
 
 
 export default function MateriaisClientPage() {
-  const router = useRouter()
   const supabase = createClient()
 
   const [cursos, setCursos] = React.useState<Curso[]>([])
@@ -73,7 +68,7 @@ export default function MateriaisClientPage() {
   const [frenteSelecionada, setFrenteSelecionada] = React.useState<string>('')
   const [frenteCursoId, setFrenteCursoId] = React.useState<string | null>(null)
   const [modulosComAtividades, setModulosComAtividades] = React.useState<ModuloComAtividades[]>([])
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [, setIsLoading] = React.useState(false)
   const [isLoadingFrentes, setIsLoadingFrentes] = React.useState(false)
   const [isLoadingAtividades, setIsLoadingAtividades] = React.useState(false)
   const [isGenerating, setIsGenerating] = React.useState(false)
@@ -152,9 +147,9 @@ export default function MateriaisClientPage() {
 
         const mapped =
           data
-            ?.map((row: any) => row.disciplina)
+            ?.map((row: { disciplina: { id: string; nome: string } | null }) => row.disciplina)
             .filter(Boolean)
-            .map((d: any) => ({ id: d.id, nome: d.nome })) ?? []
+            .map((d) => ({ id: d.id, nome: d.nome })) ?? []
 
         const unique = Array.from(new Map(mapped.map((d) => [d.id, d])).values())
         setDisciplinas(unique)
@@ -258,7 +253,7 @@ export default function MateriaisClientPage() {
             })
           })
 
-        atividadesData.forEach((atividade: any) => {
+        atividadesData.forEach((atividade: { moduloId: string; ordemExibicao: number; createdAt: string }) => {
           const modulo = modulosComAtividadesMap.get(atividade.moduloId)
           if (modulo) {
             modulo.atividades.push(atividade)
@@ -285,7 +280,7 @@ export default function MateriaisClientPage() {
     }
 
     fetchModulosEAtividades()
-  }, [frenteSelecionada, frentes])
+  }, [frenteSelecionada, frentes, supabase])
 
   React.useEffect(() => {
     const fetchRegras = async () => {
@@ -558,7 +553,7 @@ export default function MateriaisClientPage() {
           <CardHeader>
             <CardTitle>Nenhum conteúdo encontrado</CardTitle>
             <CardDescription>
-              Clique em "Gerar Estrutura" para criar os slots de atividades automaticamente.
+              Clique em &quot;Gerar Estrutura&quot; para criar os slots de atividades automaticamente.
             </CardDescription>
           </CardHeader>
         </Card>

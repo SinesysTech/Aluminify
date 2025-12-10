@@ -21,7 +21,6 @@ import { ConversationsPanel } from '@/components/conversations-panel'
 import { Button } from '@/components/ui/button'
 import { MessageSquare, Paperclip, X } from 'lucide-react'
 import type { Conversation as ConversationType } from '@/backend/services/conversation/conversation.types'
-import { cn } from '@/lib/utils'
 
 interface ChatMessage {
   id: string
@@ -627,7 +626,7 @@ export default function TobIAsPage() {
                   ref={inputRef}
                   placeholder="Digite sua mensagem..."
                   disabled={isLoading || !userId}
-                  className="min-h-[44px] text-sm md:text-base"
+                  className="min-h-11 text-sm md:text-base"
                 />
                 <PromptInputToolbar>
                   <input

@@ -1,3 +1,5 @@
 {
-    "kiroAgent.configureMCP": "Disabled"
+    "kiroAgent.configureMCP": "Disabled",
+    "tailwindCSS.lint.suggestCanonicalClasses": "ignore",
+    "vscode-webhint.ignoredHints": ["no-inline-styles"]
 }

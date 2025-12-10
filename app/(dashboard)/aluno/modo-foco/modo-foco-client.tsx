@@ -1013,7 +1013,7 @@ export default function ModoFocoClient({ searchParams }: Props) {
                     variant={nivelFoco === opt.value ? 'default' : 'outline'}
                     onClick={() => setNivelFoco(opt.value)}
                     aria-label={`Nota ${opt.value} - ${opt.label}`}
-                    className="flex flex-col items-center justify-center py-3 px-2 text-xs gap-1 text-center whitespace-normal leading-tight min-h-[80px]"
+                    className="flex flex-col items-center justify-center py-3 px-2 text-xs gap-1 text-center whitespace-normal leading-tight min-h-20"
                   >
                     <span className="text-base font-semibold">{opt.value}</span>
                     <span className="text-[11px] leading-tight">{opt.label}</span>
