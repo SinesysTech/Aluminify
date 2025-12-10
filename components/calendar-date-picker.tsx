@@ -48,8 +48,6 @@ const months = [
   "Dezembro",
 ];
 
-// Using cva to ensure proper import usage (even if variants are not currently used)
-void cva;
 
 interface CalendarDatePickerProps {
   date?: DateRange;
