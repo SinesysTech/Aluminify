@@ -86,7 +86,7 @@ type Disciplina = {
 type Frente = {
   id: string
   nome: string
-  disciplina_id: string
+  disciplina_id: string | null
 }
 
 type Curso = {
@@ -145,7 +145,7 @@ export default function FlashcardsAdminClient() {
   const [editDialogOpen, setEditDialogOpen] = React.useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [selectedFlashcard, setSelectedFlashcard] = React.useState<Flashcard | null>(null)
-  
+
   // Seleção múltipla
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
   const [deleteMultipleDialogOpen, setDeleteMultipleDialogOpen] = React.useState(false)
@@ -313,19 +313,19 @@ export default function FlashcardsAdminClient() {
       })
 
       const res = await fetchWithAuth(`/api/flashcards?${params.toString()}`)
-      
+
       // Verificar o content-type e tentar parsear o JSON
       const contentType = res.headers.get('content-type')
       console.log('[flashcards client] Content-Type:', contentType)
       console.log('[flashcards client] Status:', res.status, res.statusText)
-      
+
       let body: Record<string, unknown> = {}
       let responseText = ''
-      
+
       try {
         responseText = await res.text()
         console.log('[flashcards client] Resposta raw (primeiros 1000 chars):', responseText.substring(0, 1000))
-        
+
         if (responseText && responseText.trim()) {
           try {
             body = JSON.parse(responseText)
@@ -364,10 +364,10 @@ export default function FlashcardsAdminClient() {
           body: body,
           bodyString: JSON.stringify(body)
         })
-        
+
         // Tentar extrair mensagem de erro de diferentes formatos
         let errorMessage = 'Erro ao carregar flashcards'
-        
+
         // Primeiro, tentar extrair do body
         if (body?.error) {
           const errorValue = body.error
@@ -404,7 +404,7 @@ export default function FlashcardsAdminClient() {
         } else {
           errorMessage = `Erro ao carregar flashcards (${res.status} ${res.statusText})`
         }
-        
+
         // Limpar mensagem de erro se ainda estiver mal formatada
         if (errorMessage.includes('{"') && errorMessage.length > 10) {
           try {
@@ -419,7 +419,7 @@ export default function FlashcardsAdminClient() {
             errorMessage = errorMessage.replace(/[{}"]/g, '').trim() || 'Erro ao processar resposta do servidor'
           }
         }
-        
+
         // Garantir que a mensagem não esteja vazia ou muito longa
         if (!errorMessage || errorMessage.trim().length === 0) {
           errorMessage = `Erro ao carregar flashcards (${res.status})`
@@ -427,7 +427,7 @@ export default function FlashcardsAdminClient() {
         if (errorMessage.length > 500) {
           errorMessage = errorMessage.substring(0, 500) + '...'
         }
-        
+
         console.error('[flashcards client] Mensagem de erro final:', errorMessage)
         throw new Error(errorMessage)
       }
@@ -494,13 +494,13 @@ export default function FlashcardsAdminClient() {
     setSelectedFlashcard(flashcard)
     setFormPergunta(flashcard.pergunta)
     setFormResposta(flashcard.resposta)
-    
+
     // Carregar disciplina e frente do flashcard
     const disciplinaIdFromFlashcard = flashcard.modulo.frente.disciplina.id
     const frenteIdFromFlashcard = flashcard.modulo.frente.id
-    
+
     setDisciplinaId(disciplinaIdFromFlashcard)
-    
+
     // Carregar frentes da disciplina
     try {
       const { data: frentesData, error: frentesError } = await supabase
@@ -512,7 +512,7 @@ export default function FlashcardsAdminClient() {
       if (!frentesError) {
         setFrentes(frentesData || [])
         setFrenteId(frenteIdFromFlashcard)
-        
+
         // Carregar módulos da frente
         const { data: modulosData, error: modulosError } = await supabase
           .from('modulos')
@@ -528,7 +528,7 @@ export default function FlashcardsAdminClient() {
     } catch (err) {
       console.error('Erro ao carregar dados para edição:', err)
     }
-    
+
     setEditDialogOpen(true)
   }
 
@@ -736,9 +736,9 @@ export default function FlashcardsAdminClient() {
             <div className="grid gap-4 md:grid-cols-4">
               <div className="space-y-2">
                 <Label>Disciplina</Label>
-                <Select 
-                  value={disciplinaId} 
-                  onValueChange={setDisciplinaId} 
+                <Select
+                  value={disciplinaId}
+                  onValueChange={setDisciplinaId}
                   disabled={loadingDisciplinas}
                 >
                   <SelectTrigger id={FILTRO_DISCIPLINA_SELECT_ID}>
