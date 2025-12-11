@@ -105,10 +105,10 @@ interface CronogramaItem {
         disciplinas: {
           id: string
           nome: string
-        }
-      }
-    }
-  }
+        } | null
+      } | null
+    } | null
+  } | null
 }
 
 interface Cronograma {
@@ -319,7 +319,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             }
 
             // Buscar módulos das aulas
-            const moduloIds = [...new Set((aulasBasicas || []).map(a => a.modulo_id).filter(Boolean))]
+            const moduloIds = [...new Set((aulasBasicas || []).map(a => a.modulo_id).filter((id): id is string => !!id))]
             let modulosMap = new Map()
             
             if (moduloIds.length > 0) {
@@ -413,6 +413,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
               }
               return {
                 ...item,
+                concluido: item.concluido ?? false,
                 aulas: aula || null,
               }
             })
@@ -424,16 +425,34 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             // No aula_ids, just use items as-is
             itensCompletos = itensData.map(item => ({
               ...item,
+              concluido: item.concluido ?? false,
               aulas: null,
             }))
           }
         }
 
+        // Converter periodos_ferias de Json para o tipo esperado
+        const periodosFeriasConvertidos = cronogramaData.periodos_ferias 
+          ? (Array.isArray(cronogramaData.periodos_ferias) 
+              ? cronogramaData.periodos_ferias.map((p: unknown) => {
+                  if (typeof p === 'object' && p !== null && 'inicio' in p && 'fim' in p) {
+                    return { inicio: String(p.inicio), fim: String(p.fim) }
+                  }
+                  return null
+                }).filter((p): p is { inicio: string; fim: string } => p !== null)
+              : [])
+          : undefined
+
         // Combine the data
         const data = {
           ...cronogramaData,
+          nome: cronogramaData.nome || '',
+          modalidade_estudo: (cronogramaData.modalidade_estudo === 'paralelo' || cronogramaData.modalidade_estudo === 'sequencial')
+            ? cronogramaData.modalidade_estudo
+            : 'paralelo' as 'paralelo' | 'sequencial',
           cronograma_itens: itensCompletos,
-        }
+          periodos_ferias: periodosFeriasConvertidos,
+        } as Cronograma
 
         // Note: We continue even if there's an error loading items,
         // as the cronograma itself loaded successfully and items might load separately
@@ -448,7 +467,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
           })
         }
 
-        setCronograma(data as Cronograma)
+        setCronograma(data)
 
         // Buscar informações do curso e disciplinas
         if (data.curso_alvo_id) {
@@ -1085,7 +1104,16 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
         onToggleConcluido={toggleConcluido}
         onUpdate={(updater) => {
           if (cronograma) {
-            setCronograma(updater(cronograma))
+            const updatedItensPorSemana = updater(itensPorSemana)
+            // Converter itensPorSemana de volta para cronograma_itens
+            const updatedItens: CronogramaItem[] = []
+            Object.values(updatedItensPorSemana).forEach(itens => {
+              updatedItens.push(...itens)
+            })
+            setCronograma({
+              ...cronograma,
+              cronograma_itens: updatedItens
+            })
           }
         }}
       />

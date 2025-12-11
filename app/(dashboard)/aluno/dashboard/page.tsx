@@ -97,7 +97,7 @@ export default function StudentDashboardPage() {
 
   // Subscription Realtime para atualizar dashboard quando aulas são concluídas
   useEffect(() => {
-    let channel: ReturnType<typeof import('@supabase/supabase-js').SupabaseClient['channel']> | null = null
+    let channel: ReturnType<ReturnType<typeof import('@/lib/client').createClient>['channel']> | null = null
     let supabaseInstance: ReturnType<typeof import('@/lib/client').createClient> | null = null
 
     async function setupRealtimeSubscription() {

@@ -52,9 +52,28 @@ export interface FrenteRow {
 export interface ModuloComFrenteRow {
   id: string;
   nome: string;
+  numero_modulo?: number | null;
   frente_id: string;
   curso_id?: string | null;
-  frentes?: FrenteRow | FrenteRow[];
+  frentes?: (FrenteRow & {
+    disciplina_id?: string;
+    disciplinas?: {
+      id: string;
+      nome: string;
+    } | {
+      id: string;
+      nome: string;
+    }[];
+  }) | (FrenteRow & {
+    disciplina_id?: string;
+    disciplinas?: {
+      id: string;
+      nome: string;
+    } | {
+      id: string;
+      nome: string;
+    }[];
+  })[];
 }
 
 /**

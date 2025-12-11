@@ -13,7 +13,7 @@ import { MaterialsFilters } from '@/components/materials-filters'
 import { ModuleAccordion } from '@/components/module-accordion'
 import RulesPanel from '@/components/rules-panel'
 import { AlertCircle, Loader2 } from 'lucide-react'
-import { ModuloComAtividades } from './types'
+import { ModuloComAtividades, Atividade } from './types'
 
 type Disciplina = {
   id: string
@@ -148,7 +148,7 @@ export default function MateriaisClientPage() {
         const mapped =
           data
             ?.map((row: { disciplina: { id: string; nome: string } | null }) => row.disciplina)
-            .filter(Boolean)
+            .filter((d): d is { id: string; nome: string } => d !== null)
             .map((d) => ({ id: d.id, nome: d.nome })) ?? []
 
         const unique = Array.from(new Map(mapped.map((d) => [d.id, d])).values())
@@ -236,7 +236,7 @@ export default function MateriaisClientPage() {
           throw new Error('Erro ao carregar atividades')
         }
 
-        const { data: atividadesData } = await response.json()
+        const { data: atividadesData } = await response.json() as { data: unknown }
 
         // Agrupar atividades por módulo
         const modulosComAtividadesMap = new Map<string, ModuloComAtividades>()
@@ -253,7 +253,8 @@ export default function MateriaisClientPage() {
             })
           })
 
-        atividadesData.forEach((atividade: { moduloId: string; ordemExibicao: number; createdAt: string }) => {
+        const atividades = Array.isArray(atividadesData) ? atividadesData as Atividade[] : []
+        atividades.forEach((atividade) => {
           const modulo = modulosComAtividadesMap.get(atividade.moduloId)
           if (modulo) {
             modulo.atividades.push(atividade)

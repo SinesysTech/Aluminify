@@ -57,6 +57,7 @@ interface CronogramaItem {
   ordem_na_semana: number
   concluido: boolean
   data_conclusao: string | null
+  data_prevista: string | null
   aulas: {
     id: string
     nome: string
@@ -327,7 +328,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
             }
 
             // Buscar módulos
-            const moduloIds = [...new Set(todasAulas.map(a => a.modulo_id).filter(Boolean))]
+            const moduloIds = [...new Set(todasAulas.map(a => a.modulo_id).filter((id): id is string => id !== null && id !== undefined))]
             let modulosMap = new Map()
 
             if (moduloIds.length > 0) {
@@ -403,25 +404,43 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
 
             itensCompletos = itensData.map(item => ({
               ...item,
+              concluido: item.concluido ?? false,
               aulas: aulasMap.get(item.aula_id) || null,
-            }))
+            })) as typeof itensCompletos
           }
         }
 
+        // Converter periodos_ferias de Json para o tipo esperado
+        const periodosFeriasConvertidos = cronogramaData.periodos_ferias 
+          ? (Array.isArray(cronogramaData.periodos_ferias) 
+              ? cronogramaData.periodos_ferias.map((p: unknown) => {
+                  if (typeof p === 'object' && p !== null && 'inicio' in p && 'fim' in p) {
+                    return { inicio: String(p.inicio), fim: String(p.fim) }
+                  }
+                  return null
+                }).filter((p): p is { inicio: string; fim: string } => p !== null)
+              : [])
+          : undefined
+
         const data = {
           ...cronogramaData,
+          nome: cronogramaData.nome || '',
+          modalidade_estudo: (cronogramaData.modalidade_estudo === 'paralelo' || cronogramaData.modalidade_estudo === 'sequencial')
+            ? cronogramaData.modalidade_estudo
+            : 'paralelo' as 'paralelo' | 'sequencial',
           cronograma_itens: itensCompletos,
-        }
+          periodos_ferias: periodosFeriasConvertidos,
+        } as Cronograma
 
-        setCronograma(data as Cronograma)
+        setCronograma(data)
         setItensCompletosCache(itensCompletos)
 
         // Calcular datas dos itens (usar data_prevista se disponível, senão calcular)
         console.log('[Load] Total de itens carregados:', itensCompletos.length)
-        console.log('[Load] Itens com data_prevista:', itensCompletos.filter(i => i.data_prevista).length)
-        console.log('[Load] Itens sem data_prevista:', itensCompletos.filter(i => !i.data_prevista).length)
+        console.log('[Load] Itens com data_prevista:', itensCompletos.filter((i: any) => i.data_prevista).length)
+        console.log('[Load] Itens sem data_prevista:', itensCompletos.filter((i: any) => !i.data_prevista).length)
 
-        const itensComData = calcularDatasItens(data as Cronograma, itensCompletos)
+        const itensComData = calcularDatasItens(data as unknown as Cronograma, itensCompletos)
         const mapaPorData = new Map<string, ItemComData[]>()
 
         // Contador por dia da semana para debug
@@ -620,7 +639,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
       // Se tiver data_prevista, usar ela
       if (item.data_prevista) {
         // Parsear data_prevista corretamente (pode vir como string YYYY-MM-DD ou ISO)
-        const dataPrevistaStr = item.data_prevista
+        const dataPrevistaStr = (item as any).data_prevista
         // Se for apenas data (YYYY-MM-DD), criar Date no horário local para evitar problemas de timezone
         if (typeof dataPrevistaStr === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dataPrevistaStr)) {
           const [year, month, day] = dataPrevistaStr.split('-').map(Number)
@@ -722,7 +741,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
     if (cronograma) {
       const updatedItems = itensCompletosCache.map((item) =>
         item.id === itemId
-          ? { ...item, concluido, data_conclusao: updateData.data_conclusao }
+          ? { ...item, concluido, data_conclusao: updateData.data_conclusao ?? null }
           : item
       )
       setItensCompletosCache(updatedItems)
@@ -1230,7 +1249,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
       if (itensData && itensData.length > 0) {
         const distribuicaoDataPrevistaAntes: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 }
         const exemplosDataPrevista = itensData
-          .filter(i => i.data_prevista)
+          .filter((i): i is typeof i & { data_prevista: string } => !!i.data_prevista)
           .slice(0, 20)
           .map(i => {
             const [year, month, day] = i.data_prevista.split('-').map(Number)
@@ -1278,7 +1297,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
           }
 
           // Buscar módulos
-          const moduloIds = [...new Set(todasAulas.map(a => a.modulo_id).filter(Boolean))]
+          const moduloIds = [...new Set(todasAulas.map(a => a.modulo_id).filter((id): id is string => id !== null && id !== undefined))]
           let modulosMap = new Map()
 
           if (moduloIds.length > 0) {
@@ -1354,17 +1373,35 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
 
           itensCompletos = itensData.map(item => ({
             ...item,
+            concluido: item.concluido ?? false,
             aulas: aulasMap.get(item.aula_id) || null,
-          }))
+          })) as typeof itensCompletos
         }
       }
 
+      // Converter periodos_ferias de Json para o tipo esperado
+      const periodosFeriasConvertidos = cronogramaData.periodos_ferias 
+        ? (Array.isArray(cronogramaData.periodos_ferias) 
+            ? cronogramaData.periodos_ferias.map((p: unknown) => {
+                if (typeof p === 'object' && p !== null && 'inicio' in p && 'fim' in p) {
+                  return { inicio: String(p.inicio), fim: String(p.fim) }
+                }
+                return null
+              }).filter((p): p is { inicio: string; fim: string } => p !== null)
+            : [])
+        : undefined
+
       const data = {
         ...cronogramaData,
+        nome: cronogramaData.nome || '',
+        modalidade_estudo: (cronogramaData.modalidade_estudo === 'paralelo' || cronogramaData.modalidade_estudo === 'sequencial')
+          ? cronogramaData.modalidade_estudo
+          : 'paralelo' as 'paralelo' | 'sequencial',
         cronograma_itens: itensCompletos,
-      }
+        periodos_ferias: periodosFeriasConvertidos,
+      } as Cronograma
 
-      setCronograma(data as Cronograma)
+      setCronograma(data)
       setItensCompletosCache(itensCompletos)
 
       // Calcular datas dos itens (usar data_prevista atualizada)
@@ -1378,12 +1415,13 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
       const exemplosPorDia: Record<number, string[]> = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] }
       itensCompletos.forEach(item => {
         if (item.data_prevista) {
-          const [year, month, day] = item.data_prevista.split('-').map(Number)
+          const dataPrevista = item.data_prevista
+          const [year, month, day] = dataPrevista.split('-').map(Number)
           const data = new Date(year, month - 1, day)
           const diaSemana = data.getDay()
           distribuicaoDataPrevista[diaSemana] += 1
           if (exemplosPorDia[diaSemana].length < 3) {
-            exemplosPorDia[diaSemana].push(item.data_prevista)
+            exemplosPorDia[diaSemana].push(dataPrevista)
           }
         }
       })
@@ -1396,7 +1434,8 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
       // Verificar se há itens com data_prevista nos dias selecionados
       const itensNosDiasSelecionados = itensCompletos.filter(item => {
         if (!item.data_prevista) return false
-        const [year, month, day] = item.data_prevista.split('-').map(Number)
+        const dataPrevista = item.data_prevista
+        const [year, month, day] = dataPrevista.split('-').map(Number)
         const data = new Date(year, month - 1, day)
         const diaSemana = data.getDay()
         return diasSelecionados.includes(diaSemana)
@@ -1526,7 +1565,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
 
         // Verificar distribuição de dias na amostra
         const amostraDias = amostraItens
-          .filter(i => i.data_prevista)
+          .filter((i): i is typeof i & { data_prevista: string } => !!i.data_prevista)
           .map(i => {
             const [year, month, day] = i.data_prevista.split('-').map(Number)
             return new Date(year, month - 1, day).getDay()

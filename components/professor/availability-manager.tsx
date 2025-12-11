@@ -51,13 +51,15 @@ export function AvailabilityManager({ professorId }: AvailabilityManagerProps) {
     async function fetchAvailability() {
       try {
         const data = await getDisponibilidade(professorId)
-        const mapped: AvailabilityRule[] = data.map((d: { id: string; dia_semana: number; hora_inicio: string; hora_fim: string; ativo: boolean }) => ({
-          id: d.id,
-          dia_semana: d.dia_semana,
-          hora_inicio: d.hora_inicio,
-          hora_fim: d.hora_fim,
-          ativo: d.ativo,
-        }))
+        const mapped: AvailabilityRule[] = data
+          .filter((d) => d.ativo !== null && d.ativo !== undefined)
+          .map((d) => ({
+            id: d.id,
+            dia_semana: d.dia_semana,
+            hora_inicio: d.hora_inicio,
+            hora_fim: d.hora_fim,
+            ativo: d.ativo ?? false,
+          }))
         setRules(mapped)
       } catch (error) {
         console.error(error)

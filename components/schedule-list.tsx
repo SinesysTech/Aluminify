@@ -40,6 +40,7 @@ interface CronogramaItem {
     nome: string
     numero_aula: number | null
     tempo_estimado_minutos: number | null
+    curso_id: string | null
     modulos: {
       id: string
       nome: string
@@ -50,9 +51,9 @@ interface CronogramaItem {
         disciplinas: {
           id: string
           nome: string
-        }
-      }
-    }
+        } | null
+      } | null
+    } | null
   } | null
 }
 

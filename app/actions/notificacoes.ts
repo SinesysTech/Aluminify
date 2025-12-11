@@ -55,7 +55,15 @@ export async function getNotificacoesUsuario(userId: string): Promise<Notificaca
     return []
   }
 
-  return data || []
+  // Mapear os dados para garantir que o tipo seja correto
+  const validTipos: NotificacaoAgendamento['tipo'][] = ['criacao', 'confirmacao', 'cancelamento', 'lembrete', 'alteracao', 'rejeicao']
+  
+  return (data || []).map((item: any) => ({
+    ...item,
+    tipo: validTipos.includes(item.tipo) ? item.tipo as NotificacaoAgendamento['tipo'] : 'criacao',
+    enviado: item.enviado ?? false,
+    created_at: item.created_at || '1970-01-01T00:00:00.000Z',
+  })) as NotificacaoAgendamento[]
 }
 
 export async function getNotificacoesNaoLidas(userId: string): Promise<number> {

@@ -475,7 +475,7 @@ export function ScheduleWizard() {
         .order('nome')
 
       if (data) {
-        setFrentes(data)
+        setFrentes(data.filter((f): f is typeof f & { disciplina_id: string } => !!f.disciplina_id))
       }
     }
 
