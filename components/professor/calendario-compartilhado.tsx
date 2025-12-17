@@ -20,7 +20,9 @@ interface Agendamento {
   data_inicio: string;
   data_fim: string;
   professor_id: string;
+  professor_nome: string;
   aluno_id?: string;
+  aluno_nome: string;
   status: string;
   [key: string]: unknown;
 }
@@ -290,7 +292,7 @@ export function CalendarioCompartilhado({ empresaId }: CalendarioCompartilhadoPr
                     <CardContent className="p-4">
                       <div className="flex items-center gap-3 mb-2">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={prof.foto} />
+                          <AvatarImage src={prof.foto || undefined} />
                           <AvatarFallback>{prof.nome[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">

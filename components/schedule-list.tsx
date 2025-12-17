@@ -304,13 +304,14 @@ export function ScheduleList({
         // Atualizar estado local
         onUpdate((prev) => {
           if (!prev) return prev
-          return {
-            ...prev,
-            cronograma_itens: prev.cronograma_itens.map((item: CronogramaItem) => {
+          const newPrev: Record<number, CronogramaItem[]> = {}
+          for (const [weekNum, items] of Object.entries(prev)) {
+            newPrev[Number(weekNum)] = items.map((item: CronogramaItem) => {
               const updated = itensAtualizados.find((i) => i.id === item.id)
               return updated || item
-            }),
+            })
           }
+          return newPrev
         })
       }
     }
