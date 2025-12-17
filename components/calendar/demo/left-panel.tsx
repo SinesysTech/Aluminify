@@ -77,7 +77,6 @@ export function LeftPanel({
 						className="mr-2"
 						width={16}
 						height={16}
-						height={16}
 					/>
 					<Tooltip>
 						<TooltipTrigger asChild>
