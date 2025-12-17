@@ -22,7 +22,7 @@ interface AgendamentosDashboardProps {
 export function AgendamentosDashboard({
   agendamentos,
   stats,
-  professorId
+  professorId: _professorId
 }: AgendamentosDashboardProps) {
   const [activeTab, setActiveTab] = useState("pendentes")
 

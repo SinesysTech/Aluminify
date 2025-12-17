@@ -57,7 +57,7 @@ async function createBackup(): Promise<string> {
   return backupFile
 }
 
-async function validateMigration(stats: MigrationStats): Promise<boolean> {
+async function validateMigration(_stats: MigrationStats): Promise<boolean> {
   console.log('🔍 Validando migração...')
   
   // Verificar se todos os registros foram migrados
@@ -115,7 +115,7 @@ async function rollback(backupFile: string): Promise<void> {
     throw new Error(`Arquivo de backup não encontrado: ${backupFile}`)
   }
 
-  const backup = JSON.parse(fs.readFileSync(backupFile, 'utf-8'))
+  JSON.parse(fs.readFileSync(backupFile, 'utf-8'))
 
   // Deletar recorrências criadas na migração
   const { error: deleteError } = await supabase

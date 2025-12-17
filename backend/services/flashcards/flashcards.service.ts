@@ -5,7 +5,6 @@ import { calculateNextReview, isValidFeedback } from './srs-algorithm';
 import type { FeedbackValue } from './srs-algorithm.types';
 import type {
   ProgressoFlashcard,
-  AlunoCursoRow,
   CursoRow,
   ModuloRow,
   FlashcardRow,

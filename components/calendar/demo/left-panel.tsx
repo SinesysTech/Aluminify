@@ -10,6 +10,7 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import Image from "next/image";
 import { useLocale } from "@react-aria/i18n";
 import { CalendarIcon, Clock4 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -34,10 +35,12 @@ export function LeftPanel({
 			<div className="grid gap-1">
 				<Tooltip>
 					<TooltipTrigger asChild>
-						<img
-							alt="Shadcn Cal"
-							src="/avatar.jpeg"
-							className="rounded-full border"
+					<Image
+						alt="Shadcn Cal"
+						src="/avatar.jpeg"
+						width={40}
+						height={40}
+						className="rounded-full border"
 							width={24}
 							height={24}
 						/>

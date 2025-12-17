@@ -82,7 +82,7 @@ export type BranchMessagesProps = HTMLAttributes<HTMLDivElement>;
 
 export const BranchMessages = ({ children, ...props }: BranchMessagesProps) => {
   const { currentBranch, setBranches, branches } = useBranch();
-  const childrenArray = Array.isArray(children) ? children : [children];
+  const childrenArray = useMemo(() => Array.isArray(children) ? children : [children], [children]);
 
   // Use useEffect to update branches when they change
   useEffect(() => {

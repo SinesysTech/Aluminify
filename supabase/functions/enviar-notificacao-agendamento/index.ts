@@ -7,7 +7,7 @@ interface NotificacaoPayload {
   destinatario_id: string;
 }
 
-interface AgendamentoData {
+interface _AgendamentoData {
   id: string;
   professor_id: string;
   aluno_id: string;
@@ -19,7 +19,7 @@ interface AgendamentoData {
   motivo_cancelamento: string | null;
 }
 
-interface UserData {
+interface _UserData {
   id: string;
   email: string;
   raw_user_meta_data: {
@@ -259,7 +259,7 @@ Deno.serve(async (req: Request) => {
     const { data: outraParte } = await supabase.auth.admin.getUserById(outraParteId);
 
     const destinatarioEmail = destinatario.user.email;
-    const destinatarioNome = destinatario.user.user_metadata?.name || destinatario.user.user_metadata?.full_name || destinatarioEmail;
+    const _destinatarioNome = destinatario.user.user_metadata?.name || destinatario.user.user_metadata?.full_name || destinatarioEmail;
     const outraParteNome = outraParte?.user?.user_metadata?.name || outraParte?.user?.user_metadata?.full_name || "Usuario";
 
     const dataFormatada = formatDate(agendamento.data_inicio);

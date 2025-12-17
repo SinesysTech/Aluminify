@@ -299,7 +299,7 @@ describe('Sistema de Recorrência de Agendamentos', () => {
       const dataFim2 = new Date(dataFim)
       dataFim2.setHours(11, 30, 0, 0)
 
-      const { error } = await supabase
+      await supabase
         .from('agendamentos')
         .insert({
           professor_id: testProfessorId,

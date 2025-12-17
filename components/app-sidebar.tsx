@@ -14,7 +14,6 @@ import {
   LayoutDashboard,
   Users,
   GraduationCap,
-  Building2,
   Settings,
   UserCog,
 } from "lucide-react"

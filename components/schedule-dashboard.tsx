@@ -574,7 +574,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
 
     if (itemAlvo?.aula_id && alunoAtual && cursoDaAula) {
       if (concluido) {
-        const { data: upsertData, error: aulaError } = await supabase
+        const { error: aulaError } = await supabase
           .from('aulas_concluidas')
           .upsert(
             {

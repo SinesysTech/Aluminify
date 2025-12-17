@@ -2,7 +2,6 @@ import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"
 import { ConfiguracoesForm } from "@/components/professor/configuracoes-form"
 import { getConfiguracoesProfessor } from "@/app/actions/agendamentos"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export default async function ConfiguracoesAvancadasPage() {
   const supabase = await createClient()

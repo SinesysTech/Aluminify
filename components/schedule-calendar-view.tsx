@@ -1233,7 +1233,6 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
 
       // Carregar itens (incluindo data_prevista atualizada)
       // Forçar busca sem cache usando uma query única
-      const timestamp = Date.now()
       const { data: itensData, error: itensError } = await supabase
         .from('cronograma_itens')
         .select('id, aula_id, semana_numero, ordem_na_semana, concluido, data_conclusao, data_prevista')
@@ -3108,7 +3107,6 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                                     })
                                   }}
                                 >
-                                  {/* eslint-disable-next-line react/forbid-dom-props -- Cores dinâmicas geradas por hash não podem ser pré-definidas */}
                                   <div
                                     className="border rounded-lg p-4 bg-card space-y-2 border-l-4"
                                     style={borderStyle}
@@ -3159,7 +3157,6 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                                           </div>
                                           <div className="flex items-center gap-2">
                                             {/* Estilo dinâmico para badge colorido (cores geradas dinamicamente) */}
-                                            {/* eslint-disable-next-line react/forbid-dom-props */}
                                             <Badge
                                               variant="outline"
                                               className="text-xs"

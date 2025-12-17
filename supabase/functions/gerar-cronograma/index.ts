@@ -173,7 +173,7 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const token = authHeader.replace("Bearer ", "");
+    authHeader.replace("Bearer ", "");
     
     // Criar cliente Supabase com ANON_KEY e SERVICE_ROLE_KEY
     // Essas variáveis ainda estão disponíveis nas Edge Functions

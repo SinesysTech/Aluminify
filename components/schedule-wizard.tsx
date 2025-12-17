@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -252,7 +252,7 @@ export function ScheduleWizard() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cursos, setCursos] = useState<CursoData[]>([])
-  const [disciplinas, setDisciplinas] = useState<DisciplinaData[]>([]) // Todas as disciplinas (para referência)
+  const [_disciplinas, setDisciplinas] = useState<DisciplinaData[]>([]) // Todas as disciplinas (para referência)
   const [disciplinasDoCurso, setDisciplinasDoCurso] = useState<DisciplinaData[]>([]) // Disciplinas do curso selecionado
   const [frentes, setFrentes] = useState<FrenteData[]>([])
   const [loadingData, setLoadingData] = useState(true)
@@ -479,8 +479,9 @@ export function ScheduleWizard() {
       }
     }
 
+    const disciplinasIds = form.watch('disciplinas_ids');
     loadFrentes()
-  }, [form.watch('disciplinas_ids'), cursoSelecionado])
+  }, [form.watch('disciplinas_ids'), cursoSelecionado, form])
 
   useEffect(() => {
     if (!cursoSelecionado || !userId) {

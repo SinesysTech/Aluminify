@@ -3,7 +3,7 @@
  * Pure functions for validating scheduling logic
  */
 
-import { addMinutes, isAfter, isBefore, isWithinInterval, differenceInMinutes } from 'date-fns'
+import { addMinutes, isAfter, isBefore, differenceInMinutes } from 'date-fns'
 
 export interface TimeSlot {
   start: Date

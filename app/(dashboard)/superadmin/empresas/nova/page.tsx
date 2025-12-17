@@ -45,7 +45,7 @@ export default function NovaEmpresaPage() {
         throw new Error(error.error || 'Erro ao criar empresa');
       }
 
-      const empresa = await response.json();
+      await response.json();
       toast({
         title: 'Sucesso',
         description: 'Empresa criada com sucesso',

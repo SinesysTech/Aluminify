@@ -6,12 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Calendar } from "@/components/ui/calendar"
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { ChevronLeft, ChevronRight, CalendarIcon, Users, Loader2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { getAgendamentosEmpresa, getProfessoresDisponibilidade } from "@/app/actions/agendamentos"
-import { createClient } from "@/lib/server"
 import { cn } from "@/lib/utils"
 
 interface CalendarioCompartilhadoProps {
