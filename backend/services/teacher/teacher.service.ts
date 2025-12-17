@@ -84,14 +84,14 @@ export class TeacherService {
             authError.message?.includes('already exists') ||
             authError.status === 422) {
           
-          // Buscar usuário existente por email diretamente
-          const { data: usersData, error: getUserError } = await adminClient.auth.admin.getUserByEmail(email);
+          // Buscar usuário existente por email usando listUsers
+          const { data: usersList, error: getUserError } = await adminClient.auth.admin.listUsers();
           
-          if (getUserError || !usersData?.user) {
-            throw new Error(`Failed to get existing user: ${getUserError?.message || 'User not found'}`);
+          if (getUserError) {
+            throw new Error(`Failed to get existing user: ${getUserError.message || 'User not found'}`);
           }
           
-          const existingUser = usersData.user;
+          const existingUser = usersList?.users?.find(user => user.email === email);
           
           if (existingUser) {
             teacherId = existingUser.id;

@@ -123,6 +123,17 @@ const STUDENT_IMPORT_TEMPLATE = [
 
 const STUDENT_IMPORT_FILE_ACCEPT = '.csv,.xlsx,.xls'
 
+const normalizeCourseName = (name: string) =>
+  name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 32)
+    .toUpperCase();
+
+const generateDefaultPassword = (cpf: string, courseName: string) =>
+  `${cpf}@${normalizeCourseName(courseName)}`;
+
 const alunoSchema = z.object({
   fullName: z.string().optional().nullable(),
   email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),

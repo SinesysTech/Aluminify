@@ -41,7 +41,8 @@ function handleError(error: unknown) {
 // GET é público (catálogo)
 export async function GET() {
   try {
-    const courses = await courseService.list();
+    const result = await courseService.list();
+    const courses = Array.isArray(result) ? result : result.data;
     return NextResponse.json({ data: courses.map(serializeCourse) });
   } catch (error) {
     return handleError(error);
@@ -57,6 +58,7 @@ async function postHandler(request: AuthenticatedRequest) {
   try {
     const body = await request.json();
     const course = await courseService.create({
+      empresaId: body?.empresaId || null,
       segmentId: body?.segmentId,
       disciplineId: body?.disciplineId, // Mantido para compatibilidade
       disciplineIds: body?.disciplineIds, // Nova propriedade

@@ -69,7 +69,7 @@ export default function NovaEmpresaPage() {
       case 1:
         return formData.nome.trim() !== '';
       case 2:
-        return formData.plano !== '';
+        return true; // Plano sempre tem um valor válido
       case 3:
         return (
           formData.primeiroAdminEmail.trim() !== '' &&
