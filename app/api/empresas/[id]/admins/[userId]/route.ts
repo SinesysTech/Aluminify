@@ -3,10 +3,13 @@ import { createClient } from '@/lib/server';
 import { getAuthUser } from '@/backend/auth/middleware';
 import { getEmpresaContext, validateEmpresaAccess } from '@/backend/middleware/empresa-context';
 
-// DELETE /api/empresas/[id]/admins/[userId] - Remover admin
-export async function DELETE(
+interface RouteContext {
+  params: Promise<{ id: string; userId: string }>;
+}
+
+async function deleteHandler(
   request: NextRequest,
-  { params }: { params: { id: string; userId: string } }
+  params: { id: string; userId: string }
 ) {
   try {
     const user = await getAuthUser(request);
@@ -79,5 +82,14 @@ export async function DELETE(
       { status: 500 }
     );
   }
+}
+
+// DELETE /api/empresas/[id]/admins/[userId] - Remover admin
+export async function DELETE(
+  request: NextRequest,
+  context: RouteContext
+) {
+  const params = await context.params;
+  return deleteHandler(request, params);
 }
 

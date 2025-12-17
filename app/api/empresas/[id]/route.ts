@@ -4,10 +4,13 @@ import { EmpresaService, EmpresaRepositoryImpl } from '@/backend/services/empres
 import { getAuthUser } from '@/backend/auth/middleware';
 import { getEmpresaContext, validateEmpresaAccess } from '@/backend/middleware/empresa-context';
 
-// GET /api/empresas/[id] - Detalhes da empresa
-export async function GET(
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
+async function getHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  params: { id: string }
 ) {
   try {
     const user = await getAuthUser(request);
@@ -51,10 +54,9 @@ export async function GET(
   }
 }
 
-// PATCH /api/empresas/[id] - Atualizar empresa
-export async function PATCH(
+async function patchHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  params: { id: string }
 ) {
   try {
     const user = await getAuthUser(request);
@@ -93,10 +95,9 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/empresas/[id] - Deletar empresa (apenas superadmin)
-export async function DELETE(
+async function deleteHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  params: { id: string }
 ) {
   try {
     const user = await getAuthUser(request);
@@ -125,3 +126,29 @@ export async function DELETE(
   }
 }
 
+// GET /api/empresas/[id] - Detalhes da empresa
+export async function GET(
+  request: NextRequest,
+  context: RouteContext
+) {
+  const params = await context.params;
+  return getHandler(request, params);
+}
+
+// PATCH /api/empresas/[id] - Atualizar empresa
+export async function PATCH(
+  request: NextRequest,
+  context: RouteContext
+) {
+  const params = await context.params;
+  return patchHandler(request, params);
+}
+
+// DELETE /api/empresas/[id] - Deletar empresa (apenas superadmin)
+export async function DELETE(
+  request: NextRequest,
+  context: RouteContext
+) {
+  const params = await context.params;
+  return deleteHandler(request, params);
+}

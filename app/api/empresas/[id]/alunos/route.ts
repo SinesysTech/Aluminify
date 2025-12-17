@@ -4,10 +4,13 @@ import { StudentRepositoryImpl } from '@/backend/services/student';
 import { getAuthUser } from '@/backend/auth/middleware';
 import { getEmpresaContext, validateEmpresaAccess } from '@/backend/middleware/empresa-context';
 
-// GET /api/empresas/[id]/alunos - Listar alunos matriculados em cursos da empresa
-export async function GET(
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
+async function getHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  params: { id: string }
 ) {
   try {
     const user = await getAuthUser(request);
@@ -42,3 +45,11 @@ export async function GET(
   }
 }
 
+// GET /api/empresas/[id]/alunos - Listar alunos matriculados em cursos da empresa
+export async function GET(
+  request: NextRequest,
+  context: RouteContext
+) {
+  const params = await context.params;
+  return getHandler(request, params);
+}

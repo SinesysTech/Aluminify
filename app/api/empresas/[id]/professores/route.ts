@@ -4,10 +4,13 @@ import { TeacherRepositoryImpl } from '@/backend/services/teacher';
 import { getAuthUser } from '@/backend/auth/middleware';
 import { getEmpresaContext, validateEmpresaAccess } from '@/backend/middleware/empresa-context';
 
-// GET /api/empresas/[id]/professores - Listar professores da empresa
-export async function GET(
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
+async function getHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  params: { id: string }
 ) {
   try {
     const user = await getAuthUser(request);
@@ -42,10 +45,9 @@ export async function GET(
   }
 }
 
-// POST /api/empresas/[id]/professores - Adicionar professor
-export async function POST(
+async function postHandler(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  params: { id: string }
 ) {
   try {
     const user = await getAuthUser(request);
@@ -117,3 +119,20 @@ export async function POST(
   }
 }
 
+// GET /api/empresas/[id]/professores - Listar professores da empresa
+export async function GET(
+  request: NextRequest,
+  context: RouteContext
+) {
+  const params = await context.params;
+  return getHandler(request, params);
+}
+
+// POST /api/empresas/[id]/professores - Adicionar professor
+export async function POST(
+  request: NextRequest,
+  context: RouteContext
+) {
+  const params = await context.params;
+  return postHandler(request, params);
+}
