@@ -181,7 +181,7 @@ export default function EmpresaAdminsPage() {
                     <SelectContent>
                       {professoresNaoAdmin.map((prof) => (
                         <SelectItem key={prof.id} value={prof.id}>
-                          {prof.fullName} ({prof.email})
+                          {prof.nome} ({prof.email})
                         </SelectItem>
                       ))}
                     </SelectContent>
