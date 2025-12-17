@@ -20,7 +20,7 @@ interface Agendamento {
   data_inicio: string;
   data_fim: string;
   professor_id: string;
-  aluno_id: string;
+  aluno_id?: string;
   status: string;
   [key: string]: unknown;
 }
