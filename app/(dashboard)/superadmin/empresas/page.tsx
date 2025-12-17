@@ -17,7 +17,6 @@ interface Empresa {
 }
 
 export default function EmpresasPage() {
-  const router = useRouter();
   const { toast } = useToast();
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +38,11 @@ export default function EmpresasPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchEmpresas();
+  }, [fetchEmpresas]);
 
   async function handleToggleStatus(id: string, ativo: boolean) {
     try {

@@ -57,7 +57,11 @@ export default function EmpresaProfessoresPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
+
+  useEffect(() => {
+    fetchProfessores();
+  }, [fetchProfessores]);
 
   async function handleCreate() {
     try {

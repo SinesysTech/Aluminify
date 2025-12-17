@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -72,11 +72,7 @@ export function BloqueiosManager({ professorId, empresaId, isAdmin = false }: Bl
   })
   const [afetados, setAfetados] = useState<number>(0)
 
-  useEffect(() => {
-    loadBloqueios()
-  }, [professorId, empresaId])
-
-  const loadBloqueios = async () => {
+  const loadBloqueios = useCallback(async () => {
     setIsLoading(true)
     try {
       const supabase = await createClient()
@@ -95,7 +91,11 @@ export function BloqueiosManager({ professorId, empresaId, isAdmin = false }: Bl
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [professorId, empresaId])
+
+  useEffect(() => {
+    loadBloqueios()
+  }, [loadBloqueios])
 
   const checkAfetados = async (dataInicio: Date, dataFim: Date) => {
     try {

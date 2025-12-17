@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -46,11 +46,7 @@ export function CalendarioCompartilhado({ empresaId }: CalendarioCompartilhadoPr
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
   const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    loadData()
-  }, [currentDate, empresaId, selectedProfessor, selectedStatus])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true)
     try {
       const start = view === 'week' 
@@ -73,7 +69,11 @@ export function CalendarioCompartilhado({ empresaId }: CalendarioCompartilhadoPr
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [currentDate, empresaId, selectedProfessor, selectedStatus, view])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const filteredAgendamentos = agendamentos.filter(a => {
     if (selectedProfessor !== 'all' && a.professor_id !== selectedProfessor) return false

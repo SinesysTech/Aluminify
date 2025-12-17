@@ -56,11 +56,7 @@ export function RelatoriosDashboard({ empresaId }: RelatoriosDashboardProps) {
     tipo: 'mensal' as RelatorioTipo,
   })
 
-  useEffect(() => {
-    loadRelatorios()
-  }, [empresaId])
-
-  const loadRelatorios = async () => {
+  const loadRelatorios = useCallback(async () => {
     setIsLoading(true)
     try {
       const data = await getRelatorios(empresaId, 10)
@@ -71,7 +67,11 @@ export function RelatoriosDashboard({ empresaId }: RelatoriosDashboardProps) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [empresaId])
+
+  useEffect(() => {
+    loadRelatorios()
+  }, [loadRelatorios])
 
   const handleGenerate = async () => {
     setIsGenerating(true)
