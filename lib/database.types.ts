@@ -193,6 +193,132 @@ export type Database = {
                     },
                 ]
             }
+            agendamento_bloqueios: {
+                Row: {
+                    id: string
+                    professor_id: string | null
+                    empresa_id: string
+                    tipo: string
+                    data_inicio: string
+                    data_fim: string
+                    motivo: string | null
+                    criado_por: string
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    professor_id?: string | null
+                    empresa_id: string
+                    tipo?: string
+                    data_inicio: string
+                    data_fim: string
+                    motivo?: string | null
+                    criado_por: string
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    professor_id?: string | null
+                    empresa_id?: string
+                    tipo?: string
+                    data_inicio?: string
+                    data_fim?: string
+                    motivo?: string | null
+                    criado_por?: string
+                    created_at?: string
+                    updated_at?: string
+                }
+                Relationships: []
+            }
+            agendamento_recorrencia: {
+                Row: {
+                    id: string
+                    professor_id: string
+                    empresa_id: string
+                    tipo_servico: string
+                    data_inicio: string
+                    data_fim: string | null
+                    dia_semana: number
+                    hora_inicio: string
+                    hora_fim: string
+                    duracao_slot_minutos: number
+                    ativo: boolean
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    professor_id: string
+                    empresa_id: string
+                    tipo_servico?: string
+                    data_inicio: string
+                    data_fim?: string | null
+                    dia_semana: number
+                    hora_inicio: string
+                    hora_fim: string
+                    duracao_slot_minutos?: number
+                    ativo?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    professor_id?: string
+                    empresa_id?: string
+                    tipo_servico?: string
+                    data_inicio?: string
+                    data_fim?: string | null
+                    dia_semana?: number
+                    hora_inicio?: string
+                    hora_fim?: string
+                    duracao_slot_minutos?: number
+                    ativo?: boolean
+                    created_at?: string
+                    updated_at?: string
+                }
+                Relationships: []
+            }
+            agendamento_relatorios: {
+                Row: {
+                    id: string
+                    empresa_id: string
+                    periodo_inicio: string
+                    periodo_fim: string
+                    tipo: string
+                    dados_json: Json
+                    gerado_em: string
+                    gerado_por: string
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    empresa_id: string
+                    periodo_inicio: string
+                    periodo_fim: string
+                    tipo: string
+                    dados_json?: Json
+                    gerado_em?: string
+                    gerado_por: string
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    empresa_id?: string
+                    periodo_inicio?: string
+                    periodo_fim?: string
+                    tipo?: string
+                    dados_json?: Json
+                    gerado_em?: string
+                    gerado_por?: string
+                    created_at?: string
+                    updated_at?: string
+                }
+                Relationships: []
+            }
             alunos: {
                 Row: {
                     cep: string | null
@@ -1130,36 +1256,42 @@ export type Database = {
                 Row: {
                     biografia: string | null
                     cpf: string | null
+                    empresa_id: string
                     created_at: string
                     email: string
                     especialidade: string | null
                     foto_url: string | null
                     id: string
                     nome_completo: string
+                    is_admin: boolean
                     telefone: string | null
                     updated_at: string
                 }
                 Insert: {
                     biografia?: string | null
                     cpf?: string | null
+                    empresa_id: string
                     created_at?: string
                     email: string
                     especialidade?: string | null
                     foto_url?: string | null
                     id: string
                     nome_completo: string
+                    is_admin?: boolean
                     telefone?: string | null
                     updated_at?: string
                 }
                 Update: {
                     biografia?: string | null
                     cpf?: string | null
+                    empresa_id?: string
                     created_at?: string
                     email?: string
                     especialidade?: string | null
                     foto_url?: string | null
                     id?: string
                     nome_completo?: string
+                    is_admin?: boolean
                     telefone?: string | null
                     updated_at?: string
                 }
@@ -1444,7 +1576,26 @@ export type Database = {
             }
         }
         Views: {
-            [_ in never]: never
+            v_agendamentos_empresa: {
+                Row: {
+                    id: string
+                    professor_id: string
+                    professor_nome: string
+                    professor_foto: string | null
+                    aluno_id: string
+                    aluno_nome: string | null
+                    aluno_email: string | null
+                    data_inicio: string
+                    data_fim: string
+                    status: string
+                    link_reuniao: string | null
+                    observacoes: string | null
+                    created_at: string | null
+                    updated_at: string | null
+                    empresa_id: string
+                }
+                Relationships: []
+            }
         }
         Functions: {
             check_and_set_first_professor_superadmin: {

@@ -218,14 +218,8 @@ export async function createAgendamento(data: Omit<Agendamento, 'id' | 'created_
     end: new Date(b.data_fim)
   }))
 
-  // Get bloqueios for this professor and date
-  const { data: professor } = await supabase
-    .from('professores')
-    .select('empresa_id')
-    .eq('id', data.professor_id)
-    .single()
-
-  const empresaId = professor?.empresa_id
+  // Get bloqueios for this professor and date, using empresa_id from recorrência
+  const empresaId = rulesData && rulesData.length > 0 ? rulesData[0].empresa_id : undefined
 
   if (empresaId) {
     const { data: bloqueios } = await supabase

@@ -69,7 +69,7 @@ export default function NovaEmpresaPage() {
       case 1:
         return formData.nome.trim() !== '';
       case 2:
-        return formData.plano !== '';
+        return !!formData.plano;
       case 3:
         return (
           formData.primeiroAdminEmail.trim() !== '' &&
