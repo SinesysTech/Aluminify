@@ -1613,4 +1613,7 @@ export class FlashcardsService {
   }
 }
 
-export const flashcardsService = new FlashcardsService();
+// Factory para evitar inicialização do cliente de banco na importação do módulo.
+// Isso impede erros em build quando variáveis de ambiente do Supabase não estão configuradas,
+// mas ainda garante que em tempo de execução o erro seja lançado se o banco não estiver configurado.
+export const createFlashcardsService = () => new FlashcardsService();

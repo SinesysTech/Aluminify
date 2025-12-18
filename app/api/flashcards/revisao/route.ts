@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireUserAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
-import { flashcardsService } from '@/backend/services/flashcards/flashcards.service';
+import { createFlashcardsService } from '@/backend/services/flashcards/flashcards.service';
 
 async function handler(request: AuthenticatedRequest) {
   try {
@@ -15,6 +15,7 @@ async function handler(request: AuthenticatedRequest) {
     const excludeIds = excludeIdsParam ? excludeIdsParam.split(',').filter(Boolean) : undefined;
 
     console.log(`[flashcards/revisao] Requisição recebida - modo: ${modo}, alunoId: ${request.user!.id}`);
+    const flashcardsService = createFlashcardsService();
     const data = await flashcardsService.listForReview(
       request.user!.id,
       modo,

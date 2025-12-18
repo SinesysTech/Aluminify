@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireUserAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
-import { flashcardsService, FlashcardImportRow } from '@/backend/services/flashcards/flashcards.service';
+import { createFlashcardsService, FlashcardImportRow } from '@/backend/services/flashcards/flashcards.service';
 
 async function handler(request: AuthenticatedRequest) {
   if (request.method !== 'POST') {
@@ -11,6 +11,7 @@ async function handler(request: AuthenticatedRequest) {
     const body = await request.json();
     const rows = (body?.rows ?? []) as FlashcardImportRow[];
 
+    const flashcardsService = createFlashcardsService();
     const result = await flashcardsService.importFlashcards(rows, request.user!.id);
 
     const hasErrors = result.errors.length > 0;
