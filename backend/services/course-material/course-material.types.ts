@@ -2,7 +2,9 @@
  * @deprecated Use types from '@/types/shared/enums' instead
  * This file re-exports for backward compatibility
  */
-export type { MaterialType } from '@/types/shared/enums';
+import type { MaterialType } from '@/types/shared/enums';
+
+export type { MaterialType };
 
 export interface CourseMaterial {
   id: string;

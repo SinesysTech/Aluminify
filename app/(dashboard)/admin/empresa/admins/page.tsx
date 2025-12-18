@@ -35,7 +35,7 @@ export default function EmpresaAdminsPage() {
     id: string;
     nome: string;
     email: string;
-    [key: string]: unknown;
+    fullName?: string;
   }
 
   const [admins, setAdmins] = useState<Admin[]>([]);
@@ -181,7 +181,7 @@ export default function EmpresaAdminsPage() {
                     <SelectContent>
                       {professoresNaoAdmin.map((prof) => (
                         <SelectItem key={prof.id} value={prof.id}>
-                          {prof.nome} ({prof.email})
+                          {prof.fullName || prof.nome} ({prof.email})
                         </SelectItem>
                       ))}
                     </SelectContent>

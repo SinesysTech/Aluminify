@@ -15,11 +15,11 @@ interface ConversationRow {
   user_id: string;
   session_id: string;
   title: string;
-  messages?: ChatMessage[] | null;
-  created_at?: string;
-  updated_at?: string;
-  is_active?: boolean;
-  history?: ChatMessage[];
+  messages?: unknown;
+  created_at?: string | null;
+  updated_at?: string | null;
+  is_active?: boolean | null;
+  history?: unknown;
   [key: string]: unknown;
 }
 
@@ -67,7 +67,7 @@ export class ConversationService {
 
     console.log('[Conversation Service] ✅ Conversation created:', data.id);
     
-    return mapConversation(data);
+    return mapConversation(data as any);
   }
 
   /**
@@ -265,7 +265,7 @@ export class ConversationService {
         {
           conversation_id: conversationId,
           user_id: userId,
-          history: history as unknown as ChatMessage[],
+          history: history as any,
         },
         { onConflict: 'conversation_id' },
       );

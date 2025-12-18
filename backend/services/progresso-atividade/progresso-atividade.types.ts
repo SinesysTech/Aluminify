@@ -2,10 +2,12 @@
  * @deprecated Use types from '@/types/shared/enums' instead
  * This file re-exports for backward compatibility
  */
-export type {
+import type {
   StatusAtividade,
   DificuldadePercebida,
 } from '@/types/shared/enums';
+
+export type { StatusAtividade, DificuldadePercebida };
 
 export interface ProgressoAtividade {
   id: string;

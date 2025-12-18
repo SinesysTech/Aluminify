@@ -168,7 +168,13 @@ async function getHandler(
   }
 
   const { cronograma, itens } = await fetchCronogramaCompleto(cronogramaId)
-  const Doc = buildPdf(cronograma, itens)
+  const cronogramaExport = {
+    ...cronograma,
+    dias_estudo_semana: (cronograma as any).dias_estudo_semana || 5,
+    horas_estudo_dia: (cronograma as any).horas_estudo_dia || 2,
+    modalidade_estudo: (cronograma as any).modalidade_estudo || 'hibrido',
+  }
+  const Doc = buildPdf(cronogramaExport, itens)
   const blob = await pdf(Doc).toBlob()
   const arr = await blob.arrayBuffer()
 

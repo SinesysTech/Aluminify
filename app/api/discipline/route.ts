@@ -45,7 +45,8 @@ function handleError(error: unknown) {
 // GET é público (catálogo)
 export async function GET() {
   try {
-    const disciplines = await disciplineService.list();
+    const result = await disciplineService.list();
+    const disciplines = Array.isArray(result) ? result : result.data;
     return NextResponse.json({ data: disciplines.map(serializeDiscipline) });
   } catch (error) {
     return handleError(error);

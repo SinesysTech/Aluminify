@@ -1219,7 +1219,7 @@ export class FlashcardsService {
             [key: string]: unknown;
           }
           // Verificar se a disciplina foi realmente carregada (não apenas a foreign key)
-          const frentesWithDisciplina = frentes as FrenteComDisciplina;
+          const frentesWithDisciplina = frentes as unknown as FrenteComDisciplina;
           const disciplinasData = frentesWithDisciplina?.disciplinas;
           const disciplina = Array.isArray(disciplinasData) ? disciplinasData[0] : disciplinasData;
           return disciplina && disciplina.id && disciplina.nome;
@@ -1232,7 +1232,7 @@ export class FlashcardsService {
             disciplinas?: { id: string; nome: string } | { id: string; nome: string }[];
             [key: string]: unknown;
           }
-          const frentesWithDisciplina = frentes as FrenteComDisciplina;
+          const frentesWithDisciplina = frentes as unknown as FrenteComDisciplina;
           const disciplinasData = frentesWithDisciplina?.disciplinas;
           const disciplina = Array.isArray(disciplinasData) ? disciplinasData[0] : disciplinasData;
           

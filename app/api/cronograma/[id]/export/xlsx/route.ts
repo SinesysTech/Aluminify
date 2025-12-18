@@ -199,7 +199,13 @@ async function getHandler(
   }
 
   const { cronograma, itens } = await fetchCronogramaCompleto(cronogramaId)
-  const wb = await buildWorkbook(cronograma, itens)
+  const cronogramaExport = {
+    ...cronograma,
+    dias_estudo_semana: (cronograma as any).dias_estudo_semana || 5,
+    horas_estudo_dia: (cronograma as any).horas_estudo_dia || 2,
+    modalidade_estudo: (cronograma as any).modalidade_estudo || 'hibrido',
+  }
+  const wb = await buildWorkbook(cronogramaExport, itens)
   const buffer = await wb.xlsx.writeBuffer()
 
   return new NextResponse(buffer, {
