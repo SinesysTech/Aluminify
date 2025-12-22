@@ -1,6 +1,5 @@
-// @ts-nocheck - Temporary: Supabase types need to be regenerated after new migrations
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/server';
+import { getDatabaseClient } from '@/backend/clients/database';
 import { EmpresaService, EmpresaRepositoryImpl } from '@/backend/services/empresa';
 import { getAuthUser } from '@/backend/auth/middleware';
 
@@ -16,10 +15,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    // Usar cliente admin para bypass de RLS
+    const adminClient = getDatabaseClient();
 
-    const repository = new EmpresaRepositoryImpl(supabase);
-    const service = new EmpresaService(repository, supabase);
+    const repository = new EmpresaRepositoryImpl(adminClient);
+    const service = new EmpresaService(repository, adminClient);
     const empresas = await service.listAll();
 
     return NextResponse.json(empresas);
@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
+    // Usar cliente admin para bypass de RLS
+    const adminClient = getDatabaseClient();
 
     const body = await request.json();
     const { nome, cnpj, emailContato, telefone, plano, primeiroAdminEmail, primeiroAdminNome, primeiroAdminPassword } = body;
@@ -56,8 +57,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const repository = new EmpresaRepositoryImpl(supabase);
-    const service = new EmpresaService(repository, supabase);
+    const repository = new EmpresaRepositoryImpl(adminClient);
+    const service = new EmpresaService(repository, adminClient);
 
     // Criar empresa
     const empresa = await service.create({
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     // Se primeiroAdminEmail fornecido, criar primeiro admin
     if (primeiroAdminEmail && primeiroAdminNome && primeiroAdminPassword) {
-      const { data: newUser, error: userError } = await supabase.auth.admin.createUser({
+      const { data: newUser, error: userError } = await adminClient.auth.admin.createUser({
         email: primeiroAdminEmail,
         password: primeiroAdminPassword,
         email_confirm: true,
@@ -87,8 +88,8 @@ export async function POST(request: NextRequest) {
         // Não falhar a criação da empresa, apenas logar o erro
       } else if (newUser.user) {
         // Inserir em empresa_admins como owner
-        await supabase
-          .from('empresa_admins' as any)
+        await adminClient
+          .from('empresa_admins')
           .insert({
             empresa_id: empresa.id,
             user_id: newUser.user.id,

@@ -26,6 +26,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { createClient } from '@/lib/client';
 
 interface Empresa {
   id: string;
@@ -88,10 +89,34 @@ export default function AdminPage() {
 
   const fetchEmpresas = useCallback(async () => {
     try {
-      const response = await fetch('/api/empresas');
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: 'Erro',
+          description: 'Sessão expirada. Faça login novamente.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const response = await fetch('/api/empresas', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setEmpresas(data);
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: 'Erro',
+          description: errorData.error || 'Erro ao carregar empresas',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Error fetching empresas:', error);
@@ -105,7 +130,19 @@ export default function AdminPage() {
 
   const fetchProfessores = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/all-users');
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        return;
+      }
+
+      const response = await fetch('/api/admin/all-users', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setProfessores(data);
@@ -122,7 +159,19 @@ export default function AdminPage() {
 
   const fetchAlunos = useCallback(async () => {
     try {
-      const response = await fetch('/api/admin/all-students');
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        return;
+      }
+
+      const response = await fetch('/api/admin/all-students', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+      
       if (response.ok) {
         const data = await response.json();
         setAlunos(data);
@@ -152,9 +201,24 @@ export default function AdminPage() {
 
   async function handleToggleEmpresaStatus(id: string, ativo: boolean) {
     try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: 'Erro',
+          description: 'Sessão expirada. Faça login novamente.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const response = await fetch(`/api/empresas/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ ativo: !ativo }),
       });
 
@@ -179,9 +243,24 @@ export default function AdminPage() {
 
   async function handleCreateEmpresa() {
     try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: 'Erro',
+          description: 'Sessão expirada. Faça login novamente.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const response = await fetch('/api/empresas', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify(empresaForm),
       });
 
