@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -70,11 +71,24 @@ interface Aluno {
 
 export default function AdminPage() {
   const { toast } = useToast();
+  const searchParams = useSearchParams();
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [professores, setProfessores] = useState<Professor[]>([]);
   const [alunos, setAlunos] = useState<Aluno[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('empresas');
+  
+  // Ler tab da query string ou usar 'empresas' como padrão
+  const tabFromUrl = searchParams.get('tab');
+  const validTabs = ['empresas', 'professores', 'alunos'];
+  const initialTab = tabFromUrl && validTabs.includes(tabFromUrl) ? tabFromUrl : 'empresas';
+  const [activeTab, setActiveTab] = useState(initialTab);
+  
+  // Atualizar tab quando a URL mudar
+  useEffect(() => {
+    if (tabFromUrl && validTabs.includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]);
   const [openEmpresaDialog, setOpenEmpresaDialog] = useState(false);
   const [empresaForm, setEmpresaForm] = useState({
     nome: '',

@@ -22,6 +22,7 @@ import { usePathname } from "next/navigation"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
+import { SuperAdminSidebar } from "@/components/superadmin-sidebar"
 import { useCurrentUser } from "@/components/providers/user-provider"
 import {
   Sidebar,
@@ -174,6 +175,11 @@ const navMainData: NavItem[] = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const user = useCurrentUser()
+
+  // Se o usuário for superadmin, renderizar sidebar específica
+  if (user.role === 'superadmin') {
+    return <SuperAdminSidebar {...props} />
+  }
 
   const filteredNav = navMainData.filter((item) =>
     hasRequiredRole(user.role, item.roles)

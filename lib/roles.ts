@@ -5,7 +5,7 @@ export const PROFESSOR_ROLES: AppUserRole[] = ['professor', 'superadmin']
 const DEFAULT_ROUTE_BY_ROLE: Record<AppUserRole, string> = {
   aluno: '/aluno/dashboard',
   professor: '/aluno/dashboard',
-  superadmin: '/aluno/dashboard',
+  superadmin: '/admin',
 }
 
 export function isProfessorRole(role: AppUserRole) {
