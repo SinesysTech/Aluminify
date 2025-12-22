@@ -1,4 +1,4 @@
-import { ProfessorLoginForm } from '@/components/professor-login-form';
+import { ProfessorLoginForm } from '@/components/auth/professor-login-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ProfessorLoginPage() {

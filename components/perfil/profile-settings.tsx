@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { AvatarUpload } from '@/components/avatar-upload'
+import { AvatarUpload } from '@/components/shared/avatar-upload'
 
 type ProfileSettingsProps = {
   user: AppUser

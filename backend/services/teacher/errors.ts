@@ -18,4 +18,3 @@ export class TeacherNotFoundError extends Error {
     this.name = 'TeacherNotFoundError';
   }
 }
-

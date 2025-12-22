@@ -33,8 +33,9 @@ export class TeacherService {
   }
 
   async create(payload: CreateTeacherInput): Promise<Teacher> {
-    // Validar empresaId é obrigatório
-    if (!payload.empresaId) {
+    // Validar empresaId é obrigatório (pode ser null apenas quando criado por Super Admin via endpoint específico)
+    // A validação de permissão é feita no endpoint, aqui apenas validamos se fornecido
+    if (payload.empresaId === undefined) {
       throw new TeacherValidationError('empresaId is required');
     }
 
@@ -66,16 +67,23 @@ export class TeacherService {
       
       // Tentar criar um novo usuário
       const tempPassword = randomBytes(16).toString('hex');
+      
+      // Construir metadata - incluir empresa_id apenas se fornecido (não null)
+      const userMetadata: Record<string, unknown> = {
+        role: 'professor',
+        full_name: fullName,
+        is_admin: payload.isAdmin ?? false,
+      };
+      
+      if (payload.empresaId) {
+        userMetadata.empresa_id = payload.empresaId;
+      }
+      
       const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
         email: email,
         password: tempPassword,
         email_confirm: true,
-        user_metadata: {
-          role: 'professor',
-          full_name: fullName,
-          empresa_id: payload.empresaId,
-          is_admin: payload.isAdmin ?? false,
-        },
+        user_metadata: userMetadata,
       });
 
       if (authError) {
@@ -97,14 +105,19 @@ export class TeacherService {
             teacherId = existingUser.id;
             
             // Atualizar metadata para garantir que o role está correto
+            const updateMetadata: Record<string, unknown> = {
+              ...existingUser.user_metadata,
+              role: 'professor',
+              full_name: fullName,
+              is_admin: payload.isAdmin ?? false,
+            };
+            
+            if (payload.empresaId) {
+              updateMetadata.empresa_id = payload.empresaId;
+            }
+            
             await adminClient.auth.admin.updateUserById(existingUser.id, {
-              user_metadata: {
-                ...existingUser.user_metadata,
-                role: 'professor',
-                full_name: fullName,
-                empresa_id: payload.empresaId,
-                is_admin: payload.isAdmin ?? false,
-              },
+              user_metadata: updateMetadata,
             });
           } else {
             throw new Error(`User with email "${email}" exists but could not be found`);
@@ -119,7 +132,8 @@ export class TeacherService {
       }
     }
 
-    return this.repository.create({
+    // Criar registro - o repositório deve aceitar empresaId null
+    return await this.repository.create({
       id: teacherId,
       empresaId: payload.empresaId,
       isAdmin: payload.isAdmin ?? false,

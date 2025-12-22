@@ -44,13 +44,20 @@ export class StudentService {
       throw new StudentConflictError(`Student with email "${email}" already exists`);
     }
 
-    const courseIds = this.validateCourseIds(payload.courseIds);
-    const courses = await this.fetchCourses(courseIds);
-    if (courses.length !== courseIds.length) {
-      throw new StudentValidationError('Um ou mais cursos selecionados são inválidos.');
-    }
+    // Validar courseIds - permitir vazio se temporaryPassword for fornecida ou CPF fornecido
+    const courseIds = payload.courseIds && payload.courseIds.length > 0 
+      ? this.validateCourseIds(payload.courseIds)
+      : [];
+    let courses: Awaited<ReturnType<typeof this.fetchCourses>> = [];
+    let primaryCourse: { name: string } | null = null;
 
-    const primaryCourse = courses[0];
+    if (courseIds.length > 0) {
+      courses = await this.fetchCourses(courseIds);
+      if (courses.length !== courseIds.length) {
+        throw new StudentValidationError('Um ou mais cursos selecionados são inválidos.');
+      }
+      primaryCourse = courses[0];
+    }
 
     if (payload.cpf) {
       const cpf = this.validateCpf(payload.cpf);
@@ -79,12 +86,24 @@ export class StudentService {
     let temporaryPassword = payload.temporaryPassword?.trim();
 
     if (!temporaryPassword) {
-      if (!cpf) {
-        throw new StudentValidationError(
-          'Informe o CPF ou defina manualmente a senha temporária para o aluno.',
-        );
+      // Se não há cursos, precisa fornecer CPF ou senha temporária
+      if (courseIds.length === 0) {
+        if (!cpf) {
+          throw new StudentValidationError(
+            'Informe o CPF ou defina manualmente a senha temporária para o aluno quando não há cursos.',
+          );
+        }
+        // Gerar senha usando CPF (sem curso)
+        temporaryPassword = this.generateDefaultPassword(cpf, 'Sistema');
+      } else {
+        // Se há cursos, precisa de CPF ou senha temporária para gerar senha padrão
+        if (!cpf) {
+          throw new StudentValidationError(
+            'Informe o CPF ou defina manualmente a senha temporária para o aluno.',
+          );
+        }
+        temporaryPassword = this.generateDefaultPassword(cpf, primaryCourse!.name);
       }
-      temporaryPassword = this.generateDefaultPassword(cpf, primaryCourse.name);
     }
 
     if (temporaryPassword.length < 8) {

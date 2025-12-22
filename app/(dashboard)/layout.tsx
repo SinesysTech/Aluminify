@@ -1,11 +1,11 @@
-import { AppSidebar } from '@/components/app-sidebar'
+import { AppSidebar } from '@/components/layout/app-sidebar'
 import { UserProvider } from '@/components/providers/user-provider'
-import { BottomNavigation } from '@/components/bottom-navigation'
+import { BottomNavigation } from '@/components/layout/bottom-navigation'
 import {
   SidebarInset,
   SidebarProvider,
 } from '@/components/ui/sidebar'
-import { DashboardHeader } from '@/components/dashboard-header'
+import { DashboardHeader } from '@/components/layout/dashboard-header'
 import { requireUser } from '@/lib/auth'
 
 export default async function DashboardLayout({

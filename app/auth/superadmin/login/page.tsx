@@ -1,4 +1,4 @@
-import { SuperAdminLoginForm } from '@/components/superadmin-login-form';
+import { SuperAdminLoginForm } from '@/components/auth/superadmin-login-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SuperAdminLoginPage() {

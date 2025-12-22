@@ -93,7 +93,7 @@ Quando o aluno clica no botão "Visualizar", o PDF é exibido em um modal/popup 
 Se precisar usar o modal de PDF em outro componente:
 
 ```tsx
-import { PdfViewerModal } from '@/components/pdf-viewer-modal'
+import { PdfViewerModal } from '@/components/shared/pdf-viewer-modal'
 
 // No componente:
 const [pdfModalOpen, setPdfModalOpen] = React.useState(false)

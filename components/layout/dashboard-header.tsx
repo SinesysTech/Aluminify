@@ -4,8 +4,8 @@ import { Separator } from '@/components/ui/separator'
 import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { DynamicBreadcrumb } from '@/components/dynamic-breadcrumb'
+import { ThemeToggle } from '@/components/shared/theme-toggle'
+import { DynamicBreadcrumb } from '@/components/layout/dynamic-breadcrumb'
 
 export function DashboardHeader() {
   return (

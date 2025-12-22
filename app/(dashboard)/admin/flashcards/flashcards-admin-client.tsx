@@ -48,7 +48,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Pencil, Trash2, Plus, Loader2, Search, X } from 'lucide-react'
-import { FlashcardUploadCard } from '@/components/flashcard-upload-card'
+import { FlashcardUploadCard } from '@/components/shared/flashcard-upload-card'
 import {
   Empty,
   EmptyDescription,

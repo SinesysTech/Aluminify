@@ -4,6 +4,7 @@ import {
   TeacherConflictError,
   TeacherValidationError,
 } from '@/backend/services/teacher';
+import { getAuthUser } from '@/backend/auth/middleware';
 
 const serializeTeacher = (teacher: Awaited<ReturnType<typeof teacherService.getById>>) => ({
   id: teacher.id,
@@ -59,6 +60,24 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verificar autenticação
+    const user = await getAuthUser(request);
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Não autenticado' },
+        { status: 401 }
+      );
+    }
+
+    // Apenas professores e superadmins podem criar professores
+    if (user.role !== 'professor' && user.role !== 'superadmin') {
+      return NextResponse.json(
+        { error: 'Acesso negado. Apenas professores ou superadmin podem criar professores.' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     console.log('[Teacher POST] Request body:', body);
     
@@ -66,6 +85,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ 
         error: 'Campos obrigatórios: fullName e email são necessários' 
       }, { status: 400 });
+    }
+
+    // Super Admin pode criar sem empresaId, outros professores precisam de empresaId
+    if (!user.isSuperAdmin && !body?.empresaId) {
+      return NextResponse.json(
+        { error: 'empresaId é obrigatório para professores' },
+        { status: 400 }
+      );
     }
     
     const teacher = await teacherService.create({

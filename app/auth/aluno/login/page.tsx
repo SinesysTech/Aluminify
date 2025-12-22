@@ -1,4 +1,4 @@
-import { AlunoLoginForm } from '@/components/aluno-login-form';
+import { AlunoLoginForm } from '@/components/auth/aluno-login-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function AlunoLoginPage() {

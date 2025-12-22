@@ -1,7 +1,22 @@
-// @ts-nocheck - Temporary: Supabase types need to be regenerated after new migrations
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/server';
 import { getAuthUser } from '@/backend/auth/middleware';
+
+interface EmpresaInfo {
+  id: string;
+  nome: string;
+}
+
+interface ProfessorWithEmpresa {
+  id: string;
+  email: string;
+  nome_completo: string;
+  is_admin: boolean;
+  empresa_id: string;
+  empresas: EmpresaInfo | null;
+  created_at: string;
+  updated_at: string;
+}
 
 /**
  * GET /api/admin/all-users
@@ -42,7 +57,7 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
-    return NextResponse.json(professores || []);
+    return NextResponse.json((professores || []) as ProfessorWithEmpresa[]);
   } catch (error) {
     console.error('Error listing all users:', error);
     return NextResponse.json(

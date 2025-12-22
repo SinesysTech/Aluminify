@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card'
 import { MaterialsFilters } from '@/components/materials-filters'
 import { ModuleAccordion } from '@/components/module-accordion'
-import RulesPanel from '@/components/rules-panel'
+import RulesPanel from '@/components/shared/rules-panel'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { ModuloComAtividades, Atividade } from './types'
 

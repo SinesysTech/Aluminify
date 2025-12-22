@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 
 import { requireUser } from '@/lib/auth'
 import { getDefaultRouteForRole } from '@/lib/roles'
-import { FirstAccessForm } from '@/components/first-access-form'
+import { FirstAccessForm } from '@/components/auth/first-access-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function PrimeiroAcessoPage() {

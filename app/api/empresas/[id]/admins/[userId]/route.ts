@@ -9,10 +9,10 @@ interface RouteContext {
 
 async function deleteHandler(
   request: NextRequest,
-  context: RouteContext
+  routeContext: RouteContext
 ) {
   try {
-    const { id, userId } = await context.params;
+    const { id, userId } = await routeContext.params;
     const user = await getAuthUser(request);
 
     if (!user) {

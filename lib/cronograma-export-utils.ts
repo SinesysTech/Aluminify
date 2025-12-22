@@ -1,5 +1,4 @@
 import { getDatabaseClient } from '@/backend/clients/database'
-import type { Database } from '@/lib/database.types'
 
 interface CronogramaData {
   id: string;

@@ -90,7 +90,7 @@ export interface Teacher {
 
 export interface CreateTeacherInput {
   id?: string;
-  empresaId: string;
+  empresaId: string | null; // Permite null para Super Admin criar professores sem empresa
   isAdmin?: boolean;
   fullName: string;
   email: string;

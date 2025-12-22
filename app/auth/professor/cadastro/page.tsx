@@ -1,4 +1,4 @@
-import { ProfessorSignUpForm } from '@/components/professor-sign-up-form';
+import { ProfessorSignUpForm } from '@/components/auth/professor-sign-up-form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Suspense } from 'react';
 

@@ -9,8 +9,8 @@ import {
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/layout/nav-main"
+import { NavUser } from "@/components/layout/nav-user"
 import { useCurrentUser } from "@/components/providers/user-provider"
 import {
   Sidebar,
