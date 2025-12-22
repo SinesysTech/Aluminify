@@ -86,38 +86,71 @@ export function ProfessorSignUpForm() {
     try {
       const supabase = createClient();
 
-      const userMetadata: Record<string, string> = {
-        role: 'professor',
-        full_name: fullName,
-      };
-
-      // Adicionar empresa_id se fornecido
+      // Se empresa_id foi fornecido, usar fluxo normal de signup
       if (empresaId) {
-        userMetadata.empresa_id = empresaId;
-      }
+        const userMetadata: Record<string, string> = {
+          role: 'professor',
+          full_name: fullName,
+          empresa_id: empresaId,
+        };
 
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userMetadata,
-        },
-      });
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: userMetadata,
+          },
+        });
 
-      if (signUpError) {
-        if (signUpError.message.includes('already registered')) {
-          throw new Error('Este email já está cadastrado');
+        if (signUpError) {
+          if (signUpError.message.includes('already registered')) {
+            throw new Error('Este email já está cadastrado');
+          }
+          throw new Error(signUpError.message);
         }
-        throw new Error(signUpError.message);
-      }
 
-      if (!data.user) {
-        throw new Error('Erro ao criar conta. Tente novamente.');
-      }
+        if (!data.user) {
+          throw new Error('Erro ao criar conta. Tente novamente.');
+        }
 
-      // Redirecionar para dashboard do professor
-      router.push('/tobias');
-      router.refresh();
+        // Redirecionar para dashboard do professor
+        router.push('/tobias');
+        router.refresh();
+      } else {
+        // Se não há empresa_id, criar empresa automaticamente
+        const response = await fetch('/api/auth/signup-with-empresa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            password,
+            fullName,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Erro ao criar conta e empresa');
+        }
+
+        const data = await response.json();
+        
+        // Fazer login automático após criar conta
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (signInError) {
+          // Mesmo se login falhar, redirecionar para login
+          router.push('/auth/professor/login');
+          return;
+        }
+
+        // Redirecionar para dashboard do professor
+        router.push('/tobias');
+        router.refresh();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao criar conta');
       setIsLoading(false);
