@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 export type NotificacaoAgendamento = {
   id: string
   agendamento_id: string
-  tipo: 'criacao' | 'confirmacao' | 'cancelamento' | 'lembrete' | 'alteracao' | 'rejeicao'
+  tipo: 'criacao' | 'confirmacao' | 'cancelamento' | 'lembrete' | 'alteracao' | 'rejeicao' | 'bloqueio_criado' | 'recorrencia_alterada' | 'substituicao_solicitada'
   destinatario_id: string
   enviado: boolean
   enviado_em: string | null
@@ -55,7 +55,15 @@ export async function getNotificacoesUsuario(userId: string): Promise<Notificaca
     return []
   }
 
-  return data || []
+  // Mapear os dados para garantir que o tipo seja correto
+  const validTipos: NotificacaoAgendamento['tipo'][] = ['criacao', 'confirmacao', 'cancelamento', 'lembrete', 'alteracao', 'rejeicao', 'bloqueio_criado', 'recorrencia_alterada', 'substituicao_solicitada']
+
+  return ((data || []) as any[]).map((item: any) => ({
+    ...item,
+    tipo: (validTipos as string[]).includes(item.tipo) ? item.tipo : 'criacao',
+    enviado: item.enviado ?? false,
+    created_at: item.created_at || '1970-01-01T00:00:00.000Z',
+  })) as NotificacaoAgendamento[]
 }
 
 export async function getNotificacoesNaoLidas(userId: string): Promise<number> {
@@ -77,7 +85,7 @@ export async function getNotificacoesNaoLidas(userId: string): Promise<number> {
   return count || 0
 }
 
-export async function marcarComoLida(_notificacaoId: string) {
+export async function marcarComoLida() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -120,7 +128,10 @@ export function getNotificacaoMessage(notificacao: NotificacaoAgendamento, userI
     cancelamento: `Agendamento com ${outraParteNome} foi cancelado`,
     rejeicao: `Seu pedido de agendamento foi recusado`,
     lembrete: `Lembrete: Mentoria com ${outraParteNome} em breve`,
-    alteracao: `Agendamento com ${outraParteNome} foi atualizado`
+    alteracao: `Agendamento com ${outraParteNome} foi atualizado`,
+    bloqueio_criado: `Seu agendamento foi afetado por um bloqueio de agenda`,
+    recorrencia_alterada: `Disponibilidade do professor ${outraParteNome} foi alterada`,
+    substituicao_solicitada: `Foi solicitada uma substituição para seu agendamento com ${outraParteNome}`
   }
 
   return messages[notificacao.tipo] || 'Nova notificacao'
@@ -134,7 +145,10 @@ export function getNotificacaoIcon(tipo: NotificacaoAgendamento['tipo']): string
     cancelamento: 'x-circle',
     rejeicao: 'ban',
     lembrete: 'bell',
-    alteracao: 'edit'
+    alteracao: 'edit',
+    bloqueio_criado: 'shield-x',
+    recorrencia_alterada: 'calendar-range',
+    substituicao_solicitada: 'refresh-cw'
   }
 
   return icons[tipo] || 'bell'

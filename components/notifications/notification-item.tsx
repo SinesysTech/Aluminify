@@ -9,7 +9,10 @@ import {
   XCircle,
   Ban,
   Bell,
-  Edit
+  Edit,
+  ShieldX,
+  CalendarRange,
+  RefreshCw
 } from "lucide-react"
 import Link from "next/link"
 
@@ -24,7 +27,10 @@ const iconMap = {
   cancelamento: XCircle,
   rejeicao: Ban,
   lembrete: Bell,
-  alteracao: Edit
+  alteracao: Edit,
+  bloqueio_criado: ShieldX,
+  recorrencia_alterada: CalendarRange,
+  substituicao_solicitada: RefreshCw
 }
 
 const iconColorMap = {
@@ -33,7 +39,10 @@ const iconColorMap = {
   cancelamento: "text-red-500",
   rejeicao: "text-red-500",
   lembrete: "text-amber-500",
-  alteracao: "text-purple-500"
+  alteracao: "text-purple-500",
+  bloqueio_criado: "text-orange-500",
+  recorrencia_alterada: "text-indigo-500",
+  substituicao_solicitada: "text-cyan-500"
 }
 
 export function NotificationItem({ notificacao, userId }: NotificationItemProps) {

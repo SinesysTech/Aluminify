@@ -14,6 +14,8 @@ import {
   LayoutDashboard,
   Users,
   GraduationCap,
+  Settings,
+  UserCog,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
@@ -142,6 +144,31 @@ const navMainData: NavItem[] = [
     icon: CalendarCheck,
     roles: PROFESSOR_ONLY,
   },
+  // Gestão da Empresa (apenas admins)
+  {
+    title: "Configurações da Empresa",
+    url: "/admin/empresa",
+    icon: Settings,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Administradores",
+    url: "/admin/empresa/admins",
+    icon: UserCog,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Professores",
+    url: "/admin/empresa/professores",
+    icon: GraduationCap,
+    roles: PROFESSOR_ONLY,
+  },
+  {
+    title: "Alunos da Empresa",
+    url: "/admin/empresa/alunos",
+    icon: Users,
+    roles: PROFESSOR_ONLY,
+  },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -158,7 +185,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }))
 
   const studentItems = navMainWithActive.filter((item) => hasRequiredRole("aluno", item.roles))
-  const professorItems = navMainWithActive.filter((item) => hasRequiredRole("professor", item.roles) && !hasRequiredRole("aluno", item.roles))
+  const professorItems = navMainWithActive.filter((item) => hasRequiredRole("professor", item.roles) && !hasRequiredRole("aluno", item.roles) && !item.url.startsWith("/admin/empresa"))
+  const empresaItems = navMainWithActive.filter((item) => item.url.startsWith("/admin/empresa"))
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -182,9 +210,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         {studentItems.length > 0 && <NavMain items={studentItems} label="Menu Estudante" />}
         {studentItems.length > 0 && professorItems.length > 0 && (
-          <div className="h-px bg-border/60 mx-3 my-2" aria-hidden="true" />
+          <div className="h-px bg-border/60 mx-3 my-0" aria-hidden="true" />
         )}
         {professorItems.length > 0 && <NavMain items={professorItems} label="Menu Professor" />}
+        {empresaItems.length > 0 && (
+          <>
+            <div className="h-px bg-border/60 mx-3 my-2" aria-hidden="true" />
+            <NavMain items={empresaItems} label="Gestão da Empresa" />
+          </>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

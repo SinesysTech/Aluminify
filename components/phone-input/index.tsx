@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
 	Command,
@@ -202,12 +203,14 @@ export function PhoneInput({
 															: "opacity-0",
 													)}
 												/>
-												<img
+												<Image
 													src={`/flags/${country.iso2.toLowerCase()}.svg`}
+													alt={country.name}
+													width={16}
+													height={12}
 													className="relative top-0.5 mr-2 w-4 h-3 object-cover"
 													aria-labelledby={country.name}
 													title={country.name}
-													alt={country.name}
 												/>
 												{country.name}
 												<span className="text-gray-11 ml-1">

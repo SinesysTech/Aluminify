@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireUserAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
-import { flashcardsService, ListFlashcardsFilters } from '@/backend/services/flashcards/flashcards.service';
+import { createFlashcardsService, ListFlashcardsFilters } from '@/backend/services/flashcards/flashcards.service';
 
 async function getHandler(request: AuthenticatedRequest) {
   try {
@@ -20,6 +20,7 @@ async function getHandler(request: AuthenticatedRequest) {
     console.log('[flashcards API] Recebida requisição GET com filtros:', JSON.stringify(filters, null, 2));
     console.log('[flashcards API] User ID:', request.user!.id);
 
+    const flashcardsService = createFlashcardsService();
     const result = await flashcardsService.listAll(filters, request.user!.id);
     
     console.log('[flashcards API] Resultado:', {
@@ -141,6 +142,7 @@ async function postHandler(request: AuthenticatedRequest) {
       );
     }
 
+    const flashcardsService = createFlashcardsService();
     const flashcard = await flashcardsService.create(
       { moduloId, pergunta, resposta },
       request.user!.id,

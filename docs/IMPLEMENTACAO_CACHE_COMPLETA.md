@@ -186,3 +186,11 @@ O sistema funciona perfeitamente mesmo sem Redis configurado. Quando Redis não 
 
 
 
+
+
+
+
+
+
+
+

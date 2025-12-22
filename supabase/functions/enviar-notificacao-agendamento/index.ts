@@ -3,11 +3,12 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 interface NotificacaoPayload {
   agendamento_id: string;
-  tipo: 'criacao' | 'confirmacao' | 'cancelamento' | 'lembrete' | 'alteracao' | 'rejeicao';
+  tipo: 'criacao' | 'confirmacao' | 'cancelamento' | 'lembrete' | 'alteracao' | 'rejeicao' | 'bloqueio_criado' | 'recorrencia_alterada' | 'substituicao_solicitada';
   destinatario_id: string;
 }
 
-interface AgendamentoData {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface _AgendamentoData {
   id: string;
   professor_id: string;
   aluno_id: string;
@@ -19,7 +20,8 @@ interface AgendamentoData {
   motivo_cancelamento: string | null;
 }
 
-interface UserData {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface _UserData {
   id: string;
   email: string;
   raw_user_meta_data: {
@@ -102,6 +104,38 @@ const emailTemplates = {
       <p><strong>Data:</strong> ${data.dataFormatada}</p>
       <p><strong>Horario:</strong> ${data.horario}</p>
       <p>Acesse a plataforma para ver os detalhes.</p>
+    `
+  },
+  bloqueio_criado: {
+    subject: "Agendamento afetado por bloqueio de agenda",
+    getBody: (data: { nomeOutraParte: string; dataFormatada: string; horario: string; motivo?: string }) => `
+      <h2>Agendamento Afetado por Bloqueio</h2>
+      <p>Seu agendamento foi afetado por um bloqueio de agenda.</p>
+      <p><strong>Com:</strong> ${data.nomeOutraParte}</p>
+      <p><strong>Data:</strong> ${data.dataFormatada}</p>
+      <p><strong>Horario:</strong> ${data.horario}</p>
+      ${data.motivo ? `<p><strong>Motivo do bloqueio:</strong> ${data.motivo}</p>` : ''}
+      <p>Por favor, entre em contato para reagendar ou verifique outras opcoes disponiveis.</p>
+    `
+  },
+  recorrencia_alterada: {
+    subject: "Disponibilidade do professor alterada",
+    getBody: (data: { nomeOutraParte: string; mensagem?: string }) => `
+      <h2>Disponibilidade Alterada</h2>
+      <p>O professor ${data.nomeOutraParte} alterou sua disponibilidade.</p>
+      ${data.mensagem ? `<p>${data.mensagem}</p>` : ''}
+      <p>Acesse a plataforma para ver os novos horarios disponiveis.</p>
+    `
+  },
+  substituicao_solicitada: {
+    subject: "Solicitacao de substituicao de agendamento",
+    getBody: (data: { nomeOutraParte: string; dataFormatada: string; horario: string }) => `
+      <h2>Solicitacao de Substituicao</h2>
+      <p>Foi solicitada uma substituicao para seu agendamento.</p>
+      <p><strong>Com:</strong> ${data.nomeOutraParte}</p>
+      <p><strong>Data:</strong> ${data.dataFormatada}</p>
+      <p><strong>Horario:</strong> ${data.horario}</p>
+      <p>Acesse a plataforma para mais detalhes.</p>
     `
   }
 };
@@ -227,7 +261,8 @@ Deno.serve(async (req: Request) => {
     const { data: outraParte } = await supabase.auth.admin.getUserById(outraParteId);
 
     const destinatarioEmail = destinatario.user.email;
-    const destinatarioNome = destinatario.user.user_metadata?.name || destinatario.user.user_metadata?.full_name || destinatarioEmail;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _destinatarioNome = destinatario.user.user_metadata?.name || destinatario.user.user_metadata?.full_name || destinatarioEmail;
     const outraParteNome = outraParte?.user?.user_metadata?.name || outraParte?.user?.user_metadata?.full_name || "Usuario";
 
     const dataFormatada = formatDate(agendamento.data_inicio);
@@ -288,6 +323,27 @@ Deno.serve(async (req: Request) => {
         });
         break;
       case 'alteracao':
+        emailBody = template.getBody({
+          nomeOutraParte: outraParteNome,
+          dataFormatada,
+          horario
+        });
+        break;
+      case 'bloqueio_criado':
+        emailBody = template.getBody({
+          nomeOutraParte: outraParteNome,
+          dataFormatada,
+          horario,
+          motivo: agendamento.motivo_cancelamento || undefined
+        });
+        break;
+      case 'recorrencia_alterada':
+        emailBody = template.getBody({
+          nomeOutraParte: outraParteNome,
+          mensagem: 'A disponibilidade do professor foi atualizada.'
+        });
+        break;
+      case 'substituicao_solicitada':
         emailBody = template.getBody({
           nomeOutraParte: outraParteNome,
           dataFormatada,

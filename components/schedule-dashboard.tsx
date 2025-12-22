@@ -105,10 +105,10 @@ interface CronogramaItem {
         disciplinas: {
           id: string
           nome: string
-        }
-      }
-    }
-  }
+        } | null
+      } | null
+    } | null
+  } | null
 }
 
 interface Cronograma {
@@ -319,7 +319,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             }
 
             // Buscar módulos das aulas
-            const moduloIds = [...new Set((aulasBasicas || []).map(a => a.modulo_id).filter(Boolean))]
+            const moduloIds = [...new Set((aulasBasicas || []).map(a => a.modulo_id).filter((id): id is string => !!id))]
             let modulosMap = new Map()
             
             if (moduloIds.length > 0) {
@@ -336,7 +336,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             }
 
             // Buscar frentes dos módulos
-            const frenteIds = [...new Set(Array.from(modulosMap.values()).map((m: any) => m.frente_id).filter(Boolean))]
+            const frenteIds = [...new Set(Array.from(modulosMap.values()).map((m: ModuloMapValue) => m.frente_id).filter(Boolean))]
             let frentesMap = new Map()
             
             if (frenteIds.length > 0) {
@@ -353,7 +353,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             }
 
             // Buscar disciplinas das frentes
-            const disciplinaIds = [...new Set(Array.from(frentesMap.values()).map((f: any) => f.disciplina_id).filter(Boolean))]
+            const disciplinaIds = [...new Set(Array.from(frentesMap.values()).map((f: FrenteMapValue) => f.disciplina_id).filter(Boolean))]
             let disciplinasMap = new Map()
             
             if (disciplinaIds.length > 0) {
@@ -371,9 +371,9 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
 
             // Montar estrutura completa das aulas
             const aulasCompletas = (aulasBasicas || []).map(aula => {
-              const modulo = modulosMap.get(aula.modulo_id)
-              const frente = modulo ? frentesMap.get((modulo as any).frente_id) : null
-              const disciplina = frente ? disciplinasMap.get((frente as any).disciplina_id) : null
+              const modulo = modulosMap.get(aula.modulo_id) as ModuloMapValue | undefined
+              const frente = modulo ? frentesMap.get(modulo.frente_id) as FrenteMapValue | undefined : null
+              const disciplina = frente ? disciplinasMap.get(frente.disciplina_id) as DisciplinaMapValue | undefined : null
 
               return {
                 id: aula.id,
@@ -382,15 +382,15 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
                 tempo_estimado_minutos: aula.tempo_estimado_minutos,
                 curso_id: aula.curso_id,
                 modulos: modulo ? {
-                  id: (modulo as any).id,
-                  nome: (modulo as any).nome,
-                  numero_modulo: (modulo as any).numero_modulo,
+                  id: modulo.id,
+                  nome: modulo.nome,
+                  numero_modulo: modulo.numero_modulo,
                   frentes: frente ? {
-                    id: (frente as any).id,
-                    nome: (frente as any).nome,
+                    id: frente.id,
+                    nome: frente.nome,
                     disciplinas: disciplina ? {
-                      id: (disciplina as any).id,
-                      nome: (disciplina as any).nome,
+                      id: disciplina.id,
+                      nome: disciplina.nome,
                     } : null,
                   } : null,
                 } : null,
@@ -413,6 +413,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
               }
               return {
                 ...item,
+                concluido: item.concluido ?? false,
                 aulas: aula || null,
               }
             })
@@ -424,23 +425,41 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             // No aula_ids, just use items as-is
             itensCompletos = itensData.map(item => ({
               ...item,
+              concluido: item.concluido ?? false,
               aulas: null,
             }))
           }
         }
 
+        // Converter periodos_ferias de Json para o tipo esperado
+        const periodosFeriasConvertidos = cronogramaData.periodos_ferias 
+          ? (Array.isArray(cronogramaData.periodos_ferias) 
+              ? cronogramaData.periodos_ferias.map((p: unknown) => {
+                  if (typeof p === 'object' && p !== null && 'inicio' in p && 'fim' in p) {
+                    return { inicio: String(p.inicio), fim: String(p.fim) }
+                  }
+                  return null
+                }).filter((p): p is { inicio: string; fim: string } => p !== null)
+              : [])
+          : undefined
+
         // Combine the data
         const data = {
           ...cronogramaData,
+          nome: cronogramaData.nome || '',
+          modalidade_estudo: (cronogramaData.modalidade_estudo === 'paralelo' || cronogramaData.modalidade_estudo === 'sequencial')
+            ? cronogramaData.modalidade_estudo
+            : 'paralelo' as 'paralelo' | 'sequencial',
           cronograma_itens: itensCompletos,
-        }
+          periodos_ferias: periodosFeriasConvertidos,
+        } as Cronograma
 
         // Note: We continue even if there's an error loading items,
         // as the cronograma itself loaded successfully and items might load separately
 
         // Ordenar itens por semana e ordem
         if (data.cronograma_itens) {
-          data.cronograma_itens.sort((a: any, b: any) => {
+          data.cronograma_itens.sort((a, b) => {
             if (a.semana_numero !== b.semana_numero) {
               return a.semana_numero - b.semana_numero
             }
@@ -448,7 +467,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
           })
         }
 
-        setCronograma(data as Cronograma)
+        setCronograma(data)
 
         // Buscar informações do curso e disciplinas
         if (data.curso_alvo_id) {
@@ -503,9 +522,15 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
         (payload) => {
           console.log('[Realtime Dashboard] Mudança detectada em cronograma_itens:', payload)
           
+          interface CronogramaItemUpdate {
+            id: string;
+            concluido: boolean;
+            data_conclusao: string | null;
+            [key: string]: unknown;
+          }
           // Recarregar o item específico que mudou
           if (cronograma && payload.new) {
-            const updatedItem = payload.new as any
+            const updatedItem = payload.new as CronogramaItemUpdate
             const updatedItems = cronograma.cronograma_itens.map((item) =>
               item.id === updatedItem.id
                 ? { ...item, concluido: updatedItem.concluido, data_conclusao: updatedItem.data_conclusao }
@@ -514,7 +539,8 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             setCronograma({ ...cronograma, cronograma_itens: updatedItems })
           } else if (payload.eventType === 'DELETE' && payload.old) {
             // Remover item deletado
-            const deletedId = (payload.old as any).id
+            const deletedItem = payload.old as { id: string; [key: string]: unknown }
+            const deletedId = deletedItem.id
             const updatedItems = cronograma?.cronograma_itens.filter((item) => item.id !== deletedId) || []
             if (cronograma) {
               setCronograma({ ...cronograma, cronograma_itens: updatedItems })
@@ -532,7 +558,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
   const toggleConcluido = async (itemId: string, concluido: boolean) => {
     const supabase = createClient()
     
-    const updateData: any = { concluido }
+    const updateData: { concluido: boolean; data_conclusao: string | null } = { concluido, data_conclusao: null }
     if (concluido) {
       updateData.data_conclusao = new Date().toISOString()
     } else {
@@ -555,7 +581,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
 
     if (itemAlvo?.aula_id && alunoAtual && cursoDaAula) {
       if (concluido) {
-        const { data: upsertData, error: aulaError } = await supabase
+        const { error: aulaError } = await supabase
           .from('aulas_concluidas')
           .upsert(
             {
@@ -747,7 +773,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
   const dataFim = new Date(cronograma.data_fim)
   const todasSemanas: number[] = []
   let semanaNumero = 1
-  let dataAtual = new Date(dataInicio)
+  const dataAtual = new Date(dataInicio)
   
   while (dataAtual <= dataFim) {
     todasSemanas.push(semanaNumero)
@@ -1085,7 +1111,16 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
         onToggleConcluido={toggleConcluido}
         onUpdate={(updater) => {
           if (cronograma) {
-            setCronograma(updater(cronograma))
+            const updatedItensPorSemana = updater(itensPorSemana)
+            // Converter itensPorSemana de volta para cronograma_itens
+            const updatedItens: CronogramaItem[] = []
+            Object.values(updatedItensPorSemana).forEach(itens => {
+              updatedItens.push(...itens)
+            })
+            setCronograma({
+              ...cronograma,
+              cronograma_itens: updatedItens
+            })
           }
         }}
       />

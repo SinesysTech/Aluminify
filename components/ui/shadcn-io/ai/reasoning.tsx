@@ -67,11 +67,18 @@ export const Reasoning = memo(
     useEffect(() => {
       if (isStreaming) {
         if (startTime === null) {
-          setStartTime(Date.now());
+          // Use setTimeout to avoid synchronous setState in effect
+          setTimeout(() => {
+            setStartTime(Date.now());
+          }, 0);
         }
       } else if (startTime !== null) {
-        setDuration(Math.round((Date.now() - startTime) / 1000));
-        setStartTime(null);
+        const durationValue = Math.round((Date.now() - startTime) / 1000);
+        setDuration(durationValue);
+        // Use setTimeout to avoid synchronous setState in effect
+        setTimeout(() => {
+          setStartTime(null);
+        }, 0);
       }
     }, [isStreaming, startTime, setDuration]);
 
@@ -119,7 +126,8 @@ export type ReasoningTriggerProps = ComponentProps<
 export const ReasoningTrigger = memo(
   ({
     className,
-    title = 'Reasoning',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    title: _title = 'Reasoning',
     children,
     ...props
   }: ReasoningTriggerProps) => {

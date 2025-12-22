@@ -11,7 +11,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import type { ChatStatus } from 'ai';
-import { Loader2Icon, SendIcon, SquareIcon, XIcon, ArrowUp } from 'lucide-react';
+import { Loader2Icon, SquareIcon, XIcon, ArrowUp } from 'lucide-react';
 import type {
   ComponentProps,
   HTMLAttributes,
@@ -40,8 +40,10 @@ export const PromptInputTextarea = ({
   onChange,
   className,
   placeholder = 'What would you like to know?',
-  minHeight = 48,
-  maxHeight = 164,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  minHeight: _minHeight,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  maxHeight: _maxHeight,
   ...props
 }: PromptInputTextareaProps) => {
   const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {

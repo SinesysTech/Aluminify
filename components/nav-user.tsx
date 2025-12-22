@@ -7,9 +7,7 @@ import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
-  CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -65,7 +63,6 @@ export function NavUser() {
       subscription.unsubscribe()
       window.removeEventListener('avatar-updated', handleAvatarUpdate)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadUser = async () => {

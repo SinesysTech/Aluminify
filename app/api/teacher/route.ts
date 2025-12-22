@@ -49,7 +49,8 @@ function handleError(error: unknown) {
 
 export async function GET() {
   try {
-    const teachers = await teacherService.list();
+    const result = await teacherService.list();
+    const teachers = Array.isArray(result) ? result : result.data;
     return NextResponse.json({ data: teachers.map(serializeTeacher) });
   } catch (error) {
     return handleError(error);
@@ -69,6 +70,7 @@ export async function POST(request: NextRequest) {
     
     const teacher = await teacherService.create({
       id: body?.id,
+      empresaId: body?.empresaId || null,
       fullName: body?.fullName,
       email: body?.email,
       cpf: body?.cpf,

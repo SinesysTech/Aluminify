@@ -9,6 +9,32 @@ import type {
   GetActiveConversationRequest,
 } from './conversation.types';
 
+// Helper function to map database conversation to Conversation type
+interface ConversationRow {
+  id: string;
+  user_id: string;
+  session_id: string;
+  title: string;
+  messages?: unknown;
+  created_at?: string | null;
+  updated_at?: string | null;
+  is_active?: boolean | null;
+  history?: unknown;
+  [key: string]: unknown;
+}
+
+function mapConversation(data: ConversationRow): Conversation {
+  return {
+    ...data,
+    messages: (data.messages && typeof data.messages === 'object' && Array.isArray(data.messages))
+      ? (data.messages as unknown as ChatMessage[])
+      : null,
+    created_at: data.created_at || '1970-01-01T00:00:00.000Z',
+    updated_at: data.updated_at || '1970-01-01T00:00:00.000Z',
+    is_active: data.is_active ?? true,
+  } as Conversation;
+}
+
 export class ConversationService {
   /**
    * Criar nova conversa
@@ -35,8 +61,13 @@ export class ConversationService {
       throw new Error(`Failed to create conversation: ${error.message}`);
     }
 
+    if (!data) {
+      throw new Error('Failed to create conversation: No data returned');
+    }
+
     console.log('[Conversation Service] ✅ Conversation created:', data.id);
-    return data;
+    
+    return mapConversation(data as any);
   }
 
   /**
@@ -67,7 +98,7 @@ export class ConversationService {
     }
 
     console.log('[Conversation Service] 📋 Listed', data?.length || 0, 'conversations');
-    return data || [];
+    return (data || []).map(mapConversation);
   }
 
   /**
@@ -90,11 +121,11 @@ export class ConversationService {
 
     if (data) {
       console.log('[Conversation Service] ✅ Active conversation:', data.id);
+      return mapConversation(data);
     } else {
       console.log('[Conversation Service] ℹ️  No active conversation found');
+      return null;
     }
-
-    return data;
   }
 
   /**
@@ -115,7 +146,7 @@ export class ConversationService {
       throw new Error(`Failed to get conversation: ${error.message}`);
     }
 
-    return data;
+    return data ? mapConversation(data) : null;
   }
 
   /**
@@ -124,7 +155,7 @@ export class ConversationService {
   async updateConversation(request: UpdateConversationRequest): Promise<Conversation> {
     const supabase = await createClient();
 
-    const updates: Partial<Conversation> = {};
+    const updates: Record<string, unknown> = {};
 
     if (request.title !== undefined && request.title !== null) {
       const trimmedTitle = String(request.title).trim();
@@ -171,7 +202,7 @@ export class ConversationService {
     }
 
     console.log('[Conversation Service] ✅ Conversation updated:', data.id);
-    return data;
+    return mapConversation(data);
   }
 
   /**
@@ -234,7 +265,7 @@ export class ConversationService {
         {
           conversation_id: conversationId,
           user_id: userId,
-          history,
+          history: history as any,
         },
         { onConflict: 'conversation_id' },
       );
@@ -263,7 +294,7 @@ export class ConversationService {
     }
 
     if (Array.isArray(data?.history)) {
-      return data?.history as ChatMessage[];
+      return data?.history as unknown as ChatMessage[];
     }
 
     return [];

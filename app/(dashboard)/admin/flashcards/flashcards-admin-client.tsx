@@ -432,8 +432,9 @@ export default function FlashcardsAdminClient() {
         throw new Error(errorMessage)
       }
 
-      setFlashcards((body.data as Flashcard[]) || [])
-      setTotal((body.total as number) || 0)
+      const flashcardsData = Array.isArray(body.data) ? body.data : []
+      setFlashcards(flashcardsData as Flashcard[])
+      setTotal(typeof body.total === 'number' ? body.total : 0)
     } catch (err) {
       console.error('[flashcards client] Erro ao carregar flashcards:', err)
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar flashcards'

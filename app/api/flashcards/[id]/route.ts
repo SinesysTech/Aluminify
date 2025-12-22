@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUserAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
-import { flashcardsService } from '@/backend/services/flashcards/flashcards.service';
+import { createFlashcardsService } from '@/backend/services/flashcards/flashcards.service';
 
 interface FlashcardUpdateFields {
   moduloId?: string;
@@ -17,6 +17,7 @@ async function getHandler(
   params: { id: string },
 ) {
   try {
+    const flashcardsService = createFlashcardsService();
     const flashcard = await flashcardsService.getById(params.id, request.user!.id);
     
     if (!flashcard) {
@@ -51,6 +52,7 @@ async function putHandler(
       );
     }
 
+    const flashcardsService = createFlashcardsService();
     const flashcard = await flashcardsService.update(params.id, updateData, request.user!.id);
     return NextResponse.json({ data: flashcard });
   } catch (error) {
@@ -65,6 +67,7 @@ async function deleteHandler(
   params: { id: string },
 ) {
   try {
+    const flashcardsService = createFlashcardsService();
     await flashcardsService.delete(params.id, request.user!.id);
     return NextResponse.json({ success: true });
   } catch (error) {

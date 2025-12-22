@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireUserAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
-import { flashcardsService } from '@/backend/services/flashcards/flashcards.service';
+import { createFlashcardsService } from '@/backend/services/flashcards/flashcards.service';
 
 async function handler(request: AuthenticatedRequest) {
   if (request.method !== 'POST') {
@@ -16,6 +16,7 @@ async function handler(request: AuthenticatedRequest) {
       return NextResponse.json({ error: 'cardId é obrigatório' }, { status: 400 });
     }
 
+    const flashcardsService = createFlashcardsService();
     const data = await flashcardsService.sendFeedback(request.user!.id, cardId, feedback);
     return NextResponse.json({ data });
   } catch (error) {
@@ -26,6 +27,14 @@ async function handler(request: AuthenticatedRequest) {
 }
 
 export const POST = requireUserAuth(handler);
+
+
+
+
+
+
+
+
 
 
 

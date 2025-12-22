@@ -5,7 +5,6 @@ import { calculateNextReview, isValidFeedback } from './srs-algorithm';
 import type { FeedbackValue } from './srs-algorithm.types';
 import type {
   ProgressoFlashcard,
-  AlunoCursoRow,
   CursoRow,
   ModuloRow,
   FlashcardRow,
@@ -428,7 +427,7 @@ export class FlashcardsService {
           throw new Error(`Erro ao buscar cursos do aluno: ${alunosCursosError.message}`);
         }
 
-        cursoIds = alunosCursos?.map((ac: AlunoCursoRow) => ac.curso_id) || [];
+        cursoIds = alunosCursos?.map((ac: { curso_id: string }) => ac.curso_id) || [];
         const frente = moduloData.frentes as ModuloRow['frentes'];
 
         // Verificar se o módulo pertence a um curso do aluno (via frente ou módulo)
@@ -486,6 +485,7 @@ export class FlashcardsService {
         const progress = progressMap.get(c.id);
         return {
           ...c,
+          importancia: c.importancia !== null && c.importancia !== undefined ? String(c.importancia) : null,
           dataProximaRevisao: progress?.data_proxima_revisao ?? null,
         };
       });
@@ -533,7 +533,7 @@ export class FlashcardsService {
         return []; // Aluno sem cursos matriculados
       }
       
-      cursoIds = alunosCursos.map((ac: AlunoCursoRow) => ac.curso_id);
+      cursoIds = alunosCursos.map((ac: { curso_id: string }) => ac.curso_id);
       console.log(`[flashcards] Aluno matriculado em ${cursoIds.length} cursos`);
     }
     
@@ -741,10 +741,18 @@ export class FlashcardsService {
           console.warn('[flashcards] erro ao buscar atividades concluídas para revisao_geral', atividadesError);
         }
         
+        interface AtividadeRow {
+          atividades: { modulo_id?: string } | { modulo_id?: string }[] | null;
+          [key: string]: unknown;
+        }
         const moduloIdsConcluidos = Array.from(
           new Set(
             (atividadesConcluidas ?? [])
-              .map((a: { atividades?: { modulo_id?: string } }) => a.atividades?.modulo_id)
+              .map((a: AtividadeRow) => {
+                // Supabase retorna atividades como objeto único (não array) para relações foreign key
+                const atividades = Array.isArray(a.atividades) ? a.atividades[0] : a.atividades;
+                return atividades?.modulo_id;
+              })
               .filter(Boolean)
           )
         );
@@ -869,6 +877,7 @@ export class FlashcardsService {
         const progress = progressMap.get(c.id);
         return {
           ...c,
+          importancia: c.importancia !== null && c.importancia !== undefined ? String(c.importancia) : null,
           dataProximaRevisao: progress?.data_proxima_revisao ?? null,
         };
       });
@@ -895,6 +904,7 @@ export class FlashcardsService {
       const progress = progressMap.get(c.id);
       return {
         ...c,
+        importancia: c.importancia !== null && c.importancia !== undefined ? String(c.importancia) : null,
         dataProximaRevisao: progress?.data_proxima_revisao ?? null,
       };
     });
@@ -1148,7 +1158,7 @@ export class FlashcardsService {
         )
         .in('id', moduloIdsFromFlashcards);
       
-      modulosData = result.data;
+      modulosData = result.data as ModuloComFrenteRow[] | null;
       modulosError = result.error;
       
       if (modulosError) {
@@ -1200,23 +1210,49 @@ export class FlashcardsService {
       (modulosData || [])
         .filter((m: ModuloComFrenteRow) => {
           // Verificar se o módulo tem os relacionamentos necessários
+          // IMPORTANTE: Verificar se disciplinas foi carregado, não apenas disciplina_id
           const frentes = Array.isArray(m.frentes) ? m.frentes[0] : m.frentes;
-          return m && frentes && frentes.disciplinas;
+          if (!m || !frentes) return false;
+          
+          interface FrenteComDisciplina {
+            disciplinas?: { id: string; nome: string } | { id: string; nome: string }[];
+            [key: string]: unknown;
+          }
+          // Verificar se a disciplina foi realmente carregada (não apenas a foreign key)
+          const frentesWithDisciplina = frentes as unknown as FrenteComDisciplina;
+          const disciplinasData = frentesWithDisciplina?.disciplinas;
+          const disciplina = Array.isArray(disciplinasData) ? disciplinasData[0] : disciplinasData;
+          return disciplina && disciplina.id && disciplina.nome;
         })
         .map((m: ModuloComFrenteRow) => {
           const frentes = Array.isArray(m.frentes) ? m.frentes[0]! : m.frentes!;
+          // Acessar disciplinas do objeto frentes (estrutura retornada pela query SQL)
+          // Supabase pode retornar como objeto único ou array, tratar ambos os casos
+          interface FrenteComDisciplina {
+            disciplinas?: { id: string; nome: string } | { id: string; nome: string }[];
+            [key: string]: unknown;
+          }
+          const frentesWithDisciplina = frentes as unknown as FrenteComDisciplina;
+          const disciplinasData = frentesWithDisciplina?.disciplinas;
+          const disciplina = Array.isArray(disciplinasData) ? disciplinasData[0] : disciplinasData;
+          
+          // Garantir que temos a disciplina carregada (já filtrado acima, mas double-check para type safety)
+          if (!disciplina || !disciplina.id || !disciplina.nome) {
+            throw new Error(`Disciplina não carregada para módulo ${m.id}`);
+          }
+          
           return [
             m.id,
             {
               id: m.id,
               nome: m.nome,
-              numero_modulo: m.numero_modulo,
+              numero_modulo: m.numero_modulo ?? null,
               frente: {
                 id: frentes.id,
                 nome: frentes.nome,
                 disciplina: {
-                  id: frentes.disciplina_id,
-                  nome: frentes.nome,
+                  id: disciplina.id,
+                  nome: disciplina.nome,
                 },
               },
             },
@@ -1226,7 +1262,7 @@ export class FlashcardsService {
 
     // Montar resposta final
     const flashcards = flashcardsData
-      .map((item: FlashcardRow) => {
+      .map((item: FlashcardRow & { created_at?: string }) => {
         const modulo = modulosMap.get(item.modulo_id);
         if (!modulo) return null;
 
@@ -1235,11 +1271,11 @@ export class FlashcardsService {
           modulo_id: item.modulo_id,
           pergunta: item.pergunta,
           resposta: item.resposta,
-          created_at: item.created_at,
+          created_at: item.created_at || '1970-01-01T00:00:00.000Z',
           modulo,
         };
       })
-      .filter((f): f is FlashcardAdmin => f !== null);
+      .filter((f) => f !== null) as FlashcardAdmin[];
 
     const result = {
       data: flashcards,
@@ -1315,15 +1351,15 @@ export class FlashcardsService {
       resposta: flashcard.resposta,
       created_at: flashcard.created_at,
       modulo: {
-        id: (modulo as ModuloWithNestedRelations).id,
-        nome: (modulo as ModuloWithNestedRelations).nome,
-        numero_modulo: (modulo as ModuloWithNestedRelations).numero_modulo,
+        id: (modulo as unknown as ModuloWithNestedRelations).id,
+        nome: (modulo as unknown as ModuloWithNestedRelations).nome,
+        numero_modulo: (modulo as unknown as ModuloWithNestedRelations).numero_modulo,
         frente: {
-          id: (modulo as ModuloWithNestedRelations).frentes.id,
-          nome: (modulo as ModuloWithNestedRelations).frentes.nome,
+          id: (modulo as unknown as ModuloWithNestedRelations).frentes.id,
+          nome: (modulo as unknown as ModuloWithNestedRelations).frentes.nome,
           disciplina: {
-            id: (modulo as ModuloWithNestedRelations).frentes.disciplinas.id,
-            nome: (modulo as ModuloWithNestedRelations).frentes.disciplinas.nome,
+            id: (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.id,
+            nome: (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.nome,
           },
         },
       },
@@ -1394,15 +1430,15 @@ export class FlashcardsService {
       resposta: flashcard.resposta,
       created_at: flashcard.created_at,
       modulo: {
-        id: (modulo as ModuloWithNestedRelations).id,
-        nome: (modulo as ModuloWithNestedRelations).nome,
-        numero_modulo: (modulo as ModuloWithNestedRelations).numero_modulo,
+        id: (modulo as unknown as ModuloWithNestedRelations).id,
+        nome: (modulo as unknown as ModuloWithNestedRelations).nome,
+        numero_modulo: (modulo as unknown as ModuloWithNestedRelations).numero_modulo,
         frente: {
-          id: (modulo as ModuloWithNestedRelations).frentes.id,
-          nome: (modulo as ModuloWithNestedRelations).frentes.nome,
+          id: (modulo as unknown as ModuloWithNestedRelations).frentes.id,
+          nome: (modulo as unknown as ModuloWithNestedRelations).frentes.nome,
           disciplina: {
-            id: (modulo as ModuloWithNestedRelations).frentes.disciplinas.id,
-            nome: (modulo as ModuloWithNestedRelations).frentes.disciplinas.nome,
+            id: (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.id,
+            nome: (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.nome,
           },
         },
       },
@@ -1410,8 +1446,8 @@ export class FlashcardsService {
 
     // Invalidar cache
     await this.invalidateFlashcardCache(
-      (modulo as ModuloWithNestedRelations).frentes.disciplinas.id,
-      (modulo as ModuloWithNestedRelations).frentes.id,
+      (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.id,
+      (modulo as unknown as ModuloWithNestedRelations).frentes.id,
       flashcard.modulo_id
     );
 
@@ -1501,15 +1537,15 @@ export class FlashcardsService {
       resposta: flashcard.resposta,
       created_at: flashcard.created_at,
       modulo: {
-        id: (modulo as ModuloWithNestedRelations).id,
-        nome: (modulo as ModuloWithNestedRelations).nome,
-        numero_modulo: (modulo as ModuloWithNestedRelations).numero_modulo,
+        id: (modulo as unknown as ModuloWithNestedRelations).id,
+        nome: (modulo as unknown as ModuloWithNestedRelations).nome,
+        numero_modulo: (modulo as unknown as ModuloWithNestedRelations).numero_modulo,
         frente: {
-          id: (modulo as ModuloWithNestedRelations).frentes.id,
-          nome: (modulo as ModuloWithNestedRelations).frentes.nome,
+          id: (modulo as unknown as ModuloWithNestedRelations).frentes.id,
+          nome: (modulo as unknown as ModuloWithNestedRelations).frentes.nome,
           disciplina: {
-            id: (modulo as ModuloWithNestedRelations).frentes.disciplinas.id,
-            nome: (modulo as ModuloWithNestedRelations).frentes.disciplinas.nome,
+            id: (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.id,
+            nome: (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.nome,
           },
         },
       },
@@ -1517,8 +1553,8 @@ export class FlashcardsService {
 
     // Invalidar cache (tanto do módulo antigo quanto do novo, se mudou)
     await this.invalidateFlashcardCache(
-      (modulo as ModuloWithNestedRelations).frentes.disciplinas.id,
-      (modulo as ModuloWithNestedRelations).frentes.id,
+      (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.id,
+      (modulo as unknown as ModuloWithNestedRelations).frentes.id,
       flashcard.modulo_id
     );
     
@@ -1577,4 +1613,7 @@ export class FlashcardsService {
   }
 }
 
-export const flashcardsService = new FlashcardsService();
+// Factory para evitar inicialização do cliente de banco na importação do módulo.
+// Isso impede erros em build quando variáveis de ambiente do Supabase não estão configuradas,
+// mas ainda garante que em tempo de execução o erro seja lançado se o banco não estiver configurado.
+export const createFlashcardsService = () => new FlashcardsService();

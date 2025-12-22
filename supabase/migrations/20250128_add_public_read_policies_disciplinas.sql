@@ -12,3 +12,11 @@ CREATE POLICY "Catálogo de Disciplinas é Público"
     FOR SELECT 
     USING (true);
 
+
+
+
+
+
+
+
+

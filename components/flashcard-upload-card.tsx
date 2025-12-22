@@ -93,7 +93,7 @@ export function FlashcardUploadCard({ cursos, onUploadSuccess }: FlashcardUpload
         const mapped =
           data
             ?.map((row: { disciplina: { id: string; nome: string } | null }) => row.disciplina)
-            .filter(Boolean)
+            .filter((d): d is { id: string; nome: string } => d !== null)
             .map((d) => ({ id: d.id, nome: d.nome })) ?? []
 
         const unique = Array.from(new Map(mapped.map((d) => [d.id, d])).values())
@@ -133,7 +133,13 @@ export function FlashcardUploadCard({ cursos, onUploadSuccess }: FlashcardUpload
           setError(null)
         }
         
-        setFrentes(data || [])
+        const filteredFrentes = (data || []).filter((f) => f.disciplina_id !== null).map((f) => ({
+          id: f.id,
+          nome: f.nome,
+          disciplina_id: f.disciplina_id!,
+          curso_id: f.curso_id ?? null,
+        }))
+        setFrentes(filteredFrentes)
         setFrenteSelecionada('')
       } catch (err) {
         console.error('Erro ao carregar frentes:', err)

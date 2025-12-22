@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { Bell } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,7 +21,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const [isLoading, setIsLoading] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
 
-  const fetchNotificacoes = async () => {
+  const fetchNotificacoes = useCallback(async () => {
     setIsLoading(true)
     try {
       const data = await getNotificacoesUsuario(userId)
@@ -31,14 +31,14 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [userId])
 
   useEffect(() => {
     fetchNotificacoes()
     // Refresh every 30 seconds
     const interval = setInterval(fetchNotificacoes, 30000)
     return () => clearInterval(interval)
-  }, [userId])
+  }, [fetchNotificacoes])
 
   // Count recent unread (last 24 hours for now)
   const recentCount = notificacoes.filter(n => {

@@ -146,7 +146,8 @@ export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
           const errorKeys = Object.getOwnPropertyNames(alunoError)
           const errorSerialized = JSON.stringify(alunoError, errorKeys.length > 0 ? errorKeys : undefined, 2)
           console.error('[FirstAccessForm] Erro serializado:', errorSerialized)
-        } catch (serializeError) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_serializeError) {
           console.error('[FirstAccessForm] Detalhes do erro:', {
             message: alunoError.message,
             details: alunoError.details,
