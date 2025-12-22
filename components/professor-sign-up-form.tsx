@@ -133,10 +133,10 @@ export function ProfessorSignUpForm() {
           throw new Error(errorData.error || 'Erro ao criar conta e empresa');
         }
 
-        const data = await response.json();
+        await response.json();
         
         // Fazer login automático após criar conta
-        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });

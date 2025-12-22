@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/server';
 import { getAuthUser } from '@/backend/auth/middleware';
-import { TeacherRepositoryImpl } from '@/backend/services/teacher';
 
 /**
  * GET /api/admin/all-users
