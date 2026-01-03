@@ -1134,8 +1134,26 @@ export default function ConteudosClientPage() {
       router.refresh()
     } catch (err) {
       console.error('Erro ao importar:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Erro ao importar cronograma'
-      setError(errorMessage)
+
+      // Supabase RPC costuma retornar PostgrestError como objeto (não instanceof Error)
+      // com campos: message, details, hint, code.
+      const anyErr = err as
+        | { message?: string; details?: string; hint?: string; code?: string }
+        | undefined
+        | null
+
+      const baseMessage =
+        (anyErr && typeof anyErr === 'object' && anyErr.message) ||
+        (err instanceof Error ? err.message : null) ||
+        'Erro ao importar cronograma'
+
+      // Em desenvolvimento, ajuda muito mostrar detalhes do Postgres/Supabase
+      const detailed =
+        process.env.NODE_ENV === 'development' && anyErr && typeof anyErr === 'object'
+          ? [baseMessage, anyErr.details, anyErr.hint, anyErr.code].filter(Boolean).join(' | ')
+          : baseMessage
+
+      setError(detailed)
     } finally {
       setIsLoading(false)
     }
