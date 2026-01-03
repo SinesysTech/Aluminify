@@ -76,6 +76,42 @@ if (Test-Path ".env.local") {
     if ($missingVars.Count -eq 0) {
         Write-Host "   [OK] Todas as variaveis obrigatorias estao presentes" -ForegroundColor Green
         $success += "Variaveis de ambiente configuradas"
+
+        # 4.1 Testar conectividade com o Supabase (DNS + healthcheck)
+        try {
+            $supabaseUrlLine = ($envContent -split "`n") | Where-Object { $_ -match "^\s*NEXT_PUBLIC_SUPABASE_URL\s*=" } | Select-Object -First 1
+            if ($supabaseUrlLine) {
+                $supabaseUrl = ($supabaseUrlLine -split "=", 2)[1].Trim().Trim('"').Trim("'")
+                $uri = [uri]$supabaseUrl
+                $host = $uri.Host
+
+                Write-Host "   4.1 Testando DNS do Supabase ($host)..." -ForegroundColor Yellow
+                try {
+                    Resolve-DnsName -Name $host -ErrorAction Stop | Out-Null
+                    Write-Host "      [OK] DNS resolveu $host" -ForegroundColor Green
+                    $success += "DNS Supabase OK"
+                } catch {
+                    Write-Host "      [AVISO] Nao foi possivel resolver DNS de $host" -ForegroundColor Yellow
+                    Write-Host "         Isso causa o erro 'Failed to fetch' no login." -ForegroundColor Gray
+                    $warnings += "DNS do Supabase falhou (verifique DNS/firewall/proxy)"
+                }
+
+                Write-Host "   4.2 Testando acesso HTTP ao Supabase (healthcheck)..." -ForegroundColor Yellow
+                try {
+                    $healthUrl = "$supabaseUrl/auth/v1/health"
+                    Invoke-WebRequest -Uri $healthUrl -Method GET -TimeoutSec 10 | Out-Null
+                    Write-Host "      [OK] Supabase respondeu no healthcheck" -ForegroundColor Green
+                    $success += "Conectividade Supabase OK"
+                } catch {
+                    Write-Host "      [AVISO] Nao foi possivel acessar o Supabase via HTTP" -ForegroundColor Yellow
+                    Write-Host "         Verifique internet/DNS/firewall/proxy e se a URL esta correta." -ForegroundColor Gray
+                    $warnings += "Conectividade HTTP com Supabase falhou"
+                }
+            }
+        } catch {
+            Write-Host "   [AVISO] Nao foi possivel validar conectividade com o Supabase" -ForegroundColor Yellow
+            $warnings += "Falha ao validar conectividade com Supabase"
+        }
     } else {
         Write-Host "   [AVISO] Variaveis faltando: $($missingVars -join ', ')" -ForegroundColor Yellow
         $warnings += "Variaveis de ambiente incompletas"

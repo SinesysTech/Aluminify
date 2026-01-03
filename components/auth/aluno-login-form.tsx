@@ -16,6 +16,27 @@ export function AlunoLoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const getSupabaseHost = () => {
+    try {
+      return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!).host;
+    } catch {
+      return null;
+    }
+  };
+
+  const isNetworkAuthError = (err: unknown) => {
+    const e = err as { name?: string; message?: string; cause?: unknown } | null;
+    const name = e?.name || '';
+    const message = e?.message || '';
+
+    // Supabase (auth) costuma levantar AuthRetryableFetchError em falha de rede/DNS
+    return (
+      name === 'AuthRetryableFetchError' ||
+      message.includes('Failed to fetch') ||
+      message.includes('fetch failed')
+    );
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -70,7 +91,15 @@ export function AlunoLoginForm() {
       router.push('/aluno/dashboard');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao fazer login');
+      if (isNetworkAuthError(err)) {
+        const host = getSupabaseHost();
+        setError(
+          `Não foi possível conectar ao Supabase (erro de rede/DNS). ` +
+            `Verifique sua internet, DNS/firewall/proxy e se o domínio ${host ?? 'do Supabase'} está acessível.`
+        );
+      } else {
+        setError(err instanceof Error ? err.message : 'Erro ao fazer login');
+      }
       setIsLoading(false);
     }
   };
