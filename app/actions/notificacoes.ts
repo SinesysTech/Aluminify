@@ -74,17 +74,42 @@ export async function getNotificacoesUsuario(userId: string): Promise<Notificaca
       data_inicio: string
       data_fim: string
       status: string
-      professor?: { nome: string } | null
-      aluno?: { nome: string } | null
+      // Tipos do Supabase podem retornar SelectQueryError quando a relation não está no `Database` gerado
+      professor?: unknown
+      aluno?: unknown
     } | null
   }
 
-  return ((data || []) as NotificacaoRow[]).map((item) => ({
-    ...item,
-    tipo: (validTipos as string[]).includes(item.tipo) ? item.tipo : 'criacao',
-    enviado: item.enviado ?? false,
-    created_at: item.created_at || '1970-01-01T00:00:00.000Z',
-  })) as NotificacaoAgendamento[]
+  const rows = (data || []) as unknown as NotificacaoRow[]
+  return rows.map((item) => {
+    const agendamentoRaw = item.agendamento && typeof item.agendamento === 'object' ? item.agendamento : null
+
+    const professorRaw = agendamentoRaw?.professor
+    const alunoRaw = agendamentoRaw?.aluno
+
+    const professor =
+      professorRaw && typeof professorRaw === 'object' && !('code' in (professorRaw as Record<string, unknown>))
+        ? (professorRaw as { nome: string })
+        : undefined
+    const aluno =
+      alunoRaw && typeof alunoRaw === 'object' && !('code' in (alunoRaw as Record<string, unknown>))
+        ? (alunoRaw as { nome: string })
+        : undefined
+
+    return {
+      ...item,
+      tipo: (validTipos as string[]).includes(item.tipo) ? item.tipo : 'criacao',
+      enviado: item.enviado ?? false,
+      created_at: item.created_at || '1970-01-01T00:00:00.000Z',
+      agendamento: agendamentoRaw
+        ? {
+            ...agendamentoRaw,
+            professor,
+            aluno,
+          }
+        : undefined,
+    }
+  }) as NotificacaoAgendamento[]
 }
 
 export async function getNotificacoesNaoLidas(userId: string): Promise<number> {

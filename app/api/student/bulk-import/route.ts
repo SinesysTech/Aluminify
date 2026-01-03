@@ -36,7 +36,7 @@ const filterSpreadsheetRows = (rows: Record<string, string>[]) =>
     Object.values(row).some((value) => String(value ?? '').trim()),
   );
 
-const parseCSVFile = (buffer: Buffer): Promise<ParsedSpreadsheetRow[]> =>
+const parseCSVFile = (buffer: Buffer<ArrayBufferLike>): Promise<ParsedSpreadsheetRow[]> =>
   new Promise((resolve, reject) => {
     const csvContent = buffer.toString('utf-8');
     Papa.parse<ParsedSpreadsheetRow>(csvContent, {
@@ -60,6 +60,7 @@ const parseCSVFile = (buffer: Buffer): Promise<ParsedSpreadsheetRow[]> =>
 const parseXLSXFile = async (buffer: Buffer): Promise<ParsedSpreadsheetRow[]> => {
   try {
     const workbook = new ExcelJS.Workbook();
+    // @ts-expect-error - ExcelJS expects Buffer but TypeScript infers Buffer<ArrayBufferLike> from Buffer.from()
     await workbook.xlsx.load(buffer);
 
     const worksheet = workbook.worksheets[0];
@@ -154,7 +155,7 @@ async function postHandler(request: AuthenticatedRequest) {
 
     // Ler arquivo como buffer
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const buffer = Buffer.from(arrayBuffer) as Buffer;
 
     // Parse do arquivo
     const rawRows = extension.endsWith('.xlsx') || extension.endsWith('.xls')

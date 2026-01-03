@@ -111,6 +111,13 @@ async function postHandler(request: AuthenticatedRequest) {
       }
     }
 
+    if (!empresaId) {
+      return NextResponse.json(
+        { error: 'empresaId is required (não foi possível resolver a empresa do curso)' },
+        { status: 400 },
+      );
+    }
+
     const course = await courseService.create({
       empresaId,
       segmentId: body?.segmentId,

@@ -37,6 +37,19 @@ export class StudentService {
     return this.repository.list(params);
   }
 
+  private isAuthEmailAlreadyRegistered(message?: string): boolean {
+    const m = (message || '').toLowerCase();
+    return (
+      m.includes('already been registered') ||
+      m.includes('already registered') ||
+      m.includes('user already registered') ||
+      m.includes('email already') ||
+      m.includes('já foi registrado') ||
+      m.includes('já está registrado') ||
+      m.includes('já cadastrado')
+    );
+  }
+
   async create(payload: CreateStudentInput): Promise<Student> {
     const email = this.validateEmail(payload.email);
     
@@ -128,7 +141,16 @@ export class StudentService {
       });
 
       if (authError || !authUser?.user) {
-        throw new Error(`Failed to create auth user: ${authError?.message || 'Unknown error'}`);
+        const authMessage = authError?.message || 'Unknown error';
+
+        // Se o usuário já existe no Auth, isso é um conflito (409), não erro interno (500).
+        if (this.isAuthEmailAlreadyRegistered(authMessage)) {
+          throw new StudentConflictError(
+            `Já existe um usuário com o e-mail "${email}" cadastrado no sistema. Por favor, use outro e-mail.`,
+          );
+        }
+
+        throw new Error(`Failed to create auth user: ${authMessage}`);
       }
 
       studentId = authUser.user.id;

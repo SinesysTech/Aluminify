@@ -67,6 +67,23 @@ supabase/
 - **React 19.2.0** - Biblioteca UI
 - **Tailwind CSS 4** - Estilização
 
+## 🎨 Convenção de cores (status)
+
+Para manter consistência visual no app, **evite usar diretamente** `bg-red-*`, `text-yellow-*`, `border-blue-*`, etc, dentro de `components/ui` e `components/shared`.
+
+Use **tokens semânticos** definidos em [`app/globals.css`](app/globals.css):
+
+- **Erro**: `bg-status-error`, `text-status-error-text`, `border-status-error-border`, `ring-status-error-ring`
+- **Alerta**: `bg-status-warning`, `text-status-warning-text`, `border-status-warning-border`, `ring-status-warning-ring`
+- **Info**: `bg-status-info`, `text-status-info-text`, `border-status-info-border`, `ring-status-info-ring`
+- **Sucesso**: `bg-status-success`, `text-status-success-text`, `border-status-success-border`, `ring-status-success-ring`
+
+Checagem rápida (evita regressões em componentes compartilhados):
+
+```bash
+npm run check:colors
+```
+
 ### Backend
 - **Supabase** - Banco de dados PostgreSQL + Auth
 - **Row Level Security (RLS)** - Segurança em nível de banco

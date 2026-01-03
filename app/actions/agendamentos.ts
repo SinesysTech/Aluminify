@@ -726,7 +726,10 @@ export async function confirmarAgendamento(id: string, linkReuniao?: string) {
 
     // Load professor integration settings
     const { data: integration } = await supabase
-      .from('professor_integracoes')
+      // Next build estava falhando porque os tipos do Supabase não incluem essa tabela
+      // (provavelmente o `Database` gerado está desatualizado). Em runtime a tabela existe.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from('professor_integracoes' as any)
       .select('*')
       .eq('professor_id', user.id)
       .single()
@@ -739,7 +742,13 @@ export async function confirmarAgendamento(id: string, linkReuniao?: string) {
           nome: string
           email: string
         } | null
-        const alunoData = agendamento.aluno as AlunoData
+        // A tipagem do Supabase pode retornar SelectQueryError quando a relation não está no `Database` gerado.
+        // Em runtime, quando vem corretamente, é um objeto com { nome, email }.
+        const alunoRaw = agendamento.aluno as unknown
+        const alunoData: AlunoData =
+          alunoRaw && typeof alunoRaw === 'object' && !('code' in (alunoRaw as Record<string, unknown>))
+            ? (alunoRaw as AlunoData)
+            : null
         const meetingLink = await generateMeetingLink(
           validIntegration.provider as 'google' | 'zoom' | 'default',
           {
@@ -1009,7 +1018,9 @@ export async function getIntegracaoProfessor(professorId: string): Promise<Profe
   const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from('professor_integracoes')
+    // Tipos do Supabase podem estar desatualizados e não conter essa tabela
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('professor_integracoes' as any)
     .select('*')
     .eq('professor_id', professorId)
     .single()
@@ -1031,15 +1042,17 @@ export async function getIntegracaoProfessor(professorId: string): Promise<Profe
   }
 
   // Map database data to ProfessorIntegracao type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const row = data as any
   return {
-    id: data.id,
-    professor_id: data.professor_id,
-    provider: data.provider as 'google' | 'zoom' | 'default',
-    access_token: data.access_token,
-    refresh_token: data.refresh_token,
-    token_expiry: data.token_expiry,
-    created_at: data.created_at ?? undefined,
-    updated_at: data.updated_at ?? undefined
+    id: row.id,
+    professor_id: row.professor_id,
+    provider: row.provider as 'google' | 'zoom' | 'default',
+    access_token: row.access_token,
+    refresh_token: row.refresh_token,
+    token_expiry: row.token_expiry,
+    created_at: row.created_at ?? undefined,
+    updated_at: row.updated_at ?? undefined
   }
 }
 
@@ -1058,7 +1071,9 @@ export async function updateIntegracaoProfessor(
   void _id; void _created_at; void _updated_at;
 
   const { data, error } = await supabase
-    .from('professor_integracoes')
+    // Tipos do Supabase podem estar desatualizados e não conter essa tabela
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('professor_integracoes' as any)
     .upsert({
       ...integrationData,
       professor_id: professorId,
@@ -1187,7 +1202,9 @@ export async function getAgendamentosEmpresa(empresaId: string, dateStart: Date,
   const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from('v_agendamentos_empresa')
+    // View pode não estar presente no `Database` gerado
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('v_agendamentos_empresa' as any)
     .select('*')
     .eq('empresa_id', empresaId)
     .gte('data_inicio', dateStart.toISOString())
@@ -1199,7 +1216,7 @@ export async function getAgendamentosEmpresa(empresaId: string, dateStart: Date,
     return []
   }
 
-  return ((data || []) as VAgendamentosEmpresa[]).map((item) => ({
+  return ((data || []) as unknown as VAgendamentosEmpresa[]).map((item) => ({
     id: item.id,
     professor_id: item.professor_id,
     professor_nome: item.professor_nome,
@@ -1295,11 +1312,13 @@ export async function getRecorrencias(professorId: string): Promise<Recorrencia[
     throw new Error('Failed to fetch recorrencias')
   }
 
-  type RecorrenciaWithExtras = AgendamentoRecorrencia & {
-    empresa_id?: string
-    tipo_servico?: string
+  type RecorrenciaRow = AgendamentoRecorrencia & {
+    empresa_id: string
+    tipo_servico: 'plantao' | 'mentoria'
+    created_at?: string | null
+    updated_at?: string | null
   }
-  return ((data || []) as RecorrenciaWithExtras[]).map((item) => ({
+  return ((data || []) as unknown as RecorrenciaRow[]).map((item) => ({
     id: item.id,
     professor_id: item.professor_id,
     empresa_id: item.empresa_id,
@@ -1309,10 +1328,10 @@ export async function getRecorrencias(professorId: string): Promise<Recorrencia[
     dia_semana: item.dia_semana,
     hora_inicio: item.hora_inicio,
     hora_fim: item.hora_fim,
-    duracao_slot_minutos: item.duracao_slot_minutos,
+    duracao_slot_minutos: item.duracao_slot_minutos as number,
     ativo: item.ativo,
-    created_at: item.created_at,
-    updated_at: item.updated_at,
+    created_at: item.created_at ?? undefined,
+    updated_at: item.updated_at ?? undefined,
   }))
 }
 
@@ -1351,11 +1370,13 @@ export async function createRecorrencia(data: Omit<Recorrencia, 'id' | 'created_
   revalidatePath('/professor/disponibilidade')
   revalidatePath('/agendamentos')
   
-  type RecorrenciaResult = AgendamentoRecorrencia & {
-    empresa_id?: string
-    tipo_servico?: string
+  type RecorrenciaRow = AgendamentoRecorrencia & {
+    empresa_id: string
+    tipo_servico: 'plantao' | 'mentoria'
+    created_at?: string | null
+    updated_at?: string | null
   }
-  const typedResult = result as RecorrenciaResult
+  const typedResult = result as unknown as RecorrenciaRow
   return {
     id: typedResult.id,
     professor_id: typedResult.professor_id,
@@ -1366,10 +1387,10 @@ export async function createRecorrencia(data: Omit<Recorrencia, 'id' | 'created_
     dia_semana: typedResult.dia_semana,
     hora_inicio: typedResult.hora_inicio,
     hora_fim: typedResult.hora_fim,
-    duracao_slot_minutos: typedResult.duracao_slot_minutos,
+    duracao_slot_minutos: typedResult.duracao_slot_minutos as number,
     ativo: typedResult.ativo,
-    created_at: typedResult.created_at,
-    updated_at: typedResult.updated_at,
+    created_at: typedResult.created_at ?? undefined,
+    updated_at: typedResult.updated_at ?? undefined,
   }
 }
 
@@ -1417,20 +1438,27 @@ export async function updateRecorrencia(id: string, data: Partial<Omit<Recorrenc
   revalidatePath('/professor/disponibilidade')
   revalidatePath('/agendamentos')
   
+  type RecorrenciaRow = AgendamentoRecorrencia & {
+    empresa_id: string
+    tipo_servico: 'plantao' | 'mentoria'
+    created_at?: string | null
+    updated_at?: string | null
+  }
+  const typedResult = result as unknown as RecorrenciaRow
   return {
-    id: result.id,
-    professor_id: result.professor_id,
-    empresa_id: result.empresa_id,
-    tipo_servico: result.tipo_servico as 'plantao' | 'mentoria',
-    data_inicio: result.data_inicio,
-    data_fim: result.data_fim,
-    dia_semana: result.dia_semana,
-    hora_inicio: result.hora_inicio,
-    hora_fim: result.hora_fim,
-    duracao_slot_minutos: result.duracao_slot_minutos,
-    ativo: result.ativo,
-    created_at: result.created_at,
-    updated_at: result.updated_at,
+    id: typedResult.id,
+    professor_id: typedResult.professor_id,
+    empresa_id: typedResult.empresa_id,
+    tipo_servico: typedResult.tipo_servico,
+    data_inicio: typedResult.data_inicio,
+    data_fim: typedResult.data_fim,
+    dia_semana: typedResult.dia_semana,
+    hora_inicio: typedResult.hora_inicio,
+    hora_fim: typedResult.hora_fim,
+    duracao_slot_minutos: typedResult.duracao_slot_minutos as number,
+    ativo: typedResult.ativo,
+    created_at: typedResult.created_at ?? undefined,
+    updated_at: typedResult.updated_at ?? undefined,
   }
 }
 
@@ -1878,7 +1906,9 @@ export async function getRelatorios(empresaId: string, limit?: number): Promise<
   const supabase = await createClient()
 
   let query = supabase
-    .from('agendamento_relatorios')
+    // Tipos do Supabase podem estar desatualizados e não conter essa tabela
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('agendamento_relatorios' as any)
     .select('*')
     .eq('empresa_id', empresaId)
     .order('gerado_em', { ascending: false })
@@ -1894,17 +1924,19 @@ export async function getRelatorios(empresaId: string, limit?: number): Promise<
     return []
   }
 
-  return (data || []).map(item => ({
-    id: item.id,
-    empresa_id: item.empresa_id,
-    periodo_inicio: item.periodo_inicio,
-    periodo_fim: item.periodo_fim,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rows = (data || []) as unknown as any[]
+  return rows.map((item) => ({
+    id: item.id as string,
+    empresa_id: item.empresa_id as string,
+    periodo_inicio: item.periodo_inicio as string,
+    periodo_fim: item.periodo_fim as string,
     tipo: item.tipo as RelatorioTipo,
     dados_json: item.dados_json as RelatorioDados,
-    gerado_em: item.gerado_em,
-    gerado_por: item.gerado_por,
-    created_at: item.created_at,
-    updated_at: item.updated_at,
+    gerado_em: item.gerado_em as string,
+    gerado_por: item.gerado_por as string,
+    created_at: item.created_at ?? undefined,
+    updated_at: item.updated_at ?? undefined,
   }))
 }
 
@@ -1912,7 +1944,9 @@ export async function getRelatorioById(id: string): Promise<Relatorio | null> {
   const supabase = await createClient()
 
   const { data, error } = await supabase
-    .from('agendamento_relatorios')
+    // Tipos do Supabase podem estar desatualizados e não conter essa tabela
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .from('agendamento_relatorios' as any)
     .select('*')
     .eq('id', id)
     .single()
@@ -1924,17 +1958,19 @@ export async function getRelatorioById(id: string): Promise<Relatorio | null> {
 
   if (!data) return null
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const row = data as any
   return {
-    id: data.id,
-    empresa_id: data.empresa_id,
-    periodo_inicio: data.periodo_inicio,
-    periodo_fim: data.periodo_fim,
-    tipo: data.tipo as RelatorioTipo,
-    dados_json: data.dados_json as RelatorioDados,
-    gerado_em: data.gerado_em,
-    gerado_por: data.gerado_por,
-    created_at: data.created_at,
-    updated_at: data.updated_at,
+    id: row.id,
+    empresa_id: row.empresa_id,
+    periodo_inicio: row.periodo_inicio,
+    periodo_fim: row.periodo_fim,
+    tipo: row.tipo as RelatorioTipo,
+    dados_json: row.dados_json as RelatorioDados,
+    gerado_em: row.gerado_em,
+    gerado_por: row.gerado_por,
+    created_at: row.created_at ?? undefined,
+    updated_at: row.updated_at ?? undefined,
   }
 }
 

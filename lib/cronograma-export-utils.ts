@@ -85,7 +85,8 @@ export async function fetchCronogramaCompleto(cronogramaId: string): Promise<Cro
   }
 
   const aulaIds = [...new Set((itens || []).map((i) => i.aula_id).filter(Boolean))]
-  let aulasMap = new Map<string, unknown>()
+  type AulaDetalhe = CronogramaCompleto['itens'][number]['aulas']
+  let aulasMap = new Map<string, AulaDetalhe>()
   if (aulaIds.length) {
     const LOTE = 100
     const todasAulas: AulaData[] = []
@@ -129,7 +130,7 @@ export async function fetchCronogramaCompleto(cronogramaId: string): Promise<Cro
 
     aulasMap = new Map(
       todasAulas.map((a) => {
-        const modulo = modulosMap.get(a.modulo_id)
+        const modulo = a.modulo_id ? modulosMap.get(a.modulo_id) : undefined
         const frente = modulo ? frentesMap.get(modulo.frente_id) : null
         const disciplina = frente ? disciplinasMap.get(frente.disciplina_id) : null
         return [
@@ -160,9 +161,16 @@ export async function fetchCronogramaCompleto(cronogramaId: string): Promise<Cro
     )
   }
 
-  const itensCompletos = (itens || []).map((item) => ({
-    ...item,
-    aulas: aulasMap.get(item.aula_id) || null,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const itensCompletos: CronogramaCompleto['itens'] = (itens || []).map((item: any) => ({
+    id: String(item.id),
+    aula_id: String(item.aula_id),
+    semana_numero: Number(item.semana_numero),
+    ordem_na_semana: Number(item.ordem_na_semana),
+    concluido: Boolean(item.concluido),
+    data_conclusao: item.data_conclusao ?? null,
+    data_prevista: item.data_prevista ?? null,
+    aulas: aulasMap.get(String(item.aula_id)) || null,
   }))
 
   return { cronograma, itens: itensCompletos }

@@ -1203,6 +1203,7 @@ export default function ConteudosClientPage() {
           const propsPreview =
             allProps.length > 0
               ? `props: ${allProps
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   .map((k) => `${k}=${getString((obj as any)[k]) ?? '[obj]'}`)
                   .join(', ')}`
               : null
@@ -1535,8 +1536,8 @@ export default function ConteudosClientPage() {
           )}
 
           {successMessage && (
-            <div className="rounded-md bg-green-500/15 p-3 text-sm text-green-600 dark:text-green-400 flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" />
+            <div className="rounded-md bg-green-500/15 p-3 text-sm text-black flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-black" />
               {successMessage}
             </div>
           )}
@@ -1743,7 +1744,7 @@ export default function ConteudosClientPage() {
                               size="sm"
                               onClick={checkCronogramasBeforeDelete}
                               disabled={isDeleting}
-                              className="ml-4"
+                              className="ml-4 text-white"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
                               Deletar Frente
@@ -2055,7 +2056,7 @@ export default function ConteudosClientPage() {
             <AlertDialogAction
               onClick={handleDeleteFrente}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90"
             >
               {isDeleting ? 'Deletando...' : 'Deletar Frente'}
             </AlertDialogAction>

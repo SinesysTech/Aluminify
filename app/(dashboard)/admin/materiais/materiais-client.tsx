@@ -506,8 +506,8 @@ export default function MateriaisClientPage() {
 
       {successMessage && (
         <Card className="border-green-500">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+          <CardContent className="flex items-center justify-center">
+            <div className="flex items-center justify-center gap-2 text-center text-green-600 dark:text-green-400">
               <span>{successMessage}</span>
             </div>
           </CardContent>

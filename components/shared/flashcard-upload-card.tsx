@@ -706,7 +706,7 @@ export function FlashcardUploadCard({ cursos, onUploadSuccess }: FlashcardUpload
         )}
 
         {successMessage && (
-          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
+          <div className="flex items-center gap-2 text-status-success-text text-sm">
             <CheckCircle2 className="h-4 w-4" />
             <span>{successMessage}</span>
           </div>

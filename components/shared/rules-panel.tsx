@@ -206,7 +206,7 @@ export default function RulesPanel({
               type="checkbox"
               checked={acumulativo}
               onChange={(e) => setAcumulativo(e.target.checked)}
-              className="h-4 w-4"
+              className="h-4 w-4 accent-primary"
             />
             <span className="flex items-center gap-1">
               Acumulativo (Módulos X a Y)
@@ -227,7 +227,7 @@ export default function RulesPanel({
               type="checkbox"
               checked={gerarNoUltimo}
               onChange={(e) => setGerarNoUltimo(e.target.checked)}
-              className="h-4 w-4"
+              className="h-4 w-4 accent-primary"
             />
             <span className="flex items-center gap-1">
               Gerar no último módulo

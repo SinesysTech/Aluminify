@@ -654,16 +654,15 @@ export function ScheduleWizard() {
 
         interface AulaData {
           id: string;
-          nome: string;
-          numero_aula: number | null;
+          modulo_id: string | null;
           tempo_estimado_minutos: number | null;
-          modulo_id: string;
           [key: string]: unknown;
         }
         // Agrupar aulas por módulo
-        const aulasPorModulo = new Map<string, typeof aulasData>()
-        if (aulasData) {
-          aulasData.forEach((aula) => {
+        const aulasPorModulo = new Map<string, AulaData[]>()
+        const aulasRows = ((aulasData || []) as unknown as AulaData[])
+        if (aulasRows.length > 0) {
+          aulasRows.forEach((aula) => {
             if (aula.modulo_id) {
               if (!aulasPorModulo.has(aula.modulo_id)) {
                 aulasPorModulo.set(aula.modulo_id, [])
@@ -684,6 +683,12 @@ export function ScheduleWizard() {
             )
             const concluidas = aulas.filter((aula: AulaData) => concluidasSet.has(aula.id)).length
 
+            const importanciaValida: ModuloResumo['importancia'] = 
+              modulo.importancia === 'Alta' || modulo.importancia === 'Media' || 
+              modulo.importancia === 'Baixa' || modulo.importancia === 'Base'
+                ? modulo.importancia
+                : null;
+            
             return {
               id: modulo.id,
               nome: modulo.nome,
@@ -691,7 +696,7 @@ export function ScheduleWizard() {
               totalAulas,
               tempoTotal,
               concluidas,
-              importancia: modulo.importancia || null,
+              importancia: importanciaValida,
             }
           })
 
@@ -782,7 +787,7 @@ export function ScheduleWizard() {
           errorKeys: err && typeof err === 'object' ? Object.keys(err) : [],
         })
         if (!cancelled) {
-          setError(`Não foi possível carregar os módulos deste curso. ${err?.message || 'Erro desconhecido'}`)
+          setError(`Não foi possível carregar os módulos deste curso. ${error?.message || 'Erro desconhecido'}`)
         }
       } finally {
         if (!cancelled) {
@@ -1001,8 +1006,11 @@ export function ScheduleWizard() {
 
       interface ApiResponse {
         id?: string;
+        success?: boolean;
         error?: string;
         message?: string;
+        details?: unknown;
+        detalhes?: Record<string, unknown> | null;
         [key: string]: unknown;
       }
       let result: ApiResponse = {}
@@ -1047,7 +1055,7 @@ export function ScheduleWizard() {
 
         // Se o erro contém detalhes, mostrar mensagem mais específica
         if (isTempoInsuficiente) {
-          const detalhes = result?.detalhes || {}
+          const detalhes = (result?.detalhes || {}) as Record<string, unknown>
           const horasNecessarias = Number(detalhes.horas_necessarias) || 0
           const horasDisponiveis = Number(detalhes.horas_disponiveis) || 0
           const horasDiaNecessarias = Number(detalhes.horas_dia_necessarias) || 0
@@ -1075,7 +1083,7 @@ export function ScheduleWizard() {
             // Se não temos detalhes, mostrar apenas a mensagem de erro
             const errorMessage = result?.error || 'Tempo insuficiente para gerar o cronograma'
             console.warn('Erro de tempo insuficiente sem detalhes completos')
-            setError(errorMessage)
+            setError(String(errorMessage))
           }
         } else {
           // Extrair mensagem de erro de forma mais robusta
@@ -1091,7 +1099,7 @@ export function ScheduleWizard() {
             console.error('Mensagem de erro final:', errorMessage)
             console.error('Result completo para debug:', JSON.stringify(result, null, 2))
           }
-          setError(errorMessage)
+          setError(String(errorMessage))
         }
         setLoading(false)
         return

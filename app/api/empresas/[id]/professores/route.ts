@@ -126,8 +126,7 @@ export async function GET(
   request: NextRequest,
   context: RouteContext
 ) {
-  const params = await context.params;
-  return getHandler(request, params);
+  return getHandler(request, context);
 }
 
 // POST /api/empresas/[id]/professores - Adicionar professor
@@ -135,6 +134,5 @@ export async function POST(
   request: NextRequest,
   context: RouteContext
 ) {
-  const params = await context.params;
-  return postHandler(request, params);
+  return postHandler(request, context);
 }

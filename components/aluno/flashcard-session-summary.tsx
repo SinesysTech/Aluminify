@@ -34,10 +34,10 @@ export function FlashcardSessionSummary({ feedbacks, onFinish, onStudyMore }: Se
   const score = total > 0 ? Math.round((acertos / total) * 100) : 0
 
   // Cores para o gráfico
-  const erreiColor = 'bg-red-500'
-  const parcialColor = 'bg-yellow-500'
-  const dificilColor = 'bg-blue-500'
-  const facilColor = 'bg-green-500'
+  const erreiColor = 'bg-status-error'
+  const parcialColor = 'bg-status-warning'
+  const dificilColor = 'bg-status-info'
+  const facilColor = 'bg-status-success'
 
   // Calcular percentuais para o gráfico
   const erreiPercent = total > 0 ? (counts.errei / total) * 100 : 0
@@ -47,10 +47,10 @@ export function FlashcardSessionSummary({ feedbacks, onFinish, onStudyMore }: Se
 
   // Determinar mensagem baseada no score
   const getScoreMessage = (score: number) => {
-    if (score >= 80) return { text: 'Excelente!', color: 'text-green-600' }
-    if (score >= 60) return { text: 'Bom trabalho!', color: 'text-blue-600' }
-    if (score >= 40) return { text: 'Continue praticando!', color: 'text-yellow-600' }
-    return { text: 'Não desista!', color: 'text-red-600' }
+    if (score >= 80) return { text: 'Excelente!', color: 'text-status-success-text' }
+    if (score >= 60) return { text: 'Bom trabalho!', color: 'text-status-info-text' }
+    if (score >= 40) return { text: 'Continue praticando!', color: 'text-status-warning-text' }
+    return { text: 'Não desista!', color: 'text-status-error-text' }
   }
 
   const scoreMessage = getScoreMessage(score)
@@ -74,7 +74,7 @@ export function FlashcardSessionSummary({ feedbacks, onFinish, onStudyMore }: Se
       />
       <CardHeader className="text-center">
         <div className="flex justify-center mb-2">
-          <Trophy className="h-12 w-12 text-yellow-500" />
+          <Trophy className="h-12 w-12 text-status-warning-text" />
         </div>
         <CardTitle className="text-2xl">Sessão Concluída!</CardTitle>
         <CardDescription>Você completou 10 flashcards</CardDescription>

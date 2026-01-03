@@ -104,8 +104,9 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
     if (!professorError && professorRow) {
       empresaId = professorRow.empresa_id ?? undefined
       isEmpresaAdmin = Boolean(professorRow.is_admin)
-      // @ts-expect-error - join typed as any in generated types
-      empresaNome = professorRow.empresas?.nome ?? undefined
+      // Join pode vir como `any` dependendo do `Database` gerado
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      empresaNome = (professorRow as any)?.empresas?.nome ?? undefined
 
       // Se existir nome_completo, preferir como fullName
       if (professorRow.nome_completo) {

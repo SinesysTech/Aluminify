@@ -1,4 +1,3 @@
-// @ts-nocheck - Temporary: type issue with ReactNode to string assignment
 'use client';
 
 import { cn } from '@/lib/utils';
@@ -356,6 +355,7 @@ const components: Options['components'] = {
       children.props &&
       typeof (children.props as PropsWithChildren).children === 'string'
     ) {
+      // @ts-expect-error - ReactNode children can be string in this context
       code = (children.props as PropsWithChildren).children;
     } else if (typeof children === 'string') {
       code = children;

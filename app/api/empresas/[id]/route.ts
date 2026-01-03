@@ -134,8 +134,7 @@ export async function GET(
   request: NextRequest,
   context: RouteContext
 ) {
-  const params = await context.params;
-  return getHandler(request, params);
+  return getHandler(request, context);
 }
 
 // PATCH /api/empresas/[id] - Atualizar empresa
@@ -143,8 +142,7 @@ export async function PATCH(
   request: NextRequest,
   context: RouteContext
 ) {
-  const params = await context.params;
-  return patchHandler(request, params);
+  return patchHandler(request, context);
 }
 
 // DELETE /api/empresas/[id] - Deletar empresa (apenas superadmin)
@@ -152,6 +150,5 @@ export async function DELETE(
   request: NextRequest,
   context: RouteContext
 ) {
-  const params = await context.params;
-  return deleteHandler(request, params);
+  return deleteHandler(request, context);
 }

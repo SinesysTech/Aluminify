@@ -269,16 +269,19 @@ export class ConversationService {
   async updateConversationHistory(conversationId: string, userId: string, history: ChatMessage[]): Promise<void> {
     const supabase = await createClient();
 
+    // `history` é persistido em JSONB. O tipo `Json` do Supabase é bem estrito e não aceita `ChatMessage[]` diretamente.
+    // Em runtime isso é serializável, então fazemos cast controlado para evitar ruído de typecheck.
+    const payload = {
+      conversation_id: conversationId,
+      user_id: userId,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      history: history as unknown as any,
+    };
+
     const { error } = await supabase
       .from('chat_conversation_history')
-      .upsert(
-        {
-          conversation_id: conversationId,
-          user_id: userId,
-          history: history,
-        },
-        { onConflict: 'conversation_id' },
-      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .upsert(payload as any, { onConflict: 'conversation_id' });
 
     if (error) {
       console.error('[Conversation Service] Error updating conversation history:', error);

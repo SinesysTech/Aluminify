@@ -199,7 +199,8 @@ async function apiRequest<T>(
       errorData = { error: errorMessage }
     }
     
-    // Log detalhado do erro - garantir que sempre tenha informações úteis
+    // Log detalhado do erro - evitar console.error em erros esperados (4xx),
+    // porque o overlay do Next trata console.error como "Console Error".
     const errorLogData = {
       endpoint: String(endpoint),
       status: Number(response.status),
@@ -218,17 +219,17 @@ async function apiRequest<T>(
       (errorLogData as Record<string, unknown>).headers = Object.fromEntries(response.headers.entries())
     }
     
-    // Log usando console.error com múltiplos argumentos para garantir que sempre mostre informações
-    console.error('=== API Error ===')
-    console.error('Endpoint:', errorLogData.endpoint)
-    console.error('Status:', errorLogData.status, errorLogData.statusText)
-    console.error('Error Message:', errorLogData.error)
-    console.error('Error Data:', errorLogData.errorData)
-    console.error('Raw Response:', errorLogData.rawResponse)
+    const logFn = response.status >= 500 ? console.error : console.warn
+    logFn('=== API Error ===')
+    logFn('Endpoint:', errorLogData.endpoint)
+    logFn('Status:', errorLogData.status, errorLogData.statusText)
+    logFn('Error Message:', errorLogData.error)
+    logFn('Error Data:', errorLogData.errorData)
+    logFn('Raw Response:', errorLogData.rawResponse)
     if (process.env.NODE_ENV === 'development') {
-      console.error('Full Error Data Object:', JSON.stringify(errorData, null, 2))
+      logFn('Full Error Data Object:', JSON.stringify(errorData, null, 2))
     }
-    console.error('=================')
+    logFn('=================')
 
     throw new ApiClientError(
       errorMessage,

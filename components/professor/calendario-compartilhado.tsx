@@ -59,7 +59,14 @@ export function CalendarioCompartilhado({ empresaId }: CalendarioCompartilhadoPr
         getProfessoresDisponibilidade(empresaId, currentDate),
       ])
 
-      setAgendamentos(agendamentosData)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const normalizedAgendamentos: Agendamento[] = (agendamentosData || []).map((a: any) => ({
+        ...a,
+        professor_nome: a.professor_nome ?? 'Professor',
+        aluno_nome: a.aluno_nome ?? 'Aluno',
+      }))
+
+      setAgendamentos(normalizedAgendamentos)
       setDisponibilidade(disponibilidadeData)
     } catch (error) {
       console.error("Error loading shared calendar data:", error)

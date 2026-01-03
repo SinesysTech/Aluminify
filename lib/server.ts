@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from './database.types'
+import { getPublicSupabaseConfig } from './supabase-public-env'
 
 /**
  * If using Fluid compute: Don't put this client in a global variable. Always create a new client within each
@@ -8,10 +9,11 @@ import type { Database } from './database.types'
  */
 export async function createClient() {
   const cookieStore = await cookies()
+  const { url, anonKey } = getPublicSupabaseConfig()
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY!,
+    url,
+    anonKey,
     {
       cookies: {
         getAll() {

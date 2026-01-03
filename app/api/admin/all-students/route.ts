@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
             id,
             nome,
             empresa_id,
-            empresas:nome
+            empresas ( nome )
           )
         )
       `)

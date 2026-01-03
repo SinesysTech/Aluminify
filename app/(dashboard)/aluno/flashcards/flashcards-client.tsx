@@ -8,7 +8,18 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { AlertCircle, Loader2, RefreshCcw, BrainCircuit, Target, Info } from 'lucide-react'
+import {
+  AlertCircle,
+  Loader2,
+  RefreshCcw,
+  BrainCircuit,
+  Target,
+  Info,
+  XCircle,
+  AlertTriangle,
+  Lightbulb,
+  CheckCircle2,
+} from 'lucide-react'
 import { FlashcardSessionSummary } from '@/components/aluno/flashcard-session-summary'
 import {
   Tooltip,
@@ -687,30 +698,30 @@ export default function FlashcardsClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
               <Button 
                 onClick={() => handleFeedback(1)}
-                className="flex flex-col items-center gap-1 h-auto py-2 bg-red-50 hover:bg-red-100 border-2 border-red-200 text-red-700 hover:text-red-800 transition-colors"
+                className="flex flex-col items-center gap-1 h-auto py-2 bg-status-error text-status-error-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
               >
-                <span className="text-xl">❌</span>
+                <XCircle className="h-6 w-6 drop-shadow-sm" />
                 <span className="text-xs font-semibold">Errei o item</span>
               </Button>
               <Button 
                 onClick={() => handleFeedback(2)}
-                className="flex flex-col items-center gap-1 h-auto py-2 bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 text-orange-700 hover:text-orange-800 transition-colors"
+                className="flex flex-col items-center gap-1 h-auto py-2 bg-status-warning text-status-warning-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
               >
-                <span className="text-xl">⚠️</span>
+                <AlertTriangle className="h-6 w-6 drop-shadow-sm" />
                 <span className="text-xs font-semibold">Acertei parcialmente</span>
               </Button>
               <Button 
                 onClick={() => handleFeedback(3)}
-                className="flex flex-col items-center gap-1 h-auto py-2 bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-200 text-yellow-700 hover:text-yellow-800 transition-colors"
+                className="flex flex-col items-center gap-1 h-auto py-2 bg-status-info text-status-info-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
               >
-                <span className="text-xl">💡</span>
+                <Lightbulb className="h-6 w-6 drop-shadow-sm" />
                 <span className="text-xs font-semibold">Acertei com dificuldade</span>
               </Button>
               <Button 
                 onClick={() => handleFeedback(4)}
-                className="flex flex-col items-center gap-1 h-auto py-2 bg-green-50 hover:bg-green-100 border-2 border-green-200 text-green-700 hover:text-green-800 transition-colors"
+                className="flex flex-col items-center gap-1 h-auto py-2 bg-status-success text-status-success-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
               >
-                <span className="text-xl">✅</span>
+                <CheckCircle2 className="h-6 w-6 drop-shadow-sm" />
                 <span className="text-xs font-semibold">Acertei com facilidade</span>
               </Button>
             </div>
