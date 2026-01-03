@@ -74,6 +74,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import { apiClient, ApiClientError } from '@/lib/api-client'
+import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/lib/br'
 
 export type Professor = {
   id: string
@@ -91,8 +92,16 @@ export type Professor = {
 const professorSchema = z.object({
   fullName: z.string().min(1, 'Nome completo é obrigatório'),
   email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
-  cpf: z.string().optional().nullable(),
-  phone: z.string().optional().nullable(),
+  cpf: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || v.trim() === '' || isValidCPF(v), 'CPF inválido'),
+  phone: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || v.trim() === '' || isValidBRPhone(v), 'Telefone inválido'),
   biography: z.string().optional().nullable(),
   photoUrl: z.string().url('URL inválida').optional().nullable().or(z.literal('')),
   specialty: z.string().optional().nullable(),
@@ -488,7 +497,14 @@ export function ProfessorTable() {
                             <FormItem>
                               <FormLabel>CPF</FormLabel>
                               <FormControl>
-                                <Input placeholder="000.000.000-00" {...field} value={field.value || ''} />
+                                <Input
+                                  placeholder="000.000.000-00"
+                                  inputMode="numeric"
+                                  maxLength={14}
+                                  {...field}
+                                  value={field.value || ''}
+                                  onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -501,7 +517,14 @@ export function ProfessorTable() {
                             <FormItem>
                               <FormLabel>Telefone</FormLabel>
                               <FormControl>
-                                <Input placeholder="(00) 00000-0000" {...field} value={field.value || ''} />
+                                <Input
+                                  placeholder="(11) 99999-9999"
+                                  inputMode="numeric"
+                                  maxLength={15}
+                                  {...field}
+                                  value={field.value || ''}
+                                  onChange={(e) => field.onChange(formatBRPhone(e.target.value))}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -801,7 +824,14 @@ export function ProfessorTable() {
                       <FormItem>
                         <FormLabel>CPF</FormLabel>
                         <FormControl>
-                          <Input placeholder="000.000.000-00" {...field} value={field.value || ''} />
+                          <Input
+                            placeholder="000.000.000-00"
+                            inputMode="numeric"
+                            maxLength={14}
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -814,7 +844,14 @@ export function ProfessorTable() {
                       <FormItem>
                         <FormLabel>Telefone</FormLabel>
                         <FormControl>
-                          <Input placeholder="(00) 00000-0000" {...field} value={field.value || ''} />
+                          <Input
+                            placeholder="(11) 99999-9999"
+                            inputMode="numeric"
+                            maxLength={15}
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) => field.onChange(formatBRPhone(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

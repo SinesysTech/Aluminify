@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { formatBRPhone, formatCNPJ } from '@/lib/br';
 
 interface Empresa {
   id: string;
@@ -134,7 +135,10 @@ export default function EmpresaPage() {
             <Input
               id="cnpj"
               value={formData.cnpj}
-              onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, cnpj: formatCNPJ(e.target.value) })}
+              inputMode="numeric"
+              maxLength={18}
+              placeholder="00.000.000/0000-00"
             />
           </div>
 
@@ -153,7 +157,10 @@ export default function EmpresaPage() {
             <Input
               id="telefone"
               value={formData.telefone}
-              onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, telefone: formatBRPhone(e.target.value) })}
+              inputMode="numeric"
+              maxLength={15}
+              placeholder="(11) 99999-9999"
             />
           </div>
 

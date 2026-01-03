@@ -1,6 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { EmpresaRepositoryImpl } from './empresa.repository';
 import { Empresa, CreateEmpresaInput, UpdateEmpresaInput } from './empresa.types';
+import { isValidCNPJ, normalizeCnpj } from '@/lib/br';
 
 export class EmpresaService {
   constructor(
@@ -99,7 +100,7 @@ export class EmpresaService {
 
   private validateCnpj(cnpj: string): void {
     // Remove caracteres não numéricos
-    const cleanCnpj = cnpj.replace(/[^\d]/g, '');
+    const cleanCnpj = normalizeCnpj(cnpj);
 
     // Verifica se tem 14 dígitos
     if (cleanCnpj.length !== 14) {
@@ -111,8 +112,10 @@ export class EmpresaService {
       throw new Error('CNPJ inválido');
     }
 
-    // Validação básica de dígitos verificadores (pode ser expandida)
-    // Por enquanto, apenas valida formato
+    // Dígitos verificadores
+    if (!isValidCNPJ(cleanCnpj)) {
+      throw new Error('CNPJ inválido');
+    }
   }
 
   private generateSlug(nome: string): string {

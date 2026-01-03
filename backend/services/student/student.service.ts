@@ -7,6 +7,7 @@ import {
 } from './errors';
 import { getDatabaseClient } from '@/backend/clients/database';
 import type { PaginationParams } from '@/types/shared/dtos/api-responses';
+import { isValidBRPhone, isValidCPF, normalizeBRPhone, normalizeCpf } from '@/lib/br';
 
 const FULL_NAME_MIN_LENGTH = 3;
 const FULL_NAME_MAX_LENGTH = 200;
@@ -294,24 +295,25 @@ export class StudentService {
   }
 
   private validateCpf(cpf?: string): string {
-    const cleaned = cpf?.replace(/\D/g, '');
+    const cleaned = normalizeCpf(cpf || '');
     if (!cleaned || cleaned.length !== CPF_LENGTH) {
       throw new StudentValidationError(`CPF must have exactly ${CPF_LENGTH} digits`);
     }
-
+    if (!isValidCPF(cleaned)) {
+      throw new StudentValidationError('Invalid CPF');
+    }
     return cleaned;
   }
 
   private validatePhone(phone?: string): string {
-    const cleaned = phone?.replace(/\D/g, '');
+    const cleaned = normalizeBRPhone(phone || '');
     if (!cleaned) {
       throw new StudentValidationError('Phone cannot be empty');
     }
 
-    if (cleaned.length < PHONE_MIN_LENGTH || cleaned.length > PHONE_MAX_LENGTH) {
-      throw new StudentValidationError(
-        `Phone must have between ${PHONE_MIN_LENGTH} and ${PHONE_MAX_LENGTH} digits`,
-      );
+    // padrão BR: 10 ou 11 dígitos (DDD + número)
+    if (!isValidBRPhone(cleaned)) {
+      throw new StudentValidationError('Invalid phone number');
     }
 
     return cleaned;

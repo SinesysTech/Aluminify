@@ -77,6 +77,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { apiClient, ApiClientError } from '@/lib/api-client'
+import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/lib/br'
 
 export type CourseOption = {
   id: string
@@ -137,8 +138,16 @@ const generateDefaultPassword = (cpf: string, courseName: string) =>
 const alunoSchema = z.object({
   fullName: z.string().optional().nullable(),
   email: z.string().email('Email inválido').min(1, 'Email é obrigatório'),
-  cpf: z.string().optional().nullable(),
-  phone: z.string().optional().nullable(),
+  cpf: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || v.trim() === '' || isValidCPF(v), 'CPF inválido'),
+  phone: z
+    .string()
+    .optional()
+    .nullable()
+    .refine((v) => !v || v.trim() === '' || isValidBRPhone(v), 'Telefone inválido'),
   birthDate: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   zipCode: z.string().optional().nullable(),
@@ -821,7 +830,14 @@ export function AlunoTable() {
                             <FormItem>
                               <FormLabel>CPF</FormLabel>
                               <FormControl>
-                                <Input placeholder="000.000.000-00" {...field} value={field.value || ''} />
+                                <Input
+                                  placeholder="000.000.000-00"
+                                  inputMode="numeric"
+                                  maxLength={14}
+                                  {...field}
+                                  value={field.value || ''}
+                                  onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -834,7 +850,14 @@ export function AlunoTable() {
                             <FormItem>
                               <FormLabel>Telefone</FormLabel>
                               <FormControl>
-                                <Input placeholder="(00) 00000-0000" {...field} value={field.value || ''} />
+                                <Input
+                                  placeholder="(11) 99999-9999"
+                                  inputMode="numeric"
+                                  maxLength={15}
+                                  {...field}
+                                  value={field.value || ''}
+                                  onChange={(e) => field.onChange(formatBRPhone(e.target.value))}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -1364,7 +1387,14 @@ export function AlunoTable() {
                       <FormItem>
                         <FormLabel>CPF</FormLabel>
                         <FormControl>
-                          <Input placeholder="000.000.000-00" {...field} value={field.value || ''} />
+                          <Input
+                            placeholder="000.000.000-00"
+                            inputMode="numeric"
+                            maxLength={14}
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -1377,7 +1407,14 @@ export function AlunoTable() {
                       <FormItem>
                         <FormLabel>Telefone</FormLabel>
                         <FormControl>
-                          <Input placeholder="(00) 00000-0000" {...field} value={field.value || ''} />
+                          <Input
+                            placeholder="(11) 99999-9999"
+                            inputMode="numeric"
+                            maxLength={15}
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) => field.onChange(formatBRPhone(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
