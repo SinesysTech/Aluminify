@@ -7,7 +7,7 @@ Este diretório contém toda a documentação técnica do projeto Área do Aluno
 ### 🚀 Início Rápido
 
 - [README Principal](../README.md) - Visão geral do projeto
-- [Variáveis de Ambiente](../ENV_VARIABLES.md) - Configuração completa
+- [Variáveis de Ambiente](./ENV_VARIABLES.md) - Configuração completa
 - [Guia de Deploy](../DEPLOY.md) - Como fazer deploy na Vercel
 
 ### 🔐 Autenticação e Segurança
@@ -76,7 +76,7 @@ Este diretório contém toda a documentação técnica do projeto Área do Aluno
 - Calendário → [FLUXO_CALENDARIO.md](../FLUXO_CALENDARIO.md)
 
 **Infraestrutura**
-- Variáveis de ambiente → [../ENV_VARIABLES.md](../ENV_VARIABLES.md)
+- Variáveis de ambiente → [./ENV_VARIABLES.md](./ENV_VARIABLES.md)
 - Redis → [UPSTASH_REDIS_SETUP.md](./UPSTASH_REDIS_SETUP.md)
 - Deploy → [../DEPLOY.md](../DEPLOY.md)
 

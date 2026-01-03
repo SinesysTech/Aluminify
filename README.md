@@ -108,7 +108,7 @@ UPSTASH_REDIS_REST_URL=https://your-redis-instance.upstash.io
 UPSTASH_REDIS_REST_TOKEN=your-redis-token
 ```
 
-Para mais detalhes sobre as variáveis de ambiente, consulte [ENV_VARIABLES.md](./ENV_VARIABLES.md).
+Para mais detalhes sobre as variáveis de ambiente, consulte [ENV_VARIABLES.md](./docs/ENV_VARIABLES.md).
 
 ### Instalação
 
@@ -136,7 +136,7 @@ A API estará disponível em `http://localhost:3000`
 📖 **[Ver Índice Completo de Documentação](./docs/README.md)** - Navegue por toda a documentação do projeto
 
 #### Configuração e Setup
-- [Variáveis de Ambiente](./ENV_VARIABLES.md) - Todas as variáveis necessárias
+- [Variáveis de Ambiente](./docs/ENV_VARIABLES.md) - Todas as variáveis necessárias
 - [Guia de Deploy](./DEPLOY.md) - Como fazer deploy na Vercel
 - [Guia de Instalação do Supabase CLI](./GUIA_INSTALACAO_SUPABASE_CLI.md)
 
@@ -271,7 +271,7 @@ O projeto está configurado para deploy na Vercel. Consulte o guia completo em [
 
 **Pré-requisitos:**
 - Conta na Vercel
-- Variáveis de ambiente configuradas (veja [ENV_VARIABLES.md](./ENV_VARIABLES.md))
+- Variáveis de ambiente configuradas (veja [ENV_VARIABLES.md](./docs/ENV_VARIABLES.md))
 - Projeto Supabase configurado
 - Upstash Redis (opcional, mas recomendado)
 

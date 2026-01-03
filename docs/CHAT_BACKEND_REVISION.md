@@ -41,7 +41,7 @@ Criado um serviço de cache (`backend/services/cache/response-store.ts`) que:
 - ✨ [`backend/services/cache/index.ts`](../backend/services/cache/index.ts) - Exportações
 - ✨ [`docs/UPSTASH_REDIS_SETUP.md`](./UPSTASH_REDIS_SETUP.md) - Guia de configuração
 - ✨ [`scripts/test-chat-callback.sh`](../scripts/test-chat-callback.sh) - Script de teste
-- ✨ [`.env.example`](../.env.example) - Template de variáveis de ambiente
+- ✨ [`env.example`](../env.example) - Template de variáveis de ambiente
 - ✨ [`types/swagger-ui-react.d.ts`](../types/swagger-ui-react.d.ts) - Tipos TypeScript
 
 #### Arquivos Atualizados
@@ -257,7 +257,7 @@ O endpoint `/api/chat/callback` é **público** (sem autenticação) para permit
 ### Credenciais
 - ✅ Upstash Redis usa credenciais em `.env.local`
 - ✅ Arquivo `.env.local` está no `.gitignore`
-- ✅ `.env.example` não contém credenciais reais
+- ✅ `env.example` não contém credenciais reais
 
 ## 📝 Próximos Passos (Opcional)
 
