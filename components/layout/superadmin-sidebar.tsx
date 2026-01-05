@@ -5,6 +5,9 @@ import {
   GraduationCap,
   Shield,
   Users,
+  LayoutDashboard,
+  FileText,
+  User,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
@@ -31,19 +34,34 @@ type NavItem = {
 
 const superAdminNavItems: NavItem[] = [
   {
+    title: "Dashboard",
+    url: "/superadmin/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
     title: "Empresas",
-    url: "/admin/empresas",
+    url: "/superadmin/empresas",
     icon: Building2,
   },
   {
     title: "Professores",
-    url: "/admin/professores",
+    url: "/superadmin/professores",
     icon: GraduationCap,
   },
   {
     title: "Alunos",
-    url: "/admin/alunos",
+    url: "/superadmin/alunos",
     icon: Users,
+  },
+  {
+    title: "Relatórios Globais",
+    url: "/superadmin/relatorios",
+    icon: FileText,
+  },
+  {
+    title: "Perfil",
+    url: "/perfil",
+    icon: User,
   },
 ]
 
@@ -91,7 +109,7 @@ export function SuperAdminSidebar({ ...props }: React.ComponentProps<typeof Side
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMainWithActive} label="Super Administração" />
+        <NavMain items={navMainWithActive} label="Menu" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

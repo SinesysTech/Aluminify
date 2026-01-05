@@ -17,10 +17,11 @@ export function ProfessorSignUpForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [empresaNome, setEmpresaNome] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [empresaId, setEmpresaId] = useState<string | null>(null);
-  const [empresaNome, setEmpresaNome] = useState<string | null>(null);
+  const [empresaNomeFromSlug, setEmpresaNomeFromSlug] = useState<string | null>(null);
 
   useEffect(() => {
     // Buscar empresa_id via empresa_slug se fornecido
@@ -46,7 +47,7 @@ export function ProfessorSignUpForm() {
       const data = await response.json();
       if (data) {
         setEmpresaId(data.id);
-        setEmpresaNome(data.nome);
+        setEmpresaNomeFromSlug(data.nome);
       }
     } catch (err) {
       console.error('Error fetching empresa:', err);
@@ -78,6 +79,12 @@ export function ProfessorSignUpForm() {
     const empresaSlug = searchParams.get('empresa');
     if (empresaSlug && !empresaId) {
       setError('Empresa não encontrada. Verifique o link de cadastro.');
+      return;
+    }
+
+    // Se não há empresa_id (cadastro novo), validar nome da empresa
+    if (!empresaId && !empresaNome.trim()) {
+      setError('Por favor, informe o nome da sua empresa');
       return;
     }
 
@@ -117,15 +124,16 @@ export function ProfessorSignUpForm() {
         router.push('/tobias');
         router.refresh();
       } else {
-        // Se não há empresa_id, criar conta de professor SEM empresa (onboarding)
-        // (precisa ser no backend para não disparar o trigger que exige empresa_id)
-        const response = await fetch('/api/auth/professor/signup', {
+        // Se não há empresa_id, criar conta de professor COM empresa (apenas nome)
+        // Usar endpoint que cria empresa automaticamente com apenas o nome
+        const response = await fetch('/api/auth/signup-with-empresa', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email,
             password,
             fullName,
+            empresaNome: empresaNome.trim(),
           }),
         });
 
@@ -135,6 +143,9 @@ export function ProfessorSignUpForm() {
         }
 
         await response.json();
+        
+        // Aguardar um pouco para garantir que a trigger tenha criado o registro do professor
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
         // Fazer login automático após criar conta
         const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -148,8 +159,11 @@ export function ProfessorSignUpForm() {
           return;
         }
 
-        // Redirecionar para cadastro de empresa (dentro do app)
-        router.push('/professor/empresa/nova');
+        // Aguardar mais um pouco para garantir que a sessão esteja atualizada
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Redirecionar para completar cadastro da empresa (primeiro login)
+        router.push('/professor/empresa/completar');
         router.refresh();
       }
     } catch (err) {
@@ -166,12 +180,30 @@ export function ProfessorSignUpForm() {
         </Alert>
       )}
 
-      {empresaNome && (
+      {empresaNomeFromSlug && (
         <Alert>
           <AlertDescription>
-            Cadastrando para: <strong>{empresaNome}</strong>
+            Cadastrando para: <strong>{empresaNomeFromSlug}</strong>
           </AlertDescription>
         </Alert>
+      )}
+
+      {!empresaId && (
+        <div className="space-y-2">
+          <Label htmlFor="empresaNome">Nome da Empresa</Label>
+          <Input
+            id="empresaNome"
+            type="text"
+            placeholder="Nome da sua empresa ou instituição"
+            value={empresaNome}
+            onChange={(e) => setEmpresaNome(e.target.value)}
+            required
+            disabled={isLoading}
+          />
+          <p className="text-xs text-muted-foreground">
+            Você poderá completar as demais informações da empresa após o primeiro login.
+          </p>
+        </div>
       )}
 
       <div className="space-y-2">

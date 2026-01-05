@@ -53,7 +53,8 @@ BEGIN
             IF v_contador >= r_regra.comecar_no_modulo THEN
                 IF ((v_contador - r_regra.comecar_no_modulo) % r_regra.frequencia_modulos = 0) THEN
                     IF r_regra.acumulativo THEN
-                        v_modulo_inicio := GREATEST(v_contador - r_regra.frequencia_modulos + 1, r_regra.comecar_no_modulo);
+                        -- Para acumulativo, sempre começa do módulo inicial até o módulo atual
+                        v_modulo_inicio := r_regra.comecar_no_modulo;
                         IF v_modulo_inicio = v_contador THEN
                             v_titulo_final := r_regra.nome_padrao || ' (Módulo ' || v_contador || ')';
                         ELSE

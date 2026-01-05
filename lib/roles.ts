@@ -1,11 +1,13 @@
 import type { AppUserRole } from '@/types/user'
 
 export const PROFESSOR_ROLES: AppUserRole[] = ['professor', 'superadmin']
+export const ADMIN_ROLES: AppUserRole[] = ['professor', 'superadmin', 'empresa']
 
 const DEFAULT_ROUTE_BY_ROLE: Record<AppUserRole, string> = {
   aluno: '/aluno/dashboard',
-  professor: '/aluno/dashboard',
-  superadmin: '/admin',
+  professor: '/professor/dashboard',
+  superadmin: '/superadmin/dashboard',
+  empresa: '/empresa/dashboard',
 }
 
 export function isProfessorRole(role: AppUserRole) {
@@ -24,7 +26,15 @@ export function hasRequiredRole(role: AppUserRole, allowedRoles: AppUserRole[]) 
 }
 
 export function getDefaultRouteForRole(role: AppUserRole) {
-  return DEFAULT_ROUTE_BY_ROLE[role] ?? '/tobias'
+  return DEFAULT_ROUTE_BY_ROLE[role] ?? '/aluno/dashboard'
+}
+
+export function isAdminRole(role: AppUserRole) {
+  return ADMIN_ROLES.includes(role)
+}
+
+export function canImpersonate(role: AppUserRole) {
+  return isAdminRole(role)
 }
 
 

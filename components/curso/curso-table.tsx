@@ -86,6 +86,7 @@ import {
 } from '@/components/ui/empty'
 import { apiClient, ApiClientError } from '@/lib/api-client'
 import { format } from 'date-fns'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 export type Curso = {
   id: string
@@ -269,7 +270,7 @@ export function CursoTable() {
         ...values,
         segmentId: values.segmentId || undefined,
         disciplineId: values.disciplineId || undefined, // Mantido para compatibilidade
-        disciplineIds: values.disciplineIds && values.disciplineIds.length > 0 ? values.disciplineIds : undefined,
+        disciplineIds: values.disciplineIds || [], // Sempre enviar array, mesmo se vazio
         planningUrl: values.planningUrl || undefined,
         coverImageUrl: values.coverImageUrl || undefined,
       })
@@ -330,7 +331,7 @@ export function CursoTable() {
         ...values,
         segmentId: values.segmentId || null,
         disciplineId: values.disciplineId || null, // Mantido para compatibilidade
-        disciplineIds: values.disciplineIds && values.disciplineIds.length > 0 ? values.disciplineIds : undefined,
+        disciplineIds: values.disciplineIds || [], // Sempre enviar array, mesmo se vazio
         planningUrl: values.planningUrl || null,
         coverImageUrl: values.coverImageUrl || null,
       })
@@ -820,9 +821,7 @@ export function CursoTable() {
             />
           </div>
           {loading ? (
-            <div className="flex h-24 items-center justify-center">
-              <p>Carregando cursos...</p>
-            </div>
+            <TableSkeleton rows={5} columns={6} />
           ) : table.getRowModel().rows?.length ? (
             <>
               {/* Mobile Card View */}
@@ -1095,28 +1094,43 @@ export function CursoTable() {
                   />
                   <FormField
                     control={editForm.control}
-                    name="disciplineId"
+                    name="disciplineIds"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Disciplina</FormLabel>
-                        <Select
-                          onValueChange={(value) => field.onChange(value === '__none__' ? null : value)}
-                          value={field.value || '__none__'}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Selecione a disciplina" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="__none__">Nenhuma</SelectItem>
+                        <FormLabel>Disciplinas</FormLabel>
+                        <div className="space-y-2">
+                          <FormDescription>
+                            Selecione uma ou mais disciplinas para este curso
+                          </FormDescription>
+                          <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto border rounded-md p-4">
                             {disciplinas.map((disciplina) => (
-                              <SelectItem key={disciplina.id} value={disciplina.id}>
-                                {disciplina.name}
-                              </SelectItem>
+                              <div key={disciplina.id} className="flex items-center space-x-2">
+                                <Checkbox
+                                  checked={field.value?.includes(disciplina.id) || false}
+                                  onCheckedChange={(checked) => {
+                                    const currentValue = field.value || []
+                                    if (checked) {
+                                      field.onChange([...currentValue, disciplina.id])
+                                    } else {
+                                      field.onChange(currentValue.filter((id) => id !== disciplina.id))
+                                    }
+                                  }}
+                                />
+                                <label
+                                  htmlFor={`edit-discipline-${disciplina.id}`}
+                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                                >
+                                  {disciplina.name}
+                                </label>
+                              </div>
                             ))}
-                          </SelectContent>
-                        </Select>
+                            {disciplinas.length === 0 && (
+                              <p className="text-sm text-muted-foreground col-span-2">
+                                Nenhuma disciplina cadastrada
+                              </p>
+                            )}
+                          </div>
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -10,6 +10,7 @@ import { RenameConversationDialog } from './rename-conversation-dialog'
 import type { Conversation } from '@/backend/services/conversation/conversation.types'
 import { cn } from '@/lib/utils'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { ListSkeleton } from '@/components/ui/list-skeleton'
 
 interface ConversationsPanelProps {
   selectedConversationId: string | null
@@ -188,10 +189,7 @@ export function ConversationsPanel({
       <ScrollArea className="flex-1">
         <div className="p-2">
           {isLoading ? (
-            <div className="flex items-center gap-2 p-2 text-sm text-muted-foreground">
-              <MessageSquare className="h-4 w-4" />
-              <span>Carregando...</span>
-            </div>
+            <ListSkeleton items={5} showAvatar={true} />
           ) : conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-4 text-center text-sm text-muted-foreground">
               <MessageSquare className="h-8 w-8 mb-2 opacity-50" />

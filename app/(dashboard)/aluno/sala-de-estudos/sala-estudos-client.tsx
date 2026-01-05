@@ -63,8 +63,6 @@ export default function SalaEstudosClientPage({
   const [frenteSelecionada, setFrenteSelecionada] = React.useState<string>('')
   const [alunoId, setAlunoId] = React.useState<string | null>(null)
   const [userRole, setUserRole] = React.useState<string | null>(null)
-  const [isSuperAdmin, setIsSuperAdmin] = React.useState<boolean>(false)
-  const [isLoading, setIsLoading] = React.useState(true)
   const [isLoadingAtividades, setIsLoadingAtividades] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -92,7 +90,6 @@ export default function SalaEstudosClientPage({
         // Detectar role do usuário
         const role = (user.user_metadata?.role as string) || 'aluno'
         setUserRole(role)
-        setIsSuperAdmin(role === 'superadmin' || user.user_metadata?.is_superadmin === true)
 
         // Usar o ID do usuário como aluno_id (mesmo para professores, para buscar progresso se necessário)
         setAlunoId(user.id)
@@ -106,185 +103,67 @@ export default function SalaEstudosClientPage({
     fetchUser()
   }, [supabase])
 
-  // Carregar cursos (diferente para alunos e professores)
+  // Extrair cursos, disciplinas e frentes da estrutura hierárquica
   React.useEffect(() => {
-    const fetchCursos = async () => {
-      if (!alunoId || !userRole) return
-
-      try {
-        setIsLoading(true)
-        setError(null)
-
-        // Verificar se há sessão ativa
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        
-        if (sessionError) {
-          console.error('Erro ao verificar sessão:', sessionError)
-          const errorMsg = formatSupabaseError(sessionError)
-          throw new Error(`Erro de autenticação: ${errorMsg}`)
-        }
-
-        if (!session) {
-          throw new Error('Sessão não encontrada. Faça login novamente.')
-        }
-
-        let cursoIds: string[] = []
-
-        // Se for professor, buscar cursos criados por ele; se superadmin, todos
-        if (userRole === 'professor' || isSuperAdmin) {
-          let query = supabase.from('cursos').select('id, created_by').order('nome', { ascending: true })
-          if (!isSuperAdmin) {
-            query = query.eq('created_by', alunoId)
-          }
-
-          const { data: cursosData, error: cursosError } = await query
-
-          if (cursosError) {
-            console.error('Erro ao buscar cursos (professor):', cursosError)
-            const errorMsg = formatSupabaseError(cursosError)
-            throw new Error(`Erro ao buscar cursos: ${errorMsg}`)
-          }
-
-          cursoIds = cursosData?.map((c) => c.id) || []
-        } else {
-          // Se for aluno, buscar cursos através da tabela alunos_cursos (mesmo método do cronograma)
-          const { data: alunosCursos, error: alunosCursosError } = await supabase
-            .from('alunos_cursos')
-            .select('curso_id, cursos(*)')
-            .eq('aluno_id', alunoId)
-
-          if (alunosCursosError) {
-            console.error('Erro ao buscar cursos do aluno:', alunosCursosError)
-            const errorMsg = formatSupabaseError(alunosCursosError)
-            throw new Error(`Erro ao buscar cursos: ${errorMsg}`)
-          }
-
-          if (!alunosCursos || alunosCursos.length === 0) {
-            setCursos([])
-            setIsLoading(false)
-            return
-          }
-
-          // Extrair os cursos do resultado (mesmo método do cronograma)
-          const cursosData = alunosCursos
-            .map((ac: { cursos: { id: string } | null }) => ac.cursos)
-            .filter((c): c is { id: string } => c !== null)
-          cursoIds = cursosData.map((c) => c.id)
-        }
-
-        if (cursoIds.length === 0) {
-          setCursos([])
-          setIsLoading(false)
-          return
-        }
-
-        // Buscar cursos
-        const { data: cursosData, error: cursosError } = await supabase
-          .from('cursos')
-          .select('id, nome')
-          .in('id', cursoIds)
-          .order('nome', { ascending: true })
-
-        if (cursosError) {
-          console.error('Erro na query de cursos:', cursosError)
-          const errorMsg = formatSupabaseError(cursosError)
-          throw new Error(`Erro ao buscar cursos: ${errorMsg}`)
-        }
-
-        setCursos(cursosData || [])
-
-        // Se houver apenas um curso, selecionar automaticamente
-        if (cursosData && cursosData.length === 1) {
-          setCursoSelecionado(cursosData[0].id)
-        }
-      } catch (err) {
-        console.error('Erro ao carregar cursos:', err)
-        const errorMessage = formatSupabaseError(err)
-        console.error('Detalhes do erro:', {
-          message: errorMessage,
-          error: err,
-          alunoId,
-          userRole,
-        })
-        setError(`Erro ao carregar cursos: ${errorMessage}`)
-      } finally {
-        setIsLoading(false)
-      }
+    if (estruturaHierarquica.length === 0) {
+      setCursos([])
+      setDisciplinas([])
+      setFrentes([])
+      return
     }
 
-    fetchCursos()
-  }, [alunoId, userRole, isSuperAdmin, supabase])
+    // Extrair cursos únicos
+    const cursosUnicos = estruturaHierarquica.map((curso) => ({
+      id: curso.id,
+      nome: curso.nome,
+    }))
+    setCursos(cursosUnicos)
 
-  // Carregar disciplinas e frentes dos cursos
+    // Se houver apenas um curso, selecionar automaticamente
+    if (cursosUnicos.length === 1 && !cursoSelecionado) {
+      setCursoSelecionado(cursosUnicos[0].id)
+    }
+  }, [estruturaHierarquica, cursoSelecionado])
+
+  // Extrair disciplinas e frentes baseado no curso selecionado
   React.useEffect(() => {
-    const fetchDisciplinasEFrentes = async () => {
-      if (!cursoSelecionado) {
-        setDisciplinas([])
-        setFrentes([])
-        return
-      }
-
-      try {
-        // Buscar disciplinas do curso através de cursos_disciplinas
-        const { data: cursosDisciplinas, error: cdError } = await supabase
-          .from('cursos_disciplinas')
-          .select('disciplina_id')
-          .eq('curso_id', cursoSelecionado)
-
-        if (cdError) {
-          console.error('Erro na query de cursos_disciplinas (filtros):', cdError)
-          const errorMsg = formatSupabaseError(cdError)
-          throw new Error(`Erro ao buscar cursos_disciplinas: ${errorMsg}`)
-        }
-
-        if (!cursosDisciplinas || cursosDisciplinas.length === 0) {
-          setDisciplinas([])
-          setFrentes([])
-          return
-        }
-
-        const disciplinaIds = cursosDisciplinas.map((cd) => cd.disciplina_id)
-
-        // Buscar disciplinas
-        const { data: disciplinasData, error: discError } = await supabase
-          .from('disciplinas')
-          .select('id, nome')
-          .in('id', disciplinaIds)
-          .order('nome', { ascending: true })
-
-        if (discError) {
-          console.error('Erro na query de disciplinas (filtros):', discError)
-          const errorMsg = formatSupabaseError(discError)
-          throw new Error(`Erro ao buscar disciplinas: ${errorMsg}`)
-        }
-
-        setDisciplinas(disciplinasData || [])
-
-        // Buscar frentes dessas disciplinas
-        const { data: frentesData, error: frentesError } = await supabase
-          .from('frentes')
-          .select('id, nome, disciplina_id')
-          .in('disciplina_id', disciplinaIds)
-          .order('nome', { ascending: true })
-
-        if (frentesError) {
-          console.error('Erro na query de frentes (filtros):', frentesError)
-          const errorMsg = formatSupabaseError(frentesError)
-          throw new Error(`Erro ao buscar frentes: ${errorMsg}`)
-        }
-
-        setFrentes((frentesData || [])
-          .filter(f => f.disciplina_id !== null)
-          .map(f => ({ id: f.id, nome: f.nome, disciplina_id: f.disciplina_id! })))
-      } catch (err) {
-        console.error('Erro ao carregar disciplinas:', err)
-        const errorMessage = formatSupabaseError(err)
-        setError(`Erro ao carregar disciplinas: ${errorMessage}`)
-      }
+    if (!cursoSelecionado || estruturaHierarquica.length === 0) {
+      setDisciplinas([])
+      setFrentes([])
+      return
     }
 
-    fetchDisciplinasEFrentes()
-  }, [cursoSelecionado, supabase])
+    // Encontrar o curso selecionado na estrutura
+    const curso = estruturaHierarquica.find((c) => c.id === cursoSelecionado)
+
+    if (!curso) {
+      setDisciplinas([])
+      setFrentes([])
+      return
+    }
+
+    // Extrair disciplinas únicas do curso
+    const disciplinasUnicas = curso.disciplinas.map((disc) => ({
+      id: disc.id,
+      nome: disc.nome,
+    }))
+    setDisciplinas(disciplinasUnicas)
+
+    // Extrair todas as frentes das disciplinas do curso
+    const frentesUnicas: Array<{ id: string; nome: string; disciplina_id: string }> = []
+    curso.disciplinas.forEach((disc) => {
+      disc.frentes.forEach((frente) => {
+        if (!frentesUnicas.find((f) => f.id === frente.id)) {
+          frentesUnicas.push({
+            id: frente.id,
+            nome: frente.nome,
+            disciplina_id: frente.disciplinaId,
+          })
+        }
+      })
+    })
+    setFrentes(frentesUnicas)
+  }, [cursoSelecionado, estruturaHierarquica])
 
   // Carregar atividades (diferente para alunos e professores)
   React.useEffect(() => {
@@ -954,7 +833,7 @@ export default function SalaEstudosClientPage({
     [alunoId, supabase],
   )
 
-  if (isLoading) {
+  if (isLoadingAtividades) {
     return (
       <div className="w-full space-y-6">
         <Skeleton className="h-12 w-64" />

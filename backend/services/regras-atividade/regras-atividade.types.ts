@@ -8,6 +8,7 @@ export interface RegraAtividade {
   frequenciaModulos: number;
   comecarNoModulo: number;
   acumulativo: boolean;
+  acumulativoDesdeInicio: boolean;
   gerarNoUltimo: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +21,7 @@ export interface CreateRegraAtividadeInput {
   frequenciaModulos?: number;
   comecarNoModulo?: number;
   acumulativo?: boolean;
+  acumulativoDesdeInicio?: boolean;
   gerarNoUltimo?: boolean;
 }
 
@@ -29,5 +31,6 @@ export interface UpdateRegraAtividadeInput {
   frequenciaModulos?: number;
   comecarNoModulo?: number;
   acumulativo?: boolean;
+  acumulativoDesdeInicio?: boolean;
   gerarNoUltimo?: boolean;
 }

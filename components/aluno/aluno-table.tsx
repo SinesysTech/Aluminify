@@ -77,6 +77,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { apiClient, ApiClientError } from '@/lib/api-client'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/lib/br'
 
 export type CourseOption = {
@@ -1179,9 +1180,7 @@ export function AlunoTable() {
             />
           </div>
           {loading ? (
-            <div className="flex h-24 items-center justify-center">
-              <p>Carregando alunos...</p>
-            </div>
+            <TableSkeleton rows={5} columns={8} />
           ) : table.getRowModel().rows?.length ? (
             <>
               {/* Mobile Card View */}

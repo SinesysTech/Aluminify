@@ -112,7 +112,8 @@ export class EmpresaRepositoryImpl implements EmpresaRepository {
     }
 
     if (input.cnpj !== undefined) {
-      updateData.cnpj = input.cnpj;
+      // Se CNPJ for string vazia, definir como null no banco
+      updateData.cnpj = input.cnpj && input.cnpj.trim() ? input.cnpj : null;
     }
 
     if (input.emailContato !== undefined) {

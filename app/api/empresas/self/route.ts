@@ -91,21 +91,32 @@ export async function POST(request: NextRequest) {
     }
 
     // 3) Inserir em empresa_admins como owner
-    await adminClient.from('empresa_admins').insert({
+    const { error: adminInsertError } = await adminClient.from('empresa_admins').insert({
       empresa_id: empresa.id,
       user_id: user.id,
       is_owner: true,
       permissoes: {},
     });
 
+    if (adminInsertError) {
+      console.error('Error inserting empresa_admin:', adminInsertError);
+      // Não falhar completamente, mas logar o erro
+      // O professor já foi vinculado como admin na tabela professores
+    }
+
     // 4) Atualizar metadata do usuário (melhora UX de contexto no frontend)
-    await adminClient.auth.admin.updateUserById(user.id, {
-      user_metadata: {
-        role: 'professor',
-        empresa_id: empresa.id,
-        is_admin: true,
-      },
-    });
+    try {
+      await adminClient.auth.admin.updateUserById(user.id, {
+        user_metadata: {
+          role: 'professor',
+          empresa_id: empresa.id,
+          is_admin: true,
+        },
+      });
+    } catch (metadataError) {
+      console.error('Error updating user metadata:', metadataError);
+      // Não falhar completamente, os metadados podem ser atualizados depois
+    }
 
     return NextResponse.json(
       {

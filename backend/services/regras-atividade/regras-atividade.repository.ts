@@ -23,6 +23,7 @@ type RegraAtividadeRow = {
   frequencia_modulos: number;
   comecar_no_modulo: number;
   acumulativo: boolean;
+  acumulativo_desde_inicio: boolean;
   gerar_no_ultimo: boolean;
   created_at: string;
   updated_at: string;
@@ -37,6 +38,7 @@ function mapRow(row: RegraAtividadeRow): RegraAtividade {
     frequenciaModulos: row.frequencia_modulos,
     comecarNoModulo: row.comecar_no_modulo,
     acumulativo: row.acumulativo,
+    acumulativoDesdeInicio: row.acumulativo_desde_inicio ?? false,
     gerarNoUltimo: row.gerar_no_ultimo,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
@@ -91,6 +93,7 @@ export class RegraAtividadeRepositoryImpl implements RegraAtividadeRepository {
         frequencia_modulos: input.frequenciaModulos ?? 1,
         comecar_no_modulo: input.comecarNoModulo ?? 1,
         acumulativo: input.acumulativo ?? false,
+        acumulativo_desde_inicio: input.acumulativoDesdeInicio ?? false,
         gerar_no_ultimo: input.gerarNoUltimo ?? false,
       })
       .select('*')
@@ -115,6 +118,7 @@ export class RegraAtividadeRepositoryImpl implements RegraAtividadeRepository {
         frequencia_modulos: payload.frequenciaModulos,
         comecar_no_modulo: payload.comecarNoModulo,
         acumulativo: payload.acumulativo,
+        acumulativo_desde_inicio: payload.acumulativoDesdeInicio,
         gerar_no_ultimo: payload.gerarNoUltimo,
       })
       .eq('id', id)

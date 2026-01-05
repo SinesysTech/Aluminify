@@ -27,6 +27,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { CardSkeleton } from '@/components/ui/card-skeleton'
 
 type Flashcard = {
   id: string
@@ -84,6 +85,7 @@ export default function FlashcardsClient() {
   const [modulos, setModulos] = React.useState<Modulo[]>([])
   const [moduloSelecionado, setModuloSelecionado] = React.useState<string>('')
   const [loadingFiltros, setLoadingFiltros] = React.useState(false)
+  const [loadingCursos, setLoadingCursos] = React.useState(true)
   
   // Estados para rastreamento de sessão
   const [cardsVistos, setCardsVistos] = React.useState<Set<string>>(new Set())
@@ -167,10 +169,18 @@ export default function FlashcardsClient() {
 
   // Carregar cursos (diferente para alunos e professores)
   React.useEffect(() => {
+    console.log('[flashcards] useEffect executado - iniciando loadCursos')
     const loadCursos = async () => {
       try {
+        console.log('[flashcards] loadCursos iniciado')
+        setLoadingCursos(true)
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
+        console.log('[flashcards] Usuário obtido:', user?.id || 'null')
+        if (!user) {
+          console.warn('[flashcards] Usuário não encontrado')
+          setLoadingCursos(false)
+          return
+        }
 
         // Verificar se é professor
         const { data: professorData } = await supabase
@@ -183,45 +193,106 @@ export default function FlashcardsClient() {
         const role = (user.user_metadata?.role as string) || 'aluno'
         const isSuperAdmin = role === 'superadmin' || user.user_metadata?.is_superadmin === true
 
+        console.log('[flashcards] Verificação de role - isProfessor:', isProfessor, 'role:', role, 'isSuperAdmin:', isSuperAdmin)
+
         let cursosData: Curso[] = []
 
         if (isProfessor || isSuperAdmin) {
-          // Professores: buscar cursos criados por eles (ou todos se superadmin)
-          let query = supabase
+          // Professores: buscar TODOS os cursos (mesmo padrão da sala de estudos e backend)
+          console.log('[flashcards] Usuário é professor/superadmin. Buscando TODOS os cursos.')
+          const { data: cursos, error } = await supabase
             .from('cursos')
             .select('id, nome')
             .order('nome', { ascending: true })
 
-          if (!isSuperAdmin) {
-            query = query.eq('created_by', user.id)
+          if (error) {
+            console.error('[flashcards] Erro ao buscar cursos (professor):', error)
+            throw error
           }
 
-          const { data: cursos, error } = await query
-
-          if (error) throw error
-
+          console.log('[flashcards] Cursos encontrados (professor):', cursos?.length || 0)
           cursosData = (cursos || []).map((c) => ({ id: c.id, nome: c.nome }))
         } else {
           // Alunos: buscar cursos através de alunos_cursos
-          const { data: alunosCursos, error } = await supabase
-            .from('alunos_cursos')
-            .select('curso_id, cursos(id, nome)')
-            .eq('aluno_id', user.id)
+          console.log('[flashcards] Carregando cursos para aluno:', user.id)
+          console.log('[flashcards] Role detectado:', role)
+          
+          try {
+            // Primeiro, buscar os curso_ids de alunos_cursos (sem relacionamento para evitar problemas de RLS)
+            const { data: alunosCursos, error: alunosCursosError } = await supabase
+              .from('alunos_cursos')
+              .select('curso_id')
+              .eq('aluno_id', user.id)
 
-          if (error) throw error
+            if (alunosCursosError) {
+              console.error('[flashcards] Erro ao buscar alunos_cursos:', {
+                message: alunosCursosError.message,
+                details: alunosCursosError.details,
+                hint: alunosCursosError.hint,
+                code: alunosCursosError.code,
+              })
+              throw alunosCursosError
+            }
 
-          if (alunosCursos) {
-            cursosData = alunosCursos
-              .map((ac: { cursos: { id: string; nome: string } | null }) => ac.cursos)
-              .filter((c): c is { id: string; nome: string } => c !== null)
-              .map((c) => ({ id: c.id, nome: c.nome }))
+            console.log('[flashcards] alunosCursos retornado:', alunosCursos)
+            console.log('[flashcards] Número de registros:', alunosCursos?.length || 0)
+
+            if (alunosCursos && alunosCursos.length > 0) {
+              // Extrair os curso_ids
+              const cursoIds = alunosCursos.map((ac: { curso_id: string }) => ac.curso_id)
+              console.log('[flashcards] cursoIds extraídos:', cursoIds)
+
+              // Agora buscar os cursos separadamente (a política de cursos é pública para leitura)
+              const { data: cursos, error: cursosError } = await supabase
+                .from('cursos')
+                .select('id, nome')
+                .in('id', cursoIds)
+                .order('nome', { ascending: true })
+
+              if (cursosError) {
+                console.error('[flashcards] Erro ao buscar cursos:', {
+                  message: cursosError.message,
+                  details: cursosError.details,
+                  hint: cursosError.hint,
+                  code: cursosError.code,
+                })
+                throw cursosError
+              }
+
+              console.log('[flashcards] Cursos encontrados:', cursos?.length || 0)
+              cursosData = (cursos || []).map((c) => ({ id: c.id, nome: c.nome }))
+              console.log('[flashcards] cursosData processado:', cursosData)
+            } else {
+              console.warn('[flashcards] Nenhum registro em alunos_cursos encontrado')
+            }
+          } catch (queryError: unknown) {
+            const error = queryError as { message?: string; details?: string; hint?: string; code?: string; stack?: string }
+            console.error('[flashcards] Erro detalhado na query:', {
+              message: error?.message,
+              details: error?.details,
+              hint: error?.hint,
+              code: error?.code,
+              stack: error?.stack,
+            })
+            throw queryError
           }
         }
 
+        console.log('[flashcards] Total de cursos carregados:', cursosData.length)
         setCursos(cursosData)
-      } catch (err) {
-        console.error('Erro ao carregar cursos:', err)
-        setError('Erro ao carregar cursos. Tente recarregar a página.')
+      } catch (err: unknown) {
+        const error = err as { message?: string; details?: string; hint?: string; code?: string; stack?: string }
+        console.error('Erro ao carregar cursos:', {
+          message: error?.message,
+          details: error?.details,
+          hint: error?.hint,
+          code: error?.code,
+          stack: error?.stack,
+        })
+        const errorMessage = error?.message || error?.details || 'Erro ao carregar cursos. Tente recarregar a página.'
+        setError(errorMessage)
+      } finally {
+        setLoadingCursos(false)
       }
     }
 
@@ -466,19 +537,37 @@ export default function FlashcardsClient() {
               <div className="space-y-2">
                 <Label>Curso *</Label>
                 <Select
-                  value={cursoSelecionado}
+                  value={cursoSelecionado || undefined}
                   onValueChange={setCursoSelecionado}
-                  disabled={loadingFiltros}
+                  disabled={loadingFiltros || loadingCursos}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um curso" />
+                    <SelectValue 
+                      placeholder={
+                        loadingCursos
+                          ? 'Carregando cursos...'
+                          : cursos.length === 0
+                            ? 'Nenhum curso disponível'
+                            : 'Selecione um curso'
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {cursos.map((curso) => (
-                      <SelectItem key={curso.id} value={curso.id}>
-                        {curso.nome}
+                    {loadingCursos ? (
+                      <SelectItem value="loading" disabled>
+                        Carregando...
                       </SelectItem>
-                    ))}
+                    ) : cursos.length === 0 ? (
+                      <SelectItem value="no-cursos" disabled>
+                        Nenhum curso disponível
+                      </SelectItem>
+                    ) : (
+                      cursos.map((curso) => (
+                        <SelectItem key={curso.id} value={curso.id}>
+                          {curso.nome}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -486,19 +575,33 @@ export default function FlashcardsClient() {
               <div className="space-y-2">
                 <Label>Disciplina *</Label>
                 <Select
-                  value={disciplinaSelecionada}
+                  value={disciplinaSelecionada || undefined}
                   onValueChange={setDisciplinaSelecionada}
                   disabled={!cursoSelecionado || loadingFiltros}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma disciplina" />
+                    <SelectValue 
+                      placeholder={
+                        loadingFiltros
+                          ? 'Carregando...'
+                          : !cursoSelecionado
+                            ? 'Selecione um curso primeiro'
+                            : 'Selecione uma disciplina'
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {disciplinas.map((disciplina) => (
-                      <SelectItem key={disciplina.id} value={disciplina.id}>
-                        {disciplina.nome}
+                    {disciplinas.length === 0 && cursoSelecionado ? (
+                      <SelectItem value="no-disciplinas" disabled>
+                        Nenhuma disciplina encontrada
                       </SelectItem>
-                    ))}
+                    ) : (
+                      disciplinas.map((disciplina) => (
+                        <SelectItem key={disciplina.id} value={disciplina.id}>
+                          {disciplina.nome}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -506,12 +609,20 @@ export default function FlashcardsClient() {
               <div className="space-y-2">
                 <Label>Frente *</Label>
                 <Select
-                  value={frenteSelecionada}
+                  value={frenteSelecionada || undefined}
                   onValueChange={setFrenteSelecionada}
                   disabled={!disciplinaSelecionada || !cursoSelecionado || loadingFiltros}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma frente" />
+                    <SelectValue 
+                      placeholder={
+                        loadingFiltros
+                          ? 'Carregando...'
+                          : !disciplinaSelecionada
+                            ? 'Selecione uma disciplina primeiro'
+                            : 'Selecione uma frente'
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {frentes.length === 0 && disciplinaSelecionada ? (
@@ -532,12 +643,20 @@ export default function FlashcardsClient() {
               <div className="space-y-2">
                 <Label>Módulo *</Label>
                 <Select
-                  value={moduloSelecionado}
+                  value={moduloSelecionado || undefined}
                   onValueChange={setModuloSelecionado}
                   disabled={!frenteSelecionada || loadingFiltros}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um módulo" />
+                    <SelectValue 
+                      placeholder={
+                        loadingFiltros
+                          ? 'Carregando...'
+                          : !frenteSelecionada
+                            ? 'Selecione uma frente primeiro'
+                            : 'Selecione um módulo'
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
                     {modulos.length === 0 && frenteSelecionada ? (
@@ -581,9 +700,8 @@ export default function FlashcardsClient() {
 
       {/* Estado de carregamento/erro */}
       {loading && (
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />
-          Carregando flashcards...
+        <div className="space-y-4">
+          <CardSkeleton count={3} />
         </div>
       )}
       {error && (

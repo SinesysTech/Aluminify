@@ -2,7 +2,7 @@
  * Tipos de entidades de usuário compartilhados
  */
 
-export type AppUserRole = 'aluno' | 'professor' | 'superadmin';
+export type AppUserRole = 'aluno' | 'professor' | 'superadmin' | 'empresa';
 
 export interface AppUser {
   id: string;

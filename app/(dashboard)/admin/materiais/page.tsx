@@ -1,10 +1,5 @@
-import { requireUser } from '@/lib/auth'
-import MateriaisClientPage from './materiais-client'
+import { redirect } from 'next/navigation'
 
-export default async function MateriaisPage() {
-  await requireUser({ allowedRoles: ['professor'] })
-  return <MateriaisClientPage />
+export default function MateriaisRedirectPage() {
+  redirect('/professor/materiais')
 }
-
-
-

@@ -63,16 +63,25 @@ export function SalaEstudosFilters({
       <div className="flex flex-col gap-4 md:flex-row md:items-end">
         <div className="flex-1 space-y-2">
           <Label htmlFor="curso">Curso</Label>
-          <Select value={cursoSelecionado} onValueChange={onCursoChange}>
+          <Select 
+            value={cursoSelecionado || undefined} 
+            onValueChange={onCursoChange}
+          >
             <SelectTrigger id="curso">
               <SelectValue placeholder="Selecione um curso" />
             </SelectTrigger>
             <SelectContent>
-              {cursos.map((curso) => (
-                <SelectItem key={curso.id} value={curso.id}>
-                  {curso.nome}
+              {cursos.length === 0 ? (
+                <SelectItem value="no-cursos" disabled>
+                  Nenhum curso disponível
                 </SelectItem>
-              ))}
+              ) : (
+                cursos.map((curso) => (
+                  <SelectItem key={curso.id} value={curso.id}>
+                    {curso.nome}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -80,7 +89,7 @@ export function SalaEstudosFilters({
         <div className="flex-1 space-y-2">
           <Label htmlFor="disciplina">Disciplina</Label>
           <Select
-            value={disciplinaSelecionada}
+            value={disciplinaSelecionada || undefined}
             onValueChange={onDisciplinaChange}
             disabled={!cursoSelecionado || isLoadingDisciplinas}
           >
@@ -96,11 +105,17 @@ export function SalaEstudosFilters({
               />
             </SelectTrigger>
             <SelectContent>
-              {disciplinas.map((disciplina) => (
-                <SelectItem key={disciplina.id} value={disciplina.id}>
-                  {disciplina.nome}
+              {disciplinas.length === 0 && cursoSelecionado ? (
+                <SelectItem value="no-disciplinas" disabled>
+                  Nenhuma disciplina encontrada
                 </SelectItem>
-              ))}
+              ) : (
+                disciplinas.map((disciplina) => (
+                  <SelectItem key={disciplina.id} value={disciplina.id}>
+                    {disciplina.nome}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -108,7 +123,7 @@ export function SalaEstudosFilters({
         <div className="flex-1 space-y-2">
           <Label htmlFor="frente">Frente</Label>
           <Select
-            value={frenteSelecionada}
+            value={frenteSelecionada || undefined}
             onValueChange={onFrenteChange}
             disabled={!disciplinaSelecionada || isLoadingFrentes}
           >
@@ -124,11 +139,17 @@ export function SalaEstudosFilters({
               />
             </SelectTrigger>
             <SelectContent>
-              {frentesFiltradas.map((frente) => (
-                <SelectItem key={frente.id} value={frente.id}>
-                  {frente.nome}
+              {frentesFiltradas.length === 0 && disciplinaSelecionada ? (
+                <SelectItem value="no-frentes" disabled>
+                  Nenhuma frente encontrada
                 </SelectItem>
-              ))}
+              ) : (
+                frentesFiltradas.map((frente) => (
+                  <SelectItem key={frente.id} value={frente.id}>
+                    {frente.nome}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         </div>

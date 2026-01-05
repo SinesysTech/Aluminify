@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { AuthUser } from '@/backend/auth/types';
 
 export interface EmpresaContext {
   empresaId: string | null;
@@ -13,15 +14,21 @@ export interface EmpresaContext {
 export async function getEmpresaContext(
   client: SupabaseClient,
   userId: string | null,
-  request?: NextRequest
+  request?: NextRequest,
+  authUser?: AuthUser | null
 ): Promise<EmpresaContext> {
   if (!userId) {
     return { empresaId: null, isSuperAdmin: false };
   }
 
-  // Verificar se é superadmin
-  const { data: userData } = await client.auth.getUser();
-  const isSuperAdmin = userData?.user?.user_metadata?.role === 'superadmin';
+  // Verificar se é superadmin - usar authUser se disponível
+  // Não tentar obter do client.auth.getUser() pois pode causar erro de permissão
+  let isSuperAdmin = false;
+  if (authUser) {
+    isSuperAdmin = authUser.isSuperAdmin || authUser.role === 'superadmin';
+  }
+  // Se authUser não foi fornecido, assumir que não é superadmin
+  // (evita tentar acessar auth.users que pode causar erro de permissão)
 
   // Se for superadmin, permitir acessar empresa via query param
   if (isSuperAdmin && request) {
@@ -40,7 +47,29 @@ export async function getEmpresaContext(
 
   if (error) {
     console.error('Error fetching professor empresa_id:', error);
+    // Se não encontrar registro do professor, tentar buscar do metadata do usuário
+    // Isso pode acontecer se a trigger ainda não executou
+    // Usar authUser se disponível, senão não tentar acessar client.auth.getUser()
+    if (authUser) {
+      const empresaIdFromMetadata = (authUser as { user_metadata?: { empresa_id?: string }; empresaId?: string })?.user_metadata?.empresa_id || 
+                                     (authUser as { empresaId?: string })?.empresaId;
+      if (empresaIdFromMetadata) {
+        return {
+          empresaId: empresaIdFromMetadata,
+          isSuperAdmin,
+        };
+      }
+    }
     return { empresaId: null, isSuperAdmin };
+  }
+
+  // Se não encontrou registro do professor mas tem empresa_id no metadata, usar metadata
+  // Usar authUser.empresaId se disponível
+  if (!professor?.empresa_id && authUser?.empresaId) {
+    return {
+      empresaId: authUser.empresaId,
+      isSuperAdmin,
+    };
   }
 
   return {

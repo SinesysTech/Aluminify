@@ -45,9 +45,24 @@ function handleError(error: unknown) {
 // GET é público (catálogo)
 export async function GET() {
   try {
+    const startTime = Date.now();
     const result = await disciplineService.list();
+    const endTime = Date.now();
+    
     const disciplines = Array.isArray(result) ? result : result.data;
-    return NextResponse.json({ data: disciplines.map(serializeDiscipline) });
+    
+    // Log de performance em desenvolvimento
+    const duration = endTime - startTime;
+    if (process.env.NODE_ENV === 'development' && duration > 500) {
+      console.warn(`[Discipline API] GET lento: ${duration}ms`);
+    }
+    
+    const response = NextResponse.json({ data: disciplines.map(serializeDiscipline) });
+    
+    // Adicionar headers de cache HTTP (5 minutos)
+    response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    
+    return response;
   } catch (error) {
     return handleError(error);
   }

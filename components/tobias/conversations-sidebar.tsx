@@ -10,13 +10,13 @@ import {
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
 } from '@/components/ui/sidebar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Plus, MessageSquare } from 'lucide-react'
 import { ConversationItem } from './conversation-item'
 import { RenameConversationDialog } from './rename-conversation-dialog'
 import type { Conversation } from '@/backend/services/conversation/conversation.types'
+import { ListSkeleton } from '@/components/ui/list-skeleton'
 
 interface ConversationsSidebarProps {
   selectedConversationId: string | null
@@ -175,12 +175,9 @@ export function ConversationsSidebar({
               <SidebarGroupLabel>Suas Conversas</SidebarGroupLabel>
               <SidebarMenu>
                 {isLoading ? (
-                  <SidebarMenuItem>
-                    <SidebarMenuButton disabled>
-                      <MessageSquare className="h-4 w-4" />
-                      <span>Carregando...</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <div className="px-2 py-1">
+                    <ListSkeleton items={3} showAvatar={false} />
+                  </div>
                 ) : conversations.length === 0 ? (
                   <SidebarMenuItem>
                     <div className="flex flex-col items-center justify-center p-4 text-center text-sm text-muted-foreground">

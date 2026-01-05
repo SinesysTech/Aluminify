@@ -179,7 +179,7 @@ export class AtividadeService {
     const { data: regras, error: regrasError } = await client
       .from('regras_atividades')
       .select(
-        'id, tipo_atividade, nome_padrao, frequencia_modulos, comecar_no_modulo, acumulativo, gerar_no_ultimo',
+        'id, tipo_atividade, nome_padrao, frequencia_modulos, comecar_no_modulo, acumulativo, acumulativo_desde_inicio, gerar_no_ultimo',
       )
       .eq('curso_id', cursoId)
       .order('created_at', { ascending: true });
@@ -207,7 +207,11 @@ export class AtividadeService {
         if (geraPrincipal) {
           let titulo = regra.nome_padrao;
           if (regra.acumulativo) {
-            const moduloInicio = Math.max(contador - frequencia + 1, inicio);
+            // Se acumulativo_desde_inicio = true, sempre começa do módulo 1
+            // Se false, usa o intervalo baseado na frequência (comportamento original)
+            const moduloInicio = regra.acumulativo_desde_inicio
+              ? 1
+              : Math.max(contador - frequencia + 1, inicio);
             titulo =
               moduloInicio === contador
                 ? `${regra.nome_padrao} (Módulo ${contador})`

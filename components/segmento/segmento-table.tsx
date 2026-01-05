@@ -75,6 +75,7 @@ import {
 } from '@/components/ui/empty'
 import { Layers } from 'lucide-react'
 import { apiClient, ApiClientError } from '@/lib/api-client'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 export type Segmento = {
   id: string
@@ -472,35 +473,7 @@ export function SegmentoTable() {
             />
           </div>
           {loading ? (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id}>
-                      {headerGroup.headers.map((header) => {
-                        return (
-                          <TableHead key={header.id}>
-                            {header.isPlaceholder
-                              ? null
-                              : flexRender(
-                                  header.column.columnDef.header,
-                                  header.getContext()
-                                )}
-                          </TableHead>
-                        )
-                      })}
-                    </TableRow>
-                  ))}
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      Carregando...
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </div>
+            <TableSkeleton rows={5} columns={4} />
           ) : table.getRowModel().rows?.length ? (
             <>
               {/* Mobile Card View */}

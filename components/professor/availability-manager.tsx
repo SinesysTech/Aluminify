@@ -16,9 +16,17 @@ import {
 } from "@/components/ui/table"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { getDisponibilidade, upsertDisponibilidade } from "@/app/actions/agendamentos"
 import { Loader2, Plus, Save, Trash } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
+import { TableSkeleton } from "@/components/ui/table-skeleton"
 
 const DAYS = [
   "Domingo",
@@ -130,7 +138,13 @@ export function AvailabilityManager({ professorId }: AvailabilityManagerProps) {
   }
 
   if (loading) {
-    return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+    return (
+      <Card>
+        <CardContent className="space-y-4 pt-6">
+          <TableSkeleton rows={3} columns={5} />
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
@@ -150,18 +164,21 @@ export function AvailabilityManager({ professorId }: AvailabilityManagerProps) {
             {rules.map((rule, index) => (
               <TableRow key={index}>
                 <TableCell>
-                  <select
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                    value={rule.dia_semana}
-                    aria-label="Dia da semana"
-                    onChange={(e) => handleChange(index, "dia_semana", Number(e.target.value))}
+                  <Select
+                    value={String(rule.dia_semana)}
+                    onValueChange={(value) => handleChange(index, "dia_semana", Number(value))}
                   >
-                    {DAYS.map((day, i) => (
-                      <option key={i} value={i}>
-                        {day}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger aria-label="Dia da semana" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DAYS.map((day, i) => (
+                        <SelectItem key={i} value={String(i)}>
+                          {day}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </TableCell>
                 <TableCell>
                   <Input

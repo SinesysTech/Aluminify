@@ -24,7 +24,7 @@ async function deleteHandler(
 
     const supabase = await createClient();
 
-    const context = await getEmpresaContext(supabase, user.id, request);
+    const context = await getEmpresaContext(supabase, user.id, request, user);
     
     // Verificar se é owner ou superadmin
     const { data: isOwner } = await supabase

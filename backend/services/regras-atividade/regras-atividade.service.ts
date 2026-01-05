@@ -55,6 +55,7 @@ export class RegraAtividadeService {
       frequenciaModulos: frequencia,
       comecarNoModulo,
       acumulativo: input.acumulativo ?? false,
+      acumulativoDesdeInicio: input.acumulativoDesdeInicio ?? false,
       gerarNoUltimo: input.gerarNoUltimo ?? false,
     });
   }
@@ -89,6 +90,10 @@ export class RegraAtividadeService {
 
     if (payload.acumulativo !== undefined) {
       updateData.acumulativo = payload.acumulativo;
+    }
+
+    if (payload.acumulativoDesdeInicio !== undefined) {
+      updateData.acumulativoDesdeInicio = payload.acumulativoDesdeInicio;
     }
 
     if (payload.gerarNoUltimo !== undefined) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/client';
 import { Button } from '@/components/ui/button';
@@ -8,11 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrentUser } from '@/components/providers/user-provider';
 
 export default function ProfessorNovaEmpresaPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const user = useCurrentUser();
   const [loading, setLoading] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [formData, setFormData] = useState({
     nome: '',
     cnpj: '',
@@ -20,18 +23,87 @@ export default function ProfessorNovaEmpresaPage() {
     telefone: '',
   });
 
+  // Verificar se o professor já tem empresa ao carregar a página
+  useEffect(() => {
+    async function checkEmpresa() {
+      if (user?.empresaId) {
+        // Já tem empresa, redirecionar
+        toast({
+          title: 'Você já tem uma empresa',
+          description: 'Redirecionando para a página da sua empresa...',
+        });
+        setTimeout(() => {
+          router.push('/admin/empresa');
+        }, 1500);
+        return;
+      }
+
+      // Verificar diretamente no banco
+      try {
+        const supabase = createClient();
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        
+        if (authUser) {
+          const { data: professor } = await supabase
+            .from('professores')
+            .select('empresa_id')
+            .eq('id', authUser.id)
+            .maybeSingle();
+
+          if (professor?.empresa_id) {
+            toast({
+              title: 'Você já tem uma empresa',
+              description: 'Redirecionando para a página da sua empresa...',
+            });
+            setTimeout(() => {
+              router.push('/admin/empresa');
+            }, 1500);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao verificar empresa:', error);
+      } finally {
+        setChecking(false);
+      }
+    }
+
+    checkEmpresa();
+  }, [user, router, toast]);
+
   async function handleCreateEmpresa() {
+    console.log('[Criar Empresa] Iniciando criação...', { formData });
+    
+    // Validação básica
+    if (!formData.nome.trim()) {
+      toast({
+        title: 'Erro',
+        description: 'Nome da empresa é obrigatório',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        console.error('[Criar Empresa] Erro ao obter sessão:', sessionError);
+        throw new Error('Erro ao verificar sessão. Faça login novamente.');
+      }
 
       if (!session) {
+        console.error('[Criar Empresa] Sessão não encontrada');
         throw new Error('Sessão expirada. Faça login novamente.');
       }
 
+      console.log('[Criar Empresa] Sessão válida, processando dados...');
+
       const cnpjDigits = formData.cnpj.replace(/\D/g, '');
       const cnpjToSend = cnpjDigits.length === 0 ? undefined : cnpjDigits;
+      
       if (cnpjToSend && cnpjToSend.length !== 14) {
         throw new Error('CNPJ deve ter 14 dígitos (ou deixe em branco)');
       }
@@ -39,33 +111,61 @@ export default function ProfessorNovaEmpresaPage() {
         throw new Error('CNPJ inválido');
       }
 
+      const payload = {
+        nome: formData.nome.trim(),
+        cnpj: cnpjToSend,
+        emailContato: formData.emailContato?.trim() || undefined,
+        telefone: formData.telefone?.trim() || undefined,
+      };
+
+      console.log('[Criar Empresa] Enviando requisição...', payload);
+
       const response = await fetch('/api/empresas/self', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({
-          nome: formData.nome,
-          cnpj: cnpjToSend,
-          emailContato: formData.emailContato || undefined,
-          telefone: formData.telefone || undefined,
-        }),
+        body: JSON.stringify(payload),
       });
 
+      console.log('[Criar Empresa] Resposta recebida:', { status: response.status, ok: response.ok });
+
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || 'Erro ao criar empresa');
+        const err = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+        console.error('[Criar Empresa] Erro na API:', err);
+        
+        // Se o erro for 409 (já tem empresa), redirecionar
+        if (response.status === 409) {
+          toast({
+            title: 'Você já tem uma empresa',
+            description: 'Redirecionando para a página da sua empresa...',
+          });
+          setTimeout(() => {
+            router.push('/admin/empresa');
+            router.refresh();
+          }, 1500);
+          return;
+        }
+        
+        throw new Error(err.error || `Erro ao criar empresa (${response.status})`);
       }
+
+      const result = await response.json();
+      console.log('[Criar Empresa] Sucesso:', result);
 
       toast({
         title: 'Sucesso',
         description: 'Empresa criada e vinculada ao seu usuário.',
       });
 
-      router.push('/admin/empresa');
-      router.refresh();
+      // Aguardar um pouco para o toast aparecer antes de redirecionar
+      setTimeout(() => {
+        router.push('/admin/empresa');
+        router.refresh();
+      }, 1000);
     } catch (error) {
+      console.error('[Criar Empresa] Erro capturado:', error);
       const msg = error instanceof Error ? error.message : 'Erro ao criar empresa';
       toast({
         title: 'Erro',
@@ -75,6 +175,20 @@ export default function ProfessorNovaEmpresaPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (checking) {
+    return (
+      <div className="container mx-auto py-8 max-w-xl">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <p className="text-muted-foreground">Verificando...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -135,7 +249,16 @@ export default function ProfessorNovaEmpresaPage() {
             />
           </div>
 
-          <Button onClick={handleCreateEmpresa} className="w-full" disabled={loading || !formData.nome.trim()}>
+          <Button 
+            onClick={(e) => {
+              e.preventDefault();
+              console.log('[Criar Empresa] Botão clicado');
+              handleCreateEmpresa();
+            }} 
+            className="w-full" 
+            disabled={loading || !formData.nome.trim()}
+            type="button"
+          >
             {loading ? 'Criando...' : 'Criar Empresa'}
           </Button>
         </CardContent>

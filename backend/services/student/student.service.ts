@@ -263,6 +263,10 @@ export class StudentService {
       updateData.mustChangePassword = true;
     }
 
+    if (payload.mustChangePassword !== undefined) {
+      updateData.mustChangePassword = payload.mustChangePassword;
+    }
+
     return this.repository.update(id, updateData);
   }
 

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/server'
 import type { AppUser, AppUserRole } from '@/types/user'
 import { getDefaultRouteForRole, hasRequiredRole } from '@/lib/roles'
+import { getImpersonationContext } from '@/lib/auth-impersonate'
 
 export async function getAuthenticatedUser(): Promise<AppUser | null> {
   const supabase = await createClient()
@@ -15,12 +16,45 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
     return null
   }
 
-  const role = (user.user_metadata?.role as AppUserRole) || 'aluno'
+  // Verificar se está em modo impersonação
+  const impersonationContext = await getImpersonationContext()
+  const isImpersonating = impersonationContext !== null && impersonationContext.realUserId === user.id
+
+  // Se estiver impersonando, usar dados do usuário impersonado
+  let targetUserId = user.id
+  if (isImpersonating && impersonationContext) {
+    targetUserId = impersonationContext.impersonatedUserId
+  }
+
+  const role = isImpersonating && impersonationContext
+    ? impersonationContext.impersonatedUserRole
+    : ((user.user_metadata?.role as AppUserRole) || 'aluno')
   let mustChangePassword = Boolean(user.user_metadata?.must_change_password)
 
   let empresaId: string | undefined
   let empresaNome: string | undefined
   let isEmpresaAdmin: boolean | undefined
+
+  // Se estiver impersonando, buscar dados do aluno impersonado
+  if (isImpersonating && impersonationContext) {
+    const { data: alunoData } = await supabase
+      .from('alunos')
+      .select('must_change_password, nome_completo, email')
+      .eq('id', targetUserId)
+      .maybeSingle()
+
+    if (alunoData) {
+      return {
+        id: targetUserId,
+        email: alunoData.email || '',
+        role: 'aluno' as AppUserRole,
+        fullName: alunoData.nome_completo || undefined,
+        mustChangePassword: alunoData.must_change_password || false,
+        // Manter informações do usuário real para contexto
+        _impersonationContext: impersonationContext,
+      } as AppUser & { _impersonationContext?: typeof impersonationContext }
+    }
+  }
 
   // Ensure professor record exists if user is a professor
   // Note: This is a best-effort attempt. The handle_new_user() trigger should have created it,
@@ -132,7 +166,7 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
   }
 
   return {
-    id: user.id,
+    id: targetUserId,
     email: user.email || '',
     role,
     fullName:
@@ -144,7 +178,9 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
     empresaId,
     empresaNome,
     isEmpresaAdmin,
-  }
+    // Adicionar contexto de impersonação se estiver impersonando
+    ...(isImpersonating && impersonationContext ? { _impersonationContext: impersonationContext } : {}),
+  } as AppUser & { _impersonationContext?: typeof impersonationContext }
 }
 
 type RequireUserOptions = {

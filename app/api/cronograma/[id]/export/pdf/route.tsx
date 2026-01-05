@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { requireUserAuth, type AuthenticatedRequest } from '@/backend/auth/middleware'
 import { getDatabaseClient } from '@/backend/clients/database'
 import { pdf, Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer'
@@ -137,24 +137,16 @@ function buildPdf(cronograma: CronogramaExport, itens: ItemExport[]) {
   return Doc
 }
 
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
 async function getHandler(
   request: AuthenticatedRequest,
-  context?: Record<string, unknown>,
+  params: { id: string },
 ) {
   if (!request.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  let cronogramaId: string | null = null
-  if (context && 'params' in context) {
-    const params = (context as { params?: { id?: string } }).params
-    if (params && typeof params === 'object' && 'id' in params) {
-      cronogramaId = String(params.id)
-    }
-  }
-  if (!cronogramaId) {
-    const url = new URL(request.url)
-    const parts = url.pathname.split('/')
-    const idx = parts.indexOf('export') - 1
-    if (idx >= 0 && parts[idx]) cronogramaId = parts[idx]
-  }
+  const cronogramaId = String(params.id)
   if (!cronogramaId) return NextResponse.json({ error: 'cronograma_id é obrigatório' }, { status: 400 })
 
   const client = getDatabaseClient()
@@ -197,4 +189,7 @@ async function getHandler(
   })
 }
 
-export const GET = requireUserAuth(getHandler)
+export async function GET(request: NextRequest, context: RouteContext) {
+  const params = await context.params;
+  return requireUserAuth((req) => getHandler(req, params))(request);
+}

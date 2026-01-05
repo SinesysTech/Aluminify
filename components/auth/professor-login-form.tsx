@@ -66,6 +66,55 @@ export function ProfessorLoginForm() {
         throw new Error('Esta área é exclusiva para professores. Alunos devem usar a área de login adequada.');
       }
 
+      // Verificar se precisa completar cadastro da empresa
+      // Tentar obter empresaId de múltiplas fontes
+      let empresaId = authData.user.user_metadata?.empresa_id;
+      
+      // Se não tiver no metadata, tentar buscar da tabela professores
+      if (!empresaId) {
+        try {
+          const { data: professor } = await supabase
+            .from('professores')
+            .select('empresa_id')
+            .eq('id', authData.user.id)
+            .maybeSingle();
+          
+          if (professor?.empresa_id) {
+            empresaId = professor.empresa_id;
+          }
+        } catch (error) {
+          console.error('Erro ao buscar empresa_id do professor:', error);
+        }
+      }
+
+      if (empresaId) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            const empresaResponse = await fetch(`/api/empresas/${empresaId}`, {
+              headers: {
+                'Authorization': `Bearer ${session.access_token}`,
+              },
+            });
+
+            if (empresaResponse.ok) {
+              const empresaData = await empresaResponse.json();
+              // Verificar se empresa está incompleta (sem CNPJ, email ou telefone)
+              const empresaIncompleta = !empresaData.cnpj && !empresaData.emailContato && !empresaData.telefone;
+              
+              if (empresaIncompleta) {
+                router.push('/professor/empresa/completar');
+                router.refresh();
+                return;
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Erro ao verificar empresa:', error);
+          // Continuar com redirecionamento normal se houver erro
+        }
+      }
+
       // Redirecionar para dashboard
       const defaultRoute = getDefaultRouteForRole(userRole);
       router.push(defaultRoute);

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/server';
+import { createClient } from '@supabase/supabase-js';
 import { EmpresaService, EmpresaRepositoryImpl } from '@/backend/services/empresa';
 import { getAuthUser } from '@/backend/auth/middleware';
 import { getEmpresaContext, validateEmpresaAccess } from '@/backend/middleware/empresa-context';
+import { getPublicSupabaseConfig } from '@/lib/supabase-public-env';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -23,7 +24,17 @@ async function getHandler(
       );
     }
 
-    const supabase = await createClient();
+    // Criar cliente Supabase com token do header Authorization
+    const authHeader = request.headers.get('authorization');
+    const { url, anonKey } = getPublicSupabaseConfig();
+    const supabase = createClient(url, anonKey, {
+      global: {
+        headers: authHeader ? { Authorization: authHeader } : {},
+      },
+      auth: {
+        persistSession: false,
+      },
+    });
 
     const repository = new EmpresaRepositoryImpl(supabase);
     const service = new EmpresaService(repository, supabase);
@@ -37,7 +48,7 @@ async function getHandler(
     }
 
     // Verificar acesso
-    const context = await getEmpresaContext(supabase, user.id, request);
+    const context = await getEmpresaContext(supabase, user.id, request, user);
     if (!validateEmpresaAccess(context, empresa.id) && !context.isSuperAdmin) {
       return NextResponse.json(
         { error: 'Acesso negado' },
@@ -48,8 +59,11 @@ async function getHandler(
     return NextResponse.json(empresa);
   } catch (error) {
     console.error('Error fetching empresa:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Erro ao buscar empresa';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('Error details:', { errorMessage, errorStack });
     return NextResponse.json(
-      { error: 'Erro ao buscar empresa' },
+      { error: errorMessage, details: process.env.NODE_ENV === 'development' ? errorStack : undefined },
       { status: 500 }
     );
   }
@@ -70,14 +84,24 @@ async function patchHandler(
       );
     }
 
-    const supabase = await createClient();
+    // Criar cliente Supabase com token do header Authorization
+    const authHeader = request.headers.get('authorization');
+    const { url, anonKey } = getPublicSupabaseConfig();
+    const supabase = createClient(url, anonKey, {
+      global: {
+        headers: authHeader ? { Authorization: authHeader } : {},
+      },
+      auth: {
+        persistSession: false,
+      },
+    });
 
     const body = await request.json();
     const repository = new EmpresaRepositoryImpl(supabase);
     const service = new EmpresaService(repository, supabase);
 
     // Verificar acesso
-    const context = await getEmpresaContext(supabase, user.id, request);
+    const context = await getEmpresaContext(supabase, user.id, request, user);
     if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
       return NextResponse.json(
         { error: 'Acesso negado. Apenas admin da empresa ou superadmin pode atualizar.' },
@@ -112,7 +136,12 @@ async function deleteHandler(
       );
     }
 
-    const supabase = await createClient();
+    const { url, anonKey } = getPublicSupabaseConfig();
+    const supabase = createClient(url, anonKey, {
+      auth: {
+        persistSession: false,
+      },
+    });
 
     const repository = new EmpresaRepositoryImpl(supabase);
     const service = new EmpresaService(repository, supabase);

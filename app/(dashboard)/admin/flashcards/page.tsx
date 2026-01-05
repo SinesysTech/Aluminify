@@ -1,26 +1,5 @@
-import { requireUser } from '@/lib/auth'
-import FlashcardsAdminClient from './flashcards-admin-client'
+import { redirect } from 'next/navigation'
 
-export default async function FlashcardsAdminPage() {
-  await requireUser({ allowedRoles: ['professor'] })
-  return <FlashcardsAdminClient />
+export default function FlashcardsRedirectPage() {
+  redirect('/professor/flashcards')
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

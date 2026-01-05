@@ -500,16 +500,10 @@ export async function getAgendamentosProfessor(
 ): Promise<AgendamentoComDetalhes[]> {
   const supabase = await createClient()
 
+  // Primeiro, buscar os agendamentos
   let query = supabase
     .from('agendamentos')
-    .select(`
-      *,
-      aluno:alunos!agendamentos_aluno_id_fkey(
-        id, 
-        nome_completo,
-        email
-      )
-    `)
+    .select('*')
     .eq('professor_id', professorId)
     .order('data_inicio', { ascending: true })
 
@@ -529,15 +523,41 @@ export async function getAgendamentosProfessor(
     query = query.lte('data_inicio', filters.dateEnd.toISOString())
   }
 
-  const { data, error } = await query
+  const { data: agendamentos, error } = await query
 
   if (error) {
     console.error('Error fetching professor appointments:', error)
     return []
   }
 
-  return (data || []).map((item) => {
-    const aluno = isValidUserObject(item.aluno) ? item.aluno : undefined
+  if (!agendamentos || agendamentos.length === 0) {
+    return []
+  }
+
+  // Buscar dados dos alunos em lote
+  const alunoIds = [...new Set(agendamentos.map(a => a.aluno_id))]
+  const { data: alunos, error: alunosError } = await supabase
+    .from('alunos')
+    .select('id, nome_completo, email')
+    .in('id', alunoIds)
+
+  if (alunosError) {
+    console.error('Error fetching alunos data:', alunosError)
+  }
+
+  // Criar um mapa de alunos por ID
+  const alunosMap = new Map(
+    (alunos || []).map(aluno => [aluno.id, aluno])
+  )
+
+  // Combinar agendamentos com dados dos alunos
+  return agendamentos.map((item) => {
+    const aluno = alunosMap.get(item.aluno_id)
+    const alunoData = aluno ? {
+      id: aluno.id,
+      nome: aluno.nome_completo || '',
+      email: aluno.email || '',
+    } : undefined
     
     return {
       ...item,
@@ -545,7 +565,7 @@ export async function getAgendamentosProfessor(
       lembrete_enviado: item.lembrete_enviado ?? undefined,
       created_at: item.created_at ?? undefined,
       updated_at: item.updated_at ?? undefined,
-      aluno,
+      aluno: alunoData,
       professor: undefined,
     }
   })
@@ -568,32 +588,10 @@ export async function getAgendamentosAluno(alunoId: string): Promise<Agendamento
     return []
   }
 
-  // Primeiro, tentar uma query simples para diagnosticar
-  const { data: simpleData, error: simpleError } = await supabase
+  // Buscar agendamentos primeiro
+  const { data: agendamentos, error } = await supabase
     .from('agendamentos')
     .select('*')
-    .eq('aluno_id', alunoId)
-    .limit(1)
-
-  console.log('Simple query result:', {
-    hasData: !!simpleData,
-    count: simpleData?.length || 0,
-    hasError: !!simpleError,
-    errorCode: simpleError?.code,
-    errorMessage: simpleError?.message
-  })
-
-  const { data, error } = await supabase
-    .from('agendamentos')
-    .select(`
-      *,
-      professor:professores!agendamentos_professor_id_fkey(
-        id, 
-        nome_completo,
-        email, 
-        foto_url
-      )
-    `)
     .eq('aluno_id', alunoId)
     .order('data_inicio', { ascending: false })
 
@@ -607,30 +605,38 @@ export async function getAgendamentosAluno(alunoId: string): Promise<Agendamento
       userId: user.id,
       errorObject: JSON.stringify(error)
     })
-
-    // Se houver erro no join, tentar query simples como fallback
-    if (simpleData && simpleData.length > 0) {
-      console.log('Using simple query fallback, found', simpleData.length, 'appointments')
-
-      // Buscar todos os agendamentos sem join
-      const { data: allSimpleData } = await supabase
-        .from('agendamentos')
-        .select('*')
-        .eq('aluno_id', alunoId)
-        .order('data_inicio', { ascending: false })
-
-      // Retornar dados sem informações do professor
-      return (allSimpleData || []).map((agendamento: Record<string, unknown>) => ({
-        ...agendamento,
-        professor: undefined
-      })) as AgendamentoComDetalhes[]
-    }
-
     return []
   }
 
-  return (data || []).map((item) => {
-    const professor = isValidUserObject(item.professor) ? item.professor : undefined
+  if (!agendamentos || agendamentos.length === 0) {
+    return []
+  }
+
+  // Buscar dados dos professores em lote
+  const professorIds = [...new Set(agendamentos.map(a => a.professor_id))]
+  const { data: professores, error: professoresError } = await supabase
+    .from('professores')
+    .select('id, nome_completo, email, foto_url')
+    .in('id', professorIds)
+
+  if (professoresError) {
+    console.error('Error fetching professores data:', professoresError)
+  }
+
+  // Criar um mapa de professores por ID
+  const professoresMap = new Map(
+    (professores || []).map(professor => [professor.id, professor])
+  )
+
+  // Combinar agendamentos com dados dos professores
+  return agendamentos.map((item) => {
+    const professor = professoresMap.get(item.professor_id)
+    const professorData = professor ? {
+      id: professor.id,
+      nome: professor.nome_completo || '',
+      email: professor.email || '',
+      avatar_url: professor.foto_url || undefined,
+    } : undefined
     
     return {
       ...item,
@@ -639,7 +645,7 @@ export async function getAgendamentosAluno(alunoId: string): Promise<Agendamento
       created_at: item.created_at ?? undefined,
       updated_at: item.updated_at ?? undefined,
       aluno: undefined,
-      professor,
+      professor: professorData,
     }
   })
 }

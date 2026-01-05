@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDatabaseClient } from '@/backend/clients/database';
 import { AuthUser, UserRole, ApiKeyAuth } from './types';
 import { apiKeyService } from '@/backend/services/api-key';
+import { getImpersonationContext } from '@/lib/auth-impersonate';
 
 export interface AuthenticatedRequest extends NextRequest {
   user?: AuthUser;
   apiKey?: ApiKeyAuth;
+  impersonationContext?: Awaited<ReturnType<typeof getImpersonationContext>>;
 }
 
 export async function getAuthUser(request: NextRequest): Promise<AuthUser | null> {
@@ -29,6 +31,7 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
 
     const role = (user.user_metadata?.role as UserRole) || 'aluno';
     const isSuperAdmin = role === 'superadmin' || user.user_metadata?.is_superadmin === true;
+    const empresaId = user.user_metadata?.empresa_id as string | undefined;
 
     console.log('[Auth] User authenticated:', {
       id: user.id,
@@ -36,6 +39,7 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
       user_metadata: user.user_metadata,
       role,
       isSuperAdmin,
+      empresaId,
     });
 
     return {
@@ -43,6 +47,7 @@ export async function getAuthUser(request: NextRequest): Promise<AuthUser | null
       email: user.email!,
       role: isSuperAdmin ? 'superadmin' : role,
       isSuperAdmin,
+      empresaId,
     };
   } catch (err) {
     console.error('[Auth] Exception getting user:', err);
@@ -115,7 +120,7 @@ export async function isSuperAdmin(userId: string): Promise<boolean> {
 export function requireAuth(
   handler: (request: AuthenticatedRequest, context?: Record<string, unknown>) => Promise<NextResponse>,
 ) {
-  return async (request: NextRequest, context?: Record<string, unknown>) => {
+  return async (request: NextRequest, context?: Record<string, unknown> | { params?: Promise<Record<string, string>> }) => {
     const auth = await getAuth(request);
     
     if (!auth) {
@@ -129,24 +134,44 @@ export function requireAuth(
       authenticatedRequest.apiKey = auth.apiKey;
     }
     
-    return handler(authenticatedRequest, context);
+    // Unwrap params if it's a Promise (Next.js 16+)
+    let unwrappedContext = context;
+    if (context && 'params' in context && context.params instanceof Promise) {
+      const params = await context.params;
+      unwrappedContext = { ...context, params };
+    }
+    
+    return handler(authenticatedRequest, unwrappedContext);
   };
 }
 
 export function requireUserAuth(
   handler: (request: AuthenticatedRequest, context?: Record<string, unknown>) => Promise<NextResponse>,
 ) {
-  return async (request: NextRequest, context?: Record<string, unknown>) => {
+  return async (request: NextRequest, context?: Record<string, unknown> | { params?: Promise<Record<string, string>> }) => {
     const user = await getAuthUser(request);
     
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Verificar contexto de impersonação
+    const impersonationContext = await getImpersonationContext();
+    
     const authenticatedRequest = request as AuthenticatedRequest;
     authenticatedRequest.user = user;
+    if (impersonationContext && impersonationContext.realUserId === user.id) {
+      authenticatedRequest.impersonationContext = impersonationContext;
+    }
     
-    return handler(authenticatedRequest, context);
+    // Unwrap params if it's a Promise (Next.js 16+)
+    let unwrappedContext = context;
+    if (context && 'params' in context && context.params instanceof Promise) {
+      const params = await context.params;
+      unwrappedContext = { ...context, params };
+    }
+    
+    return handler(authenticatedRequest, unwrappedContext);
   };
 }
 
@@ -154,7 +179,7 @@ export function requireRole(role: UserRole) {
   return (
     handler: (request: AuthenticatedRequest, context?: Record<string, unknown>) => Promise<NextResponse>,
   ) => {
-    return async (request: NextRequest, context?: Record<string, unknown>) => {
+    return async (request: NextRequest, context?: Record<string, unknown> | { params?: Promise<Record<string, string>> }) => {
       const user = await getAuthUser(request);
       
       if (!user) {
@@ -168,7 +193,14 @@ export function requireRole(role: UserRole) {
       const authenticatedRequest = request as AuthenticatedRequest;
       authenticatedRequest.user = user;
       
-      return handler(authenticatedRequest, context);
+      // Unwrap params if it's a Promise (Next.js 16+)
+      let unwrappedContext = context;
+      if (context && 'params' in context && context.params instanceof Promise) {
+        const params = await context.params;
+        unwrappedContext = { ...context, params };
+      }
+      
+      return handler(authenticatedRequest, unwrappedContext);
     };
   };
 }
@@ -176,7 +208,7 @@ export function requireRole(role: UserRole) {
 export function requireSuperAdmin(
   handler: (request: AuthenticatedRequest, context?: Record<string, unknown>) => Promise<NextResponse>,
 ) {
-  return async (request: NextRequest, context?: Record<string, unknown>) => {
+  return async (request: NextRequest, context?: Record<string, unknown> | { params?: Promise<Record<string, string>> }) => {
     const user = await getAuthUser(request);
     
     if (!user || !user.isSuperAdmin) {
@@ -186,7 +218,14 @@ export function requireSuperAdmin(
     const authenticatedRequest = request as AuthenticatedRequest;
     authenticatedRequest.user = user;
     
-    return handler(authenticatedRequest, context);
+    // Unwrap params if it's a Promise (Next.js 16+)
+    let unwrappedContext = context;
+    if (context && 'params' in context && context.params instanceof Promise) {
+      const params = await context.params;
+      unwrappedContext = { ...context, params };
+    }
+    
+    return handler(authenticatedRequest, unwrappedContext);
   };
 }
 

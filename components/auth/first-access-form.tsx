@@ -131,38 +131,33 @@ export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
 
       console.log('[FirstAccessForm] Senha atualizada no Auth com sucesso')
 
-      // Step 2: Update aluno record in database
-      console.log('[FirstAccessForm] Atualizando registro do aluno na tabela alunos...', { userId: actualUserId })
-      const { error: alunoError, data: alunoData } = await supabase
-        .from('alunos')
-        .update({ must_change_password: false, senha_temporaria: null })
-        .eq('id', actualUserId)
-        .select()
+      // Step 2: Update aluno record in database via API route (evita problemas de RLS)
+      console.log('[FirstAccessForm] Atualizando registro do aluno via API...', { userId: actualUserId })
+      try {
+        const response = await fetch(`/api/student/${actualUserId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            mustChangePassword: false,
+            temporaryPassword: null,
+          }),
+        })
 
-      if (alunoError) {
-        console.error('[FirstAccessForm] Erro ao atualizar tabela alunos:', alunoError)
-        // Serialize error to get all properties
-        try {
-          const errorKeys = Object.getOwnPropertyNames(alunoError)
-          const errorSerialized = JSON.stringify(alunoError, errorKeys.length > 0 ? errorKeys : undefined, 2)
-          console.error('[FirstAccessForm] Erro serializado:', errorSerialized)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_serializeError) {
-          console.error('[FirstAccessForm] Detalhes do erro:', {
-            message: alunoError.message,
-            details: alunoError.details,
-            hint: alunoError.hint,
-            code: alunoError.code,
-          })
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          console.error('[FirstAccessForm] Erro ao atualizar aluno via API:', errorData)
+          throw new Error(errorData.error || 'Erro ao atualizar dados do aluno')
         }
-        throw alunoError
-      }
 
-      if (!alunoData || alunoData.length === 0) {
-        console.warn('[FirstAccessForm] Nenhum registro foi atualizado na tabela alunos')
-        // This might be okay if the record doesn't exist yet, but log it
-      } else {
-        console.log('[FirstAccessForm] Registro do aluno atualizado com sucesso:', alunoData)
+        const result = await response.json()
+        console.log('[FirstAccessForm] Registro do aluno atualizado com sucesso via API:', result.data)
+      } catch (apiError) {
+        console.error('[FirstAccessForm] Erro ao chamar API de atualização:', apiError)
+        // Não lançar erro aqui - a senha já foi atualizada no Auth, que é o mais importante
+        // O flag must_change_password pode ser atualizado depois
+        console.warn('[FirstAccessForm] Continuando mesmo com erro na atualização do aluno (senha já foi atualizada)')
       }
 
       router.push(getDefaultRouteForRole(role))

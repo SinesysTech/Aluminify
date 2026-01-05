@@ -74,6 +74,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty'
 import { apiClient, ApiClientError } from '@/lib/api-client'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/lib/br'
 
 export type Professor = {
@@ -629,9 +630,7 @@ export function ProfessorTable() {
             />
           </div>
           {loading ? (
-            <div className="flex h-24 items-center justify-center">
-              <p>Carregando professores...</p>
-            </div>
+            <TableSkeleton rows={5} columns={7} />
           ) : table.getRowModel().rows?.length ? (
             <>
               {/* Mobile Card View */}

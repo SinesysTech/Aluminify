@@ -75,6 +75,7 @@ import {
 } from '@/components/ui/empty'
 import { FileText } from 'lucide-react'
 import { apiClient, ApiClientError } from '@/lib/api-client'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export type Disciplina = {
   id: string
@@ -98,6 +99,8 @@ export function DisciplinaTable() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [mounted, setMounted] = React.useState(false)
+  const [filterValue, setFilterValue] = React.useState('')
+  const filterTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
   
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
@@ -129,7 +132,14 @@ export function DisciplinaTable() {
     try {
       setLoading(true)
       setError(null)
+      const startTime = performance.now()
       const response = await apiClient.get<{ data: Disciplina[] }>('/api/discipline')
+      const endTime = performance.now()
+      
+      if (endTime - startTime > 1000) {
+        console.warn(`[DisciplinaTable] Carregamento lento: ${Math.round(endTime - startTime)}ms`)
+      }
+      
       if (response && 'data' in response) {
         setData(response.data)
       } else {
@@ -347,6 +357,23 @@ export function DisciplinaTable() {
     },
   })
 
+  // Debounce filter
+  React.useEffect(() => {
+    if (filterTimeoutRef.current) {
+      clearTimeout(filterTimeoutRef.current)
+    }
+    
+    filterTimeoutRef.current = setTimeout(() => {
+      table.getColumn('name')?.setFilterValue(filterValue)
+    }, 300)
+    
+    return () => {
+      if (filterTimeoutRef.current) {
+        clearTimeout(filterTimeoutRef.current)
+      }
+    }
+  }, [filterValue, table])
+
   return (
     <div className="w-full space-y-4">
       <Card>
@@ -428,11 +455,10 @@ export function DisciplinaTable() {
           <div className="flex items-center py-4">
             <Input
               placeholder="Filtrar por nome..."
-              value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-              onChange={(event) =>
-                table.getColumn('name')?.setFilterValue(event.target.value)
-              }
+              value={filterValue}
+              onChange={(event) => setFilterValue(event.target.value)}
               className="w-full md:max-w-sm"
+              disabled={loading}
             />
           </div>
           {loading ? (
@@ -457,11 +483,19 @@ export function DisciplinaTable() {
                   ))}
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell colSpan={columns.length} className="h-24 text-center">
-                      Carregando...
-                    </TableCell>
-                  </TableRow>
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <TableRow key={`skeleton-${index}`}>
+                      <TableCell>
+                        <Skeleton className="h-5 w-48" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-5 w-24" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-5 w-16" />
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </div>

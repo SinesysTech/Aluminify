@@ -1,6 +1,7 @@
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { UserProvider } from '@/components/providers/user-provider'
 import { BottomNavigation } from '@/components/layout/bottom-navigation'
+import { ImpersonationBanner } from '@/components/layout/impersonation-banner'
 import {
   SidebarInset,
   SidebarProvider,
@@ -21,6 +22,7 @@ export default async function DashboardLayout({
         <AppSidebar />
         <SidebarInset>
           <DashboardHeader />
+          <ImpersonationBanner />
           <div className="flex flex-1 flex-col gap-2 md:gap-4 p-2 md:p-4 pt-0 pb-16 md:pb-0 overflow-hidden min-h-0">{children}</div>
           <BottomNavigation />
         </SidebarInset>

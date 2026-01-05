@@ -56,6 +56,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from '@/components/ui/empty'
+import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 type Flashcard = {
   id: string
@@ -832,8 +833,8 @@ export default function FlashcardsAdminClient() {
       <Card>
         <CardContent className="p-0">
           {loading ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <div className="p-8">
+              <TableSkeleton rows={5} columns={5} />
             </div>
           ) : flashcards.length === 0 ? (
             <Empty>

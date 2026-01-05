@@ -20,6 +20,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!empresaNome || !empresaNome.trim()) {
+      return NextResponse.json(
+        { error: 'nome da empresa é obrigatório' },
+        { status: 400 }
+      );
+    }
+
     const adminClient = getDatabaseClient();
 
     // 1. Criar empresa automaticamente
@@ -27,8 +34,8 @@ export async function POST(request: NextRequest) {
     const repository = new EmpresaRepositoryImpl(adminClient);
     const service = new EmpresaService(repository, adminClient);
 
-    // Usar nome da empresa fornecido ou gerar a partir do nome do professor
-    const nomeEmpresa = empresaNome || `${fullName} - Instituição`;
+    // Usar nome da empresa fornecido (já validado acima)
+    const nomeEmpresa = empresaNome.trim();
 
     const empresa = await service.create({
       nome: nomeEmpresa,

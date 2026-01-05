@@ -13,6 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Loader2, Trash2, Plus, HelpCircle } from 'lucide-react';
+import { formatTipoAtividade } from '@/lib/utils';
 
 type TipoAtividade =
   | 'Nivel_1'
@@ -35,6 +36,7 @@ type RegraAtividade = {
   frequenciaModulos: number;
   comecarNoModulo: number;
   acumulativo: boolean;
+  acumulativoDesdeInicio?: boolean;
   gerarNoUltimo: boolean;
 };
 
@@ -48,6 +50,7 @@ type RulesPanelProps = {
     frequenciaModulos: number;
     comecarNoModulo: number;
     acumulativo: boolean;
+    acumulativoDesdeInicio?: boolean;
     gerarNoUltimo: boolean;
   }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
@@ -87,6 +90,7 @@ export default function RulesPanel({
   const [frequenciaModulos, setFrequenciaModulos] = React.useState('1');
   const [comecarNoModulo, setComecarNoModulo] = React.useState('1');
   const [acumulativo, setAcumulativo] = React.useState(false);
+  const [acumulativoDesdeInicio, setAcumulativoDesdeInicio] = React.useState(false);
   const [gerarNoUltimo, setGerarNoUltimo] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
 
@@ -96,6 +100,7 @@ export default function RulesPanel({
     setFrequenciaModulos('1');
     setComecarNoModulo('1');
     setAcumulativo(false);
+    setAcumulativoDesdeInicio(false);
     setGerarNoUltimo(false);
   };
 
@@ -108,6 +113,7 @@ export default function RulesPanel({
       frequenciaModulos: Number(frequenciaModulos) || 1,
       comecarNoModulo: Number(comecarNoModulo) || 1,
       acumulativo,
+      acumulativoDesdeInicio: acumulativo ? acumulativoDesdeInicio : false,
       gerarNoUltimo,
     });
     setIsSaving(false);
@@ -216,12 +222,35 @@ export default function RulesPanel({
                     <HelpCircle className="h-4 w-4 text-muted-foreground" aria-label="Ajuda sobre acumulativo" />
                   </TooltipTrigger>
                   <TooltipContent side="top">
-                    O título indica o intervalo de módulos coberto. Útil para listas ou blocos que somam vários módulos.
+                    Quando ativado, o título mostra o intervalo de módulos. Use &quot;Acumulativo desde início&quot; para sempre começar do módulo inicial (ex: &quot;Módulos 1 ao 6&quot;). Sem essa opção, usa intervalo baseado na frequência (ex: &quot;Módulos 4 ao 6&quot;).
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             </span>
           </label>
+          {acumulativo && (
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={acumulativoDesdeInicio}
+                onChange={(e) => setAcumulativoDesdeInicio(e.target.checked)}
+                className="h-4 w-4 accent-primary"
+              />
+              <span className="flex items-center gap-1">
+                Acumulativo desde início
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground" aria-label="Ajuda sobre acumulativo desde início" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      Quando marcado, o intervalo sempre começa do módulo inicial (ex: &quot;Módulos 1 ao 6&quot;). Quando desmarcado, usa intervalo baseado na frequência (ex: &quot;Módulos 4 ao 6&quot;).
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </span>
+            </label>
+          )}
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -263,13 +292,17 @@ export default function RulesPanel({
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{regra.tipoAtividade}</Badge>
+                    <Badge variant="secondary">{formatTipoAtividade(regra.tipoAtividade)}</Badge>
                     <span className="font-medium">{regra.nomePadrao}</span>
                   </div>
                   <div className="text-xs text-muted-foreground flex flex-wrap gap-2">
                     <span>Frequência: a cada {regra.frequenciaModulos} módulo(s)</span>
                     <span>Começar no módulo {regra.comecarNoModulo}</span>
-                    {regra.acumulativo && <Badge variant="outline">Acumulativo</Badge>}
+                    {regra.acumulativo && (
+                      <Badge variant="outline">
+                        {regra.acumulativoDesdeInicio ? 'Acumulativo (desde início)' : 'Acumulativo'}
+                      </Badge>
+                    )}
                     {regra.gerarNoUltimo && <Badge variant="outline">Gera no último</Badge>}
                   </div>
                 </div>

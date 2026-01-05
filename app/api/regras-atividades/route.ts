@@ -13,6 +13,7 @@ const serializeRegra = (regra: Awaited<ReturnType<typeof regraAtividadeService.g
   frequenciaModulos: regra.frequenciaModulos,
   comecarNoModulo: regra.comecarNoModulo,
   acumulativo: regra.acumulativo,
+  acumulativoDesdeInicio: regra.acumulativoDesdeInicio,
   gerarNoUltimo: regra.gerarNoUltimo,
   createdAt: regra.createdAt.toISOString(),
   updatedAt: regra.updatedAt.toISOString(),
@@ -71,6 +72,7 @@ async function postHandler(request: AuthenticatedRequest) {
       frequenciaModulos: body?.frequencia_modulos,
       comecarNoModulo: body?.comecar_no_modulo,
       acumulativo: body?.acumulativo,
+      acumulativoDesdeInicio: body?.acumulativo_desde_inicio,
       gerarNoUltimo: body?.gerar_no_ultimo,
     });
 

@@ -75,6 +75,7 @@ async function putHandler(request: AuthenticatedRequest, params: { id: string })
       twitter: body?.twitter,
       courseIds: body?.courseIds,
       temporaryPassword: body?.temporaryPassword,
+      mustChangePassword: body?.mustChangePassword,
     });
     return NextResponse.json({ data: serializeStudent(student) });
   } catch (error) {

@@ -49,6 +49,7 @@ import ExcelJS from 'exceljs'
 import { useRouter } from 'next/navigation'
 import AddActivityModal from '../../../components/conteudos/add-activity-modal'
 import InlineEditableTitle from '@/components/shared/inline-editable-title'
+import { formatTipoAtividade } from '@/lib/utils'
 
 type Disciplina = {
   id: string
@@ -1863,7 +1864,7 @@ export default function ConteudosClientPage() {
                                 className="flex items-center justify-between rounded-md border p-3"
                               >
                                 <div className="flex items-center gap-3">
-                                  <Badge variant="secondary">{atividade.tipo}</Badge>
+                                  <Badge variant="secondary">{formatTipoAtividade(atividade.tipo)}</Badge>
                                   <InlineEditableTitle
                                     value={atividade.titulo}
                                     isEditing={editingTitle === atividade.id}
