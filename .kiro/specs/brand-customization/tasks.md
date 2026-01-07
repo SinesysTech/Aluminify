@@ -131,15 +131,15 @@ Este plano implementa o sistema de personalização de marca para aplicações m
     - Implement custom font scheme creation
     - _Requirements: 3.1, 3.2, 5.2_
 
-  - [-] 8.5 Write property test for real-time preview functionality
+  - [x] 8.5 Write property test for real-time preview functionality
     - **Property 11: Real-time Preview Functionality**
     - **Validates: Requirements 5.2**
 
-  - [ ] 8.6 Write property test for customization state management
+  - [x] 8.6 Write property test for customization state management
     - **Property 12: Customization State Management**
     - **Validates: Requirements 5.3, 5.5**
 
-  - [ ] 8.7 Write property test for validation feedback
+  - [x] 8.7 Write property test for validation feedback
     - **Property 13: Validation Feedback**
     - **Validates: Requirements 5.4**
 
@@ -150,7 +150,7 @@ Este plano implementa o sistema de personalização de marca para aplicações m
     - Create graceful error handling for unauthorized access
     - _Requirements: 7.1, 7.4, 7.5_
 
-  - [ ] 9.2 Write property test for access control validation
+  - [-] 9.2 Write property test for access control validation
     - **Property 17: Access Control Validation**
     - **Validates: Requirements 7.1, 7.5**
 
