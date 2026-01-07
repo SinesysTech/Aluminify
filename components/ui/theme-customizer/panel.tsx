@@ -17,9 +17,11 @@ import {
   ThemeRadiusSelector,
   ResetThemeButton
 } from "@/components/theme-customizer/index";
+import { BrandCustomizationPanel } from "@/components/brand-customization";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useThemeConfig } from "@/components/active-theme";
 import { useState } from "react";
+import type { SaveTenantBrandingRequest } from "@/types/brand-customization";
 
 export function ThemeCustomizerPanel() {
   const isMobile = useIsMobile();
@@ -28,6 +30,33 @@ export function ThemeCustomizerPanel() {
 
   // Check if user has access to brand customization (empresa admin)
   const hasBrandCustomizationAccess = true; // TODO: Implement proper access control
+  
+  // Mock empresa ID - in real implementation, this would come from user context
+  const empresaId = "mock-empresa-id"; // TODO: Get from user context
+
+  // Mock handlers for brand customization - these would integrate with actual API
+  const handleSaveBranding = async (branding: SaveTenantBrandingRequest) => {
+    console.log('Saving brand customization:', branding);
+    // TODO: Implement actual API call
+    // await fetch(`/api/tenant-branding/${empresaId}`, {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(branding)
+    // });
+  };
+
+  const handleResetBranding = async () => {
+    console.log('Resetting brand customization');
+    // TODO: Implement actual API call
+    // await fetch(`/api/tenant-branding/${empresaId}`, {
+    //   method: 'DELETE'
+    // });
+  };
+
+  const handleCancelBranding = () => {
+    console.log('Cancelling brand customization');
+    setShowBrandCustomization(false);
+  };
 
   return (
     <DropdownMenu>
@@ -55,15 +84,13 @@ export function ThemeCustomizerPanel() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium">Brand Customization</span>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowBrandCustomization(true)}
-                    className="h-7 px-2 text-xs"
-                  >
-                    <Settings className="mr-1 h-3 w-3" />
-                    Customize
-                  </Button>
+                  <BrandCustomizationPanel
+                    empresaId={empresaId}
+                    currentBranding={theme.activeBranding}
+                    onSave={handleSaveBranding}
+                    onReset={handleResetBranding}
+                    onCancel={handleCancelBranding}
+                  />
                 </div>
                 
                 {/* Show active branding info if available */}
