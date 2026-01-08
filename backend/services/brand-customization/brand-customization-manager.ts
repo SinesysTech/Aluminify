@@ -1,5 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { BrandCustomizationRepositoryImpl } from './brand-customization.repository';
+import { getBrandingCacheManager } from '@/lib/services/branding-cache-manager';
+import { getBrandingPerformanceMonitor, measurePerformance } from '@/lib/services/branding-performance-monitor';
 import type {
   CompleteBrandingConfig,
   SaveTenantBrandingRequest,
@@ -27,6 +29,8 @@ export interface BrandCustomizationService {
 export class BrandCustomizationManager implements BrandCustomizationService {
   private readonly repository: BrandCustomizationRepositoryImpl;
   private readonly defaultBranding: DefaultBrandingConfig;
+  private readonly cache = getBrandingCacheManager();
+  private readonly performanceMonitor = getBrandingPerformanceMonitor();
 
   constructor(private readonly client: SupabaseClient) {
     this.repository = new BrandCustomizationRepositoryImpl(client);
@@ -34,12 +38,29 @@ export class BrandCustomizationManager implements BrandCustomizationService {
   }
 
   /**
-   * Load tenant branding configuration
+   * Load tenant branding configuration with caching
    * Validates Requirements 4.1: Load customizations specific to empresa
    */
+  @measurePerformance('load_tenant_branding')
   async loadTenantBranding(options: LoadTenantBrandingOptions): Promise<BrandingOperationResult> {
+    const stopCacheTiming = this.performanceMonitor.startTiming('cache_lookup');
+    
     try {
       const { empresaId } = options;
+
+      // Check cache first
+      const cachedBranding = this.cache.get(empresaId);
+      if (cachedBranding) {
+        stopCacheTiming();
+        this.performanceMonitor.recordCacheOperation('get', 0, true);
+        return {
+          success: true,
+          data: cachedBranding,
+        };
+      }
+
+      stopCacheTiming();
+      this.performanceMonitor.recordCacheOperation('get', 0, false);
 
       // Validate empresa exists
       const { data: empresa, error: empresaError } = await this.client
@@ -68,12 +89,19 @@ export class BrandCustomizationManager implements BrandCustomizationService {
       if (!brandingConfig) {
         // Return default branding if no custom configuration exists
         const defaultConfig = this.createDefaultBrandingConfig(empresaId);
+        
+        // Cache default configuration with shorter TTL
+        this.cache.set(empresaId, defaultConfig, 2 * 60 * 1000); // 2 minutes
+        
         return {
           success: true,
           data: defaultConfig,
           warnings: ['No custom branding found, using default configuration'],
         };
       }
+
+      // Cache the loaded configuration
+      this.cache.set(empresaId, brandingConfig);
 
       return {
         success: true,

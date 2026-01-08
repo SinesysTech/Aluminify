@@ -185,42 +185,42 @@ Este plano implementa o sistema de personalização de marca para aplicações m
 - [ ] 12. Checkpoint - Ensure integration is working
   - Ensure all tests pass, ask the user if questions arise.
 
-- [-] 13. Add database API endpoints
-  - [-] 13.1 Create tenant branding API routes
+- [x] 13. Add database API endpoints
+  - [x] 13.1 Create tenant branding API routes
     - Implement GET /api/tenant-branding/[empresaId] endpoint
     - Add POST /api/tenant-branding/[empresaId] for saving customizations
     - Create DELETE /api/tenant-branding/[empresaId] for reset functionality
     - _Requirements: 4.2, 5.3, 5.5_
 
-  - [ ] 13.2 Create logo upload API routes
+  - [x] 13.2 Create logo upload API routes
     - Implement POST /api/tenant-branding/[empresaId]/logos endpoint
     - Add file validation and secure storage
     - Create DELETE endpoint for logo removal
     - _Requirements: 1.3, 1.4, 7.2, 7.3_
 
-  - [ ] 13.3 Create color palette API routes
+  - [x] 13.3 Create color palette API routes
     - Implement CRUD endpoints for custom color palettes
     - Add validation for color contrast and accessibility
     - _Requirements: 2.2, 2.5_
 
-  - [ ] 13.4 Create font scheme API routes
+  - [x] 13.4 Create font scheme API routes
     - Implement CRUD endpoints for custom font schemes
     - Add Google Fonts integration endpoints
     - _Requirements: 3.2, 3.3_
 
-- [ ] 13.5 Write integration tests for API endpoints
+- [x] 13.5 Write integration tests for API endpoints
   - Test all CRUD operations with proper tenant isolation
   - Validate security and access control
   - _Requirements: 4.4, 7.1_
 
-- [ ] 14. Final integration and testing
-  - [ ] 14.1 Test complete brand customization workflow
+- [-] 14. Final integration and testing
+  - [x] 14.1 Test complete brand customization workflow
     - Test end-to-end customization process
     - Verify multi-tenant isolation
     - Validate real-time updates across sessions
     - _Requirements: 4.3, 4.4, 1.5_
 
-  - [ ] 14.2 Performance optimization
+  - [-] 14.2 Performance optimization
     - Optimize CSS custom property updates
     - Implement caching for tenant branding data
     - Add lazy loading for Google Fonts
