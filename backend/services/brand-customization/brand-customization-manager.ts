@@ -1,7 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { BrandCustomizationRepositoryImpl } from './brand-customization.repository';
 import { getBrandingCacheManager } from '@/lib/services/branding-cache-manager';
-import { getBrandingPerformanceMonitor, measurePerformance } from '@/lib/services/branding-performance-monitor';
+import { getBrandingPerformanceMonitor } from '@/lib/services/branding-performance-monitor';
 import type {
   CompleteBrandingConfig,
   SaveTenantBrandingRequest,
@@ -41,8 +41,8 @@ export class BrandCustomizationManager implements BrandCustomizationService {
    * Load tenant branding configuration with caching
    * Validates Requirements 4.1: Load customizations specific to empresa
    */
-  @measurePerformance('load_tenant_branding')
   async loadTenantBranding(options: LoadTenantBrandingOptions): Promise<BrandingOperationResult> {
+    const stopTiming = this.performanceMonitor.startTiming('load_tenant_branding');
     const stopCacheTiming = this.performanceMonitor.startTiming('cache_lookup');
     
     try {
@@ -53,6 +53,7 @@ export class BrandCustomizationManager implements BrandCustomizationService {
       if (cachedBranding) {
         stopCacheTiming();
         this.performanceMonitor.recordCacheOperation('get', 0, true);
+        stopTiming();
         return {
           success: true,
           data: cachedBranding,
@@ -70,6 +71,7 @@ export class BrandCustomizationManager implements BrandCustomizationService {
         .maybeSingle();
 
       if (empresaError) {
+        stopTiming();
         return {
           success: false,
           error: `Failed to validate empresa: ${empresaError.message}`,
@@ -77,6 +79,7 @@ export class BrandCustomizationManager implements BrandCustomizationService {
       }
 
       if (!empresa) {
+        stopTiming();
         return {
           success: false,
           error: `Empresa with ID ${empresaId} not found`,
@@ -93,6 +96,7 @@ export class BrandCustomizationManager implements BrandCustomizationService {
         // Cache default configuration with shorter TTL
         this.cache.set(empresaId, defaultConfig, 2 * 60 * 1000); // 2 minutes
         
+        stopTiming();
         return {
           success: true,
           data: defaultConfig,
@@ -103,11 +107,13 @@ export class BrandCustomizationManager implements BrandCustomizationService {
       // Cache the loaded configuration
       this.cache.set(empresaId, brandingConfig);
 
+      stopTiming();
       return {
         success: true,
         data: brandingConfig,
       };
     } catch (error) {
+      stopTiming();
       return {
         success: false,
         error: `Failed to load tenant branding: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -116,10 +122,14 @@ export class BrandCustomizationManager implements BrandCustomizationService {
   }
 
   /**
-   * Apply tenant branding to DOM or specific element
+   * Apply tenant branding to DOM with performance optimization
    * Validates Requirements 2.4, 3.5: Apply colors and fonts via CSS custom properties
    */
   async applyTenantBranding(options: ApplyTenantBrandingOptions): Promise<CSSApplicationResult> {
+    const stopTiming = this.performanceMonitor.startTiming('apply_tenant_branding');
+    const startTime = performance.now();
+    const componentsApplied: string[] = [];
+    
     try {
       const { branding, target = 'document', element, immediate = true } = options;
       const appliedProperties: Partial<CSSCustomProperties> = {};
@@ -129,6 +139,7 @@ export class BrandCustomizationManager implements BrandCustomizationService {
       let targetElement: HTMLElement;
       if (target === 'document') {
         if (typeof document === 'undefined') {
+          stopTiming();
           return {
             success: false,
             appliedProperties,
@@ -139,6 +150,7 @@ export class BrandCustomizationManager implements BrandCustomizationService {
       } else if (element) {
         targetElement = element;
       } else {
+        stopTiming();
         return {
           success: false,
           appliedProperties,
@@ -146,14 +158,15 @@ export class BrandCustomizationManager implements BrandCustomizationService {
         };
       }
 
+      // Batch CSS property updates for better performance
+      const propertiesToApply: Record<string, string> = {};
+
       // Apply color palette
       if (branding.colorPalette) {
         try {
           const colorProperties = this.generateColorCSSProperties(branding.colorPalette);
-          Object.entries(colorProperties).forEach(([property, value]) => {
-            targetElement.style.setProperty(property, value);
-            appliedProperties[property as keyof CSSCustomProperties] = value;
-          });
+          Object.assign(propertiesToApply, colorProperties);
+          componentsApplied.push('color-palette');
         } catch (error) {
           errors.push(`Failed to apply color palette: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
@@ -163,35 +176,58 @@ export class BrandCustomizationManager implements BrandCustomizationService {
       if (branding.fontScheme) {
         try {
           const fontProperties = this.generateFontCSSProperties(branding.fontScheme);
-          Object.entries(fontProperties).forEach(([property, value]) => {
-            targetElement.style.setProperty(property, value);
-            appliedProperties[property as keyof CSSCustomProperties] = value;
-          });
+          Object.assign(propertiesToApply, fontProperties);
+          componentsApplied.push('font-scheme');
 
-          // Load Google Fonts if needed
+          // Load Google Fonts asynchronously
           if (branding.fontScheme.googleFonts && branding.fontScheme.googleFonts.length > 0) {
-            await this.loadGoogleFonts(branding.fontScheme.googleFonts);
+            this.loadGoogleFontsOptimized(branding.fontScheme.googleFonts);
           }
         } catch (error) {
           errors.push(`Failed to apply font scheme: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
 
+      // Apply all CSS properties in a single batch
+      const cssUpdateStart = performance.now();
+      Object.entries(propertiesToApply).forEach(([property, value]) => {
+        targetElement.style.setProperty(property, value);
+        appliedProperties[property as keyof CSSCustomProperties] = value;
+      });
+      const cssUpdateDuration = performance.now() - cssUpdateStart;
+      
+      this.performanceMonitor.recordCSSPropertyUpdate(
+        Object.keys(propertiesToApply).length,
+        cssUpdateDuration,
+        true // batched
+      );
+
       // Apply custom CSS if present
       if (branding.tenantBranding.customCss) {
         try {
           this.applyCustomCSS(branding.tenantBranding.customCss, targetElement);
+          componentsApplied.push('custom-css');
         } catch (error) {
           errors.push(`Failed to apply custom CSS: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
 
+      // Record overall performance
+      const totalDuration = performance.now() - startTime;
+      this.performanceMonitor.recordBrandingApplication(
+        branding.tenantBranding.empresaId,
+        totalDuration,
+        componentsApplied
+      );
+
+      stopTiming();
       return {
         success: errors.length === 0,
         appliedProperties,
         errors: errors.length > 0 ? errors : undefined,
       };
     } catch (error) {
+      stopTiming();
       return {
         success: false,
         appliedProperties: {},
@@ -201,12 +237,17 @@ export class BrandCustomizationManager implements BrandCustomizationService {
   }
 
   /**
-   * Save tenant branding configuration
+   * Save tenant branding configuration with cache invalidation
    * Validates Requirements 4.2: Persist customizations linked to empresa_id
    */
   async saveTenantBranding(options: SaveTenantBrandingOptions): Promise<BrandingOperationResult> {
+    const stopTiming = this.performanceMonitor.startTiming('save_tenant_branding');
+    
     try {
       const { empresaId, branding, userId } = options;
+
+      // Invalidate cache before saving
+      this.cache.invalidate(empresaId);
 
       // Check if tenant branding already exists
       let existingBranding = await this.repository.findTenantBranding(empresaId);
@@ -223,6 +264,12 @@ export class BrandCustomizationManager implements BrandCustomizationService {
         // Load complete configuration
         const completeConfig = await this.repository.getCompleteBrandingConfig(empresaId);
         
+        // Update cache with new configuration
+        if (completeConfig) {
+          this.cache.set(empresaId, completeConfig);
+        }
+        
+        stopTiming();
         return {
           success: true,
           data: completeConfig || undefined,
@@ -243,12 +290,19 @@ export class BrandCustomizationManager implements BrandCustomizationService {
         // Load complete configuration
         const completeConfig = await this.repository.getCompleteBrandingConfig(empresaId);
 
+        // Cache the new configuration
+        if (completeConfig) {
+          this.cache.set(empresaId, completeConfig);
+        }
+
+        stopTiming();
         return {
           success: true,
           data: completeConfig || undefined,
         };
       }
     } catch (error) {
+      stopTiming();
       return {
         success: false,
         error: `Failed to save tenant branding: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -257,12 +311,17 @@ export class BrandCustomizationManager implements BrandCustomizationService {
   }
 
   /**
-   * Reset tenant branding to default
+   * Reset tenant branding to default with cache invalidation
    * Validates Requirements 4.5: Apply default system branding when no custom branding exists
    */
   async resetToDefault(options: ResetToDefaultOptions): Promise<BrandingOperationResult> {
+    const stopTiming = this.performanceMonitor.startTiming('reset_tenant_branding');
+    
     try {
       const { empresaId, userId, preserveLogos = false } = options;
+
+      // Invalidate cache
+      this.cache.invalidate(empresaId);
 
       // Find existing branding
       const existingBranding = await this.repository.findTenantBranding(empresaId);
@@ -285,11 +344,16 @@ export class BrandCustomizationManager implements BrandCustomizationService {
       // Return default branding configuration
       const defaultConfig = this.createDefaultBrandingConfig(empresaId);
 
+      // Cache default configuration with shorter TTL
+      this.cache.set(empresaId, defaultConfig, 2 * 60 * 1000); // 2 minutes
+
+      stopTiming();
       return {
         success: true,
         data: defaultConfig,
       };
     } catch (error) {
+      stopTiming();
       return {
         success: false,
         error: `Failed to reset to default: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -334,25 +398,67 @@ export class BrandCustomizationManager implements BrandCustomizationService {
   }
 
   /**
-   * Load Google Fonts dynamically
+   * Load Google Fonts with optimized lazy loading and caching
    */
-  private async loadGoogleFonts(googleFonts: string[]): Promise<void> {
+  private async loadGoogleFontsOptimized(googleFonts: string[]): Promise<void> {
     if (typeof document === 'undefined') return;
 
-    const existingLinks = document.querySelectorAll('link[data-google-fonts]');
-    const existingFonts = new Set(
-      Array.from(existingLinks).map(link => link.getAttribute('data-google-fonts'))
-    );
+    const loadPromises = googleFonts.map(async (fontFamily) => {
+      const startTime = performance.now();
+      
+      try {
+        // Check if font is already loaded
+        const existingLink = document.querySelector(`link[data-google-fonts="${fontFamily}"]`);
+        if (existingLink) {
+          this.performanceMonitor.recordFontLoading(fontFamily, 0, true, true);
+          return;
+        }
 
-    for (const fontFamily of googleFonts) {
-      if (!existingFonts.has(fontFamily)) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontFamily)}:wght@300;400;500;600;700&display=swap`;
-        link.setAttribute('data-google-fonts', fontFamily);
-        document.head.appendChild(link);
+        // Create optimized font loading
+        await this.createOptimizedFontLink(fontFamily);
+        
+        const duration = performance.now() - startTime;
+        this.performanceMonitor.recordFontLoading(fontFamily, duration, false, true);
+      } catch (error) {
+        const duration = performance.now() - startTime;
+        this.performanceMonitor.recordFontLoading(fontFamily, duration, false, false);
+        console.warn(`Failed to load Google Font ${fontFamily}:`, error);
       }
-    }
+    });
+
+    // Don't await all promises to avoid blocking
+    Promise.all(loadPromises).catch(error => {
+      console.warn('Some Google Fonts failed to load:', error);
+    });
+  }
+
+  /**
+   * Create optimized Google Font link with preload and display=swap
+   */
+  private async createOptimizedFontLink(fontFamily: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontFamily)}:wght@300;400;500;600;700&display=swap`;
+      link.setAttribute('data-google-fonts', fontFamily);
+      
+      // Add performance optimizations
+      link.setAttribute('crossorigin', 'anonymous');
+      
+      link.onload = () => resolve();
+      link.onerror = () => reject(new Error(`Failed to load font: ${fontFamily}`));
+      
+      // Use requestIdleCallback for non-blocking loading
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(() => {
+          document.head.appendChild(link);
+        });
+      } else {
+        setTimeout(() => {
+          document.head.appendChild(link);
+        }, 0);
+      }
+    });
   }
 
   /**
