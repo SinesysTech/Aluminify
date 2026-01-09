@@ -9,7 +9,8 @@
       "Delete(*:*)",
       "Bash(npx tsc:*)",
       "Bash(npx tsc --noEmit)",
-      "Bash(npx eslint . --ext .ts,.tsx --format stylish)"
+      "Bash(npx eslint . --ext .ts,.tsx --format stylish)",
+      "Bash(npm run lint:*)"
     ],
     "deny": [],
     "ask": []
