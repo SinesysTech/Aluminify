@@ -8,7 +8,6 @@ import {
   Layers,
   FolderOpen,
   Users,
-  GraduationCap,
   Eye,
   LayoutDashboard,
   User,

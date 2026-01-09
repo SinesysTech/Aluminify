@@ -32,17 +32,6 @@ export function PresetSelector() {
     }
   };
 
-  // Combine standard themes with custom tenant presets
-  const allPresets = [
-    ...THEMES,
-    ...(theme.customPresets?.map(preset => ({
-      name: preset.name,
-      value: preset.id,
-      colors: preset.previewColors,
-      isCustom: true,
-    })) || [])
-  ];
-
   return (
     <div className="flex flex-col gap-4">
       <Label>Theme preset:</Label>

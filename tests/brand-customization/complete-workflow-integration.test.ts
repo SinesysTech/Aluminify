@@ -9,19 +9,15 @@
  * Feature: brand-customization, Complete Workflow Integration
  */
 
-import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import { NextRequest, NextResponse } from 'next/server';
+import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { createClient } from '@supabase/supabase-js';
 import { BrandCustomizationManager } from '@/backend/services/brand-customization';
 import { CSSPropertiesManager } from '@/lib/services/css-properties-manager';
 import { BrandingSyncManager } from '@/lib/services/branding-sync-manager';
-import { getPublicSupabaseConfig } from '@/lib/supabase-public-env';
 import type { 
   CompleteBrandingConfig, 
   ColorPalette, 
-  FontScheme,
-  TenantBranding,
-  LogoType 
+  FontScheme
 } from '@/types/brand-customization';
 
 // Mock environment variables for testing

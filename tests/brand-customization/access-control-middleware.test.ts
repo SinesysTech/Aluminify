@@ -3,8 +3,6 @@ import {
   requireEmpresaAdmin,
   withUploadRateLimit,
   verifyEmpresaAdminAccess,
-  checkBrandCustomizationAccess,
-  BrandCustomizationRequest,
 } from '@/backend/middleware/brand-customization-access';
 import { validateUploadedFile, sanitizeFilename } from '@/backend/middleware/file-security';
 

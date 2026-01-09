@@ -57,8 +57,6 @@ class MockFile implements File {
 // Test data generators
 const logoTypeGenerator = fc.constantFrom('login', 'sidebar', 'favicon') as fc.Arbitrary<LogoType>
 
-const empresaIdGenerator = fc.string({ minLength: 10, maxLength: 50 })
-
 // Security threat generators
 const pathTraversalNameGenerator = fc.constantFrom(
   '../../../etc/passwd',
@@ -88,33 +86,12 @@ const reservedWindowsNameGenerator = fc.constantFrom(
   'LPT9.webp'
 )
 
-const hiddenFileNameGenerator = fc.constantFrom(
-  '.htaccess.png',
-  '.env.jpg',
-  '.git.svg',
-  '.ssh.webp',
-  '.bashrc.png',
-  '.profile.jpg'
-)
-
 const executableExtensionNameGenerator = fc.string({ minLength: 3, maxLength: 20 })
   .chain(name => fc.constantFrom('.exe', '.bat', '.cmd', '.scr', '.pif', '.com')
     .map(ext => `${name}${ext}`))
 
 const longFileNameGenerator = fc.string({ minLength: 200, maxLength: 500 })
   .map(s => `${s}.png`)
-
-const specialCharacterNameGenerator = fc.string({ minLength: 5, maxLength: 30 })
-  .map(s => s.replace(/[a-zA-Z0-9]/g, ''))
-  .filter(s => s.length > 0)
-  .map(s => `${s}.png`)
-
-const nullByteNameGenerator = fc.constantFrom(
-  'file\x00.png',
-  'image.png\x00.exe',
-  'logo\x00\x00.jpg',
-  'test.svg\x00.bat'
-)
 
 // Malicious content generators
 const executableContentGenerator = fc.record({
@@ -127,21 +104,6 @@ const executableContentGenerator = fc.record({
   const view = new Uint8Array(content)
   // PE signature: MZ
   view.set([0x4D, 0x5A])
-  return new MockFile(name, size, type, content)
-})
-
-const scriptContentGenerator = fc.record({
-  name: fc.string({ minLength: 5, maxLength: 30 }).map(s => `${s}.png`),
-  size: fc.integer({ min: 100, max: 1024 }),
-  type: fc.constantFrom('image/png', 'image/jpeg'),
-}).map(({ name, size, type }) => {
-  // Create content that contains script tags
-  const scriptContent = '<script>alert("xss")</script>'
-  const content = new ArrayBuffer(size)
-  const view = new Uint8Array(content)
-  const encoder = new TextEncoder()
-  const scriptBytes = encoder.encode(scriptContent)
-  view.set(scriptBytes)
   return new MockFile(name, size, type, content)
 })
 

@@ -1,12 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { FontSchemeManagerImpl } from '@/backend/services/brand-customization';
 import { requireBrandCustomizationAccess, BrandCustomizationRequest } from '@/backend/middleware/brand-customization-access';
 import { getPublicSupabaseConfig } from '@/lib/supabase-public-env';
 
-interface RouteContext {
-  params: Promise<{ empresaId: string }>;
-}
+interface RouteContext {}
 
 /**
  * POST /api/tenant-branding/[empresaId]/font-schemes/google-fonts - Validate Google Font

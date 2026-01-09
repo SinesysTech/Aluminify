@@ -220,8 +220,7 @@ describe('Logo Upload Validation', () => {
     await fc.assert(
       fc.asyncProperty(
         oversizedFileGenerator,
-        logoTypeGenerator,
-        async (oversizedFile, logoType) => {
+        async (oversizedFile) => {
           // Validate the oversized file
           const validation = await logoManager!.validateLogo(oversizedFile)
 
@@ -255,8 +254,7 @@ describe('Logo Upload Validation', () => {
     await fc.assert(
       fc.asyncProperty(
         invalidMimeTypeFileGenerator,
-        logoTypeGenerator,
-        async (invalidFile, logoType) => {
+        async (invalidFile) => {
           // Validate the file with invalid MIME type
           const validation = await logoManager!.validateLogo(invalidFile)
 
@@ -290,8 +288,7 @@ describe('Logo Upload Validation', () => {
     await fc.assert(
       fc.asyncProperty(
         invalidExtensionFileGenerator,
-        logoTypeGenerator,
-        async (invalidFile, logoType) => {
+        async (invalidFile) => {
           // Validate the file with invalid extension
           const validation = await logoManager!.validateLogo(invalidFile)
 
@@ -324,8 +321,7 @@ describe('Logo Upload Validation', () => {
     await fc.assert(
       fc.asyncProperty(
         maliciousFileGenerator,
-        logoTypeGenerator,
-        async (maliciousFile, logoType) => {
+        async (maliciousFile) => {
           // Validate the file with malicious filename
           const validation = await logoManager!.validateLogo(maliciousFile)
 
@@ -356,8 +352,7 @@ describe('Logo Upload Validation', () => {
     await fc.assert(
       fc.asyncProperty(
         invalidContentFileGenerator,
-        logoTypeGenerator,
-        async (invalidFile, logoType) => {
+        async (invalidFile) => {
           // Validate the file with invalid content
           const validation = await logoManager!.validateLogo(invalidFile)
 
@@ -388,8 +383,7 @@ describe('Logo Upload Validation', () => {
     await fc.assert(
       fc.asyncProperty(
         validFileGenerator,
-        logoTypeGenerator,
-        async (validFile, logoType) => {
+        async (validFile) => {
           // Validate the valid file
           const validation = await logoManager!.validateLogo(validFile)
 

@@ -14,13 +14,11 @@ import {
   CheckCircle2, 
   Loader2,
   Trash2,
-  Eye
 } from 'lucide-react';
 import type {
   LogoUploadComponentProps,
   LogoType,
   LogoUploadResult,
-  LogoUploadError
 } from '@/types/brand-customization';
 
 interface UploadState {

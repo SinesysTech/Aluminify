@@ -15,8 +15,7 @@ import { BrandingCacheManager, getBrandingCacheManager } from '@/lib/services/br
 import { BrandingPerformanceMonitor, getBrandingPerformanceMonitor } from '@/lib/services/branding-performance-monitor';
 import type { 
   CompleteBrandingConfig, 
-  ColorPalette, 
-  FontScheme 
+  ColorPalette 
 } from '@/types/brand-customization';
 
 // Mock DOM environment

@@ -92,20 +92,6 @@ class MockFile implements File {
   }
 }
 
-const validLogoFileGenerator = fc.record({
-  name: fc.string({ minLength: 5, maxLength: 50 }).map(s => `${s}.png`),
-  size: fc.integer({ min: 1024, max: 1024 * 1024 }), // 1KB to 1MB
-  type: fc.constantFrom('image/png', 'image/jpeg', 'image/jpg', 'image/svg+xml', 'image/webp'),
-}).map(({ name, size, type }) => {
-  // Create valid PNG header for content validation
-  const pngHeader = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
-  const content = new ArrayBuffer(size)
-  const view = new Uint8Array(content)
-  view.set(pngHeader)
-  
-  return new MockFile(name, size, type, content)
-})
-
 describe('Logo Application Consistency', () => {
   let testEmpresaIds: string[] = []
   let testTenantBrandingIds: string[] = []
@@ -203,7 +189,7 @@ describe('Logo Application Consistency', () => {
             // Create test empresas
             for (const empresaData of empresas) {
               const uniqueSlug = `${empresaData.slug}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-              const { data: empresa, error } = await supabase!
+              const { data: empresa } = await supabase!
                 .from('empresas')
                 .insert({
                   ...empresaData,
@@ -212,7 +198,6 @@ describe('Logo Application Consistency', () => {
                 .select()
                 .single()
 
-              if (error) throw error
               createdEmpresaIds.push(empresa.id)
               testEmpresaIds.push(empresa.id)
             }

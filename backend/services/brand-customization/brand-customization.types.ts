@@ -1,5 +1,4 @@
 import type {
-  TenantBranding,
   CompleteBrandingConfig,
   SaveTenantBrandingRequest,
   CSSCustomProperties,

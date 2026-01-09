@@ -86,12 +86,11 @@ export class LogoManagerImpl implements LogoManager {
 
       // Generate secure filename
       const sanitizedFileName = this.sanitizeFileName(file.name);
-      const fileExtension = this.getFileExtension(sanitizedFileName);
       const timestamp = Date.now();
       const secureFileName = `${empresaId}/${type}/${timestamp}_${sanitizedFileName}`;
 
       // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await this.client.storage
+      const { error: uploadError } = await this.client.storage
         .from(this.STORAGE_BUCKET)
         .upload(secureFileName, file, {
           cacheControl: '3600',
@@ -128,7 +127,7 @@ export class LogoManagerImpl implements LogoManager {
         mimeType: file.type,
       };
 
-      const { data: savedLogo, error: saveError } = await this.client
+      const { error: saveError } = await this.client
         .from('tenant_logos')
         .insert(logoData)
         .select()

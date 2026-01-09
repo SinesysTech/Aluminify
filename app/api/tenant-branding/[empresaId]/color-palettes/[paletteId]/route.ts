@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ColorPaletteManagerImpl } from '@/backend/services/brand-customization';
 import { requireBrandCustomizationAccess, BrandCustomizationRequest } from '@/backend/middleware/brand-customization-access';

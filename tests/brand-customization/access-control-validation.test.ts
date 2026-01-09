@@ -15,9 +15,7 @@ import {
   verifyEmpresaAdminAccess,
   checkBrandCustomizationAccess,
   requireEmpresaAdmin,
-  BrandCustomizationRequest,
 } from '@/backend/middleware/brand-customization-access'
-import { getDatabaseClient } from '@/backend/clients/database'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY

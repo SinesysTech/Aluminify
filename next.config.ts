@@ -44,7 +44,7 @@ const nextConfig: NextConfig = {
   },
 
   // Configuração do Webpack para produção
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     // Ignorar dependências opcionais do unzipper
     config.resolve.alias = {
       ...config.resolve.alias,

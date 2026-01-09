@@ -3,7 +3,6 @@
 import {
   Building2,
   GraduationCap,
-  Shield,
   Users,
   LayoutDashboard,
   FileText,

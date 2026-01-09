@@ -1,13 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ColorPaletteManagerImpl } from '@/backend/services/brand-customization';
 import { requireBrandCustomizationAccess, BrandCustomizationRequest } from '@/backend/middleware/brand-customization-access';
 import { getPublicSupabaseConfig } from '@/lib/supabase-public-env';
 import type { CreateColorPaletteRequest } from '@/types/brand-customization';
-
-interface RouteContext {
-  params: Promise<{ empresaId: string }>;
-}
 
 /**
  * POST /api/tenant-branding/[empresaId]/color-palettes/validate - Validate color palette for accessibility
@@ -18,7 +14,6 @@ async function postHandler(
   { params }: { params: Promise<{ empresaId: string }> }
 ) {
   try {
-    const { empresaId } = await params;
     const body = await request.json() as CreateColorPaletteRequest;
 
     // Validate required fields for contrast checking

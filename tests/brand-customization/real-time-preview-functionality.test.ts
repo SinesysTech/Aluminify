@@ -295,7 +295,7 @@ describe('Real-time Preview Functionality', () => {
           };
 
           // Apply initial preview
-          const initialPreview = applyPreview(initialState);
+          applyPreview(initialState);
           expect(mockApplyBrandingToTheme).toHaveBeenCalledTimes(1);
 
           // Apply changed preview

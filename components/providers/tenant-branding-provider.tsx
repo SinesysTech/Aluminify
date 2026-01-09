@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useEffect, useCallback, useRef } from 'react';
 import { useThemeConfig } from '@/components/active-theme';
-import { getCSSPropertiesManager } from '@/lib/services/css-properties-manager';
 import { getBrandingSyncManager } from '@/lib/services/branding-sync-manager';
 import type { CompleteBrandingConfig } from '@/types/brand-customization';
 

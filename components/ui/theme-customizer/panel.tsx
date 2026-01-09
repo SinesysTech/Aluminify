@@ -1,6 +1,6 @@
 "use client";
 
-import { Palette, Settings } from "lucide-react";
+import { Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,13 +20,11 @@ import {
 import { BrandCustomizationPanel } from "@/components/brand-customization";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useThemeConfig } from "@/components/active-theme";
-import { useState } from "react";
 import type { SaveTenantBrandingRequest } from "@/types/brand-customization";
 
 export function ThemeCustomizerPanel() {
   const isMobile = useIsMobile();
   const { theme } = useThemeConfig();
-  const [showBrandCustomization, setShowBrandCustomization] = useState(false);
 
   // Check if user has access to brand customization (empresa admin)
   const hasBrandCustomizationAccess = true; // TODO: Implement proper access control
@@ -55,7 +53,6 @@ export function ThemeCustomizerPanel() {
 
   const handleCancelBranding = () => {
     console.log('Cancelling brand customization');
-    setShowBrandCustomization(false);
   };
 
   return (
