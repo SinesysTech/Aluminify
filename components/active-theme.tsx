@@ -10,6 +10,7 @@ export interface ExtendedThemeConfig {
   radius: number;
   scale: number;
   mode: 'light' | 'dark';
+  contentLayout: 'full' | 'centered';
   // Brand customization properties
   customPresets?: CustomThemePreset[];
   activeBranding?: CompleteBrandingConfig;
@@ -21,6 +22,7 @@ export const DEFAULT_THEME: ExtendedThemeConfig = {
   radius: 0.5,
   scale: 1,
   mode: 'light',
+  contentLayout: 'full',
 };
 
 // Basic theme presets (will be extended with custom tenant presets)
@@ -58,14 +60,26 @@ interface ThemeConfigContextType {
 const ThemeConfigContext = createContext<ThemeConfigContextType | undefined>(undefined);
 
 export function ThemeConfigProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ExtendedThemeConfig>(DEFAULT_THEME);
+  const [theme, setThemeState] = useState<ExtendedThemeConfig>(() => {
+    if (typeof window === 'undefined') return DEFAULT_THEME;
+
+    const saved = localStorage.getItem('theme-config');
+    if (!saved) return DEFAULT_THEME;
+
+    try {
+      const parsed = JSON.parse(saved);
+      return {
+        ...DEFAULT_THEME,
+        ...parsed,
+      } as ExtendedThemeConfig;
+    } catch (error) {
+      console.error('Failed to parse saved theme:', error);
+      return DEFAULT_THEME;
+    }
+  });
 
   const setTheme = (newTheme: ExtendedThemeConfig) => {
     setThemeState(newTheme);
-    // Apply theme to CSS custom properties
-    applyThemeToCSS(newTheme);
-    // Save to localStorage
-    localStorage.setItem('theme-config', JSON.stringify(newTheme));
   };
 
   const loadTenantBranding = async (empresaId: string) => {
@@ -113,19 +127,10 @@ export function ThemeConfigProvider({ children }: { children: React.ReactNode })
     setTheme(resetTheme);
   };
 
-  // Load theme from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem('theme-config');
-    if (saved) {
-      try {
-        const parsedTheme = JSON.parse(saved);
-        setThemeState(parsedTheme);
-        applyThemeToCSS(parsedTheme);
-      } catch (error) {
-        console.error('Failed to parse saved theme:', error);
-      }
-    }
-  }, []);
+    applyThemeToCSS(theme);
+    localStorage.setItem('theme-config', JSON.stringify(theme));
+  }, [theme]);
 
   return (
     <ThemeConfigContext.Provider value={{ theme, setTheme, loadTenantBranding, applyBrandingToTheme, resetBrandingToDefaults }}>

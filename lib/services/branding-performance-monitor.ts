@@ -9,7 +9,7 @@ interface PerformanceMetric {
   name: string;
   value: number;
   timestamp: number;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface PerformanceReport {
@@ -76,7 +76,7 @@ export class BrandingPerformanceMonitor {
   /**
    * Record a performance metric
    */
-  public recordMetric(name: string, value: number, metadata?: Record<string, any>): void {
+  public recordMetric(name: string, value: number, metadata?: Record<string, unknown>): void {
     if (!this.isEnabled) return;
 
     const metric: PerformanceMetric = {
@@ -360,11 +360,11 @@ export class BrandingPerformanceMonitor {
  * Performance decorator for methods
  */
 export function measurePerformance(metricName: string) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
     const monitor = getBrandingPerformanceMonitor();
 
-    descriptor.value = async function (...args: any[]) {
+    descriptor.value = async function (...args: unknown[]) {
       const stopTiming = monitor.startTiming(metricName);
       
       try {

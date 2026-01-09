@@ -120,12 +120,12 @@ function checkForDangerousPatterns(filename: string, mimeType: string): string[]
   
   // Check dangerous extensions
   const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
-  if (DANGEROUS_EXTENSIONS.includes(ext as any)) {
+  if (DANGEROUS_EXTENSIONS.includes(ext as typeof DANGEROUS_EXTENSIONS[number])) {
     warnings.push(`Dangerous file extension detected: ${ext}`);
   }
   
   // Check dangerous MIME types
-  if (DANGEROUS_MIME_TYPES.includes(mimeType as any)) {
+  if (DANGEROUS_MIME_TYPES.includes(mimeType as typeof DANGEROUS_MIME_TYPES[number])) {
     warnings.push(`Dangerous MIME type detected: ${mimeType}`);
   }
   

@@ -7,15 +7,33 @@ import { BanIcon } from "lucide-react";
 
 export function ThemeScaleSelector() {
   const { theme, setTheme } = useThemeConfig();
+  const scaleValues = {
+    none: 1,
+    sm: 0.95,
+    lg: 1.05,
+  } as const;
+
+  type ScaleKey = keyof typeof scaleValues;
+
+  const selectedScaleKey: ScaleKey =
+    (Object.entries(scaleValues).find(([, val]) => val === theme.scale)?.[0] as ScaleKey | undefined) || 'none';
+
+  const handleChange = (value: string | undefined) => {
+    if (!value) return;
+    const nextScale = scaleValues[value as ScaleKey];
+    if (typeof nextScale === 'number') {
+      setTheme({ ...theme, scale: nextScale });
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4">
       <Label htmlFor="roundedCorner">Scale:</Label>
       <div>
         <ToggleGroup
-          value={theme.scale}
+          value={selectedScaleKey}
           type="single"
-          onValueChange={(value) => setTheme({ ...theme, scale: value as any })}
+          onValueChange={handleChange}
           className="*:border-input w-full gap-3 *:rounded-md *:border">
           <ToggleGroupItem variant="outline" value="none">
             <BanIcon />

@@ -113,7 +113,7 @@ export class LogoManagerImpl implements LogoManager {
       const logoUrl = urlData.publicUrl;
 
       // Find existing tenant branding or create one
-      let tenantBrandingId = await this.findOrCreateTenantBranding(empresaId);
+      const tenantBrandingId = await this.findOrCreateTenantBranding(empresaId);
 
       // Remove existing logo of the same type
       await this.removeExistingLogo(tenantBrandingId, type);

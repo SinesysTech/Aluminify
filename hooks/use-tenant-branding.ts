@@ -53,6 +53,7 @@ export function useTenantBrandingState(): TenantBrandingHookReturn {
   // Update applied properties when branding changes
   useEffect(() => {
     const cssManager = getCSSPropertiesManager();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAppliedProperties(cssManager.getAppliedProperties());
   }, [currentBranding]);
 
@@ -115,6 +116,7 @@ export function useBrandingProperty(property: string) {
 
   useEffect(() => {
     const cssManager = getCSSPropertiesManager();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setValue(cssManager.getProperty(property));
   }, [property, branding]);
 
@@ -203,6 +205,7 @@ export function useBrandingLoadingState(timeoutMs: number = 5000): {
 
   useEffect(() => {
     if (loading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setTimedOut(false);
       const timeout = setTimeout(() => {
         setTimedOut(true);
@@ -236,6 +239,7 @@ export function useBrandingChangeDetection(): {
 
   useEffect(() => {
     if (JSON.stringify(branding) !== JSON.stringify(previousBranding)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasChanged(true);
       setLastChangeTime(new Date());
       setPreviousBranding(branding);

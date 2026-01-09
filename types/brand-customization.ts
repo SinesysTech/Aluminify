@@ -392,7 +392,7 @@ export class BrandCustomizationError extends Error {
   constructor(
     message: string,
     public code: string,
-    public details?: Record<string, any>
+    public details?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'BrandCustomizationError'
@@ -403,7 +403,7 @@ export class BrandCustomizationError extends Error {
  * Logo upload specific errors
  */
 export class LogoUploadError extends BrandCustomizationError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, 'LOGO_UPLOAD_ERROR', details)
     this.name = 'LogoUploadError'
   }
@@ -413,7 +413,7 @@ export class LogoUploadError extends BrandCustomizationError {
  * Color validation specific errors
  */
 export class ColorValidationError extends BrandCustomizationError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, 'COLOR_VALIDATION_ERROR', details)
     this.name = 'ColorValidationError'
   }
@@ -423,7 +423,7 @@ export class ColorValidationError extends BrandCustomizationError {
  * Font loading specific errors
  */
 export class FontLoadingError extends BrandCustomizationError {
-  constructor(message: string, details?: Record<string, any>) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, 'FONT_LOADING_ERROR', details)
     this.name = 'FontLoadingError'
   }

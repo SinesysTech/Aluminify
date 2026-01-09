@@ -668,7 +668,7 @@ export function BrandCustomizationPanel({
               )}
             </DialogTitle>
             <DialogDescription>
-              Customize your organization's brand identity including logos, colors, and fonts.
+              Customize your organization&apos;s brand identity including logos, colors, and fonts.
             </DialogDescription>
           </DialogHeader>
 

@@ -8,6 +8,8 @@ import type {
   CSSCustomProperties,
   TenantBrandingInsert,
   BrandCustomizationError,
+  ColorPalette,
+  FontScheme,
 } from '@/types/brand-customization';
 import type {
   LoadTenantBrandingOptions,
@@ -250,7 +252,7 @@ export class BrandCustomizationManager implements BrandCustomizationService {
       this.cache.invalidate(empresaId);
 
       // Check if tenant branding already exists
-      let existingBranding = await this.repository.findTenantBranding(empresaId);
+      const existingBranding = await this.repository.findTenantBranding(empresaId);
 
       if (existingBranding) {
         // Update existing branding
@@ -364,7 +366,7 @@ export class BrandCustomizationManager implements BrandCustomizationService {
   /**
    * Generate CSS custom properties for color palette
    */
-  private generateColorCSSProperties(colorPalette: any): Partial<CSSCustomProperties> {
+  private generateColorCSSProperties(colorPalette: ColorPalette): Partial<CSSCustomProperties> {
     return {
       '--primary': colorPalette.primaryColor,
       '--primary-foreground': colorPalette.primaryForeground,
@@ -390,7 +392,7 @@ export class BrandCustomizationManager implements BrandCustomizationService {
   /**
    * Generate CSS custom properties for font scheme
    */
-  private generateFontCSSProperties(fontScheme: any): Partial<CSSCustomProperties> {
+  private generateFontCSSProperties(fontScheme: FontScheme): Partial<CSSCustomProperties> {
     return {
       '--font-sans': fontScheme.fontSans.join(', '),
       '--font-mono': fontScheme.fontMono.join(', '),
@@ -464,14 +466,15 @@ export class BrandCustomizationManager implements BrandCustomizationService {
   /**
    * Apply custom CSS to target element
    */
-  private applyCustomCSS(customCss: string, targetElement: HTMLElement): void {
+  private applyCustomCSS(customCss: string, targetElement?: HTMLElement): void {
     // Create or update style element for custom CSS
-    let styleElement = document.querySelector('#tenant-custom-css') as HTMLStyleElement;
+    const parent = targetElement ?? document.head;
+    let styleElement = parent.querySelector('#tenant-custom-css') as HTMLStyleElement | null;
     
     if (!styleElement) {
       styleElement = document.createElement('style');
       styleElement.id = 'tenant-custom-css';
-      document.head.appendChild(styleElement);
+      parent.appendChild(styleElement);
     }
 
     styleElement.textContent = customCss;

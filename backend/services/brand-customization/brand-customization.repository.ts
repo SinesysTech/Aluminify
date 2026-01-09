@@ -98,7 +98,13 @@ export class BrandCustomizationRepositoryImpl implements BrandCustomizationRepos
   }
 
   async updateTenantBranding(id: string, data: TenantBrandingUpdate): Promise<TenantBranding> {
-    const updateData: any = {
+    const updateData: Partial<{
+      color_palette_id: string;
+      font_scheme_id: string;
+      custom_css: string;
+      updated_by: string;
+      updated_at: string;
+    }> = {
       updated_at: new Date().toISOString(),
     };
 

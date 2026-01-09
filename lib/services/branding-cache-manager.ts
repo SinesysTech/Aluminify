@@ -308,11 +308,11 @@ export function getBrandingCacheManager(): BrandingCacheManager {
 /**
  * Cache decorator for branding operations
  */
-export function withBrandingCache<T extends any[], R>(
+export function withBrandingCache<T extends unknown[], R>(
   cacheKey: (...args: T) => string,
   ttl?: number
 ) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
     const cache = getBrandingCacheManager();
 

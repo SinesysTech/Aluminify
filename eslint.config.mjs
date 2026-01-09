@@ -12,7 +12,18 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated files that should not be linted
+    "lib/database.types.ts",
   ]),
+  {
+    files: ["tests/**/*"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unsafe-function-type": "off",
+      "prefer-const": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

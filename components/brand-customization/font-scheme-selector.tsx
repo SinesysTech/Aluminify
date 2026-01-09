@@ -121,7 +121,6 @@ function FontInput({ label, value, onChange, description, placeholder, disabled 
           className={!isValid ? 'border-destructive' : ''}
         />
       </div>
-      
       {description && (
         <p className="text-xs text-muted-foreground">{description}</p>
       )}
@@ -186,8 +185,8 @@ function FontPreview({ scheme, className = "" }: FontPreviewProps) {
             </div>
             <div className="text-xs space-y-1">
               <div>Numbers: 0123456789</div>
-              <div>Symbols: !@#$%^&*()_+-=[]{}|;':\",./?</div>
-              <div>Mixed: const API_URL = "https://api.example.com/v1";</div>
+              <div>Symbols: !@#$%^&*()_+-=[]{}|;&apos;:&quot;,./?</div>
+              <div>Mixed: const API_URL = &quot;https://api.example.com/v1&quot;;</div>
             </div>
           </div>
         </div>
@@ -383,10 +382,13 @@ export function FontSchemeSelector({
   }, [schemeData]);
 
   // Handle scheme data updates
-  const updateSchemeData = useCallback((field: keyof CreateFontSchemeRequest, value: any) => {
+  const updateSchemeData = useCallback(<K extends keyof CreateFontSchemeRequest>(
+    field: K,
+    value: CreateFontSchemeRequest[K]
+  ) => {
     setSchemeData(prev => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   }, []);
 
@@ -838,7 +840,7 @@ export function FontSchemeSelector({
                       <div className="font-medium">How to use Google Fonts:</div>
                       <div className="text-sm space-y-1">
                         <div>1. Select a Google Font from the dropdown above</div>
-                        <div>2. Click "Load Font" to add it to your scheme</div>
+                        <div>2. Click &quot;Load Font&quot; to add it to your scheme</div>
                         <div>3. The font will be automatically added to your font stacks</div>
                         <div>4. Use the Preview tab to see how it looks</div>
                       </div>
