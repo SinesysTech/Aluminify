@@ -60,35 +60,6 @@ const logoUrlGenerator = fc.string({ minLength: 10, maxLength: 200 }).map(s =>
   `https://example.com/logos/${s}.png`
 )
 
-// Mock File class for testing
-class MockFile implements File {
-  constructor(
-    public name: string,
-    public size: number,
-    public type: string,
-    public content: ArrayBuffer = new ArrayBuffer(size)
-  ) {}
-
-  get lastModified(): number { return Date.now() }
-  get webkitRelativePath(): string { return '' }
-
-  arrayBuffer(): Promise<ArrayBuffer> {
-    return Promise.resolve(this.content)
-  }
-
-  slice(): Blob {
-    return new MockFile(this.name, this.size, this.type, this.content)
-  }
-
-  stream(): ReadableStream<Uint8Array> {
-    throw new Error('Not implemented')
-  }
-
-  text(): Promise<string> {
-    return Promise.resolve('')
-  }
-}
-
 describe('Logo Application Consistency', () => {
   let testEmpresaIds: string[] = []
   let testTenantBrandingIds: string[] = []
