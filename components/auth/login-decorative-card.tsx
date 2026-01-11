@@ -1,10 +1,11 @@
 'use client'
 
 import { Gauge } from 'lucide-react'
+import { Card } from '@/components/ui/card'
 
 export function LoginDecorativeCard() {
   return (
-    <div className="w-full max-w-sm transform rounded-2xl border border-gray-100 bg-white p-6 shadow-xl transition-transform duration-500 hover:rotate-0 rotate-[-2deg]">
+    <Card className="w-full max-w-sm transform rounded-2xl border border-gray-100 bg-white p-6 shadow-xl transition-transform duration-500 hover:rotate-0 -rotate-2 gap-0">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -59,6 +60,6 @@ export function LoginDecorativeCard() {
       <div className="mt-4 text-right">
         <span className="font-mono text-[10px] text-gray-400">node-br-south-01</span>
       </div>
-    </div>
+    </Card>
   )
 }

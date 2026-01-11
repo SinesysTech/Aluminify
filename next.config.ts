@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Otimizações para produção
   reactStrictMode: true,
+
+  // Evita warning de cross-origin em desenvolvimento ao acessar via IP da rede
+  // (ex.: http://192.168.1.100:3000)
+  allowedDevOrigins: ["192.168.1.100"],
   
   // Configuração para Vercel (SSR por padrão)
   output: undefined,
