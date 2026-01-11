@@ -201,3 +201,18 @@
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+
+/* Grid patterns para auth pages */
+.bg-grid-pattern {
+  background-size: 24px 24px;
+  background-image:
+    linear-gradient(to right, rgb(229 231 235) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(229 231 235) 1px, transparent 1px);
+}
+
+.bg-grid-pattern-dark {
+  background-size: 24px 24px;
+  background-image:
+    linear-gradient(to right, rgb(31 41 55) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(31 41 55) 1px, transparent 1px);
+}
