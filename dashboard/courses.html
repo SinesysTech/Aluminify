@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Meus Cursos - Aluminify</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#111827", 
+              "background-body": "#F3F4F6",
+              "surface-paper": "#FFFFFF",
+              border: "#E5E7EB",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              display: ["Plus Jakarta Sans", "sans-serif"],
+            }
+          },
+        },
+      };
+    </script>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none;  scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background-body text-gray-900 font-sans antialiased h-screen flex overflow-hidden">
+
+    <aside class="w-64 bg-surface-paper border-r border-border hidden md:flex flex-col justify-between z-20">
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-8">
+                <a href="dashboard.html" class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold font-display text-lg">A</div>
+                    <div class="leading-tight">
+                        <h1 class="font-display font-bold text-sm tracking-tight">Aluminify</h1>
+                        <span class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Cursinho Aprova</span>
+                    </div>
+                </a>
+            </div>
+            <nav class="space-y-1">
+                <a href="dashboard.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-primary hover:bg-gray-50 font-medium text-sm group transition-colors">
+                    <span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">dashboard</span>
+                    Dashboard
+                </a>
+                <a href="courses.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-100 text-primary font-semibold text-sm group transition-colors">
+                    <span class="material-icons-outlined text-xl text-primary">library_books</span>
+                    Meus Cursos
+                </a>
+                <a href="review.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-primary hover:bg-gray-50 font-medium text-sm group transition-colors">
+                    <span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">style</span>
+                    Flashcards
+                </a>
+                <a href="schedule.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-primary hover:bg-gray-50 font-medium text-sm group transition-colors">
+                    <span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">calendar_today</span>
+                    Agenda
+                </a>
+                <a href="ai-tutor.html" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-purple-600 hover:bg-purple-50 font-medium text-sm group transition-colors">
+                    <span class="material-icons-outlined text-xl text-purple-500">auto_awesome</span>
+                    Tutor IA
+                </a>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-border">
+            <button class="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                <img src="https://ui-avatars.com/api/?name=Lucas+S&background=111827&color=fff" class="w-9 h-9 rounded-full border border-gray-200">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-900 truncate">Lucas Silva</p>
+                    <p class="text-xs text-gray-500 truncate">Extensivo 2026</p>
+                </div>
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <header class="h-16 bg-surface-paper border-b border-border flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10">
+            <div class="flex items-center gap-4">
+                <h2 class="text-lg font-bold font-display text-gray-900">Biblioteca de Estudos</h2>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <div class="relative">
+                    <span class="material-icons-outlined absolute left-2.5 top-2 text-gray-400 text-lg">search</span>
+                    <input type="text" placeholder="Filtrar cursos..." class="pl-9 pr-4 py-1.5 bg-gray-50 border border-border rounded-lg text-sm focus:ring-primary focus:border-primary">
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-4 sm:p-8 no-scrollbar">
+            <div class="max-w-6xl mx-auto">
+                
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Em Andamento</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                    
+                    <div class="bg-surface-paper rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full group">
+                        <div class="h-32 bg-linear-to-r from-blue-600 to-blue-400 relative">
+                            <div class="absolute top-3 right-3 bg-white/20 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold text-white uppercase">Extensivo</div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col">
+                            <div class="mb-4">
+                                <h3 class="font-bold text-lg text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">Física: Do Zero ao ENEM</h3>
+                                <p class="text-sm text-gray-500">Prof. Breno Meira</p>
+                            </div>
+                            
+                            <div class="mt-auto space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="font-bold text-gray-700">32% Concluído</span>
+                                        <span class="text-gray-400">45/140 aulas</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                        <div class="bg-blue-500 h-1.5 rounded-full" style="width: 32%"></div>
+                                    </div>
+                                </div>
+                                <a href="course.html" class="block w-full py-2 bg-white border border-gray-200 text-gray-700 font-bold text-center rounded-lg text-sm hover:bg-gray-50 hover:border-gray-300 transition-all">
+                                    Continuar Estudando
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-paper rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full group">
+                        <div class="h-32 bg-linear-to-r from-purple-600 to-pink-500 relative"></div>
+                        <div class="p-5 flex-1 flex flex-col">
+                            <div class="mb-4">
+                                <h3 class="font-bold text-lg text-gray-900 mb-1 group-hover:text-purple-600 transition-colors">Redação Nota 1000</h3>
+                                <p class="text-sm text-gray-500">Prof. Cláudia</p>
+                            </div>
+                            
+                            <div class="mt-auto space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="font-bold text-gray-700">15% Concluído</span>
+                                        <span class="text-gray-400">3/20 módulos</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                        <div class="bg-purple-500 h-1.5 rounded-full" style="width: 15%"></div>
+                                    </div>
+                                </div>
+                                <button class="w-full py-2 bg-white border border-gray-200 text-gray-700 font-bold text-center rounded-lg text-sm hover:bg-gray-50 transition-all">
+                                    Continuar Estudando
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-paper rounded-xl border border-border overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full group">
+                        <div class="h-32 bg-linear-to-r from-orange-500 to-yellow-400 relative"></div>
+                        <div class="p-5 flex-1 flex flex-col">
+                            <div class="mb-4">
+                                <h3 class="font-bold text-lg text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">Matemática Básica</h3>
+                                <p class="text-sm text-gray-500">Equipe Aprova</p>
+                            </div>
+                            
+                            <div class="mt-auto space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="font-bold text-gray-700">88% Concluído</span>
+                                        <span class="text-gray-400">Reta final</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                        <div class="bg-green-500 h-1.5 rounded-full" style="width: 88%"></div>
+                                    </div>
+                                </div>
+                                <button class="w-full py-2 bg-white border border-gray-200 text-gray-700 font-bold text-center rounded-lg text-sm hover:bg-gray-50 transition-all">
+                                    Continuar Estudando
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Disponíveis (Catálogo)</h3>
+                
+                <div class="bg-surface-paper rounded-xl border border-border p-6 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                            <span class="material-icons-outlined">lock</span>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900">Química Orgânica Avançada</h4>
+                            <p class="text-sm text-gray-500">Módulo Extra • Libera em 15/02</p>
+                        </div>
+                    </div>
+                    <button class="text-sm font-bold text-primary border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 disabled:opacity-50 cursor-not-allowed">
+                        Em breve
+                    </button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+</body>
+</html>
