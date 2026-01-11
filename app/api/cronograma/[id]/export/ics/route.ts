@@ -55,7 +55,7 @@ function formatTempo(minutos?: number | null): string {
 function buildIcs(cronograma: CronogramaExport, itens: ItemExport[]): string {
   const calendar = ical({
     prodId: {
-      company: 'Área do Aluno',
+      company: 'Aluminify',
       product: 'Cronograma de Estudos',
       language: 'PT',
     },
@@ -121,7 +121,7 @@ function buildIcs(cronograma: CronogramaExport, itens: ItemExport[]): string {
         summary: summary,
         description: description,
         categories: [{ name: 'Estudos' }],
-        location: 'Área do Aluno',
+        location: 'Aluminify',
       })
     } catch (error) {
       console.error(`Erro ao processar item ${item.id}:`, error)

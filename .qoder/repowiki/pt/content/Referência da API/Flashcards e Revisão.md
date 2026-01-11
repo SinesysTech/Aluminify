@@ -535,13 +535,13 @@ O sistema inclui logging detalhado para depuração, especialmente em operaçõe
 
 **Listar flashcards de um módulo:**
 ```bash
-curl -X GET "https://api.areadoaluno.com/api/flashcards?moduloId=abc123" \
+curl -X GET "https://api.aluminify.com/api/flashcards?moduloId=abc123" \
   -H "Authorization: Bearer seu_token"
 ```
 
 **Criar um novo flashcard:**
 ```bash
-curl -X POST "https://api.areadoaluno.com/api/flashcards" \
+curl -X POST "https://api.aluminify.com/api/flashcards" \
   -H "Authorization: Bearer seu_token" \
   -H "Content-Type: application/json" \
   -d '{
@@ -553,7 +553,7 @@ curl -X POST "https://api.areadoaluno.com/api/flashcards" \
 
 **Enviar feedback de revisão:**
 ```bash
-curl -X POST "https://api.areadoaluno.com/api/flashcards/feedback" \
+curl -X POST "https://api.aluminify.com/api/flashcards/feedback" \
   -H "Authorization: Bearer seu_token" \
   -H "Content-Type: application/json" \
   -d '{

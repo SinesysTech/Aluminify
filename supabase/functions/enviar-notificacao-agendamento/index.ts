@@ -36,10 +36,22 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface TemplateData {
+  alunoNome?: string;
+  professorNome?: string;
+  nomeOutraParte?: string;
+  dataFormatada?: string;
+  horario?: string;
+  observacoes?: string;
+  linkReuniao?: string;
+  motivo?: string;
+  mensagem?: string;
+}
+
 const emailTemplates = {
   criacao: {
     subject: "Novo agendamento de mentoria",
-    getBody: (data: { alunoNome: string; dataFormatada: string; horario: string; observacoes?: string }) => `
+    getBody: (data: TemplateData) => `
       <h2>Novo Agendamento de Mentoria</h2>
       <p>Voce recebeu um novo pedido de agendamento de mentoria.</p>
       <p><strong>Aluno:</strong> ${data.alunoNome}</p>
@@ -51,7 +63,7 @@ const emailTemplates = {
   },
   confirmacao: {
     subject: "Seu agendamento foi confirmado!",
-    getBody: (data: { professorNome: string; dataFormatada: string; horario: string; linkReuniao?: string }) => `
+    getBody: (data: TemplateData) => `
       <h2>Agendamento Confirmado!</h2>
       <p>Seu agendamento de mentoria foi confirmado.</p>
       <p><strong>Professor:</strong> ${data.professorNome}</p>
@@ -63,7 +75,7 @@ const emailTemplates = {
   },
   cancelamento: {
     subject: "Agendamento cancelado",
-    getBody: (data: { nomeOutraParte: string; dataFormatada: string; horario: string; motivo?: string }) => `
+    getBody: (data: TemplateData) => `
       <h2>Agendamento Cancelado</h2>
       <p>Um agendamento de mentoria foi cancelado.</p>
       <p><strong>Com:</strong> ${data.nomeOutraParte}</p>
@@ -74,7 +86,7 @@ const emailTemplates = {
   },
   rejeicao: {
     subject: "Agendamento nao aprovado",
-    getBody: (data: { professorNome: string; dataFormatada: string; horario: string; motivo?: string }) => `
+    getBody: (data: TemplateData) => `
       <h2>Agendamento Nao Aprovado</h2>
       <p>Infelizmente seu pedido de agendamento nao foi aprovado.</p>
       <p><strong>Professor:</strong> ${data.professorNome}</p>
@@ -86,7 +98,7 @@ const emailTemplates = {
   },
   lembrete: {
     subject: "Lembrete: Agendamento de mentoria amanha",
-    getBody: (data: { nomeOutraParte: string; dataFormatada: string; horario: string; linkReuniao?: string }) => `
+    getBody: (data: TemplateData) => `
       <h2>Lembrete de Agendamento</h2>
       <p>Voce tem um agendamento de mentoria amanha!</p>
       <p><strong>Com:</strong> ${data.nomeOutraParte}</p>
@@ -97,7 +109,7 @@ const emailTemplates = {
   },
   alteracao: {
     subject: "Agendamento atualizado",
-    getBody: (data: { nomeOutraParte: string; dataFormatada: string; horario: string }) => `
+    getBody: (data: TemplateData) => `
       <h2>Agendamento Atualizado</h2>
       <p>Um agendamento de mentoria foi atualizado.</p>
       <p><strong>Com:</strong> ${data.nomeOutraParte}</p>
@@ -108,7 +120,7 @@ const emailTemplates = {
   },
   bloqueio_criado: {
     subject: "Agendamento afetado por bloqueio de agenda",
-    getBody: (data: { nomeOutraParte: string; dataFormatada: string; horario: string; motivo?: string }) => `
+    getBody: (data: TemplateData) => `
       <h2>Agendamento Afetado por Bloqueio</h2>
       <p>Seu agendamento foi afetado por um bloqueio de agenda.</p>
       <p><strong>Com:</strong> ${data.nomeOutraParte}</p>
@@ -120,7 +132,7 @@ const emailTemplates = {
   },
   recorrencia_alterada: {
     subject: "Disponibilidade do professor alterada",
-    getBody: (data: { nomeOutraParte: string; mensagem?: string }) => `
+    getBody: (data: TemplateData) => `
       <h2>Disponibilidade Alterada</h2>
       <p>O professor ${data.nomeOutraParte} alterou sua disponibilidade.</p>
       ${data.mensagem ? `<p>${data.mensagem}</p>` : ''}
@@ -129,7 +141,7 @@ const emailTemplates = {
   },
   substituicao_solicitada: {
     subject: "Solicitacao de substituicao de agendamento",
-    getBody: (data: { nomeOutraParte: string; dataFormatada: string; horario: string }) => `
+    getBody: (data: TemplateData) => `
       <h2>Solicitacao de Substituicao</h2>
       <p>Foi solicitada uma substituicao para seu agendamento.</p>
       <p><strong>Com:</strong> ${data.nomeOutraParte}</p>
@@ -158,7 +170,7 @@ function formatTime(startStr: string, endStr: string): string {
 
 async function sendEmail(to: string, subject: string, htmlBody: string): Promise<boolean> {
   const resendApiKey = Deno.env.get("RESEND_API_KEY");
-  const emailFrom = Deno.env.get("EMAIL_FROM") || "noreply@areadoaluno.com";
+  const emailFrom = Deno.env.get("EMAIL_FROM") || "noreply@aluminify.com";
 
   if (!resendApiKey) {
     console.log("RESEND_API_KEY not configured, skipping email send");

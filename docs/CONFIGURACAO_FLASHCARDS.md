@@ -12,7 +12,7 @@ Crie um arquivo `.env.local` na raiz do projeto com as seguintes variáveis:
 
 ```env
 # ============================================
-# VARIÁVEIS DE AMBIENTE - Área do Aluno
+# VARIÁVEIS DE AMBIENTE - Aluminify
 # ============================================
 # ⚠️ NUNCA commite este arquivo no Git!
 

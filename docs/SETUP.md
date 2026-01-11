@@ -1,4 +1,4 @@
-# 🚀 Guia de Configuração do Ambiente - Área do Aluno
+# 🚀 Guia de Configuração do Ambiente - Aluminify
 
 Este guia irá ajudá-lo a configurar todo o ambiente necessário para trabalhar no projeto.
 

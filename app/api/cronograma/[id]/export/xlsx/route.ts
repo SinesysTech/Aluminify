@@ -69,7 +69,7 @@ function corDisciplina(disciplinaId?: string) {
 
 async function buildWorkbook(cronograma: CronogramaExport, itens: ItemExport[]) {
   const wb = new ExcelJS.Workbook()
-  wb.creator = 'Área do Aluno'
+  wb.creator = 'Aluminify'
   wb.created = new Date()
 
   const resumo = wb.addWorksheet('Resumo')

@@ -263,7 +263,7 @@ Esta seção fornece exemplos práticos de utilização dos endpoints.
 
 ### Exemplo com curl - Criação de Aluno
 ```bash
-curl -X POST https://api.areadoaluno.com/api/student \
+curl -X POST https://api.aluminify.com/api/student \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '{
@@ -279,7 +279,7 @@ curl -X POST https://api.areadoaluno.com/api/student \
 
 ### Exemplo com curl - Importação em Massa
 ```bash
-curl -X POST https://api.areadoaluno.com/api/student/import \
+curl -X POST https://api.aluminify.com/api/student/import \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer <token>" \
   -d '[

@@ -15,27 +15,27 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Área do Aluno",
-    template: "%s · Área do Aluno",
+    default: "Aluminify",
+    template: "%s · Aluminify",
   },
   description: "Portal do aluno com chat assistido por IA e recursos acadêmicos",
-  applicationName: "Área do Aluno",
+  applicationName: "Aluminify",
   keywords: ["aluno", "educação", "chat", "IA", "portal"],
-  authors: [{ name: "Área do Aluno" }],
-  creator: "Área do Aluno",
-  publisher: "Área do Aluno",
+  authors: [{ name: "Aluminify" }],
+  creator: "Aluminify",
+  publisher: "Aluminify",
   category: "education",
   openGraph: {
-    title: "Área do Aluno",
+    title: "Aluminify",
     description: "Portal do aluno com chat assistido por IA e recursos acadêmicos",
     url: "https://localhost/",
-    siteName: "Área do Aluno",
+    siteName: "Aluminify",
     locale: "pt_BR",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Área do Aluno",
+    title: "Aluminify",
     description: "Portal do aluno com chat assistido por IA e recursos acadêmicos",
   },
 };

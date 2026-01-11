@@ -1,6 +1,6 @@
-# Área do Aluno
+# Aluminify
 
-Sistema completo de gerenciamento educacional com arquitetura API-First, modularizada e baseada em princípios SOLID, KISS e YAGNI. Inclui plataforma web completa para alunos, professores e administradores.
+A infraestrutura invisível da educação. Sistema completo de gerenciamento educacional com arquitetura API-First, modularizada e baseada em princípios SOLID, KISS e YAGNI. Inclui plataforma web completa para alunos, professores e administradores.
 
 ## 🏗️ Arquitetura
 

@@ -79,7 +79,7 @@ O arquivo .ics deve seguir o padrão iCalendar com:
    ```
    BEGIN:VCALENDAR
    VERSION:2.0
-   PRODID:-//Área do Aluno//Cronograma de Estudos//PT
+   PRODID:-//Aluminify//Cronograma de Estudos//PT
    CALSCALE:GREGORIAN
    METHOD:PUBLISH
    ```
@@ -167,7 +167,7 @@ import ical from 'ical-generator';
 
 const calendar = ical({
   prodId: {
-    company: 'Área do Aluno',
+    company: 'Aluminify',
     product: 'Cronograma de Estudos',
     language: 'PT'
   },

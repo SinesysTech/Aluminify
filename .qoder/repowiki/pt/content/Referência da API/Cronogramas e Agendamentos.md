@@ -233,7 +233,7 @@ O sistema implementa várias regras de negócio para garantir a integridade e vi
 ### Exemplo 1: Criação de um Cronograma (curl)
 
 ```bash
-curl -X POST https://api.areadoaluno.com/api/cronograma \
+curl -X POST https://api.aluminify.com/api/cronograma \
   -H "Authorization: Bearer <seu_token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -286,7 +286,7 @@ async function atualizarDiasEstudo(cronogramaId, novosDias) {
 Para exportar um agendamento, o usuário pode simplesmente acessar a URL diretamente no navegador ou fazer uma requisição GET:
 
 ```bash
-curl -X GET https://api.areadoaluno.com/api/agendamentos/abc123-xyz456/ical \
+curl -X GET https://api.aluminify.com/api/agendamentos/abc123-xyz456/ical \
   -H "Authorization: Bearer <seu_token>" \
   --output "mentoria.ics"
 ```

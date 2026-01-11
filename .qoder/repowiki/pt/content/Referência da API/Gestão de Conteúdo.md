@@ -505,7 +505,7 @@ Exemplo de resposta de erro:
 
 **Criar Disciplina**
 ```bash
-curl -X POST https://api.areadoaluno.com/api/discipline \
+curl -X POST https://api.aluminify.com/api/discipline \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{"name": "Matemática"}'
@@ -513,7 +513,7 @@ curl -X POST https://api.areadoaluno.com/api/discipline \
 
 **Listar Cursos**
 ```bash
-curl https://api.areadoaluno.com/api/course
+curl https://api.aluminify.com/api/course
 ```
 
 ### Exemplo Frontend (JavaScript)

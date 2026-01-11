@@ -46,8 +46,8 @@ Para configurar o ambiente de desenvolvimento, siga os passos abaixo:
 
 1. **Clone o repositório**:
    ```bash
-   git clone https://github.com/seu-usuario/areadoaluno.git
-   cd areadoaluno
+   git clone https://github.com/seu-usuario/aluminify.git
+   cd aluminify
    ```
 
 2. **Instale as dependências** utilizando pnpm:
@@ -114,7 +114,7 @@ Para inicializar o Supabase localmente e aplicar as migrations:
 O sistema utiliza Upstash Redis para armazenamento temporário de respostas do chat, especialmente em ambientes serverless. Para configurar:
 
 1. **Crie uma conta no [Upstash Console](https://console.upstash.com/)**.
-2. **Crie um banco de dados Redis** com nome como `areadoaluno-chat`.
+2. **Crie um banco de dados Redis** com nome como `aluminify-chat`.
 3. **Obtenha as credenciais** em **REST API**:
    - `UPSTASH_REDIS_REST_URL`
    - `UPSTASH_REDIS_REST_TOKEN`

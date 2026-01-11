@@ -1,6 +1,6 @@
-# Índice de Documentação - Área do Aluno
+# Índice de Documentação - Aluminify
 
-Este diretório contém toda a documentação técnica do projeto Área do Aluno.
+Este diretório contém toda a documentação técnica do projeto Aluminify.
 
 ## 📚 Documentação por Categoria
 

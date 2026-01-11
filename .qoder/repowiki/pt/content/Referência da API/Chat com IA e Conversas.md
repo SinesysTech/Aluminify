@@ -346,7 +346,7 @@ A tabela `chat_conversation_history` armazena o histórico separadamente da tabe
 ### cURL - Envio de Mensagem Simples
 
 ```bash
-curl -X POST https://api.areadoaluno.com.br/api/chat \
+curl -X POST https://api.aluminify.com.br/api/chat \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -358,7 +358,7 @@ curl -X POST https://api.areadoaluno.com.br/api/chat \
 ### cURL - Envio com Anexo
 
 ```bash
-curl -X POST https://api.areadoaluno.com.br/api/chat \
+curl -X POST https://api.aluminify.com.br/api/chat \
   -H "Authorization: Bearer <token>" \
   -F "message=Por favor, analise este documento" \
   -F "attachments=@/caminho/do/arquivo.pdf" \
@@ -368,7 +368,7 @@ curl -X POST https://api.areadoaluno.com.br/api/chat \
 ### cURL - Criação de Nova Conversa
 
 ```bash
-curl -X POST https://api.areadoaluno.com.br/api/chat \
+curl -X POST https://api.aluminify.com.br/api/chat \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -381,7 +381,7 @@ curl -X POST https://api.areadoaluno.com.br/api/chat \
 ### cURL - Listar Conversas Ativas
 
 ```bash
-curl -X GET "https://api.areadoaluno.com.br/api/conversations?active=true" \
+curl -X GET "https://api.aluminify.com.br/api/conversations?active=true" \
   -H "Authorization: Bearer <token>"
 ```
 

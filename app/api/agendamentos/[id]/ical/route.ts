@@ -60,7 +60,7 @@ async function getHandler(
     // Create calendar
     const calendar = ical({
       prodId: {
-        company: 'Área do Aluno',
+        company: 'Aluminify',
         product: 'Agendamentos',
         language: 'PT',
       },
@@ -102,7 +102,7 @@ async function getHandler(
       end: new Date(agendamento.data_fim),
       summary: summary,
       description: description,
-      location: agendamento.link_reuniao || 'Área do Aluno',
+      location: agendamento.link_reuniao || 'Aluminify',
       url: agendamento.link_reuniao || undefined,
       categories: [{ name: 'Mentoria' }],
     })

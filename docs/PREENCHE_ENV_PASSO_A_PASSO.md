@@ -174,7 +174,7 @@ Seu arquivo `.env.local` final deve parecer assim:
 
 ```env
 # ============================================
-# VARIÁVEIS DE AMBIENTE - Área do Aluno
+# VARIÁVEIS DE AMBIENTE - Aluminify
 # ============================================
 
 # --------------------------------------------

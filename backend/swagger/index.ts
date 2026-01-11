@@ -13,9 +13,9 @@ import { chatPaths, chatSchemas } from './chat.spec';
 const baseDefinition: OAS3Definition = {
   openapi: '3.0.3',
   info: {
-    title: 'Área do Aluno API',
+    title: 'Aluminify API',
     version: '1.0.0',
-    description: 'API documentation for Área do Aluno services',
+    description: 'API documentation for Aluminify services',
   },
   servers: [
     {

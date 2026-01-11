@@ -1,8 +1,8 @@
-# Documentação da API - Área do Aluno
+# Documentação da API - Aluminify
 
 ## Visão Geral
 
-A API do Área do Aluno é uma API RESTful que suporta duas formas de autenticação:
+A API do Aluminify é uma API RESTful que suporta duas formas de autenticação:
 1. **JWT (JSON Web Token)** - Para interface de usuário
 2. **API Key** - Para requisições diretas de aplicações externas
 

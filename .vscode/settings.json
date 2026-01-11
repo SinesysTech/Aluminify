@@ -1,4 +1,8 @@
 {
   "css.lint.unknownAtRules": "ignore",
-  "css.lint.unknownProperties": "ignore"
+  "css.lint.unknownProperties": "ignore",
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": true,
+  "editor.defaultFormatter": "denoland.vscode-deno"
 }

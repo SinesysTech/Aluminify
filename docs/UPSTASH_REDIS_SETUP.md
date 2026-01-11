@@ -32,7 +32,7 @@ Upstash Redis é um banco de dados Redis serverless que:
 
 1. No dashboard, clique em **"Create Database"**
 2. Configure:
-   - **Name:** `areadoaluno-chat` (ou o nome que preferir)
+   - **Name:** `aluminify-chat` (ou o nome que preferir)
    - **Region:** Escolha a região mais próxima do seu servidor (ex: `us-east-1` para Vercel US)
    - **Type:** `Regional` (para melhor latência) ou `Global` (para múltiplas regiões)
    - **Eviction:** `allkeys-lru` (limpa dados antigos automaticamente)

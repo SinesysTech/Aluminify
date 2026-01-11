@@ -761,7 +761,7 @@ export async function confirmarAgendamento(id: string, linkReuniao?: string) {
             title: `Mentoria com ${alunoData?.nome || 'Aluno'}`,
             startTime: new Date(agendamento.data_inicio),
             endTime: new Date(agendamento.data_fim),
-            description: 'Sessão de mentoria agendada via Área do Aluno',
+            description: 'Sessão de mentoria agendada via Aluminify',
             attendees: alunoData?.email ? [alunoData.email] : []
           },
           {

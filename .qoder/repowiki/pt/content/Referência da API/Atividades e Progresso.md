@@ -418,13 +418,13 @@ O sistema possui um tratamento robusto de erros, retornando mensagens claras e c
 ### Exemplo com cURL
 **Listar atividades de um módulo:**
 ```bash
-curl -X GET "https://api.areadoaluno.com/api/atividade?modulo_id=mod123" \
+curl -X GET "https://api.aluminify.com/api/atividade?modulo_id=mod123" \
   -H "Authorization: Bearer <token>"
 ```
 
 **Gerar estrutura de atividades para uma frente:**
 ```bash
-curl -X POST "https://api.areadoaluno.com/api/atividade/gerar-estrutura" \
+curl -X POST "https://api.aluminify.com/api/atividade/gerar-estrutura" \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -435,7 +435,7 @@ curl -X POST "https://api.areadoaluno.com/api/atividade/gerar-estrutura" \
 
 **Marcar uma atividade como concluída com desempenho:**
 ```bash
-curl -X PATCH "https://api.areadoaluno.com/api/progresso-atividade/atividade/ativ456" \
+curl -X PATCH "https://api.aluminify.com/api/progresso-atividade/atividade/ativ456" \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{

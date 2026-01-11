@@ -435,7 +435,7 @@ O sistema atualmente não implementa versionamento explícito de API, mas segue 
 
 ### Recomendações para Versionamento
 1. **URL Path**: `/api/v1/course/[id]`, `/api/v2/course/[id]`
-2. **Header HTTP**: `Accept: application/vnd.areadoaluno.v1+json`
+2. **Header HTTP**: `Accept: application/vnd.aluminify.v1+json`
 3. **Query Parameter**: `/api/course/[id]?version=1`
 
 A documentação OpenAPI em `backend/swagger/` já está configurada para suportar múltiplas versões, com definições de schemas e paths separados por domínio.

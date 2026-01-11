@@ -32,8 +32,8 @@ Este documento detalha o fluxo completo de contribuição para o repositório Á
 ### Fork e Clonagem do Repositório
 O processo inicia com o fork do repositório principal para o namespace do contribuidor, seguido pela clonagem local:
 ```bash
-git clone https://github.com/seu-usuario/areadoaluno.git
-cd areadoaluno
+git clone https://github.com/seu-usuario/aluminify.git
+cd aluminify
 ```
 
 ### Criação de Branch com Convenção de Nomenclatura
