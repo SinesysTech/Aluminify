@@ -126,12 +126,13 @@ export default function ModoFocoClient() {
           const { data, error: acError } = await supabase
             .from('alunos_cursos')
             .select('curso_id, cursos(id, nome)')
-            .eq('aluno_id', user.id);
+            .eq('aluno_id', user.id)
+            .returns<Array<{ curso_id: string; cursos: { id: string; nome: string } | null }>>();
           if (acError) throw acError;
           const lista = (data ?? [])
             .map((ac) => ac.cursos)
-            .filter(Boolean)
-            .map((c: { id: string; nome: string }) => ({ id: c.id, nome: c.nome }));
+            .filter((c): c is { id: string; nome: string } => Boolean(c))
+            .map((c) => ({ id: c.id, nome: c.nome }));
           setCursos(lista);
           if (!cursoId && lista.length > 0) setCursoId(lista[0].id);
         }

@@ -31,7 +31,7 @@ export default function CalendarioPage() {
         .eq('aluno_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle()
+        .maybeSingle<{ id: string }>()
 
       if (error) {
         console.error('Erro ao buscar cronograma:', error)

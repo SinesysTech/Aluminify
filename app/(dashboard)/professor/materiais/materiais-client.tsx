@@ -143,12 +143,13 @@ export default function MateriaisClientPage() {
           .select('disciplina:disciplina_id ( id, nome )')
           .eq('curso_id', cursoSelecionado)
           .order('disciplina(nome)', { ascending: true })
+          .returns<Array<{ disciplina: { id: string; nome: string } | null }>>()
 
         if (error) throw error
 
         const mapped =
           data
-            ?.map((row: { disciplina: { id: string; nome: string } | null }) => row.disciplina)
+            ?.map((row) => row.disciplina)
             .filter((d): d is { id: string; nome: string } => d !== null)
             .map((d) => ({ id: d.id, nome: d.nome })) ?? []
 

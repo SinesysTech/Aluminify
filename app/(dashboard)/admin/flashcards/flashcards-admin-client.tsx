@@ -244,8 +244,11 @@ export default function FlashcardsAdminClient() {
           .eq('disciplina_id', disciplinaId)
           .order('nome', { ascending: true })
 
+          // Evita inferência incorreta (never[]) quando os tipos do Supabase não estão disponíveis
+          .returns<Frente[]>()
+
         if (error) throw error
-        setFrentes((data || []).filter((f): f is Frente => f.disciplina_id !== null))
+        setFrentes(data ?? [])
         setFrenteId(undefined)
         setModulos([])
         setModuloId(undefined)
@@ -276,8 +279,11 @@ export default function FlashcardsAdminClient() {
           .eq('frente_id', frenteId)
           .order('numero_modulo', { ascending: true })
 
+          // Evita inferência incorreta (never[]) quando os tipos do Supabase não estão disponíveis
+          .returns<Modulo[]>()
+
         if (error) throw error
-        setModulos((data || []).filter((m): m is Modulo => m.frente_id !== null))
+        setModulos(data ?? [])
         setModuloId(undefined)
       } catch (err) {
         console.error('Erro ao carregar módulos:', err)
@@ -510,9 +516,10 @@ export default function FlashcardsAdminClient() {
         .select('id, nome, disciplina_id')
         .eq('disciplina_id', disciplinaIdFromFlashcard)
         .order('nome', { ascending: true })
+        .returns<Frente[]>()
 
       if (!frentesError) {
-        setFrentes((frentesData || []).filter((f): f is Frente => f.disciplina_id !== null))
+        setFrentes(frentesData ?? [])
         setFrenteId(frenteIdFromFlashcard)
 
         // Carregar módulos da frente
@@ -521,9 +528,10 @@ export default function FlashcardsAdminClient() {
           .select('id, nome, numero_modulo, frente_id')
           .eq('frente_id', frenteIdFromFlashcard)
           .order('numero_modulo', { ascending: true })
+          .returns<Modulo[]>()
 
         if (!modulosError) {
-          setModulos((modulosData || []).filter((m): m is Modulo => m.frente_id !== null))
+          setModulos(modulosData ?? [])
           setFormModuloId(flashcard.modulo_id)
         }
       }

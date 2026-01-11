@@ -31,7 +31,7 @@ export default function CronogramaPage() {
         .eq('aluno_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle()
+        .maybeSingle<{ id: string }>()
 
       if (error) {
         // Ignorar erro 400 se for relacionado a coluna 'ativo' inexistente

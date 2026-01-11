@@ -45,11 +45,15 @@ import {
 } from '@/components/ui/alert-dialog'
 import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2, Trash2, Plus } from 'lucide-react'
 import Papa from 'papaparse'
-import ExcelJS from 'exceljs'
 import { useRouter } from 'next/navigation'
 import AddActivityModal from '../../../components/conteudos/add-activity-modal'
 import InlineEditableTitle from '@/components/shared/inline-editable-title'
 import { formatTipoAtividade } from '@/lib/utils'
+
+async function loadExcelJS() {
+  const mod: any = await import('exceljs/dist/exceljs.min.js')
+  return mod?.default ?? mod
+}
 
 type Disciplina = {
   id: string
@@ -643,6 +647,7 @@ export default function ConteudosClientPage() {
   const parseXLSX = async (file: File): Promise<CSVRow[]> => {
     try {
       const buffer = await file.arrayBuffer()
+      const ExcelJS = await loadExcelJS()
       const workbook = new ExcelJS.Workbook()
       await workbook.xlsx.load(buffer)
 
@@ -654,16 +659,16 @@ export default function ConteudosClientPage() {
       const headers: string[] = []
       const rows: CSVRow[] = []
 
-      worksheet.eachRow((row, rowNumber) => {
+      worksheet.eachRow((row: any, rowNumber: number) => {
         if (rowNumber === 1) {
           // First row = headers (normalize to lowercase)
-          row.eachCell({ includeEmpty: false }, (cell) => {
+          row.eachCell({ includeEmpty: false }, (cell: any) => {
             headers.push(String(cell.value ?? '').trim().toLowerCase())
           })
         } else {
           // Data rows
           const rowObj: CSVRow = {} as CSVRow
-          row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
+          row.eachCell({ includeEmpty: false }, (cell: any, colNumber: number) => {
             const header = headers[colNumber - 1]
             if (header) {
               const value = cell.value

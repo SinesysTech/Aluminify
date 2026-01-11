@@ -209,6 +209,7 @@ export default function SalaEstudosClientPage({
             .from('alunos_cursos')
             .select('curso_id, cursos(*)')
             .eq('aluno_id', alunoId)
+            .returns<Array<{ curso_id: string; cursos: { id: string } | null }>>()
 
           if (alunosCursosError) {
             console.error('Erro ao buscar cursos do aluno (atividades):', alunosCursosError)
@@ -225,7 +226,7 @@ export default function SalaEstudosClientPage({
 
           // Extrair os cursos do resultado (mesmo método do cronograma)
           const cursosData = alunosCursos
-            .map((ac: { cursos: { id: string } | null }) => ac.cursos)
+            .map((ac) => ac.cursos)
             .filter((c): c is { id: string } => c !== null)
           cursoIds = cursosData.map((c) => c.id)
         }

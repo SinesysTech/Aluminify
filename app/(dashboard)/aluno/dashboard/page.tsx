@@ -121,10 +121,9 @@ export default function StudentDashboardPage() {
         .from('cronogramas')
         .select('id')
         .eq('aluno_id', user.id)
-        .eq('ativo', true)
         .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle()
+        .maybeSingle<{ id: string }>()
 
       if (!cronograma) return
 
@@ -191,7 +190,7 @@ export default function StudentDashboardPage() {
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <p className="text-slate-500 dark:text-slate-400">
           Nenhum dado disponível
         </p>

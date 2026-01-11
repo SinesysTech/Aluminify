@@ -235,6 +235,14 @@ npm run start        # Inicia servidor de produção
 
 # Qualidade de Código
 npm run lint         # Executa linter ESLint
+
+# TypeScript
+npm run typecheck     # Verificação de tipos (tsc --noEmit)
+
+# Checks adicionais
+npm run check:colors  # Garante uso de tokens semânticos de status (sem cores hardcoded)
+npm run check:quick   # lint + typecheck + check:colors
+npm run check         # check:quick + testes (jest)
 ```
 
 ## 🔄 Rotas da API Principais

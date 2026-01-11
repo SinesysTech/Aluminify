@@ -141,6 +141,15 @@ npm start
 
 # Linting
 npm run lint
+
+# Typecheck (TypeScript)
+npm run typecheck
+
+# Verificações rápidas (lint + typecheck + check:colors)
+npm run check:quick
+
+# Verificações completas (check:quick + testes)
+npm run check
 ```
 
 O projeto estará disponível em: `http://localhost:3000`

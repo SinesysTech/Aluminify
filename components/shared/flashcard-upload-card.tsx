@@ -21,7 +21,11 @@ import {
 } from '@/components/ui/select'
 import { FileText, Upload, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
 import Papa from 'papaparse'
-import ExcelJS from 'exceljs'
+
+async function loadExcelJS() {
+  const mod: any = await import('exceljs/dist/exceljs.min.js')
+  return mod?.default ?? mod
+}
 
 // IDs estáveis para evitar erro de hidratação
 const CURSO_SELECT_ID = 'flashcard-curso'
@@ -166,6 +170,7 @@ export function FlashcardUploadCard({ cursos, onUploadSuccess }: FlashcardUpload
   const parseXLSX = async (file: File): Promise<CSVRow[]> => {
     try {
       const buffer = await file.arrayBuffer()
+      const ExcelJS = await loadExcelJS()
       const workbook = new ExcelJS.Workbook()
       await workbook.xlsx.load(buffer)
 

@@ -143,12 +143,13 @@ export default function MateriaisClientPage() {
           .select('disciplina:disciplina_id ( id, nome )')
           .eq('curso_id', cursoSelecionado)
           .order('disciplina(nome)', { ascending: true })
+          .returns<Array<{ disciplina: { id: string; nome: string } | null }>>()
 
         if (error) throw error
 
         const mapped =
           data
-            ?.map((row: { disciplina: { id: string; nome: string } | null }) => row.disciplina)
+            ?.map((row) => row.disciplina)
             .filter((d): d is { id: string; nome: string } => d !== null)
             .map((d) => ({ id: d.id, nome: d.nome })) ?? []
 
@@ -183,6 +184,7 @@ export default function MateriaisClientPage() {
           .eq('disciplina_id', disciplinaSelecionada)
           .eq('curso_id', cursoSelecionado)
           .order('nome', { ascending: true })
+          .returns<Array<{ id: string; nome: string; disciplina_id: string | null; curso_id: string | null }>>()
 
         if (error) throw error
         setFrentes((data || []).filter(f => f.disciplina_id !== null).map(f => ({
@@ -223,6 +225,7 @@ export default function MateriaisClientPage() {
           .select('id, nome, numero_modulo, frente_id')
           .eq('frente_id', frenteSelecionada)
           .order('numero_modulo', { ascending: true })
+          .returns<Array<{ id: string; nome: string; numero_modulo: number | null; frente_id: string | null }>>()
 
         if (modulosError) throw modulosError
 

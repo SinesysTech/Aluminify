@@ -187,7 +187,7 @@ export default function FlashcardsClient() {
           .from('professores')
           .select('id')
           .eq('id', user.id)
-          .maybeSingle()
+          .maybeSingle<{ id: string }>()
 
         const isProfessor = !!professorData
         const role = (user.user_metadata?.role as string) || 'aluno'
@@ -204,6 +204,7 @@ export default function FlashcardsClient() {
             .from('cursos')
             .select('id, nome')
             .order('nome', { ascending: true })
+            .returns<Curso[]>()
 
           if (error) {
             console.error('[flashcards] Erro ao buscar cursos (professor):', error)
@@ -223,6 +224,7 @@ export default function FlashcardsClient() {
               .from('alunos_cursos')
               .select('curso_id')
               .eq('aluno_id', user.id)
+              .returns<Array<{ curso_id: string }>>()
 
             if (alunosCursosError) {
               console.error('[flashcards] Erro ao buscar alunos_cursos:', {
@@ -248,6 +250,7 @@ export default function FlashcardsClient() {
                 .select('id, nome')
                 .in('id', cursoIds)
                 .order('nome', { ascending: true })
+                .returns<Curso[]>()
 
               if (cursosError) {
                 console.error('[flashcards] Erro ao buscar cursos:', {
@@ -314,12 +317,13 @@ export default function FlashcardsClient() {
               .from('cursos_disciplinas')
               .select('disciplina:disciplina_id ( id, nome )')
               .eq('curso_id', cursoSelecionado)
+              .returns<Array<{ disciplina: { id: string; nome: string } | null }>>()
 
             if (error) throw error
 
             if (cursosDisciplinas) {
               const disciplinasData = cursosDisciplinas
-                .map((cd: { disciplina: { id: string; nome: string } | null }) => cd.disciplina)
+                .map((cd) => cd.disciplina)
                 .filter((d): d is { id: string; nome: string } => d !== null)
                 .map((d) => ({ id: d.id, nome: d.nome }))
               
@@ -359,6 +363,7 @@ export default function FlashcardsClient() {
           .eq('disciplina_id', disciplinaSelecionada)
           .eq('curso_id', cursoSelecionado)
           .order('nome', { ascending: true })
+          .returns<Array<{ id: string; nome: string; disciplina_id: string | null; curso_id: string | null }>>()
 
         if (error) {
           console.error('Erro na query de frentes:', error)
@@ -366,9 +371,14 @@ export default function FlashcardsClient() {
         }
 
         console.log('Frentes carregadas:', frentesData?.length || 0, frentesData)
-        setFrentes((frentesData || [])
-          .filter(f => f.disciplina_id !== null)
-          .map((f) => ({ id: f.id, nome: f.nome, disciplina_id: f.disciplina_id! })) as Frente[])
+        setFrentes(
+          (frentesData ?? [])
+            .filter(
+              (f): f is { id: string; nome: string; disciplina_id: string; curso_id: string | null } =>
+                f.disciplina_id !== null
+            )
+            .map((f) => ({ id: f.id, nome: f.nome, disciplina_id: f.disciplina_id }))
+        )
       } catch (err) {
         console.error('Erro ao carregar frentes:', err)
         setError('Erro ao carregar frentes. Verifique se a disciplina e o curso estão corretos.')
@@ -399,12 +409,18 @@ export default function FlashcardsClient() {
           .eq('frente_id', frenteSelecionada)
           .or(`curso_id.eq.${cursoSelecionado},curso_id.is.null`)
           .order('numero_modulo', { ascending: true, nullsFirst: false })
+          .returns<Array<{ id: string; nome: string; numero_modulo: number | null; frente_id: string | null }>>()
 
         if (error) throw error
 
-        setModulos((modulosData || [])
-          .filter(m => m.frente_id !== null)
-          .map((m) => ({ id: m.id, nome: m.nome, numero_modulo: m.numero_modulo, frente_id: m.frente_id! })) as Modulo[])
+        setModulos(
+          (modulosData ?? [])
+            .filter(
+              (m): m is { id: string; nome: string; numero_modulo: number | null; frente_id: string } =>
+                m.frente_id !== null
+            )
+            .map((m) => ({ id: m.id, nome: m.nome, numero_modulo: m.numero_modulo, frente_id: m.frente_id }))
+        )
       } catch (err) {
         console.error('Erro ao carregar módulos:', err)
       } finally {
