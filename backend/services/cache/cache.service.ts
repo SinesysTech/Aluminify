@@ -106,12 +106,12 @@ class CacheService {
    * Obter valor do cache
    */
   async get<T>(key: string): Promise<T | null> {
-    if (!this.shouldAttemptRedis()) {
+    if (!this.shouldAttemptRedis() || !this.redis) {
       return null;
     }
 
     try {
-      const data = await this.redis!.get<T>(key);
+      const data = await this.redis.get<T>(key);
       if (data !== null) {
         console.log(`[Cache] ✅ Hit: ${key}`);
         // Registrar hit no monitor
@@ -155,12 +155,12 @@ class CacheService {
    * @param ttlSeconds - Tempo de vida em segundos (padrão: 3600)
    */
   async set(key: string, value: unknown, ttlSeconds: number = 3600): Promise<void> {
-    if (!this.shouldAttemptRedis()) {
+    if (!this.shouldAttemptRedis() || !this.redis) {
       return;
     }
 
     try {
-      await this.redis!.setex(key, ttlSeconds, value);
+      await this.redis.setex(key, ttlSeconds, value);
       console.log(`[Cache] 💾 Set: ${key} (TTL: ${ttlSeconds}s)`);
       // Registrar set no monitor
       if (typeof window === 'undefined') {
@@ -190,12 +190,12 @@ class CacheService {
    * Deletar chave do cache
    */
   async del(key: string): Promise<void> {
-    if (!this.shouldAttemptRedis()) {
+    if (!this.shouldAttemptRedis() || !this.redis) {
       return;
     }
 
     try {
-      await this.redis!.del(key);
+      await this.redis.del(key);
       console.log(`[Cache] 🗑️ Del: ${key}`);
       // Registrar delete no monitor
       if (typeof window === 'undefined') {

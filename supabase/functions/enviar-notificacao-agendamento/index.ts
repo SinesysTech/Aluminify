@@ -1,5 +1,16 @@
+// NOTE: Este arquivo roda no runtime Deno (Supabase Edge Functions).
+// O TypeScript Server do VS Code (projeto Next.js) não resolve specifiers `jsr:`.
+// Mantemos os imports para o runtime, mas ignoramos no TS Server para evitar erros no editor.
+// @ts-ignore
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+// @ts-ignore
 import { createClient } from "jsr:@supabase/supabase-js@2";
+
+// Declaração mínima para o TypeScript Server (não afeta o runtime Deno).
+declare const Deno: {
+  env: { get(key: string): string | undefined };
+  serve: (handler: (req: Request) => Response | Promise<Response>) => void;
+};
 
 interface NotificacaoPayload {
   agendamento_id: string;
@@ -48,7 +59,12 @@ interface TemplateData {
   mensagem?: string;
 }
 
-const emailTemplates = {
+type EmailTemplate = {
+  subject: string;
+  getBody: (data: TemplateData) => string;
+};
+
+const emailTemplates: Record<NotificacaoPayload['tipo'], EmailTemplate> = {
   criacao: {
     subject: "Novo agendamento de mentoria",
     getBody: (data: TemplateData) => `
