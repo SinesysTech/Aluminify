@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Roadmap - Aluminify</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#111827", 
+              "background-light": "#F9FAFB",
+              "border-light": "#E5E7EB",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              display: ["Plus Jakarta Sans", "sans-serif"],
+            }
+          },
+        },
+      };
+    </script>
+</head>
+<body class="bg-background-light text-gray-900 font-sans antialiased">
+
+    <nav class="sticky top-0 z-50 w-full border-b border-border-light bg-white/80 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <a class="flex items-center gap-2" href="/">
+                    <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold font-display text-xl">A</div>
+                    <span class="font-display font-bold text-lg tracking-tight">Aluminify</span>
+                </a>
+                <div class="flex gap-4 text-sm font-medium">
+                    <a href="features.html" class="text-gray-500 hover:text-primary transition-colors">Produto</a>
+                    <a href="roadmap.html" class="text-primary font-bold transition-colors">Roadmap</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center mb-16">
+            <h1 class="text-4xl font-display font-bold mb-4">Roadmap Público</h1>
+            <p class="text-gray-500 max-w-2xl mx-auto">
+                Nossa visão para o futuro da infraestrutura educacional. Vote nas features que você mais precisa no nosso <a href="#" class="text-blue-600 underline decoration-1 underline-offset-2">GitHub Discussions</a>.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8 items-start">
+            
+            <div>
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                    <h3 class="font-bold text-sm uppercase tracking-wider text-gray-500">Em Desenvolvimento</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-blue-300 transition-colors group">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-mono text-gray-400">CORE-241</span>
+                            <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold uppercase">Beta</span>
+                        </div>
+                        <h4 class="font-bold mb-2 group-hover:text-blue-600 transition-colors">Integração Nativa Notion</h4>
+                        <p class="text-sm text-gray-500 mb-4">Sincronização bidirecional de notas de aula e agenda do aluno.</p>
+                        <div class="flex items-center gap-2">
+                            <img src="https://ui-avatars.com/api/?name=Pedro+Z&background=random" class="w-5 h-5 rounded-full border border-white">
+                            <span class="text-xs text-gray-400">Pedro Z.</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-blue-300 transition-colors group">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-mono text-gray-400">AI-102</span>
+                        </div>
+                        <h4 class="font-bold mb-2 group-hover:text-blue-600 transition-colors">RAG Multi-idioma</h4>
+                        <p class="text-sm text-gray-500">Suporte para ingestão de aulas em inglês e espanhol com legendas automáticas.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="w-2 h-2 rounded-full bg-orange-400"></div>
+                    <h3 class="font-bold text-sm uppercase tracking-wider text-gray-500">Próximo (Q2 2026)</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-orange-300 transition-colors">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-mono text-gray-400">MOB-001</span>
+                        </div>
+                        <h4 class="font-bold mb-2">App Mobile Offline (PWA v2)</h4>
+                        <p class="text-sm text-gray-500">Download real de vídeos criptografados para assistir sem internet.</p>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:border-orange-300 transition-colors">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-mono text-gray-400">ANA-300</span>
+                        </div>
+                        <h4 class="font-bold mb-2">Analytics Preditivo</h4>
+                        <p class="text-sm text-gray-500">Alerta automático de evasão escolar baseado em padrões de login.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex items-center gap-2 mb-6">
+                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                    <h3 class="font-bold text-sm uppercase tracking-wider text-gray-500">Futuro / Pesquisa</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 border-dashed">
+                        <h4 class="font-bold mb-2 text-gray-600">Gamificação Multiplayer</h4>
+                        <p class="text-sm text-gray-500">Batalhas de flashcards em tempo real entre alunos.</p>
+                    </div>
+                    <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 border-dashed">
+                        <h4 class="font-bold mb-2 text-gray-600">Marketplace de Plugins</h4>
+                        <p class="text-sm text-gray-500">Loja de extensões criadas pela comunidade.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</body>
+</html>

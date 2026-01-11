@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <title>Changelog - Aluminify</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&amp;family=Plus+Jakarta+Sans:wght@700&amp;family=JetBrains+Mono:wght@400&amp;display=swap" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#111827", },
+            fontFamily: { sans: ["Inter", "sans-serif"], display: ["Plus Jakarta Sans", "sans-serif"], mono: ["JetBrains Mono", "monospace"] }
+          },
+        },
+      };
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased">
+
+    <nav class="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/80 backdrop-blur-md">
+        <div class="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
+            <a href="/" class="font-display font-bold text-lg">Aluminify</a>
+            <span class="text-sm font-medium text-gray-500">Changelog</span>
+        </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-4 py-16">
+        <h1 class="text-4xl font-display font-bold mb-4">Novidades & Atualizações</h1>
+        <p class="text-gray-500 mb-12">Acompanhe a evolução da infraestrutura semana a semana.</p>
+
+        <div class="relative border-l border-gray-200 ml-4 space-y-12">
+            
+            <div class="relative pl-8">
+                <div class="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-white bg-blue-500 shadow"></div>
+                <div class="flex items-center gap-3 mb-2">
+                    <h2 class="text-xl font-bold">v2.1.0 - The Focus Update</h2>
+                    <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-mono font-bold">LATEST</span>
+                </div>
+                <time class="block text-sm text-gray-400 mb-4">12 Jan 2026</time>
+                <div class="prose prose-sm text-gray-600 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                    <p>Focamos totalmente na experiência do aluno nesta versão. O novo "Focus Mode" remove todas as distrações da interface durante a reprodução de vídeo.</p>
+                    <ul class="list-disc pl-4 mt-2 space-y-1">
+                        <li><strong>Novo:</strong> Focus Mode (Atalho: F). Esconde sidebar e header.</li>
+                        <li><strong>Melhoria:</strong> Player de vídeo agora suporta HLS nativo para menor consumo de dados.</li>
+                        <li><strong>Fix:</strong> Correção no cálculo de progresso de módulos aninhados.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="relative pl-8">
+                <div class="absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border-2 border-white bg-gray-300"></div>
+                <div class="flex items-center gap-3 mb-2">
+                    <h2 class="text-xl font-bold">v2.0.0 - Open Source Release</h2>
+                </div>
+                <time class="block text-sm text-gray-400 mb-4">01 Jan 2026</time>
+                <div class="prose prose-sm text-gray-600">
+                    <p>O grande dia. Aluminify agora é 100% open source sob licença Apache 2.0.</p>
+                    <ul class="list-disc pl-4 mt-2 space-y-1">
+                        <li>Código fonte liberado no GitHub.</li>
+                        <li>Documentação de self-hosting via Docker Compose.</li>
+                        <li>Lançamento do plano Cloud para escolas que preferem gestão assistida.</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</body>
+</html>

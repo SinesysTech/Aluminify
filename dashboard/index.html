@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Dashboard - Aluminify Student</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#111827", 
+              "background-body": "#F3F4F6", // Cinza levemente mais escuro que o paper para contraste
+              "surface-paper": "#FFFFFF",
+              border: "#E5E7EB",
+            },
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+              display: ["Plus Jakarta Sans", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            }
+          },
+        },
+      };
+    </script>
+    <style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar { -ms-overflow-style: none;  scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background-body text-gray-900 font-sans antialiased h-screen flex overflow-hidden">
+
+    <aside class="w-64 bg-surface-paper border-r border-border hidden md:flex flex-col justify-between z-20">
+        
+        <div class="p-6">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold font-display text-lg">A</div>
+                <div class="leading-tight">
+                    <h1 class="font-display font-bold text-sm tracking-tight">Aluminify</h1>
+                    <span class="text-[10px] text-gray-500 font-medium uppercase tracking-wider">Cursinho Aprova</span>
+                </div>
+            </div>
+
+            <nav class="space-y-1">
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gray-100 text-primary font-semibold text-sm group transition-colors">
+                    <span class="material-icons-outlined text-xl text-primary">dashboard</span>
+                    Dashboard
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-primary hover:bg-gray-50 font-medium text-sm group transition-colors">
+                    <span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">library_books</span>
+                    Meus Cursos
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-primary hover:bg-gray-50 font-medium text-sm group transition-colors">
+                    <span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">style</span>
+                    Flashcards
+                    <span class="ml-auto bg-red-100 text-red-600 py-0.5 px-2 rounded-full text-[10px] font-bold">42</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-primary hover:bg-gray-50 font-medium text-sm group transition-colors">
+                    <span class="material-icons-outlined text-xl group-hover:text-primary transition-colors">calendar_today</span>
+                    Agenda
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-500 hover:text-purple-600 hover:bg-purple-50 font-medium text-sm group transition-colors">
+                    <span class="material-icons-outlined text-xl text-purple-500">auto_awesome</span>
+                    Tutor IA
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-border">
+            <button class="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-gray-50 transition-colors text-left">
+                <img src="https://ui-avatars.com/api/?name=Lucas+S&background=111827&color=fff" class="w-9 h-9 rounded-full border border-gray-200">
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-900 truncate">Lucas Silva</p>
+                    <p class="text-xs text-gray-500 truncate">Extensivo 2026</p>
+                </div>
+                <span class="material-icons-outlined text-gray-400 text-lg">settings</span>
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        <header class="h-16 bg-surface-paper border-b border-border flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-gray-500 hover:text-gray-900">
+                    <span class="material-icons-outlined">menu</span>
+                </button>
+                <div class="hidden md:flex items-center text-sm text-gray-500">
+                    <span class="hover:text-gray-900 cursor-pointer transition-colors">Área do Aluno</span>
+                    <span class="material-icons-outlined text-base mx-2 text-gray-300">chevron_right</span>
+                    <span class="font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded">Dashboard</span>
+                </div>
+            </div>
+
+            <div class="hidden md:block w-full max-w-md mx-4">
+                <button class="w-full flex items-center justify-between px-4 py-2 bg-gray-50 border border-border rounded-lg text-sm text-gray-400 hover:border-gray-300 hover:bg-white transition-all group">
+                    <span class="flex items-center gap-2">
+                        <span class="material-icons-outlined text-lg">search</span>
+                        Buscar aula, professor ou tópico...
+                    </span>
+                    <span class="text-xs border border-gray-200 rounded px-1.5 py-0.5 bg-white group-hover:border-gray-300">⌘K</span>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-4">
+                <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 border border-orange-100 rounded-full">
+                    <span class="material-icons-outlined text-orange-500 text-lg">local_fire_department</span>
+                    <span class="text-xs font-bold text-orange-700">12 Dias</span>
+                </div>
+                
+                <button class="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                    <span class="material-icons-outlined">notifications</span>
+                    <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 no-scrollbar">
+            
+            <div class="max-w-6xl mx-auto space-y-6">
+                
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-display font-bold text-gray-900">Bom dia, Lucas! 👋</h2>
+                        <p class="text-gray-500 text-sm mt-1">Você tem <strong class="text-gray-900">3 atividades</strong> prioritárias para hoje.</p>
+                    </div>
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Meta Semanal</p>
+                        <div class="flex items-center gap-2 justify-end">
+                            <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="w-[70%] h-full bg-green-500 rounded-full"></div>
+                            </div>
+                            <span class="text-sm font-bold text-gray-700">70%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <div class="md:col-span-2 bg-surface-paper rounded-2xl border border-border p-1 shadow-sm group cursor-pointer hover:border-gray-300 transition-all">
+                        <div class="flex gap-4 sm:gap-6 p-4 sm:p-5">
+                            <div class="relative w-32 sm:w-48 aspect-video bg-gray-900 rounded-lg overflow-hidden flex-shrink-0">
+                                <div class="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-all">
+                                    <span class="material-icons-outlined text-white text-3xl sm:text-4xl opacity-90 group-hover:scale-110 transition-transform">play_circle_filled</span>
+                                </div>
+                                <div class="absolute bottom-0 left-0 w-full h-1 bg-gray-700">
+                                    <div class="h-full bg-blue-500 w-[45%]"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col justify-center flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wide">Continuar</span>
+                                    <span class="text-xs text-gray-500 truncate">Mecânica • Módulo 02</span>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-900 leading-tight mb-2 truncate">Leis de Newton: Aplicações Práticas</h3>
+                                <p class="text-sm text-gray-500 line-clamp-2 mb-3">
+                                    Continuando a resolução dos exercícios de blocos e tração com vetores inclinados.
+                                </p>
+                                <div class="flex items-center gap-2 text-xs text-gray-400 font-mono mt-auto">
+                                    <span class="material-icons-outlined text-sm">schedule</span>
+                                    Restam 12 min
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-surface-paper rounded-2xl border border-border p-6 shadow-sm flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-4">
+                            <h3 class="font-bold text-gray-900">Meta Diária</h3>
+                            <button class="text-gray-400 hover:text-gray-600"><span class="material-icons-outlined text-lg">more_horiz</span></button>
+                        </div>
+                        
+                        <div class="flex items-center gap-6">
+                            <div class="relative w-20 h-20 rounded-full border-4 border-gray-100 flex items-center justify-center">
+                                <svg class="absolute inset-0 w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#E5E7EB" stroke-width="3" />
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10B981" stroke-width="3" stroke-dasharray="75, 100" />
+                                </svg>
+                                <span class="text-xs font-bold text-gray-700">3/4h</span>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-gray-900">75%</div>
+                                <p class="text-xs text-gray-500">do objetivo concluído</p>
+                                <p class="text-xs text-green-600 font-medium mt-1">+20% vs ontem</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-1 bg-surface-paper rounded-2xl border border-border p-6 shadow-sm">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="font-bold text-gray-900">Agenda Hoje</h3>
+                            <span class="text-xs font-medium text-blue-600 cursor-pointer">Ver tudo</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex gap-4 group">
+                                <div class="flex flex-col items-center min-w-[3rem]">
+                                    <span class="text-xs font-bold text-gray-900">14:00</span>
+                                    <div class="h-full w-0.5 bg-gray-200 mt-1 group-last:hidden"></div>
+                                </div>
+                                <div class="pb-4">
+                                    <div class="p-3 bg-red-50 border border-red-100 rounded-lg">
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                                            <span class="text-xs font-bold text-red-700 uppercase">Ao Vivo</span>
+                                        </div>
+                                        <h4 class="font-bold text-gray-900 text-sm">Redação: Estrutura Dissertativa</h4>
+                                        <p class="text-xs text-gray-500 mt-1">Prof. Cláudia • Sala 03</p>
+                                        <button class="mt-2 w-full py-1.5 bg-white border border-red-200 rounded text-xs font-bold text-red-600 hover:bg-red-50 transition-colors">
+                                            Entrar na Sala
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="flex flex-col items-center min-w-[3rem]">
+                                    <span class="text-xs font-medium text-gray-500">16:30</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-medium text-gray-900 text-sm">Mentoria Individual</h4>
+                                    <p class="text-xs text-gray-500">Google Meet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-2 bg-surface-paper rounded-2xl border border-border p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 flex-shrink-0">
+                                <span class="material-icons-outlined text-2xl">style</span>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900 text-lg">Revisão Espaçada Pendente</h3>
+                                <p class="text-sm text-gray-500 max-w-md">
+                                    O algoritmo identificou <strong class="text-gray-900">42 conceitos</strong> que você está prestes a esquecer. Reforce a memória agora.
+                                </p>
+                            </div>
+                        </div>
+                        <button class="w-full md:w-auto px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-gray-800 transition-all shadow-md flex items-center justify-center gap-2">
+                            <span class="material-icons-outlined text-lg">play_arrow</span>
+                            Iniciar Revisão (15m)
+                        </button>
+                    </div>
+
+                </div> </div>
+        </main>
+    </div>
+
+</body>
+</html>
