@@ -604,7 +604,7 @@ export default function ConteudosClientPage() {
 
   // Calcular estatísticas de um módulo
   const calcularEstatisticasModulo = (aulas: Aula[]) => {
-    const totalAulas = aulas.length
+    const totalAulas = new Set(aulas.map((a) => a.id).filter(Boolean)).size
     const tempoTotal = aulas.reduce((sum, aula) => {
       return sum + (aula.tempo_estimado_minutos || 0)
     }, 0)
@@ -613,13 +613,29 @@ export default function ConteudosClientPage() {
 
   // Calcular estatísticas de uma frente (todos os módulos)
   const calcularEstatisticasFrente = (modulos: Modulo[]) => {
-    const totalAulas = modulos.reduce((sum, modulo) => sum + modulo.aulas.length, 0)
-    const tempoTotal = modulos.reduce((sum, modulo) => {
-      return sum + modulo.aulas.reduce((aulaSum, aula) => {
-        return aulaSum + (aula.tempo_estimado_minutos || 0)
-      }, 0)
-    }, 0)
-    return { totalAulas, tempoTotal }
+    const aulaIds = new Set<string>()
+    let tempoTotal = 0
+
+    for (const modulo of modulos) {
+      for (const aula of modulo.aulas) {
+        if (aula?.id) aulaIds.add(aula.id)
+        tempoTotal += aula?.tempo_estimado_minutos || 0
+      }
+    }
+
+    // Debug: se houver duplicatas (mesma aula aparecendo mais de uma vez)
+    if (process.env.NODE_ENV === 'development') {
+      const totalSomado = modulos.reduce((sum, m) => sum + (m.aulas?.length || 0), 0)
+      if (totalSomado !== aulaIds.size) {
+        console.warn('[Conteudos] Contagem de aulas com duplicatas detectadas', {
+          totalSomado,
+          totalUnico: aulaIds.size,
+          diferenca: totalSomado - aulaIds.size,
+        })
+      }
+    }
+
+    return { totalAulas: aulaIds.size, tempoTotal }
   }
 
 
@@ -656,6 +672,41 @@ export default function ConteudosClientPage() {
         throw new Error('O arquivo XLSX não contém planilhas')
       }
 
+      const normalizeCellValue = (value: unknown): string => {
+        if (value == null) return ''
+
+        // ExcelJS frequentemente usa Date ou number para horários/durações
+        if (value instanceof Date) {
+          // Ex: 1899-12-31T00:09:06.000Z -> "00:09:06"
+          return value.toISOString().slice(11, 19)
+        }
+
+        if (typeof value === 'number') {
+          // Pode ser fração do dia (Excel). Ex: 0.00625 ~= 00:09:00
+          // Mantemos como string numérica para o parser converter.
+          return String(value)
+        }
+
+        if (typeof value === 'object') {
+          // Fórmulas: { formula, result }
+          const anyVal = value as Record<string, unknown>
+          if (anyVal.result != null) return normalizeCellValue(anyVal.result)
+
+          // Rich text: { richText: [{ text: '...' }] }
+          if (Array.isArray(anyVal.richText)) {
+            return (anyVal.richText as Array<{ text?: unknown }>)
+              .map((p) => (p?.text != null ? String(p.text) : ''))
+              .join('')
+              .trim()
+          }
+
+          // Algumas versões expõem { text: '...' }
+          if (anyVal.text != null) return String(anyVal.text).trim()
+        }
+
+        return String(value).trim()
+      }
+
       const headers: string[] = []
       const rows: CSVRow[] = []
 
@@ -663,7 +714,7 @@ export default function ConteudosClientPage() {
         if (rowNumber === 1) {
           // First row = headers (normalize to lowercase)
           row.eachCell({ includeEmpty: false }, (cell) => {
-            headers.push(String(cell.value ?? '').trim().toLowerCase())
+            headers.push(normalizeCellValue(cell.value).trim().toLowerCase())
           })
         } else {
           // Data rows
@@ -672,7 +723,7 @@ export default function ConteudosClientPage() {
             const header = headers[colNumber - 1]
             if (header) {
               const value = cell.value
-              const stringValue = value != null ? String(value).trim() : ''
+              const stringValue = normalizeCellValue(value)
               ;(rowObj as Record<string, string>)[header] = stringValue
             }
           })
@@ -864,6 +915,58 @@ export default function ConteudosClientPage() {
     return null
   }
 
+  // Converte diferentes formatos de tempo para minutos (inteiro)
+  // Aceita:
+  // - "15" / "15,5" / "15.5" (minutos)
+  // - "00:09:06" (hh:mm:ss)
+  // - "09:06" (mm:ss)
+  // - fração do dia do Excel (ex: 0.00625 ~= 9 min) quando vem como número/string decimal <= 1
+  const parseTempoParaMinutos = (raw?: string | null): number | null => {
+    if (!raw) return null
+    const s = String(raw).trim()
+    if (!s) return null
+
+    // hh:mm:ss ou mm:ss
+    const timeMatch = /^(\d{1,3}):(\d{2})(?::(\d{2}))?$/.exec(s)
+    if (timeMatch) {
+      const a = Number(timeMatch[1])
+      const b = Number(timeMatch[2])
+      const c = timeMatch[3] != null ? Number(timeMatch[3]) : null
+      if ([a, b, c].some((n) => n != null && Number.isNaN(n))) return null
+
+      // Se tem 3 partes: hh:mm:ss
+      if (c != null) {
+        const totalSeconds = a * 3600 + b * 60 + c
+        if (totalSeconds <= 0) return null
+        const mins = Math.ceil(totalSeconds / 60)
+        return mins > 0 ? mins : 1
+      }
+
+      // Se tem 2 partes: mm:ss
+      const totalSeconds = a * 60 + b
+      if (totalSeconds <= 0) return null
+      const mins = Math.ceil(totalSeconds / 60)
+      return mins > 0 ? mins : 1
+    }
+
+    // Número puro (minutos) ou fração do dia (Excel)
+    const numeric = s.replace(',', '.')
+    if (/^\d+(\.\d+)?$/.test(numeric)) {
+      const val = Number(numeric)
+      if (!Number.isFinite(val) || val <= 0) return null
+
+      // Heurística: se <= 1 e tem decimal, pode ser fração do dia do Excel
+      if (val <= 1 && numeric.includes('.')) {
+        const mins = Math.ceil(val * 24 * 60)
+        return mins > 0 ? mins : 1
+      }
+
+      return Math.ceil(val)
+    }
+
+    return null
+  }
+
   const transformCSVToJSON = (rows: CSVRow[]) => {
     const jsonData: Array<{
       modulo_numero: number
@@ -998,6 +1101,7 @@ export default function ConteudosClientPage() {
         'tempo_estimado',
         'tempo estimado (minutos)',
         'tempo (minutos)',
+        'tempo em minutos',
         'duração',
         'duracao',
       ])
@@ -1012,7 +1116,7 @@ export default function ConteudosClientPage() {
         'prioridade 1-5',
       ])
 
-      const tempo = tempoStr ? parseInt(tempoStr, 10) : null
+      const tempo = parseTempoParaMinutos(tempoStr)
       const prioridade = prioridadeStr ? parseInt(prioridadeStr, 10) : null
       const importancia = normalizeImportancia(
         getColumnValue(row, ['importancia', 'prioridade', 'importância', 'Importancia', 'Prioridade']),
@@ -1190,17 +1294,18 @@ export default function ConteudosClientPage() {
         if (e && typeof e === 'object') {
           // Algumas libs retornam erros com props não-enumeráveis, e o console mostra "{}".
           const obj = e as Record<string, unknown>
+          const get = (k: string) => Reflect.get(e as object, k) as unknown
           const getString = (v: unknown) => (typeof v === 'string' ? v : v != null ? String(v) : undefined)
 
           const message =
-            getString(obj.message) ||
-            getString(obj.error_description) ||
-            getString(obj.error) ||
+            getString(get('message') ?? obj.message) ||
+            getString(get('error_description') ?? obj.error_description) ||
+            getString(get('error') ?? obj.error) ||
             'Erro ao importar cronograma'
 
-          const details = getString(obj.details)
-          const hint = getString(obj.hint)
-          const code = getString(obj.code)
+          const details = getString(get('details') ?? obj.details)
+          const hint = getString(get('hint') ?? obj.hint)
+          const code = getString(get('code') ?? obj.code)
 
           // Tenta também inspecionar propriedades não-enumeráveis
           const allProps = Object.getOwnPropertyNames(e)
@@ -1647,7 +1752,7 @@ export default function ConteudosClientPage() {
                 type="file"
                 accept=".csv,.xlsx"
                 onChange={handleFileChange}
-                className="cursor-pointer"
+                className="cursor-pointer py-0 leading-9 file:h-9 file:py-0 file:leading-9"
               />
               {arquivo && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -1739,36 +1844,38 @@ export default function ConteudosClientPage() {
                   const frenteSelecionadaData = frentes.find(f => f.id === frenteSelecionada)
                   return (
                     <div className="rounded-lg border-2 bg-primary/5 p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold">
-                              Resumo: {frenteSelecionadaData?.nome || 'N/A'}
-                            </h3>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={checkCronogramasBeforeDelete}
-                              disabled={isDeleting}
-                              className="ml-4 text-white"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Deletar Frente
-                            </Button>
-                          </div>
-                          <p className="text-sm text-muted-foreground mt-1">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-lg font-semibold">
+                            Resumo: {frenteSelecionadaData?.nome || 'N/A'}
+                          </h3>
+                          <p className="mt-1 text-sm text-muted-foreground">
                             {modulos.length} módulo{modulos.length !== 1 ? 's' : ''} cadastrado{modulos.length !== 1 ? 's' : ''}
                           </p>
                         </div>
-                        <div className="text-right ml-4">
-                          <div className="text-2xl font-bold">
-                            {totalAulas} aula{totalAulas !== 1 ? 's' : ''}
-                          </div>
-                          {tempoTotal > 0 && (
-                            <div className="text-lg text-muted-foreground mt-1">
-                              {formatTempo(tempoTotal)}
+
+                        <div className="flex shrink-0 items-center gap-4">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={checkCronogramasBeforeDelete}
+                            disabled={isDeleting}
+                            className="text-white"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Deletar Frente
+                          </Button>
+
+                          <div className="text-right">
+                            <div className="text-2xl font-bold">
+                              {totalAulas} aula{totalAulas !== 1 ? 's' : ''}
                             </div>
-                          )}
+                            {tempoTotal > 0 && (
+                              <div className="mt-1 text-lg text-muted-foreground">
+                                {formatTempo(tempoTotal)}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1937,9 +2044,14 @@ export default function ConteudosClientPage() {
                                         {aula.nome || 'Sem nome'}
                                       </TableCell>
                                       <TableCell>
-                                        {aula.tempo_estimado_minutos != null && aula.tempo_estimado_minutos > 0
-                                          ? `${aula.tempo_estimado_minutos} min`
-                                          : '-'}
+                                        {(() => {
+                                          const raw = (aula as unknown as { tempo_estimado_minutos?: unknown })
+                                            .tempo_estimado_minutos
+                                          if (raw == null) return '-'
+                                          const n = typeof raw === 'number' ? raw : Number(raw)
+                                          if (!Number.isFinite(n)) return '-'
+                                          return `${Math.round(n)} min`
+                                        })()}
                                       </TableCell>
                                     <TableCell>
                                       {aula.prioridade !== null && aula.prioridade !== undefined ? (
@@ -2047,7 +2159,7 @@ export default function ConteudosClientPage() {
                       Atenção: Esta frente possui {deleteCronogramasInfo.count} cronograma(s) associado(s).
                     </p>
                     <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
-                      Os itens do cronograma que referenciam estas aulas podem ficar órfãos após a deleção.
+                      Os itens do cronograma que referenciam estas aulas serão removidos automaticamente junto com o conteúdo.
                     </p>
                   </div>
                 )}

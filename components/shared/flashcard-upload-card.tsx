@@ -95,10 +95,17 @@ export function FlashcardUploadCard({ cursos, onUploadSuccess }: FlashcardUpload
         if (error) throw error
 
         const mapped =
-          data
-            ?.map((row: { disciplina: { id: string; nome: string } }) => row.disciplina)
-            .filter((d): d is { id: string; nome: string } => Boolean(d))
-            .map((d) => ({ id: d.id, nome: d.nome })) ?? []
+          (data ?? [])
+            .flatMap((row) => {
+              const disciplina = (row as { disciplina?: unknown }).disciplina
+              if (!disciplina) return []
+              return Array.isArray(disciplina) ? disciplina : [disciplina]
+            })
+            .map((d) => ({
+              id: String((d as { id?: unknown }).id ?? ''),
+              nome: String((d as { nome?: unknown }).nome ?? ''),
+            }))
+            .filter((d) => d.id && d.nome)
 
         const unique = Array.from(new Map(mapped.map((d) => [d.id, d])).values())
         setDisciplinas(unique)

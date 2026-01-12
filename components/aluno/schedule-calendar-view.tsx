@@ -2192,15 +2192,25 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                 modifiers={modifiers}
                 modifiersClassNames={{
                   // hasConcluidas: verde (prioridade máxima - todas as aulas concluídas)
-                  hasConcluidas: 'bg-green-50 dark:bg-green-950 border-2 border-green-300 dark:border-green-700',
+                  hasConcluidas:
+                    'bg-green-50 dark:bg-green-950 border-2 border-green-200 dark:border-green-700 ' +
+                    'text-slate-900 dark:text-foreground [&>button]:text-slate-900 dark:[&>button]:text-foreground [&>button>span]:text-slate-900 dark:[&>button>span]:text-foreground',
                   // hasPendentes: laranja (prioridade média - algumas aulas concluídas mas não todas)
-                  hasPendentes: 'bg-orange-50 dark:bg-orange-950 border-2 border-orange-300 dark:border-orange-700',
+                  hasPendentes:
+                    'bg-orange-50 dark:bg-orange-950 border-2 border-orange-200 dark:border-orange-700 ' +
+                    'text-slate-900 dark:text-foreground [&>button]:text-slate-900 dark:[&>button]:text-foreground [&>button>span]:text-slate-900 dark:[&>button>span]:text-foreground',
                   // hasAulas: azul (prioridade baixa - tem aulas mas nenhuma concluída)
-                  hasAulas: 'bg-blue-50 dark:bg-blue-950 border-2 border-blue-300 dark:border-blue-700',
+                  hasAulas:
+                    'bg-blue-50 dark:bg-blue-950 border-2 border-blue-200 dark:border-blue-700 ' +
+                    'text-slate-900 dark:text-foreground [&>button]:text-slate-900 dark:[&>button]:text-foreground [&>button>span]:text-slate-900 dark:[&>button>span]:text-foreground',
                   // hasDiasSelecionados: amarelo (prioridade baixa - dia selecionado sem aulas ainda)
-                  hasDiasSelecionados: 'bg-yellow-50/50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800',
+                  hasDiasSelecionados:
+                    'bg-yellow-50/50 dark:bg-yellow-950/50 border border-yellow-200 dark:border-yellow-800 ' +
+                    'text-slate-900 dark:text-foreground [&>button]:text-slate-900 dark:[&>button]:text-foreground [&>button>span]:text-slate-900 dark:[&>button>span]:text-foreground',
                   // hasFerias: rosa (períodos de férias e recesso)
-                  hasFerias: 'bg-pink-50 dark:bg-pink-950 border-2 border-pink-300 dark:border-pink-700',
+                  hasFerias:
+                    'bg-pink-50 dark:bg-pink-950 border-2 border-pink-200 dark:border-pink-700 ' +
+                    'text-slate-900 dark:text-foreground [&>button]:text-slate-900 dark:[&>button]:text-foreground [&>button>span]:text-slate-900 dark:[&>button>span]:text-foreground',
                   // hasSemanaSobrecarregada: vermelho (semana acima de 100% de capacidade)
                   hasSemanaSobrecarregada: 'ring-2 ring-red-500 dark:ring-red-400',
                   // hasSemanaCompleta: laranja (semana entre 95-100% de capacidade)
@@ -3226,21 +3236,16 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                                             <div className="flex-1 min-w-0">
                                               <div className="flex items-start justify-between gap-2">
                                                 <div className="flex-1">
-                                                  {/* Badges: Aula, Módulo, Frente */}
-                                                  <div className="flex items-center gap-2 mb-1.5 flex-nowrap min-w-0">
-                                                    {item.aulas?.numero_aula && (
-                                                      <Badge variant="outline" className="text-xs whitespace-nowrap shrink-0">
-                                                        Aula {item.aulas.numero_aula}
-                                                      </Badge>
-                                                    )}
+                                                  {/* Badges: Módulo (acima) e Aula (abaixo). Frente já aparece no card. */}
+                                                  <div className="flex flex-col gap-1 mb-1.5 min-w-0">
                                                     {item.aulas?.modulos?.numero_modulo && (
-                                                      <Badge variant="secondary" className="text-xs whitespace-nowrap shrink-0">
+                                                      <Badge variant="secondary" className="text-xs whitespace-nowrap shrink-0 w-fit">
                                                         Módulo {item.aulas.modulos.numero_modulo}
                                                       </Badge>
                                                     )}
-                                                    {item.aulas?.modulos?.frentes?.nome && (
-                                                      <Badge variant="outline" className="text-xs whitespace-nowrap min-w-0 truncate">
-                                                        {item.aulas.modulos.frentes.nome}
+                                                    {item.aulas?.numero_aula && (
+                                                      <Badge variant="outline" className="text-xs whitespace-nowrap shrink-0 w-fit">
+                                                        Aula {item.aulas.numero_aula}
                                                       </Badge>
                                                     )}
                                                   </div>

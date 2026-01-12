@@ -1,9 +1,9 @@
 // NOTE: Este arquivo roda no runtime Deno (Supabase Edge Functions).
 // O TypeScript Server do VS Code (projeto Next.js) não resolve specifiers `jsr:`.
 // Mantemos os imports para o runtime, mas ignoramos no TS Server para evitar erros no editor.
-// @ts-ignore
+// @ts-expect-error - specifier `jsr:` é resolvido no runtime do Deno/Supabase
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-// @ts-ignore
+// @ts-expect-error - specifier `jsr:` é resolvido no runtime do Deno/Supabase
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 // Declaração mínima para o TypeScript Server (não afeta o runtime Deno).

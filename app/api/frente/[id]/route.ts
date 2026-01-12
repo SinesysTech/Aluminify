@@ -36,12 +36,41 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
   const client = getDatabaseClient();
   const frenteId = params.id;
   const userId = request.user.id;
+  const metadataEmpresaId = request.user.empresaId;
 
   try {
+    // Resolver empresa_id do professor (preferir metadata, mas cair para tabela professores)
+    let empresaId: string | undefined = metadataEmpresaId;
+    if (!empresaId && request.user.role === 'professor') {
+      const { data: professor, error: professorError } = await client
+        .from('professores')
+        .select('empresa_id')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (professorError) {
+        console.error('[Frente API] Error fetching professor empresa_id:', professorError);
+        return NextResponse.json(
+          { error: 'Failed to verify professor company' },
+          { status: 500 }
+        );
+      }
+
+      empresaId = professor?.empresa_id ?? undefined;
+    }
+
+    // Se não conseguimos determinar a empresa e não é superadmin, não dá para autorizar com segurança
+    if (!empresaId && request.user.role !== 'superadmin') {
+      return NextResponse.json(
+        { error: 'Forbidden. Missing company context for this user.' },
+        { status: 403 }
+      );
+    }
+
     // 1. Buscar a frente e verificar se existe
     const { data: frente, error: frenteError } = await client
       .from('frentes')
-      .select('id, nome, curso_id, disciplina_id')
+      .select('id, nome, curso_id, disciplina_id, empresa_id')
       .eq('id', frenteId)
       .maybeSingle();
 
@@ -64,7 +93,7 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
     if (frente.curso_id) {
       const { data: curso, error: cursoError } = await client
         .from('cursos')
-        .select('id, created_by')
+        .select('id, created_by, empresa_id')
         .eq('id', frente.curso_id)
         .maybeSingle();
 
@@ -83,20 +112,20 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
         );
       }
 
-      // Verificar se o curso pertence ao professor (ou se é superadmin)
-      if (curso.created_by !== userId && request.user.role !== 'superadmin') {
+      // Verificar se o curso está na mesma empresa do professor (ou se é superadmin)
+      // (created_by pode ser outro usuário/admin, mas ainda assim o curso pode ser da mesma empresa)
+      if (request.user.role !== 'superadmin' && empresaId && curso.empresa_id !== empresaId) {
         return NextResponse.json(
-          { error: 'Forbidden. You can only delete fronts from your own courses.' },
+          { error: 'Forbidden. You can only delete fronts from your own company courses.' },
           { status: 403 }
         );
       }
     } else {
-      // Se a frente não tem curso_id, verificar se o professor tem permissão
-      // (pode ser uma frente antiga sem curso associado)
-      // Por segurança, apenas superadmin pode deletar frentes sem curso
-      if (request.user.role !== 'superadmin') {
+      // Se a frente não tem curso_id, autorizar por empresa_id da própria frente
+      // (em multitenancy, frentes possuem empresa_id; logo, dá pra autorizar sem depender do curso)
+      if (request.user.role !== 'superadmin' && empresaId && frente.empresa_id !== empresaId) {
         return NextResponse.json(
-          { error: 'Forbidden. Cannot delete front without course association.' },
+          { error: 'Forbidden. You can only delete fronts from your company.' },
           { status: 403 }
         );
       }
