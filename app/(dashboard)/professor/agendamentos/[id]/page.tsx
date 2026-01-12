@@ -18,7 +18,7 @@ export default async function AgendamentoDetailPage({ params }: PageProps) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect("/auth/professor/login")
+    redirect("/auth/login")
   }
 
   const agendamento = await getAgendamentoById(id)

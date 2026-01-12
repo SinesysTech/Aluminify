@@ -21,7 +21,7 @@ export default function CalendarioPage() {
       const { data: { user } } = await supabase.auth.getUser()
       
       if (!user) {
-        router.push('/auth/aluno/login')
+        router.push('/auth/login')
         return
       }
 

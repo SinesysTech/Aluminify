@@ -9,7 +9,7 @@ export default async function DisponibilidadePage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect("/auth/professor/login")
+    redirect("/auth/login")
   }
 
   // Verify role if needed, but RLS protects data. 

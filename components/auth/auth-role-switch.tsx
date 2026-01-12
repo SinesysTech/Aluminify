@@ -17,10 +17,10 @@ export function AuthRoleSwitch() {
   return (
     <div className="flex items-center gap-2">
       <Button asChild variant={activeRole === 'aluno' ? 'default' : 'outline'} size="sm">
-        <Link href="/auth/aluno/login">Aluno</Link>
+        <Link href="/auth/login">Aluno</Link>
       </Button>
       <Button asChild variant={activeRole === 'professor' ? 'default' : 'outline'} size="sm">
-        <Link href="/auth/professor/login">Professor</Link>
+        <Link href="/auth/login">Professor</Link>
       </Button>
     </div>
   )

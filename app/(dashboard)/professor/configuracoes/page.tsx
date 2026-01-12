@@ -10,7 +10,7 @@ export default async function ProfessorConfiguracoesPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect("/auth/professor/login")
+    redirect("/auth/login")
   }
 
   const configuracoes = await getConfiguracoesProfessor(user.id)

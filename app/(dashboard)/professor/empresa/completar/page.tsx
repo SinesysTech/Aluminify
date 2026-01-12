@@ -41,7 +41,7 @@ export default function CompletarCadastroEmpresaPage() {
         const { data: { session } } = await supabase.auth.getSession();
 
         if (!session) {
-          router.push('/auth/professor/login');
+          router.push('/auth/login');
           return;
         }
 

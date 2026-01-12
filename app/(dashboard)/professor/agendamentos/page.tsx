@@ -12,7 +12,7 @@ export default async function ProfessorAgendamentosPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect("/auth/professor/login")
+    redirect("/auth/login")
   }
 
   const [agendamentos, stats] = await Promise.all([

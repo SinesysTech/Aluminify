@@ -299,7 +299,7 @@ export function ScheduleWizard() {
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
-        router.push('/auth/professor/login')
+        router.push('/auth/login')
         return
       }
       setUserId(user.id)
