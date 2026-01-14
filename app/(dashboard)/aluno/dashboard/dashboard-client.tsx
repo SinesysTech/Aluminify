@@ -243,7 +243,7 @@ export default function StudentDashboardClientPage() {
       {/* Linha 1: Grid de 4 Metric Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         <MetricCard
-          label="Tempo Focado"
+          label="Tempo de Estudo"
           value={data.metrics.focusTime}
           icon={Clock}
           trend={{
@@ -251,8 +251,8 @@ export default function StudentDashboardClientPage() {
             isPositive: data.metrics.focusTimeDelta.startsWith('+'),
           }}
           tooltip={[
-            'Este é o tempo total que você passou estudando com foco, considerando apenas o tempo líquido (sem pausas).',
-            'O valor mostra a diferença em relação ao período anterior, ajudando você a acompanhar sua evolução no estudo.',
+            'Este é o tempo total de estudo no período, somando aulas que você marcou como assistidas no cronograma e o tempo registrado em listas de exercícios (sessões vinculadas a uma atividade).',
+            'O valor mostra a diferença em relação ao período anterior, ajudando você a acompanhar sua evolução.',
           ]}
         />
         <MetricCard
@@ -296,12 +296,12 @@ export default function StudentDashboardClientPage() {
       />
 
       {/* Linha 3: 2 Colunas - Subject Performance List e Subject Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
-        <div className="lg:col-span-3">
-          <SubjectPerformanceList subjects={data.subjects} />
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8 items-stretch">
+        <div className="lg:col-span-3 h-full">
+          <SubjectPerformanceList subjects={data.subjects} period={heatmapPeriod} />
         </div>
-        <div className="lg:col-span-2">
-          <SubjectDistribution data={data.subjectDistribution} />
+        <div className="lg:col-span-2 h-full">
+          <SubjectDistribution data={data.subjectDistribution} period={heatmapPeriod} />
         </div>
       </div>
 

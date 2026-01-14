@@ -11,6 +11,7 @@ type SessaoEstudoRow = {
   aluno_id: string;
   disciplina_id: string | null;
   frente_id: string | null;
+  modulo_id: string | null;
   atividade_relacionada_id: string | null;
   inicio: string;
   fim: string | null;
@@ -29,6 +30,7 @@ function mapRowToModel(row: SessaoEstudoRow): SessaoEstudo {
     alunoId: row.aluno_id,
     disciplinaId: row.disciplina_id,
     frenteId: row.frente_id,
+    moduloId: row.modulo_id,
     atividadeRelacionadaId: row.atividade_relacionada_id,
     inicio: row.inicio,
     fim: row.fim,
@@ -49,17 +51,35 @@ export class SessaoEstudoRepository {
     alunoId: string;
     disciplinaId?: string;
     frenteId?: string;
+    moduloId?: string;
     atividadeRelacionadaId?: string;
     metodoEstudo?: MetodoEstudo;
     inicioIso?: string;
   }): Promise<SessaoEstudo> {
     const client = getDatabaseClient();
+
+    // Derivar modulo_id quando não vier explicitamente, mas houver atividade relacionada.
+    // Isso melhora a qualidade do analytics por módulo sem exigir mudanças imediatas no front.
+    let moduloId = input.moduloId ?? null;
+    if (!moduloId && input.atividadeRelacionadaId) {
+      const { data: atividade, error: atividadeError } = await client
+        .from('atividades')
+        .select('modulo_id')
+        .eq('id', input.atividadeRelacionadaId)
+        .maybeSingle<{ modulo_id: string | null }>();
+
+      if (!atividadeError && atividade?.modulo_id) {
+        moduloId = atividade.modulo_id;
+      }
+    }
+
     const { data, error } = await client
       .from(this.table)
       .insert({
         aluno_id: input.alunoId,
         disciplina_id: input.disciplinaId ?? null,
         frente_id: input.frenteId ?? null,
+        modulo_id: moduloId,
         atividade_relacionada_id: input.atividadeRelacionadaId ?? null,
         metodo_estudo: input.metodoEstudo ?? null,
         inicio: input.inicioIso ?? new Date().toISOString(),

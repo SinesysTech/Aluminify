@@ -162,7 +162,7 @@ export function AtividadeChecklistRow({
     <>
       <div className={cn('relative rounded-md border p-3', className)}>
         <div className="flex items-start gap-3">
-          <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-start mt-px">
             <Checkbox
               checked={isConcluido}
               onCheckedChange={handleCheckboxChange}
@@ -172,11 +172,11 @@ export function AtividadeChecklistRow({
           </div>
 
           <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-medium">{atividade.titulo}</span>
-                    <Badge variant="outline" className={cn('text-xs', statusBadgeColor)}>
-                      {status}
-                    </Badge>
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-sm font-medium">{atividade.titulo}</span>
+              <Badge variant="outline" className={cn('text-xs', statusBadgeColor)}>
+                {status}
+              </Badge>
             </div>
 
             {(isIniciado || isConcluido) && atividade.progressoDataInicio && (
@@ -229,7 +229,7 @@ export function AtividadeChecklistRow({
             )}
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-start gap-2 shrink-0 mt-px">
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>

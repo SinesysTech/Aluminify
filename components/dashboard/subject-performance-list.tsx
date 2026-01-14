@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import type { SubjectPerformance } from '@/types/dashboard'
+import { useEffect, useMemo, useState } from 'react'
+import type { DashboardGroupBy, DashboardPeriod, DashboardScopeLevel, PerformanceItem, SubjectPerformance } from '@/types/dashboard'
 import { Card, CardContent } from '@/components/ui/card'
 import {
   Select,
@@ -18,27 +18,167 @@ import {
 } from '@/components/ui/tooltip'
 import { Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { fetchDashboardCourses, fetchPerformance } from '@/lib/services/dashboardService'
 
 interface SubjectPerformanceListProps {
-  subjects: SubjectPerformance[]
+  subjects: SubjectPerformance[] // usado como fallback inicial
+  period?: DashboardPeriod
 }
 
 type SortOption = 'worst-best' | 'best-worst' | 'alphabetical'
 
 export function SubjectPerformanceList({
   subjects,
+  period = 'anual',
 }: SubjectPerformanceListProps) {
   const [sortOption, setSortOption] = useState<SortOption>('worst-best')
+  const [groupBy, setGroupBy] = useState<DashboardGroupBy>('frente')
+
+  const [courses, setCourses] = useState<Array<{ id: string; nome: string }>>([])
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null)
+  const [selectedDisciplineId, setSelectedDisciplineId] = useState<string | null>(null)
+  const [selectedFrontId, setSelectedFrontId] = useState<string | null>(null)
+
+  const [disciplineOptions, setDisciplineOptions] = useState<PerformanceItem[]>([])
+  const [frontOptions, setFrontOptions] = useState<PerformanceItem[]>([])
+
+  const [items, setItems] = useState<PerformanceItem[] | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const scopeParams = useMemo((): { scope: DashboardScopeLevel; scopeId?: string } => {
+    if (groupBy === 'curso') return { scope: 'curso' }
+    if (groupBy === 'disciplina') return { scope: 'curso', scopeId: selectedCourseId ?? undefined }
+    if (groupBy === 'frente') return { scope: 'disciplina', scopeId: selectedDisciplineId ?? undefined }
+    return { scope: 'frente', scopeId: selectedFrontId ?? undefined } // modulo
+  }, [groupBy, selectedCourseId, selectedDisciplineId, selectedFrontId])
+
+  useEffect(() => {
+    let cancelled = false
+    async function loadCourses() {
+      try {
+        const c = await fetchDashboardCourses()
+        if (!cancelled) {
+          setCourses(c)
+          if (c.length === 1) setSelectedCourseId(c[0].id)
+        }
+      } catch {
+        // noop
+      }
+    }
+    loadCourses()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (groupBy === 'curso') {
+      setSelectedDisciplineId(null)
+      setSelectedFrontId(null)
+      setDisciplineOptions([])
+      setFrontOptions([])
+      return
+    }
+    if (groupBy === 'disciplina') {
+      setSelectedDisciplineId(null)
+      setSelectedFrontId(null)
+      setDisciplineOptions([])
+      setFrontOptions([])
+      return
+    }
+    if (groupBy === 'frente') {
+      setSelectedFrontId(null)
+      setFrontOptions([])
+    }
+  }, [groupBy])
+
+  // Garantir disciplina selecionada quando necessário (groupBy=frente)
+  useEffect(() => {
+    let cancelled = false
+    async function ensureDiscipline() {
+      if (groupBy !== 'frente') return
+      if (selectedDisciplineId) return
+      setIsLoading(true)
+      try {
+        const res = await fetchPerformance({ groupBy: 'disciplina', scope: 'curso', scopeId: selectedCourseId ?? undefined, period })
+        if (cancelled) return
+        setDisciplineOptions(res)
+        const first = res.find((i) => i.id && i.id !== '__unknown__')?.id ?? null
+        setSelectedDisciplineId(first)
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    }
+    ensureDiscipline()
+    return () => {
+      cancelled = true
+    }
+  }, [groupBy, selectedDisciplineId, selectedCourseId, period])
+
+  // Garantir frente selecionada quando necessário (groupBy=modulo)
+  useEffect(() => {
+    let cancelled = false
+    async function ensureFront() {
+      if (groupBy !== 'modulo') return
+      if (!selectedDisciplineId) return
+      if (selectedFrontId) return
+      setIsLoading(true)
+      try {
+        const res = await fetchPerformance({ groupBy: 'frente', scope: 'disciplina', scopeId: selectedDisciplineId, period })
+        if (cancelled) return
+        setFrontOptions(res)
+        const first = res.find((i) => i.id && i.id !== '__unknown__')?.id ?? null
+        setSelectedFrontId(first)
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    }
+    ensureFront()
+    return () => {
+      cancelled = true
+    }
+  }, [groupBy, selectedDisciplineId, selectedFrontId, period])
+
+  // Carregar dados do card
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      if ((groupBy === 'frente' && !scopeParams.scopeId) || (groupBy === 'modulo' && !scopeParams.scopeId)) {
+        return
+      }
+      setIsLoading(true)
+      try {
+        const res = await fetchPerformance({ groupBy, scope: scopeParams.scope, scopeId: scopeParams.scopeId, period })
+        if (cancelled) return
+        setItems(res)
+      } finally {
+        if (!cancelled) setIsLoading(false)
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [groupBy, scopeParams.scope, scopeParams.scopeId, period])
 
   // Função para ordenar os dados
-  const sortedSubjects = [...subjects].sort((a, b) => {
+  const renderItems: PerformanceItem[] = items ?? subjects.map((s) => ({
+    id: String(s.id),
+    name: s.name,
+    subLabel: s.front,
+    score: s.score,
+    isNotStarted: !!s.isNotStarted,
+  }))
+
+  const sortedSubjects = [...renderItems].sort((a, b) => {
     switch (sortOption) {
       case 'worst-best':
         return a.score - b.score
       case 'best-worst':
         return b.score - a.score
       case 'alphabetical':
-        return `${a.name} (${a.front})`.localeCompare(`${b.name} (${b.front})`)
+        return `${a.name} (${a.subLabel ?? ''})`.localeCompare(`${b.name} (${b.subLabel ?? ''})`)
       default:
         return 0
     }
@@ -56,12 +196,12 @@ export function SubjectPerformanceList({
   }
 
   return (
-    <Card>
-      <CardContent className="px-4 md:px-6 py-3 md:py-4">
+    <Card className="h-full">
+      <CardContent className="px-4 md:px-6 py-3 md:py-4 h-full flex flex-col">
         <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4 mb-4 md:mb-6">
           <div className="flex items-center gap-2">
             <h2 className="text-foreground text-base md:text-lg font-semibold">
-              Performance por Disciplina (Frente)
+              Performance por {groupBy === 'curso' ? 'Curso' : groupBy === 'disciplina' ? 'Disciplina' : groupBy === 'frente' ? 'Frente' : 'Módulo'}
             </h2>
             <TooltipProvider delayDuration={200}>
               <Tooltip>
@@ -105,50 +245,124 @@ export function SubjectPerformanceList({
               </Tooltip>
             </TooltipProvider>
           </div>
-          <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Ordenar por" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="worst-best">Pior para Melhor</SelectItem>
-              <SelectItem value="best-worst">Melhor para Pior</SelectItem>
-              <SelectItem value="alphabetical">Ordem Alfabética</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex flex-wrap items-center gap-2">
+            <ToggleGroup
+              type="single"
+              value={groupBy}
+              onValueChange={(v) => {
+                if (!v) return
+                setGroupBy(v as DashboardGroupBy)
+              }}
+              variant="outline"
+              size="sm"
+            >
+              <ToggleGroupItem value="curso">Curso</ToggleGroupItem>
+              <ToggleGroupItem value="disciplina">Disciplina</ToggleGroupItem>
+              <ToggleGroupItem value="frente">Frente</ToggleGroupItem>
+              <ToggleGroupItem value="modulo">Módulo</ToggleGroupItem>
+            </ToggleGroup>
+            <Select value={sortOption} onValueChange={(value) => setSortOption(value as SortOption)}>
+              <SelectTrigger className="w-[180px] h-8">
+                <SelectValue placeholder="Ordenar por" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="worst-best">Pior para Melhor</SelectItem>
+                <SelectItem value="best-worst">Melhor para Pior</SelectItem>
+                <SelectItem value="alphabetical">Ordem Alfabética</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
-        <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:gap-y-6">
-          {sortedSubjects.map((subject) => (
-            <div key={subject.id} className="flex flex-col gap-2">
-              <div className="flex justify-between text-sm">
-                <span className="font-medium text-foreground">
-                  {subject.name} ({subject.front})
-                </span>
-                <span className="font-medium text-muted-foreground">
-                  {subject.isNotStarted ? (
-                    <span className="text-muted-foreground italic">
-                      Não iniciada
-                    </span>
-                  ) : (
-                    `${subject.score}%`
-                  )}
-                </span>
-              </div>
-              <div className="w-full bg-muted rounded-full h-2.5">
-                {subject.isNotStarted ? (
-                  <div className="h-2.5 rounded-full bg-muted-foreground/25" />
-                ) : (
-                  <div
-                    className={cn(
-                      'h-2.5 rounded-full transition-all',
-                      getBarColor(subject.score)
+
+        <div className="flex flex-wrap gap-2 mb-2">
+          {groupBy !== 'curso' && courses.length > 1 && (
+            <Select value={selectedCourseId ?? ''} onValueChange={(v) => setSelectedCourseId(v || null)}>
+              <SelectTrigger className="h-8 w-[220px]">
+                <SelectValue placeholder="Filtrar por curso" />
+              </SelectTrigger>
+              <SelectContent>
+                {courses.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {groupBy === 'frente' && (
+            <Select value={selectedDisciplineId ?? ''} onValueChange={(v) => setSelectedDisciplineId(v || null)}>
+              <SelectTrigger className="h-8 w-[220px]">
+                <SelectValue placeholder="Disciplina" />
+              </SelectTrigger>
+              <SelectContent>
+                {disciplineOptions.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          {groupBy === 'modulo' && (
+            <Select value={selectedFrontId ?? ''} onValueChange={(v) => setSelectedFrontId(v || null)}>
+              <SelectTrigger className="h-8 w-[220px]">
+                <SelectValue placeholder="Frente" />
+              </SelectTrigger>
+              <SelectContent>
+                {frontOptions.map((f) => (
+                  <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+
+        {isLoading && (
+          <p className="text-xs text-muted-foreground mb-2">Atualizando…</p>
+        )}
+
+        {sortedSubjects.length === 0 ? (
+          <div className="py-10 text-center">
+            <p className="text-sm text-muted-foreground">
+              Sem dados suficientes para calcular performance.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:gap-y-6">
+            {sortedSubjects.map((subject) => (
+              <div key={subject.id} className="flex flex-col gap-2">
+                <div className="flex justify-between text-sm">
+                  <span className="font-medium text-foreground">
+                    {subject.name}
+                    {subject.subLabel ? (
+                      <span className="text-muted-foreground font-normal"> ({subject.subLabel})</span>
+                    ) : null}
+                  </span>
+                  <span className="font-medium text-muted-foreground">
+                    {subject.isNotStarted ? (
+                      <span className="text-muted-foreground italic">
+                        Não iniciada
+                      </span>
+                    ) : (
+                      `${subject.score}%`
                     )}
-                    style={{ width: `${subject.score}%` }}
-                  />
-                )}
+                  </span>
+                </div>
+                <div className="w-full bg-muted rounded-full h-2.5">
+                  {subject.isNotStarted ? (
+                    <div className="h-2.5 rounded-full bg-muted-foreground/25" />
+                  ) : (
+                    <div
+                      className={cn(
+                        'h-2.5 rounded-full transition-all',
+                        getBarColor(subject.score)
+                      )}
+                      style={{ width: `${subject.score}%` }}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

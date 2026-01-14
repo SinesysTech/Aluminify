@@ -376,6 +376,9 @@ export default function ModoFocoClient() {
       const body = {
         disciplina_id: disciplinaId || null,
         frente_id: frenteId || null,
+        // Importante: enviar `modulo_id` mesmo sem atividade selecionada,
+        // para permitir métricas por módulo no dashboard.
+        modulo_id: moduloId || null,
         atividade_relacionada_id: atividadeId || null,
         metodo_estudo: metodo,
         inicio: new Date().toISOString(),
