@@ -132,7 +132,7 @@ export default function FlashcardsClient() {
   const [loadingCursos, setLoadingCursos] = React.useState(true)
   
   // Estados para rastreamento de sessão
-  const [cardsVistos, setCardsVistos] = React.useState<Set<string>>(new Set())
+  const [_cardsVistos, setCardsVistos] = React.useState<Set<string>>(new Set())
   const [feedbacks, setFeedbacks] = React.useState<number[]>([])
   const [sessaoCompleta, setSessaoCompleta] = React.useState(false)
   
@@ -164,7 +164,15 @@ export default function FlashcardsClient() {
   )
 
   const fetchCards = React.useCallback(
-    async (modoSelecionado: string, cursoId?: string, frenteId?: string, moduloId?: string, resetSession = false) => {
+    async (
+      modoSelecionado: string,
+      scopeSelecionado: 'all' | 'completed',
+      cursoId?: string,
+      frenteId?: string,
+      moduloId?: string,
+      resetSession = false,
+      excludeIds?: string[],
+    ) => {
       try {
         setLoading(true)
         setError(null)
@@ -178,15 +186,14 @@ export default function FlashcardsClient() {
         }
         
         // Construir URL com excludeIds
-        let url = `/api/flashcards/revisao?modo=${modoSelecionado}&scope=${scope}`
+        let url = `/api/flashcards/revisao?modo=${modoSelecionado}&scope=${scopeSelecionado}`
         if (cursoId) url += `&cursoId=${cursoId}`
         if (frenteId) url += `&frenteId=${frenteId}`
         if (moduloId) url += `&moduloId=${moduloId}`
         
         // Adicionar IDs já vistos na sessão
-        if (cardsVistos.size > 0 && !resetSession) {
-          const excludeIds = Array.from(cardsVistos).join(',')
-          url += `&excludeIds=${excludeIds}`
+        if (excludeIds && excludeIds.length > 0 && !resetSession) {
+          url += `&excludeIds=${excludeIds.join(',')}`
         }
         
         const res = await fetchWithAuth(url)
@@ -208,7 +215,7 @@ export default function FlashcardsClient() {
         setLoading(false)
       }
     },
-    [fetchWithAuth, cardsVistos, scope],
+    [fetchWithAuth],
   )
 
   // Auto-refresh ao trocar escopo (usa o scope atualizado, evitando corrida com setState)
@@ -219,7 +226,7 @@ export default function FlashcardsClient() {
     }
 
     if (!modo || modo === 'personalizado') return
-    fetchCards(modo, undefined, undefined, undefined, true)
+    fetchCards(modo, scope, undefined, undefined, undefined, true)
   }, [scope, modo, fetchCards])
 
   // Carregar cursos (diferente para alunos e professores)
@@ -490,7 +497,7 @@ export default function FlashcardsClient() {
   const handleSelectModo = (id: string) => {
     setModo(id)
     if (id !== 'personalizado') {
-      fetchCards(id, undefined, undefined, undefined, true)
+      fetchCards(id, scope, undefined, undefined, undefined, true)
     } else {
       // Resetar cards quando selecionar modo personalizado
       setCards([])
@@ -506,7 +513,7 @@ export default function FlashcardsClient() {
       setError('Selecione curso, disciplina, frente e módulo para buscar flashcards')
       return
     }
-    fetchCards('personalizado', cursoSelecionado, frenteSelecionada, moduloSelecionado, true)
+    fetchCards('personalizado', scope, cursoSelecionado, frenteSelecionada, moduloSelecionado, true)
   }
 
   const handleFeedback = async (feedback: number) => {
@@ -551,17 +558,17 @@ export default function FlashcardsClient() {
   const handleStudyMore = () => {
     // Manter modo e filtros, mas resetar sessão
     if (modo === 'personalizado') {
-      fetchCards('personalizado', cursoSelecionado, frenteSelecionada, moduloSelecionado, true)
+      fetchCards('personalizado', scope, cursoSelecionado, frenteSelecionada, moduloSelecionado, true)
     } else if (modo) {
-      fetchCards(modo, undefined, undefined, undefined, true)
+      fetchCards(modo, scope, undefined, undefined, undefined, true)
     }
   }
 
   const handleReload = () => {
     if (modo === 'personalizado') {
-      fetchCards('personalizado', cursoSelecionado, frenteSelecionada, moduloSelecionado, true)
+      fetchCards('personalizado', scope, cursoSelecionado, frenteSelecionada, moduloSelecionado, true)
     } else if (modo) {
-      fetchCards(modo, undefined, undefined, undefined, true)
+      fetchCards(modo, scope, undefined, undefined, undefined, true)
     }
   }
 
@@ -992,28 +999,28 @@ export default function FlashcardsClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
               <Button 
                 onClick={() => handleFeedback(1)}
-                className="flex flex-col items-center gap-1 h-auto py-2 bg-status-error text-status-error-foreground shadow-lg transition hover:bg-status-error/90 hover:shadow-xl active:bg-status-error/80 active:shadow-md"
+                className="flex flex-col items-center gap-1 h-auto py-2 bg-[#F87171] text-white shadow-lg transition hover:bg-[#F87171]/90 hover:shadow-xl active:bg-[#F87171]/80 active:shadow-md"
               >
                 <XCircle className="h-6 w-6 drop-shadow-sm" />
                 <span className="text-xs font-semibold">Errei o item</span>
               </Button>
               <Button 
                 onClick={() => handleFeedback(2)}
-                className="flex flex-col items-center gap-1 h-auto py-2 bg-status-warning text-status-warning-foreground shadow-lg transition hover:bg-status-warning/90 hover:shadow-xl active:bg-status-warning/80 active:shadow-md"
+                className="flex flex-col items-center gap-1 h-auto py-2 bg-[#FB923C] text-white shadow-lg transition hover:bg-[#FB923C]/90 hover:shadow-xl active:bg-[#FB923C]/80 active:shadow-md"
               >
                 <AlertTriangle className="h-6 w-6 drop-shadow-sm" />
                 <span className="text-xs font-semibold">Acertei parcialmente</span>
               </Button>
               <Button 
                 onClick={() => handleFeedback(3)}
-                className="flex flex-col items-center gap-1 h-auto py-2 bg-status-info text-status-info-foreground shadow-lg transition hover:bg-status-info/90 hover:shadow-xl active:bg-status-info/80 active:shadow-md"
+                className="flex flex-col items-center gap-1 h-auto py-2 bg-[#FACC15] text-white shadow-lg transition hover:bg-[#FACC15]/90 hover:shadow-xl active:bg-[#FACC15]/80 active:shadow-md"
               >
                 <Lightbulb className="h-6 w-6 drop-shadow-sm" />
                 <span className="text-xs font-semibold">Acertei com dificuldade</span>
               </Button>
               <Button 
                 onClick={() => handleFeedback(4)}
-                className="flex flex-col items-center gap-1 h-auto py-2 bg-status-success text-status-success-foreground shadow-lg transition hover:bg-status-success/90 hover:shadow-xl active:bg-status-success/80 active:shadow-md"
+                className="flex flex-col items-center gap-1 h-auto py-2 bg-[#34D399] text-white shadow-lg transition hover:bg-[#34D399]/90 hover:shadow-xl active:bg-[#34D399]/80 active:shadow-md"
               >
                 <CheckCircle2 className="h-6 w-6 drop-shadow-sm" />
                 <span className="text-xs font-semibold">Acertei com facilidade</span>

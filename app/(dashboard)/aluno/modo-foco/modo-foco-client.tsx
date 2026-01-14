@@ -827,10 +827,10 @@ export default function ModoFocoClient() {
                           timeline.totalMs > 0 ? `${Math.max(8, (seg.ms / timeline.totalMs) * 100)}%` : '20%';
                         const colors =
                           seg.type === 'focus'
-                            ? 'bg-primary/80 text-primary-foreground'
+                            ? 'bg-[#60A5FA] text-white' // Azul
                             : seg.type === 'long_break'
-                              ? 'bg-emerald-200 text-emerald-900'
-                              : 'bg-amber-200 text-amber-900';
+                              ? 'bg-[#34D399] text-white' // Verde
+                              : 'bg-[#FACC15] text-white'; // Amarelo (pausa curta)
                         return (
                           <div
                             key={`${seg.type}-${idx}`}
@@ -838,8 +838,10 @@ export default function ModoFocoClient() {
                             style={{ width, minHeight: '64px' }}
                           >
                             <div className="flex flex-col justify-center h-full">
-                              <div>{seg.label}</div>
-                              <div>{minutos(seg.ms)}m</div>
+                              <div className="text-[11px] leading-tight opacity-95">{seg.label}</div>
+                              <div className="mt-1 text-base font-extrabold leading-none tabular-nums">
+                                {minutos(seg.ms)}m
+                              </div>
                             </div>
                           </div>
                         );
@@ -847,15 +849,15 @@ export default function ModoFocoClient() {
                     </div>
                     <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
                       <span className="inline-flex items-center gap-1">
-                        <span className="inline-block h-2 w-2 rounded-full bg-primary/80" />
+                        <span className="inline-block h-2 w-2 rounded-full bg-[#60A5FA]" />
                         Foco
                       </span>
                       <span className="inline-flex items-center gap-1">
-                        <span className="inline-block h-2 w-2 rounded-full bg-amber-300" />
+                        <span className="inline-block h-2 w-2 rounded-full bg-[#FACC15]" />
                         Pausa curta
                       </span>
                       <span className="inline-flex items-center gap-1">
-                        <span className="inline-block h-2 w-2 rounded-full bg-emerald-300" />
+                        <span className="inline-block h-2 w-2 rounded-full bg-[#34D399]" />
                         Pausa longa
                       </span>
                     </div>

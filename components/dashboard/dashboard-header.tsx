@@ -24,7 +24,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
           {getGreeting()}, {user.name}!
         </h1>
         <div className="flex items-center gap-2">
-          <Flame className="text-orange-500 fill-orange-500" size={20} />
+          <Flame className="text-[#FB923C] fill-[#FB923C]" size={20} />
           <p className="text-muted-foreground text-base font-normal leading-normal">
             {user.streakDays} {user.streakDays === 1 ? 'Dia seguido' : 'Dias seguidos'}
           </p>
