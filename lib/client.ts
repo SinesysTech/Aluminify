@@ -2,6 +2,10 @@ import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from './database.types'
 import { getPublicSupabaseConfig } from './supabase-public-env'
 
+// Evita flood no console quando o auth-js tenta refresh/retry.
+const SUPABASE_FETCH_LOG_THROTTLE_MS = 5_000
+const supabaseFetchLogLastAt = new Map<string, number>()
+
 export function createClient() {
   const { url, anonKey } = getPublicSupabaseConfig()
 
@@ -66,9 +70,21 @@ export function createClient() {
         `error=${error instanceof Error ? error.message : String(error)}`,
       ].join(' ')
 
-      console.error(message)
-      // Mantém o erro original no console (stack/causa), sem vazar headers/chaves.
-      console.error(error)
+      const key = `${requestUrl ?? 'requestUrl=(indisponível)'}|${error instanceof Error ? error.message : String(error)}`
+      const now = Date.now()
+      const last = supabaseFetchLogLastAt.get(key) ?? 0
+      const shouldLog = now - last >= SUPABASE_FETCH_LOG_THROTTLE_MS
+      if (shouldLog) {
+        supabaseFetchLogLastAt.set(key, now)
+        // Se o navegador estiver offline, isso é esperado — não tratar como erro “alto”.
+        if (online === false) {
+          console.warn(message)
+        } else {
+          console.error(message)
+          // Mantém o erro original no console (stack/causa), sem vazar headers/chaves.
+          console.error(error)
+        }
+      }
 
       throw error
     }
