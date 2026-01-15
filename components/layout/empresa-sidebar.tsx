@@ -8,6 +8,12 @@ import {
   LayoutDashboard,
   FileText,
   Palette,
+  BookOpen,
+  Calendar,
+  CalendarCheck,
+  Layers,
+  FolderOpen,
+  Eye,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"

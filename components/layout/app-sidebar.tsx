@@ -15,6 +15,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     case 'aluno':
       return <AlunoSidebar {...props} />
     case 'professor':
+      if (user.isEmpresaAdmin) {
+        return <EmpresaSidebar {...props} />
+      }
       return <ProfessorSidebar {...props} />
     case 'superadmin':
       return <SuperAdminSidebar {...props} />
