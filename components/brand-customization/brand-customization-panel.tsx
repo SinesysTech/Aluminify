@@ -243,7 +243,7 @@ export function BrandCustomizationPanel({
   };
 
   const handleFontSchemePreview = () => setPreviewMode(!previewMode);
-  const handleLoadGoogleFont = (fontFamily: string) => {
+  const handleLoadGoogleFont = async (fontFamily: string): Promise<void> => {
     const link = document.createElement('link');
     link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, '+')}:wght@300;400;500;700&display=swap`;
     link.rel = 'stylesheet';
