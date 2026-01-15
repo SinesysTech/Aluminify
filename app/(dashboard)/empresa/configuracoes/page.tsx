@@ -1,0 +1,24 @@
+import { SettingsTabs } from '@/components/configuracoes/settings-tabs'
+import { requireUser } from '@/lib/auth'
+import { redirect } from 'next/navigation'
+
+export default async function ConfiguracoesPage() {
+  const user = await requireUser()
+
+  // Only empresa admins can access this page
+  const allowedRoles = ['professor', 'superadmin', 'empresa']
+  if (!allowedRoles.includes(user.role)) {
+    redirect('/dashboard')
+  }
+
+  // Must have an associated empresa
+  if (!user.empresaId) {
+    redirect('/dashboard')
+  }
+
+  return (
+    <div className="container mx-auto py-6">
+      <SettingsTabs user={user} />
+    </div>
+  )
+}

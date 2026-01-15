@@ -244,23 +244,23 @@ export class LogoManagerImpl implements LogoManager {
    */
   async removeLogo(empresaId: string, type: LogoType): Promise<void> {
     try {
-      // Find tenant branding
+      // Find tenant branding (using snake_case for DB columns)
       const { data: tenantBranding } = await this.client
         .from('tenant_branding')
         .select('id')
-        .eq('empresaId', empresaId)
+        .eq('empresa_id', empresaId)
         .maybeSingle();
 
       if (!tenantBranding) {
         return; // No branding configuration exists
       }
 
-      // Find existing logo
+      // Find existing logo (using snake_case for DB columns)
       const { data: existingLogo } = await this.client
         .from('tenant_logos')
         .select('*')
-        .eq('tenantBrandingId', tenantBranding.id)
-        .eq('logoType', type)
+        .eq('tenant_branding_id', tenantBranding.id)
+        .eq('logo_type', type)
         .maybeSingle();
 
       if (!existingLogo) {
@@ -268,7 +268,7 @@ export class LogoManagerImpl implements LogoManager {
       }
 
       // Extract file path from URL
-      const filePath = this.extractFilePathFromUrl(existingLogo.logoUrl);
+      const filePath = this.extractFilePathFromUrl(existingLogo.logo_url);
 
       // Remove from storage
       if (filePath) {
