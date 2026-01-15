@@ -466,11 +466,15 @@ async function getHandler(
     .select('aluno_id')
     .eq('id', cronogramaId)
     .single()
-  if (!owner || owner.aluno_id !== request.user.id) {
+  
+  // Type assertion: Query result properly typed (cronogramas table exists in schema)
+  const typedOwner = owner as { aluno_id: string } | null;
+  
+  if (!typedOwner || typedOwner.aluno_id !== request.user.id) {
     console.warn('[Export PDF] Forbidden - dono diferente', {
       cronogramaId,
       userId: request.user.id,
-      ownerAlunoId: owner?.aluno_id ?? null,
+      ownerAlunoId: typedOwner?.aluno_id ?? null,
     })
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
@@ -525,13 +529,16 @@ async function getHandler(
         .order('created_at', { ascending: false })
         .limit(5)
 
+      // Type assertion: Query result properly typed (cronogramas table exists in schema)
+      const typedRecentes = recentes as Array<{ id: string; created_at: string }> | null;
+
       if (recentesErr) {
         console.warn('[Export PDF] Diagnóstico (admin) falha ao listar cronogramas recentes', {
           userId: request.user.id,
           error: { message: recentesErr.message, code: recentesErr.code, details: recentesErr.details, hint: recentesErr.hint },
         })
       } else {
-        const ids = (recentes ?? []).map((r) => r.id)
+        const ids = (typedRecentes ?? []).map((r) => r.id)
         const itensPorCronograma: Array<{ id: string; itens: number | null }> = []
         for (const id of ids) {
           const { count: c } = await admin
@@ -605,7 +612,11 @@ async function getHandler(
       .select('id, nome')
       .in('id', disciplinasIds)
       .order('nome', { ascending: true })
-    disciplinasNomes = (discData || []).map((d) => d.nome).filter(Boolean)
+    
+    // Type assertion: Query result properly typed (disciplinas table exists in schema)
+    const typedDiscData = discData as Array<{ id: string; nome: string }> | null;
+    
+    disciplinasNomes = (typedDiscData || []).map((d) => d.nome).filter(Boolean)
   }
 
   const periodosFerias = normalizePeriodosFerias(cronogramaTyped.periodos_ferias)

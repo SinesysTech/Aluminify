@@ -1,3 +1,37 @@
+/**
+ * Teacher Repository
+ * 
+ * Provides data access methods for the professores table with full type safety.
+ * 
+ * Type Safety Patterns:
+ * - Uses generated Database types from lib/database.types.ts
+ * - Insert operations use TeacherInsert type (enforces required fields)
+ * - Update operations use TeacherUpdate type (all fields optional)
+ * - Query results are properly typed (not 'never')
+ * 
+ * Example Usage:
+ * ```typescript
+ * const repository = new TeacherRepositoryImpl(client);
+ * 
+ * // Create with type-safe insert
+ * const teacher = await repository.create({
+ *   id: userId,
+ *   empresaId: 'empresa-123',
+ *   fullName: 'John Doe',
+ *   email: 'john@example.com',
+ *   // Optional fields can be omitted
+ * });
+ * 
+ * // Update with partial data
+ * const updated = await repository.update(teacherId, {
+ *   phone: '+55 11 98765-4321',
+ *   // Only include fields to update
+ * });
+ * ```
+ * 
+ * For detailed documentation, see: docs/TYPESCRIPT_SUPABASE_GUIDE.md
+ */
+
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Teacher, CreateTeacherInput, UpdateTeacherInput } from './teacher.types';
 import type { PaginationParams, PaginationMeta } from '@/types/shared/dtos/api-responses';
@@ -22,7 +56,39 @@ export interface TeacherRepository {
 
 const TABLE = 'professores';
 
-// Use generated Database types instead of manual type definition
+/**
+ * Database Type Aliases
+ * 
+ * These types are extracted from the generated Database interface and provide
+ * type safety for all database operations.
+ * 
+ * - TeacherRow: Complete row returned by SELECT queries
+ * - TeacherInsert: Type for INSERT operations (required + optional fields)
+ * - TeacherUpdate: Type for UPDATE operations (all fields optional)
+ * 
+ * Benefits:
+ * - Types automatically stay in sync with database schema
+ * - No manual type maintenance required
+ * - Compile-time validation of column names and types
+ * 
+ * @example
+ * ```typescript
+ * // Insert requires all non-nullable fields without defaults
+ * const insertData: TeacherInsert = {
+ *   id: userId,              // Required
+ *   empresa_id: empresaId,   // Required
+ *   nome_completo: 'John',   // Required
+ *   email: 'john@test.com',  // Required
+ *   cpf: null,               // Optional (nullable)
+ *   is_admin: false,         // Optional (has default)
+ * };
+ * 
+ * // Update allows partial updates (all fields optional)
+ * const updateData: TeacherUpdate = {
+ *   telefone: '+55 11 98765-4321', // Only update phone
+ * };
+ * ```
+ */
 type TeacherRow = Database['public']['Tables']['professores']['Row'];
 type TeacherInsert = Database['public']['Tables']['professores']['Insert'];
 type TeacherUpdate = Database['public']['Tables']['professores']['Update'];
@@ -125,6 +191,19 @@ export class TeacherRepositoryImpl implements TeacherRepository {
   }
 
   async create(payload: CreateTeacherInput): Promise<Teacher> {
+    /**
+     * Type-Safe Insert Operation
+     * 
+     * The TeacherInsert type enforces:
+     * - Required fields: id, empresa_id, nome_completo, email
+     * - Optional fields: cpf, telefone, biografia, foto_url, especialidade, is_admin
+     * - Nullable fields can be set to null or omitted
+     * 
+     * TypeScript will show compile errors if:
+     * - Required fields are missing
+     * - Field types don't match the schema
+     * - Invalid field names are used
+     */
     const insertData: TeacherInsert = {
       id: payload.id, // ID is required (comes from auth.users)
       nome_completo: payload.fullName,
@@ -157,6 +236,26 @@ export class TeacherRepositoryImpl implements TeacherRepository {
   }
 
   async update(id: string, payload: UpdateTeacherInput): Promise<Teacher> {
+    /**
+     * Type-Safe Update Operation
+     * 
+     * The TeacherUpdate type makes all fields optional, allowing partial updates.
+     * 
+     * Best Practices:
+     * - Only include fields that need to be updated
+     * - Use null to explicitly clear nullable fields
+     * - Use undefined to skip fields (they won't be updated)
+     * 
+     * Example:
+     * ```typescript
+     * // Update only phone and clear biography
+     * const updateData: TeacherUpdate = {
+     *   telefone: '+55 11 98765-4321',
+     *   biografia: null, // Explicitly clear
+     *   // Other fields are not included, so they won't be updated
+     * };
+     * ```
+     */
     const updateData: TeacherUpdate = {};
 
     if (payload.fullName !== undefined) {

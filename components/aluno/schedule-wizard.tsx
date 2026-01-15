@@ -324,17 +324,18 @@ export function ScheduleWizard() {
       if (isProfessor) {
         // Professor vê todos os cursos disponíveis (os que ele criou + cursos sem created_by para testes)
         // Buscar cursos em duas queries para evitar problemas com RLS
+        // Type assertions needed because database types are currently out of sync with actual schema
         const [cursosDoProfessor, cursosSemCriador] = await Promise.all([
           supabase
             .from('cursos')
             .select('*')
             .eq('created_by', user.id)
-            .order('nome', { ascending: true }),
+            .order('nome', { ascending: true }) as unknown as Promise<{ data: CursoData[] | null; error: any }>,
           supabase
             .from('cursos')
             .select('*')
             .is('created_by', null)
-            .order('nome', { ascending: true }),
+            .order('nome', { ascending: true }) as unknown as Promise<{ data: CursoData[] | null; error: any }>,
         ])
 
         if (cursosDoProfessor.error) {
@@ -359,10 +360,11 @@ export function ScheduleWizard() {
         console.log(`Professor ${user.id} encontrou ${cursosUnicos.length} curso(s):`, cursosUnicos.map((c) => c.nome))
       } else {
         // Aluno vê cursos através da tabela alunos_cursos
-        const { data: alunosCursos, error: alunosCursosError } = await supabase
+        // Type assertion needed because database types are currently out of sync with actual schema
+        const { data: alunosCursos, error: alunosCursosError } = (await supabase
           .from('alunos_cursos')
           .select('curso_id, cursos(*)')
-          .eq('aluno_id', user.id)
+          .eq('aluno_id', user.id)) as { data: Array<{ curso_id: string; cursos: CursoData }> | null; error: any }
 
         if (alunosCursosError) {
           console.error('Erro ao carregar cursos do aluno:', alunosCursosError)
@@ -410,10 +412,11 @@ export function ScheduleWizard() {
       const supabase = createClient()
       try {
         // Buscar disciplinas do curso através da tabela cursos_disciplinas
-        const { data: cursosDisciplinas, error: cdError } = await supabase
+        // Type assertion needed because database types are currently out of sync with actual schema
+        const { data: cursosDisciplinas, error: cdError } = (await supabase
           .from('cursos_disciplinas')
           .select('disciplina_id')
-          .eq('curso_id', cursoSelecionado)
+          .eq('curso_id', cursoSelecionado)) as { data: Array<{ disciplina_id: string }> | null; error: any }
 
         if (cdError) {
           console.error('Erro ao carregar disciplinas do curso:', cdError)
@@ -430,11 +433,12 @@ export function ScheduleWizard() {
 
         // Buscar detalhes das disciplinas
         const disciplinaIds = cursosDisciplinas.map((cd) => cd.disciplina_id)
-        const { data: disciplinasData, error: discError } = await supabase
+        // Type assertion needed because database types are currently out of sync with actual schema
+        const { data: disciplinasData, error: discError } = (await supabase
           .from('disciplinas')
           .select('id, nome')
           .in('id', disciplinaIds)
-          .order('nome', { ascending: true })
+          .order('nome', { ascending: true })) as { data: DisciplinaData[] | null; error: any }
 
         if (discError) {
           console.error('Erro ao carregar detalhes das disciplinas:', discError)
@@ -472,12 +476,13 @@ export function ScheduleWizard() {
       }
 
       const supabase = createClient()
-      const { data } = await supabase
+      // Type assertion needed because database types are currently out of sync with actual schema
+      const { data } = (await supabase
         .from('frentes')
         .select('*')
         .eq('curso_id', cursoSelecionado)
         .in('disciplina_id', disciplinasIds)
-        .order('nome')
+        .order('nome')) as { data: FrenteData[] | null }
 
       if (data) {
         setFrentes(data.filter((f): f is typeof f & { disciplina_id: string } => !!f.disciplina_id))
@@ -511,12 +516,13 @@ export function ScheduleWizard() {
 
       try {
         // Buscar frentes com informações da disciplina
-        const { data: frentesData, error: frentesError } = await supabase
+        // Type assertion needed because database types are currently out of sync with actual schema
+        const { data: frentesData, error: frentesError } = (await supabase
           .from('frentes')
           .select('id, nome, disciplina_id, disciplinas(nome)')
           .eq('curso_id', cursoSelecionado)
           .in('disciplina_id', disciplinasIds)
-          .order('nome', { ascending: true })
+          .order('nome', { ascending: true })) as { data: Array<FrenteData & { disciplinas?: { nome?: string } }> | null; error: any }
 
         if (frentesError) {
           console.error('Erro ao buscar frentes:', {
@@ -543,11 +549,12 @@ export function ScheduleWizard() {
         const frenteIds = frentesData.map((f) => f.id)
 
         // Buscar módulos das frentes
-        const { data: modulosData, error: modulosError } = await supabase
+        // Type assertion needed because database types are currently out of sync with actual schema
+        const { data: modulosData, error: modulosError } = (await supabase
           .from('modulos')
           .select('id, nome, numero_modulo, frente_id, importancia')
           .in('frente_id', frenteIds)
-          .order('numero_modulo', { ascending: true })
+          .order('numero_modulo', { ascending: true })) as { data: Array<{ id: string; nome: string; numero_modulo: number; frente_id: string; importancia: string }> | null; error: any }
 
         if (modulosError) {
           console.error('Erro ao buscar módulos:', {
@@ -603,10 +610,11 @@ export function ScheduleWizard() {
         }
 
         // Buscar aulas dos módulos
-        const { data: aulasData, error: aulasError } = await supabase
+        // Type assertion needed because database types are currently out of sync with actual schema
+        const { data: aulasData, error: aulasError } = (await supabase
           .from('aulas')
           .select('id, modulo_id, tempo_estimado_minutos')
-          .in('modulo_id', moduloIds)
+          .in('modulo_id', moduloIds)) as { data: Array<{ id: string; modulo_id: string | null; tempo_estimado_minutos: number | null }> | null; error: any }
 
         if (aulasError) {
           console.error('Erro ao buscar aulas:', {
@@ -621,11 +629,12 @@ export function ScheduleWizard() {
         // Buscar aulas concluídas (pode não existir a tabela, então tratar erro separadamente)
         let concluidasSet = new Set<string>()
         try {
-          const { data: concluidasData, error: concluidasError } = await supabase
+          // Type assertion needed because database types are currently out of sync with actual schema
+          const { data: concluidasData, error: concluidasError } = (await supabase
             .from('aulas_concluidas')
             .select('aula_id')
             .eq('aluno_id', userId)
-            .eq('curso_id', cursoSelecionado)
+            .eq('curso_id', cursoSelecionado)) as { data: Array<{ aula_id: string }> | null; error: any }
 
           if (concluidasError) {
             // Se a tabela não existir ou houver erro, apenas logar e continuar
@@ -831,7 +840,8 @@ export function ScheduleWizard() {
 
       try {
         const supabase = createClient()
-        const { data, error } = await supabase
+        // Type assertion needed because database types are currently out of sync with actual schema
+        const { data, error } = (await supabase
           .from('aulas')
           .select(`
             id,
@@ -844,7 +854,15 @@ export function ScheduleWizard() {
               )
             )
           `)
-          .in('modulos.frentes.disciplina_id', disciplinasSelecionadas)
+          .in('modulos.frentes.disciplina_id', disciplinasSelecionadas)) as { 
+            data: Array<{ 
+              id: string; 
+              tempo_estimado_minutos: number | null; 
+              prioridade: number | null;
+              modulos: { id: string; frentes: { disciplina_id: string } }
+            }> | null; 
+            error: any 
+          }
 
         if (error) {
           throw error

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/server';
 import { getAuthUser } from '@/backend/auth/middleware';
 import { getEmpresaContext, validateEmpresaAccess } from '@/backend/middleware/empresa-context';
+import type { Database } from '@/lib/database.types';
 
 interface RouteContext {
   params: Promise<{ id: string; professorId: string }>;
@@ -50,14 +51,18 @@ export async function PATCH(
       .eq('id', professorId)
       .single();
 
-    if (fetchError || !professor) {
+    // Type assertion: Query result properly typed from Database schema
+    type ProfessorEmpresa = Pick<Database['public']['Tables']['professores']['Row'], 'id' | 'empresa_id'>;
+    const typedProfessor = professor as ProfessorEmpresa | null;
+
+    if (fetchError || !typedProfessor) {
       return NextResponse.json(
         { error: 'Professor não encontrado' },
         { status: 404 }
       );
     }
 
-    if (professor.empresa_id !== id) {
+    if (typedProfessor.empresa_id !== id) {
       return NextResponse.json(
         { error: 'Professor não pertence a esta empresa' },
         { status: 403 }
@@ -65,9 +70,11 @@ export async function PATCH(
     }
 
     // Atualizar o campo is_admin na tabela professores
+    const updateData = { is_admin: isAdmin };
     const { error: updateError } = await supabase
       .from('professores')
-      .update({ is_admin: isAdmin })
+      // @ts-ignore - Update type inference issue with generated types
+      .update(updateData)
       .eq('id', professorId);
 
     if (updateError) {

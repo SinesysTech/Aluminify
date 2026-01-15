@@ -47,6 +47,8 @@ Este diretório contém toda a documentação técnica do projeto Aluminify.
 ### 🛠️ Guias Técnicos
 
 - [Guia de Instalação do Supabase CLI](../GUIA_INSTALACAO_SUPABASE_CLI.md) - Setup local do Supabase
+- [TypeScript & Supabase Type Safety Guide](./TYPESCRIPT_SUPABASE_GUIDE.md) - Guia completo de padrões TypeScript
+- [TypeScript Quick Reference](./TYPESCRIPT_QUICK_REFERENCE.md) - Referência rápida de padrões TypeScript
 
 ## 🔍 Busca Rápida
 
@@ -79,6 +81,13 @@ Este diretório contém toda a documentação técnica do projeto Aluminify.
 - Variáveis de ambiente → [./ENV_VARIABLES.md](./ENV_VARIABLES.md)
 - Redis → [UPSTASH_REDIS_SETUP.md](./UPSTASH_REDIS_SETUP.md)
 - Deploy → [../DEPLOY.md](../DEPLOY.md)
+
+**TypeScript & Supabase**
+- Guia completo de tipos → [TYPESCRIPT_SUPABASE_GUIDE.md](./TYPESCRIPT_SUPABASE_GUIDE.md)
+- Referência rápida → [TYPESCRIPT_QUICK_REFERENCE.md](./TYPESCRIPT_QUICK_REFERENCE.md)
+- Como fazer queries tipadas? → [TYPESCRIPT_SUPABASE_GUIDE.md#query-patterns](./TYPESCRIPT_SUPABASE_GUIDE.md#query-patterns)
+- Como fazer inserts/updates? → [TYPESCRIPT_SUPABASE_GUIDE.md#insert-operations](./TYPESCRIPT_SUPABASE_GUIDE.md#insert-operations)
+- Quando usar type assertions? → [TYPESCRIPT_SUPABASE_GUIDE.md#type-assertions](./TYPESCRIPT_SUPABASE_GUIDE.md#type-assertions)
 
 ## 📝 Contribuindo com a Documentação
 

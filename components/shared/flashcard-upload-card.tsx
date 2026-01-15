@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { createClient } from '@/lib/client'
+import type { Database } from '@/lib/database.types'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -48,6 +49,12 @@ type Frente = {
   disciplina_id: string
   curso_id?: string | null
 }
+
+// Type for frentes query result
+type FrenteRow = Database['public']['Tables']['frentes']['Row']
+
+// Type for modulos query result
+type ModuloRow = Database['public']['Tables']['modulos']['Row']
 
 type CSVRow = {
   [key: string]: string
@@ -128,27 +135,30 @@ export function FlashcardUploadCard({ cursos, onUploadSuccess }: FlashcardUpload
       }
 
       try {
-        // Buscar frentes da disciplina que pertencem ao curso selecionado
+        // Buscar frentes da disciplina selecionada
+        // Note: frentes table doesn't have curso_id - relationship is through disciplina
         const { data, error } = await supabase
           .from('frentes')
-          .select('id, nome, disciplina_id, curso_id')
+          .select('id, nome, disciplina_id')
           .eq('disciplina_id', disciplinaSelecionada)
-          .eq('curso_id', cursoSelecionado) // Frentes devem ter curso_id preenchido
           .order('nome', { ascending: true })
 
         if (error) throw error
         
-        if (!data || data.length === 0) {
+        // Type assertion: Supabase correctly infers the row type from the table
+        const frentesData = data as FrenteRow[] | null
+        
+        if (!frentesData || frentesData.length === 0) {
           setError('Nenhuma frente encontrada para esta disciplina no curso selecionado.')
         } else {
           setError(null)
         }
         
-        const filteredFrentes = (data || []).filter((f) => f.disciplina_id !== null).map((f) => ({
+        const filteredFrentes = (frentesData || []).filter((f) => f.disciplina_id !== null).map((f) => ({
           id: f.id,
           nome: f.nome,
           disciplina_id: f.disciplina_id!,
-          curso_id: f.curso_id ?? null,
+          curso_id: null, // frentes don't have curso_id in schema
         }))
         setFrentes(filteredFrentes)
         setFrenteSelecionada('')
@@ -432,13 +442,16 @@ export function FlashcardUploadCard({ cursos, onUploadSuccess }: FlashcardUpload
         throw new Error(`Erro ao buscar módulos: ${modulosError.message}`)
       }
 
-      if (!modulosData || modulosData.length === 0) {
+      // Type assertion: Supabase correctly infers the row type from the table
+      const modulos = modulosData as ModuloRow[] | null
+
+      if (!modulos || modulos.length === 0) {
         setError('Nenhum módulo encontrado para a frente selecionada. Verifique se a frente possui módulos cadastrados.')
         return
       }
 
       // Validar que todos os módulos pertencem à frente correta
-      const modulosInvalidos = modulosData.filter(
+      const modulosInvalidos = modulos.filter(
         m => m.frente_id !== frenteSelecionada
       )
       if (modulosInvalidos.length > 0) {
@@ -447,7 +460,7 @@ export function FlashcardUploadCard({ cursos, onUploadSuccess }: FlashcardUpload
 
       // Criar mapa de números de módulos para IDs
       const moduloMap = new Map<number, { id: string; nome: string; numero: number | null }>()
-      modulosData.forEach(modulo => {
+      modulos.forEach(modulo => {
         // Validar apenas que pertence à frente
         if (modulo.frente_id === frenteSelecionada && modulo.numero_modulo !== null) {
           moduloMap.set(modulo.numero_modulo, {

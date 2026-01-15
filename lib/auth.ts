@@ -1,3 +1,20 @@
+/**
+ * Authentication Module
+ * 
+ * Provides authentication utilities for the application including user retrieval,
+ * role-based access control, and impersonation support.
+ * 
+ * Key Functions:
+ * - getAuthenticatedUser(): Get the current authenticated user with full context
+ * - requireUser(): Enforce authentication and optionally check roles
+ * 
+ * Type Safety Notes:
+ * - This file uses type assertions for Supabase join queries (see inline comments)
+ * - Nullable fields are handled with optional chaining (?.) and nullish coalescing (??)
+ * 
+ * For detailed TypeScript patterns, see: docs/TYPESCRIPT_SUPABASE_GUIDE.md
+ */
+
 import { redirect } from 'next/navigation'
 
 import { createClient } from '@/lib/server'
@@ -139,8 +156,28 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
       empresaId = professorRow.empresa_id ?? undefined
       isEmpresaAdmin = Boolean(professorRow.is_admin)
       
-      // Type assertion needed: Supabase doesn't infer join types automatically
-      // The query joins professores with empresas table to get empresa name
+      /**
+       * Type Assertion for Join Query
+       * 
+       * Why needed: Supabase's TypeScript client cannot automatically infer the structure
+       * of joined data. The query `.select('empresa_id,is_admin,nome_completo,empresas(nome)')`
+       * joins the professores table with the empresas table, but TypeScript doesn't know
+       * the shape of the joined result.
+       * 
+       * What we're asserting: The result includes an 'empresas' property that is either:
+       * - An object with a 'nome' field (when the join finds a matching empresa)
+       * - null (when there's no matching empresa or empresa_id is null)
+       * 
+       * Safety: This assertion is safe because:
+       * 1. The query explicitly requests 'empresas(nome)'
+       * 2. We handle the null case with optional chaining (?.)
+       * 3. The database schema guarantees empresa_id is a foreign key to empresas
+       * 
+       * Alternative: We could use a generic type parameter on the select() call, but
+       * type assertions are more explicit and easier to maintain for complex joins.
+       * 
+       * For more information, see: docs/TYPESCRIPT_SUPABASE_GUIDE.md#type-assertions
+       */
       type ProfessorWithEmpresa = {
         empresa_id: string | null
         is_admin: boolean

@@ -98,74 +98,74 @@ This plan addresses 450 TypeScript errors by regenerating database types, removi
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 9. Fix API route types
-  - [~] 9.1 Update API routes in `app/api/empresas/`
+  - [x] 9.1 Update API routes in `app/api/empresas/`
     - Verify Supabase queries are properly typed
     - Add type assertions where needed
     - Ensure request/response types are correct
     - _Requirements: 3.1, 3.5, 6.1, 6.2_
   
-  - [~] 9.2 Update API routes in `app/api/` (user profile, agendamentos, etc.)
+  - [x] 9.2 Update API routes in `app/api/` (user profile, agendamentos, etc.)
     - Apply same fixes to all API routes
     - Verify query results are properly typed
     - Add type assertions for complex queries
     - _Requirements: 3.1, 3.5, 6.1, 6.2_
 
-- [~] 9.3 Write property test for service layer type preservation
+- [x] 9.3 Write property test for service layer type preservation
   - **Property 7: Service Layer Type Preservation**
   - **Validates: Requirements 6.1, 6.2, 6.3, 6.4**
 
 - [ ] 10. Fix component types
-  - [~] 10.1 Update components in `components/aluno/`
+  - [x] 10.1 Update components in `components/aluno/`
     - Verify props receiving Supabase data are properly typed
     - Update hook return types
     - Fix loading/error state types
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
   
-  - [~] 10.2 Update components in `components/professor/`
+  - [x] 10.2 Update components in `components/professor/`
     - Apply same fixes to professor components
     - Verify data props are properly typed
     - Fix hook and state types
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
   
-  - [~] 10.3 Update components in `components/shared/`
+  - [x] 10.3 Update components in `components/shared/`
     - Apply same fixes to shared components
     - Verify generic component props work with typed data
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-- [~] 10.4 Write property test for component prop type safety
+- [x] 10.4 Write property test for component prop type safety
   - **Property 8: Component Prop Type Safety**
   - **Validates: Requirements 7.1, 7.2, 7.3, 7.4**
 
-- [~] 11. Verify compilation success
+- [x] 11. Verify compilation success
   - Run `tsc --noEmit` and verify zero errors
   - Run `npm run build` and verify successful build
   - Check specific directories: backend/services/, app/api/, components/
   - Verify lib/auth.ts and utility files compile
   - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6_
 
-- [~] 11.1 Write property test for compilation success
+- [x] 11.1 Write property test for compilation success
   - **Property 9: Compilation Success**
   - **Validates: Requirements 8.1, 8.2, 8.3, 8.4, 8.5, 8.6**
 
-- [~] 12. Verify backward compatibility
+- [x] 12. Verify backward compatibility
   - Run all existing tests and verify they pass
   - Compare function signatures before and after
   - Verify no runtime behavior changes
   - Check that existing queries still work
   - _Requirements: 9.1, 9.2, 9.3, 9.4_
 
-- [~] 12.1 Write property test for backward compatibility
+- [x] 12.1 Write property test for backward compatibility
   - **Property 10: Backward Compatibility**
   - **Validates: Requirements 9.1, 9.2, 9.3, 9.4**
 
-- [~] 13. Add documentation
+- [x] 13. Add documentation
   - Add comments documenting correct Supabase query patterns
   - Add examples of properly typed insert/update operations
   - Document when and why type assertions are necessary
   - Add guidance on handling nullable fields
   - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-- [~] 14. Final checkpoint - Ensure all tests pass
+- [x] 14. Final checkpoint - Ensure all tests pass
   - Run full test suite
   - Verify zero TypeScript errors
   - Verify build succeeds

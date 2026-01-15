@@ -6,6 +6,7 @@ import {
 } from '@/backend/services/course';
 import { requireAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
 import { getDatabaseClient } from '@/backend/clients/database';
+import type { Database } from '@/lib/database.types';
 
 const serializeCourse = (course: Awaited<ReturnType<typeof courseService.getById>>) => ({
   id: course.id,
@@ -85,7 +86,11 @@ async function postHandler(request: AuthenticatedRequest) {
         .eq('id', request.user.id)
         .maybeSingle();
 
-      empresaId = professor?.empresa_id ?? null;
+      // Type assertion: Query result properly typed from Database schema
+      type ProfessorEmpresa = Pick<Database['public']['Tables']['professores']['Row'], 'empresa_id'>;
+      const typedProfessor = professor as ProfessorEmpresa | null;
+
+      empresaId = typedProfessor?.empresa_id ?? null;
 
       if (!empresaId) {
         return NextResponse.json(
@@ -101,7 +106,11 @@ async function postHandler(request: AuthenticatedRequest) {
         .eq('id', request.apiKey.createdBy)
         .maybeSingle();
 
-      empresaId = professor?.empresa_id ?? null;
+      // Type assertion: Query result properly typed from Database schema
+      type ProfessorEmpresa = Pick<Database['public']['Tables']['professores']['Row'], 'empresa_id'>;
+      const typedProfessor = professor as ProfessorEmpresa | null;
+
+      empresaId = typedProfessor?.empresa_id ?? null;
 
       if (!empresaId) {
         return NextResponse.json(

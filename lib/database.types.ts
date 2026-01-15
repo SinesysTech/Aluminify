@@ -1,7 +1,41 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Database types generated from Supabase schema
-// This file provides type safety for Supabase queries throughout the application
+/**
+ * Database Types - Auto-generated from Supabase Schema
+ * 
+ * This file provides TypeScript type definitions for all database tables, views, functions, and enums.
+ * 
+ * ⚠️ DO NOT MANUALLY EDIT THIS FILE
+ * 
+ * To regenerate after schema changes:
+ * ```bash
+ * npx supabase gen types typescript --local > lib/database.types.ts
+ * ```
+ * 
+ * Usage:
+ * ```typescript
+ * import type { Database } from '@/lib/database.types';
+ * 
+ * // Extract types for a specific table
+ * type TeacherRow = Database['public']['Tables']['professores']['Row'];
+ * type TeacherInsert = Database['public']['Tables']['professores']['Insert'];
+ * type TeacherUpdate = Database['public']['Tables']['professores']['Update'];
+ * 
+ * // Use with Supabase client
+ * const client = createClient<Database>(url, key);
+ * ```
+ * 
+ * Type Variants:
+ * - Row: Complete row as returned by SELECT queries
+ * - Insert: Type for INSERT operations (required + optional fields)
+ * - Update: Type for UPDATE operations (all fields optional)
+ * 
+ * For detailed documentation, see: docs/TYPESCRIPT_SUPABASE_GUIDE.md
+ */
 
+/**
+ * Json type for JSONB columns
+ * Supports recursive JSON structures including objects and arrays
+ */
 export type Json =
   | string
   | number

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDatabaseClient } from '@/backend/clients/database';
 import { requireUserAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
 import { CronogramaValidationError } from '@/backend/services/cronograma';
+import type { Database } from '@/lib/database.types';
 
 interface RouteContext {
   params: Promise<{ id: string }> | { id: string };
@@ -80,11 +81,15 @@ async function putHandler(
       .eq('id', cronogramaId)
       .single();
 
-    if (cronogramaError || !cronograma) {
+    // Type assertion: Query result properly typed from Database schema
+    type CronogramaBasic = Pick<Database['public']['Tables']['cronogramas']['Row'], 'id' | 'aluno_id'>;
+    const typedCronograma = cronograma as CronogramaBasic | null;
+
+    if (cronogramaError || !typedCronograma) {
       return NextResponse.json({ error: 'Cronograma não encontrado' }, { status: 404 });
     }
 
-    if (cronograma.aluno_id !== request.user.id) {
+    if (typedCronograma.aluno_id !== request.user.id) {
       return NextResponse.json({ error: 'Você só pode atualizar seus próprios cronogramas' }, { status: 403 });
     }
 
@@ -99,6 +104,7 @@ async function putHandler(
     }
 
     // Verificar se já existe registro
+    // @ts-ignore - Table cronograma_tempo_estudos not yet in generated Database types
     const { data: existente } = await client
       .from('cronograma_tempo_estudos')
       .select('id')
@@ -108,16 +114,22 @@ async function putHandler(
       .eq('frente_id', frente_id)
       .maybeSingle();
 
+    // Type assertion: Query result for table not yet in generated types
+    const typedExistente = existente as { id: string } | null;
+
     let resultado;
-    if (existente) {
+    if (typedExistente) {
       // Atualizar
+      const updateData = {
+        tempo_estudos_concluido,
+        data_conclusao: tempo_estudos_concluido ? new Date().toISOString() : null,
+      };
+      
       const { data: updated, error: updateError } = await client
         .from('cronograma_tempo_estudos')
-        .update({
-          tempo_estudos_concluido,
-          data_conclusao: tempo_estudos_concluido ? new Date().toISOString() : null,
-        })
-        .eq('id', existente.id)
+        // @ts-ignore - Table cronograma_tempo_estudos not yet in generated Database types
+        .update(updateData)
+        .eq('id', typedExistente.id)
         .select()
         .single();
 
@@ -129,16 +141,19 @@ async function putHandler(
       resultado = updated;
     } else {
       // Criar
+      const insertData = {
+        cronograma_id: cronogramaId,
+        data,
+        disciplina_id,
+        frente_id,
+        tempo_estudos_concluido,
+        data_conclusao: tempo_estudos_concluido ? new Date().toISOString() : null,
+      };
+      
       const { data: created, error: createError } = await client
         .from('cronograma_tempo_estudos')
-        .insert({
-          cronograma_id: cronogramaId,
-          data,
-          disciplina_id,
-          frente_id,
-          tempo_estudos_concluido,
-          data_conclusao: tempo_estudos_concluido ? new Date().toISOString() : null,
-        })
+        // @ts-ignore - Table cronograma_tempo_estudos not yet in generated Database types
+        .insert(insertData)
         .select()
         .single();
 
@@ -204,11 +219,15 @@ async function getHandler(
       .eq('id', cronogramaId)
       .single();
 
-    if (cronogramaError || !cronograma) {
+    // Type assertion: Query result properly typed from Database schema
+    type CronogramaBasic = Pick<Database['public']['Tables']['cronogramas']['Row'], 'id' | 'aluno_id'>;
+    const typedCronogramaGet = cronograma as CronogramaBasic | null;
+
+    if (cronogramaError || !typedCronogramaGet) {
       return NextResponse.json({ error: 'Cronograma não encontrado' }, { status: 404 });
     }
 
-    if (cronograma.aluno_id !== request.user.id) {
+    if (typedCronogramaGet.aluno_id !== request.user.id) {
       return NextResponse.json({ error: 'Você só pode acessar seus próprios cronogramas' }, { status: 403 });
     }
 

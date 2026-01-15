@@ -1,3 +1,26 @@
+/**
+ * Database Client Module
+ * 
+ * Provides typed Supabase client instances for database operations.
+ * 
+ * Key Functions:
+ * - getDatabaseClient(): Server-side client with service role permissions
+ * - getDatabaseClientAsUser(token): User-scoped client that respects RLS policies
+ * 
+ * Usage Examples:
+ * ```typescript
+ * // Server-side operations (bypasses RLS)
+ * const client = getDatabaseClient();
+ * const { data } = await client.from('professores').select('*');
+ * 
+ * // User-scoped operations (respects RLS)
+ * const client = getDatabaseClientAsUser(accessToken);
+ * const { data } = await client.from('professores').select('*');
+ * ```
+ * 
+ * For detailed documentation, see: docs/TYPESCRIPT_SUPABASE_GUIDE.md
+ */
+
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/lib/database.types';
 
@@ -43,6 +66,26 @@ function getDatabaseUserCredentials() {
   return { DATABASE_URL, DATABASE_API_KEY };
 }
 
+/**
+ * Get a server-side Supabase client with service role permissions.
+ * 
+ * This client bypasses Row Level Security (RLS) policies and should only be used
+ * for server-side operations that require elevated permissions.
+ * 
+ * The client is cached globally for performance.
+ * 
+ * @returns {SupabaseClient<Database>} Typed Supabase client instance
+ * @throws {Error} If database credentials are not configured
+ * 
+ * @example
+ * ```typescript
+ * const client = getDatabaseClient();
+ * const { data, error } = await client
+ *   .from('professores')
+ *   .select('*')
+ *   .eq('empresa_id', empresaId);
+ * ```
+ */
 export function getDatabaseClient(): SupabaseClient<Database> {
   if (!cachedClient) {
     const { DATABASE_URL, DATABASE_KEY } = getDatabaseCredentials();
@@ -59,10 +102,29 @@ export function getDatabaseClient(): SupabaseClient<Database> {
 }
 
 /**
- * Cria um client "user-scoped" (anon key + Bearer token).
- * Útil para rotas que dependem de RLS e de funções como get_user_empresa_id().
- *
- * Importante: não cachear este client globalmente (token varia por request).
+ * Create a user-scoped Supabase client that respects Row Level Security (RLS).
+ * 
+ * This client uses the user's access token to enforce RLS policies and database functions
+ * like get_user_empresa_id() that depend on the authenticated user context.
+ * 
+ * ⚠️ Important: Do NOT cache this client globally as the token varies per request.
+ * 
+ * @param {string} accessToken - User's JWT access token from authentication
+ * @returns {SupabaseClient<Database>} Typed Supabase client instance with user context
+ * @throws {Error} If accessToken is missing or empty
+ * 
+ * @example
+ * ```typescript
+ * // In an API route
+ * const token = request.headers.get('Authorization')?.replace('Bearer ', '');
+ * const client = getDatabaseClientAsUser(token);
+ * 
+ * // This query respects RLS policies for the authenticated user
+ * const { data, error } = await client
+ *   .from('professores')
+ *   .select('*')
+ *   .eq('id', userId);
+ * ```
  */
 export function getDatabaseClientAsUser(accessToken: string): SupabaseClient<Database> {
   const token = accessToken?.trim();
@@ -86,7 +148,19 @@ export function getDatabaseClientAsUser(accessToken: string): SupabaseClient<Dat
   });
 }
 
-// Função para recriar o cliente (útil quando há mudanças no schema)
+/**
+ * Clear the cached database client.
+ * 
+ * Useful when schema changes require a fresh client instance.
+ * The next call to getDatabaseClient() will create a new client.
+ * 
+ * @example
+ * ```typescript
+ * // After regenerating database types
+ * clearDatabaseClientCache();
+ * const client = getDatabaseClient(); // Creates new client with updated types
+ * ```
+ */
 export function clearDatabaseClientCache(): void {
   cachedClient = null;
 }

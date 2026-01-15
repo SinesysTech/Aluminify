@@ -30,8 +30,9 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { CalendarIcon, Plus, Trash2, Edit, AlertTriangle, Loader2 } from "lucide-react"
 import { toast } from "sonner"
-import { createClient } from "@/lib/server"
+import { createClient } from "@/lib/client"
 import { cn } from "@/lib/utils"
+import type { Database } from "@/lib/database.types"
 
 const TIPOS_BLOQUEIO = [
   { value: 'feriado', label: 'Feriado' },
@@ -39,6 +40,8 @@ const TIPOS_BLOQUEIO = [
   { value: 'imprevisto', label: 'Imprevisto' },
   { value: 'outro', label: 'Outro' },
 ]
+
+type BloqueioRow = Database['public']['Tables']['agendamento_bloqueios']['Row']
 
 interface Bloqueio {
   id: string
@@ -75,7 +78,7 @@ export function BloqueiosManager({ professorId, empresaId, isAdmin = false }: Bl
   const loadBloqueios = useCallback(async () => {
     setIsLoading(true)
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('agendamento_bloqueios')
         .select('*')
@@ -84,7 +87,7 @@ export function BloqueiosManager({ professorId, empresaId, isAdmin = false }: Bl
         .order('data_inicio', { ascending: false })
 
       if (error) throw error
-      setBloqueios(data || [])
+      setBloqueios((data || []) as Bloqueio[])
     } catch (error) {
       console.error("Error loading bloqueios:", error)
       toast.error("Erro ao carregar bloqueios")
@@ -99,7 +102,7 @@ export function BloqueiosManager({ professorId, empresaId, isAdmin = false }: Bl
 
   const checkAfetados = async (dataInicio: Date, dataFim: Date) => {
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
       const query = supabase
         .from('agendamentos')
         .select('id', { count: 'exact', head: true })
@@ -170,7 +173,7 @@ export function BloqueiosManager({ professorId, empresaId, isAdmin = false }: Bl
     }
 
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
 
       // Combine date and time
       const dataInicio = new Date(formData.data_inicio)
@@ -181,7 +184,7 @@ export function BloqueiosManager({ professorId, empresaId, isAdmin = false }: Bl
       const [horaFim, minutoFim] = formData.hora_fim.split(':').map(Number)
       dataFim.setHours(horaFim, minutoFim, 0, 0)
 
-      const payload = {
+      const payload: Database['public']['Tables']['agendamento_bloqueios']['Insert'] = {
         professor_id: formData.professor_id,
         empresa_id: empresaId,
         tipo: formData.tipo,
@@ -220,7 +223,7 @@ export function BloqueiosManager({ professorId, empresaId, isAdmin = false }: Bl
     if (!confirm("Tem certeza que deseja excluir este bloqueio?")) return
 
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
       const { error } = await supabase
         .from('agendamento_bloqueios')
         .delete()

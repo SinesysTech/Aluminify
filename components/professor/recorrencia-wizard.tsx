@@ -13,8 +13,9 @@ import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { CalendarIcon, ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react"
 import { toast } from "sonner"
-import { createClient } from "@/lib/server"
+import { createClient } from "@/lib/client"
 import { cn } from "@/lib/utils"
+import type { Database } from "@/lib/database.types"
 
 const DAYS = [
   { value: 0, label: "Domingo" },
@@ -90,10 +91,10 @@ export function RecorrenciaWizard({ professorId, empresaId, onSuccess }: Recorre
     setIsSubmitting(true)
 
     try {
-      const supabase = await createClient()
+      const supabase = createClient()
       
       // Criar um padrão de recorrência para cada dia selecionado
-      const recorrencias = data.dias_semana.map(dia => ({
+      const recorrencias: Database['public']['Tables']['agendamento_recorrencia']['Insert'][] = data.dias_semana.map(dia => ({
         professor_id: professorId,
         empresa_id: empresaId,
         tipo_servico: data.tipo_servico,

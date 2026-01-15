@@ -3,6 +3,7 @@ import { requireUserAuth, type AuthenticatedRequest } from '@/backend/auth/middl
 import { getDatabaseClient } from '@/backend/clients/database'
 import { setImpersonationContext, canImpersonateUser } from '@/lib/auth-impersonate'
 import type { AppUserRole } from '@/types/user'
+import type { Database } from '@/lib/database.types'
 
 async function postHandler(request: AuthenticatedRequest) {
   try {
@@ -28,7 +29,11 @@ async function postHandler(request: AuthenticatedRequest) {
       .eq('id', studentId)
       .maybeSingle()
 
-    if (alunoError || !aluno) {
+    // Type assertion: Query result properly typed from Database schema
+    type AlunoBasic = Pick<Database['public']['Tables']['alunos']['Row'], 'id' | 'email'>;
+    const typedAluno = aluno as AlunoBasic | null;
+
+    if (alunoError || !typedAluno) {
       return NextResponse.json(
         { error: 'Aluno não encontrado' },
         { status: 404 }
@@ -43,7 +48,13 @@ async function postHandler(request: AuthenticatedRequest) {
       .limit(1)
       .maybeSingle()
 
-    const alunoEmpresaId = (alunoCurso as { cursos?: { empresa_id?: string } } | null)?.cursos?.empresa_id
+    // Type assertion for joined query result
+    type AlunoCursoWithEmpresa = {
+      curso_id: string;
+      cursos: { empresa_id: string } | null;
+    };
+    const typedAlunoCurso = alunoCurso as AlunoCursoWithEmpresa | null;
+    const alunoEmpresaId = typedAlunoCurso?.cursos?.empresa_id
 
     // Buscar empresa_id do usuário real (se for professor)
     let realUserEmpresaId: string | undefined
@@ -54,7 +65,11 @@ async function postHandler(request: AuthenticatedRequest) {
         .eq('id', request.user.id)
         .maybeSingle()
       
-      realUserEmpresaId = professor?.empresa_id
+      // Type assertion: Query result properly typed from Database schema
+      type ProfessorEmpresa = Pick<Database['public']['Tables']['professores']['Row'], 'empresa_id'>;
+      const typedProfessor = professor as ProfessorEmpresa | null;
+      
+      realUserEmpresaId = typedProfessor?.empresa_id
     }
 
     // Validar se pode impersonar
@@ -89,8 +104,8 @@ async function postHandler(request: AuthenticatedRequest) {
       context: {
         ...context,
         impersonatedUser: {
-          id: aluno.id,
-          email: aluno.email,
+          id: typedAluno.id,
+          email: typedAluno.email,
         },
       },
     })

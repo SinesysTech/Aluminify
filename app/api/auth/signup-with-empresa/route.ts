@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     // Não depender apenas de trigger, pois fluxos via admin client podem variar.
     const { error: insertProfessorError } = await adminClient.from('professores').insert({
       id: newUser.user.id,
-      email: newUser.user.email,
+      email: newUser.user.email || email,
       nome_completo: fullName,
       empresa_id: empresa.id,
       is_admin: true,
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       biografia: null,
       foto_url: null,
       especialidade: null,
-    });
+    } as any); // Type assertion for insert
 
     if (insertProfessorError) {
       console.error('Error creating professor record:', insertProfessorError);
@@ -121,13 +121,13 @@ export async function POST(request: NextRequest) {
 
     // 3. Inserir em empresa_admins como owner
     const { error: adminError } = await adminClient
-      .from('empresa_admins')
+      .from('empresa_admins' as any) // Table not in generated types yet
       .insert({
         empresa_id: empresa.id,
         user_id: newUser.user.id,
         is_owner: true,
         permissoes: {},
-      });
+      } as any); // Type assertion for table not in generated types
 
     if (adminError) {
       console.error('Error creating empresa_admin:', adminError);

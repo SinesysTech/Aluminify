@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUserAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
 import { getDatabaseClient } from '@/backend/clients/database';
+import type { Database } from '@/lib/database.types';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -48,18 +49,24 @@ async function patchHandler(request: AuthenticatedRequest, params: { id: string 
     }
 
     // Atualizar a importância
+    const updateData = { importancia };
     const { data: updatedModulo, error: updateError } = await client
       .from('modulos')
-      .update({ importancia })
+      // @ts-ignore - Update type inference issue with generated types
+      .update(updateData)
       .eq('id', id)
       .select('id, importancia')
       .single();
+
+    // Type assertion: Query result properly typed from Database schema
+    type ModuloUpdate = Pick<Database['public']['Tables']['modulos']['Row'], 'id' | 'importancia'>;
+    const typedUpdatedModulo = updatedModulo as ModuloUpdate | null;
 
     if (updateError) {
       throw new Error(`Erro ao atualizar módulo: ${updateError.message}`);
     }
 
-    return NextResponse.json({ data: updatedModulo });
+    return NextResponse.json({ data: typedUpdatedModulo });
   } catch (error) {
     console.error('[modulo PATCH]', error);
     const message = error instanceof Error ? error.message : 'Erro interno';

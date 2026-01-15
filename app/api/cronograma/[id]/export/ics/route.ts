@@ -154,7 +154,11 @@ async function getHandler(
     .select('aluno_id')
     .eq('id', cronogramaId)
     .single()
-  if (!owner || owner.aluno_id !== request.user.id) {
+  
+  // Type assertion: Query result properly typed (cronogramas table exists in schema)
+  const typedOwner = owner as { aluno_id: string } | null;
+  
+  if (!typedOwner || typedOwner.aluno_id !== request.user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

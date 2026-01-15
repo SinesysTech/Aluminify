@@ -38,6 +38,27 @@ type StudentRow = Database['public']['Tables']['alunos']['Row'];
 type StudentInsert = Database['public']['Tables']['alunos']['Insert'];
 type StudentUpdate = Database['public']['Tables']['alunos']['Update'];
 
+/**
+ * Map database row to domain object
+ * 
+ * Demonstrates proper handling of nullable fields from the database:
+ * - nome_completo: string | null → fullName: string | null
+ * - cpf: string | null → cpf: string | null
+ * - telefone: string | null → phone: string | null
+ * - data_nascimento: string | null → birthDate: Date | null (with conversion)
+ * - endereco: string | null → address: string | null
+ * - cep: string | null → zipCode: string | null
+ * - numero_matricula: string | null → enrollmentNumber: string | null
+ * - instagram: string | null → instagram: string | null
+ * - twitter: string | null → twitter: string | null
+ * 
+ * Best Practices:
+ * - Preserve null values (don't convert to undefined or empty strings)
+ * - Use ternary operator for type conversions (e.g., string to Date)
+ * - Handle null explicitly when converting types
+ * 
+ * For more information, see: docs/TYPESCRIPT_SUPABASE_GUIDE.md#nullable-fields
+ */
 function mapRow(
   row: StudentRow,
   courses: StudentCourseSummary[] = []

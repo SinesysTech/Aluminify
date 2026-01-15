@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDatabaseClient } from '@/backend/clients/database';
 import { requireUserAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
 import { courseStructureCacheService, activityCacheService } from '@/backend/services/cache';
+import type { Database } from '@/lib/database.types';
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -48,6 +49,10 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
         .eq('id', userId)
         .maybeSingle();
 
+      // Type assertion: Query result properly typed from Database schema
+      type ProfessorEmpresa = Pick<Database['public']['Tables']['professores']['Row'], 'empresa_id'>;
+      const typedProfessor = professor as ProfessorEmpresa | null;
+
       if (professorError) {
         console.error('[Frente API] Error fetching professor empresa_id:', professorError);
         return NextResponse.json(
@@ -56,7 +61,7 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
         );
       }
 
-      empresaId = professor?.empresa_id ?? undefined;
+      empresaId = typedProfessor?.empresa_id ?? undefined;
     }
 
     // Se não conseguimos determinar a empresa e não é superadmin, não dá para autorizar com segurança
@@ -70,9 +75,13 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
     // 1. Buscar a frente e verificar se existe
     const { data: frente, error: frenteError } = await client
       .from('frentes')
-      .select('id, nome, curso_id, disciplina_id, empresa_id')
+      .select('id, nome, disciplina_id, empresa_id')
       .eq('id', frenteId)
       .maybeSingle();
+
+    // Type assertion: Query result properly typed from Database schema
+    type FrenteDetails = Pick<Database['public']['Tables']['frentes']['Row'], 'id' | 'nome' | 'disciplina_id' | 'empresa_id'>;
+    const typedFrente = frente as FrenteDetails | null;
 
     if (frenteError) {
       console.error('[Frente API] Error fetching frente:', frenteError);
@@ -82,53 +91,20 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
       );
     }
 
-    if (!frente) {
+    if (!typedFrente) {
       return NextResponse.json(
         { error: 'Frente not found' },
         { status: 404 }
       );
     }
 
-    // 2. Validar que o curso pertence ao professor
-    if (frente.curso_id) {
-      const { data: curso, error: cursoError } = await client
-        .from('cursos')
-        .select('id, created_by, empresa_id')
-        .eq('id', frente.curso_id)
-        .maybeSingle();
-
-      if (cursoError) {
-        console.error('[Frente API] Error fetching curso:', cursoError);
-        return NextResponse.json(
-          { error: 'Failed to verify course ownership' },
-          { status: 500 }
-        );
-      }
-
-      if (!curso) {
-        return NextResponse.json(
-          { error: 'Course not found' },
-          { status: 404 }
-        );
-      }
-
-      // Verificar se o curso está na mesma empresa do professor (ou se é superadmin)
-      // (created_by pode ser outro usuário/admin, mas ainda assim o curso pode ser da mesma empresa)
-      if (request.user.role !== 'superadmin' && empresaId && curso.empresa_id !== empresaId) {
-        return NextResponse.json(
-          { error: 'Forbidden. You can only delete fronts from your own company courses.' },
-          { status: 403 }
-        );
-      }
-    } else {
-      // Se a frente não tem curso_id, autorizar por empresa_id da própria frente
-      // (em multitenancy, frentes possuem empresa_id; logo, dá pra autorizar sem depender do curso)
-      if (request.user.role !== 'superadmin' && empresaId && frente.empresa_id !== empresaId) {
-        return NextResponse.json(
-          { error: 'Forbidden. You can only delete fronts from your company.' },
-          { status: 403 }
-        );
-      }
+    // 2. Validar que a frente pertence à empresa do professor
+    // (em multitenancy, frentes possuem empresa_id; logo, dá pra autorizar sem depender do curso)
+    if (request.user.role !== 'superadmin' && empresaId && typedFrente.empresa_id !== empresaId) {
+      return NextResponse.json(
+        { error: 'Forbidden. You can only delete fronts from your company.' },
+        { status: 403 }
+      );
     }
 
     // 3. Buscar módulos da frente
@@ -136,6 +112,10 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
       .from('modulos')
       .select('id')
       .eq('frente_id', frenteId);
+
+    // Type assertion: Query result properly typed from Database schema
+    type ModuloId = Pick<Database['public']['Tables']['modulos']['Row'], 'id'>;
+    const typedModulos = modulos as ModuloId[] | null;
 
     if (modulosError) {
       console.error('[Frente API] Error fetching modulos:', modulosError);
@@ -145,7 +125,7 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
       );
     }
 
-    const moduloIds = modulos?.map(m => m.id) || [];
+    const moduloIds = typedModulos?.map(m => m.id) || [];
 
     // 4. Verificar se há cronogramas que referenciam aulas desta frente
     let cronogramasCount = 0;
@@ -156,11 +136,15 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
         .select('id')
         .in('modulo_id', moduloIds);
 
+      // Type assertion: Query result properly typed from Database schema
+      type AulaId = Pick<Database['public']['Tables']['aulas']['Row'], 'id'>;
+      const typedAulas = aulas as AulaId[] | null;
+
       if (aulasError) {
         console.error('[Frente API] Error fetching aulas:', aulasError);
         // Continuar mesmo com erro, pois pode não haver aulas
       } else {
-        const aulaIds = aulas?.map(a => a.id) || [];
+        const aulaIds = typedAulas?.map(a => a.id) || [];
         
         if (aulaIds.length > 0) {
           // Verificar se há cronogramas que referenciam essas aulas
@@ -170,9 +154,13 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
             .select('cronograma_id')
             .in('aula_id', aulaIds);
 
-          if (!cronogramasError && cronogramas && cronogramas.length > 0) {
+          // Type assertion: Query result properly typed from Database schema
+          type CronogramaId = Pick<Database['public']['Tables']['cronograma_itens']['Row'], 'cronograma_id'>;
+          const typedCronogramas = cronogramas as CronogramaId[] | null;
+
+          if (!cronogramasError && typedCronogramas && typedCronogramas.length > 0) {
             // Contar cronogramas únicos
-            const cronogramaIds = new Set(cronogramas.map(c => c.cronograma_id));
+            const cronogramaIds = new Set(typedCronogramas.map(c => c.cronograma_id));
             cronogramasCount = cronogramaIds.size;
           }
         }
@@ -229,8 +217,8 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
     console.log(`[Frente API] Frente ${frenteId} deleted successfully by user ${userId}`);
 
     // Invalidar cache de estrutura hierárquica e atividades
-    if (frente.disciplina_id) {
-      await courseStructureCacheService.invalidateDisciplines([frente.disciplina_id]);
+    if (typedFrente.disciplina_id) {
+      await courseStructureCacheService.invalidateDisciplines([typedFrente.disciplina_id]);
     }
     if (moduloIds.length > 0) {
       await activityCacheService.invalidateModulos(moduloIds);

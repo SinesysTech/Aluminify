@@ -6,6 +6,7 @@ import {
 import { requireAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
 import Papa from 'papaparse';
 import ExcelJS from 'exceljs';
+import type { Database } from '@/lib/database.types';
 
 const STUDENT_IMPORT_COLUMN_ALIASES = {
   fullName: ['nome completo', 'nome'],
@@ -176,11 +177,15 @@ async function postHandler(request: AuthenticatedRequest) {
       .from('cursos')
       .select('id, nome');
 
+    // Type assertion: Query result properly typed from Database schema
+    type CourseBasic = Pick<Database['public']['Tables']['cursos']['Row'], 'id' | 'nome'>;
+    const typedCoursesData = coursesData as CourseBasic[] | null;
+
     if (coursesError) {
       throw new Error(`Erro ao carregar cursos: ${coursesError.message}`);
     }
 
-    const courseOptions = (coursesData ?? []).map((course) => ({
+    const courseOptions = (typedCoursesData ?? []).map((course) => ({
       id: course.id,
       name: course.nome,
     }));

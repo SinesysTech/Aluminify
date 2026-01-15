@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { getDisponibilidade, upsertDisponibilidade } from "@/app/actions/agendamentos"
+import { getDisponibilidade, upsertDisponibilidade, type Disponibilidade } from "@/app/actions/agendamentos"
 import { Loader2, Plus, Save, Trash } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { TableSkeleton } from "@/components/ui/table-skeleton"
@@ -38,13 +38,7 @@ const DAYS = [
   "Sábado",
 ]
 
-interface AvailabilityRule {
-  id?: string
-  dia_semana: number
-  hora_inicio: string
-  hora_fim: string
-  ativo: boolean
-}
+type AvailabilityRule = Disponibilidade
 
 interface AvailabilityManagerProps {
   professorId: string
@@ -59,14 +53,16 @@ export function AvailabilityManager({ professorId }: AvailabilityManagerProps) {
     async function fetchAvailability() {
       try {
         const data = await getDisponibilidade(professorId)
+        // Filter and map to ensure proper types
         const mapped: AvailabilityRule[] = data
-          .filter((d) => d.ativo !== null && d.ativo !== undefined)
+          .filter((d): d is Disponibilidade => d.ativo !== null && d.ativo !== undefined)
           .map((d) => ({
             id: d.id,
+            professor_id: d.professor_id,
             dia_semana: d.dia_semana,
             hora_inicio: d.hora_inicio,
             hora_fim: d.hora_fim,
-            ativo: d.ativo ?? false,
+            ativo: d.ativo,
           }))
         setRules(mapped)
       } catch (error) {

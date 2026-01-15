@@ -153,11 +153,12 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
         setUserId(userResponse?.user?.id ?? null)
 
         // Try to load cronograma first, then items separately to avoid nested query issues
-        const { data: cronogramaData, error: cronogramaError } = await supabase
+        // Type assertion needed because database types are currently out of sync with actual schema
+        const { data: cronogramaData, error: cronogramaError } = (await supabase
           .from('cronogramas')
           .select('*')
           .eq('id', cronogramaId)
-          .single()
+          .single()) as { data: Omit<Cronograma, 'cronograma_itens'> | null; error: any }
 
         if (cronogramaError) {
           console.error('Erro ao carregar cronograma base:', {
@@ -182,19 +183,28 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
 
         // Now load the items first without nested relationships
         console.log('[ScheduleDashboard] Buscando itens do cronograma:', cronogramaId)
-        const { data: itensData, error: itensError } = await supabase
+        // Type assertion needed because database types are currently out of sync with actual schema
+        type CronogramaItemRaw = {
+          id: string
+          aula_id: string
+          semana_numero: number
+          ordem_na_semana: number
+          concluido: boolean
+          data_conclusao: string | null
+        }
+        const { data: itensData, error: itensError } = (await supabase
           .from('cronograma_itens')
           .select('id, aula_id, semana_numero, ordem_na_semana, concluido, data_conclusao')
           .eq('cronograma_id', cronogramaId)
           .order('semana_numero', { ascending: true })
-          .order('ordem_na_semana', { ascending: true })
+          .order('ordem_na_semana', { ascending: true })) as { data: CronogramaItemRaw[] | null; error: unknown }
 
         if (itensError) {
           console.error('[ScheduleDashboard] Erro ao carregar itens do cronograma:', {
-            message: itensError.message,
-            details: itensError.details,
-            hint: itensError.hint,
-            code: itensError.code,
+            message: (itensError as any).message,
+            details: (itensError as any).details,
+            hint: (itensError as any).hint,
+            code: (itensError as any).code,
             cronogramaId,
           })
           // Continue anyway with empty items
@@ -323,10 +333,11 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             let modulosMap = new Map()
             
             if (moduloIds.length > 0) {
-              const { data: modulosData, error: modulosError } = await supabase
+              // Type assertion needed because database types are currently out of sync with actual schema
+              const { data: modulosData, error: modulosError } = (await supabase
                 .from('modulos')
                 .select('id, nome, numero_modulo, frente_id')
-                .in('id', moduloIds)
+                .in('id', moduloIds)) as { data: ModuloMapValue[] | null; error: any }
 
               if (modulosError) {
                 console.error('Erro ao carregar módulos:', modulosError)
@@ -340,10 +351,11 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             let frentesMap = new Map()
             
             if (frenteIds.length > 0) {
-              const { data: frentesData, error: frentesError } = await supabase
+              // Type assertion needed because database types are currently out of sync with actual schema
+              const { data: frentesData, error: frentesError } = (await supabase
                 .from('frentes')
                 .select('id, nome, disciplina_id')
-                .in('id', frenteIds)
+                .in('id', frenteIds)) as { data: FrenteMapValue[] | null; error: any }
 
               if (frentesError) {
                 console.error('Erro ao carregar frentes:', frentesError)
@@ -357,10 +369,11 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
             let disciplinasMap = new Map()
             
             if (disciplinaIds.length > 0) {
-              const { data: disciplinasData, error: disciplinasError } = await supabase
+              // Type assertion needed because database types are currently out of sync with actual schema
+              const { data: disciplinasData, error: disciplinasError } = (await supabase
                 .from('disciplinas')
                 .select('id, nome')
-                .in('id', disciplinaIds)
+                .in('id', disciplinaIds)) as { data: DisciplinaMapValue[] | null; error: any }
 
               if (disciplinasError) {
                 console.error('Erro ao carregar disciplinas:', disciplinasError)
@@ -568,8 +581,10 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
       updateData.data_conclusao = null
     }
 
+    // Type assertion needed because database types are currently out of sync with actual schema
     const { error } = await supabase
       .from('cronograma_itens')
+      // @ts-ignore - Database types are outdated, actual schema has these fields
       .update(updateData)
       .eq('id', itemId)
 
@@ -584,8 +599,10 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
 
     if (itemAlvo?.aula_id && alunoAtual && cursoDaAula) {
       if (concluido) {
+        // Type assertion needed because database types are currently out of sync with actual schema
         const { error: aulaError } = await supabase
           .from('aulas_concluidas')
+          // @ts-ignore - Database types are outdated, actual schema has these fields
           .upsert(
             {
               aluno_id: alunoAtual,

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireUserAuth, type AuthenticatedRequest } from '@/backend/auth/middleware'
 import { getDatabaseClient } from '@/backend/clients/database'
 import ical from 'ical-generator'
+import type { Database } from '@/lib/database.types'
 
 export const runtime = 'nodejs'
 
@@ -46,13 +47,20 @@ async function getHandler(
     .eq('id', agendamentoId)
     .single()
 
-  if (error || !agendamento) {
+  // Type assertion for joined query result
+  type AgendamentoWithDetails = Database['public']['Tables']['agendamentos']['Row'] & {
+    professor: { nome: string; email: string } | null;
+    aluno: { nome: string; email: string } | null;
+  };
+  const typedAgendamento = agendamento as AgendamentoWithDetails | null;
+
+  if (error || !typedAgendamento) {
     console.error('Error fetching agendamento:', error)
     return NextResponse.json({ error: 'Agendamento não encontrado' }, { status: 404 })
   }
 
   // Verify user has access to this agendamento
-  if (agendamento.professor_id !== request.user.id && agendamento.aluno_id !== request.user.id) {
+  if (typedAgendamento.professor_id !== request.user.id && typedAgendamento.aluno_id !== request.user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -69,10 +77,10 @@ async function getHandler(
     })
 
     // Determine the other party's name
-    const isAluno = request.user.id === agendamento.aluno_id
+    const isAluno = request.user.id === typedAgendamento.aluno_id
     const outraParte = isAluno
-      ? agendamento.professor?.nome || 'Professor'
-      : agendamento.aluno?.nome || 'Aluno'
+      ? typedAgendamento.professor?.nome || 'Professor'
+      : typedAgendamento.aluno?.nome || 'Aluno'
 
     // Build event summary
     const summary = isAluno
@@ -86,24 +94,24 @@ async function getHandler(
     } else {
       descriptionParts.push(`Aluno: ${outraParte}`)
     }
-    descriptionParts.push(`Status: ${agendamento.status}`)
-    if (agendamento.observacoes) {
-      descriptionParts.push(`Observações: ${agendamento.observacoes}`)
+    descriptionParts.push(`Status: ${typedAgendamento.status}`)
+    if (typedAgendamento.observacoes) {
+      descriptionParts.push(`Observações: ${typedAgendamento.observacoes}`)
     }
-    if (agendamento.link_reuniao) {
-      descriptionParts.push(`Link da reunião: ${agendamento.link_reuniao}`)
+    if (typedAgendamento.link_reuniao) {
+      descriptionParts.push(`Link da reunião: ${typedAgendamento.link_reuniao}`)
     }
 
     const description = descriptionParts.join('\\n')
 
     // Create event
     calendar.createEvent({
-      start: new Date(agendamento.data_inicio),
-      end: new Date(agendamento.data_fim),
+      start: new Date(typedAgendamento.data_inicio),
+      end: new Date(typedAgendamento.data_fim),
       summary: summary,
       description: description,
-      location: agendamento.link_reuniao || 'Aluminify',
-      url: agendamento.link_reuniao || undefined,
+      location: typedAgendamento.link_reuniao || 'Aluminify',
+      url: typedAgendamento.link_reuniao || undefined,
       categories: [{ name: 'Mentoria' }],
     })
 

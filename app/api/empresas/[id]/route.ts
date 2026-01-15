@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/lib/database.types';
 import { EmpresaService, EmpresaRepositoryImpl } from '@/backend/services/empresa';
 import { getAuthUser } from '@/backend/auth/middleware';
 import { getEmpresaContext, validateEmpresaAccess } from '@/backend/middleware/empresa-context';
@@ -27,7 +28,7 @@ async function getHandler(
     // Criar cliente Supabase com token do header Authorization
     const authHeader = request.headers.get('authorization');
     const { url, anonKey } = getPublicSupabaseConfig();
-    const supabase = createClient(url, anonKey, {
+    const supabase = createClient<Database>(url, anonKey, {
       global: {
         headers: authHeader ? { Authorization: authHeader } : {},
       },
@@ -87,7 +88,7 @@ async function patchHandler(
     // Criar cliente Supabase com token do header Authorization
     const authHeader = request.headers.get('authorization');
     const { url, anonKey } = getPublicSupabaseConfig();
-    const supabase = createClient(url, anonKey, {
+    const supabase = createClient<Database>(url, anonKey, {
       global: {
         headers: authHeader ? { Authorization: authHeader } : {},
       },
@@ -137,7 +138,7 @@ async function deleteHandler(
     }
 
     const { url, anonKey } = getPublicSupabaseConfig();
-    const supabase = createClient(url, anonKey, {
+    const supabase = createClient<Database>(url, anonKey, {
       auth: {
         persistSession: false,
       },

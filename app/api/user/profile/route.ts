@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/server';
+import type { Database } from '@/lib/database.types';
 
 /**
  * GET /api/user/profile
@@ -33,16 +34,20 @@ export async function GET() {
         .eq('id', user.id)
         .maybeSingle();
 
+      // Type assertion: Query result properly typed from Database schema
+      type ProfessorProfile = Pick<Database['public']['Tables']['professores']['Row'], 'empresa_id' | 'is_admin' | 'nome_completo'>;
+      const typedProfessor = professor as ProfessorProfile | null;
+
       // `professores` é fonte de verdade, mas em cadastros recentes pode haver atraso/fluxo sem trigger.
       // Fallback para metadata evita UX quebrada (ex.: admin/empresa exibindo "Empresa não encontrada").
       empresaId =
-        professor?.empresa_id ??
+        typedProfessor?.empresa_id ??
         ((user.user_metadata?.empresa_id as string | undefined) ?? null);
       isEmpresaAdmin =
-        professor?.is_admin ??
+        typedProfessor?.is_admin ??
         ((user.user_metadata?.is_admin as boolean | undefined) ?? null);
       fullName =
-        professor?.nome_completo ??
+        typedProfessor?.nome_completo ??
         ((user.user_metadata?.full_name as string | undefined) ?? null);
     } else {
       const { data: aluno } = await supabase
@@ -51,7 +56,11 @@ export async function GET() {
         .eq('id', user.id)
         .maybeSingle();
 
-      fullName = aluno?.nome_completo ?? (user.user_metadata?.full_name as string | undefined) ?? null;
+      // Type assertion: Query result properly typed from Database schema
+      type AlunoProfile = Pick<Database['public']['Tables']['alunos']['Row'], 'nome_completo'>;
+      const typedAluno = aluno as AlunoProfile | null;
+
+      fullName = typedAluno?.nome_completo ?? (user.user_metadata?.full_name as string | undefined) ?? null;
     }
 
     return NextResponse.json({
