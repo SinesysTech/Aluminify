@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "@/components/perfil/branding-settings"
 import { CompanySettings } from "@/components/perfil/company-settings"
@@ -8,9 +9,14 @@ import type { AppUser } from "@/types/user"
 
 interface SettingsTabsProps {
     user: AppUser
+    initialTab?: string
 }
 
-export function SettingsTabs({ user }: SettingsTabsProps) {
+const VALID_TABS = ['branding', 'empresa', 'usuarios']
+
+export function SettingsTabs({ user, initialTab }: SettingsTabsProps) {
+    const defaultTab = initialTab && VALID_TABS.includes(initialTab) ? initialTab : 'branding'
+    const [activeTab, setActiveTab] = useState(defaultTab)
     if (!user.empresaId) {
         return (
             <div className="text-center py-8">
@@ -32,7 +38,7 @@ export function SettingsTabs({ user }: SettingsTabsProps) {
                 </div>
             </header>
 
-            <Tabs defaultValue="branding" className="w-full">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="branding">Customizações de Marca</TabsTrigger>
                     <TabsTrigger value="empresa">Dados da Empresa</TabsTrigger>

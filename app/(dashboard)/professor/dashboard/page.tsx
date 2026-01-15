@@ -7,6 +7,8 @@ export default async function ProfessorDashboardPage() {
   const user = await requireUser({ allowedRoles: ['professor', 'superadmin'] })
 
   // Verificar se precisa completar cadastro da empresa
+  let shouldRedirectToComplete = false;
+
   if (user.empresaId && user.role !== 'superadmin') {
     try {
       const supabase = await createClient();
@@ -22,16 +24,16 @@ export default async function ProfessorDashboardPage() {
         const cnpjVazio = !empresa.cnpj || empresa.cnpj.trim() === '';
         const emailVazio = !empresa.email_contato || empresa.email_contato.trim() === '';
         const telefoneVazio = !empresa.telefone || empresa.telefone.trim() === '';
-        const empresaIncompleta = cnpjVazio && emailVazio && telefoneVazio;
-        
-        if (empresaIncompleta) {
-          redirect('/professor/empresa/completar');
-        }
+        shouldRedirectToComplete = cnpjVazio && emailVazio && telefoneVazio;
       }
     } catch (error) {
       console.error('Erro ao verificar empresa:', error);
       // Continuar normalmente se houver erro
     }
+  }
+
+  if (shouldRedirectToComplete) {
+    redirect('/professor/empresa/completar');
   }
 
   // Por enquanto, redireciona para a página principal do professor

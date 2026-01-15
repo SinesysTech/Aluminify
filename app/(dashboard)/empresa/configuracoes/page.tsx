@@ -2,8 +2,13 @@ import { SettingsTabs } from '@/components/configuracoes/settings-tabs'
 import { requireUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 
-export default async function ConfiguracoesPage() {
+interface ConfiguracoesPageProps {
+  searchParams: Promise<{ tab?: string }>
+}
+
+export default async function ConfiguracoesPage({ searchParams }: ConfiguracoesPageProps) {
   const user = await requireUser()
+  const { tab } = await searchParams
 
   // Only empresa admins can access this page
   const allowedRoles = ['professor', 'superadmin', 'empresa']
@@ -18,7 +23,7 @@ export default async function ConfiguracoesPage() {
 
   return (
     <div className="flex flex-col gap-8 h-full">
-      <SettingsTabs user={user} />
+      <SettingsTabs user={user} initialTab={tab} />
     </div>
   )
 }
