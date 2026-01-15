@@ -10,8 +10,6 @@ import {
   Users,
   Eye,
   LayoutDashboard,
-  User,
-  Building2,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
@@ -93,16 +91,7 @@ const professorNavItems: NavItem[] = [
     url: "/professor/agendamentos",
     icon: Calendar,
   },
-  {
-    title: "Perfil",
-    url: "/perfil",
-    icon: User,
-  },
-  {
-    title: "Empresa",
-    url: "/admin/empresa",
-    icon: Building2,
-  },
+
 ]
 
 export function ProfessorSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

@@ -7,7 +7,6 @@ import {
   School,
   BrainCircuit,
   LayoutDashboard,
-  User,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
@@ -69,11 +68,7 @@ const alunoNavItems: NavItem[] = [
     url: "/agendamentos",
     icon: Calendar,
   },
-  {
-    title: "Perfil",
-    url: "/perfil",
-    icon: User,
-  },
+
 ]
 
 export function AlunoSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

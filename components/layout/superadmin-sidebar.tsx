@@ -6,7 +6,6 @@ import {
   Users,
   LayoutDashboard,
   FileText,
-  User,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
@@ -58,11 +57,7 @@ const superAdminNavItems: NavItem[] = [
     url: "/superadmin/relatorios",
     icon: FileText,
   },
-  {
-    title: "Perfil",
-    url: "/perfil",
-    icon: User,
-  },
+
 ]
 
 export function SuperAdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

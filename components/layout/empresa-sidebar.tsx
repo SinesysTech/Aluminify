@@ -7,7 +7,6 @@ import {
   GraduationCap,
   LayoutDashboard,
   FileText,
-  User,
   Palette,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -70,11 +69,7 @@ const empresaNavItems: NavItem[] = [
     url: "/empresa/relatorios",
     icon: FileText,
   },
-  {
-    title: "Perfil",
-    url: "/perfil",
-    icon: User,
-  },
+
 ]
 
 export function EmpresaSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
