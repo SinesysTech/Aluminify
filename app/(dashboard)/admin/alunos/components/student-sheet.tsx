@@ -8,9 +8,10 @@ import { useRouter } from 'next/navigation'
 interface StudentSheetProps {
     isOpen: boolean
     onClose: () => void
+    courses: { id: string, name: string }[]
 }
 
-export function StudentSheet({ isOpen, onClose }: StudentSheetProps) {
+export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
