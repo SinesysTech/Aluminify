@@ -47,11 +47,6 @@ const empresaNavItems: NavItem[] = [
     icon: Users,
   },
   {
-    title: "Professores",
-    url: "/admin/empresa/professores",
-    icon: GraduationCap,
-  },
-  {
     title: "Alunos",
     url: "/admin/empresa/alunos",
     icon: Users,

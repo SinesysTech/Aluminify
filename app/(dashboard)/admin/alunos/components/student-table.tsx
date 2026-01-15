@@ -1,13 +1,74 @@
 "use client"
 
-import { MoreHorizontal } from 'lucide-react'
+import { useState } from 'react'
+import { MoreHorizontal, Eye } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Student } from '@/types/shared/entities/user'
+import { createClient } from '@/lib/client'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface StudentTableProps {
     students: Student[]
 }
 
 export function StudentTable({ students }: StudentTableProps) {
+    const [loadingId, setLoadingId] = useState<string | null>(null)
+    const router = useRouter()
+
+    const handleViewAsStudent = async (studentId: string) => {
+        setLoadingId(studentId)
+        try {
+            // Obter token de autenticação
+            const supabase = createClient()
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+            if (sessionError || !session) {
+                alert('Sessão expirada. Faça login novamente.')
+                return
+            }
+
+            const response = await fetch('/api/auth/impersonate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({ studentId }),
+            })
+
+            const data = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
+
+            if (!response.ok) {
+                console.error('Erro na resposta da API:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    error: data,
+                })
+                alert(data.error || `Erro ao iniciar visualização (${response.status})`)
+                return
+            }
+
+            if (data.success) {
+                // Aguardar um pouco para garantir que o cookie foi definido
+                await new Promise(resolve => setTimeout(resolve, 100))
+                router.push('/aluno/dashboard')
+                router.refresh()
+            } else {
+                alert(data.error || 'Erro ao iniciar visualização')
+            }
+        } catch (error) {
+            console.error('Erro ao iniciar visualização:', error)
+            alert('Erro ao iniciar visualização. Verifique o console para mais detalhes.')
+        } finally {
+            setLoadingId(null)
+        }
+    }
+
     return (
         <div className="rounded-lg border border-[#E4E4E7] bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] overflow-hidden flex-1">
             <table className="w-full text-left text-sm">
@@ -52,8 +113,8 @@ export function StudentTable({ students }: StudentTableProps) {
                                     </td>
                                     <td className="p-4">
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${status === 'Ativo'
-                                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                                : 'bg-red-50 text-red-700 border-red-200'
+                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                            : 'bg-red-50 text-red-700 border-red-200'
                                             }`}>
                                             {status}
                                         </span>
@@ -70,9 +131,23 @@ export function StudentTable({ students }: StudentTableProps) {
                                         </div>
                                     </td>
                                     <td className="p-4 text-right">
-                                        <button className="text-zinc-400 hover:text-zinc-900 transition-colors">
-                                            <MoreHorizontal className="w-5 h-5" strokeWidth={1.5} />
-                                        </button>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <button className="text-zinc-400 hover:text-zinc-900 transition-colors">
+                                                    <MoreHorizontal className="w-5 h-5" strokeWidth={1.5} />
+                                                </button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem
+                                                    onClick={() => handleViewAsStudent(student.id)}
+                                                    disabled={loadingId === student.id}
+                                                    className="cursor-pointer"
+                                                >
+                                                    <Eye className="mr-2 h-4 w-4" />
+                                                    {loadingId === student.id ? 'Carregando...' : 'Visualizar como Aluno'}
+                                                </DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </td>
                                 </tr>
                             )
