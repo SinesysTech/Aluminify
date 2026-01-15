@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { createClient } from '@/lib/client'
-
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { MaterialsFilters } from '@/components/conteudos/materials-filters'
 import { ModuleAccordion } from '@/components/conteudos/module-accordion'
 import RulesPanel from '@/components/shared/rules-panel'
