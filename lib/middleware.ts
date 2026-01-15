@@ -238,6 +238,7 @@ export async function updateSession(request: NextRequest) {
     "/auth/aluno/login",
     "/auth/professor/login",
     "/auth/professor/cadastro",
+    "/api/auth/signup-with-empresa", // Endpoint de cadastro público
     "/api/chat/attachments", // Anexos usam token na URL, não precisam de autenticação de sessão
   ];
 
