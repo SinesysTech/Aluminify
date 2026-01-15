@@ -17,6 +17,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import { createClient } from '@/lib/client'
 
 interface Professor {
   id: string
@@ -39,6 +40,7 @@ interface UserManagementProps {
 export function UserManagement({ empresaId }: UserManagementProps) {
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState('professores')
+  const [accessToken, setAccessToken] = useState<string | null>(null)
 
   // Professores state
   const [professores, setProfessores] = useState<Professor[]>([])
@@ -57,10 +59,21 @@ export function UserManagement({ empresaId }: UserManagementProps) {
   const [loadingAlunos, setLoadingAlunos] = useState(true)
   const [alunoSearch, setAlunoSearch] = useState('')
 
+  // Inicializar accessToken
+  useEffect(() => {
+    const supabase = createClient()
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setAccessToken(session?.access_token ?? null)
+    })
+  }, [])
+
   // Fetch professores
   const fetchProfessores = useCallback(async () => {
+    if (!accessToken) return
     try {
-      const response = await fetch(`/api/empresas/${empresaId}/professores`)
+      const response = await fetch(`/api/empresas/${empresaId}/professores`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
       if (response.ok) {
         const data = await response.json()
         setProfessores(data)
@@ -75,12 +88,15 @@ export function UserManagement({ empresaId }: UserManagementProps) {
     } finally {
       setLoadingProfessores(false)
     }
-  }, [empresaId, toast])
+  }, [empresaId, toast, accessToken])
 
   // Fetch alunos
   const fetchAlunos = useCallback(async () => {
+    if (!accessToken) return
     try {
-      const response = await fetch(`/api/empresas/${empresaId}/alunos`)
+      const response = await fetch(`/api/empresas/${empresaId}/alunos`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
       if (response.ok) {
         const data = await response.json()
         setAlunos(data)
@@ -95,7 +111,7 @@ export function UserManagement({ empresaId }: UserManagementProps) {
     } finally {
       setLoadingAlunos(false)
     }
-  }, [empresaId, toast])
+  }, [empresaId, toast, accessToken])
 
   useEffect(() => {
     fetchProfessores()
@@ -104,10 +120,14 @@ export function UserManagement({ empresaId }: UserManagementProps) {
 
   // Create professor
   async function handleCreateProfessor() {
+    if (!accessToken) return
     try {
       const response = await fetch(`/api/empresas/${empresaId}/professores`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify(professorForm),
       })
 
@@ -134,10 +154,14 @@ export function UserManagement({ empresaId }: UserManagementProps) {
 
   // Toggle admin status
   async function handleToggleAdmin(professorId: string, currentStatus: boolean) {
+    if (!accessToken) return
     try {
       const response = await fetch(`/api/empresas/${empresaId}/professores/${professorId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
         body: JSON.stringify({ isAdmin: !currentStatus }),
       })
 
