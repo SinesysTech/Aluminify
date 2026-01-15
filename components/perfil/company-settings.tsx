@@ -189,16 +189,6 @@ export function CompanySettings({ empresaId }: CompanySettingsProps) {
 
     return (
         <div className="flex flex-col gap-6">
-            <header className="flex items-center justify-between pb-4 border-b border-[#E4E4E7]">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-zinc-900">Dados da Empresa</h2>
-                    <p className="text-sm text-[#71717A]">Gerencie as informações básicas da sua empresa</p>
-                </div>
-                <Button onClick={handleSave} className="h-10" disabled={saving}>
-                    {saving ? 'Salvando...' : 'Salvar Alterações'}
-                </Button>
-            </header>
-
             <div className="space-y-4">
                 <div className="space-y-2">
                     <Label htmlFor="nome">Nome da Empresa</Label>
@@ -257,6 +247,12 @@ export function CompanySettings({ empresaId }: CompanySettingsProps) {
                     </div>
                 </div>
             </div>
+
+            <footer className="flex justify-end pt-4 border-t border-[#E4E4E7]">
+                <Button onClick={handleSave} className="h-10" disabled={saving}>
+                    {saving ? 'Salvando...' : 'Salvar Alterações'}
+                </Button>
+            </footer>
         </div>
     );
 }

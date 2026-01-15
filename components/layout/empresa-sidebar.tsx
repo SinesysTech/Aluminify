@@ -45,11 +45,6 @@ const empresaNavItems: NavItem[] = [
     url: "/admin/empresa/alunos",
     icon: Users,
   },
-  {
-    title: "Relatórios",
-    url: "/empresa/relatorios",
-    icon: FileText,
-  },
   // Funcionalidades do Professor (Superset)
   {
     title: "Cursos",

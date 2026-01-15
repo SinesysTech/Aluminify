@@ -28,6 +28,7 @@ export function BrandingSettings({ empresaId }: BrandingSettingsProps) {
                 headers: {
                     'Authorization': `Bearer ${session.access_token}`,
                 },
+                credentials: 'include',
             });
 
             if (response.ok) {

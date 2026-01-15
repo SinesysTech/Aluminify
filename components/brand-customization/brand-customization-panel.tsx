@@ -84,6 +84,7 @@ export function BrandCustomizationPanel({
       const response = await fetch(`/api/tenant-branding/${empresaId}/logos`, {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -118,6 +119,7 @@ export function BrandCustomizationPanel({
     try {
       const response = await fetch(`/api/tenant-branding/${empresaId}/logos/${type}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -147,6 +149,7 @@ export function BrandCustomizationPanel({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(paletteRequest),
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -180,6 +183,7 @@ export function BrandCustomizationPanel({
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(schemeRequest),
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -242,45 +246,21 @@ export function BrandCustomizationPanel({
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex items-center justify-between pb-4 border-b border-[#E4E4E7]">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
-            Personalização da Marca
-          </h2>
-          <p className="text-sm text-[#71717A] mt-1">
-            Personalize a identidade visual da sua empresa, incluindo logos, cores e fontes.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handleReset}
-            variant="outline"
-            className="h-9"
-            disabled={isSaving || isResetting}
-          >
-            {isResetting ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <RotateCcw className="h-4 w-4 mr-2" />
-            )}
-            Restaurar Padrão
-          </Button>
-
-          <Button
-            onClick={handleSave}
-            className="h-10"
-            disabled={!hasUnsavedChanges || isSaving || isResetting}
-          >
-            {isSaving ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4 mr-2" />
-            )}
-            Salvar Alterações
-          </Button>
-        </div>
-      </header>
+      <div className="flex justify-end">
+        <Button
+          onClick={handleReset}
+          variant="outline"
+          className="h-9"
+          disabled={isSaving || isResetting}
+        >
+          {isResetting ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <RotateCcw className="h-4 w-4 mr-2" />
+          )}
+          Restaurar Padrão
+        </Button>
+      </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
@@ -485,6 +465,27 @@ export function BrandCustomizationPanel({
           />
         </TabsContent>
       </Tabs>
+
+      <footer className="flex justify-end items-center pt-4 border-t border-[#E4E4E7]">
+        {hasUnsavedChanges ? (
+          <Button
+            onClick={handleSave}
+            className="h-10"
+            disabled={isSaving || isResetting}
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4 mr-2" />
+            )}
+            Salvar Alterações
+          </Button>
+        ) : (
+          <span className="text-sm text-[#71717A]">
+            Todas as alterações foram salvas automaticamente
+          </span>
+        )}
+      </footer>
     </div>
   );
 }

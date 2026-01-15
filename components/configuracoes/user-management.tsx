@@ -177,15 +177,6 @@ export function UserManagement({ empresaId }: UserManagementProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex items-center justify-between pb-4 border-b border-[#E4E4E7]">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900">Gestão de Usuários</h2>
-          <p className="text-sm text-[#71717A]">
-            Gerencie professores, alunos e administradores da sua empresa
-          </p>
-        </div>
-      </header>
-
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="professores" className="flex items-center gap-2">
