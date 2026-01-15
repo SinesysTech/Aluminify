@@ -1,9 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
-import { createClient } from '@/lib/server';
-import { TeacherRepositoryImpl } from '@/backend/services/teacher';
-import { getAuthUser } from '@/backend/auth/middleware';
-import { getEmpresaContext, validateEmpresaAccess } from '@/backend/middleware/empresa-context';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/server";
+import { TeacherRepositoryImpl } from "@/backend/services/teacher";
+import { getAuthUser } from "@/backend/auth/middleware";
+import {
+  getEmpresaContext,
+  validateEmpresaAccess,
+} from "@/backend/middleware/empresa-context";
 
 function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -30,20 +33,14 @@ async function getHandler(
     const user = await getAuthUser(request);
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
     const supabase = await createClient();
 
     const context = await getEmpresaContext(supabase, user.id, request, user);
     if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
-      return NextResponse.json(
-        { error: 'Acesso negado' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
     const repository = new TeacherRepositoryImpl(supabase);
@@ -51,9 +48,9 @@ async function getHandler(
 
     return NextResponse.json(professores);
   } catch (error) {
-    console.error('Error listing professores:', error);
+    console.error("Error listing professores:", error);
     return NextResponse.json(
-      { error: 'Erro ao listar professores' },
+      { error: "Erro ao listar professores" },
       { status: 500 }
     );
   }
@@ -68,10 +65,7 @@ async function postHandler(
     const user = await getAuthUser(request);
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
     const supabase = await createClient();
@@ -79,7 +73,10 @@ async function postHandler(
     const context = await getEmpresaContext(supabase, user.id, request, user);
     if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
       return NextResponse.json(
-        { error: 'Acesso negado. Apenas admin da empresa pode adicionar professores.' },
+        {
+          error:
+            "Acesso negado. Apenas admin da empresa pode adicionar professores.",
+        },
         { status: 403 }
       );
     }
@@ -89,24 +86,25 @@ async function postHandler(
 
     if (!email || !fullName || !password) {
       return NextResponse.json(
-        { error: 'email, fullName e password são obrigatórios' },
+        { error: "email, fullName e password são obrigatórios" },
         { status: 400 }
       );
     }
 
     // Usar cliente admin para criar usuário (requer service_role key)
     const adminClient = createAdminClient();
-    const { data: newUser, error: userError } = await adminClient.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: {
-        role: 'professor',
-        full_name: fullName,
-        empresa_id: id,
-        is_admin: isAdmin || false,
-      },
-    });
+    const { data: newUser, error: userError } =
+      await adminClient.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: {
+          role: "professor",
+          full_name: fullName,
+          empresa_id: id,
+          is_admin: isAdmin || false,
+        },
+      });
 
     if (userError) {
       throw userError;
@@ -114,39 +112,55 @@ async function postHandler(
 
     if (!newUser.user) {
       return NextResponse.json(
-        { error: 'Erro ao criar usuário' },
+        { error: "Erro ao criar usuário" },
         { status: 500 }
       );
     }
 
     // O registro de professor será criado automaticamente pela trigger handle_new_user
-    // Mas podemos buscar para retornar
+    // Aguardar um pouco para a trigger completar e tentar buscar o professor
     const repository = new TeacherRepositoryImpl(supabase);
-    const professor = await repository.findById(newUser.user.id);
+
+    // Retry logic: tentar buscar até 3 vezes com delay
+    let professor = null;
+    for (let i = 0; i < 3; i++) {
+      professor = await repository.findById(newUser.user.id);
+      if (professor) break;
+
+      // Aguardar antes de tentar novamente
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+
+    if (!professor) {
+      console.error("Professor record not created by trigger after retries", {
+        userId: newUser.user.id,
+        email,
+        empresaId: id,
+      });
+      return NextResponse.json(
+        {
+          error:
+            "Usuário criado mas registro de professor não foi criado automaticamente. Entre em contato com o suporte.",
+        },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(professor, { status: 201 });
   } catch (error) {
-    console.error('Error creating professor:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Erro ao criar professor';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    console.error("Error creating professor:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Erro ao criar professor";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
 // GET /api/empresas/[id]/professores - Listar professores da empresa
-export async function GET(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function GET(request: NextRequest, context: RouteContext) {
   return getHandler(request, context);
 }
 
 // POST /api/empresas/[id]/professores - Adicionar professor
-export async function POST(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function POST(request: NextRequest, context: RouteContext) {
   return postHandler(request, context);
 }

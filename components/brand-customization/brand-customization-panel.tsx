@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Palette,
   Upload,
@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { LogoUploadComponent } from './logo-upload-component';
 import { ColorPaletteEditor } from './color-palette-editor';
 import { FontSchemeSelector } from './font-scheme-selector';
+import { createClient } from '@/lib/client';
 import type {
   BrandCustomizationState,
   BrandCustomizationPanelProps,
@@ -46,6 +47,18 @@ export function BrandCustomizationPanel({
   const [previewMode, setPreviewMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+
+  // Helper function to get auth token
+  const getAuthToken = useCallback(async (): Promise<string | null> => {
+    try {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      return session?.access_token || null;
+    } catch (error) {
+      console.error('Failed to get auth token:', error);
+      return null;
+    }
+  }, []);
 
   // Initialize state from props
   useEffect(() => {
@@ -77,14 +90,21 @@ export function BrandCustomizationPanel({
     try {
       console.log('Uploading logo for empresa:', empresaId);
 
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('logoType', type);
 
       const response = await fetch(`/api/tenant-branding/${empresaId}/logos`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
-        credentials: 'include',
       });
 
       const data = await response.json();
@@ -103,7 +123,7 @@ export function BrandCustomizationPanel({
       }));
 
       // Logos are saved instantly, so we don't set hasUnsavedChanges
-      // setHasUnsavedChanges(true); 
+      // setHasUnsavedChanges(true);
 
       return { success: true, logoUrl: data.logoUrl };
     } catch (error) {
@@ -117,9 +137,16 @@ export function BrandCustomizationPanel({
 
   const handleLogoRemove = async (type: LogoType): Promise<void> => {
     try {
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
       const response = await fetch(`/api/tenant-branding/${empresaId}/logos/${type}`, {
         method: 'DELETE',
-        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
@@ -137,19 +164,24 @@ export function BrandCustomizationPanel({
       // setHasUnsavedChanges(true);
     } catch (error) {
       console.error('Removal failed:', error);
-      throw error; // Re-throw to let child component handle if needed, though handleLogoRemove signature returns Promise<void>
+      throw error; // Re-throw to let child component handle if needed
     }
   };
 
   const handleColorPaletteSave = async (paletteRequest: CreateColorPaletteRequest): Promise<void> => {
     try {
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
       const response = await fetch(`/api/tenant-branding/${empresaId}/color-palettes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(paletteRequest),
-        credentials: 'include',
       });
 
       const data = await response.json();
@@ -177,13 +209,18 @@ export function BrandCustomizationPanel({
 
   const handleFontSchemeSave = async (schemeRequest: CreateFontSchemeRequest): Promise<void> => {
     try {
+      const token = await getAuthToken();
+      if (!token) {
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
       const response = await fetch(`/api/tenant-branding/${empresaId}/font-schemes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(schemeRequest),
-        credentials: 'include',
       });
 
       const data = await response.json();
