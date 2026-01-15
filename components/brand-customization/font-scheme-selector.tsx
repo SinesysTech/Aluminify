@@ -839,150 +839,151 @@ export function FontSchemeSelector({
                               onClick={() => applyPreset(preset)}
                               size="sm"
                               variant="outline"
+                            >
                               Aplicar
                             </Button>
-                        </div>
-                        <div className="space-y-2 text-sm text-muted-foreground">
-                          <div>Sans: {preset.scheme.fontSans?.slice(0, 2).join(', ')}</div>
-                          <div>Mono: {preset.scheme.fontMono?.slice(0, 2).join(', ')}</div>
-                          {preset.scheme.googleFonts && preset.scheme.googleFonts.length > 0 && (
-                            <div className="flex gap-1 flex-wrap">
-                              {preset.scheme.googleFonts.map(font => (
-                                <Badge key={font} variant="secondary" className="text-xs">
-                                  {font}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
+                          </div>
+                          <div className="space-y-2 text-sm text-muted-foreground">
+                            <div>Sans: {preset.scheme.fontSans?.slice(0, 2).join(', ')}</div>
+                            <div>Mono: {preset.scheme.fontMono?.slice(0, 2).join(', ')}</div>
+                            {preset.scheme.googleFonts && preset.scheme.googleFonts.length > 0 && (
+                              <div className="flex gap-1 flex-wrap">
+                                {preset.scheme.googleFonts.map(font => (
+                                  <Badge key={font} variant="secondary" className="text-xs">
+                                    {font}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
                       </Card>
                     ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </TabsContent >
-
-      <TabsContent value="google-fonts" className="space-y-6 mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Integração Google Fonts</CardTitle>
-            <CardDescription>
-              Adicione Google Fonts ao seu esquema para uma tipografia aprimorada
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {/* Add Google Font */}
-              <div className="flex gap-2">
-                <Select value={selectedGoogleFont} onValueChange={setSelectedGoogleFont}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Selecione uma Google Font" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableGoogleFonts.map((font) => (
-                      <SelectItem key={font} value={font}>
-                        {font}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={handleLoadGoogleFont}
-                  disabled={!selectedGoogleFont || loadingGoogleFont}
-                  className="gap-2"
-                >
-                  {loadingGoogleFont ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Download className="h-4 w-4" />
-                  )}
-                  Carregar Fonte
-                </Button>
-              </div>
-
-              {/* Loaded Google Fonts */}
-              {schemeData.googleFonts && schemeData.googleFonts.length > 0 && (
-                <div>
-                  <h4 className="font-medium mb-3">Google Fonts Carregadas</h4>
-                  <div className="space-y-2">
-                    {schemeData.googleFonts.map((font) => (
-                      <div key={font} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <span className="font-medium">{font}</span>
-                          <div
-                            className="text-sm text-muted-foreground"
-                            style={{ fontFamily: font }}
-                          >
-                            The quick brown fox jumps over the lazy dog
-                          </div>
-                        </div>
-                        <Button
-                          onClick={() => removeGoogleFont(font)}
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
                   </div>
                 </div>
-              )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent >
 
-              {/* Instructions */}
-              <Alert>
-                <CheckCircle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="space-y-2">
-                    <div className="font-medium">Como usar Google Fonts:</div>
-                    <div className="text-sm space-y-1">
-                      <div>1. Selecione uma Google Font na lista acima</div>
-                      <div>2. Clique em &quot;Carregar Fonte&quot; para adicionar ao seu esquema</div>
-                      <div>3. A fonte será adicionada automaticamente às suas pilhas de fontes</div>
-                      <div>4. Use a aba Visualizar para ver como fica</div>
+        <TabsContent value="google-fonts" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Integração Google Fonts</CardTitle>
+              <CardDescription>
+                Adicione Google Fonts ao seu esquema para uma tipografia aprimorada
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Add Google Font */}
+                <div className="flex gap-2">
+                  <Select value={selectedGoogleFont} onValueChange={setSelectedGoogleFont}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Selecione uma Google Font" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableGoogleFonts.map((font) => (
+                        <SelectItem key={font} value={font}>
+                          {font}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={handleLoadGoogleFont}
+                    disabled={!selectedGoogleFont || loadingGoogleFont}
+                    className="gap-2"
+                  >
+                    {loadingGoogleFont ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                    Carregar Fonte
+                  </Button>
+                </div>
+
+                {/* Loaded Google Fonts */}
+                {schemeData.googleFonts && schemeData.googleFonts.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-3">Google Fonts Carregadas</h4>
+                    <div className="space-y-2">
+                      {schemeData.googleFonts.map((font) => (
+                        <div key={font} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <span className="font-medium">{font}</span>
+                            <div
+                              className="text-sm text-muted-foreground"
+                              style={{ fontFamily: font }}
+                            >
+                              The quick brown fox jumps over the lazy dog
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => removeGoogleFont(font)}
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </AlertDescription>
-              </Alert>
-            </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
+                )}
 
-      <TabsContent value="preview" className="space-y-6 mt-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Visualização do Esquema de Fonte</CardTitle>
-            <CardDescription>
-              Veja como seu esquema de fontes ficará na interface
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FontPreview scheme={schemeData} />
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs >
+                {/* Instructions */}
+                <Alert>
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <div className="font-medium">Como usar Google Fonts:</div>
+                      <div className="text-sm space-y-1">
+                        <div>1. Selecione uma Google Font na lista acima</div>
+                        <div>2. Clique em &quot;Carregar Fonte&quot; para adicionar ao seu esquema</div>
+                        <div>3. A fonte será adicionada automaticamente às suas pilhas de fontes</div>
+                        <div>4. Use a aba Visualizar para ver como fica</div>
+                      </div>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-    {/* Save Button */ }
-  < div className="flex justify-end" >
-    <Button
-      onClick={handleSave}
-      disabled={isSaving || validationErrors.length > 0}
-      className="gap-2"
-    >
-      {isSaving ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <Save className="h-4 w-4" />
-      )}
-      Salvar Esquema de Fontes
-    </Button>
-  </div >
+        <TabsContent value="preview" className="space-y-6 mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Visualização do Esquema de Fonte</CardTitle>
+              <CardDescription>
+                Veja como seu esquema de fontes ficará na interface
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FontPreview scheme={schemeData} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs >
+
+      {/* Save Button */}
+      < div className="flex justify-end" >
+        <Button
+          onClick={handleSave}
+          disabled={isSaving || validationErrors.length > 0}
+          className="gap-2"
+        >
+          {isSaving ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4" />
+          )}
+          Salvar Esquema de Fontes
+        </Button>
+      </div >
     </div >
   );
 }

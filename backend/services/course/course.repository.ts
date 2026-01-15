@@ -1,6 +1,15 @@
-import { SupabaseClient } from '@supabase/supabase-js';
-import { Course, CreateCourseInput, UpdateCourseInput, Modality, CourseType } from './course.types';
-import type { PaginationParams, PaginationMeta } from '@/types/shared/dtos/api-responses';
+import { SupabaseClient } from "@supabase/supabase-js";
+import {
+  Course,
+  CreateCourseInput,
+  UpdateCourseInput,
+  Modality,
+  CourseType,
+} from "./course.types";
+import type {
+  PaginationParams,
+  PaginationMeta,
+} from "@/types/shared/dtos/api-responses";
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -16,14 +25,17 @@ export interface CourseRepository {
   findByEmpresa(empresaId: string): Promise<Course[]>;
   segmentExists(segmentId: string): Promise<boolean>;
   disciplineExists(disciplineId: string): Promise<boolean>;
-  setCourseDisciplines(courseId: string, disciplineIds: string[]): Promise<void>;
+  setCourseDisciplines(
+    courseId: string,
+    disciplineIds: string[]
+  ): Promise<void>;
   getCourseDisciplines(courseId: string): Promise<string[]>;
 }
 
-const TABLE = 'cursos';
-const SEGMENT_TABLE = 'segmentos';
-const DISCIPLINE_TABLE = 'disciplinas';
-const COURSE_DISCIPLINES_TABLE = 'cursos_disciplinas';
+const TABLE = "cursos";
+const SEGMENT_TABLE = "segmentos";
+const DISCIPLINE_TABLE = "disciplinas";
+const COURSE_DISCIPLINES_TABLE = "cursos_disciplinas";
 
 type CourseRow = {
   id: string;
@@ -47,7 +59,7 @@ type CourseRow = {
 async function mapRow(row: CourseRow, client: SupabaseClient): Promise<Course> {
   // Buscar disciplinas relacionadas
   const disciplineIds = await getCourseDisciplinesFromDb(row.id, client);
-  
+
   return {
     id: row.id,
     empresaId: row.empresa_id,
@@ -69,36 +81,64 @@ async function mapRow(row: CourseRow, client: SupabaseClient): Promise<Course> {
   };
 }
 
-async function getCourseDisciplinesFromDb(courseId: string, client: SupabaseClient): Promise<string[]> {
+async function getCourseDisciplinesFromDb(
+  courseId: string,
+  client: SupabaseClient
+): Promise<string[]> {
   const { data, error } = await client
     .from(COURSE_DISCIPLINES_TABLE)
-    .select('disciplina_id')
-    .eq('curso_id', courseId);
+    .select("disciplina_id")
+    .eq("curso_id", courseId);
 
   if (error) {
     console.error(`Failed to fetch course disciplines: ${error.message}`);
     return [];
   }
 
-  return (data ?? []).map((row: { disciplina_id: string }) => row.disciplina_id);
+  return (data ?? []).map(
+    (row: { disciplina_id: string }) => row.disciplina_id
+  );
 }
 
 export class CourseRepositoryImpl implements CourseRepository {
   constructor(private readonly client: SupabaseClient) {}
 
+  // Map English property names to Portuguese column names
+  private mapSortByToColumn(sortBy: string): string {
+    const columnMap: Record<string, string> = {
+      name: "nome",
+      modality: "modalidade",
+      type: "tipo",
+      description: "descricao",
+      year: "ano_vigencia",
+      startDate: "data_inicio",
+      endDate: "data_termino",
+      accessMonths: "meses_acesso",
+      planningUrl: "planejamento_url",
+      coverImageUrl: "imagem_capa_url",
+      createdAt: "created_at",
+      updatedAt: "updated_at",
+      empresaId: "empresa_id",
+      segmentId: "segmento_id",
+      disciplineId: "disciplina_id",
+    };
+    return columnMap[sortBy] || sortBy;
+  }
+
   async list(params?: PaginationParams): Promise<PaginatedResult<Course>> {
     const page = params?.page ?? 1;
     const perPage = params?.perPage ?? 50;
-    const sortBy = params?.sortBy ?? 'nome';
-    const sortOrder = params?.sortOrder === 'desc' ? false : true;
-    
+    const sortByParam = params?.sortBy ?? "nome";
+    const sortBy = this.mapSortByToColumn(sortByParam);
+    const sortOrder = params?.sortOrder === "desc" ? false : true;
+
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
 
     // Get total count
     const { count, error: countError } = await this.client
       .from(TABLE)
-      .select('*', { count: 'exact', head: true });
+      .select("*", { count: "exact", head: true });
 
     if (countError) {
       throw new Error(`Failed to count courses: ${countError.message}`);
@@ -110,7 +150,7 @@ export class CourseRepositoryImpl implements CourseRepository {
     // Get paginated data
     const { data, error } = await this.client
       .from(TABLE)
-      .select('*')
+      .select("*")
       .order(sortBy, { ascending: sortOrder })
       .range(from, to);
 
@@ -118,7 +158,9 @@ export class CourseRepositoryImpl implements CourseRepository {
       throw new Error(`Failed to list courses: ${error.message}`);
     }
 
-    const courses = await Promise.all((data ?? []).map(row => mapRow(row, this.client)));
+    const courses = await Promise.all(
+      (data ?? []).map((row) => mapRow(row, this.client))
+    );
 
     return {
       data: courses,
@@ -132,7 +174,11 @@ export class CourseRepositoryImpl implements CourseRepository {
   }
 
   async findById(id: string): Promise<Course | null> {
-    const { data, error } = await this.client.from(TABLE).select('*').eq('id', id).maybeSingle();
+    const { data, error } = await this.client
+      .from(TABLE)
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
 
     if (error) {
       throw new Error(`Failed to fetch course: ${error.message}`);
@@ -143,7 +189,9 @@ export class CourseRepositoryImpl implements CourseRepository {
 
   async create(payload: CreateCourseInput): Promise<Course> {
     // Determinar disciplineIds: usar disciplineIds se fornecido, senão usar disciplineId (compatibilidade)
-    const disciplineIds = payload.disciplineIds ?? (payload.disciplineId ? [payload.disciplineId] : []);
+    const disciplineIds =
+      payload.disciplineIds ??
+      (payload.disciplineId ? [payload.disciplineId] : []);
 
     const insertData: Record<string, unknown> = {
       empresa_id: payload.empresaId,
@@ -164,7 +212,7 @@ export class CourseRepositoryImpl implements CourseRepository {
     const { data, error } = await this.client
       .from(TABLE)
       .insert(insertData)
-      .select('*')
+      .select("*")
       .single();
 
     if (error) {
@@ -191,11 +239,15 @@ export class CourseRepositoryImpl implements CourseRepository {
       // Atualizar relacionamentos de disciplinas
       await this.setCourseDisciplines(id, payload.disciplineIds);
       // Atualizar disciplina_id para compatibilidade (primeira disciplina)
-      updateData.disciplina_id = payload.disciplineIds.length > 0 ? payload.disciplineIds[0] : null;
+      updateData.disciplina_id =
+        payload.disciplineIds.length > 0 ? payload.disciplineIds[0] : null;
     } else if (payload.disciplineId !== undefined) {
       updateData.disciplina_id = payload.disciplineId;
       // Atualizar relacionamentos também
-      await this.setCourseDisciplines(id, payload.disciplineId ? [payload.disciplineId] : []);
+      await this.setCourseDisciplines(
+        id,
+        payload.disciplineId ? [payload.disciplineId] : []
+      );
     }
 
     if (payload.name !== undefined) {
@@ -241,8 +293,8 @@ export class CourseRepositoryImpl implements CourseRepository {
     const { data, error } = await this.client
       .from(TABLE)
       .update(updateData)
-      .eq('id', id)
-      .select('*')
+      .eq("id", id)
+      .select("*")
       .single();
 
     if (error) {
@@ -253,7 +305,7 @@ export class CourseRepositoryImpl implements CourseRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.client.from(TABLE).delete().eq('id', id);
+    const { error } = await this.client.from(TABLE).delete().eq("id", id);
 
     if (error) {
       throw new Error(`Failed to delete course: ${error.message}`);
@@ -263,8 +315,8 @@ export class CourseRepositoryImpl implements CourseRepository {
   async segmentExists(segmentId: string): Promise<boolean> {
     const { data, error } = await this.client
       .from(SEGMENT_TABLE)
-      .select('id')
-      .eq('id', segmentId)
+      .select("id")
+      .eq("id", segmentId)
       .maybeSingle();
 
     if (error) {
@@ -277,8 +329,8 @@ export class CourseRepositoryImpl implements CourseRepository {
   async disciplineExists(disciplineId: string): Promise<boolean> {
     const { data, error } = await this.client
       .from(DISCIPLINE_TABLE)
-      .select('id')
-      .eq('id', disciplineId)
+      .select("id")
+      .eq("id", disciplineId)
       .maybeSingle();
 
     if (error) {
@@ -288,20 +340,25 @@ export class CourseRepositoryImpl implements CourseRepository {
     return !!data;
   }
 
-  async setCourseDisciplines(courseId: string, disciplineIds: string[]): Promise<void> {
+  async setCourseDisciplines(
+    courseId: string,
+    disciplineIds: string[]
+  ): Promise<void> {
     // Remover relacionamentos existentes
     const { error: deleteError } = await this.client
       .from(COURSE_DISCIPLINES_TABLE)
       .delete()
-      .eq('curso_id', courseId);
+      .eq("curso_id", courseId);
 
     if (deleteError) {
-      throw new Error(`Failed to remove course disciplines: ${deleteError.message}`);
+      throw new Error(
+        `Failed to remove course disciplines: ${deleteError.message}`
+      );
     }
 
     // Inserir novos relacionamentos
     if (disciplineIds.length > 0) {
-      const insertData = disciplineIds.map(disciplinaId => ({
+      const insertData = disciplineIds.map((disciplinaId) => ({
         curso_id: courseId,
         disciplina_id: disciplinaId,
       }));
@@ -311,7 +368,9 @@ export class CourseRepositoryImpl implements CourseRepository {
         .insert(insertData);
 
       if (insertError) {
-        throw new Error(`Failed to set course disciplines: ${insertError.message}`);
+        throw new Error(
+          `Failed to set course disciplines: ${insertError.message}`
+        );
       }
     }
   }
@@ -323,15 +382,14 @@ export class CourseRepositoryImpl implements CourseRepository {
   async findByEmpresa(empresaId: string): Promise<Course[]> {
     const { data, error } = await this.client
       .from(TABLE)
-      .select('*')
-      .eq('empresa_id', empresaId)
-      .order('nome', { ascending: true });
+      .select("*")
+      .eq("empresa_id", empresaId)
+      .order("nome", { ascending: true });
 
     if (error) {
       throw new Error(`Failed to list courses by empresa: ${error.message}`);
     }
 
-    return Promise.all((data ?? []).map(row => mapRow(row, this.client)));
+    return Promise.all((data ?? []).map((row) => mapRow(row, this.client)));
   }
 }
-
