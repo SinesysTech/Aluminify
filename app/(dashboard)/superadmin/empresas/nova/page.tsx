@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import {
   Select,
@@ -83,14 +82,14 @@ export default function NovaEmpresaPage() {
 
   return (
     <div className="container mx-auto py-8 max-w-2xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Criar Nova Empresa</CardTitle>
-          <CardDescription>
+      <div className="container mx-auto py-8 max-w-2xl space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Criar Nova Empresa</h1>
+          <p className="text-muted-foreground">
             Passo {step} de 3: {step === 1 ? 'Dados da Empresa' : step === 2 ? 'Plano' : 'Primeiro Admin'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </p>
+        </div>
+        <div className="space-y-4">
           {step === 1 && (
             <>
               <div className="space-y-2">
@@ -216,8 +215,8 @@ export default function NovaEmpresaPage() {
               </Button>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,13 +2,7 @@
 
 import * as React from 'react'
 import { createClient } from '@/lib/client'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+
 import { MaterialsFilters } from '@/components/conteudos/materials-filters'
 import { ModuleAccordion } from '@/components/conteudos/module-accordion'
 import RulesPanel from '@/components/shared/rules-panel'
@@ -565,27 +559,23 @@ export default function MateriaisClientPage() {
       )}
 
       {!isLoadingAtividades && modulosComAtividades.length > 0 && (
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Materiais por Módulo</CardTitle>
-              <CardDescription>
-                Faça upload dos PDFs para completar cada atividade. O progresso é salvo
-                automaticamente.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {modulosComAtividades.map((modulo) => (
-                  <ModuleAccordion
-                    key={modulo.id}
-                    modulo={modulo}
-                    onActivityUploadSuccess={handleUploadSuccess}
-                  />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl font-bold tracking-tight">Materiais por Módulo</h2>
+            <p className="text-muted-foreground">
+              Faça upload dos PDFs para completar cada atividade. O progresso é salvo
+              automaticamente.
+            </p>
+          </div>
+          <div className="space-y-2">
+            {modulosComAtividades.map((modulo) => (
+              <ModuleAccordion
+                key={modulo.id}
+                modulo={modulo}
+                onActivityUploadSuccess={handleUploadSuccess}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>

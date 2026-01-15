@@ -4,11 +4,7 @@ import * as React from 'react'
 import { createClient } from '@/lib/client'
 import { Button } from '@/components/ui/button'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -140,7 +136,7 @@ type RegraAtividade = {
 export default function ConteudosClientPage() {
   const router = useRouter()
   const supabase = createClient()
-  
+
   const [userId, setUserId] = React.useState<string | null>(null)
   const [cursos, setCursos] = React.useState<CursoOption[]>([])
   const [cursoSelecionado, setCursoSelecionado] = React.useState<string>('')
@@ -295,7 +291,7 @@ export default function ConteudosClientPage() {
         }
 
         setDisciplinasDoCurso(disciplinasData || [])
-        
+
         // Se houver apenas uma disciplina, selecionar automaticamente
         if (disciplinasData && disciplinasData.length === 1) {
           setDisciplinaSelecionada(disciplinasData[0].id)
@@ -344,7 +340,7 @@ export default function ConteudosClientPage() {
           const { data: disciplinasData } = await supabase
             .from('disciplinas')
             .select('id, nome')
-          
+
           if (disciplinasData) {
             disciplinasMap = new Map(
               disciplinasData.map((d) => [d.id, d.nome])
@@ -358,14 +354,14 @@ export default function ConteudosClientPage() {
         // Buscar disciplinas de cada curso através da tabela cursos_disciplinas
         const cursoIds = cursosData?.map(c => c.id) || []
         const cursosDisciplinasMap: Map<string, string[]> = new Map()
-        
+
         if (cursoIds.length > 0) {
           try {
             const { data: cursosDisciplinasData } = await supabase
               .from('cursos_disciplinas')
               .select('curso_id, disciplina_id')
               .in('curso_id', cursoIds)
-            
+
             if (cursosDisciplinasData) {
               // Agrupar disciplinas por curso
               cursosDisciplinasData.forEach((cd) => {
@@ -450,7 +446,7 @@ export default function ConteudosClientPage() {
       }
 
       const agrupado = (data || [])
-        .filter((atividade): atividade is typeof atividade & { modulo_id: string } => 
+        .filter((atividade): atividade is typeof atividade & { modulo_id: string } =>
           atividade.modulo_id !== null
         )
         .reduce<Record<string, AtividadeItem[]>>((acc, atividade) => {
@@ -548,7 +544,7 @@ export default function ConteudosClientPage() {
           const modulosValidos = modulosData.filter(
             (m): m is typeof m & { frente_id: string } => m.frente_id !== null
           )
-          
+
           // Buscar aulas para cada módulo
           const modulosComAulas = await Promise.all(
             modulosValidos.map(async (modulo) => {
@@ -572,11 +568,11 @@ export default function ConteudosClientPage() {
             })
           )
 
-        setModulos(modulosComAulas)
-        await loadAtividadesForModulos(modulosValidos.map((m) => m.id))
+          setModulos(modulosComAulas)
+          await loadAtividadesForModulos(modulosValidos.map((m) => m.id))
         } else {
           setModulos([])
-        setAtividadesPorModulo({})
+          setAtividadesPorModulo({})
         }
       } catch (err) {
         console.error('Erro ao carregar módulos e aulas:', err)
@@ -587,7 +583,7 @@ export default function ConteudosClientPage() {
     }
 
     fetchModulosEAulas()
-}, [supabase, frenteSelecionada, loadAtividadesForModulos])
+  }, [supabase, frenteSelecionada, loadAtividadesForModulos])
 
   // Função auxiliar para formatar tempo (minutos para minutos/horas)
   const formatTempo = (minutos: number): string => {
@@ -724,7 +720,7 @@ export default function ConteudosClientPage() {
             if (header) {
               const value = cell.value
               const stringValue = normalizeCellValue(value)
-              ;(rowObj as Record<string, string>)[header] = stringValue
+                ; (rowObj as Record<string, string>)[header] = stringValue
             }
           })
           // Only add non-empty rows
@@ -771,13 +767,13 @@ export default function ConteudosClientPage() {
         fastMode: false, // Modo normal para melhor tratamento de erros
         complete: (results) => {
           // Filtrar erros por tipo
-          const quoteErrors = results.errors.filter((error) => 
-            error.type === 'Quotes' || 
+          const quoteErrors = results.errors.filter((error) =>
+            error.type === 'Quotes' ||
             error.message?.toLowerCase().includes('quote') ||
             error.message?.toLowerCase().includes('aspas')
           )
-          
-          const delimiterErrors = results.errors.filter((error) => 
+
+          const delimiterErrors = results.errors.filter((error) =>
             error.type === 'Delimiter'
           )
 
@@ -835,17 +831,17 @@ export default function ConteudosClientPage() {
   const getColumnValue = (row: CSVRow, possibleNames: string[]): string => {
     const rowObj = row as Record<string, string | undefined>
     const rowKeys = Object.keys(rowObj)
-    
+
     // Normalizar todas as chaves do row para comparação
     const normalizedRowKeys = rowKeys.map(k => ({
       original: k,
       normalized: k.toLowerCase().trim().replace(/\s+/g, ' '), // Normalizar espaços
     }))
-    
+
     // Tentar encontrar a coluna correspondente
     for (const name of possibleNames) {
       const normalizedName = name.toLowerCase().trim().replace(/\s+/g, ' ')
-      
+
       // 1. Busca exata normalizada
       const exactMatch = normalizedRowKeys.find(
         nk => nk.normalized === normalizedName
@@ -856,7 +852,7 @@ export default function ConteudosClientPage() {
           return String(value).trim()
         }
       }
-      
+
       // 2. Busca parcial (contém o nome)
       const partialMatch = normalizedRowKeys.find(
         nk => nk.normalized.includes(normalizedName) || normalizedName.includes(nk.normalized)
@@ -868,7 +864,7 @@ export default function ConteudosClientPage() {
         }
       }
     }
-    
+
     return ''
   }
 
@@ -1000,7 +996,7 @@ export default function ConteudosClientPage() {
         'nome aula',
         'nomeaula',
       ])
-      
+
       // Se não encontrou, tentar "nome" genérico (mas validar que não é número)
       let aulaNomeFinal = aulaNome
       if (!aulaNomeFinal) {
@@ -1010,7 +1006,7 @@ export default function ConteudosClientPage() {
           aulaNomeFinal = nomeCol
         }
       }
-      
+
       // Se ainda não encontrou, tentar "Aula" mas validar que não é apenas número
       if (!aulaNomeFinal) {
         const aulaCol = getColumnValue(row, ['aula', 'Aula'])
@@ -1173,11 +1169,11 @@ export default function ConteudosClientPage() {
       }
 
       // Detectar tipo de arquivo e fazer parse apropriado
-      const isXLSX = arquivo.name.toLowerCase().endsWith('.xlsx') || 
-                     arquivo.name.toLowerCase().endsWith('.xls')
-      
+      const isXLSX = arquivo.name.toLowerCase().endsWith('.xlsx') ||
+        arquivo.name.toLowerCase().endsWith('.xls')
+
       let csvRows: CSVRow[]
-      
+
       if (isXLSX) {
         csvRows = await parseXLSX(arquivo)
       } else {
@@ -1229,7 +1225,7 @@ export default function ConteudosClientPage() {
       setSuccessMessage('Cronograma importado com sucesso!')
       setArquivo(null)
       const createdFrenteNome = frenteNome.trim()
-      
+
       // Resetar input de arquivo
       const fileInput = document.getElementById('csv-file') as HTMLInputElement
       if (fileInput) {
@@ -1314,9 +1310,9 @@ export default function ConteudosClientPage() {
           const propsPreview =
             allProps.length > 0
               ? `props: ${allProps
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  .map((k) => `${k}=${getString((obj as any)[k]) ?? '[obj]'}`)
-                  .join(', ')}`
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                .map((k) => `${k}=${getString((obj as any)[k]) ?? '[obj]'}`)
+                .join(', ')}`
               : null
 
           if (process.env.NODE_ENV === 'development') {
@@ -1427,7 +1423,7 @@ export default function ConteudosClientPage() {
       }
 
       setSuccessMessage('Frente deletada com sucesso!')
-      
+
       // Limpar estado
       setFrenteSelecionada('')
       setModulos([])
@@ -1606,17 +1602,17 @@ export default function ConteudosClientPage() {
   if (isProfessor === false) {
     return (
       <div className="flex items-center justify-center p-8">
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <div className="max-w-md rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-6">
+            <h3 className="font-semibold leading-none tracking-tight flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-destructive" />
               Acesso Negado
-            </CardTitle>
-            <CardDescription>
+            </h3>
+            <p className="text-sm text-muted-foreground">
               {error || 'Apenas professores podem acessar esta página.'}
-            </CardDescription>
-          </CardHeader>
-        </Card>
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
@@ -1631,14 +1627,15 @@ export default function ConteudosClientPage() {
       </div>
 
       {/* Card de Upload */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Upload de Arquivo</CardTitle>
-          <CardDescription>
+      {/* Seção de Upload */}
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+        <div className="flex flex-col space-y-1.5 p-6">
+          <h3 className="font-semibold leading-none tracking-tight">Upload de Arquivo</h3>
+          <p className="text-sm text-muted-foreground">
             Escolha o curso, informe a disciplina e a frente correspondente, depois envie o arquivo da planilha.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </p>
+        </div>
+        <div className="p-6 pt-0 space-y-4">
           {error && (
             <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive flex items-center gap-2">
               <AlertCircle className="h-4 w-4" />
@@ -1786,19 +1783,19 @@ export default function ConteudosClientPage() {
               </>
             )}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Card de Visualização */}
+      {/* Seção de Visualização */}
       {disciplinaSelecionada && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Conteúdo Atual</CardTitle>
-            <CardDescription>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-6">
+            <h3 className="font-semibold leading-none tracking-tight">Conteúdo Atual</h3>
+            <p className="text-sm text-muted-foreground">
               Visualize o conteúdo programático cadastrado para esta disciplina
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+            </p>
+          </div>
+          <div className="p-6 pt-0">
             {frentes.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 Nenhuma frente cadastrada para esta disciplina
@@ -1881,225 +1878,225 @@ export default function ConteudosClientPage() {
                     </div>
                   )
                 })()}
-                
+
                 <div className="space-y-2">
                   {modulos.map((modulo) => {
-                  const isOpen = modulosAbertos.has(modulo.id)
-                  const toggleModulo = (open: boolean) => {
-                    setModulosAbertos((prev) => {
-                      const next = new Set(prev)
-                      if (open) {
-                        next.add(modulo.id)
-                      } else {
-                        next.delete(modulo.id)
-                      }
-                      return next
-                    })
-                  }
-                  
-                  return (
-                    <Collapsible key={modulo.id} open={isOpen} onOpenChange={toggleModulo}>
-                      <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md border p-3 hover:bg-accent">
-                        <div className="flex items-center gap-2">
-                          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-                          <span className="font-medium">
-                            Módulo {modulo.numero_modulo || 'N/A'}: {modulo.nome}
+                    const isOpen = modulosAbertos.has(modulo.id)
+                    const toggleModulo = (open: boolean) => {
+                      setModulosAbertos((prev) => {
+                        const next = new Set(prev)
+                        if (open) {
+                          next.add(modulo.id)
+                        } else {
+                          next.delete(modulo.id)
+                        }
+                        return next
+                      })
+                    }
+
+                    return (
+                      <Collapsible key={modulo.id} open={isOpen} onOpenChange={toggleModulo}>
+                        <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md border p-3 hover:bg-accent">
+                          <div className="flex items-center gap-2">
+                            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                            <span className="font-medium">
+                              Módulo {modulo.numero_modulo || 'N/A'}: {modulo.nome}
+                            </span>
+                          </div>
+                          <span className="text-sm text-muted-foreground">
+                            {modulo.aulas.length} aula{modulo.aulas.length !== 1 ? 's' : ''}
                           </span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">
-                          {modulo.aulas.length} aula{modulo.aulas.length !== 1 ? 's' : ''}
-                        </span>
-                      </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="mt-2 space-y-3">
-                        {/* Seletor de Importância */}
-                        <div className="flex items-center justify-between rounded-md border p-3 bg-muted/50">
-                          <div className="flex items-center gap-3 flex-1">
-                            <Label className="text-sm font-medium whitespace-nowrap">Importância:</Label>
-                            {editingImportancia === modulo.id ? (
-                              <Select
-                                value={modulo.importancia || 'Media'}
-                                onValueChange={(value) => {
-                                  handleUpdateModuloImportancia(modulo.id, value as 'Alta' | 'Media' | 'Baixa' | 'Base')
-                                }}
-                              >
-                                <SelectTrigger className="w-40">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="Alta">Alta</SelectItem>
-                                  <SelectItem value="Media">Média</SelectItem>
-                                  <SelectItem value="Baixa">Baixa</SelectItem>
-                                  <SelectItem value="Base">Base</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            ) : (
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="font-normal">
-                                  {modulo.importancia || 'Media'}
-                                </Badge>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => setEditingImportancia(modulo.id)}
-                                  className="h-7 px-2"
-                                >
-                                  Editar
-                                </Button>
-                              </div>
-                            )}
-                          </div>
-                          <div className="text-xs text-muted-foreground text-right ml-2">
-                            Usado no modo &quot;Mais Cobrados&quot; dos flashcards
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="text-sm font-semibold">Atividades</div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setIsAddingActivity(modulo.id)}
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Atividade
-                          </Button>
-                        </div>
-
-                        <div className="space-y-2">
-                          {(atividadesPorModulo[modulo.id] || []).length === 0 ? (
-                            <div className="text-sm text-muted-foreground">Nenhuma atividade cadastrada</div>
-                          ) : (
-                            (atividadesPorModulo[modulo.id] || []).map((atividade) => (
-                              <div
-                                key={atividade.id}
-                                className="flex items-center justify-between rounded-md border p-3"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <Badge variant="secondary">{formatTipoAtividade(atividade.tipo)}</Badge>
-                                  <InlineEditableTitle
-                                    value={atividade.titulo}
-                                    isEditing={editingTitle === atividade.id}
-                                    onStartEdit={() => setEditingTitle(atividade.id)}
-                                    onCancel={() => setEditingTitle(null)}
-                                    onSave={(novoTitulo) =>
-                                      handleUpdateActivityTitle(atividade.id, atividade.moduloId, novoTitulo)
-                                    }
-                                  />
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  {atividade.ordemExibicao !== undefined && (
-                                    <span className="text-xs text-muted-foreground">
-                                      Ordem: {atividade.ordemExibicao}
-                                    </span>
-                                  )}
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    onClick={() => handleDeleteActivity(atividade.id, atividade.moduloId)}
-                                    aria-label="Excluir atividade"
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="mt-2 space-y-3">
+                            {/* Seletor de Importância */}
+                            <div className="flex items-center justify-between rounded-md border p-3 bg-muted/50">
+                              <div className="flex items-center gap-3 flex-1">
+                                <Label className="text-sm font-medium whitespace-nowrap">Importância:</Label>
+                                {editingImportancia === modulo.id ? (
+                                  <Select
+                                    value={modulo.importancia || 'Media'}
+                                    onValueChange={(value) => {
+                                      handleUpdateModuloImportancia(modulo.id, value as 'Alta' | 'Media' | 'Baixa' | 'Base')
+                                    }}
                                   >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
-                              </div>
-                            ))
-                          )}
-                        </div>
-
-                        <div className="rounded-md border">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="w-20">Aula</TableHead>
-                                <TableHead>Nome da Aula</TableHead>
-                                <TableHead className="w-24">Tempo (min)</TableHead>
-                                <TableHead className="w-24">Prioridade</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {modulo.aulas.length === 0 ? (
-                                <TableRow>
-                                  <TableCell colSpan={4} className="text-center text-muted-foreground py-4">
-                                    Nenhuma aula cadastrada
-                                  </TableCell>
-                                </TableRow>
-                              ) : (
-                                modulo.aulas.map((aula) => {
-                                  // Debug: verificar dados da aula
-                                  if (process.env.NODE_ENV === 'development') {
-                                    console.log('Aula renderizada:', {
-                                      id: aula.id,
-                                      nome: aula.nome,
-                                      tempo_estimado_minutos: aula.tempo_estimado_minutos,
-                                      numero_aula: aula.numero_aula,
-                                      prioridade: aula.prioridade,
-                                    })
-                                  }
-                                  
-                                  return (
-                                    <TableRow key={aula.id}>
-                                      <TableCell>{aula.numero_aula ?? 'N/A'}</TableCell>
-                                      <TableCell className="font-medium">
-                                        {aula.nome || 'Sem nome'}
-                                      </TableCell>
-                                      <TableCell>
-                                        {(() => {
-                                          const raw = (aula as unknown as { tempo_estimado_minutos?: unknown })
-                                            .tempo_estimado_minutos
-                                          if (raw == null) return '-'
-                                          const n = typeof raw === 'number' ? raw : Number(raw)
-                                          if (!Number.isFinite(n)) return '-'
-                                          return `${Math.round(n)} min`
-                                        })()}
-                                      </TableCell>
-                                    <TableCell>
-                                      {aula.prioridade !== null && aula.prioridade !== undefined ? (
-                                        <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
-                                          {aula.prioridade}
-                                        </span>
-                                      ) : (
-                                        '-'
-                                      )}
-                                    </TableCell>
-                                  </TableRow>
-                                  )
-                                })
-                              )}
-                            </TableBody>
-                          </Table>
-                          {/* Resumo do Módulo */}
-                          {modulo.aulas.length > 0 && (() => {
-                            const { totalAulas, tempoTotal } = calcularEstatisticasModulo(modulo.aulas)
-                            return (
-                              <div className="border-t bg-muted/50 px-4 py-3">
-                                <div className="flex items-center justify-between text-sm font-medium">
-                                  <span>Total do Módulo:</span>
-                                  <div className="flex items-center gap-4">
-                                    <span className="text-muted-foreground">
-                                      {totalAulas} aula{totalAulas !== 1 ? 's' : ''}
-                                    </span>
-                                    {tempoTotal > 0 && (
-                                      <span className="text-muted-foreground">
-                                        {formatTempo(tempoTotal)}
-                                      </span>
-                                    )}
+                                    <SelectTrigger className="w-40">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="Alta">Alta</SelectItem>
+                                      <SelectItem value="Media">Média</SelectItem>
+                                      <SelectItem value="Baixa">Baixa</SelectItem>
+                                      <SelectItem value="Base">Base</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                ) : (
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className="font-normal">
+                                      {modulo.importancia || 'Media'}
+                                    </Badge>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => setEditingImportancia(modulo.id)}
+                                      className="h-7 px-2"
+                                    >
+                                      Editar
+                                    </Button>
                                   </div>
-                                </div>
+                                )}
                               </div>
-                            )
-                          })()}
-                        </div>
-                      </div>
-                    </CollapsibleContent>
-                    </Collapsible>
-                  )
-                })}
+                              <div className="text-xs text-muted-foreground text-right ml-2">
+                                Usado no modo &quot;Mais Cobrados&quot; dos flashcards
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <div className="text-sm font-semibold">Atividades</div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setIsAddingActivity(modulo.id)}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Atividade
+                              </Button>
+                            </div>
+
+                            <div className="space-y-2">
+                              {(atividadesPorModulo[modulo.id] || []).length === 0 ? (
+                                <div className="text-sm text-muted-foreground">Nenhuma atividade cadastrada</div>
+                              ) : (
+                                (atividadesPorModulo[modulo.id] || []).map((atividade) => (
+                                  <div
+                                    key={atividade.id}
+                                    className="flex items-center justify-between rounded-md border p-3"
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <Badge variant="secondary">{formatTipoAtividade(atividade.tipo)}</Badge>
+                                      <InlineEditableTitle
+                                        value={atividade.titulo}
+                                        isEditing={editingTitle === atividade.id}
+                                        onStartEdit={() => setEditingTitle(atividade.id)}
+                                        onCancel={() => setEditingTitle(null)}
+                                        onSave={(novoTitulo) =>
+                                          handleUpdateActivityTitle(atividade.id, atividade.moduloId, novoTitulo)
+                                        }
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                      {atividade.ordemExibicao !== undefined && (
+                                        <span className="text-xs text-muted-foreground">
+                                          Ordem: {atividade.ordemExibicao}
+                                        </span>
+                                      )}
+                                      <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => handleDeleteActivity(atividade.id, atividade.moduloId)}
+                                        aria-label="Excluir atividade"
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+
+                            <div className="rounded-md border">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableHead className="w-20">Aula</TableHead>
+                                    <TableHead>Nome da Aula</TableHead>
+                                    <TableHead className="w-24">Tempo (min)</TableHead>
+                                    <TableHead className="w-24">Prioridade</TableHead>
+                                  </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                  {modulo.aulas.length === 0 ? (
+                                    <TableRow>
+                                      <TableCell colSpan={4} className="text-center text-muted-foreground py-4">
+                                        Nenhuma aula cadastrada
+                                      </TableCell>
+                                    </TableRow>
+                                  ) : (
+                                    modulo.aulas.map((aula) => {
+                                      // Debug: verificar dados da aula
+                                      if (process.env.NODE_ENV === 'development') {
+                                        console.log('Aula renderizada:', {
+                                          id: aula.id,
+                                          nome: aula.nome,
+                                          tempo_estimado_minutos: aula.tempo_estimado_minutos,
+                                          numero_aula: aula.numero_aula,
+                                          prioridade: aula.prioridade,
+                                        })
+                                      }
+
+                                      return (
+                                        <TableRow key={aula.id}>
+                                          <TableCell>{aula.numero_aula ?? 'N/A'}</TableCell>
+                                          <TableCell className="font-medium">
+                                            {aula.nome || 'Sem nome'}
+                                          </TableCell>
+                                          <TableCell>
+                                            {(() => {
+                                              const raw = (aula as unknown as { tempo_estimado_minutos?: unknown })
+                                                .tempo_estimado_minutos
+                                              if (raw == null) return '-'
+                                              const n = typeof raw === 'number' ? raw : Number(raw)
+                                              if (!Number.isFinite(n)) return '-'
+                                              return `${Math.round(n)} min`
+                                            })()}
+                                          </TableCell>
+                                          <TableCell>
+                                            {aula.prioridade !== null && aula.prioridade !== undefined ? (
+                                              <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                                                {aula.prioridade}
+                                              </span>
+                                            ) : (
+                                              '-'
+                                            )}
+                                          </TableCell>
+                                        </TableRow>
+                                      )
+                                    })
+                                  )}
+                                </TableBody>
+                              </Table>
+                              {/* Resumo do Módulo */}
+                              {modulo.aulas.length > 0 && (() => {
+                                const { totalAulas, tempoTotal } = calcularEstatisticasModulo(modulo.aulas)
+                                return (
+                                  <div className="border-t bg-muted/50 px-4 py-3">
+                                    <div className="flex items-center justify-between text-sm font-medium">
+                                      <span>Total do Módulo:</span>
+                                      <div className="flex items-center gap-4">
+                                        <span className="text-muted-foreground">
+                                          {totalAulas} aula{totalAulas !== 1 ? 's' : ''}
+                                        </span>
+                                        {tempoTotal > 0 && (
+                                          <span className="text-muted-foreground">
+                                            {formatTempo(tempoTotal)}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )
+                              })()}
+                            </div>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
+                    )
+                  })}
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       <AddActivityModal

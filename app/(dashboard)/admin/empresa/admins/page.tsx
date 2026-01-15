@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
@@ -49,7 +49,7 @@ export default function EmpresaAdminsPage() {
       // Buscar empresa do usuário
       const userResponse = await fetch('/api/user/profile');
       const userData = await userResponse.json();
-      
+
       if (userData.empresaId) {
         // Buscar admins
         const adminsResponse = await fetch(`/api/empresas/${userData.empresaId}/admins`);
@@ -87,7 +87,7 @@ export default function EmpresaAdminsPage() {
     try {
       const userResponse = await fetch('/api/user/profile');
       const userData = await userResponse.json();
-      
+
       const response = await fetch(`/api/empresas/${userData.empresaId}/admins`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -119,7 +119,7 @@ export default function EmpresaAdminsPage() {
     try {
       const userResponse = await fetch('/api/user/profile');
       const userData = await userResponse.json();
-      
+
       const response = await fetch(`/api/empresas/${userData.empresaId}/admins/${userId}`, {
         method: 'DELETE',
       });
@@ -153,79 +153,76 @@ export default function EmpresaAdminsPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle>Administradores da Empresa</CardTitle>
-              <CardDescription>
-                Gerencie os administradores da sua empresa
-              </CardDescription>
-            </div>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button>Adicionar Admin</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Adicionar Administrador</DialogTitle>
-                  <DialogDescription>
-                    Selecione um professor para promover a administrador
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <Select value={selectedProfessor} onValueChange={setSelectedProfessor}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione um professor" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {professoresNaoAdmin.map((prof) => (
-                        <SelectItem key={prof.id} value={prof.id}>
-                          {prof.fullName || prof.nome} ({prof.email})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button onClick={handleAddAdmin} disabled={!selectedProfessor}>
-                    Adicionar
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
+      <div className="container mx-auto py-8 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Administradores da Empresa</h1>
+            <p className="text-muted-foreground">
+              Gerencie os administradores da sua empresa
+            </p>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {admins.map((admin) => (
-              <div
-                key={admin.user_id}
-                className="flex justify-between items-center p-4 border rounded-lg"
-              >
-                <div>
-                  <div className="font-medium">
-                    {admin.professores?.nome_completo || 'N/A'}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {admin.professores?.email || 'N/A'}
-                  </div>
-                  {admin.is_owner && (
-                    <span className="text-xs text-primary">Owner</span>
-                  )}
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button>Adicionar Admin</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Adicionar Administrador</DialogTitle>
+                <DialogDescription>
+                  Selecione um professor para promover a administrador
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Select value={selectedProfessor} onValueChange={setSelectedProfessor}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um professor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {professoresNaoAdmin.map((prof) => (
+                      <SelectItem key={prof.id} value={prof.id}>
+                        {prof.fullName || prof.nome} ({prof.email})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={handleAddAdmin} disabled={!selectedProfessor}>
+                  Adicionar
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="space-y-4">
+          {admins.map((admin) => (
+            <div
+              key={admin.user_id}
+              className="flex justify-between items-center p-4 border rounded-lg"
+            >
+              <div>
+                <div className="font-medium">
+                  {admin.professores?.nome_completo || 'N/A'}
                 </div>
-                {!admin.is_owner && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => handleRemoveAdmin(admin.user_id)}
-                  >
-                    Remover
-                  </Button>
+                <div className="text-sm text-muted-foreground">
+                  {admin.professores?.email || 'N/A'}
+                </div>
+                {admin.is_owner && (
+                  <span className="text-xs text-primary">Owner</span>
                 )}
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              {!admin.is_owner && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleRemoveAdmin(admin.user_id)}
+                >
+                  Remover
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

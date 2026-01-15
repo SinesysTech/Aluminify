@@ -1,12 +1,25 @@
-import { AlunoTable } from '@/components/aluno/aluno-table'
+import { studentService } from '@/backend/services/student'
+import { courseService } from '@/backend/services/course'
+import { AlunosClientPage } from '@/app/(dashboard)/admin/alunos/components/client-page'
 import { requireUser } from '@/lib/auth'
 
-export default async function AlunoPage() {
-  await requireUser({ allowedRoles: ['professor'] })
+export default async function AlunoPage({ searchParams }: { searchParams: { page?: string, query?: string } }) {
+  // Ensure only professors (and superadmins if needed, though they have their own sidebar) can access
+  // The original file had allowedRoles: ['professor']
+  await requireUser({ allowedRoles: ['professor', 'superadmin'] })
 
-  return (
-    <div className="container mx-auto py-6">
-      <AlunoTable />
-    </div>
-  )
+  const page = Number(searchParams.page) || 1
+  const query = searchParams.query || ''
+
+  const [studentsResult, coursesResult] = await Promise.all([
+    studentService.list({ page, perPage: 10, query }),
+    courseService.list({ perPage: 100, sortBy: 'name', sortOrder: 'asc' })
+  ])
+
+  const { data: students, meta } = studentsResult
+  const { data: courses } = coursesResult
+
+  const coursesSimple = courses.map(c => ({ id: c.id, name: c.name }))
+
+  return <AlunosClientPage students={students} meta={meta} courses={coursesSimple} />
 }

@@ -1,6 +1,6 @@
 /**
  * Brand Customization Types
- * 
+ *
  * TypeScript interfaces for the brand customization system that allows
  * each empresa (tenant) to customize logos, colors, fonts, and themes.
  */
@@ -9,9 +9,9 @@
 // Core Types
 // ============================================================================
 
-export type LogoType = 'login' | 'sidebar' | 'favicon'
+export type LogoType = "login" | "sidebar" | "favicon";
 
-export type ThemeMode = 'light' | 'dark'
+export type ThemeMode = "light" | "dark";
 
 // ============================================================================
 // Database Entity Types
@@ -21,158 +21,158 @@ export type ThemeMode = 'light' | 'dark'
  * Main tenant branding configuration
  */
 export interface TenantBranding {
-  id: string
-  empresaId: string
-  
+  id: string;
+  empresaId: string;
+
   // References to active color palette and font scheme
-  colorPaletteId?: string | null
-  fontSchemeId?: string | null
-  
+  colorPaletteId?: string | null;
+  fontSchemeId?: string | null;
+
   // Custom CSS for advanced customizations
-  customCss?: string | null
-  
+  customCss?: string | null;
+
   // Metadata
-  createdAt: Date
-  updatedAt: Date
-  createdBy?: string
-  updatedBy?: string
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 /**
  * Logo storage for different contexts
  */
 export interface TenantLogo {
-  id: string
-  tenantBrandingId: string
-  logoType: LogoType
-  logoUrl: string
-  
+  id: string;
+  tenantBrandingId: string;
+  logoType: LogoType;
+  logoUrl: string;
+
   // File metadata
-  fileName?: string
-  fileSize?: number
-  mimeType?: string
-  
+  fileName?: string;
+  fileSize?: number;
+  mimeType?: string;
+
   // Metadata
-  createdAt: Date
-  updatedAt: Date
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 /**
  * Color palette definition
  */
 export interface ColorPalette {
-  id: string
-  name: string
-  empresaId: string
-  
+  id: string;
+  name: string;
+  empresaId: string;
+
   // Primary colors
-  primaryColor: string
-  primaryForeground: string
-  secondaryColor: string
-  secondaryForeground: string
-  
+  primaryColor: string;
+  primaryForeground: string;
+  secondaryColor: string;
+  secondaryForeground: string;
+
   // Support colors
-  accentColor: string
-  accentForeground: string
-  mutedColor: string
-  mutedForeground: string
-  
+  accentColor: string;
+  accentForeground: string;
+  mutedColor: string;
+  mutedForeground: string;
+
   // System colors
-  backgroundColor: string
-  foregroundColor: string
-  cardColor: string
-  cardForeground: string
-  
+  backgroundColor: string;
+  foregroundColor: string;
+  cardColor: string;
+  cardForeground: string;
+
   // Status colors
-  destructiveColor: string
-  destructiveForeground: string
-  
+  destructiveColor: string;
+  destructiveForeground: string;
+
   // Sidebar specific colors
-  sidebarBackground: string
-  sidebarForeground: string
-  sidebarPrimary: string
-  sidebarPrimaryForeground: string
-  
+  sidebarBackground: string;
+  sidebarForeground: string;
+  sidebarPrimary: string;
+  sidebarPrimaryForeground: string;
+
   // Metadata
-  isCustom: boolean
-  createdAt: Date
-  updatedAt: Date
-  createdBy?: string
-  updatedBy?: string
+  isCustom: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 /**
  * Font scheme definition
  */
 export interface FontScheme {
-  id: string
-  name: string
-  empresaId: string
-  
+  id: string;
+  name: string;
+  empresaId: string;
+
   // Font families
-  fontSans: string[]
-  fontMono: string[]
-  
+  fontSans: string[];
+  fontMono: string[];
+
   // Font sizes
   fontSizes: {
-    xs: string
-    sm: string
-    base: string
-    lg: string
-    xl: string
-    '2xl': string
-    '3xl': string
-    '4xl': string
-  }
-  
+    xs: string;
+    sm: string;
+    base: string;
+    lg: string;
+    xl: string;
+    "2xl": string;
+    "3xl": string;
+    "4xl": string;
+  };
+
   // Font weights
   fontWeights: {
-    light: number
-    normal: number
-    medium: number
-    semibold: number
-    bold: number
-  }
-  
+    light: number;
+    normal: number;
+    medium: number;
+    semibold: number;
+    bold: number;
+  };
+
   // Google Fonts integration
-  googleFonts: string[]
-  
+  googleFonts: string[];
+
   // Metadata
-  isCustom: boolean
-  createdAt: Date
-  updatedAt: Date
-  createdBy?: string
-  updatedBy?: string
+  isCustom: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 /**
  * Complete theme preset combining colors, fonts, and theme customizer settings
  */
 export interface CustomThemePreset {
-  id: string
-  name: string
-  empresaId: string
-  
+  id: string;
+  name: string;
+  empresaId: string;
+
   // References
-  colorPaletteId?: string
-  fontSchemeId?: string
-  
+  colorPaletteId?: string;
+  fontSchemeId?: string;
+
   // Theme customizer settings
-  radius: number
-  scale: number
-  mode: ThemeMode
-  
+  radius: number;
+  scale: number;
+  mode: ThemeMode;
+
   // Preview colors for UI
-  previewColors: string[]
-  
+  previewColors: string[];
+
   // Default preset flag
-  isDefault: boolean
-  
+  isDefault: boolean;
+
   // Metadata
-  createdAt: Date
-  updatedAt: Date
-  createdBy?: string
-  updatedBy?: string
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy?: string;
+  updatedBy?: string;
 }
 
 // ============================================================================
@@ -183,44 +183,44 @@ export interface CustomThemePreset {
  * Logo upload result
  */
 export interface LogoUploadResult {
-  success: boolean
-  logoUrl?: string
-  error?: string
-  validationErrors?: string[]
+  success: boolean;
+  logoUrl?: string;
+  error?: string;
+  validationErrors?: string[];
 }
 
 /**
  * File validation result
  */
 export interface ValidationResult {
-  isValid: boolean
-  errors: string[]
-  warnings?: string[]
+  isValid: boolean;
+  errors: string[];
+  warnings?: string[];
 }
 
 /**
  * Accessibility report for color palettes
  */
 export interface AccessibilityReport {
-  isCompliant: boolean
+  isCompliant: boolean;
   contrastRatios: {
-    primaryOnBackground: number
-    secondaryOnBackground: number
-    accentOnBackground: number
-  }
-  recommendations?: string[]
-  warnings?: string[]
+    primaryOnBackground: number;
+    secondaryOnBackground: number;
+    accentOnBackground: number;
+  };
+  recommendations?: string[];
+  warnings?: string[];
 }
 
 /**
  * Complete branding configuration with all related data
  */
 export interface CompleteBrandingConfig {
-  tenantBranding: TenantBranding
-  logos: Record<LogoType, TenantLogo | null>
-  colorPalette?: ColorPalette
-  fontScheme?: FontScheme
-  customThemePresets: CustomThemePreset[]
+  tenantBranding: TenantBranding;
+  logos: Record<LogoType, TenantLogo | null>;
+  colorPalette?: ColorPalette;
+  fontScheme?: FontScheme;
+  customThemePresets: CustomThemePreset[];
 }
 
 // ============================================================================
@@ -231,75 +231,75 @@ export interface CompleteBrandingConfig {
  * Request to create or update tenant branding
  */
 export interface SaveTenantBrandingRequest {
-  colorPaletteId?: string | null
-  fontSchemeId?: string | null
-  customCss?: string | null
+  colorPaletteId?: string | null;
+  fontSchemeId?: string | null;
+  customCss?: string | null;
 }
 
 /**
  * Request to create a color palette
  */
 export interface CreateColorPaletteRequest {
-  name: string
-  primaryColor: string
-  primaryForeground: string
-  secondaryColor: string
-  secondaryForeground: string
-  accentColor: string
-  accentForeground: string
-  mutedColor: string
-  mutedForeground: string
-  backgroundColor: string
-  foregroundColor: string
-  cardColor: string
-  cardForeground: string
-  destructiveColor: string
-  destructiveForeground: string
-  sidebarBackground: string
-  sidebarForeground: string
-  sidebarPrimary: string
-  sidebarPrimaryForeground: string
+  name: string;
+  primaryColor: string;
+  primaryForeground: string;
+  secondaryColor: string;
+  secondaryForeground: string;
+  accentColor: string;
+  accentForeground: string;
+  mutedColor: string;
+  mutedForeground: string;
+  backgroundColor: string;
+  foregroundColor: string;
+  cardColor: string;
+  cardForeground: string;
+  destructiveColor: string;
+  destructiveForeground: string;
+  sidebarBackground: string;
+  sidebarForeground: string;
+  sidebarPrimary: string;
+  sidebarPrimaryForeground: string;
 }
 
 /**
  * Request to create a font scheme
  */
 export interface CreateFontSchemeRequest {
-  name: string
-  fontSans: string[]
-  fontMono: string[]
+  name: string;
+  fontSans: string[];
+  fontMono: string[];
   fontSizes?: {
-    xs: string
-    sm: string
-    base: string
-    lg: string
-    xl: string
-    '2xl': string
-    '3xl': string
-    '4xl': string
-  }
+    xs: string;
+    sm: string;
+    base: string;
+    lg: string;
+    xl: string;
+    "2xl": string;
+    "3xl": string;
+    "4xl": string;
+  };
   fontWeights?: {
-    light: number
-    normal: number
-    medium: number
-    semibold: number
-    bold: number
-  }
-  googleFonts?: string[]
+    light: number;
+    normal: number;
+    medium: number;
+    semibold: number;
+    bold: number;
+  };
+  googleFonts?: string[];
 }
 
 /**
  * Request to create a custom theme preset
  */
 export interface CreateCustomThemePresetRequest {
-  name: string
-  colorPaletteId?: string
-  fontSchemeId?: string
-  radius?: number
-  scale?: number
-  mode?: ThemeMode
-  previewColors?: string[]
-  isDefault?: boolean
+  name: string;
+  colorPaletteId?: string;
+  fontSchemeId?: string;
+  radius?: number;
+  scale?: number;
+  mode?: ThemeMode;
+  previewColors?: string[];
+  isDefault?: boolean;
 }
 
 // ============================================================================
@@ -310,44 +310,46 @@ export interface CreateCustomThemePresetRequest {
  * Props for brand customization panel
  */
 export interface BrandCustomizationPanelProps {
-  empresaId: string
-  currentBranding?: CompleteBrandingConfig
-  onSave: (branding: SaveTenantBrandingRequest) => Promise<void>
-  onReset: () => Promise<void>
-  onCancel: () => void
+  empresaId: string;
+  currentBranding?: CompleteBrandingConfig;
+  onSave: (branding: SaveTenantBrandingRequest) => Promise<void>;
+  onReset: () => Promise<void>;
+  onCancel: () => void;
 }
 
 /**
  * Props for logo upload component
  */
 export interface LogoUploadComponentProps {
-  logoType: LogoType
-  currentLogoUrl?: string
-  onUpload: (file: File, logoType: LogoType) => Promise<LogoUploadResult>
-  onRemove: (logoType: LogoType) => Promise<void>
-  maxFileSize?: number
-  acceptedFormats?: string[]
+  logoType: LogoType;
+  currentLogoUrl?: string;
+  onUpload: (file: File, logoType: LogoType) => Promise<LogoUploadResult>;
+  onRemove: (logoType: LogoType) => Promise<void>;
+  maxFileSize?: number;
+  acceptedFormats?: string[];
 }
 
 /**
  * Props for color palette editor
  */
 export interface ColorPaletteEditorProps {
-  currentPalette?: ColorPalette
-  onSave: (palette: CreateColorPaletteRequest) => Promise<void>
-  onPreview: (palette: CreateColorPaletteRequest) => void
-  onValidate: (palette: CreateColorPaletteRequest) => Promise<AccessibilityReport>
+  currentPalette?: ColorPalette;
+  onSave: (palette: CreateColorPaletteRequest) => Promise<void>;
+  onPreview: (palette: CreateColorPaletteRequest) => void;
+  onValidate: (
+    palette: CreateColorPaletteRequest
+  ) => Promise<AccessibilityReport>;
 }
 
 /**
  * Props for font scheme selector
  */
 export interface FontSchemeSelectorProps {
-  currentScheme?: FontScheme
-  availableGoogleFonts: string[]
-  onSave: (scheme: CreateFontSchemeRequest) => Promise<void>
-  onPreview: (scheme: CreateFontSchemeRequest) => void
-  onLoadGoogleFont: (fontFamily: string) => Promise<void>
+  currentScheme?: FontScheme;
+  availableGoogleFonts: string[];
+  onSave: (scheme: CreateFontSchemeRequest) => Promise<void>;
+  onPreview: (scheme: CreateFontSchemeRequest) => void;
+  onLoadGoogleFont: (fontFamily: string) => Promise<void>;
 }
 
 // ============================================================================
@@ -358,27 +360,27 @@ export interface FontSchemeSelectorProps {
  * CSS custom properties for theme application
  */
 export interface CSSCustomProperties {
-  '--primary': string
-  '--primary-foreground': string
-  '--secondary': string
-  '--secondary-foreground': string
-  '--accent': string
-  '--accent-foreground': string
-  '--muted': string
-  '--muted-foreground': string
-  '--background': string
-  '--foreground': string
-  '--card': string
-  '--card-foreground': string
-  '--destructive': string
-  '--destructive-foreground': string
-  '--sidebar-background': string
-  '--sidebar-foreground': string
-  '--sidebar-primary': string
-  '--sidebar-primary-foreground': string
-  '--font-sans': string
-  '--font-mono': string
-  '--radius': string
+  "--primary": string;
+  "--primary-foreground": string;
+  "--secondary": string;
+  "--secondary-foreground": string;
+  "--accent": string;
+  "--accent-foreground": string;
+  "--muted": string;
+  "--muted-foreground": string;
+  "--background": string;
+  "--foreground": string;
+  "--card": string;
+  "--card-foreground": string;
+  "--destructive": string;
+  "--destructive-foreground": string;
+  "--sidebar-background": string;
+  "--sidebar-foreground": string;
+  "--sidebar-primary": string;
+  "--sidebar-primary-foreground": string;
+  "--font-sans": string;
+  "--font-mono": string;
+  "--radius": string;
 }
 
 // ============================================================================
@@ -394,8 +396,8 @@ export class BrandCustomizationError extends Error {
     public code: string,
     public details?: Record<string, unknown>
   ) {
-    super(message)
-    this.name = 'BrandCustomizationError'
+    super(message);
+    this.name = "BrandCustomizationError";
   }
 }
 
@@ -404,8 +406,8 @@ export class BrandCustomizationError extends Error {
  */
 export class LogoUploadError extends BrandCustomizationError {
   constructor(message: string, details?: Record<string, unknown>) {
-    super(message, 'LOGO_UPLOAD_ERROR', details)
-    this.name = 'LogoUploadError'
+    super(message, "LOGO_UPLOAD_ERROR", details);
+    this.name = "LogoUploadError";
   }
 }
 
@@ -414,8 +416,8 @@ export class LogoUploadError extends BrandCustomizationError {
  */
 export class ColorValidationError extends BrandCustomizationError {
   constructor(message: string, details?: Record<string, unknown>) {
-    super(message, 'COLOR_VALIDATION_ERROR', details)
-    this.name = 'ColorValidationError'
+    super(message, "COLOR_VALIDATION_ERROR", details);
+    this.name = "ColorValidationError";
   }
 }
 
@@ -424,8 +426,8 @@ export class ColorValidationError extends BrandCustomizationError {
  */
 export class FontLoadingError extends BrandCustomizationError {
   constructor(message: string, details?: Record<string, unknown>) {
-    super(message, 'FONT_LOADING_ERROR', details)
-    this.name = 'FontLoadingError'
+    super(message, "FONT_LOADING_ERROR", details);
+    this.name = "FontLoadingError";
   }
 }
 
@@ -436,16 +438,53 @@ export class FontLoadingError extends BrandCustomizationError {
 /**
  * Partial update types for each entity
  */
-export type TenantBrandingUpdate = Partial<Omit<TenantBranding, 'id' | 'empresaId' | 'createdAt' | 'createdBy'>>
-export type ColorPaletteUpdate = Partial<Omit<ColorPalette, 'id' | 'empresaId' | 'createdAt' | 'createdBy'>>
-export type FontSchemeUpdate = Partial<Omit<FontScheme, 'id' | 'empresaId' | 'createdAt' | 'createdBy'>>
-export type CustomThemePresetUpdate = Partial<Omit<CustomThemePreset, 'id' | 'empresaId' | 'createdAt' | 'createdBy'>>
+export type TenantBrandingUpdate = Partial<
+  Omit<TenantBranding, "id" | "empresaId" | "createdAt" | "createdBy">
+>;
+export type ColorPaletteUpdate = Partial<
+  Omit<ColorPalette, "id" | "empresaId" | "createdAt" | "createdBy">
+>;
+export type FontSchemeUpdate = Partial<
+  Omit<FontScheme, "id" | "empresaId" | "createdAt" | "createdBy">
+>;
+export type CustomThemePresetUpdate = Partial<
+  Omit<CustomThemePreset, "id" | "empresaId" | "createdAt" | "createdBy">
+>;
 
 /**
  * Database insert types (without generated fields)
  */
-export type TenantBrandingInsert = Omit<TenantBranding, 'id' | 'createdAt' | 'updatedAt'>
-export type TenantLogoInsert = Omit<TenantLogo, 'id' | 'createdAt' | 'updatedAt'>
-export type ColorPaletteInsert = Omit<ColorPalette, 'id' | 'createdAt' | 'updatedAt'>
-export type FontSchemeInsert = Omit<FontScheme, 'id' | 'createdAt' | 'updatedAt'>
-export type CustomThemePresetInsert = Omit<CustomThemePreset, 'id' | 'createdAt' | 'updatedAt'>
+export type TenantBrandingInsert = Omit<
+  TenantBranding,
+  "id" | "createdAt" | "updatedAt"
+>;
+export type TenantLogoInsert = Omit<
+  TenantLogo,
+  "id" | "createdAt" | "updatedAt"
+>;
+export type ColorPaletteInsert = Omit<
+  ColorPalette,
+  "id" | "createdAt" | "updatedAt"
+>;
+export type FontSchemeInsert = Omit<
+  FontScheme,
+  "id" | "createdAt" | "updatedAt"
+>;
+export type CustomThemePresetInsert = Omit<
+  CustomThemePreset,
+  "id" | "createdAt" | "updatedAt"
+>;
+
+/**
+ * State for the brand customization panel
+ */
+export interface BrandCustomizationState {
+  logos: Partial<Record<LogoType, string | null>>;
+  colorPalette?: ColorPalette;
+  fontScheme?: FontScheme;
+  customCss?: string | null;
+
+  // IDs for saving references
+  colorPaletteId?: string | null;
+  fontSchemeId?: string | null;
+}

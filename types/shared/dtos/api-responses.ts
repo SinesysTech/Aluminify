@@ -19,6 +19,6 @@ export interface PaginationParams {
   page?: number;
   perPage?: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
+  query?: string;
 }
-

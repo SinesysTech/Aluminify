@@ -6,7 +6,7 @@ import { createClient } from '@/lib/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { useToast } from '@/hooks/use-toast';
 import { formatBRPhone, formatCNPJ, isValidCNPJ } from '@/lib/br';
 import { useCurrentUser } from '@/components/providers/user-provider';
@@ -47,25 +47,25 @@ export default function CompletarCadastroEmpresaPage() {
 
         // Tentar obter empresaId de múltiplas fontes
         let empresaIdToUse = user?.empresaId;
-        
+
         // Se não tiver empresaId do user context, tentar buscar do metadata ou da tabela professores
         if (!empresaIdToUse) {
           const { data: { user: authUser } } = await supabase.auth.getUser();
-          
+
           // Tentar do metadata primeiro
           empresaIdToUse = authUser?.user_metadata?.empresa_id;
-          
+
           // Se ainda não tiver, buscar da tabela professores
           if (!empresaIdToUse && authUser?.id) {
             // Aguardar um pouco para garantir que o registro do professor foi criado
             await new Promise(resolve => setTimeout(resolve, 500));
-            
+
             const { data: professor } = await supabase
               .from('professores')
               .select('empresa_id')
               .eq('id', authUser.id)
               .maybeSingle();
-            
+
             if (professor?.empresa_id) {
               empresaIdToUse = professor.empresa_id;
             }
@@ -101,14 +101,14 @@ export default function CompletarCadastroEmpresaPage() {
         }
 
         const empresaData = await response.json();
-        
+
         // Verificar se empresa já está completa (se tiver pelo menos um dos campos)
         // Campos podem ser null, undefined ou string vazia
         const temCnpj = empresaData.cnpj && empresaData.cnpj.trim() !== '';
         const temEmail = empresaData.emailContato && empresaData.emailContato.trim() !== '';
         const temTelefone = empresaData.telefone && empresaData.telefone.trim() !== '';
         const empresaCompleta = temCnpj || temEmail || temTelefone;
-        
+
         if (empresaCompleta) {
           // Se empresa já está completa, redirecionar para dashboard
           toast({
@@ -118,7 +118,7 @@ export default function CompletarCadastroEmpresaPage() {
           router.push('/empresa/dashboard');
           return;
         }
-        
+
         setEmpresa(empresaData);
         // Formatar CNPJ se existir, senão string vazia
         const cnpjFormatted = empresaData.cnpj ? formatCNPJ(empresaData.cnpj) : '';
@@ -172,7 +172,7 @@ export default function CompletarCadastroEmpresaPage() {
       if (formData.cnpj && formData.cnpj.trim()) {
         // Remover todos os caracteres não numéricos
         const cnpjClean = formData.cnpj.replace(/\D/g, '');
-        
+
         // Só enviar se tiver exatamente 14 dígitos E não for todos iguais
         if (cnpjClean.length === 14) {
           // Verificar se todos os dígitos são iguais (CNPJ inválido)
@@ -185,7 +185,7 @@ export default function CompletarCadastroEmpresaPage() {
             setLoading(false);
             return;
           }
-          
+
           // Validar dígitos verificadores
           if (!isValidCNPJ(cnpjClean)) {
             toast({
@@ -196,7 +196,7 @@ export default function CompletarCadastroEmpresaPage() {
             setLoading(false);
             return;
           }
-          
+
           cnpjToSend = cnpjClean;
         } else if (cnpjClean.length > 0) {
           // Se preencheu mas não tem 14 dígitos, mostrar erro antes de enviar
@@ -209,13 +209,13 @@ export default function CompletarCadastroEmpresaPage() {
           return;
         }
       }
-      
+
       const payload: Record<string, unknown> = {
         nome: formData.nome.trim(),
         emailContato: formData.emailContato?.trim() || undefined,
         telefone: formData.telefone?.trim() || undefined,
       };
-      
+
       // Só incluir CNPJ no payload se foi preenchido e validado
       if (cnpjToSend !== undefined) {
         payload.cnpj = cnpjToSend;
@@ -257,16 +257,15 @@ export default function CompletarCadastroEmpresaPage() {
     }
   }
 
+
   if (checking) {
     return (
       <div className="container mx-auto py-8 max-w-xl">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center">
-              <p className="text-muted-foreground">Carregando...</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="rounded-md border p-6">
+          <div className="text-center">
+            <p className="text-muted-foreground">Carregando...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -274,94 +273,90 @@ export default function CompletarCadastroEmpresaPage() {
   if (!empresa) {
     return (
       <div className="container mx-auto py-8 max-w-xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Empresa não encontrada</CardTitle>
-            <CardDescription>
-              Não foi possível carregar os dados da sua empresa.
-            </CardDescription>
-          </CardHeader>
-        </Card>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight">Empresa não encontrada</h1>
+          <p className="text-muted-foreground">
+            Não foi possível carregar os dados da sua empresa.
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 max-w-xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Completar Cadastro da Empresa</CardTitle>
-          <CardDescription>
-            Complete as informações da sua empresa para continuar usando a plataforma.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="nome">Nome da Empresa *</Label>
-            <Input
-              id="nome"
-              value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-              required
-              disabled={loading}
-            />
-          </div>
+    <div className="container mx-auto py-8 max-w-xl space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Completar Cadastro da Empresa</h1>
+        <p className="text-muted-foreground">
+          Complete as informações da sua empresa para continuar usando a plataforma.
+        </p>
+      </div>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="nome">Nome da Empresa *</Label>
+          <Input
+            id="nome"
+            value={formData.nome}
+            onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+            required
+            disabled={loading}
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="cnpj">CNPJ (Opcional)</Label>
-            <Input
-              id="cnpj"
-              value={formData.cnpj}
-              onChange={(e) => {
-                // Normalizar para apenas dígitos e formatar
-                const digits = e.target.value.replace(/\D/g, '');
-                const formatted = formatCNPJ(digits);
-                setFormData({ ...formData, cnpj: formatted });
-              }}
-              inputMode="numeric"
-              maxLength={18}
-              placeholder="00.000.000/0000-00"
-              pattern="^[0-9./-]*$"
-              disabled={loading}
-            />
-            <p className="text-xs text-muted-foreground">
-              Opcional. Se informar, deve ter 14 dígitos.
-            </p>
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="cnpj">CNPJ (Opcional)</Label>
+          <Input
+            id="cnpj"
+            value={formData.cnpj}
+            onChange={(e) => {
+              // Normalizar para apenas dígitos e formatar
+              const digits = e.target.value.replace(/\D/g, '');
+              const formatted = formatCNPJ(digits);
+              setFormData({ ...formData, cnpj: formatted });
+            }}
+            inputMode="numeric"
+            maxLength={18}
+            placeholder="00.000.000/0000-00"
+            pattern="^[0-9./-]*$"
+            disabled={loading}
+          />
+          <p className="text-xs text-muted-foreground">
+            Opcional. Se informar, deve ter 14 dígitos.
+          </p>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="emailContato">Email de Contato</Label>
-            <Input
-              id="emailContato"
-              type="email"
-              value={formData.emailContato}
-              onChange={(e) => setFormData({ ...formData, emailContato: e.target.value })}
-              placeholder="contato@empresa.com"
-              disabled={loading}
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="emailContato">Email de Contato</Label>
+          <Input
+            id="emailContato"
+            type="email"
+            value={formData.emailContato}
+            onChange={(e) => setFormData({ ...formData, emailContato: e.target.value })}
+            placeholder="contato@empresa.com"
+            disabled={loading}
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="telefone">Telefone</Label>
-            <Input
-              id="telefone"
-              value={formatBRPhone(formData.telefone)}
-              onChange={(e) => setFormData({ ...formData, telefone: formatBRPhone(e.target.value) })}
-              inputMode="numeric"
-              maxLength={15}
-              placeholder="(11) 99999-9999"
-              pattern="^[0-9()\\s+-]*$"
-              disabled={loading}
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="telefone">Telefone</Label>
+          <Input
+            id="telefone"
+            value={formatBRPhone(formData.telefone)}
+            onChange={(e) => setFormData({ ...formData, telefone: formatBRPhone(e.target.value) })}
+            inputMode="numeric"
+            maxLength={15}
+            placeholder="(11) 99999-9999"
+            pattern="^[0-9()\\s+-]*$"
+            disabled={loading}
+          />
+        </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button onClick={handleComplete} disabled={loading}>
-              {loading ? 'Salvando...' : 'Completar Cadastro'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        <div className="flex justify-end gap-2 pt-4">
+          <Button onClick={handleComplete} disabled={loading}>
+            {loading ? 'Salvando...' : 'Completar Cadastro'}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

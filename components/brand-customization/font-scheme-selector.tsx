@@ -10,14 +10,15 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
-  Eye, 
-  Save, 
-  Trash2, 
-  AlertTriangle, 
-  CheckCircle, 
+import {
+  Eye,
+  Save,
+  Trash2,
+  AlertTriangle,
+  CheckCircle,
   Loader2,
-  Download
+  Download,
+  Type
 } from 'lucide-react';
 import type {
   FontSchemeSelectorProps,
@@ -62,12 +63,12 @@ function FontInput({ label, value, onChange, description, placeholder, disabled 
 
   const validateFonts = useCallback((fontString: string): boolean => {
     if (!fontString.trim()) return false;
-    
+
     const fonts = fontString.split(',').map(f => f.trim()).filter(f => f.length > 0);
-    
+
     // Check that we have at least one font
     if (fonts.length === 0) return false;
-    
+
     // Check for invalid characters in font names
     const invalidChars = /[<>:"\/\\|?*]/;
     return !fonts.some(font => invalidChars.test(font));
@@ -77,7 +78,7 @@ function FontInput({ label, value, onChange, description, placeholder, disabled 
     setInputValue(newValue);
     const valid = validateFonts(newValue);
     setIsValid(valid);
-    
+
     if (valid) {
       const fonts = newValue.split(',').map(f => f.trim()).filter(f => f.length > 0);
       onChange(fonts);
@@ -92,7 +93,7 @@ function FontInput({ label, value, onChange, description, placeholder, disabled 
         .map(f => f.trim())
         .filter(f => f.length > 0)
         .join(', ');
-      
+
       if (validateFonts(cleanedValue)) {
         setInputValue(cleanedValue);
         setIsValid(true);
@@ -107,7 +108,7 @@ function FontInput({ label, value, onChange, description, placeholder, disabled 
       <Label htmlFor={label} className="text-sm font-medium">
         {label}
       </Label>
-      
+
       <div className="relative">
         <Input
           id={label}
@@ -123,9 +124,9 @@ function FontInput({ label, value, onChange, description, placeholder, disabled 
       {description && (
         <p className="text-xs text-muted-foreground">{description}</p>
       )}
-      
+
       {!isValid && (
-        <p className="text-xs text-destructive">Please enter valid font names separated by commas</p>
+        <p className="text-xs text-destructive">Por favor, insira nomes de fontes válidos separados por vírgulas</p>
       )}
     </div>
   );
@@ -140,42 +141,47 @@ function FontPreview({ scheme, className = "" }: FontPreviewProps) {
     <div className={`space-y-6 ${className}`}>
       {/* Sans-serif preview */}
       <div className="space-y-4">
-        <h4 className="font-medium">Sans-serif Font Preview</h4>
-        <div 
-          className="p-6 rounded-lg border bg-card"
-          style={{ fontFamily: sansStack }}
-        >
+        <div className="font-medium border-b pb-2">Visualização de Tipografia</div>
+
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold">Título H1</h1>
+            <h2 className="text-3xl font-bold">Título H2</h2>
+            <h3 className="text-2xl font-bold">Título H3</h3>
+            <h4 className="text-xl font-bold">Título H4</h4>
+          </div>
+
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold">Heading 1</h1>
-            <h2 className="text-3xl font-semibold">Heading 2</h2>
-            <h3 className="text-2xl font-medium">Heading 3</h3>
-            <p className="text-base">
-              This is a paragraph of body text that demonstrates how your chosen sans-serif font will look 
-              in regular content. It includes various characters and punctuation to give you a complete preview.
+            <p>
+              Este é um parágrafo de corpo de texto. Demonstra como sua fonte escolhida
+              aparecerá em blocos de texto padrão. Uma boa tipografia deve ser legível e
+              confortável de ler por longos períodos.
             </p>
-            <div className="flex gap-2">
-              <span className="text-sm font-light">Light</span>
-              <span className="text-sm font-normal">Normal</span>
-              <span className="text-sm font-medium">Medium</span>
-              <span className="text-sm font-semibold">Semibold</span>
-              <span className="text-sm font-bold">Bold</span>
-            </div>
+            <p className="text-sm text-muted-foreground">
+              Este é um texto pequeno e suave, frequentemente usado para legendas ou informações secundárias.
+            </p>
+          </div>
+
+          <div className="flex gap-4">
+            <Button>Botão Primário</Button>
+            <Button variant="outline">Botão Outline</Button>
+            <Button variant="ghost">Botão Ghost</Button>
           </div>
         </div>
       </div>
 
       {/* Monospace preview */}
       <div className="space-y-4">
-        <h4 className="font-medium">Monospace Font Preview</h4>
-        <div 
+        <h4 className="font-medium">Visualização de Fonte Monoespaçada</h4>
+        <div
           className="p-6 rounded-lg border bg-card"
           style={{ fontFamily: monoStack }}
         >
           <div className="space-y-4">
             <div className="text-sm">
-              <div className="text-muted-foreground mb-2">Code Example:</div>
+              <div className="text-muted-foreground mb-2">Exemplo de Código:</div>
               <pre className="bg-muted p-3 rounded text-sm overflow-x-auto">
-{`function calculateTotal(items) {
+                {`function calculateTotal(items) {
   return items.reduce((sum, item) => {
     return sum + (item.price * item.quantity);
   }, 0);
@@ -184,7 +190,7 @@ function FontPreview({ scheme, className = "" }: FontPreviewProps) {
             </div>
             <div className="text-xs space-y-1">
               <div>Numbers: 0123456789</div>
-              <div>Symbols: !@#$%^&*()_+-=[]{}|;&apos;:&quot;,./?</div>
+              <div>Symbols: !@#$%^&*()_+-=[]{ }|;&apos;:&quot;,./?</div>
               <div>Mixed: const API_URL = &quot;https://api.example.com/v1&quot;;</div>
             </div>
           </div>
@@ -194,7 +200,7 @@ function FontPreview({ scheme, className = "" }: FontPreviewProps) {
       {/* Font sizes preview */}
       {scheme.fontSizes && (
         <div className="space-y-4">
-          <h4 className="font-medium">Font Sizes Preview</h4>
+          <h4 className="font-medium">Visualização de Tamanhos de Fonte</h4>
           <div className="space-y-2" style={{ fontFamily: sansStack }}>
             {Object.entries(scheme.fontSizes).map(([size, value]) => (
               <div key={size} className="flex items-center gap-4">
@@ -277,6 +283,56 @@ export function FontSchemeSelector({
       }
     },
     {
+      id: 'inter-system',
+      name: 'Inter (Sistema)',
+      category: 'modern',
+      scheme: {
+        fontSans: ['Inter', 'system-ui', 'sans-serif'],
+        fontMono: ['ui-monospace', 'monospace'],
+        googleFonts: ['Inter'],
+      }
+    },
+    {
+      id: 'roboto-slab',
+      name: 'Roboto & Roboto Slab',
+      category: 'classic',
+      scheme: {
+        fontSans: ['Roboto', 'system-ui', 'sans-serif'],
+        fontMono: ['Roboto Mono', 'ui-monospace', 'monospace'],
+        googleFonts: ['Roboto', 'Roboto Slab', 'Roboto Mono'],
+      }
+    },
+    {
+      id: 'playfair-lato',
+      name: 'Playfair & Lato',
+      category: 'classic',
+      scheme: {
+        fontSans: ['Lato', 'system-ui', 'sans-serif'],
+        fontMono: ['Monaco', 'ui-monospace', 'monospace'],
+        googleFonts: ['Playfair Display', 'Lato'],
+      }
+    },
+    {
+      id: 'montserrat-opensans',
+      name: 'Montserrat & Open Sans',
+      category: 'modern',
+      scheme: {
+        fontSans: ['Montserrat', 'system-ui', 'sans-serif'],
+        fontMono: ['Open Sans', 'ui-monospace', 'monospace'],
+        googleFonts: ['Montserrat', 'Open Sans'],
+      }
+    },
+    {
+      id: 'oswald-raleway',
+      name: 'Oswald & Raleway',
+      category: 'modern',
+      scheme: {
+        fontSans: ['Raleway', 'system-ui', 'sans-serif'],
+        fontMono: ['Oswald', 'ui-monospace', 'monospace'],
+        googleFonts: ['Oswald', 'Raleway'],
+      }
+    },
+    {
       id: 'modern-roboto',
       name: 'Modern (Roboto)',
       category: 'modern',
@@ -342,43 +398,43 @@ export function FontSchemeSelector({
   // Validation function
   const validateScheme = useCallback((): string[] => {
     const errors: string[] = [];
-    
+
     if (!schemeData.name.trim()) {
-      errors.push('Scheme name is required');
+      errors.push('Nome do esquema é obrigatório');
     }
-    
+
     if (schemeData.name.length > 100) {
-      errors.push('Scheme name must be less than 100 characters');
+      errors.push('Nome do esquema deve ter menos de 100 caracteres');
     }
-    
+
     if (!schemeData.fontSans || schemeData.fontSans.length === 0) {
-      errors.push('At least one sans-serif font is required');
+      errors.push('Pelo menos uma fonte sans-serif é obrigatória');
     }
-    
+
     if (!schemeData.fontMono || schemeData.fontMono.length === 0) {
-      errors.push('At least one monospace font is required');
+      errors.push('Pelo menos uma fonte monospace é obrigatória');
     }
-    
+
     // Validate font fallbacks
-    const sansHasFallback = schemeData.fontSans?.some(font => 
-      font.includes('system-ui') || 
-      font.includes('sans-serif') || 
+    const sansHasFallback = schemeData.fontSans?.some(font =>
+      font.includes('system-ui') ||
+      font.includes('sans-serif') ||
       font.includes('-apple-system')
     );
-    
-    const monoHasFallback = schemeData.fontMono?.some(font => 
-      font.includes('monospace') || 
+
+    const monoHasFallback = schemeData.fontMono?.some(font =>
+      font.includes('monospace') ||
       font.includes('ui-monospace')
     );
-    
+
     if (!sansHasFallback) {
-      errors.push('Sans-serif fonts must include a system fallback (system-ui, sans-serif, or -apple-system)');
+      errors.push('As fontes sans-serif devem incluir um fallback de sistema (system-ui, sans-serif ou -apple-system)');
     }
-    
+
     if (!monoHasFallback) {
-      errors.push('Monospace fonts must include a system fallback (monospace or ui-monospace)');
+      errors.push('As fontes monospace devem incluir um fallback de sistema (monospace ou ui-monospace)');
     }
-    
+
     return errors;
   }, [schemeData]);
 
@@ -405,20 +461,20 @@ export function FontSchemeSelector({
   // Handle Google Font loading
   const handleLoadGoogleFont = useCallback(async () => {
     if (!selectedGoogleFont) return;
-    
+
     try {
       setLoadingGoogleFont(true);
       await onLoadGoogleFont(selectedGoogleFont);
-      
+
       // Add to Google Fonts list if not already present
       if (!schemeData.googleFonts.includes(selectedGoogleFont)) {
         updateSchemeData('googleFonts', [...schemeData.googleFonts, selectedGoogleFont]);
       }
-      
+
       setSelectedGoogleFont('');
     } catch (error) {
       console.error('Failed to load Google Font:', error);
-      setValidationErrors(['Failed to load Google Font. Please try again.']);
+      setValidationErrors(['Falha ao carregar Google Font. Por favor, tente novamente.']);
     } finally {
       setLoadingGoogleFont(false);
     }
@@ -428,15 +484,15 @@ export function FontSchemeSelector({
   const removeGoogleFont = useCallback((fontToRemove: string) => {
     const updatedGoogleFonts = schemeData.googleFonts?.filter(font => font !== fontToRemove) || [];
     updateSchemeData('googleFonts', updatedGoogleFonts);
-    
+
     // Also remove from font stacks
     const updatedSans = schemeData.fontSans?.filter(font => font !== fontToRemove) || [];
     const updatedMono = schemeData.fontMono?.filter(font => font !== fontToRemove) || [];
-    
+
     if (updatedSans.length !== schemeData.fontSans?.length) {
       updateSchemeData('fontSans', updatedSans);
     }
-    
+
     if (updatedMono.length !== schemeData.fontMono?.length) {
       updateSchemeData('fontMono', updatedMono);
     }
@@ -446,20 +502,20 @@ export function FontSchemeSelector({
   const handleSave = useCallback(async () => {
     try {
       setIsSaving(true);
-      
+
       // Validate before saving
       const errors = validateScheme();
       setValidationErrors(errors);
-      
+
       if (errors.length > 0) {
         return;
       }
-      
+
       await onSave(schemeData);
-      
+
     } catch (error) {
       console.error('Failed to save font scheme:', error);
-      setValidationErrors(['Failed to save font scheme. Please try again.']);
+      setValidationErrors(['Falha ao salvar esquema de fontes. Por favor, tente novamente.']);
     } finally {
       setIsSaving(false);
     }
@@ -481,12 +537,12 @@ export function FontSchemeSelector({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Font Scheme Selector</h3>
+          <h3 className="text-lg font-semibold">Seletor de Esquema de Fontes</h3>
           <p className="text-sm text-muted-foreground">
-            Choose fonts that represent your brand identity
+            Escolha fontes que representem a identidade da sua marca
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Button
             onClick={togglePreview}
@@ -495,7 +551,7 @@ export function FontSchemeSelector({
             className="gap-2"
           >
             <Eye className="h-4 w-4" />
-            {previewMode ? 'Exit Preview' : 'Preview'}
+            {previewMode ? 'Sair da Visualização' : 'Visualizar'}
           </Button>
         </div>
       </div>
@@ -506,7 +562,7 @@ export function FontSchemeSelector({
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <div className="space-y-1">
-              <div className="font-medium">Please fix the following errors:</div>
+              <div className="font-medium">Por favor, corrija os seguintes erros:</div>
               {validationErrors.map((error, index) => (
                 <div key={index} className="text-sm">• {error}</div>
               ))}
@@ -518,26 +574,26 @@ export function FontSchemeSelector({
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="editor">Editor</TabsTrigger>
-          <TabsTrigger value="presets">Presets</TabsTrigger>
+          <TabsTrigger value="presets">Predefinições</TabsTrigger>
           <TabsTrigger value="google-fonts">Google Fonts</TabsTrigger>
-          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="preview">Visualizar</TabsTrigger>
         </TabsList>
 
         <TabsContent value="editor" className="space-y-6 mt-6">
           {/* Scheme Name */}
           <Card>
             <CardHeader>
-              <CardTitle>Scheme Information</CardTitle>
+              <CardTitle>Informações do Esquema</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="scheme-name">Scheme Name *</Label>
+                  <Label htmlFor="scheme-name">Nome do Esquema *</Label>
                   <Input
                     id="scheme-name"
                     value={schemeData.name}
                     onChange={(e) => updateSchemeData('name', e.target.value)}
-                    placeholder="Enter scheme name"
+                    placeholder="Digite o nome do esquema"
                     className="mt-1"
                   />
                 </div>
@@ -545,28 +601,73 @@ export function FontSchemeSelector({
             </CardContent>
           </Card>
 
+          {/* Google Fonts Loader */}
+          <Card className="bg-muted/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Type className="h-4 w-4" />
+                Carregar Google Font
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <Select
+                    onValueChange={(value) => {
+                      if (value) setSelectedGoogleFont(value);
+                    }}
+                    value={selectedGoogleFont}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione uma Google Font..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableGoogleFonts.map(font => (
+                        <SelectItem key={font} value={font} style={{ fontFamily: font }}>
+                          {font}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  onClick={handleLoadGoogleFont}
+                  disabled={!selectedGoogleFont || loadingGoogleFont}
+                  className="gap-2"
+                >
+                  {loadingGoogleFont ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="h-4 w-4" />
+                  )}
+                  Carregar Fonte
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Font Families */}
           <Card>
             <CardHeader>
-              <CardTitle>Font Families</CardTitle>
+              <CardTitle>Famílias de Fontes</CardTitle>
               <CardDescription>
-                Define font stacks for different text types. Include fallback fonts for better compatibility.
+                Defina pilhas de fontes para diferentes tipos de texto. Inclua fontes de fallback para melhor compatibilidade.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <FontInput
-                  label="Sans-serif Fonts"
+                  label="Fontes Sans-serif"
                   value={schemeData.fontSans || []}
                   onChange={(value) => updateSchemeData('fontSans', value)}
-                  description="Font stack for body text and UI elements (comma-separated)"
+                  description="Pilha de fontes para texto do corpo e elementos da UI (separados por vírgulas)"
                   placeholder="Inter, system-ui, sans-serif"
                 />
                 <FontInput
-                  label="Monospace Fonts"
+                  label="Fontes Monospace"
                   value={schemeData.fontMono || []}
                   onChange={(value) => updateSchemeData('fontMono', value)}
-                  description="Font stack for code and technical content (comma-separated)"
+                  description="Pilha de fontes para código e conteúdo técnico (separados por vírgulas)"
                   placeholder="Fira Code, ui-monospace, monospace"
                 />
               </div>
@@ -576,9 +677,9 @@ export function FontSchemeSelector({
           {/* Font Sizes */}
           <Card>
             <CardHeader>
-              <CardTitle>Font Sizes</CardTitle>
+              <CardTitle>Tamanhos de Fonte</CardTitle>
               <CardDescription>
-                Define the font size scale for your design system
+                Defina a escala de tamanhos de fonte para o seu sistema de design
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -607,9 +708,9 @@ export function FontSchemeSelector({
           {/* Font Weights */}
           <Card>
             <CardHeader>
-              <CardTitle>Font Weights</CardTitle>
+              <CardTitle>Pesos de Fonte</CardTitle>
               <CardDescription>
-                Define font weight values for different emphasis levels
+                Defina os valores de peso de fonte para diferentes níveis de ênfase
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -642,16 +743,16 @@ export function FontSchemeSelector({
         <TabsContent value="presets" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Font Scheme Presets</CardTitle>
+              <CardTitle>Predefinições de Esquemas de Fonte</CardTitle>
               <CardDescription>
-                Choose from predefined font schemes or use them as starting points
+                Escolha entre esquemas predefinidos ou use-os como ponto de partida
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 {/* Default Presets */}
                 <div>
-                  <h4 className="font-medium mb-3">Default Schemes</h4>
+                  <h4 className="font-medium mb-3">Esquemas Padrão</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {presetSchemes.filter(p => p.category === 'default').map((preset) => (
                       <Card key={preset.id} className="cursor-pointer hover:shadow-md transition-shadow">
@@ -662,115 +763,112 @@ export function FontSchemeSelector({
                               onClick={() => applyPreset(preset)}
                               size="sm"
                               variant="outline"
-                            >
-                              Apply
+                              Aplicar
                             </Button>
-                          </div>
-                          <div className="space-y-2 text-sm text-muted-foreground">
-                            <div>Sans: {preset.scheme.fontSans?.slice(0, 2).join(', ')}</div>
-                            <div>Mono: {preset.scheme.fontMono?.slice(0, 2).join(', ')}</div>
-                            {preset.scheme.googleFonts && preset.scheme.googleFonts.length > 0 && (
-                              <div className="flex gap-1 flex-wrap">
-                                {preset.scheme.googleFonts.map(font => (
-                                  <Badge key={font} variant="secondary" className="text-xs">
-                                    {font}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
+                        </div>
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                          <div>Sans: {preset.scheme.fontSans?.slice(0, 2).join(', ')}</div>
+                          <div>Mono: {preset.scheme.fontMono?.slice(0, 2).join(', ')}</div>
+                          {preset.scheme.googleFonts && preset.scheme.googleFonts.length > 0 && (
+                            <div className="flex gap-1 flex-wrap">
+                              {preset.scheme.googleFonts.map(font => (
+                                <Badge key={font} variant="secondary" className="text-xs">
+                                  {font}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
                       </Card>
                     ))}
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Modern Presets */}
-                <div>
-                  <h4 className="font-medium mb-3">Modern Schemes</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {presetSchemes.filter(p => p.category === 'modern').map((preset) => (
-                      <Card key={preset.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <h5 className="font-medium">{preset.name}</h5>
-                            <Button
-                              onClick={() => applyPreset(preset)}
-                              size="sm"
-                              variant="outline"
-                            >
-                              Apply
-                            </Button>
-                          </div>
-                          <div className="space-y-2 text-sm text-muted-foreground">
-                            <div>Sans: {preset.scheme.fontSans?.slice(0, 2).join(', ')}</div>
-                            <div>Mono: {preset.scheme.fontMono?.slice(0, 2).join(', ')}</div>
-                            {preset.scheme.googleFonts && preset.scheme.googleFonts.length > 0 && (
-                              <div className="flex gap-1 flex-wrap">
-                                {preset.scheme.googleFonts.map(font => (
-                                  <Badge key={font} variant="secondary" className="text-xs">
-                                    {font}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-
-                <Separator />
-
-                {/* Classic Presets */}
-                <div>
-                  <h4 className="font-medium mb-3">Classic Schemes</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {presetSchemes.filter(p => p.category === 'classic').map((preset) => (
-                      <Card key={preset.id} className="cursor-pointer hover:shadow-md transition-shadow">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between mb-3">
-                            <h5 className="font-medium">{preset.name}</h5>
-                            <Button
-                              onClick={() => applyPreset(preset)}
-                              size="sm"
-                              variant="outline"
-                            >
-                              Apply
-                            </Button>
-                          </div>
-                          <div className="space-y-2 text-sm text-muted-foreground">
-                            <div>Sans: {preset.scheme.fontSans?.slice(0, 2).join(', ')}</div>
-                            <div>Mono: {preset.scheme.fontMono?.slice(0, 2).join(', ')}</div>
-                            {preset.scheme.googleFonts && preset.scheme.googleFonts.length > 0 && (
-                              <div className="flex gap-1 flex-wrap">
-                                {preset.scheme.googleFonts.map(font => (
-                                  <Badge key={font} variant="secondary" className="text-xs">
-                                    {font}
-                                  </Badge>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+
+              <Separator />
+
+              {/* Modern Presets */}
+              <div>
+                <h4 className="font-medium mb-3">Esquemas Modernos</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {presetSchemes.filter(p => p.category === 'modern').map((preset) => (
+                    <Card key={preset.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <h5 className="font-medium">{preset.name}</h5>
+                          <Button
+                            onClick={() => applyPreset(preset)}
+                            size="sm"
+                            variant="outline"
+                            Aplicar
+                            </Button>
+                      </div>
+                      <div className="space-y-2 text-sm text-muted-foreground">
+                        <div>Sans: {preset.scheme.fontSans?.slice(0, 2).join(', ')}</div>
+                        <div>Mono: {preset.scheme.fontMono?.slice(0, 2).join(', ')}</div>
+                        {preset.scheme.googleFonts && preset.scheme.googleFonts.length > 0 && (
+                          <div className="flex gap-1 flex-wrap">
+                            {preset.scheme.googleFonts.map(font => (
+                              <Badge key={font} variant="secondary" className="text-xs">
+                                {font}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                      </Card>
+                    ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Classic Presets */}
+            <div>
+              <h4 className="font-medium mb-3">Esquemas Clássicos</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {presetSchemes.filter(p => p.category === 'classic').map((preset) => (
+                  <Card key={preset.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h5 className="font-medium">{preset.name}</h5>
+                        <Button
+                          onClick={() => applyPreset(preset)}
+                          size="sm"
+                          variant="outline"
+                          Aplicar
+                            </Button>
+                    </div>
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <div>Sans: {preset.scheme.fontSans?.slice(0, 2).join(', ')}</div>
+                      <div>Mono: {preset.scheme.fontMono?.slice(0, 2).join(', ')}</div>
+                      {preset.scheme.googleFonts && preset.scheme.googleFonts.length > 0 && (
+                        <div className="flex gap-1 flex-wrap">
+                          {preset.scheme.googleFonts.map(font => (
+                            <Badge key={font} variant="secondary" className="text-xs">
+                              {font}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                      </Card>
+                    ))}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+        </TabsContent >
 
         <TabsContent value="google-fonts" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Google Fonts Integration</CardTitle>
+              <CardTitle>Integração Google Fonts</CardTitle>
               <CardDescription>
-                Add Google Fonts to your font scheme for enhanced typography
+                Adicione Google Fonts ao seu esquema para uma tipografia aprimorada
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -779,7 +877,7 @@ export function FontSchemeSelector({
                 <div className="flex gap-2">
                   <Select value={selectedGoogleFont} onValueChange={setSelectedGoogleFont}>
                     <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Select a Google Font" />
+                      <SelectValue placeholder="Selecione uma Google Font" />
                     </SelectTrigger>
                     <SelectContent>
                       {availableGoogleFonts.map((font) => (
@@ -799,20 +897,20 @@ export function FontSchemeSelector({
                     ) : (
                       <Download className="h-4 w-4" />
                     )}
-                    Load Font
+                    Carregar Fonte
                   </Button>
                 </div>
 
                 {/* Loaded Google Fonts */}
                 {schemeData.googleFonts && schemeData.googleFonts.length > 0 && (
                   <div>
-                    <h4 className="font-medium mb-3">Loaded Google Fonts</h4>
+                    <h4 className="font-medium mb-3">Google Fonts Carregadas</h4>
                     <div className="space-y-2">
                       {schemeData.googleFonts.map((font) => (
                         <div key={font} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center gap-3">
                             <span className="font-medium">{font}</span>
-                            <div 
+                            <div
                               className="text-sm text-muted-foreground"
                               style={{ fontFamily: font }}
                             >
@@ -838,12 +936,12 @@ export function FontSchemeSelector({
                   <CheckCircle className="h-4 w-4" />
                   <AlertDescription>
                     <div className="space-y-2">
-                      <div className="font-medium">How to use Google Fonts:</div>
+                      <div className="font-medium">Como usar Google Fonts:</div>
                       <div className="text-sm space-y-1">
-                        <div>1. Select a Google Font from the dropdown above</div>
-                        <div>2. Click &quot;Load Font&quot; to add it to your scheme</div>
-                        <div>3. The font will be automatically added to your font stacks</div>
-                        <div>4. Use the Preview tab to see how it looks</div>
+                        <div>1. Selecione uma Google Font na lista acima</div>
+                        <div>2. Clique em &quot;Carregar Fonte&quot; para adicionar ao seu esquema</div>
+                        <div>3. A fonte será adicionada automaticamente às suas pilhas de fontes</div>
+                        <div>4. Use a aba Visualizar para ver como fica</div>
                       </div>
                     </div>
                   </AlertDescription>
@@ -856,9 +954,9 @@ export function FontSchemeSelector({
         <TabsContent value="preview" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Font Scheme Preview</CardTitle>
+              <CardTitle>Visualização do Esquema de Fonte</CardTitle>
               <CardDescription>
-                See how your font scheme will look in the interface
+                Veja como seu esquema de fontes ficará na interface
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -866,23 +964,23 @@ export function FontSchemeSelector({
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+      </Tabs >
 
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <Button
-          onClick={handleSave}
-          disabled={isSaving || validationErrors.length > 0}
-          className="gap-2"
-        >
-          {isSaving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
-          Save Font Scheme
-        </Button>
-      </div>
-    </div>
+    {/* Save Button */ }
+    < div className = "flex justify-end" >
+      <Button
+        onClick={handleSave}
+        disabled={isSaving || validationErrors.length > 0}
+        className="gap-2"
+      >
+        {isSaving ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Save className="h-4 w-4" />
+        )}
+        Salvar Esquema de Fontes
+      </Button>
+      </div >
+    </div >
   );
 }

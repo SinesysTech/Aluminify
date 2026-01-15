@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { createClient } from '@/lib/client'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+
 import { AlertCircle, School } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SalaEstudosFilters } from '@/components/aluno/sala-estudos-filters'
@@ -23,7 +23,7 @@ function formatSupabaseError(error: unknown): string {
   if (error instanceof Error) {
     return error.message
   }
-  
+
   if (typeof error === 'object' && error !== null) {
     // Erro do Supabase geralmente tem propriedades: message, details, hint, code
     const supabaseError = error as Record<string, unknown>
@@ -31,16 +31,16 @@ function formatSupabaseError(error: unknown): string {
     const details = supabaseError.details
     const hint = supabaseError.hint
     const code = supabaseError.code
-    
+
     const parts: string[] = []
     if (code) parts.push(`[${code}]`)
     if (message) parts.push(String(message))
     if (details) parts.push(`Detalhes: ${String(details)}`)
     if (hint) parts.push(`Hint: ${String(hint)}`)
-    
+
     return parts.length > 0 ? parts.join(' - ') : JSON.stringify(error)
   }
-  
+
   return String(error)
 }
 
@@ -162,7 +162,7 @@ export default function SalaEstudosClientPage({
 
         // Verificar se há sessão ativa
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        
+
         if (sessionError) {
           console.error('Erro ao verificar sessão (atividades):', sessionError)
           const errorMsg = formatSupabaseError(sessionError)
@@ -411,11 +411,11 @@ export default function SalaEstudosClientPage({
 
         // Deduplicar módulos para evitar nomes repetidos no dropdown
         const uniqueModulosMap = new Map<string, typeof modulosData[number]>()
-        ;(modulosData || []).forEach((m) => {
-          if (!uniqueModulosMap.has(m.id)) {
-            uniqueModulosMap.set(m.id, m)
-          }
-        })
+          ; (modulosData || []).forEach((m) => {
+            if (!uniqueModulosMap.has(m.id)) {
+              uniqueModulosMap.set(m.id, m)
+            }
+          })
         const uniqueModulos = Array.from(uniqueModulosMap.values())
         const moduloIds = uniqueModulos.map((m) => m.id)
 
@@ -439,7 +439,7 @@ export default function SalaEstudosClientPage({
 
         // 6. Buscar progresso do aluno (incluindo campos de desempenho)
         const atividadeIds = atividadesData.map((a) => a.id)
-        
+
         // Dividir em lotes para evitar URLs muito longas (limite de ~2000 caracteres)
         // Usar lotes de 100 IDs por vez (cada UUID tem ~36 caracteres + separadores)
         const BATCH_SIZE = 100
@@ -453,12 +453,12 @@ export default function SalaEstudosClientPage({
           dificuldade_percebida: string | null
           anotacoes_pessoais: string | null
         }[] = []
-        
+
         // Só buscar progressos se houver atividades
         if (atividadeIds.length > 0) {
           for (let i = 0; i < atividadeIds.length; i += BATCH_SIZE) {
             const batch = atividadeIds.slice(i, i + BATCH_SIZE)
-            
+
             const { data: batchData, error: progressosError } = await supabase
               .from('progresso_atividades')
               .select('atividade_id, status, data_inicio, data_conclusao, questoes_totais, questoes_acertos, dificuldade_percebida, anotacoes_pessoais')
@@ -470,7 +470,7 @@ export default function SalaEstudosClientPage({
               const errorMsg = formatSupabaseError(progressosError)
               throw new Error(`Erro ao buscar progressos: ${errorMsg}`)
             }
-            
+
             if (batchData) {
               // Filtrar apenas registros com atividade_id não nulo
               const validBatchData = batchData.filter(
@@ -968,17 +968,17 @@ export default function SalaEstudosClientPage({
             Checklist e acompanhamento do seu progresso nas atividades
           </p>
         </div>
-        <Card className="border-destructive">
-          <CardHeader>
-            <div className="flex items-center gap-2">
+        <div className="rounded-xl border border-destructive bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-6">
+            <div className="flex items-center gap-2 font-semibold leading-none tracking-tight">
               <AlertCircle className="h-5 w-5 text-destructive" />
-              <CardTitle>Erro</CardTitle>
+              Erro
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="p-6 pt-0">
             <p className="text-destructive">{error}</p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     )
   }
@@ -993,17 +993,17 @@ export default function SalaEstudosClientPage({
       </div>
 
       {error && (
-        <Card className="border-destructive">
-          <CardHeader>
-            <div className="flex items-center gap-2">
+        <div className="rounded-xl border border-destructive bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-6">
+            <div className="flex items-center gap-2 font-semibold leading-none tracking-tight">
               <AlertCircle className="h-5 w-5 text-destructive" />
-              <CardTitle>Erro</CardTitle>
+              Erro
             </div>
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="p-6 pt-0">
             <p className="text-destructive">{error}</p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
 
       <ProgressoStatsCard
@@ -1042,16 +1042,18 @@ export default function SalaEstudosClientPage({
           <Skeleton className="h-64 w-full" />
         </div>
       ) : estruturaFiltrada.length === 0 ? (
-        <Card>
-          <CardContent className="py-8 text-center">
-            <School className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <CardDescription>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="p-6 py-8 text-center space-y-4">
+            <div className="flex justify-center">
+              <School className="h-12 w-12 text-muted-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground">
               {atividades.length === 0
                 ? 'Você ainda não possui atividades disponíveis. Entre em contato com seu professor.'
                 : 'Nenhuma atividade encontrada com os filtros selecionados.'}
-            </CardDescription>
-          </CardContent>
-        </Card>
+            </p>
+          </div>
+        </div>
       ) : (
         <div className="space-y-6">
           {estruturaFiltrada.map((curso) => (

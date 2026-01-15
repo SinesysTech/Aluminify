@@ -6,12 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Upload, 
-  X, 
-  Image as ImageIcon, 
-  AlertTriangle, 
-  CheckCircle2, 
+import {
+  Upload,
+  X,
+  Image as ImageIcon,
+  AlertTriangle,
+  CheckCircle2,
   Loader2,
   Trash2,
 } from 'lucide-react';
@@ -35,15 +35,15 @@ interface ValidationState {
 }
 
 const LOGO_TYPE_LABELS: Record<LogoType, string> = {
-  login: 'Login Page Logo',
-  sidebar: 'Sidebar Header Logo',
+  login: 'Logo da Página de Login',
+  sidebar: 'Logo do Cabeçalho da Sidebar',
   favicon: 'Favicon'
 };
 
 const LOGO_TYPE_DESCRIPTIONS: Record<LogoType, string> = {
-  login: 'Displayed on all login and authentication pages',
-  sidebar: 'Shown in the sidebar header across authenticated pages',
-  favicon: 'Browser tab icon and bookmarks'
+  login: 'Exibido em todas as páginas de login e autenticação',
+  sidebar: 'Mostrado no cabeçalho da barra lateral em páginas autenticadas',
+  favicon: 'Ícone da aba do navegador e favoritos'
 };
 
 const DEFAULT_MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -64,17 +64,17 @@ export function LogoUploadComponent({
     error: null,
     success: null
   });
-  
+
   const [validationState, setValidationState] = useState<ValidationState>({
     isValid: true,
     errors: [],
     warnings: []
   });
-  
+
   const [isDragOver, setIsDragOver] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentLogoUrl || null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  
+
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dragCounterRef = useRef(0);
@@ -112,39 +112,39 @@ export function LogoUploadComponent({
 
     // Check file size
     if (file.size > maxFileSize) {
-      errors.push(`File size (${(file.size / 1024 / 1024).toFixed(2)}MB) exceeds maximum allowed size (${(maxFileSize / 1024 / 1024).toFixed(2)}MB)`);
+      errors.push(`Tamanho do arquivo (${(file.size / 1024 / 1024).toFixed(2)}MB) excede o limite máximo de (${(maxFileSize / 1024 / 1024).toFixed(2)}MB)`);
     }
 
     // Check file type
     if (!acceptedFormats.includes(file.type)) {
-      errors.push(`File type "${file.type}" is not supported. Accepted formats: ${acceptedFormats.join(', ')}`);
+      errors.push(`Tipo de arquivo "${file.type}" não suportado. Formatos aceitos: ${acceptedFormats.join(', ')}`);
     }
 
     // Check file name
     if (file.name.length > 255) {
-      errors.push('File name is too long (maximum 255 characters)');
+      errors.push('Nome do arquivo é muito longo (máximo 255 caracteres)');
     }
 
     // Security checks
     const dangerousExtensions = ['.exe', '.bat', '.cmd', '.scr', '.pif', '.com'];
     const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
     if (dangerousExtensions.includes(fileExtension)) {
-      errors.push('File type is not allowed for security reasons');
+      errors.push('Tipo de arquivo não permitido por motivos de segurança');
     }
 
     // Logo type specific validations
     if (logoType === 'favicon') {
       if (file.type !== 'image/png' && file.type !== 'image/x-icon') {
-        warnings.push('For best favicon compatibility, use PNG or ICO format');
+        warnings.push('Para melhor compatibilidade de favicon, use formato PNG ou ICO');
       }
       if (file.size > 1024 * 1024) { // 1MB
-        warnings.push('Favicon files are typically smaller than 1MB for better performance');
+        warnings.push('Arquivos de favicon são geralmente menores que 1MB para melhor performance');
       }
     }
 
     // Image dimension warnings (we can't check without loading the image)
     if (logoType === 'login' && file.size < 10 * 1024) { // Less than 10KB
-      warnings.push('Login logos are typically larger for better visibility');
+      warnings.push('Logos de login são geralmente maiores para melhor visibilidade');
     }
 
     return {
@@ -158,23 +158,23 @@ export function LogoUploadComponent({
   const handleFileSelect = useCallback((file: File) => {
     const validation = validateFile(file);
     setValidationState(validation);
-    
+
     if (validation.isValid) {
       setSelectedFile(file);
-      
+
       // Create preview URL
       const objectUrl = URL.createObjectURL(file);
       setPreviewUrl(objectUrl);
-      
+
       // Clear previous messages
       setUploadState(prev => ({ ...prev, error: null, success: null }));
     } else {
       setSelectedFile(null);
       setPreviewUrl(currentLogoUrl || null);
-      setUploadState(prev => ({ 
-        ...prev, 
+      setUploadState(prev => ({
+        ...prev,
         error: validation.errors.join('. '),
-        success: null 
+        success: null
       }));
     }
   }, [validateFile, currentLogoUrl]);
@@ -227,12 +227,12 @@ export function LogoUploadComponent({
     if (!selectedFile) return;
 
     try {
-      setUploadState(prev => ({ 
-        ...prev, 
-        isUploading: true, 
-        progress: 0, 
-        error: null, 
-        success: null 
+      setUploadState(prev => ({
+        ...prev,
+        isUploading: true,
+        progress: 0,
+        error: null,
+        success: null
       }));
 
       // Simulate progress for better UX
@@ -252,13 +252,13 @@ export function LogoUploadComponent({
           isUploading: false,
           progress: 100,
           error: null,
-          success: `${LOGO_TYPE_LABELS[logoType]} uploaded successfully`
+          success: `${LOGO_TYPE_LABELS[logoType]} enviada com sucesso`
         });
-        
+
         // Update preview to the uploaded logo
         setPreviewUrl(result.logoUrl);
         setSelectedFile(null);
-        
+
         // Clear file input
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
@@ -268,12 +268,12 @@ export function LogoUploadComponent({
       }
     } catch (error) {
       console.error('Logo upload failed:', error);
-      
-      let errorMessage = 'Failed to upload logo';
+
+      let errorMessage = 'Falha ao enviar logo';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       setUploadState({
         isUploading: false,
         progress: 0,
@@ -288,17 +288,17 @@ export function LogoUploadComponent({
     if (!currentLogoUrl) return;
 
     const confirmRemove = window.confirm(
-      `Are you sure you want to remove the ${LOGO_TYPE_LABELS[logoType].toLowerCase()}?`
+      `Tem certeza que deseja remover o(a) ${LOGO_TYPE_LABELS[logoType].toLowerCase()}?`
     );
-    
+
     if (!confirmRemove) return;
 
     try {
-      setUploadState(prev => ({ 
-        ...prev, 
-        isUploading: true, 
-        error: null, 
-        success: null 
+      setUploadState(prev => ({
+        ...prev,
+        isUploading: true,
+        error: null,
+        success: null
       }));
 
       await onRemove(logoType);
@@ -307,24 +307,24 @@ export function LogoUploadComponent({
         isUploading: false,
         progress: 0,
         error: null,
-        success: `${LOGO_TYPE_LABELS[logoType]} removed successfully`
+        success: `${LOGO_TYPE_LABELS[logoType]} removida com sucesso`
       });
-      
+
       setPreviewUrl(null);
       setSelectedFile(null);
-      
+
       // Clear file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     } catch (error) {
       console.error('Logo removal failed:', error);
-      
-      let errorMessage = 'Failed to remove logo';
+
+      let errorMessage = 'Falha ao remover logo';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      
+
       setUploadState({
         isUploading: false,
         progress: 0,
@@ -361,7 +361,7 @@ export function LogoUploadComponent({
           {LOGO_TYPE_DESCRIPTIONS[logoType]}
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* Status Messages */}
         {uploadState.success && (
@@ -387,7 +387,7 @@ export function LogoUploadComponent({
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               <div className="space-y-1">
-                <div className="font-medium">Warnings:</div>
+                <div className="font-medium">Avisos:</div>
                 {validationState.warnings.map((warning, index) => (
                   <div key={index} className="text-sm">• {warning}</div>
                 ))}
@@ -400,10 +400,10 @@ export function LogoUploadComponent({
         {previewUrl && (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Current Logo:</span>
+              <span className="text-sm font-medium">Logo Atual:</span>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-xs">
-                  {selectedFile ? 'Preview' : 'Active'}
+                  {selectedFile ? 'Pré-visualização' : 'Ativo'}
                 </Badge>
                 {currentLogoUrl && !selectedFile && (
                   <Button
@@ -414,7 +414,7 @@ export function LogoUploadComponent({
                     className="h-6 px-2 text-xs"
                   >
                     <Trash2 className="h-3 w-3 mr-1" />
-                    Remove
+                    Remover
                   </Button>
                 )}
               </div>
@@ -438,8 +438,8 @@ export function LogoUploadComponent({
         <div
           className={`
             relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
-            ${isDragOver 
-              ? 'border-primary bg-primary/5' 
+            ${isDragOver
+              ? 'border-primary bg-primary/5'
               : 'border-muted-foreground/25 hover:border-muted-foreground/50'
             }
             ${uploadState.isUploading ? 'pointer-events-none opacity-50' : ''}
@@ -463,7 +463,7 @@ export function LogoUploadComponent({
             {uploadState.isUploading ? (
               <>
                 <Loader2 className="h-8 w-8 mx-auto animate-spin text-primary" />
-                <p className="text-sm font-medium">Uploading...</p>
+                <p className="text-sm font-medium">Enviando...</p>
                 <Progress value={uploadState.progress} className="w-full max-w-xs mx-auto" />
                 <p className="text-xs text-muted-foreground">{uploadState.progress}%</p>
               </>
@@ -472,10 +472,10 @@ export function LogoUploadComponent({
                 <Upload className="h-8 w-8 mx-auto text-muted-foreground" />
                 <div className="space-y-1">
                   <p className="text-sm font-medium">
-                    {isDragOver ? 'Drop your logo here' : 'Click to upload or drag and drop'}
+                    {isDragOver ? 'Solte seu logo aqui' : 'Clique para enviar ou arraste e solte'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {acceptedFormats.map(format => format.split('/')[1].toUpperCase()).join(', ')} up to {formatFileSize(maxFileSize)}
+                    {acceptedFormats.map(format => format.split('/')[1].toUpperCase()).join(', ')} até {formatFileSize(maxFileSize)}
                   </p>
                 </div>
               </>
@@ -526,12 +526,12 @@ export function LogoUploadComponent({
               {uploadState.isUploading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Uploading...
+                  Enviando...
                 </>
               ) : (
                 <>
                   <Upload className="h-4 w-4 mr-2" />
-                  Upload {LOGO_TYPE_LABELS[logoType]}
+                  Enviar {LOGO_TYPE_LABELS[logoType]}
                 </>
               )}
             </Button>
@@ -540,18 +540,18 @@ export function LogoUploadComponent({
 
         {/* File Requirements */}
         <div className="text-xs text-muted-foreground space-y-1">
-          <p><strong>Requirements:</strong></p>
+          <p><strong>Requisitos:</strong></p>
           <ul className="list-disc list-inside space-y-0.5 ml-2">
-            <li>Maximum file size: {formatFileSize(maxFileSize)}</li>
-            <li>Supported formats: {acceptedFormats.map(format => format.split('/')[1].toUpperCase()).join(', ')}</li>
+            <li>Tamanho máximo: {formatFileSize(maxFileSize)}</li>
+            <li>Formatos suportados: {acceptedFormats.map(format => format.split('/')[1].toUpperCase()).join(', ')}</li>
             {logoType === 'favicon' && (
-              <li>Recommended: 16x16, 32x32, or 48x48 pixels</li>
+              <li>Recomendado: 16x16, 32x32, ou 48x48 pixels</li>
             )}
             {logoType === 'login' && (
-              <li>Recommended: High resolution for better visibility</li>
+              <li>Recomendado: Alta resolução para melhor visibilidade</li>
             )}
             {logoType === 'sidebar' && (
-              <li>Recommended: Horizontal layout, max height 40px</li>
+              <li>Recomendado: Layout horizontal, altura max 40px</li>
             )}
           </ul>
         </div>

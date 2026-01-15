@@ -1,4 +1,4 @@
-import { ProfileSettings } from '@/components/perfil/profile-settings'
+import { ProfileTabs } from '@/components/perfil/profile-tabs'
 import { requireUser } from '@/lib/auth'
 
 export default async function PerfilPage() {
@@ -6,13 +6,7 @@ export default async function PerfilPage() {
 
   return (
     <div className="container mx-auto py-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-semibold">Meu perfil</h1>
-        <p className="text-muted-foreground">
-          Ajuste seus dados pessoais, senha e prepare seu avatar.
-        </p>
-      </div>
-      <ProfileSettings user={user} />
+      <ProfileTabs user={user} />
     </div>
   )
 }

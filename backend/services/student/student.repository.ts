@@ -1,12 +1,15 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from "@supabase/supabase-js";
 import {
   Student,
   CreateStudentInput,
   UpdateStudentInput,
   StudentCourseSummary,
-} from './student.types';
+} from "./student.types";
 
-import type { PaginationParams, PaginationMeta } from '@/types/shared/dtos/api-responses';
+import type {
+  PaginationParams,
+  PaginationMeta,
+} from "@/types/shared/dtos/api-responses";
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -25,9 +28,9 @@ export interface StudentRepository {
   findByEmpresa(empresaId: string): Promise<Student[]>;
 }
 
-const TABLE = 'alunos';
-const COURSE_LINK_TABLE = 'alunos_cursos';
-const COURSES_TABLE = 'cursos';
+const TABLE = "alunos";
+const COURSE_LINK_TABLE = "alunos_cursos";
+const COURSES_TABLE = "cursos";
 
 type StudentRow = {
   id: string;
@@ -62,7 +65,10 @@ type _CourseRow = {
 void (0 as unknown as _CourseLinkRow);
 void (0 as unknown as _CourseRow);
 
-function mapRow(row: StudentRow, courses: StudentCourseSummary[] = []): Student {
+function mapRow(
+  row: StudentRow,
+  courses: StudentCourseSummary[] = []
+): Student {
   return {
     id: row.id,
     fullName: row.nome_completo,
@@ -89,16 +95,25 @@ export class StudentRepositoryImpl implements StudentRepository {
   async list(params?: PaginationParams): Promise<PaginatedResult<Student>> {
     const page = params?.page ?? 1;
     const perPage = params?.perPage ?? 50;
-    const sortBy = params?.sortBy ?? 'nome_completo';
-    const sortOrder = params?.sortOrder === 'desc' ? false : true;
-    
+    const sortBy = params?.sortBy ?? "nome_completo";
+    const sortOrder = params?.sortOrder === "desc" ? false : true;
+
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
 
-    // Get total count
-    const { count, error: countError } = await this.client
+    let queryBuilder = this.client
       .from(TABLE)
-      .select('*', { count: 'exact', head: true });
+      .select("*", { count: "exact", head: true });
+
+    if (params?.query) {
+      const q = params.query;
+      queryBuilder = queryBuilder.or(
+        `nome_completo.ilike.%${q}%,email.ilike.%${q}%,numero_matricula.ilike.%${q}%`
+      );
+    }
+
+    // Get total count
+    const { count, error: countError } = await queryBuilder;
 
     if (countError) {
       throw new Error(`Failed to count students: ${countError.message}`);
@@ -108,11 +123,20 @@ export class StudentRepositoryImpl implements StudentRepository {
     const totalPages = Math.ceil(total / perPage);
 
     // Get paginated data
-    const { data, error } = await this.client
+    let dataQuery = this.client
       .from(TABLE)
-      .select('*')
+      .select("*")
       .order(sortBy, { ascending: sortOrder })
       .range(from, to);
+
+    if (params?.query) {
+      const q = params.query;
+      dataQuery = dataQuery.or(
+        `nome_completo.ilike.%${q}%,email.ilike.%${q}%,numero_matricula.ilike.%${q}%`
+      );
+    }
+
+    const { data, error } = await dataQuery;
 
     if (error) {
       throw new Error(`Failed to list students: ${error.message}`);
@@ -132,7 +156,11 @@ export class StudentRepositoryImpl implements StudentRepository {
   }
 
   async findById(id: string): Promise<Student | null> {
-    const { data, error } = await this.client.from(TABLE).select('*').eq('id', id).maybeSingle();
+    const { data, error } = await this.client
+      .from(TABLE)
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
 
     if (error) {
       throw new Error(`Failed to fetch student: ${error.message}`);
@@ -149,8 +177,8 @@ export class StudentRepositoryImpl implements StudentRepository {
   async findByEmail(email: string): Promise<Student | null> {
     const { data, error } = await this.client
       .from(TABLE)
-      .select('*')
-      .eq('email', email.toLowerCase())
+      .select("*")
+      .eq("email", email.toLowerCase())
       .maybeSingle();
 
     if (error) {
@@ -166,7 +194,11 @@ export class StudentRepositoryImpl implements StudentRepository {
   }
 
   async findByCpf(cpf: string): Promise<Student | null> {
-    const { data, error } = await this.client.from(TABLE).select('*').eq('cpf', cpf).maybeSingle();
+    const { data, error } = await this.client
+      .from(TABLE)
+      .select("*")
+      .eq("cpf", cpf)
+      .maybeSingle();
 
     if (error) {
       throw new Error(`Failed to fetch student by CPF: ${error.message}`);
@@ -180,15 +212,19 @@ export class StudentRepositoryImpl implements StudentRepository {
     return student ?? null;
   }
 
-  async findByEnrollmentNumber(enrollmentNumber: string): Promise<Student | null> {
+  async findByEnrollmentNumber(
+    enrollmentNumber: string
+  ): Promise<Student | null> {
     const { data, error } = await this.client
       .from(TABLE)
-      .select('*')
-      .eq('numero_matricula', enrollmentNumber)
+      .select("*")
+      .eq("numero_matricula", enrollmentNumber)
       .maybeSingle();
 
     if (error) {
-      throw new Error(`Failed to fetch student by enrollment number: ${error.message}`);
+      throw new Error(
+        `Failed to fetch student by enrollment number: ${error.message}`
+      );
     }
 
     if (!data) {
@@ -217,14 +253,16 @@ export class StudentRepositoryImpl implements StudentRepository {
 
     // O ID deve sempre ser fornecido (vem do auth.users criado no service)
     if (!payload.id) {
-      throw new Error('Student ID is required. User must be created in auth.users first.');
+      throw new Error(
+        "Student ID is required. User must be created in auth.users first."
+      );
     }
     insertData.id = payload.id;
 
     const { data, error } = await this.client
       .from(TABLE)
       .insert(insertData)
-      .select('*')
+      .select("*")
       .single();
 
     if (error) {
@@ -291,8 +329,8 @@ export class StudentRepositoryImpl implements StudentRepository {
     const { data, error } = await this.client
       .from(TABLE)
       .update(updateData)
-      .eq('id', id)
-      .select('*')
+      .eq("id", id)
+      .select("*")
       .single();
 
     if (error) {
@@ -308,7 +346,7 @@ export class StudentRepositoryImpl implements StudentRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.client.from(TABLE).delete().eq('id', id);
+    const { error } = await this.client.from(TABLE).delete().eq("id", id);
 
     if (error) {
       throw new Error(`Failed to delete student: ${error.message}`);
@@ -327,7 +365,7 @@ export class StudentRepositoryImpl implements StudentRepository {
   }
 
   private async fetchCourses(
-    studentIds: string[],
+    studentIds: string[]
   ): Promise<Map<string, StudentCourseSummary[]>> {
     const map = new Map<string, StudentCourseSummary[]>();
     if (!studentIds.length) {
@@ -336,29 +374,34 @@ export class StudentRepositoryImpl implements StudentRepository {
 
     const { data: links, error: linksError } = await this.client
       .from(COURSE_LINK_TABLE)
-      .select('aluno_id, curso_id')
-      .in('aluno_id', studentIds);
+      .select("aluno_id, curso_id")
+      .in("aluno_id", studentIds);
 
     if (linksError) {
       throw new Error(`Failed to fetch student courses: ${linksError.message}`);
     }
 
-    const courseIds = Array.from(new Set((links ?? []).map((link) => link.curso_id)));
+    const courseIds = Array.from(
+      new Set((links ?? []).map((link) => link.curso_id))
+    );
     if (!courseIds.length) {
       return map;
     }
 
     const { data: courses, error: courseError } = await this.client
       .from(COURSES_TABLE)
-      .select('id, nome')
-      .in('id', courseIds);
+      .select("id, nome")
+      .in("id", courseIds);
 
     if (courseError) {
       throw new Error(`Failed to fetch courses: ${courseError.message}`);
     }
 
     const courseLookup = new Map<string, StudentCourseSummary>(
-      (courses ?? []).map((course) => [course.id, { id: course.id, name: course.nome }]),
+      (courses ?? []).map((course) => [
+        course.id,
+        { id: course.id, name: course.nome },
+      ])
     );
 
     (links ?? []).forEach((link) => {
@@ -380,11 +423,13 @@ export class StudentRepositoryImpl implements StudentRepository {
     // Buscar cursos da empresa
     const { data: cursos, error: cursosError } = await this.client
       .from(COURSES_TABLE)
-      .select('id')
-      .eq('empresa_id', empresaId);
+      .select("id")
+      .eq("empresa_id", empresaId);
 
     if (cursosError) {
-      throw new Error(`Failed to fetch courses by empresa: ${cursosError.message}`);
+      throw new Error(
+        `Failed to fetch courses by empresa: ${cursosError.message}`
+      );
     }
 
     const cursoIds = (cursos ?? []).map((c: { id: string }) => c.id);
@@ -396,14 +441,20 @@ export class StudentRepositoryImpl implements StudentRepository {
     // Buscar alunos matriculados nesses cursos
     const { data: alunosCursos, error: alunosCursosError } = await this.client
       .from(COURSE_LINK_TABLE)
-      .select('aluno_id')
-      .in('curso_id', cursoIds);
+      .select("aluno_id")
+      .in("curso_id", cursoIds);
 
     if (alunosCursosError) {
-      throw new Error(`Failed to fetch students by empresa: ${alunosCursosError.message}`);
+      throw new Error(
+        `Failed to fetch students by empresa: ${alunosCursosError.message}`
+      );
     }
 
-    const alunoIds = Array.from(new Set((alunosCursos ?? []).map((ac: { aluno_id: string }) => ac.aluno_id)));
+    const alunoIds = Array.from(
+      new Set(
+        (alunosCursos ?? []).map((ac: { aluno_id: string }) => ac.aluno_id)
+      )
+    );
 
     if (!alunoIds.length) {
       return [];
@@ -411,9 +462,9 @@ export class StudentRepositoryImpl implements StudentRepository {
 
     const { data, error } = await this.client
       .from(TABLE)
-      .select('*')
-      .in('id', alunoIds)
-      .order('nome_completo', { ascending: true });
+      .select("*")
+      .in("id", alunoIds)
+      .order("nome_completo", { ascending: true });
 
     if (error) {
       throw new Error(`Failed to list students by empresa: ${error.message}`);
@@ -422,14 +473,19 @@ export class StudentRepositoryImpl implements StudentRepository {
     return this.attachCourses(data ?? []);
   }
 
-  private async setCourses(studentId: string, courseIds: string[]): Promise<void> {
+  private async setCourses(
+    studentId: string,
+    courseIds: string[]
+  ): Promise<void> {
     const { error: deleteError } = await this.client
       .from(COURSE_LINK_TABLE)
       .delete()
-      .eq('aluno_id', studentId);
+      .eq("aluno_id", studentId);
 
     if (deleteError) {
-      throw new Error(`Failed to clear student courses: ${deleteError.message}`);
+      throw new Error(
+        `Failed to clear student courses: ${deleteError.message}`
+      );
     }
 
     if (!courseIds || !courseIds.length) {
@@ -441,10 +497,13 @@ export class StudentRepositoryImpl implements StudentRepository {
       curso_id: courseId,
     }));
 
-    const { error: insertError } = await this.client.from(COURSE_LINK_TABLE).insert(rows);
+    const { error: insertError } = await this.client
+      .from(COURSE_LINK_TABLE)
+      .insert(rows);
     if (insertError) {
-      throw new Error(`Failed to link student to courses: ${insertError.message}`);
+      throw new Error(
+        `Failed to link student to courses: ${insertError.message}`
+      );
     }
   }
 }
-

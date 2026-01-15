@@ -8,10 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Eye, 
-  Save, 
-  CheckCircle, 
+import {
+  Eye,
+  Save,
+  CheckCircle,
   Loader2,
   Copy,
   Check,
@@ -64,7 +64,7 @@ function ColorInput({ label, value, onChange, description, required = false, dis
     setLocalValue(newValue);
     const valid = validateColor(newValue);
     setIsValid(valid);
-    
+
     if (valid) {
       onChange(newValue);
     }
@@ -117,7 +117,7 @@ function ColorInput({ label, value, onChange, description, required = false, dis
           </Button>
         )}
       </div>
-      
+
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Input
@@ -130,12 +130,12 @@ function ColorInput({ label, value, onChange, description, required = false, dis
             disabled={disabled}
             className={`pr-12 ${!isValid ? 'border-destructive' : ''}`}
           />
-          <div 
+          <div
             className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded border border-border"
             style={{ backgroundColor: isValid ? localValue : '#transparent' }}
           />
         </div>
-        
+
         <input
           type="color"
           value={isValid ? localValue : '#000000'}
@@ -144,13 +144,13 @@ function ColorInput({ label, value, onChange, description, required = false, dis
           className="w-10 h-9 rounded border border-border cursor-pointer disabled:cursor-not-allowed"
         />
       </div>
-      
+
       {description && (
         <p className="text-xs text-muted-foreground">{description}</p>
       )}
-      
+
       {!isValid && (
-        <p className="text-xs text-destructive">Please enter a valid hex color (e.g., #FF0000)</p>
+        <p className="text-xs text-destructive">Por favor, insira uma cor hexadecimal válida (ex: #FF0000)</p>
       )}
     </div>
   );
@@ -162,111 +162,111 @@ function ColorPreview({ colors, className = "" }: ColorPreviewProps) {
     <div className={`space-y-4 ${className}`}>
       <div className="grid grid-cols-2 gap-4">
         {/* Primary color preview */}
-        <div 
+        <div
           className="p-4 rounded-lg border"
-          style={{ 
+          style={{
             backgroundColor: colors.primaryColor,
             color: colors.primaryForeground,
             borderColor: colors.primaryColor
           }}
         >
-          <div className="font-medium">Primary</div>
-          <div className="text-sm opacity-90">Primary content</div>
+          <div className="font-medium">Primária</div>
+          <div className="text-sm opacity-90">Conteúdo primário</div>
         </div>
-        
+
         {/* Secondary color preview */}
-        <div 
+        <div
           className="p-4 rounded-lg border"
-          style={{ 
+          style={{
             backgroundColor: colors.secondaryColor,
             color: colors.secondaryForeground,
             borderColor: colors.secondaryColor
           }}
         >
-          <div className="font-medium">Secondary</div>
-          <div className="text-sm opacity-90">Secondary content</div>
+          <div className="font-medium">Secundária</div>
+          <div className="text-sm opacity-90">Conteúdo secundário</div>
         </div>
-        
+
         {/* Accent color preview */}
-        <div 
+        <div
           className="p-4 rounded-lg border"
-          style={{ 
+          style={{
             backgroundColor: colors.accentColor,
             color: colors.accentForeground,
             borderColor: colors.accentColor
           }}
         >
-          <div className="font-medium">Accent</div>
-          <div className="text-sm opacity-90">Accent content</div>
+          <div className="font-medium">Destaque</div>
+          <div className="text-sm opacity-90">Conteúdo destaque</div>
         </div>
-        
+
         {/* Muted color preview */}
-        <div 
+        <div
           className="p-4 rounded-lg border"
-          style={{ 
+          style={{
             backgroundColor: colors.mutedColor,
             color: colors.mutedForeground,
             borderColor: colors.mutedColor
           }}
         >
-          <div className="font-medium">Muted</div>
-          <div className="text-sm opacity-90">Muted content</div>
+          <div className="font-medium">Suave</div>
+          <div className="text-sm opacity-90">Conteúdo suave</div>
         </div>
       </div>
-      
+
       {/* Card preview */}
-      <div 
+      <div
         className="p-4 rounded-lg border"
-        style={{ 
+        style={{
           backgroundColor: colors.cardColor,
           color: colors.cardForeground,
           borderColor: colors.mutedColor
         }}
       >
-        <div className="font-medium mb-2">Card Example</div>
+        <div className="font-medium mb-2">Exemplo de Card</div>
         <div className="text-sm text-muted-foreground mb-3">
-          This is how cards will look with your color palette.
+          É assim que os cards aparecerão com sua paleta de cores.
         </div>
         <div className="flex gap-2">
-          <div 
+          <div
             className="px-3 py-1 rounded text-xs font-medium"
-            style={{ 
+            style={{
               backgroundColor: colors.primaryColor,
               color: colors.primaryForeground
             }}
           >
-            Primary Button
+            Botão Primário
           </div>
-          <div 
+          <div
             className="px-3 py-1 rounded text-xs font-medium border"
-            style={{ 
+            style={{
               borderColor: colors.primaryColor,
               color: colors.primaryColor
             }}
           >
-            Outline Button
+            Botão Outline
           </div>
         </div>
       </div>
-      
+
       {/* Sidebar preview */}
-      <div 
+      <div
         className="p-4 rounded-lg border"
-        style={{ 
+        style={{
           backgroundColor: colors.sidebarBackground,
           color: colors.sidebarForeground,
           borderColor: colors.mutedColor
         }}
       >
-        <div className="font-medium mb-2">Sidebar Preview</div>
-        <div 
+        <div className="font-medium mb-2">Visualização da Barra Lateral</div>
+        <div
           className="px-2 py-1 rounded text-sm"
-          style={{ 
+          style={{
             backgroundColor: colors.sidebarPrimary,
             color: colors.sidebarPrimaryForeground
           }}
         >
-          Active Menu Item
+          Item de Menu Ativo
         </div>
       </div>
     </div>
@@ -313,7 +313,7 @@ export function ColorPaletteEditor({
   const presetPalettes: PresetPalette[] = useMemo(() => [
     {
       id: 'default-light',
-      name: 'Default Light',
+      name: 'Padrão Claro',
       category: 'default',
       colors: {
         primaryColor: '#0f172a',
@@ -328,7 +328,7 @@ export function ColorPaletteEditor({
     },
     {
       id: 'default-dark',
-      name: 'Default Dark',
+      name: 'Padrão Escuro',
       category: 'default',
       colors: {
         primaryColor: '#f8fafc',
@@ -343,7 +343,7 @@ export function ColorPaletteEditor({
     },
     {
       id: 'brand-blue',
-      name: 'Corporate Blue',
+      name: 'Azul Corporativo',
       category: 'brand',
       colors: {
         primaryColor: '#1e40af',
@@ -358,7 +358,7 @@ export function ColorPaletteEditor({
     },
     {
       id: 'brand-green',
-      name: 'Nature Green',
+      name: 'Verde Natureza',
       category: 'brand',
       colors: {
         primaryColor: '#059669',
@@ -373,7 +373,7 @@ export function ColorPaletteEditor({
     },
     {
       id: 'brand-purple',
-      name: 'Creative Purple',
+      name: 'Roxo Criativo',
       category: 'brand',
       colors: {
         primaryColor: '#7c3aed',
@@ -425,15 +425,15 @@ export function ColorPaletteEditor({
   // Validation function
   const validatePalette = useCallback((): string[] => {
     const errors: string[] = [];
-    
+
     if (!paletteData.name.trim()) {
-      errors.push('Palette name is required');
+      errors.push('Nome da paleta é obrigatório');
     }
-    
+
     if (paletteData.name.length > 100) {
-      errors.push('Palette name must be less than 100 characters');
+      errors.push('Nome da paleta deve ter menos de 100 caracteres');
     }
-    
+
     // Validate all color fields are valid hex colors
     const colorFields = [
       'primaryColor', 'primaryForeground', 'secondaryColor', 'secondaryForeground',
@@ -442,16 +442,16 @@ export function ColorPaletteEditor({
       'destructiveColor', 'destructiveForeground', 'sidebarBackground',
       'sidebarForeground', 'sidebarPrimary', 'sidebarPrimaryForeground'
     ];
-    
+
     const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-    
+
     for (const field of colorFields) {
       const value = paletteData[field as keyof CreateColorPaletteRequest] as string;
       if (!hexRegex.test(value)) {
-        errors.push(`${field.replace(/([A-Z])/g, ' $1').toLowerCase()} must be a valid hex color`);
+        errors.push(`${field.replace(/([A-Z])/g, ' $1').toLowerCase()} deve ser uma cor hexadecimal válida`);
       }
     }
-    
+
     return errors;
   }, [paletteData]);
 
@@ -487,7 +487,7 @@ export function ColorPaletteEditor({
           secondaryOnBackground: 0,
           accentOnBackground: 0
         },
-        warnings: ['Failed to validate accessibility. Please check your colors manually.']
+        warnings: ['Falha ao validar acessibilidade. Por favor, verifique suas cores manualmente.']
       });
     } finally {
       setIsValidating(false);
@@ -498,20 +498,20 @@ export function ColorPaletteEditor({
   const handleSave = useCallback(async () => {
     try {
       setIsSaving(true);
-      
+
       // Validate before saving
       const errors = validatePalette();
       setValidationErrors(errors);
-      
+
       if (errors.length > 0) {
         return;
       }
-      
+
       await onSave(paletteData);
-      
+
     } catch (error) {
       console.error('Failed to save color palette:', error);
-      setValidationErrors(['Failed to save color palette. Please try again.']);
+      setValidationErrors(['Falha ao salvar paleta de cores. Por favor, tente novamente.']);
     } finally {
       setIsSaving(false);
     }
@@ -533,12 +533,12 @@ export function ColorPaletteEditor({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold">Color Palette Editor</h3>
+          <h3 className="text-lg font-semibold">Editor de Paleta de Cores</h3>
           <p className="text-sm text-muted-foreground">
-            Create and customize your brand&apos;s color palette
+            Crie e personalize a paleta de cores da sua marca
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Button
             onClick={togglePreview}
@@ -547,9 +547,9 @@ export function ColorPaletteEditor({
             className="gap-2"
           >
             <Eye className="h-4 w-4" />
-            {previewMode ? 'Exit Preview' : 'Preview'}
+            {previewMode ? 'Sair da Visualização' : 'Visualizar'}
           </Button>
-          
+
           <Button
             onClick={handleValidateAccessibility}
             variant="outline"
@@ -562,7 +562,7 @@ export function ColorPaletteEditor({
             ) : (
               <CheckCircle className="h-4 w-4" />
             )}
-            Validate Accessibility
+            Validar Acessibilidade
           </Button>
         </div>
       </div>
@@ -573,7 +573,7 @@ export function ColorPaletteEditor({
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <div className="space-y-1">
-              <div className="font-medium">Please fix the following errors:</div>
+              <div className="font-medium">Por favor, corrija os seguintes erros:</div>
               {validationErrors.map((error, index) => (
                 <div key={index} className="text-sm">• {error}</div>
               ))}
@@ -593,27 +593,27 @@ export function ColorPaletteEditor({
           <AlertDescription>
             <div className="space-y-2">
               <div className="font-medium">
-                Accessibility Report: {accessibilityReport.isCompliant ? 'Compliant' : 'Issues Found'}
+                Relatório de Acessibilidade: {accessibilityReport.isCompliant ? 'Em conformidade' : 'Problemas encontrados'}
               </div>
-              
+
               <div className="text-sm space-y-1">
-                <div>Primary on Background: {accessibilityReport.contrastRatios.primaryOnBackground.toFixed(2)}:1</div>
-                <div>Secondary on Background: {accessibilityReport.contrastRatios.secondaryOnBackground.toFixed(2)}:1</div>
-                <div>Accent on Background: {accessibilityReport.contrastRatios.accentOnBackground.toFixed(2)}:1</div>
+                <div>Primária no Fundo: {accessibilityReport.contrastRatios.primaryOnBackground.toFixed(2)}:1</div>
+                <div>Secundária no Fundo: {accessibilityReport.contrastRatios.secondaryOnBackground.toFixed(2)}:1</div>
+                <div>Destaque no Fundo: {accessibilityReport.contrastRatios.accentOnBackground.toFixed(2)}:1</div>
               </div>
-              
+
               {accessibilityReport.recommendations && accessibilityReport.recommendations.length > 0 && (
                 <div className="text-sm">
-                  <div className="font-medium">Recommendations:</div>
+                  <div className="font-medium">Recomendações:</div>
                   {accessibilityReport.recommendations.map((rec, index) => (
                     <div key={index}>• {rec}</div>
                   ))}
                 </div>
               )}
-              
+
               {accessibilityReport.warnings && accessibilityReport.warnings.length > 0 && (
                 <div className="text-sm">
-                  <div className="font-medium">Warnings:</div>
+                  <div className="font-medium">Avisos:</div>
                   {accessibilityReport.warnings.map((warning, index) => (
                     <div key={index}>• {warning}</div>
                   ))}
@@ -627,25 +627,25 @@ export function ColorPaletteEditor({
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="editor">Editor</TabsTrigger>
-          <TabsTrigger value="presets">Presets</TabsTrigger>
-          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="presets">Predefinições</TabsTrigger>
+          <TabsTrigger value="preview">Visualizar</TabsTrigger>
         </TabsList>
 
         <TabsContent value="editor" className="space-y-6 mt-6">
           {/* Palette Name */}
           <Card>
             <CardHeader>
-              <CardTitle>Palette Information</CardTitle>
+              <CardTitle>Informações da Paleta</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="palette-name">Palette Name *</Label>
+                  <Label htmlFor="palette-name">Nome da Paleta *</Label>
                   <Input
                     id="palette-name"
                     value={paletteData.name}
                     onChange={(e) => updatePaletteData('name', e.target.value)}
-                    placeholder="Enter palette name"
+                    placeholder="Digite o nome da paleta"
                     className="mt-1"
                   />
                 </div>
@@ -656,25 +656,25 @@ export function ColorPaletteEditor({
           {/* Primary Colors */}
           <Card>
             <CardHeader>
-              <CardTitle>Primary Colors</CardTitle>
+              <CardTitle>Cores Primárias</CardTitle>
               <CardDescription>
-                Main brand colors used for primary actions and emphasis
+                Principais cores da marca usadas para ações primárias e ênfase
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ColorInput
-                  label="Primary Color"
+                  label="Cor Primária"
                   value={paletteData.primaryColor}
                   onChange={(value) => updatePaletteData('primaryColor', value)}
-                  description="Main brand color"
+                  description="Cor principal da marca"
                   required
                 />
                 <ColorInput
-                  label="Primary Foreground"
+                  label="Texto Primário"
                   value={paletteData.primaryForeground}
                   onChange={(value) => updatePaletteData('primaryForeground', value)}
-                  description="Text color on primary background"
+                  description="Cor do texto no fundo primário"
                   required
                 />
               </div>
@@ -684,25 +684,25 @@ export function ColorPaletteEditor({
           {/* Secondary Colors */}
           <Card>
             <CardHeader>
-              <CardTitle>Secondary Colors</CardTitle>
+              <CardTitle>Cores Secundárias</CardTitle>
               <CardDescription>
-                Supporting colors for secondary actions and content
+                Cores de suporte para ações secundárias e conteúdo
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ColorInput
-                  label="Secondary Color"
+                  label="Cor Secundária"
                   value={paletteData.secondaryColor}
                   onChange={(value) => updatePaletteData('secondaryColor', value)}
-                  description="Secondary brand color"
+                  description="Cor secundária da marca"
                   required
                 />
                 <ColorInput
-                  label="Secondary Foreground"
+                  label="Texto Secundário"
                   value={paletteData.secondaryForeground}
                   onChange={(value) => updatePaletteData('secondaryForeground', value)}
-                  description="Text color on secondary background"
+                  description="Cor do texto no fundo secundário"
                   required
                 />
               </div>
@@ -712,25 +712,25 @@ export function ColorPaletteEditor({
           {/* Accent Colors */}
           <Card>
             <CardHeader>
-              <CardTitle>Accent Colors</CardTitle>
+              <CardTitle>Cores de Destaque</CardTitle>
               <CardDescription>
-                Accent colors for highlights and special elements
+                Cores de destaque para realces e elementos especiais
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ColorInput
-                  label="Accent Color"
+                  label="Cor de Destaque"
                   value={paletteData.accentColor}
                   onChange={(value) => updatePaletteData('accentColor', value)}
-                  description="Accent/highlight color"
+                  description="Cor de destaque/realce"
                   required
                 />
                 <ColorInput
-                  label="Accent Foreground"
+                  label="Texto de Destaque"
                   value={paletteData.accentForeground}
                   onChange={(value) => updatePaletteData('accentForeground', value)}
-                  description="Text color on accent background"
+                  description="Cor do texto no fundo de destaque"
                   required
                 />
               </div>
@@ -740,39 +740,39 @@ export function ColorPaletteEditor({
           {/* Background Colors */}
           <Card>
             <CardHeader>
-              <CardTitle>Background Colors</CardTitle>
+              <CardTitle>Cores de Fundo</CardTitle>
               <CardDescription>
-                Base colors for backgrounds and surfaces
+                Cores base para fundos e superfícies
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ColorInput
-                  label="Background Color"
+                  label="Cor de Fundo"
                   value={paletteData.backgroundColor}
                   onChange={(value) => updatePaletteData('backgroundColor', value)}
-                  description="Main background color"
+                  description="Cor de fundo principal"
                   required
                 />
                 <ColorInput
-                  label="Foreground Color"
+                  label="Cor do Texto"
                   value={paletteData.foregroundColor}
                   onChange={(value) => updatePaletteData('foregroundColor', value)}
-                  description="Main text color"
+                  description="Cor do texto principal"
                   required
                 />
                 <ColorInput
-                  label="Card Color"
+                  label="Cor do Card"
                   value={paletteData.cardColor}
                   onChange={(value) => updatePaletteData('cardColor', value)}
-                  description="Card background color"
+                  description="Cor de fundo dos cards"
                   required
                 />
                 <ColorInput
-                  label="Card Foreground"
+                  label="Texto do Card"
                   value={paletteData.cardForeground}
                   onChange={(value) => updatePaletteData('cardForeground', value)}
-                  description="Text color on cards"
+                  description="Cor do texto nos cards"
                   required
                 />
               </div>
@@ -782,25 +782,25 @@ export function ColorPaletteEditor({
           {/* Muted Colors */}
           <Card>
             <CardHeader>
-              <CardTitle>Muted Colors</CardTitle>
+              <CardTitle>Cores Suaves</CardTitle>
               <CardDescription>
-                Subtle colors for less prominent elements
+                Cores sutis para elementos menos proeminentes
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ColorInput
-                  label="Muted Color"
+                  label="Cor Suave"
                   value={paletteData.mutedColor}
                   onChange={(value) => updatePaletteData('mutedColor', value)}
-                  description="Muted background color"
+                  description="Cor de fundo suave"
                   required
                 />
                 <ColorInput
-                  label="Muted Foreground"
+                  label="Texto Suave"
                   value={paletteData.mutedForeground}
                   onChange={(value) => updatePaletteData('mutedForeground', value)}
-                  description="Muted text color"
+                  description="Cor do texto suave"
                   required
                 />
               </div>
@@ -810,25 +810,25 @@ export function ColorPaletteEditor({
           {/* System Colors */}
           <Card>
             <CardHeader>
-              <CardTitle>System Colors</CardTitle>
+              <CardTitle>Cores do Sistema</CardTitle>
               <CardDescription>
-                Colors for system states and feedback
+                Cores para estados do sistema e feedback
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ColorInput
-                  label="Destructive Color"
+                  label="Cor de Erro/Perigo"
                   value={paletteData.destructiveColor}
                   onChange={(value) => updatePaletteData('destructiveColor', value)}
-                  description="Error/danger color"
+                  description="Cor para erros e ações destrutivas"
                   required
                 />
                 <ColorInput
-                  label="Destructive Foreground"
+                  label="Texto de Erro/Perigo"
                   value={paletteData.destructiveForeground}
                   onChange={(value) => updatePaletteData('destructiveForeground', value)}
-                  description="Text color on destructive background"
+                  description="Cor do texto no fundo de erro"
                   required
                 />
               </div>
@@ -838,39 +838,39 @@ export function ColorPaletteEditor({
           {/* Sidebar Colors */}
           <Card>
             <CardHeader>
-              <CardTitle>Sidebar Colors</CardTitle>
+              <CardTitle>Cores da Barra Lateral</CardTitle>
               <CardDescription>
-                Specific colors for sidebar navigation
+                Cores específicas para a navegação lateral
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ColorInput
-                  label="Sidebar Background"
+                  label="Fundo da Barra Lateral"
                   value={paletteData.sidebarBackground}
                   onChange={(value) => updatePaletteData('sidebarBackground', value)}
-                  description="Sidebar background color"
+                  description="Cor de fundo da barra lateral"
                   required
                 />
                 <ColorInput
-                  label="Sidebar Foreground"
+                  label="Texto da Barra Lateral"
                   value={paletteData.sidebarForeground}
                   onChange={(value) => updatePaletteData('sidebarForeground', value)}
-                  description="Sidebar text color"
+                  description="Cor do texto da barra lateral"
                   required
                 />
                 <ColorInput
-                  label="Sidebar Primary"
+                  label="Cor Primária da Barra Lateral"
                   value={paletteData.sidebarPrimary}
                   onChange={(value) => updatePaletteData('sidebarPrimary', value)}
-                  description="Active sidebar item color"
+                  description="Cor do item ativo na barra lateral"
                   required
                 />
                 <ColorInput
-                  label="Sidebar Primary Foreground"
+                  label="Texto Primário da Barra Lateral"
                   value={paletteData.sidebarPrimaryForeground}
                   onChange={(value) => updatePaletteData('sidebarPrimaryForeground', value)}
-                  description="Active sidebar item text color"
+                  description="Cor do texto ativo na barra lateral"
                   required
                 />
               </div>
@@ -881,16 +881,16 @@ export function ColorPaletteEditor({
         <TabsContent value="presets" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Color Palette Presets</CardTitle>
+              <CardTitle>Predefinições de Paletas</CardTitle>
               <CardDescription>
-                Choose from predefined color palettes or use them as starting points
+                Escolha entre paletas predefinidas ou use-as como ponto de partida
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 {/* Default Presets */}
                 <div>
-                  <h4 className="font-medium mb-3">Default Presets</h4>
+                  <h4 className="font-medium mb-3">Padrão</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {presetPalettes.filter(p => p.category === 'default').map((preset) => (
                       <Card key={preset.id} className="cursor-pointer hover:shadow-md transition-shadow">
@@ -902,7 +902,7 @@ export function ColorPaletteEditor({
                               size="sm"
                               variant="outline"
                             >
-                              Apply
+                              Aplicar
                             </Button>
                           </div>
                           <div className="flex gap-2">
@@ -925,7 +925,7 @@ export function ColorPaletteEditor({
 
                 {/* Brand Presets */}
                 <div>
-                  <h4 className="font-medium mb-3">Brand Presets</h4>
+                  <h4 className="font-medium mb-3">Marcas</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {presetPalettes.filter(p => p.category === 'brand').map((preset) => (
                       <Card key={preset.id} className="cursor-pointer hover:shadow-md transition-shadow">
@@ -937,7 +937,7 @@ export function ColorPaletteEditor({
                               size="sm"
                               variant="outline"
                             >
-                              Apply
+                              Aplicar
                             </Button>
                           </div>
                           <div className="flex gap-2">
@@ -963,9 +963,9 @@ export function ColorPaletteEditor({
         <TabsContent value="preview" className="space-y-6 mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>Color Palette Preview</CardTitle>
+              <CardTitle>Visualização da Paleta de Cores</CardTitle>
               <CardDescription>
-                See how your color palette will look in the interface
+                Veja como sua paleta de cores ficará na interface
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -987,7 +987,7 @@ export function ColorPaletteEditor({
           ) : (
             <Save className="h-4 w-4" />
           )}
-          Save Color Palette
+          Salvar Paleta de Cores
         </Button>
       </div>
     </div>

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { useToast } from '@/hooks/use-toast';
 import { formatBRPhone, formatCNPJ } from '@/lib/br';
 import { createClient } from '@/lib/client';
@@ -50,19 +50,19 @@ export default function EmpresaClientPage() {
           'Authorization': `Bearer ${session.access_token}`,
         },
       });
-      
+
       if (!profileResponse.ok) {
         throw new Error('Erro ao buscar dados do usuário');
       }
       const userData = await profileResponse.json();
-      
+
       if (userData.empresaId) {
         const empresaResponse = await fetch(`/api/empresas/${userData.empresaId}`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
           },
         });
-        
+
         if (empresaResponse.ok) {
           const empresaData = await empresaResponse.json();
           setEmpresa(empresaData);
@@ -114,7 +114,7 @@ export default function EmpresaClientPage() {
         emailContato: formData.emailContato?.trim() || undefined,
         telefone: formData.telefone?.trim() || undefined,
       };
-      
+
       // Normalizar CNPJ se preenchido
       if (formData.cnpj && formData.cnpj.trim()) {
         const cnpjClean = formData.cnpj.replace(/\D/g, '');
@@ -203,79 +203,78 @@ export default function EmpresaClientPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Configurações da Empresa</CardTitle>
-          <CardDescription>
-            Gerencie as informações básicas da sua empresa
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="nome">Nome da Empresa</Label>
-            <Input
-              id="nome"
-              value={formData.nome}
-              onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
-            />
-          </div>
+    <div className="container mx-auto py-8 space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Configurações da Empresa</h1>
+        <p className="text-muted-foreground">
+          Gerencie as informações básicas da sua empresa
+        </p>
+      </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="cnpj">CNPJ (Opcional)</Label>
-            <Input
-              id="cnpj"
-              value={formData.cnpj}
-              onChange={(e) => {
-                // Normalizar para apenas dígitos e formatar
-                const digits = e.target.value.replace(/\D/g, '');
-                const formatted = formatCNPJ(digits);
-                setFormData({ ...formData, cnpj: formatted });
-              }}
-              inputMode="numeric"
-              maxLength={18}
-              placeholder="00.000.000/0000-00"
-              pattern="^[0-9./-]*$"
-            />
-          </div>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="nome">Nome da Empresa</Label>
+          <Input
+            id="nome"
+            value={formData.nome}
+            onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="emailContato">Email de Contato</Label>
-            <Input
-              id="emailContato"
-              type="email"
-              value={formData.emailContato}
-              onChange={(e) => setFormData({ ...formData, emailContato: e.target.value })}
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="cnpj">CNPJ (Opcional)</Label>
+          <Input
+            id="cnpj"
+            value={formData.cnpj}
+            onChange={(e) => {
+              // Normalizar para apenas dígitos e formatar
+              const digits = e.target.value.replace(/\D/g, '');
+              const formatted = formatCNPJ(digits);
+              setFormData({ ...formData, cnpj: formatted });
+            }}
+            inputMode="numeric"
+            maxLength={18}
+            placeholder="00.000.000/0000-00"
+            pattern="^[0-9./-]*$"
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="telefone">Telefone</Label>
-            <Input
-              id="telefone"
-              value={formatBRPhone(formData.telefone)}
-              onChange={(e) => setFormData({ ...formData, telefone: formatBRPhone(e.target.value) })}
-              inputMode="numeric"
-              maxLength={15}
-              placeholder="(11) 99999-9999"
-              pattern="^[0-9()\\s+-]*$"
-            />
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="emailContato">Email de Contato</Label>
+          <Input
+            id="emailContato"
+            type="email"
+            value={formData.emailContato}
+            onChange={(e) => setFormData({ ...formData, emailContato: e.target.value })}
+          />
+        </div>
 
-          <div className="space-y-2">
-            <Label>Plano</Label>
-            <div className="text-sm text-muted-foreground capitalize">
-              {empresa.plano}
-            </div>
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="telefone">Telefone</Label>
+          <Input
+            id="telefone"
+            value={formatBRPhone(formData.telefone)}
+            onChange={(e) => setFormData({ ...formData, telefone: formatBRPhone(e.target.value) })}
+            inputMode="numeric"
+            maxLength={15}
+            placeholder="(11) 99999-9999"
+            pattern="^[0-9()\\s+-]*$"
+          />
+        </div>
 
-          <div className="flex justify-end gap-2">
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? 'Salvando...' : 'Salvar Alterações'}
-            </Button>
+        <div className="space-y-2">
+          <Label>Plano</Label>
+          <div className="text-sm text-muted-foreground capitalize">
+            {empresa.plano}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button onClick={handleSave} disabled={saving}>
+            {saving ? 'Salvando...' : 'Salvar Alterações'}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

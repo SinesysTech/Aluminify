@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { CalendarDays, Clock, CheckCircle, XCircle, TrendingUp } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -143,69 +143,69 @@ export default async function StatsPage() {
 
       {/* Overview Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Este Mes</CardTitle>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+            <h3 className="tracking-tight text-sm font-medium">Este Mes</h3>
             <CalendarDays className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="p-6 pt-0">
             <div className="text-2xl font-bold">{stats.currentMonth.total}</div>
             <p className="text-xs text-muted-foreground">
               {growth >= 0 ? '+' : ''}{growth}% em relacao ao mes anterior
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Taxa de Confirmacao</CardTitle>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+            <h3 className="tracking-tight text-sm font-medium">Taxa de Confirmacao</h3>
             <CheckCircle className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="p-6 pt-0">
             <div className="text-2xl font-bold">{confirmationRate}%</div>
             <p className="text-xs text-muted-foreground">
               {stats.allTime.confirmados + stats.allTime.concluidos} de {stats.allTime.total} agendamentos
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Taxa de Cancelamento</CardTitle>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+            <h3 className="tracking-tight text-sm font-medium">Taxa de Cancelamento</h3>
             <XCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="p-6 pt-0">
             <div className="text-2xl font-bold">{cancellationRate}%</div>
             <p className="text-xs text-muted-foreground">
               {stats.allTime.cancelados} cancelados
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Horario Popular</CardTitle>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-row items-center justify-between space-y-0 p-6 pb-2">
+            <h3 className="tracking-tight text-sm font-medium">Horario Popular</h3>
             <Clock className="h-4 w-4 text-amber-500" />
-          </CardHeader>
-          <CardContent>
+          </div>
+          <div className="p-6 pt-0">
             <div className="text-2xl font-bold">
               {stats.popularHour.toString().padStart(2, '0')}:00
             </div>
             <p className="text-xs text-muted-foreground">
               Horario mais procurado
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Detailed Stats */}
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Este Mes vs Mes Anterior</CardTitle>
-            <CardDescription>Comparacao de agendamentos</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-6">
+            <h3 className="font-semibold leading-none tracking-tight">Este Mes vs Mes Anterior</h3>
+            <p className="text-sm text-muted-foreground">Comparacao de agendamentos</p>
+          </div>
+          <div className="p-6 pt-0">
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Total</span>
@@ -236,15 +236,15 @@ export default async function StatsPage() {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Ultimos 6 Meses</CardTitle>
-            <CardDescription>Evolucao mensal dos agendamentos</CardDescription>
-          </CardHeader>
-          <CardContent>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-6">
+            <h3 className="font-semibold leading-none tracking-tight">Ultimos 6 Meses</h3>
+            <p className="text-sm text-muted-foreground">Evolucao mensal dos agendamentos</p>
+          </div>
+          <div className="p-6 pt-0">
             {stats.monthlyData.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nenhum dado disponivel</p>
             ) : (
@@ -265,20 +265,20 @@ export default async function StatsPage() {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* All Time Stats */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+        <div className="flex flex-col space-y-1.5 p-6">
+          <h3 className="font-semibold leading-none tracking-tight flex items-center gap-2">
             <TrendingUp className="h-5 w-5" />
             Resumo Geral
-          </CardTitle>
-          <CardDescription>Estatisticas desde o inicio</CardDescription>
-        </CardHeader>
-        <CardContent>
+          </h3>
+          <p className="text-sm text-muted-foreground">Estatisticas desde o inicio</p>
+        </div>
+        <div className="p-6 pt-0">
           <div className="grid gap-4 md:grid-cols-5">
             <div className="text-center p-4 rounded-lg bg-muted">
               <div className="text-2xl font-bold">{stats.allTime.total}</div>
@@ -301,8 +301,8 @@ export default async function StatsPage() {
               <p className="text-xs text-muted-foreground">Cancelados</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }

@@ -6,7 +6,6 @@ import { createClient } from '@/lib/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/components/providers/user-provider';
 
@@ -42,7 +41,7 @@ export default function ProfessorNovaEmpresaPage() {
       try {
         const supabase = createClient();
         const { data: { user: authUser } } = await supabase.auth.getUser();
-        
+
         if (authUser) {
           const { data: professor } = await supabase
             .from('professores')
@@ -73,7 +72,7 @@ export default function ProfessorNovaEmpresaPage() {
 
   async function handleCreateEmpresa() {
     console.log('[Criar Empresa] Iniciando criação...', { formData });
-    
+
     // Validação básica
     if (!formData.nome.trim()) {
       toast({
@@ -103,7 +102,7 @@ export default function ProfessorNovaEmpresaPage() {
 
       const cnpjDigits = formData.cnpj.replace(/\D/g, '');
       const cnpjToSend = cnpjDigits.length === 0 ? undefined : cnpjDigits;
-      
+
       if (cnpjToSend && cnpjToSend.length !== 14) {
         throw new Error('CNPJ deve ter 14 dígitos (ou deixe em branco)');
       }
@@ -134,7 +133,7 @@ export default function ProfessorNovaEmpresaPage() {
       if (!response.ok) {
         const err = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
         console.error('[Criar Empresa] Erro na API:', err);
-        
+
         // Se o erro for 409 (já tem empresa), redirecionar
         if (response.status === 409) {
           toast({
@@ -147,7 +146,7 @@ export default function ProfessorNovaEmpresaPage() {
           }, 1500);
           return;
         }
-        
+
         throw new Error(err.error || `Erro ao criar empresa (${response.status})`);
       }
 
@@ -193,14 +192,15 @@ export default function ProfessorNovaEmpresaPage() {
 
   return (
     <div className="container mx-auto py-8 max-w-xl">
-      <Card>
-        <CardHeader>
-          <CardTitle>Cadastrar sua Empresa</CardTitle>
-          <CardDescription>
+      <div className="container mx-auto py-8 max-w-xl space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Cadastrar sua Empresa</h1>
+          <p className="text-muted-foreground">
             Para continuar, crie sua empresa e você será definido como administrador.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+          </p>
+        </div>
+
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="nome">Nome da Empresa *</Label>
             <Input
@@ -249,20 +249,20 @@ export default function ProfessorNovaEmpresaPage() {
             />
           </div>
 
-          <Button 
+          <Button
             onClick={(e) => {
               e.preventDefault();
               console.log('[Criar Empresa] Botão clicado');
               handleCreateEmpresa();
-            }} 
-            className="w-full" 
+            }}
+            className="w-full"
             disabled={loading || !formData.nome.trim()}
             type="button"
           >
             {loading ? 'Criando...' : 'Criar Empresa'}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

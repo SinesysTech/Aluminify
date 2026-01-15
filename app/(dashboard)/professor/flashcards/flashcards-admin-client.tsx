@@ -1,14 +1,9 @@
+
 'use client'
 
 import * as React from 'react'
 import { createClient } from '@/lib/client'
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -103,9 +98,7 @@ type Modulo = {
 
 
 // IDs estáveis para evitar erro de hidratação
-const FILTRO_DISCIPLINA_SELECT_ID = 'filtro-disciplina-flashcards'
-const FILTRO_FRENTE_SELECT_ID = 'filtro-frente-flashcards'
-const FILTRO_MODULO_SELECT_ID = 'filtro-modulo-flashcards'
+
 const CREATE_DISCIPLINA_SELECT_ID = 'create-disciplina-flashcards'
 const CREATE_FRENTE_SELECT_ID = 'create-frente-flashcards'
 const CREATE_MODULO_SELECT_ID = 'create-modulo-flashcards'
@@ -116,7 +109,7 @@ const EDIT_MODULO_SELECT_ID = 'edit-modulo-flashcards'
 export default function FlashcardsAdminClient() {
   const supabase = createClient()
 
-  const [mounted, setMounted] = React.useState(false)
+
   const [flashcards, setFlashcards] = React.useState<Flashcard[]>([])
   const [total, setTotal] = React.useState(0)
   const [loading, setLoading] = React.useState(false)
@@ -170,7 +163,7 @@ export default function FlashcardsAdminClient() {
       if (!(init?.body instanceof FormData)) {
         headers.set('Content-Type', 'application/json')
       }
-      headers.set('Authorization', `Bearer ${session.access_token}`)
+      headers.set('Authorization', `Bearer ${session.access_token} `)
 
       return fetch(input, {
         ...init,
@@ -312,7 +305,7 @@ export default function FlashcardsAdminClient() {
         page
       })
 
-      const res = await fetchWithAuth(`/api/flashcards?${params.toString()}`)
+      const res = await fetchWithAuth(`/ api / flashcards ? ${params.toString()} `)
 
       // Verificar o content-type e tentar parsear o JSON
       const contentType = res.headers.get('content-type')
@@ -402,7 +395,7 @@ export default function FlashcardsAdminClient() {
             errorMessage = `Erro do servidor: ${responseText.substring(0, 200)}`
           }
         } else {
-          errorMessage = `Erro ao carregar flashcards (${res.status} ${res.statusText})`
+          errorMessage = `Erro ao carregar flashcards(${res.status} ${res.statusText})`
         }
 
         // Limpar mensagem de erro se ainda estiver mal formatada
@@ -422,7 +415,7 @@ export default function FlashcardsAdminClient() {
 
         // Garantir que a mensagem não esteja vazia ou muito longa
         if (!errorMessage || errorMessage.trim().length === 0) {
-          errorMessage = `Erro ao carregar flashcards (${res.status})`
+          errorMessage = `Erro ao carregar flashcards(${res.status})`
         }
         if (errorMessage.length > 500) {
           errorMessage = errorMessage.substring(0, 500) + '...'
@@ -543,7 +536,7 @@ export default function FlashcardsAdminClient() {
       setSaving(true)
       setError(null)
 
-      const res = await fetchWithAuth(`/api/flashcards/${selectedFlashcard.id}`, {
+      const res = await fetchWithAuth(`/ api / flashcards / ${selectedFlashcard.id} `, {
         method: 'PUT',
         body: JSON.stringify({
           moduloId: formModuloId,
@@ -578,7 +571,7 @@ export default function FlashcardsAdminClient() {
       setSaving(true)
       setError(null)
 
-      const res = await fetchWithAuth(`/api/flashcards/${selectedFlashcard.id}`, {
+      const res = await fetchWithAuth(`/ api / flashcards / ${selectedFlashcard.id} `, {
         method: 'DELETE',
       })
 
@@ -606,7 +599,7 @@ export default function FlashcardsAdminClient() {
 
       // Deletar todos os flashcards selecionados
       const deletePromises = Array.from(selectedIds).map((id) =>
-        fetchWithAuth(`/api/flashcards/${id}`, {
+        fetchWithAuth(`/ api / flashcards / ${id} `, {
           method: 'DELETE',
         })
       )
@@ -615,7 +608,7 @@ export default function FlashcardsAdminClient() {
       const errors = results
         .map((result, index) => {
           if (result.status === 'rejected') {
-            return `Flashcard ${Array.from(selectedIds)[index]}: ${result.reason}`
+            return `Flashcard ${Array.from(selectedIds)[index]}: ${result.reason} `
           }
           if (!result.value.ok) {
             return `Flashcard ${Array.from(selectedIds)[index]}: Erro ao deletar`
@@ -625,7 +618,7 @@ export default function FlashcardsAdminClient() {
         .filter(Boolean)
 
       if (errors.length > 0) {
-        setError(`Erro ao deletar alguns flashcards: ${errors.join(', ')}`)
+        setError(`Erro ao deletar alguns flashcards: ${errors.join(', ')} `)
       }
 
       setDeleteMultipleDialogOpen(false)
@@ -709,270 +702,238 @@ export default function FlashcardsAdminClient() {
       />
 
       {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Filtros</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!mounted ? (
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="space-y-2">
-                <Label>Disciplina</Label>
-                <div className="h-9 w-full rounded-md border bg-transparent" />
-              </div>
-              <div className="space-y-2">
-                <Label>Frente</Label>
-                <div className="h-9 w-full rounded-md border bg-transparent" />
-              </div>
-              <div className="space-y-2">
-                <Label>Módulo</Label>
-                <div className="h-9 w-full rounded-md border bg-transparent" />
-              </div>
-              <div className="space-y-2">
-                <Label>Buscar</Label>
-                <div className="h-9 w-full rounded-md border bg-transparent" />
-              </div>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="space-y-2">
-                <Label>Disciplina</Label>
-                <Select
-                  value={disciplinaId}
-                  onValueChange={setDisciplinaId}
-                  disabled={loadingDisciplinas}
-                >
-                  <SelectTrigger id={FILTRO_DISCIPLINA_SELECT_ID}>
-                    <SelectValue placeholder="Todas" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {disciplinas.map((d) => (
-                      <SelectItem key={d.id} value={d.id}>
-                        {d.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Frente</Label>
-                <Select
-                  value={frenteId}
-                  onValueChange={setFrenteId}
-                  disabled={!disciplinaId || loadingFrentes}
-                >
-                  <SelectTrigger id={FILTRO_FRENTE_SELECT_ID}>
-                    <SelectValue placeholder="Todas" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {frentes.map((f) => (
-                      <SelectItem key={f.id} value={f.id}>
-                        {f.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Módulo</Label>
-                <Select
-                  value={moduloId}
-                  onValueChange={setModuloId}
-                  disabled={!frenteId || loadingModulos}
-                >
-                  <SelectTrigger id={FILTRO_MODULO_SELECT_ID}>
-                    <SelectValue placeholder="Todos" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {modulos.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
-                        {m.numero_modulo ? `Módulo ${m.numero_modulo}: ${m.nome}` : m.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Buscar</Label>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Pergunta ou resposta..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      className="pl-8"
-                    />
-                  </div>
-                  {(disciplinaId || frenteId || moduloId || search) && (
-                    <Button variant="outline" size="icon" onClick={clearFilters}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            </div>
+      <div className="rounded-md border p-4">
+        <div className="grid gap-4 md:grid-cols-4">
+          <div className="md:col-span-1">
+            <Select
+              value={disciplinaId ?? 'all'}
+              onValueChange={(value) => {
+                setDisciplinaId(value === 'all' ? undefined : value)
+                setFrenteId(undefined)
+                setModuloId(undefined)
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Disciplina" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as Disciplinas</SelectItem>
+                {disciplinas.map((d) => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="md:col-span-1">
+            <Select
+              value={frenteId ?? 'all'}
+              onValueChange={(value) => {
+                setFrenteId(value === 'all' ? undefined : value)
+                setModuloId(undefined)
+              }}
+              disabled={!disciplinaId || loadingFrentes}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Frente" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as Frentes</SelectItem>
+                {frentes.map((f) => (
+                  <SelectItem key={f.id} value={f.id}>
+                    {f.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="md:col-span-1">
+            <Select
+              value={moduloId ?? 'all'}
+              onValueChange={(value) => setModuloId(value === 'all' ? undefined : value)}
+              disabled={!frenteId || loadingModulos}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Módulo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos os Módulos</SelectItem>
+                {modulos.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.numero_modulo ? `Módulo ${m.numero_modulo}: ${m.nome} ` : m.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="relative flex-1">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Pergunta ou resposta..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+          {(disciplinaId || frenteId || moduloId || search) && (
+            <Button variant="outline" size="icon" onClick={clearFilters}>
+              <X className="h-4 w-4" />
+            </Button>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Erro */}
       {error && (
-        <Card className="border-destructive">
-          <CardContent className="pt-6">
-            <p className="text-destructive">{error}</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-md border border-destructive p-6">
+          <p className="text-destructive">{error}</p>
+        </div>
       )}
 
       {/* Tabela */}
-      <Card>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : flashcards.length === 0 ? (
-            <Empty>
-              <EmptyMedia>
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                  <Search className="h-6 w-6" />
+      <div className="rounded-md border">
+        {loading ? (
+          <div className="flex items-center justify-center p-8">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : flashcards.length === 0 ? (
+          <Empty>
+            <EmptyMedia>
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <Search className="h-6 w-6" />
+              </div>
+            </EmptyMedia>
+            <EmptyHeader>
+              <EmptyTitle>Nenhum flashcard encontrado</EmptyTitle>
+              <EmptyDescription>
+                {disciplinaId || frenteId || moduloId || search
+                  ? 'Tente ajustar os filtros ou criar um novo flashcard.'
+                  : 'Comece criando seu primeiro flashcard.'}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <>
+            {selectedIds.size > 0 && (
+              <div className="flex items-center justify-between border-b p-4">
+                <div className="text-sm text-muted-foreground">
+                  {selectedIds.size} flashcard{selectedIds.size !== 1 ? 's' : ''} selecionado{selectedIds.size !== 1 ? 's' : ''}
                 </div>
-              </EmptyMedia>
-              <EmptyHeader>
-                <EmptyTitle>Nenhum flashcard encontrado</EmptyTitle>
-                <EmptyDescription>
-                  {disciplinaId || frenteId || moduloId || search
-                    ? 'Tente ajustar os filtros ou criar um novo flashcard.'
-                    : 'Comece criando seu primeiro flashcard.'}
-                </EmptyDescription>
-              </EmptyHeader>
-            </Empty>
-          ) : (
-            <>
-              {selectedIds.size > 0 && (
-                <div className="flex items-center justify-between border-b p-4">
-                  <div className="text-sm text-muted-foreground">
-                    {selectedIds.size} flashcard{selectedIds.size !== 1 ? 's' : ''} selecionado{selectedIds.size !== 1 ? 's' : ''}
-                  </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setDeleteMultipleDialogOpen(true)}
+                  disabled={saving}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Deletar selecionados
+                </Button>
+              </div>
+            )}
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={isAllSelected}
+                        onCheckedChange={handleSelectAll}
+                      />
+                    </TableHead>
+                    <TableHead>Pergunta</TableHead>
+                    <TableHead>Resposta</TableHead>
+                    <TableHead>Disciplina</TableHead>
+                    <TableHead>Frente</TableHead>
+                    <TableHead>Módulo</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {flashcards.map((flashcard) => (
+                    <TableRow key={flashcard.id}>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(flashcard.id)}
+                          onCheckedChange={(checked) =>
+                            handleSelectOne(flashcard.id, checked as boolean)
+                          }
+                        />
+                      </TableCell>
+                      <TableCell className="max-w-xs">
+                        <div className="truncate" title={flashcard.pergunta}>
+                          {flashcard.pergunta}
+                        </div>
+                      </TableCell>
+                      <TableCell className="max-w-xs">
+                        <div className="truncate" title={flashcard.resposta}>
+                          {flashcard.resposta}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {flashcard.modulo.frente.disciplina.nome}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{flashcard.modulo.frente.nome}</TableCell>
+                      <TableCell>
+                        {flashcard.modulo.numero_modulo
+                          ? `M${flashcard.modulo.numero_modulo}: ${flashcard.modulo.nome} `
+                          : flashcard.modulo.nome}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(flashcard)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleOpenDelete(flashcard)}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Paginação */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between border-t p-4">
+                <div className="text-sm text-muted-foreground">
+                  Página {page} de {totalPages}
+                </div>
+                <div className="flex gap-2">
                   <Button
-                    variant="destructive"
+                    variant="outline"
                     size="sm"
-                    onClick={() => setDeleteMultipleDialogOpen(true)}
-                    disabled={saving}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1 || loading}
                   >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Deletar selecionados
+                    Anterior
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages || loading}
+                  >
+                    Próxima
                   </Button>
                 </div>
-              )}
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">
-                        <Checkbox
-                          checked={isAllSelected}
-                          onCheckedChange={handleSelectAll}
-                        />
-                      </TableHead>
-                      <TableHead>Pergunta</TableHead>
-                      <TableHead>Resposta</TableHead>
-                      <TableHead>Disciplina</TableHead>
-                      <TableHead>Frente</TableHead>
-                      <TableHead>Módulo</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {flashcards.map((flashcard) => (
-                      <TableRow key={flashcard.id}>
-                        <TableCell>
-                          <Checkbox
-                            checked={selectedIds.has(flashcard.id)}
-                            onCheckedChange={(checked) =>
-                              handleSelectOne(flashcard.id, checked as boolean)
-                            }
-                          />
-                        </TableCell>
-                        <TableCell className="max-w-xs">
-                          <div className="truncate" title={flashcard.pergunta}>
-                            {flashcard.pergunta}
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-xs">
-                          <div className="truncate" title={flashcard.resposta}>
-                            {flashcard.resposta}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary">
-                            {flashcard.modulo.frente.disciplina.nome}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{flashcard.modulo.frente.nome}</TableCell>
-                        <TableCell>
-                          {flashcard.modulo.numero_modulo
-                            ? `M${flashcard.modulo.numero_modulo}: ${flashcard.modulo.nome}`
-                            : flashcard.modulo.nome}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(flashcard)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleOpenDelete(flashcard)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
               </div>
-
-              {/* Paginação */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-between border-t p-4">
-                  <div className="text-sm text-muted-foreground">
-                    Página {page} de {totalPages}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1 || loading}
-                    >
-                      Anterior
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages || loading}
-                    >
-                      Próxima
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Modal Criar */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
@@ -1043,7 +1004,7 @@ export default function FlashcardsAdminClient() {
                 <SelectContent>
                   {modulos.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
-                      {m.numero_modulo ? `Módulo ${m.numero_modulo}: ${m.nome}` : m.nome}
+                      {m.numero_modulo ? `Módulo ${m.numero_modulo}: ${m.nome} ` : m.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1157,7 +1118,7 @@ export default function FlashcardsAdminClient() {
                 <SelectContent>
                   {modulos.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
-                      {m.numero_modulo ? `Módulo ${m.numero_modulo}: ${m.nome}` : m.nome}
+                      {m.numero_modulo ? `Módulo ${m.numero_modulo}: ${m.nome} ` : m.nome}
                     </SelectItem>
                   ))}
                 </SelectContent>
