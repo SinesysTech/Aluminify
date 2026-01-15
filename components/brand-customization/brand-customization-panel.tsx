@@ -23,7 +23,8 @@ import type {
   LogoType,
   LogoUploadResult,
   CreateColorPaletteRequest,
-  CreateFontSchemeRequest
+  CreateFontSchemeRequest,
+  SaveTenantBrandingRequest
 } from '@/types/brand-customization';
 
 export function BrandCustomizationPanel({

@@ -138,7 +138,8 @@ export class LogoManagerImpl implements LogoManager {
 
         throw new LogoUploadError(`Failed to save logo metadata: ${saveError.message}`, {
           saveError,
-          logoData,
+          empresaId,
+          logoType: type,
         });
       }
 
@@ -297,13 +298,26 @@ export class LogoManagerImpl implements LogoManager {
         .from('tenant_logos')
         .select(`
           *,
-          tenant_branding!inner(empresaId)
+          tenant_branding!inner(empresa_id)
         `)
-        .eq('tenant_branding.empresaId', empresaId)
-        .eq('logoType', type)
+        .eq('tenant_branding.empresa_id', empresaId)
+        .eq('logo_type', type)
         .maybeSingle();
 
-      return logo || null;
+      if (!logo) return null;
+
+      // Map snake_case DB columns to camelCase
+      return {
+        id: logo.id,
+        tenantBrandingId: logo.tenant_branding_id,
+        logoType: logo.logo_type as LogoType,
+        logoUrl: logo.logo_url,
+        fileName: logo.file_name,
+        fileSize: logo.file_size,
+        mimeType: logo.mime_type,
+        createdAt: new Date(logo.created_at),
+        updatedAt: new Date(logo.updated_at),
+      };
     } catch (error) {
       console.error(`Failed to get ${type} logo for empresa ${empresaId}:`, error);
       return null;
@@ -319,9 +333,9 @@ export class LogoManagerImpl implements LogoManager {
         .from('tenant_logos')
         .select(`
           *,
-          tenant_branding!inner(empresaId)
+          tenant_branding!inner(empresa_id)
         `)
-        .eq('tenant_branding.empresaId', empresaId);
+        .eq('tenant_branding.empresa_id', empresaId);
 
       const result: Record<LogoType, TenantLogo | null> = {
         login: null,
@@ -331,7 +345,19 @@ export class LogoManagerImpl implements LogoManager {
 
       if (logos) {
         logos.forEach(logo => {
-          result[logo.logoType as LogoType] = logo;
+          // Map snake_case DB columns to camelCase
+          const mappedLogo: TenantLogo = {
+            id: logo.id,
+            tenantBrandingId: logo.tenant_branding_id,
+            logoType: logo.logo_type as LogoType,
+            logoUrl: logo.logo_url,
+            fileName: logo.file_name,
+            fileSize: logo.file_size,
+            mimeType: logo.mime_type,
+            createdAt: new Date(logo.created_at),
+            updatedAt: new Date(logo.updated_at),
+          };
+          result[mappedLogo.logoType] = mappedLogo;
         });
       }
 

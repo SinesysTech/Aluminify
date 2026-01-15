@@ -10,7 +10,6 @@ import {
   CalendarCheck,
   Layers,
   FolderOpen,
-  Eye,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
@@ -63,11 +62,6 @@ const empresaNavItems: NavItem[] = [
     icon: FileText,
   },
   // Funcionalidades do Professor (Superset)
-  {
-    title: "Visualizar como Aluno",
-    url: "/professor/view-as-student",
-    icon: Eye,
-  },
   {
     title: "Cursos",
     url: "/curso",
