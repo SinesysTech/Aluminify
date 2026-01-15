@@ -117,8 +117,8 @@ export function StudentList({ alunos }: StudentListProps) {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filteredAlunos.map((aluno) => (
           <Card key={aluno.id} className="flex flex-col h-full">
-            <CardHeader className="flex-shrink-0 pb-3">
-              <CardTitle className="text-lg line-clamp-2 break-words" title={aluno.nome_completo || aluno.email}>
+            <CardHeader className="shrink-0 pb-3">
+              <CardTitle className="text-lg line-clamp-2 wrap-break-word" title={aluno.nome_completo || aluno.email}>
                 {aluno.nome_completo || aluno.email}
               </CardTitle>
               <CardDescription className="space-y-1">
@@ -134,13 +134,13 @@ export function StudentList({ alunos }: StudentListProps) {
             </CardHeader>
             <CardContent className="flex flex-col flex-1 min-h-0 gap-4">
               {aluno.matriculas && aluno.matriculas.length > 0 && (
-                <div className="flex-shrink-0 min-h-0">
+                <div className="shrink-0 min-h-0">
                   <p className="text-sm font-medium mb-2">Cursos:</p>
                   <ul className="text-sm text-muted-foreground space-y-1.5 max-h-32 overflow-y-auto pr-1">
                     {aluno.matriculas.map((matricula, idx) => (
                       <li 
                         key={idx} 
-                        className="line-clamp-2 break-words" 
+                        className="line-clamp-2 wrap-break-word" 
                         title={matricula.cursos?.nome || 'Curso não encontrado'}
                       >
                         {matricula.cursos?.nome || 'Curso não encontrado'}
@@ -156,7 +156,7 @@ export function StudentList({ alunos }: StudentListProps) {
                   className="w-full"
                   variant="outline"
                 >
-                  <Eye className="mr-2 h-4 w-4 flex-shrink-0" />
+                  <Eye className="mr-2 h-4 w-4 shrink-0" />
                   <span className="truncate">
                     {loadingId === aluno.id ? 'Carregando...' : 'Visualizar como Aluno'}
                   </span>
