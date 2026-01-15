@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { createClient } from '@/lib/client';
 import { CardSkeleton } from '@/components/ui/card-skeleton';
@@ -140,31 +139,19 @@ export function BrandingSettings({ empresaId }: BrandingSettingsProps) {
 
     if (loading) {
         return (
-            <div className="py-8">
+            <div className="pt-6">
                 <CardSkeleton count={1} />
             </div>
         );
     }
 
     return (
-        <div className="py-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Personalização da Marca</CardTitle>
-                    <CardDescription>
-                        Personalize a identidade visual da sua empresa: logos, cores e fontes
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <BrandCustomizationPanel
-                        empresaId={empresaId}
-                        currentBranding={currentBranding}
-                        onSave={handleBrandingSave}
-                        onReset={handleBrandingReset}
-                        onCancel={handleBrandingCancel}
-                    />
-                </CardContent>
-            </Card>
-        </div>
+        <BrandCustomizationPanel
+            empresaId={empresaId}
+            currentBranding={currentBranding}
+            onSave={handleBrandingSave}
+            onReset={handleBrandingReset}
+            onCancel={handleBrandingCancel}
+        />
     );
 }

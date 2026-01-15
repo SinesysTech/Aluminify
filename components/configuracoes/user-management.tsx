@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Plus, Search, UserCog, GraduationCap, Users, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -177,16 +176,18 @@ export function UserManagement({ empresaId }: UserManagementProps) {
   const admins = professores.filter((p) => p.isAdmin)
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Gestão de Usuários</CardTitle>
-        <CardDescription>
-          Gerencie professores, alunos e administradores da sua empresa
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
+    <div className="flex flex-col gap-6">
+      <header className="flex items-center justify-between pb-4 border-b border-[#E4E4E7]">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight text-zinc-900">Gestão de Usuários</h2>
+          <p className="text-sm text-[#71717A]">
+            Gerencie professores, alunos e administradores da sua empresa
+          </p>
+        </div>
+      </header>
+
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="professores" className="flex items-center gap-2">
               <GraduationCap className="h-4 w-4" />
               <span className="hidden sm:inline">Professores</span>
@@ -425,7 +426,6 @@ export function UserManagement({ empresaId }: UserManagementProps) {
             )}
           </TabsContent>
         </Tabs>
-      </CardContent>
-    </Card>
+    </div>
   )
 }

@@ -2,7 +2,6 @@
 
 import {
   Users,
-  GraduationCap,
   LayoutDashboard,
   FileText,
   BookOpen,
@@ -40,11 +39,6 @@ const empresaNavItems: NavItem[] = [
     title: "Dashboard",
     url: "/empresa/dashboard",
     icon: LayoutDashboard,
-  },
-  {
-    title: "Usuários",
-    url: "/admin/empresa/usuarios",
-    icon: Users,
   },
   {
     title: "Alunos",

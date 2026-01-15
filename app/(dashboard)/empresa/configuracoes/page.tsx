@@ -17,7 +17,7 @@ export default async function ConfiguracoesPage() {
   }
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="flex flex-col gap-8 h-full">
       <SettingsTabs user={user} />
     </div>
   )

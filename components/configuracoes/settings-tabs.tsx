@@ -22,30 +22,32 @@ export function SettingsTabs({ user }: SettingsTabsProps) {
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">Configurações da Empresa</h1>
-                <p className="text-muted-foreground">
-                    Gerencie as configurações, personalização e usuários da sua empresa.
-                </p>
-            </div>
+        <div className="flex flex-col gap-8 h-full">
+            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E4E4E7] pb-4">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Configurações da Empresa</h1>
+                    <p className="text-sm text-[#71717A]">
+                        Gerencie as configurações, personalização e usuários da sua empresa.
+                    </p>
+                </div>
+            </header>
 
             <Tabs defaultValue="branding" className="w-full">
-                <TabsList className="grid w-full grid-cols-1 md:w-auto md:inline-flex md:grid-cols-none h-auto">
+                <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="branding">Customizações de Marca</TabsTrigger>
                     <TabsTrigger value="empresa">Dados da Empresa</TabsTrigger>
                     <TabsTrigger value="usuarios">Gestão de Usuários</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="branding" className="mt-6">
+                <TabsContent value="branding" className="space-y-6">
                     <BrandingSettings empresaId={user.empresaId} />
                 </TabsContent>
 
-                <TabsContent value="empresa" className="mt-6">
+                <TabsContent value="empresa" className="space-y-6">
                     <CompanySettings empresaId={user.empresaId} />
                 </TabsContent>
 
-                <TabsContent value="usuarios" className="mt-6">
+                <TabsContent value="usuarios" className="space-y-6">
                     <UserManagement empresaId={user.empresaId} />
                 </TabsContent>
             </Tabs>

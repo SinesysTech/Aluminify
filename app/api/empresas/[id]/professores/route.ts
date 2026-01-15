@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/server';
 import { TeacherRepositoryImpl } from '@/backend/services/teacher';
 import { getAuthUser } from '@/backend/auth/middleware';
 import { getEmpresaContext, validateEmpresaAccess } from '@/backend/middleware/empresa-context';
+
+function createAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+  return createSupabaseClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -81,8 +94,9 @@ async function postHandler(
       );
     }
 
-    // Criar usuário no auth
-    const { data: newUser, error: userError } = await supabase.auth.admin.createUser({
+    // Usar cliente admin para criar usuário (requer service_role key)
+    const adminClient = createAdminClient();
+    const { data: newUser, error: userError } = await adminClient.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
