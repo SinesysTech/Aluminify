@@ -49,31 +49,31 @@ This implementation plan breaks down the codebase cleanup analysis system into d
     - Test AST query helpers with various code structures
     - _Requirements: All analysis requirements_
 
-- [-] 4. Implement CodeQualityAnalyzer
-  - [-] 4.1 Implement confusing logic detection
+- [x] 4. Implement CodeQualityAnalyzer
+  - [x] 4.1 Implement confusing logic detection
     - Detect deeply nested conditionals (>3 levels)
     - Detect complex boolean expressions (>3 operators)
     - Detect unclear control flow patterns
     - _Requirements: 1.5_
   
-  - [ ] 4.2 Implement code duplication detection
+  - [x] 4.2 Implement code duplication detection
     - Use AST similarity comparison for duplicate functions
     - Detect similar code blocks with minor differences
     - Detect duplicate constants across files
     - _Requirements: 6.5, 8.1, 8.2, 8.4, 8.5, 15.2_
   
-  - [ ] 4.3 Implement naming convention analysis
+  - [x] 4.3 Implement naming convention analysis
     - Detect single-letter variables (except loop counters)
     - Detect inconsistent naming patterns (camelCase vs snake_case)
     - Detect unclear function/variable names
     - _Requirements: 10.1, 10.4_
   
-  - [ ] 4.4 Implement legacy code detection
+  - [x] 4.4 Implement legacy code detection
     - Detect commented-out code blocks
     - Detect unused exports using import analysis
     - _Requirements: 1.3_
   
-  - [ ] 4.5 Write property tests for code quality detection
+  - [x] 4.5 Write property tests for code quality detection
     - **Property 3: Legacy Code Pattern Detection**
     - **Property 5: Confusing Logic Detection**
     - **Property 6: Code Quality Issue Detection**
@@ -81,33 +81,33 @@ This implementation plan breaks down the codebase cleanup analysis system into d
     - **Property 18: Naming Convention Inconsistency Detection**
     - **Validates: Requirements 1.3, 1.5, 1.6, 6.5, 8.1, 8.2, 8.4, 8.5, 10.1, 10.4, 15.2**
   
-  - [ ] 4.6 Write unit tests for specific code quality patterns
+  - [x] 4.6 Write unit tests for specific code quality patterns
     - Test specific examples of nested conditionals, duplicate code, poor naming
     - _Requirements: 1.3, 1.5, 1.6_
 
-- [ ] 5. Implement AuthPatternAnalyzer
-  - [ ] 5.1 Implement auth client instantiation pattern detection
+- [x] 5. Implement AuthPatternAnalyzer
+  - [x] 5.1 Implement auth client instantiation pattern detection
     - Detect multiple patterns for creating auth clients
     - Track all auth client creation locations
     - _Requirements: 2.1_
   
-  - [ ] 5.2 Implement auth inconsistency detection
+  - [x] 5.2 Implement auth inconsistency detection
     - Detect inconsistent permission checking patterns
     - Detect inconsistent session management
     - Identify redundant auth middleware
     - _Requirements: 2.2, 2.3, 2.4_
   
-  - [ ] 5.3 Implement unnecessary auth adapter detection
+  - [x] 5.3 Implement unnecessary auth adapter detection
     - Detect simple pass-through auth wrapper functions
     - Identify auth adapters that add no value
     - _Requirements: 2.5_
   
-  - [ ] 5.4 Write property tests for auth pattern detection
+  - [x] 5.4 Write property tests for auth pattern detection
     - **Property 7: Authentication Pattern Inconsistency Detection**
     - **Validates: Requirements 2.2, 2.3, 2.4**
     - Generate code with various auth patterns, verify inconsistencies detected
   
-  - [ ] 5.5 Write unit tests for specific auth anti-patterns
+  - [x] 5.5 Write unit tests for specific auth anti-patterns
     - Test examples of inconsistent auth, redundant middleware
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
 
@@ -312,7 +312,7 @@ This implementation plan breaks down the codebase cleanup analysis system into d
     - Test specific examples of pass-through wrappers
     - _Requirements: 1.4, 14.1, 14.2, 14.4_
 
-- [ ] 15. Checkpoint - Ensure all pattern analyzers work correctly
+- [x] 15. Checkpoint - Ensure all pattern analyzers work correctly
   - Run all analyzer tests
   - Verify each analyzer detects its target patterns
   - Ensure all tests pass, ask the user if questions arise
