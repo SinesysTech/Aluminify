@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { getDefaultRouteForRole } from "@/lib/roles";
+import { LandingPage } from "@/components/landing-page";
 
 export const dynamic = "force-dynamic";
 
@@ -14,5 +15,5 @@ export default async function Home() {
     redirect(getDefaultRouteForRole(user.role));
   }
 
-  redirect('/index.html');
+  return <LandingPage />;
 }
