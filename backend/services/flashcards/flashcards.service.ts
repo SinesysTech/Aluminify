@@ -867,7 +867,7 @@ export class FlashcardsService {
         
         interface AtividadeRow {
           atividade_id: string | null;
-          atividades: { modulo_id?: string } | null;
+          atividades: { modulo_id?: string | null } | null;
         }
         const moduloIdsConcluidos = Array.from(
           new Set(
@@ -1401,20 +1401,21 @@ export class FlashcardsService {
 
     // Montar resposta final
     const flashcards = flashcardsData
-      .map((item: FlashcardRow & { created_at?: string | null }) => {
-        const modulo = modulosMap.get(item.modulo_id ?? '');
-        if (!modulo || !item.modulo_id) return null;
+      .map((item) => {
+        // After migration, modulo_id is guaranteed to be non-null
+        const modulo = modulosMap.get(item.modulo_id as string);
+        if (!modulo) return null;
 
         return {
           id: item.id,
-          modulo_id: item.modulo_id,
+          modulo_id: item.modulo_id as string,
           pergunta: item.pergunta,
           resposta: item.resposta,
-          created_at: item.created_at || '1970-01-01T00:00:00.000Z',
+          created_at: item.created_at as string,
           modulo,
         };
       })
-      .filter((f) => f !== null) as FlashcardAdmin[];
+      .filter((f): f is FlashcardAdmin => f !== null);
 
     const result = {
       data: flashcards,
@@ -1485,10 +1486,10 @@ export class FlashcardsService {
 
     return {
       id: flashcard.id,
-      modulo_id: flashcard.modulo_id,
+      modulo_id: flashcard.modulo_id as string,
       pergunta: flashcard.pergunta,
       resposta: flashcard.resposta,
-      created_at: flashcard.created_at ?? new Date().toISOString(),
+      created_at: flashcard.created_at as string,
       modulo: {
         id: (modulo as unknown as ModuloWithNestedRelations).id,
         nome: (modulo as unknown as ModuloWithNestedRelations).nome,
@@ -1544,6 +1545,10 @@ export class FlashcardsService {
     }
 
     // Buscar módulo com relacionamentos
+    if (!flashcard.modulo_id) {
+      throw new Error('Flashcard sem módulo associado');
+    }
+
     const { data: modulo, error: moduloFetchError } = await this.client
       .from('modulos')
       .select(
@@ -1568,12 +1573,12 @@ export class FlashcardsService {
       throw new Error(`Erro ao buscar módulo: ${moduloFetchError?.message || 'Módulo não encontrado'}`);
     }
 
-    const result = {
+    const result: FlashcardAdmin = {
       id: flashcard.id,
-      modulo_id: flashcard.modulo_id,
+      modulo_id: flashcard.modulo_id as string,
       pergunta: flashcard.pergunta,
       resposta: flashcard.resposta,
-      created_at: flashcard.created_at,
+      created_at: flashcard.created_at as string,
       modulo: {
         id: (modulo as unknown as ModuloWithNestedRelations).id,
         nome: (modulo as unknown as ModuloWithNestedRelations).nome,
@@ -1590,13 +1595,11 @@ export class FlashcardsService {
     };
 
     // Invalidar cache
-    if (flashcard.modulo_id) {
-      await this.invalidateFlashcardCache(
-        (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.id,
-        (modulo as unknown as ModuloWithNestedRelations).frentes.id,
-        flashcard.modulo_id
-      );
-    }
+    await this.invalidateFlashcardCache(
+      (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.id,
+      (modulo as unknown as ModuloWithNestedRelations).frentes.id,
+      flashcard.modulo_id as string
+    );
 
     return result;
   }

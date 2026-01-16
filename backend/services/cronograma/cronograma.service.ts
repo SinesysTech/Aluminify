@@ -547,10 +547,12 @@ export class CronogramaService {
     // Agrupar frentes por disciplina para validação
     frentesData?.forEach((frente: FrenteValidacaoResult) => {
       const discId = frente.disciplina_id;
-      if (!frentesPorDisciplina.has(discId)) {
+      if (discId && !frentesPorDisciplina.has(discId)) {
         frentesPorDisciplina.set(discId, []);
       }
-      frentesPorDisciplina.get(discId)!.push(frente.nome);
+      if (discId) {
+        frentesPorDisciplina.get(discId)!.push(frente.nome);
+      }
     });
 
     console.log('[CronogramaService] Frentes encontradas por disciplina (COM filtro):',
@@ -865,7 +867,7 @@ export class CronogramaService {
       } else {
         const frentesValidasSet = new Set(frenteIds);
         const modulosForaDasFrentes = (modulosSelecionadosData || []).filter(
-          (m: ModuloSelecionadoQueryResult) => !frentesValidasSet.has(m.frente_id),
+          (m: ModuloSelecionadoQueryResult) => m.frente_id && !frentesValidasSet.has(m.frente_id),
         );
 
         console.warn('[CronogramaService] ⚠️ Módulos selecionados não pertencem às frentes/curso informados:', {

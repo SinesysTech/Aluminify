@@ -81,7 +81,7 @@ async function buildWorkbook(cronograma: CronogramaExport, itens: ItemExport[]) 
 
   resumo.mergeCells('A1:B1')
   const titulo = resumo.getCell('A1')
-  titulo.value = cronograma.nome || 'Meu Cronograma'
+  titulo.value = cronograma.nome
   titulo.font = { size: 16, bold: true }
   titulo.alignment = { vertical: 'middle', horizontal: 'center' }
 
@@ -208,8 +208,11 @@ async function getHandler(
     [key: string]: unknown
   }
   const cronogramaTyped = cronograma as CronogramaCompleto
-  const cronogramaExport = {
+  
+  // After migration, nome is guaranteed to be non-null
+  const cronogramaExport: CronogramaExport = {
     ...cronograma,
+    nome: cronograma.nome as string,
     dias_estudo_semana: cronogramaTyped.dias_estudo_semana || 5,
     horas_estudo_dia: cronogramaTyped.horas_estudo_dia || 2,
     modalidade_estudo: cronogramaTyped.modalidade_estudo || 'hibrido',

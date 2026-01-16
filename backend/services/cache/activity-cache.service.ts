@@ -83,18 +83,19 @@ class ActivityCacheService {
       return [];
     }
 
-    return data.map((row: ActivityRow) => ({
+    // After migration, all fields are guaranteed to be non-null
+    return data.map((row) => ({
       id: row.id,
-      moduloId: row.modulo_id,
+      moduloId: row.modulo_id as string,
       tipo: row.tipo,
       titulo: row.titulo,
       arquivoUrl: row.arquivo_url,
       gabaritoUrl: row.gabarito_url,
       linkExterno: row.link_externo,
-      obrigatorio: row.obrigatorio,
-      ordemExibicao: row.ordem_exibicao,
-      createdAt: row.created_at,
-      updatedAt: row.updated_at,
+      obrigatorio: row.obrigatorio as boolean,
+      ordemExibicao: row.ordem_exibicao as number,
+      createdAt: row.created_at as string,
+      updatedAt: row.updated_at as string,
     }));
   }
 }

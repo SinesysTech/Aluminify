@@ -18,7 +18,16 @@ function mapRowToModel(row: SessaoEstudoRow): SessaoEstudo {
   if (row.log_pausas) {
     try {
       if (Array.isArray(row.log_pausas)) {
-        logPausas = row.log_pausas as LogPausa[];
+        // Validate that each item has the required LogPausa structure
+        logPausas = (row.log_pausas as unknown[]).filter((item): item is LogPausa => {
+          return (
+            typeof item === 'object' &&
+            item !== null &&
+            'inicio' in item &&
+            'fim' in item &&
+            'tipo' in item
+          );
+        });
       }
     } catch (e) {
       console.error('Error parsing log_pausas:', e);

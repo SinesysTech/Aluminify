@@ -148,7 +148,7 @@ export interface FrenteNestedInModulo {
   id?: string;
   nome?: string;
   curso_id?: string | null;
-  disciplinas?: { id?: string; nome?: string } | { id?: string; nome?: string }[];
+  disciplinas?: { id?: string; nome?: string } | { id?: string; nome?: string }[] | null;
 }
 
 export interface ModuloSelecionadoQueryResult {
@@ -175,7 +175,7 @@ export function getFirst<T>(value: T | T[] | undefined): T | undefined {
  * Extrai o nome da disciplina de forma segura
  */
 export function getDisciplinaNome(
-  disciplinas: DisciplinaQueryResult | DisciplinaQueryResult[] | undefined
+  disciplinas: DisciplinaQueryResult | DisciplinaQueryResult[] | null | undefined
 ): string | undefined {
   const disc = getFirst(disciplinas);
   return disc?.nome;
@@ -185,8 +185,8 @@ export function getDisciplinaNome(
  * Extrai as propriedades da frente de forma segura
  */
 export function getFrenteInfo(
-  frentes: FrenteQueryResult | FrenteQueryResult[] | undefined
-): FrenteQueryResult | undefined {
+  frentes: FrenteQueryResult | FrenteQueryResult[] | null | undefined
+): FrenteQueryResult | null | undefined {
   return getFirst(frentes);
 }
 
@@ -194,7 +194,7 @@ export function getFrenteInfo(
  * Extrai as propriedades do módulo de forma segura
  */
 export function getModuloInfo(
-  modulos: ModuloQueryResult | ModuloQueryResult[] | undefined
-): ModuloQueryResult | undefined {
+  modulos: ModuloQueryResult | ModuloQueryResult[] | null | undefined
+): ModuloQueryResult | null | undefined {
   return getFirst(modulos);
 }

@@ -69,7 +69,7 @@ async function postHandler(request: AuthenticatedRequest) {
       type ProfessorEmpresa = Pick<Database['public']['Tables']['professores']['Row'], 'empresa_id'>;
       const typedProfessor = professor as ProfessorEmpresa | null;
       
-      realUserEmpresaId = typedProfessor?.empresa_id
+      realUserEmpresaId = typedProfessor?.empresa_id || undefined
     }
 
     // Validar se pode impersonar

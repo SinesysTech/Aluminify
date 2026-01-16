@@ -59,7 +59,7 @@ function buildIcs(cronograma: CronogramaExport, itens: ItemExport[]): string {
       product: 'Cronograma de Estudos',
       language: 'PT',
     },
-    name: cronograma.nome || 'Meu Cronograma',
+    name: cronograma.nome,
     timezone: 'America/Sao_Paulo',
     description: `Cronograma de estudos de ${cronograma.data_inicio} a ${cronograma.data_fim}`,
   })
@@ -164,7 +164,14 @@ async function getHandler(
 
   try {
     const { cronograma, itens } = await fetchCronogramaCompleto(cronogramaId, client)
-    const icsContent = buildIcs(cronograma, itens)
+    
+    // After migration, nome is guaranteed to be non-null
+    const cronogramaExport: CronogramaExport = {
+      ...cronograma,
+      nome: cronograma.nome as string,
+    };
+    
+    const icsContent = buildIcs(cronogramaExport, itens)
 
     return new NextResponse(icsContent, {
       status: 200,

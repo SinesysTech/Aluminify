@@ -251,7 +251,7 @@ function buildPdf(cronograma: CronogramaExport, itens: ItemExport[]) {
   const HeaderBlock = () => (
     <View style={styles.headerRow}>
       <View style={styles.headerLeft}>
-        <Text style={styles.headerTitle}>{cronograma.nome || 'Meu Cronograma'}</Text>
+        <Text style={styles.headerTitle}>{cronograma.nome}</Text>
         <Text style={styles.headerSub}>
           <Text style={styles.bold}>Curso:</Text> {cursoNome}
         </Text>
@@ -621,8 +621,10 @@ async function getHandler(
 
   const periodosFerias = normalizePeriodosFerias(cronogramaTyped.periodos_ferias)
 
-  const cronogramaExport = {
+  // After migration, nome is guaranteed to be non-null
+  const cronogramaExport: CronogramaExport = {
     ...cronograma,
+    nome: cronograma.nome as string,
     dias_estudo_semana: cronogramaTyped.dias_estudo_semana || 5,
     horas_estudo_dia: cronogramaTyped.horas_estudo_dia || 2,
     modalidade_estudo: cronogramaTyped.modalidade_estudo || 'hibrido',
