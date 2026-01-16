@@ -50,24 +50,90 @@ export function TenantLoginPageClient({
   const [brandingLogo, setBrandingLogo] = useState<string | null>(null);
   const [loadingLogo, setLoadingLogo] = useState(true);
 
-  // Load branding logo for this tenant (unauthenticated)
+  // Load branding for this tenant (unauthenticated)
   useEffect(() => {
-    async function loadBrandingLogo() {
+    async function loadBranding() {
       try {
         const response = await fetch(`/api/tenant-branding/${empresaId}/public`);
         if (response.ok) {
-          const data = await response.json();
-          if (data.logos?.login?.logoUrl) {
-            setBrandingLogo(data.logos.login.logoUrl);
+          const result = await response.json();
+          if (result.success && result.data) {
+            const branding = result.data;
+
+            // Set Logo
+            if (branding.logos?.login?.logoUrl) {
+              setBrandingLogo(branding.logos.login.logoUrl);
+            }
+
+            // Apply Colors
+            if (branding.colorPalette) {
+              const root = document.documentElement;
+              const p = branding.colorPalette;
+
+              root.style.setProperty('--primary', p.primaryColor);
+              root.style.setProperty('--primary-foreground', p.primaryForeground);
+              root.style.setProperty('--secondary', p.secondaryColor);
+              root.style.setProperty('--secondary-foreground', p.secondaryForeground);
+              root.style.setProperty('--accent', p.accentColor);
+              root.style.setProperty('--accent-foreground', p.accentForeground);
+              root.style.setProperty('--muted', p.mutedColor);
+              root.style.setProperty('--muted-foreground', p.mutedForeground);
+              root.style.setProperty('--background', p.backgroundColor);
+              root.style.setProperty('--foreground', p.foregroundColor);
+              root.style.setProperty('--card', p.cardColor);
+              root.style.setProperty('--card-foreground', p.cardForeground);
+              root.style.setProperty('--destructive', p.destructiveColor);
+              root.style.setProperty('--destructive-foreground', p.destructiveForeground);
+              root.style.setProperty('--sidebar-background', p.sidebarBackground);
+              root.style.setProperty('--sidebar-foreground', p.sidebarForeground);
+              root.style.setProperty('--sidebar-primary', p.sidebarPrimary);
+              root.style.setProperty('--sidebar-primary-foreground', p.sidebarPrimaryForeground);
+            }
+
+            // Apply Fonts
+            if (branding.fontScheme) {
+              const root = document.documentElement;
+              const f = branding.fontScheme;
+
+              if (f.fontSans && f.fontSans.length > 0) {
+                root.style.setProperty('--font-sans', f.fontSans.join(', '));
+              }
+              if (f.fontMono && f.fontMono.length > 0) {
+                root.style.setProperty('--font-mono', f.fontMono.join(', '));
+              }
+
+              // Load Google Fonts
+              if (f.googleFonts && f.googleFonts.length > 0) {
+                f.googleFonts.forEach((fontFamily: string) => {
+                  const link = document.createElement('link');
+                  link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, '+')}:wght@300;400;500;600;700&display=swap`;
+                  link.rel = 'stylesheet';
+                  link.crossOrigin = 'anonymous';
+                  document.head.appendChild(link);
+                });
+              }
+            }
+
+            // Apply Custom CSS
+            if (branding.tenantBranding?.customCss) {
+              const styleId = 'tenant-custom-css';
+              let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+              if (!styleElement) {
+                styleElement = document.createElement('style');
+                styleElement.id = styleId;
+                document.head.appendChild(styleElement);
+              }
+              styleElement.textContent = branding.tenantBranding.customCss;
+            }
           }
         }
       } catch (error) {
-        console.warn('[tenant-login] Failed to load branding logo:', error);
+        console.warn('[tenant-login] Failed to load branding:', error);
       } finally {
         setLoadingLogo(false);
       }
     }
-    loadBrandingLogo();
+    loadBranding();
   }, [empresaId]);
 
   // Determine which logo to use
