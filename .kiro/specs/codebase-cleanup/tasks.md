@@ -14,19 +14,19 @@ This implementation plan breaks down the codebase cleanup analysis system into d
   - _Requirements: All requirements (foundation for entire system)_
 
 - [-] 2. Implement File Scanner
-  - [-] 2.1 Create FileScanner class with directory traversal
+  - [x] 2.1 Create FileScanner class with directory traversal
     - Implement recursive directory scanning with configurable depth
     - Apply include/exclude glob patterns using minimatch
     - Handle symbolic links and circular references safely
     - Categorize files by path patterns (component, api-route, service, etc.)
     - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 9.1, 15.1_
   
-  - [~] 2.2 Write property test for file discovery completeness
+  - [x] 2.2 Write property test for file discovery completeness
     - **Property 1: Complete File Discovery**
     - **Validates: Requirements 1.1, 2.1, 3.1, 4.1, 5.1, 6.1, 7.1, 9.1, 15.1**
     - Generate random directory structures, verify all matching files discovered
   
-  - [~] 2.3 Write unit tests for FileScanner edge cases
+  - [-] 2.3 Write unit tests for FileScanner edge cases
     - Test empty directories, deeply nested structures, symbolic links
     - Test include/exclude pattern combinations
     - _Requirements: 1.1_
