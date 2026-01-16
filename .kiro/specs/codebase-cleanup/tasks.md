@@ -38,7 +38,7 @@ This implementation plan breaks down the codebase cleanup analysis system into d
     - Create helper methods for issue creation with location tracking
     - _Requirements: All pattern detection requirements_
   
-  - [ ] 3.2 Create AST parsing utilities
+  - [-] 3.2 Create AST parsing utilities
     - Implement file-to-AST parsing using ts-morph
     - Add error handling for invalid syntax
     - Create AST query helpers (find functions, find imports, find types, etc.)
