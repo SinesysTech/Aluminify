@@ -21,7 +21,7 @@ export interface FrenteQueryResult {
   nome: string;
   curso_id?: string | null;
   disciplina_id?: string | null;
-  disciplinas?: DisciplinaQueryResult | DisciplinaQueryResult[];
+  disciplinas?: DisciplinaQueryResult | DisciplinaQueryResult[] | null;
 }
 
 /**
@@ -35,7 +35,7 @@ export interface ModuloQueryResult {
   frente_id?: string | null;
   modulo_id?: string;
   curso_id?: string | null;
-  frentes?: FrenteQueryResult | FrenteQueryResult[];
+  frentes?: FrenteQueryResult | FrenteQueryResult[] | null;
 }
 
 /**
@@ -48,8 +48,8 @@ export interface AulaQueryResult {
   numero_aula?: number | null;
   tempo_estimado_minutos?: number | null;
   prioridade?: number | null;
-  modulo_id?: string;
-  modulos?: ModuloQueryResult | ModuloQueryResult[];
+  modulo_id?: string | null;
+  modulos?: ModuloQueryResult | ModuloQueryResult[] | null;
 }
 
 /**
@@ -90,9 +90,9 @@ export interface FrenteComCursoDiferenteAccumulator {
 export interface FrenteValidacaoResult {
   id: string;
   nome: string;
-  disciplina_id: string;
+  disciplina_id: string | null;
   curso_id: string | null;
-  disciplinas?: DisciplinaQueryResult | DisciplinaQueryResult[];
+  disciplinas?: DisciplinaQueryResult | DisciplinaQueryResult[] | null;
 }
 
 /**
@@ -153,9 +153,9 @@ export interface FrenteNestedInModulo {
 
 export interface ModuloSelecionadoQueryResult {
   id: string;
-  frente_id: string;
+  frente_id: string | null;
   curso_id: string | null;
-  frentes?: FrenteNestedInModulo | FrenteNestedInModulo[];
+  frentes?: FrenteNestedInModulo | FrenteNestedInModulo[] | null;
 }
 
 /**

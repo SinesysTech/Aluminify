@@ -319,7 +319,7 @@ export class FlashcardsService {
         .from('modulos')
         .select('id, empresa_id')
         .eq('frente_id', frente.id)
-        .eq('numero_modulo', row.moduloNumero)
+        .eq('numero_modulo', row.moduloNumero ?? 0)
         .maybeSingle();
 
       if (moduloError) {
@@ -512,9 +512,10 @@ export class FlashcardsService {
         const frente = moduloData.frentes as ModuloRow['frentes'];
 
         // Verificar se o módulo pertence a um curso do aluno (via frente ou módulo)
-        cursoValido = 
+        cursoValido = Boolean(
           (frente?.curso_id && cursoIds.includes(frente.curso_id)) ||
-          (moduloData.curso_id && cursoIds.includes(moduloData.curso_id));
+          (moduloData.curso_id && cursoIds.includes(moduloData.curso_id))
+        );
       }
 
       if (!cursoValido) {
@@ -689,14 +690,14 @@ export class FlashcardsService {
       // Filtrar módulos que pertencem aos cursos do usuário.
       // - Alunos: curso_id DEVE pertencer aos cursos do aluno (sem globais)
       // - Professores: permitir também módulos globais (curso_id null)
-      const modulosFiltrados = (todosModulos ?? []).filter((m: { id: string; curso_id: string | null; importancia: string }) => {
+      const modulosFiltrados = (todosModulos ?? []).filter((m: { id: string; curso_id: string | null; importancia: string | null }) => {
         if (!m.curso_id) return isProfessor; // Módulos globais apenas para professor
         return cursoIds.includes(m.curso_id);
       });
       
       console.log(`[flashcards] Modo "mais_cobrados": encontrados ${modulosFiltrados.length} módulos com importancia = 'Alta' (de ${todosModulos?.length ?? 0} total)`);
       if (modulosFiltrados.length > 0) {
-        console.log(`[flashcards] Primeiros módulos encontrados:`, modulosFiltrados.slice(0, 3).map((m: { id: string; importancia: string; curso_id: string | null }) => ({ id: m.id, importancia: m.importancia, curso_id: m.curso_id })));
+        console.log(`[flashcards] Primeiros módulos encontrados:`, modulosFiltrados.slice(0, 3).map((m: { id: string; importancia: string | null; curso_id: string | null }) => ({ id: m.id, importancia: m.importancia, curso_id: m.curso_id })));
       }
       moduloIds = modulosFiltrados.map((m: { id: string }) => m.id);
       
@@ -798,7 +799,7 @@ export class FlashcardsService {
           }
           
           const moduloIdsDosFlashcards = Array.from(
-            new Set((flashcards ?? []).map((f: { modulo_id: string }) => f.modulo_id as string))
+            new Set((flashcards ?? []).map((f: { modulo_id: string | null }) => f.modulo_id).filter((id): id is string => Boolean(id)))
           );
           
           // Filtrar apenas módulos que estão nas frentes do aluno/professor
@@ -865,18 +866,18 @@ export class FlashcardsService {
         }
         
         interface AtividadeRow {
-          atividades: { modulo_id?: string } | { modulo_id?: string }[] | null;
-          [key: string]: unknown;
+          atividade_id: string | null;
+          atividades: { modulo_id?: string } | null;
         }
         const moduloIdsConcluidos = Array.from(
           new Set(
             (atividadesConcluidas ?? [])
               .map((a: AtividadeRow) => {
                 // Supabase retorna atividades como objeto único (não array) para relações foreign key
-                const atividades = Array.isArray(a.atividades) ? a.atividades[0] : a.atividades;
+                const atividades = a.atividades;
                 return atividades?.modulo_id;
               })
-              .filter(Boolean)
+              .filter((id): id is string => Boolean(id))
           )
         );
         
@@ -1400,9 +1401,9 @@ export class FlashcardsService {
 
     // Montar resposta final
     const flashcards = flashcardsData
-      .map((item: FlashcardRow & { created_at?: string }) => {
-        const modulo = modulosMap.get(item.modulo_id);
-        if (!modulo) return null;
+      .map((item: FlashcardRow & { created_at?: string | null }) => {
+        const modulo = modulosMap.get(item.modulo_id ?? '');
+        if (!modulo || !item.modulo_id) return null;
 
         return {
           id: item.id,
@@ -1475,10 +1476,10 @@ export class FlashcardsService {
         )
       `,
       )
-      .eq('id', flashcard.modulo_id)
+      .eq('id', flashcard.modulo_id ?? '')
       .maybeSingle();
 
-    if (moduloGetError || !modulo) {
+    if (moduloGetError || !modulo || !flashcard.modulo_id) {
       throw new Error(`Erro ao buscar módulo: ${moduloGetError?.message || 'Módulo não encontrado'}`);
     }
 
@@ -1487,7 +1488,7 @@ export class FlashcardsService {
       modulo_id: flashcard.modulo_id,
       pergunta: flashcard.pergunta,
       resposta: flashcard.resposta,
-      created_at: flashcard.created_at,
+      created_at: flashcard.created_at ?? new Date().toISOString(),
       modulo: {
         id: (modulo as unknown as ModuloWithNestedRelations).id,
         nome: (modulo as unknown as ModuloWithNestedRelations).nome,
@@ -1589,11 +1590,13 @@ export class FlashcardsService {
     };
 
     // Invalidar cache
-    await this.invalidateFlashcardCache(
-      (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.id,
-      (modulo as unknown as ModuloWithNestedRelations).frentes.id,
-      flashcard.modulo_id
-    );
+    if (flashcard.modulo_id) {
+      await this.invalidateFlashcardCache(
+        (modulo as unknown as ModuloWithNestedRelations).frentes.disciplinas.id,
+        (modulo as unknown as ModuloWithNestedRelations).frentes.id,
+        flashcard.modulo_id
+      );
+    }
 
     return result;
   }
@@ -1673,10 +1676,10 @@ export class FlashcardsService {
         )
       `,
       )
-      .eq('id', flashcard.modulo_id)
+      .eq('id', flashcard.modulo_id ?? '')
       .maybeSingle();
 
-    if (moduloFetchError || !modulo) {
+    if (moduloFetchError || !modulo || !flashcard.modulo_id) {
       throw new Error(`Erro ao buscar módulo: ${moduloFetchError?.message || 'Módulo não encontrado'}`);
     }
 
@@ -1685,7 +1688,7 @@ export class FlashcardsService {
       modulo_id: flashcard.modulo_id,
       pergunta: flashcard.pergunta,
       resposta: flashcard.resposta,
-      created_at: flashcard.created_at,
+      created_at: flashcard.created_at ?? new Date().toISOString(),
       modulo: {
         id: (modulo as unknown as ModuloWithNestedRelations).id,
         nome: (modulo as unknown as ModuloWithNestedRelations).nome,

@@ -13,6 +13,18 @@ type SessaoEstudoInsert = Database['public']['Tables']['sessoes_estudo']['Insert
 type SessaoEstudoUpdate = Database['public']['Tables']['sessoes_estudo']['Update'];
 
 function mapRowToModel(row: SessaoEstudoRow): SessaoEstudo {
+  // Parse log_pausas safely
+  let logPausas: LogPausa[] = [];
+  if (row.log_pausas) {
+    try {
+      if (Array.isArray(row.log_pausas)) {
+        logPausas = row.log_pausas as LogPausa[];
+      }
+    } catch (e) {
+      console.error('Error parsing log_pausas:', e);
+    }
+  }
+
   return {
     id: row.id,
     alunoId: row.aluno_id ?? '',
@@ -24,7 +36,7 @@ function mapRowToModel(row: SessaoEstudoRow): SessaoEstudo {
     fim: row.fim ?? null,
     tempoTotalBrutoSegundos: row.tempo_total_bruto_segundos ?? null,
     tempoTotalLiquidoSegundos: row.tempo_total_liquido_segundos ?? null,
-    logPausas: (row.log_pausas ?? []) as LogPausa[],
+    logPausas,
     metodoEstudo: (row.metodo_estudo as MetodoEstudo) ?? null,
     nivelFoco: row.nivel_foco ?? null,
     status: (row.status as SessaoStatus) ?? 'em_andamento',

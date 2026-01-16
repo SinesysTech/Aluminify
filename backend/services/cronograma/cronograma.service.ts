@@ -1971,26 +1971,26 @@ export class CronogramaService {
       semana_numero: number;
       ordem_na_semana: number;
       aula_id: string;
-      aulas?: {
+      aulas: {
         id: string;
-        modulos?: {
+        modulos: {
           id: string;
-          frentes?: {
+          frentes: {
             id: string;
             nome: string;
-            disciplina_id?: string;
-            disciplinas?: { id: string; nome: string }[];
-          }[];
-        }[];
-      }[];
+            disciplina_id: string | null;
+            disciplinas: { id: string; nome: string; } | null;
+          };
+        };
+      };
     };
 
     const extrairInfoItem = (item: ItemComAula) => {
       // Supabase pode retornar dados aninhados de diferentes formas
-      const aula = Array.isArray(item.aulas) ? item.aulas[0] : item.aulas;
-      const modulo = aula?.modulos ? (Array.isArray(aula.modulos) ? aula.modulos[0] : aula.modulos) : null;
-      const frente = modulo?.frentes ? (Array.isArray(modulo.frentes) ? modulo.frentes[0] : modulo.frentes) : null;
-      const disciplina = frente?.disciplinas ? (Array.isArray(frente.disciplinas) ? frente.disciplinas[0] : frente.disciplinas) : null;
+      const aula = item.aulas;
+      const modulo = aula?.modulos || null;
+      const frente = modulo?.frentes || null;
+      const disciplina = frente?.disciplinas || null;
 
       return {
         disciplinaId: disciplina?.id || '',

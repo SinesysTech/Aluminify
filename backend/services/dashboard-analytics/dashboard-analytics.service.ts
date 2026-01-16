@@ -1276,8 +1276,10 @@ export class DashboardAnalyticsService {
     // Agrupar por data (ignorar hora)
     const diasUnicos = new Set<string>()
     sessoes.forEach((sessao) => {
-      const data = new Date(sessao.inicio).toISOString().split('T')[0]
-      diasUnicos.add(data)
+      if (sessao.inicio) {
+        const data = new Date(sessao.inicio).toISOString().split('T')[0]
+        diasUnicos.add(data)
+      }
     })
 
     // Ordenar datas e calcular streak
@@ -1689,7 +1691,7 @@ export class DashboardAnalyticsService {
     );
 
     // 4. Buscar disciplinas
-    const disciplinaIdsFrentes = [...new Set(frentesFiltradas.map((f) => f.disciplina_id).filter(Boolean))];
+    const disciplinaIdsFrentes = [...new Set(frentesFiltradas.map((f) => f.disciplina_id).filter((id): id is string => Boolean(id)))];
     const { data: disciplinas } = await client
       .from('disciplinas')
       .select('id, nome')
@@ -1722,7 +1724,7 @@ export class DashboardAnalyticsService {
 
     if (progressos && progressos.length > 0) {
       // Buscar atividades
-      const atividadeIds = progressos.map((p) => p.atividade_id);
+      const atividadeIds = progressos.map((p) => p.atividade_id).filter((id): id is string => Boolean(id));
       const { data: atividades } = await client
         .from('atividades')
         .select('id, modulo_id')
@@ -1730,7 +1732,7 @@ export class DashboardAnalyticsService {
 
       if (atividades && atividades.length > 0) {
         // Buscar módulos
-        const moduloIds = [...new Set(atividades.map((a) => a.modulo_id).filter(Boolean))];
+        const moduloIds = [...new Set(atividades.map((a) => a.modulo_id).filter((id): id is string => Boolean(id)))];
         const { data: modulos } = await client
           .from('modulos')
           .select('id, frente_id')
@@ -1837,13 +1839,15 @@ export class DashboardAnalyticsService {
     >()
 
     sessoes?.forEach((sessao) => {
-      const data = new Date(sessao.inicio)
-      const diaSemana = data.getDay() // 0 = domingo, 1 = segunda, etc.
-      const atual = diasMap.get(diaSemana) || { bruto: 0, liquido: 0 }
+      if (sessao.inicio) {
+        const data = new Date(sessao.inicio)
+        const diaSemana = data.getDay() // 0 = domingo, 1 = segunda, etc.
+        const atual = diasMap.get(diaSemana) || { bruto: 0, liquido: 0 }
 
-      atual.bruto += sessao.tempo_total_bruto_segundos || 0
-      atual.liquido += sessao.tempo_total_liquido_segundos || 0
-      diasMap.set(diaSemana, atual)
+        atual.bruto += sessao.tempo_total_bruto_segundos || 0
+        atual.liquido += sessao.tempo_total_liquido_segundos || 0
+        diasMap.set(diaSemana, atual)
+      }
     })
 
     // Converter para formato esperado (Segunda = 1, Domingo = 0)
@@ -2141,7 +2145,7 @@ export class DashboardAnalyticsService {
       })
     }
 
-    const atividadeIds = [...new Set((progressosAtividades ?? []).map((p: { atividade_id: string }) => p.atividade_id))]
+    const atividadeIds = [...new Set((progressosAtividades ?? []).map((p: { atividade_id: string | null }) => p.atividade_id).filter((id): id is string => Boolean(id)))]
     const atividadeIdToModuloId = new Map<string, string>()
 
     for (const idsChunk of chunk(atividadeIds, 900)) {
