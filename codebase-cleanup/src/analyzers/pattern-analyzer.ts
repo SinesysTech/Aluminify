@@ -4,7 +4,7 @@
  */
 
 import { SourceFile, Node, SyntaxKind } from 'ts-morph';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import type {
   PatternAnalyzer,
   FileInfo,
@@ -64,7 +64,7 @@ export abstract class BasePatternAnalyzer implements PatternAnalyzer {
     const codeSnippet = this.getCodeSnippet(params.node);
 
     return {
-      id: uuidv4(),
+      id: randomUUID(),
       type: params.type,
       severity: params.severity,
       category: params.category,
