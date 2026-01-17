@@ -135,6 +135,7 @@ export class StudentService {
           role: 'aluno',
           full_name: fullName,
           must_change_password: true,
+          empresa_id: payload.empresaId, // Para isolamento multi-tenant
         },
       });
 
@@ -156,6 +157,7 @@ export class StudentService {
 
     return this.repository.create({
       id: studentId,
+      empresaId: payload.empresaId, // Para isolamento multi-tenant
       fullName,
       email,
       cpf,

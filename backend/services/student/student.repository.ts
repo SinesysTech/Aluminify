@@ -63,8 +63,12 @@ function mapRow(
   row: StudentRow,
   courses: StudentCourseSummary[] = []
 ): Student {
+  // Cast para acessar empresa_id (será gerado após migration)
+  const rowWithEmpresa = row as StudentRow & { empresa_id?: string | null };
+
   return {
     id: row.id,
+    empresaId: rowWithEmpresa.empresa_id ?? null,
     fullName: row.nome_completo,
     email: row.email,
     cpf: row.cpf,
@@ -237,8 +241,10 @@ export class StudentRepositoryImpl implements StudentRepository {
       );
     }
 
-    const insertData: StudentInsert = {
+    // Cast para incluir empresa_id (será gerado após migration)
+    const insertData = {
       id: payload.id,
+      empresa_id: payload.empresaId ?? null,
       nome_completo: payload.fullName ?? null,
       email: payload.email.toLowerCase(),
       cpf: payload.cpf ?? null,
@@ -251,7 +257,7 @@ export class StudentRepositoryImpl implements StudentRepository {
       twitter: payload.twitter ?? null,
       must_change_password: payload.mustChangePassword ?? false,
       senha_temporaria: payload.temporaryPassword ?? null,
-    };
+    } as StudentInsert & { empresa_id?: string | null };
 
     const { data, error } = await this.client
       .from(TABLE)
