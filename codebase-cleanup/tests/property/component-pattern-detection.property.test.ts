@@ -20,11 +20,9 @@ import { ComponentPatternAnalyzer } from '../../src/analyzers/component-pattern-
 import type { FileInfo } from '../../src/types';
 
 describe('Property 12: Component Prop Drilling Detection', () => {
-  let analyzer: ComponentPatternAnalyzer;
   let project: Project;
 
   beforeEach(() => {
-    analyzer = new ComponentPatternAnalyzer();
     project = new Project({
       useInMemoryFileSystem: true,
       compilerOptions: {
@@ -47,6 +45,8 @@ describe('Property 12: Component Prop Drilling Detection', () => {
   const parseCode = (code: string): SourceFile => {
     return project.createSourceFile('test.tsx', code, { overwrite: true });
   };
+
+  const createAnalyzer = () => new ComponentPatternAnalyzer();
 
   // ============================================================================
   // Arbitrary Generators for Component Code Patterns
@@ -215,6 +215,7 @@ function ${name}(props) {
       fc.asyncProperty(
         propDrillingChainArb.filter(chain => chain.depth > 3),
         async (chain) => {
+          const analyzer = createAnalyzer();
           const code = chain.code;
           const ast = parseCode(code);
           const fileInfo = createFileInfo('components/PropDrilling.tsx');
@@ -394,7 +395,6 @@ describe('Property 13: Component Pattern Inconsistency Detection', () => {
 
   const createFileInfo = (relativePath: string): FileInfo => ({
     path: `/test/${relativePath}`,
-    relativePath,
     relativePath,
     extension: '.tsx',
     size: 1000,
@@ -770,3 +770,167 @@ function ${name}({ items }) {
       { numRuns: 100 }
     );
   });
+
+  it('should provide actionable recommendations for all inconsistencies', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.tuple(
+          fc.array(simpleComponentArb, { minLength: 2, maxLength: 4 }),
+          fc.array(simpleComponentArb, { minLength: 2, maxLength: 4 })
+        ),
+        async ([group1, group2]) => {
+          const allComponents = [...group1, ...group2];
+          const code = allComponents.map(c => c.code).join('\n\n');
+
+          const ast = parseCode(code);
+          const fileInfo = createFileInfo('components/All.tsx');
+          const issues = await analyzer.analyze(fileInfo, ast);
+
+          // All issues should have recommendations
+          issues.forEach(issue => {
+            expect(issue.recommendation).toBeTruthy();
+            expect(issue.recommendation.length).toBeGreaterThan(20);
+            expect(issue.estimatedEffort).toBeDefined();
+            expect(issue.severity).toBeDefined();
+            expect(issue.tags).toBeDefined();
+            expect(issue.tags.length).toBeGreaterThan(0);
+            expect(issue.category).toBe('components');
+          });
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('should handle files with no components without errors', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.stringMatching(/^[a-z][a-zA-Z0-9]{5,20}$/),
+        async (functionName) => {
+          const code = `
+function ${functionName}(items: Item[]): number {
+  return items.reduce((sum, item) => sum + item.price, 0);
+}`;
+
+          const ast = parseCode(code);
+          const fileInfo = createFileInfo('utils/math.tsx');
+          const issues = await analyzer.analyze(fileInfo, ast);
+
+          expect(issues).toEqual([]);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('should correctly categorize issue severity', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        simpleComponentArb,
+        async (component) => {
+          const code = component.code;
+          const ast = parseCode(code);
+          const fileInfo = createFileInfo('components/Test.tsx');
+          const issues = await analyzer.analyze(fileInfo, ast);
+
+          // All issues should have valid severity
+          issues.forEach(issue => {
+            expect(['critical', 'high', 'medium', 'low']).toContain(issue.severity);
+          });
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  // ============================================================================
+  // Integration Tests: Multiple Pattern Types
+  // ============================================================================
+
+  it('should detect multiple types of inconsistencies in same file', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.record({
+          propPatternMix: fc.tuple(
+            simpleComponentArb.filter(c => c.propPattern === 'destructuring'),
+            simpleComponentArb.filter(c => c.propPattern === 'object')
+          ),
+          styleMix: fc.tuple(
+            simpleComponentArb.filter(c => c.style === 'function'),
+            simpleComponentArb.filter(c => c.style === 'arrow')
+          ),
+          exportMix: fc.tuple(
+            simpleComponentArb.filter(c => c.exportPattern === 'default'),
+            simpleComponentArb.filter(c => c.exportPattern === 'named')
+          ),
+        }),
+        async ({ propPatternMix, styleMix, exportMix }) => {
+          const allComponents = [
+            ...propPatternMix,
+            ...styleMix,
+            ...exportMix,
+          ];
+          const code = allComponents.map(c => c.code).join('\n\n');
+
+          const ast = parseCode(code);
+          const fileInfo = createFileInfo('components/Mixed.tsx');
+          const issues = await analyzer.analyze(fileInfo, ast);
+
+          // Should detect multiple issue types
+          expect(issues.length).toBeGreaterThan(0);
+
+          // Should have issues from different categories
+          const issueTypes = new Set(issues.map(i => i.type));
+          expect(issueTypes.size).toBeGreaterThan(0);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+
+  it('should detect similar component structures for abstraction opportunities', async () => {
+    await fc.assert(
+      fc.asyncProperty(
+        fc.array(componentNameArb, { minLength: 2, maxLength: 3 }),
+        propNameArb,
+        async (names, propName) => {
+          const uniqueNames = [...new Set(names)];
+          if (uniqueNames.length < 2) {
+            return;
+          }
+
+          // Create very similar components
+          const components = uniqueNames.map(name => `
+function ${name}({ ${propName} }) {
+  const [state, setState] = useState(null);
+  
+  useEffect(() => {
+    fetchData().then(setState);
+  }, []);
+  
+  return (
+    <div className="container">
+      <h1>{${propName}}</h1>
+      <p>{state}</p>
+    </div>
+  );
+}`);
+
+          const code = components.join('\n\n');
+          const ast = parseCode(code);
+          const fileInfo = createFileInfo('components/Similar.tsx');
+          const issues = await analyzer.analyze(fileInfo, ast);
+
+          // Should detect similar structures
+          const similarityIssues = issues.filter(
+            issue => issue.type === 'code-duplication' && 
+                     issue.description.includes('similar structures')
+          );
+
+          expect(similarityIssues.length).toBeGreaterThan(0);
+        }
+      ),
+      { numRuns: 100 }
+    );
+  });
+});
