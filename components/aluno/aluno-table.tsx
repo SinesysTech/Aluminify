@@ -13,7 +13,7 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
-import { ArrowUpDown, MoreHorizontal, Pencil, Trash2, Plus, Users, UploadCloud, FileDown } from 'lucide-react'
+import { ArrowUpDown, MoreHorizontal, Pencil, Trash2, Plus, Users, UploadCloud, FileDown, Eye } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -175,7 +175,7 @@ export function AlunoTable() {
   const [coursesLoading, setCoursesLoading] = React.useState(false)
   const [createPasswordTouched, setCreatePasswordTouched] = React.useState(false)
   const [editPasswordTouched, setEditPasswordTouched] = React.useState(false)
-  
+
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
   const [editDialogOpen, setEditDialogOpen] = React.useState(false)
@@ -482,10 +482,10 @@ export function AlunoTable() {
         } else if (err.status === 500) {
           // Verificar se é erro de email duplicado
           const errorText = err.data?.error || err.message || ''
-          if (errorText.includes('email address has already been registered') || 
-              errorText.includes('email já está registrado') ||
-              errorText.includes('email já cadastrado') ||
-              errorText.includes('already been registered')) {
+          if (errorText.includes('email address has already been registered') ||
+            errorText.includes('email já está registrado') ||
+            errorText.includes('email já cadastrado') ||
+            errorText.includes('already been registered')) {
             errorMessage = 'Este email já está cadastrado no sistema. Por favor, use outro email.'
           } else {
             errorMessage = `Erro interno do servidor: ${errorText || 'Erro desconhecido'}`
@@ -498,10 +498,10 @@ export function AlunoTable() {
         }
       } else if (err instanceof Error) {
         // Verificar se a mensagem de erro contém informação sobre email duplicado
-        if (err.message.includes('email address has already been registered') || 
-            err.message.includes('email já está registrado') ||
-            err.message.includes('email já cadastrado') ||
-            err.message.includes('already been registered')) {
+        if (err.message.includes('email address has already been registered') ||
+          err.message.includes('email já está registrado') ||
+          err.message.includes('email já cadastrado') ||
+          err.message.includes('already been registered')) {
           errorMessage = 'Este email já está cadastrado no sistema. Por favor, use outro email.'
         } else {
           errorMessage = err.message
@@ -575,13 +575,41 @@ export function AlunoTable() {
       await fetchAlunos()
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
-      const errorMessage = err instanceof ApiClientError 
-        ? err.data?.error || err.message 
+      const errorMessage = err instanceof ApiClientError
+        ? err.data?.error || err.message
         : 'Erro ao atualizar aluno'
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleImpersonate = async (aluno: Aluno) => {
+    try {
+      setLoading(true)
+
+      const response = await apiClient.post<{ success: boolean; context: unknown }>('/api/auth/impersonate', {
+        studentId: aluno.id
+      })
+
+      if (response?.success) {
+        setSuccessMessage(`Visualizando como ${aluno.fullName || aluno.email}`)
+        // Redirecionar para dashboard do aluno
+        // Forçamos um refresh completo para garantir que o contexto seja atualizado
+        window.location.href = '/aluno/dashboard'
+      }
+    } catch (err) {
+      let errorMessage = 'Erro ao iniciar visualização como aluno'
+      if (err instanceof ApiClientError) {
+        errorMessage = err.data?.error || err.message || errorMessage
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      setError(errorMessage)
+      setTimeout(() => setError(null), 5000)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -603,8 +631,8 @@ export function AlunoTable() {
       await fetchAlunos()
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
-      const errorMessage = err instanceof ApiClientError 
-        ? err.data?.error || err.message 
+      const errorMessage = err instanceof ApiClientError
+        ? err.data?.error || err.message
         : 'Erro ao excluir aluno'
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
@@ -744,6 +772,11 @@ export function AlunoTable() {
                 <Trash2 className="mr-2 h-4 w-4" />
                 Excluir
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleImpersonate(aluno)}>
+                <Eye className="mr-2 h-4 w-4" />
+                Visualizar como Aluno
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -795,260 +828,260 @@ export function AlunoTable() {
                     </DialogHeader>
                     <Form {...createForm}>
                       <form onSubmit={createForm.handleSubmit(handleCreate)} className="space-y-3">
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        <FormField
-                          control={createForm.control}
-                          name="fullName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Nome Completo</FormLabel>
-                              <FormControl>
-                                <Input placeholder="João Silva" {...field} value={field.value || ''} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email *</FormLabel>
-                              <FormControl>
-                                <Input type="email" placeholder="joao@example.com" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <FormField
-                          control={createForm.control}
-                          name="cpf"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>CPF</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="000.000.000-00"
-                                  inputMode="numeric"
-                                  maxLength={14}
-                                  {...field}
-                                  value={field.value || ''}
-                                  onChange={(e) => field.onChange(formatCPF(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="phone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Telefone</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="(11) 99999-9999"
-                                  inputMode="numeric"
-                                  maxLength={15}
-                                  {...field}
-                                  value={field.value || ''}
-                                  onChange={(e) => field.onChange(formatBRPhone(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="birthDate"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Data de Nascimento</FormLabel>
-                              <FormControl>
-                                <DatePicker
-                                  value={field.value ? (() => {
-                                    // Converter string YYYY-MM-DD para Date sem problemas de timezone
-                                    const [year, month, day] = field.value.split('-').map(Number)
-                                    return new Date(year, month - 1, day)
-                                  })() : null}
-                                  onChange={(date) => {
-                                    if (date) {
-                                      // Converter Date para string YYYY-MM-DD sem problemas de timezone
-                                      const year = date.getFullYear()
-                                      const month = String(date.getMonth() + 1).padStart(2, '0')
-                                      const day = String(date.getDate()).padStart(2, '0')
-                                      field.onChange(`${year}-${month}-${day}`)
-                                    } else {
-                                      field.onChange(null)
-                                    }
-                                  }}
-                                  placeholder="dd/mm/yyyy"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <FormField
-                          control={createForm.control}
-                          name="address"
-                          render={({ field }) => (
-                            <FormItem className="md:col-span-2">
-                              <FormLabel>Endereço</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Rua, número, bairro" {...field} value={field.value || ''} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="zipCode"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>CEP</FormLabel>
-                              <FormControl>
-                                <Input placeholder="00000-000" {...field} value={field.value || ''} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <FormField
-                          control={createForm.control}
-                          name="enrollmentNumber"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Número de Matrícula</FormLabel>
-                              <FormControl>
-                                <Input placeholder="12345" {...field} value={field.value || ''} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="instagram"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Instagram</FormLabel>
-                              <FormControl>
-                                <Input placeholder="@usuario" {...field} value={field.value || ''} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="twitter"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Twitter</FormLabel>
-                              <FormControl>
-                                <Input placeholder="@usuario" {...field} value={field.value || ''} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <FormField
-                        control={createForm.control}
-                        name="courseIds"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Cursos *</FormLabel>
-                            <div className="space-y-2 rounded-md border p-3">
-                              {coursesLoading ? (
-                                <p className="text-sm text-muted-foreground">Carregando cursos...</p>
-                              ) : courseOptions.length === 0 ? (
-                                <p className="text-sm text-muted-foreground">
-                                  Nenhum curso disponível. Cadastre um curso antes de adicionar alunos.
-                                </p>
-                              ) : (
-                                courseOptions.map((course) => {
-                                  const selected = field.value?.includes(course.id)
-                                  return (
-                                    <label key={course.id} className="flex items-center gap-2 text-sm">
-                                      <Checkbox
-                                        checked={selected}
-                                        onCheckedChange={(checked) => {
-                                          const current = field.value ?? []
-                                          if (checked) {
-                                            field.onChange([...current, course.id])
-                                          } else {
-                                            field.onChange(current.filter((id) => id !== course.id))
-                                          }
-                                          setCreatePasswordTouched(false)
-                                        }}
-                                      />
-                                      {course.name}
-                                    </label>
-                                  )
-                                })
-                              )}
-                            </div>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={createForm.control}
-                        name="temporaryPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Senha Temporária *</FormLabel>
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <FormControl>
-                          <Input
-                            placeholder="Senha provisória do aluno"
-                            {...field}
-                            value={field.value || ''}
-                            onChange={(event) => {
-                              setCreatePasswordTouched(true)
-                              field.onChange(event.target.value)
-                            }}
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                          <FormField
+                            control={createForm.control}
+                            name="fullName"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Nome Completo</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="João Silva" {...field} value={field.value || ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </FormControl>
-                        <Button type="button" variant="outline" onClick={handleGenerateCreatePassword} className="w-full sm:w-auto">
-                          Gerar
-                        </Button>
-                      </div>
-                            <p className="text-xs text-muted-foreground">
-                              Esta senha será exibida ao professor e o aluno precisará alterá-la no primeiro acesso.
-                            </p>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <DialogFooter>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setCreateDialogOpen(false)}
-                          disabled={isSubmitting}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button type="submit" disabled={isSubmitting}>
-                          {isSubmitting ? 'Criando...' : 'Criar'}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
+                          <FormField
+                            control={createForm.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email *</FormLabel>
+                                <FormControl>
+                                  <Input type="email" placeholder="joao@example.com" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                          <FormField
+                            control={createForm.control}
+                            name="cpf"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>CPF</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="000.000.000-00"
+                                    inputMode="numeric"
+                                    maxLength={14}
+                                    {...field}
+                                    value={field.value || ''}
+                                    onChange={(e) => field.onChange(formatCPF(e.target.value))}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name="phone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Telefone</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    placeholder="(11) 99999-9999"
+                                    inputMode="numeric"
+                                    maxLength={15}
+                                    {...field}
+                                    value={field.value || ''}
+                                    onChange={(e) => field.onChange(formatBRPhone(e.target.value))}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name="birthDate"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Data de Nascimento</FormLabel>
+                                <FormControl>
+                                  <DatePicker
+                                    value={field.value ? (() => {
+                                      // Converter string YYYY-MM-DD para Date sem problemas de timezone
+                                      const [year, month, day] = field.value.split('-').map(Number)
+                                      return new Date(year, month - 1, day)
+                                    })() : null}
+                                    onChange={(date) => {
+                                      if (date) {
+                                        // Converter Date para string YYYY-MM-DD sem problemas de timezone
+                                        const year = date.getFullYear()
+                                        const month = String(date.getMonth() + 1).padStart(2, '0')
+                                        const day = String(date.getDate()).padStart(2, '0')
+                                        field.onChange(`${year}-${month}-${day}`)
+                                      } else {
+                                        field.onChange(null)
+                                      }
+                                    }}
+                                    placeholder="dd/mm/yyyy"
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                          <FormField
+                            control={createForm.control}
+                            name="address"
+                            render={({ field }) => (
+                              <FormItem className="md:col-span-2">
+                                <FormLabel>Endereço</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Rua, número, bairro" {...field} value={field.value || ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name="zipCode"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>CEP</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="00000-000" {...field} value={field.value || ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                          <FormField
+                            control={createForm.control}
+                            name="enrollmentNumber"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Número de Matrícula</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="12345" {...field} value={field.value || ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name="instagram"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Instagram</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="@usuario" {...field} value={field.value || ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={createForm.control}
+                            name="twitter"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Twitter</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="@usuario" {...field} value={field.value || ''} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={createForm.control}
+                          name="courseIds"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Cursos *</FormLabel>
+                              <div className="space-y-2 rounded-md border p-3">
+                                {coursesLoading ? (
+                                  <p className="text-sm text-muted-foreground">Carregando cursos...</p>
+                                ) : courseOptions.length === 0 ? (
+                                  <p className="text-sm text-muted-foreground">
+                                    Nenhum curso disponível. Cadastre um curso antes de adicionar alunos.
+                                  </p>
+                                ) : (
+                                  courseOptions.map((course) => {
+                                    const selected = field.value?.includes(course.id)
+                                    return (
+                                      <label key={course.id} className="flex items-center gap-2 text-sm">
+                                        <Checkbox
+                                          checked={selected}
+                                          onCheckedChange={(checked) => {
+                                            const current = field.value ?? []
+                                            if (checked) {
+                                              field.onChange([...current, course.id])
+                                            } else {
+                                              field.onChange(current.filter((id) => id !== course.id))
+                                            }
+                                            setCreatePasswordTouched(false)
+                                          }}
+                                        />
+                                        {course.name}
+                                      </label>
+                                    )
+                                  })
+                                )}
+                              </div>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={createForm.control}
+                          name="temporaryPassword"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Senha Temporária *</FormLabel>
+                              <div className="flex flex-col sm:flex-row gap-2">
+                                <FormControl>
+                                  <Input
+                                    placeholder="Senha provisória do aluno"
+                                    {...field}
+                                    value={field.value || ''}
+                                    onChange={(event) => {
+                                      setCreatePasswordTouched(true)
+                                      field.onChange(event.target.value)
+                                    }}
+                                  />
+                                </FormControl>
+                                <Button type="button" variant="outline" onClick={handleGenerateCreatePassword} className="w-full sm:w-auto">
+                                  Gerar
+                                </Button>
+                              </div>
+                              <p className="text-xs text-muted-foreground">
+                                Esta senha será exibida ao professor e o aluno precisará alterá-la no primeiro acesso.
+                              </p>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <DialogFooter>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setCreateDialogOpen(false)}
+                            disabled={isSubmitting}
+                          >
+                            Cancelar
+                          </Button>
+                          <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? 'Criando...' : 'Criar'}
+                          </Button>
+                        </DialogFooter>
+                      </form>
+                    </Form>
                   </DialogContent>
                 </Dialog>
                 <Dialog open={importDialogOpen} onOpenChange={handleImportDialogChange}>
@@ -1265,9 +1298,9 @@ export function AlunoTable() {
                               {header.isPlaceholder
                                 ? null
                                 : flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
                             </TableHead>
                           )
                         })}

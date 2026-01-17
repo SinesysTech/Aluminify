@@ -1,29 +1,41 @@
 'use server'
 
 import { createClient } from '@/lib/server'
+import type { Database } from '@/lib/database.types'
+import { revalidatePath } from 'next/cache'
+import { validateCancellation, validateAppointment, generateAvailableSlots } from '@/lib/agendamento-validations'
+import { generateMeetingLink } from '@/lib/meeting-providers'
 
-// Tipos para tabelas que não estão no schema gerado
-type AgendamentoRecorrencia = {
-  id?: string
-  professor_id: string
-  dia_semana: number
-  hora_inicio: string
-  hora_fim: string
-  ativo: boolean
-  data_inicio: string
-  data_fim: string | null
-  duracao_slot_minutos?: number
-}
+// =============================================
+// Type Aliases from Generated Database Types
+// =============================================
 
-type AgendamentoBloqueio = {
-  id?: string
-  empresa_id: string
-  professor_id: string | null
-  data_inicio: string
-  data_fim: string
-  motivo?: string | null
-}
+// Tables that exist in the schema - use these for type inference
+type DbAgendamentoRecorrencia = Database['public']['Tables']['agendamento_recorrencia']['Row']
+type DbAgendamentoBloqueio = Database['public']['Tables']['agendamento_bloqueios']['Row']
+type DbAgendamento = Database['public']['Tables']['agendamentos']['Row']
+type DbAgendamentoConfiguracoes = Database['public']['Tables']['agendamento_configuracoes']['Row']
 
+// Enums from schema
+type TipoBloqueioEnum = Database['public']['Enums']['enum_tipo_bloqueio']
+type TipoServicoEnum = Database['public']['Enums']['enum_tipo_servico_agendamento']
+
+// Suppress unused variable warnings - these types document the schema
+void (0 as unknown as DbAgendamento)
+void (0 as unknown as DbAgendamentoConfiguracoes)
+void (0 as unknown as TipoBloqueioEnum)
+void (0 as unknown as TipoServicoEnum)
+
+// =============================================
+// Types for tables NOT in generated schema
+// These require 'as any' casts when used with Supabase client
+// TODO: Apply migrations and regenerate types to remove these
+// =============================================
+
+/**
+ * View for company-wide appointments - not in generated schema
+ * Migration: needs to be created or schema regenerated
+ */
 type VAgendamentosEmpresa = {
   id: string
   professor_id: string
@@ -33,12 +45,47 @@ type VAgendamentosEmpresa = {
   status: string
   empresa_id: string
   professor_nome?: string
+  professor_foto?: string
   aluno_nome?: string
+  aluno_email?: string
+  link_reuniao?: string | null
+  observacoes?: string | null
+  created_at?: string
+  updated_at?: string
   [key: string]: unknown
 }
-import { revalidatePath } from 'next/cache'
-import { validateCancellation, validateAppointment, generateAvailableSlots } from '@/lib/agendamento-validations'
-import { generateMeetingLink } from '@/lib/meeting-providers'
+
+/**
+ * Professor integrations table - not in generated schema
+ * Migration: 20260117_create_professor_integracoes.sql needs to be applied
+ */
+type DbProfessorIntegracao = {
+  id: string
+  professor_id: string
+  provider: 'google' | 'zoom' | 'default'
+  access_token: string | null
+  refresh_token: string | null
+  token_expiry: string | null
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Reports table - not in generated schema
+ * Migration: 20260117_create_agendamento_relatorios.sql needs to be applied
+ */
+type DbAgendamentoRelatorio = {
+  id: string
+  empresa_id: string
+  periodo_inicio: string
+  periodo_fim: string
+  tipo: 'mensal' | 'semanal' | 'customizado'
+  dados_json: unknown // Cast to RelatorioDados when using
+  gerado_em: string
+  gerado_por: string
+  created_at?: string
+  updated_at?: string
+}
 
 export type Disponibilidade = {
   id?: string
@@ -413,7 +460,7 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
     .or(`data_fim.is.null,data_fim.gte.${dateOnly}`)
 
   // Filter and map rules to ensure ativo is boolean
-  const rules = ((rulesData || []) as AgendamentoRecorrencia[])
+  const rules = ((rulesData || []) as DbAgendamentoRecorrencia[])
     .filter((r) => r.ativo === true)
     .map((r) => ({
       dia_semana: r.dia_semana,
@@ -468,7 +515,7 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
       .lte('data_inicio', endOfDay.toISOString())
       .gte('data_fim', startOfDay.toISOString())
     
-    bloqueios = (bloqueiosData as AgendamentoBloqueio[]) || []
+    bloqueios = (bloqueiosData as DbAgendamentoBloqueio[]) || []
   }
 
   // Add bloqueios to existing slots to exclude them
@@ -1196,12 +1243,12 @@ export async function getIntegracaoProfessor(professorId: string): Promise<Profe
   }
 
   // Map database data to ProfessorIntegracao type
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const row = data as any
+  // Table not in generated schema, using local type definition
+  const row = data as unknown as DbProfessorIntegracao
   return {
     id: row.id,
     professor_id: row.professor_id,
-    provider: row.provider as 'google' | 'zoom' | 'default',
+    provider: row.provider,
     access_token: row.access_token,
     refresh_token: row.refresh_token,
     token_expiry: row.token_expiry,
@@ -1302,8 +1349,8 @@ export async function getProfessoresDisponibilidade(empresaId: string, date: Dat
 
   // Build result for each professor
   const result = professores.map(professor => {
-    const profRecorrencias = ((recorrencias || []) as AgendamentoRecorrencia[]).filter((r) => r.professor_id === professor.id)
-    const profBloqueios = ((bloqueios || []) as AgendamentoBloqueio[]).filter((b) => !b.professor_id || b.professor_id === professor.id)
+    const profRecorrencias = ((recorrencias || []) as DbAgendamentoRecorrencia[]).filter((r) => r.professor_id === professor.id)
+    const profBloqueios = ((bloqueios || []) as DbAgendamentoBloqueio[]).filter((b) => !b.professor_id || b.professor_id === professor.id)
     type AgendamentoRow = {
       professor_id: string
       data_inicio: string
@@ -1466,7 +1513,7 @@ export async function getRecorrencias(professorId: string): Promise<Recorrencia[
     throw new Error('Failed to fetch recorrencias')
   }
 
-  type RecorrenciaRow = AgendamentoRecorrencia & {
+  type RecorrenciaRow = DbAgendamentoRecorrencia & {
     empresa_id: string
     tipo_servico: 'plantao' | 'mentoria'
     created_at?: string | null
@@ -1524,7 +1571,7 @@ export async function createRecorrencia(data: Omit<Recorrencia, 'id' | 'created_
   revalidatePath('/professor/disponibilidade')
   revalidatePath('/agendamentos')
   
-  type RecorrenciaRow = AgendamentoRecorrencia & {
+  type RecorrenciaRow = DbAgendamentoRecorrencia & {
     empresa_id: string
     tipo_servico: 'plantao' | 'mentoria'
     created_at?: string | null
@@ -1592,7 +1639,7 @@ export async function updateRecorrencia(id: string, data: Partial<Omit<Recorrenc
   revalidatePath('/professor/disponibilidade')
   revalidatePath('/agendamentos')
   
-  type RecorrenciaRow = AgendamentoRecorrencia & {
+  type RecorrenciaRow = DbAgendamentoRecorrencia & {
     empresa_id: string
     tipo_servico: 'plantao' | 'mentoria'
     created_at?: string | null
@@ -2100,17 +2147,17 @@ export async function getRelatorios(empresaId: string, limit?: number): Promise<
     return []
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const rows = (data || []) as unknown as any[]
+  // Table not in generated schema, using local type definition
+  const rows = (data || []) as unknown as DbAgendamentoRelatorio[]
   return rows.map((item) => ({
-    id: item.id as string,
-    empresa_id: item.empresa_id as string,
-    periodo_inicio: item.periodo_inicio as string,
-    periodo_fim: item.periodo_fim as string,
+    id: item.id,
+    empresa_id: item.empresa_id,
+    periodo_inicio: item.periodo_inicio,
+    periodo_fim: item.periodo_fim,
     tipo: item.tipo as RelatorioTipo,
     dados_json: item.dados_json as RelatorioDados,
-    gerado_em: item.gerado_em as string,
-    gerado_por: item.gerado_por as string,
+    gerado_em: item.gerado_em,
+    gerado_por: item.gerado_por,
     created_at: item.created_at ?? undefined,
     updated_at: item.updated_at ?? undefined,
   }))
@@ -2134,8 +2181,8 @@ export async function getRelatorioById(id: string): Promise<Relatorio | null> {
 
   if (!data) return null
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const row = data as any
+  // Table not in generated schema, using local type definition
+  const row = data as unknown as DbAgendamentoRelatorio
   return {
     id: row.id,
     empresa_id: row.empresa_id,
@@ -2298,7 +2345,7 @@ export async function getProfessoresDisponiveis(empresaId?: string): Promise<Pro
 
   // Build result for each professor
   const result: ProfessorDisponivel[] = professores.map(professor => {
-    const profRecorrencias = ((recorrencias || []) as AgendamentoRecorrencia[])
+    const profRecorrencias = ((recorrencias || []) as DbAgendamentoRecorrencia[])
       .filter(r => r.professor_id === professor.id)
 
     const profAgendamentos = (agendamentos || [])
@@ -2308,7 +2355,7 @@ export async function getProfessoresDisponiveis(empresaId?: string): Promise<Pro
         end: new Date(a.data_fim)
       }))
 
-    const profBloqueios = ((bloqueios || []) as AgendamentoBloqueio[])
+    const profBloqueios = ((bloqueios || []) as DbAgendamentoBloqueio[])
       .filter(b => !b.professor_id || b.professor_id === professor.id)
       .map(b => ({
         start: new Date(b.data_inicio),

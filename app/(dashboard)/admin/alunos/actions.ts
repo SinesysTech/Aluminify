@@ -1,19 +1,41 @@
 "use server";
 
-import { studentService } from "@/backend/services/student";
+import { createClient } from "@/lib/server";
+import { createStudentService } from "@/backend/services/student";
+import { getAuthenticatedUser } from "@/lib/auth";
 import { CreateStudentInput } from "@/types/shared/entities/user";
 import { revalidatePath } from "next/cache";
 
 export async function createStudentAction(data: CreateStudentInput) {
   try {
-    // In a real app, we should validate the user's session/role here
-    // For now assuming the page's middleware handles access control
+    // Obter usuário autenticado para pegar empresaId
+    const user = await getAuthenticatedUser();
 
-    const newStudent = await studentService.create(data);
+    if (!user) {
+      return { success: false, error: "Usuário não autenticado" };
+    }
+
+    if (!user.empresaId) {
+      return { success: false, error: "Usuário não está associado a uma empresa" };
+    }
+
+    // Usar cliente com contexto do usuário para respeitar RLS
+    const supabase = await createClient();
+    const studentService = createStudentService(supabase);
+
+    // Passar empresaId do usuário para o aluno
+    const newStudent = await studentService.create({
+      ...data,
+      empresaId: user.empresaId,
+    });
+
     revalidatePath("/admin/alunos");
+    revalidatePath("/admin/empresa/alunos");
+    revalidatePath("/aluno");
+
     return { success: true, data: newStudent };
   } catch (error) {
-    console.error("Values error:", error);
+    console.error("Error creating student:", error);
     return { success: false, error: (error as Error).message };
   }
 }
