@@ -163,8 +163,40 @@ async function postHandler(request: AuthenticatedRequest) {
       );
     }
 
-    const student = await studentService.create({
+    // Obter empresaId do usuário autenticado ou do body
+    const empresaId = body?.empresaId || request.user?.empresaId;
+
+    if (!empresaId) {
+      return NextResponse.json(
+        {
+          error: "empresaId é obrigatório para criar um aluno",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Usar cliente com contexto do usuário
+    const authHeader = request.headers.get("authorization");
+    const token = authHeader?.replace("Bearer ", "");
+
+    let service = studentService;
+
+    if (token && request.user) {
+      const { getDatabaseClientAsUser } =
+        await import("@/backend/clients/database");
+      const { StudentRepositoryImpl } =
+        await import("@/backend/services/student/student.repository");
+      const { StudentService } =
+        await import("@/backend/services/student/student.service");
+
+      const client = getDatabaseClientAsUser(token);
+      const repository = new StudentRepositoryImpl(client);
+      service = new StudentService(repository);
+    }
+
+    const student = await service.create({
       id: body?.id,
+      empresaId, // Passando empresaId para isolamento multi-tenant
       fullName: body?.fullName,
       email: body?.email,
       cpf: body?.cpf,
