@@ -218,7 +218,13 @@ export default function ConteudosClientPage() {
           setError('Acesso negado. Apenas professores podem acessar esta página.')
         }
       } catch (err) {
-        console.error('Erro ao verificar permissões:', err)
+        console.error('Erro ao verificar permissões:', {
+          error: err,
+          errorString: String(err),
+          errorJSON: JSON.stringify(err, Object.getOwnPropertyNames(err)),
+          errorType: typeof err,
+          errorKeys: err && typeof err === 'object' ? Object.keys(err) : [],
+        })
         setIsProfessor(false)
       }
     }
@@ -238,7 +244,13 @@ export default function ConteudosClientPage() {
         if (error) throw error
         setDisciplinas(data || [])
       } catch (err) {
-        console.error('Erro ao carregar disciplinas:', err)
+        console.error('Erro ao carregar disciplinas:', {
+          error: err,
+          errorString: String(err),
+          errorJSON: JSON.stringify(err, Object.getOwnPropertyNames(err)),
+          errorType: typeof err,
+          errorKeys: err && typeof err === 'object' ? Object.keys(err) : [],
+        })
         setError('Erro ao carregar disciplinas')
       }
     }
@@ -299,7 +311,13 @@ export default function ConteudosClientPage() {
           setDisciplinaSelecionada('')
         }
       } catch (err) {
-        console.error('Erro ao carregar disciplinas do curso:', err)
+        console.error('Erro ao carregar disciplinas do curso:', {
+          error: err,
+          errorString: String(err),
+          errorJSON: JSON.stringify(err, Object.getOwnPropertyNames(err)),
+          errorType: typeof err,
+          errorKeys: err && typeof err === 'object' ? Object.keys(err) : [],
+        })
         setDisciplinasDoCurso([])
         setDisciplinaSelecionada('')
       }
@@ -416,7 +434,13 @@ export default function ConteudosClientPage() {
         }
         setRegras(body.data || [])
       } catch (err) {
-        console.error('Erro ao carregar regras:', err)
+        console.error('Erro ao carregar regras:', {
+          error: err,
+          errorString: String(err),
+          errorJSON: JSON.stringify(err, Object.getOwnPropertyNames(err)),
+          errorType: typeof err,
+          errorKeys: err && typeof err === 'object' ? Object.keys(err) : [],
+        })
         setError(err instanceof Error ? err.message : 'Erro ao carregar regras de atividades')
       }
     }
@@ -509,6 +533,8 @@ export default function ConteudosClientPage() {
           error: err,
           errorString: String(err),
           errorJSON: JSON.stringify(err, Object.getOwnPropertyNames(err)),
+          errorType: typeof err,
+          errorKeys: err && typeof err === 'object' ? Object.keys(err) : [],
           disciplinaSelecionada,
           cursoSelecionado,
         })
@@ -575,7 +601,14 @@ export default function ConteudosClientPage() {
           setAtividadesPorModulo({})
         }
       } catch (err) {
-        console.error('Erro ao carregar módulos e aulas:', err)
+        console.error('Erro ao carregar módulos e aulas:', {
+          error: err,
+          errorString: String(err),
+          errorJSON: JSON.stringify(err, Object.getOwnPropertyNames(err)),
+          errorType: typeof err,
+          errorKeys: err && typeof err === 'object' ? Object.keys(err) : [],
+          frenteSelecionada,
+        })
         setError('Erro ao carregar conteúdo')
       } finally {
         setIsLoadingContent(false)
