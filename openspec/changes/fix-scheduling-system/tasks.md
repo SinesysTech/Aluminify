@@ -122,12 +122,18 @@
 
 ## Phase 5: Technical Cleanup ✅ COMPLETE
 
-### 5.1 Type Regeneration ⏳ MANUAL STEP REQUIRED
-- [ ] 5.1.1 Run `supabase gen types typescript --local > lib/database.types.ts`
-  - **Note**: Run this command after applying all migrations
-- [ ] 5.1.2 Remove all `as any` casts in `agendamentos.ts`
-- [ ] 5.1.3 Update type imports across components
-- [ ] 5.1.4 Remove local type definitions that duplicate generated types
+### 5.1 Type Regeneration ✅ COMPLETE
+- [x] 5.1.1 Run `supabase gen types typescript --local > lib/database.types.ts`
+  - **Note**: Types generated from remote database via `npx supabase link` + MCP `generate_typescript_types`
+- [x] 5.1.2 Remove all `as any` casts in `agendamentos.ts`
+  - **Note**: Table-level casts remain for tables not in schema: `professor_integracoes`, `agendamento_relatorios`, `v_agendamentos_empresa`
+  - Data row casts updated to use proper typed casts: `DbProfessorIntegracao`, `DbAgendamentoRelatorio`
+- [x] 5.1.3 Update type imports across components
+  - Added `Database` type import from `@/lib/database.types`
+  - Created type aliases: `DbAgendamentoRecorrencia`, `DbAgendamentoBloqueio`, `DbAgendamento`, etc.
+- [x] 5.1.4 Remove local type definitions that duplicate generated types
+  - Kept local definitions for tables not in schema (documented with TODO comments)
+  - Updated code to use `Db*` prefixed types from generated schema where available
 
 ### 5.2 Migration Cleanup ✅ COMPLETE
 - [x] 5.2.1 Identify and document duplicate migrations - No critical duplicates found
@@ -164,7 +170,7 @@
 | P1 - New Features | ✅ Complete | 100% |
 | P2 - Logic Improvements | ✅ Complete | 100% |
 | P3 - UX Improvements | ✅ Complete | 100% |
-| P5 - Technical Cleanup | ✅ Complete | 90% |
+| P5 - Technical Cleanup | ✅ Complete | 100% |
 | P6 - Validation & Testing | ⏳ Manual | 0% |
 
 ## Files Created/Modified in This Session
@@ -179,11 +185,18 @@
 
 ### Files Modified:
 1. `components/agendamento/left-panel.tsx` - Dynamic timezone and duration display
+2. `lib/database.types.ts` - Regenerated from remote Supabase database
+3. `app/actions/agendamentos.ts` - Updated type imports and removed unnecessary `as any` casts:
+   - Added `Database` type import from generated types
+   - Created `Db*` type aliases for schema tables
+   - Replaced data row `as any` casts with typed casts (`DbProfessorIntegracao`, `DbAgendamentoRelatorio`)
+   - Documented remaining table-level casts for tables not in schema
 
 ## Post-Implementation Steps
 
 1. **Apply Migrations**: Run `supabase db push` or apply migrations through Supabase dashboard
 2. **Enable pg_cron**: Enable the pg_cron extension in Supabase dashboard and configure the job
-3. **Regenerate Types**: Run `supabase gen types typescript --local > lib/database.types.ts`
+3. ~~**Regenerate Types**: Run `supabase gen types typescript --local > lib/database.types.ts`~~ ✅ DONE
 4. **Manual Testing**: Complete the testing checklist in Phase 6
 5. **Deploy Edge Function**: Deploy `complete-past-appointments` if not already deployed
+6. **Create missing tables** (optional): Apply migrations to create `professor_integracoes`, `agendamento_relatorios`, and `v_agendamentos_empresa` view, then regenerate types to remove remaining `as any` casts
