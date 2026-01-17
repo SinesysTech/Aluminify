@@ -79,6 +79,21 @@ export default function SignUpPage() {
 
       if (!response.ok) {
         const message = data?.error || 'Erro ao inicializar instância'
+
+        if (message.includes('já está cadastrado') || message.includes('already registered')) {
+          toast({
+            title: 'Conta já existe',
+            description: 'Este email já possui uma conta. Por favor, faça login.',
+            variant: 'destructive',
+            action: (
+              <Link href="/auth" className="inline-flex h-8 shrink-0 items-center justify-center rounded-md border text-sm font-medium transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                Fazer Login
+              </Link>
+            ),
+          })
+          return
+        }
+
         toast({
           title: 'Não foi possível criar sua conta',
           description: message,
