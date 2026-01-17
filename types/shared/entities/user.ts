@@ -23,6 +23,7 @@ export interface StudentCourseSummary {
 
 export interface Student {
   id: string;
+  empresaId: string | null;
   fullName: string | null;
   email: string;
   cpf: string | null;
@@ -42,6 +43,7 @@ export interface Student {
 
 export interface CreateStudentInput {
   id?: string;
+  empresaId?: string;
   fullName?: string;
   email: string;
   cpf?: string;
