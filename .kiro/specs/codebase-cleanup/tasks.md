@@ -152,7 +152,7 @@ This implementation plan breaks down the codebase cleanup analysis system into d
     - Identify duplicate component logic
     - _Requirements: 6.4, 6.5_
   
-  - [~] 7.4 Write property tests for component pattern detection
+  - [-] 7.4 Write property tests for component pattern detection
     - **Property 12: Component Prop Drilling Detection**
     - **Property 13: Component Pattern Inconsistency Detection**
     - **Validates: Requirements 6.3, 6.4**
