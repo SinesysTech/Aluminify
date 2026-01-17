@@ -12,8 +12,8 @@
  */
 
 import { SourceFile, Node, SyntaxKind, FunctionDeclaration, ArrowFunction, FunctionExpression, VariableDeclaration } from 'ts-morph';
-import { BasePatternAnalyzer } from './pattern-analyzer';
-import type { FileInfo, Issue, FileCategory } from '../types';
+import { BasePatternAnalyzer } from './pattern-analyzer.js';
+import type { FileInfo, Issue, FileCategory } from '../types.js';
 
 /**
  * Pattern for tracking middleware implementations

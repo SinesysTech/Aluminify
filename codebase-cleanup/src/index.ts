@@ -16,8 +16,14 @@ export * from './analyzers/index.js';
 // Export engine
 export * from './engine/index.js';
 
-// Placeholder for future exports
-// export * from './scanner/index.js';
-// export * from './classifier/index.js';
-// export * from './reporter/index.js';
-// export * from './planner/index.js';
+// Export scanner
+export * from './scanner/index.js';
+
+// Export classifier
+export * from './classifier/index.js';
+
+// Export reporter
+export * from './reporter/index.js';
+
+// Export planner
+export * from './planner/index.js';

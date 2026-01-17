@@ -13,7 +13,7 @@ import type {
   Severity,
   IssueType,
   IssueCategory,
-} from '../types';
+} from '../types.js';
 
 /**
  * Configuration for pattern detection

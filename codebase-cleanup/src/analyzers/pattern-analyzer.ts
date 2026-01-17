@@ -15,7 +15,7 @@ import type {
   EffortLevel,
   CodeLocation,
   FileCategory,
-} from '../types';
+} from '../types.js';
 
 /**
  * Abstract base class that all pattern analyzers must extend

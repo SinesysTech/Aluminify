@@ -4,5 +4,5 @@
  * Exports report generation functionality
  */
 
-export { ReportGeneratorImpl, createReportGenerator } from './report-generator';
-export type { ReportGeneratorConfig } from './report-generator';
+export { ReportGeneratorImpl, createReportGenerator } from './report-generator.js';
+export type { ReportGeneratorConfig } from './report-generator.js';

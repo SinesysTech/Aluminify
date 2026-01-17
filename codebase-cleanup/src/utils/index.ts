@@ -2,4 +2,4 @@
  * Utility functions and helpers
  */
 
-export * from './ast-parser';
+export * from './ast-parser.js';

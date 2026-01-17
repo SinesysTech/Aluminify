@@ -10,4 +10,4 @@ export {
   type AnalysisEngineOptions,
   type FilePerformanceMetrics,
   type PerformanceMetrics,
-} from './analysis-engine';
+} from './analysis-engine.js';

@@ -16,8 +16,8 @@ import type {
   IssueCategory,
   Severity,
   PatternAnalyzer,
-} from '../types';
-import { ASTParser, ParseError } from '../utils/ast-parser';
+} from '../types.js';
+import { ASTParser, ParseError } from '../utils/ast-parser.js';
 
 /**
  * Error thrown when analysis fails

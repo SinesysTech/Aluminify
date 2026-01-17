@@ -4,6 +4,9 @@
   "description": "Systematic codebase cleanup and refactoring analysis tool for Next.js/Supabase applications",
   "main": "dist/index.js",
   "type": "module",
+  "bin": {
+    "codebase-cleanup": "dist/cli/index.js"
+  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
@@ -25,19 +28,21 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "ts-morph": "^24.0.0",
+    "commander": "^13.0.0",
     "minimatch": "^10.0.1",
-    "commander": "^13.0.0"
+    "ts-morph": "^24.0.0",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
     "@types/minimatch": "^5.1.2",
-    "typescript": "^5.7.2",
-    "vitest": "^3.0.0",
-    "fast-check": "^4.5.3",
+    "@types/node": "^22.0.0",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
     "@vitest/coverage-v8": "^3.0.0",
     "eslint": "^9.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0"
+    "fast-check": "^4.5.3",
+    "typescript": "^5.7.2",
+    "vitest": "^3.0.0"
   }
 }

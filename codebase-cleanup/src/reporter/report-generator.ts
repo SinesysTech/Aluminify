@@ -17,7 +17,7 @@ import type {
   Severity,
   IssueCategory,
   IssueType,
-} from '../types';
+} from '../types.js';
 
 /**
  * Configuration for report generation
@@ -111,6 +111,23 @@ export class ReportGeneratorImpl implements ReportGenerator {
     sections.push(`**Generated:** ${result.analysisTimestamp.toLocaleString()}\n`);
     sections.push(`**Analysis Duration:** ${this.formatDuration(result.analysisDuration)}\n`);
 
+    // Table of Contents
+    sections.push('## Table of Contents\n');
+    sections.push('1. [Executive Summary](#executive-summary)');
+    if (classified.patterns.length > 0) {
+      sections.push('2. [Top Patterns Detected](#top-patterns-detected)');
+    }
+    if (this.config.includeRecommendations) {
+      sections.push('3. [Recommendations](#recommendations)');
+    }
+    sections.push('4. [Issues by Category](#issues-by-category)');
+    sections.push('5. [Issues by Severity](#issues-by-severity)');
+    if (summary.mostAffectedFiles.length > 0) {
+      sections.push('6. [Most Affected Files](#most-affected-files)');
+    }
+    sections.push('7. [Detailed Statistics](#detailed-statistics)');
+    sections.push('');
+
     // Executive Summary
     sections.push('## Executive Summary\n');
     sections.push(this.formatSummarySection(summary));
@@ -141,7 +158,63 @@ export class ReportGeneratorImpl implements ReportGenerator {
       sections.push(this.formatMostAffectedFiles(summary.mostAffectedFiles, result));
     }
 
+    // Detailed Statistics
+    sections.push('## Detailed Statistics\n');
+    sections.push(this.formatDetailedStatistics(result));
+
     return sections.join('\n');
+  }
+
+  /**
+   * Format detailed statistics section
+   * 
+   * @param result Analysis result
+   * @returns Formatted statistics
+   */
+  private formatDetailedStatistics(result: AnalysisResult): string {
+    const lines: string[] = [];
+
+    // File analysis statistics
+    lines.push('### File Analysis\n');
+    lines.push(`- **Total Files Scanned:** ${result.totalFiles}`);
+    lines.push(`- **Files Analyzed:** ${result.analyzedFiles}`);
+    const skippedFiles = result.totalFiles - result.analyzedFiles;
+    if (skippedFiles > 0) {
+      lines.push(`- **Files Skipped:** ${skippedFiles}`);
+    }
+    lines.push('');
+
+    // Issues by type
+    lines.push('### Issues by Type\n');
+    const typeEntries = Array.from(result.issuesByType.entries())
+      .sort((a, b) => b[1].length - a[1].length);
+    
+    if (typeEntries.length > 0) {
+      lines.push('| Issue Type | Count | Percentage |');
+      lines.push('|------------|-------|------------|');
+      for (const [type, issues] of typeEntries) {
+        const percentage = Math.round((issues.length / result.totalIssues) * 100);
+        lines.push(`| ${this.formatIssueTypeName(type)} | ${issues.length} | ${percentage}% |`);
+      }
+      lines.push('');
+    }
+
+    // Issues by category
+    lines.push('### Issues by Category\n');
+    const categoryEntries = Array.from(result.issuesByCategory.entries())
+      .sort((a, b) => b[1].length - a[1].length);
+    
+    if (categoryEntries.length > 0) {
+      lines.push('| Category | Count | Percentage |');
+      lines.push('|----------|-------|------------|');
+      for (const [category, issues] of categoryEntries) {
+        const percentage = Math.round((issues.length / result.totalIssues) * 100);
+        lines.push(`| ${this.formatCategoryName(category)} | ${issues.length} | ${percentage}% |`);
+      }
+      lines.push('');
+    }
+
+    return lines.join('\n');
   }
 
   /**
@@ -155,7 +228,7 @@ export class ReportGeneratorImpl implements ReportGenerator {
     const summary = this.generateSummary(result);
     const recommendations = this.generateRecommendations(classified);
 
-    // Collect all issues
+    // Collect all issues with proper ordering
     const allIssues = [
       ...classified.critical,
       ...classified.high,
@@ -163,12 +236,54 @@ export class ReportGeneratorImpl implements ReportGenerator {
       ...classified.low,
     ];
 
+    // Enhance summary with additional statistics
+    const enhancedSummary = {
+      ...summary,
+      topPatterns: classified.patterns.slice(0, this.config.maxTopPatterns),
+      analysisMetadata: {
+        totalFiles: result.totalFiles,
+        analyzedFiles: result.analyzedFiles,
+        analysisTimestamp: result.analysisTimestamp.toISOString(),
+        analysisDuration: result.analysisDuration,
+      },
+      issuesByType: this.getIssueCountsByType(result),
+      issuesByCategory: this.getIssueCountsByCategory(result),
+    };
+
     return {
-      summary,
+      summary: enhancedSummary as ReportSummary,
       issues: allIssues,
       patterns: classified.patterns,
       recommendations,
     };
+  }
+
+  /**
+   * Get issue counts by type
+   * 
+   * @param result Analysis result
+   * @returns Issue counts by type
+   */
+  private getIssueCountsByType(result: AnalysisResult): Record<string, number> {
+    const counts: Record<string, number> = {};
+    for (const [type, issues] of result.issuesByType) {
+      counts[type] = issues.length;
+    }
+    return counts;
+  }
+
+  /**
+   * Get issue counts by category
+   * 
+   * @param result Analysis result
+   * @returns Issue counts by category
+   */
+  private getIssueCountsByCategory(result: AnalysisResult): Record<string, number> {
+    const counts: Record<string, number> = {};
+    for (const [category, issues] of result.issuesByCategory) {
+      counts[category] = issues.length;
+    }
+    return counts;
   }
 
   /**
@@ -317,11 +432,29 @@ export class ReportGeneratorImpl implements ReportGenerator {
   private formatSummarySection(summary: ReportSummary): string {
     const lines: string[] = [];
 
+    // Issue counts with visual indicators
     lines.push(`- **Total Issues:** ${summary.totalIssues}`);
-    lines.push(`- **Critical:** ${summary.criticalIssues}`);
-    lines.push(`- **High:** ${summary.highIssues}`);
-    lines.push(`- **Medium:** ${summary.mediumIssues}`);
-    lines.push(`- **Low:** ${summary.lowIssues}`);
+    lines.push(`  - 🔴 **Critical:** ${summary.criticalIssues}`);
+    lines.push(`  - 🟠 **High:** ${summary.highIssues}`);
+    lines.push(`  - 🟡 **Medium:** ${summary.mediumIssues}`);
+    lines.push(`  - 🟢 **Low:** ${summary.lowIssues}`);
+    lines.push('');
+
+    // Severity distribution
+    if (summary.totalIssues > 0) {
+      const criticalPct = Math.round((summary.criticalIssues / summary.totalIssues) * 100);
+      const highPct = Math.round((summary.highIssues / summary.totalIssues) * 100);
+      const mediumPct = Math.round((summary.mediumIssues / summary.totalIssues) * 100);
+      const lowPct = Math.round((summary.lowIssues / summary.totalIssues) * 100);
+
+      lines.push('- **Severity Distribution:**');
+      lines.push(`  - Critical: ${criticalPct}%`);
+      lines.push(`  - High: ${highPct}%`);
+      lines.push(`  - Medium: ${mediumPct}%`);
+      lines.push(`  - Low: ${lowPct}%`);
+      lines.push('');
+    }
+
     lines.push(`- **Estimated Cleanup Effort:** ${summary.estimatedCleanupEffort}`);
 
     return lines.join('\n') + '\n';
@@ -339,14 +472,45 @@ export class ReportGeneratorImpl implements ReportGenerator {
 
     for (let i = 0; i < topPatterns.length; i++) {
       const pattern = topPatterns[i];
-      lines.push(`### ${i + 1}. ${pattern.patternName} (${pattern.occurrences} occurrences)\n`);
-      lines.push(`**Priority:** ${pattern.priority}/10\n`);
-      lines.push(`**Description:** ${pattern.description}\n`);
-      lines.push(`**Affected Files:** ${pattern.affectedFiles.length} files\n`);
-      lines.push(`**Recommended Action:** ${pattern.recommendedAction}\n`);
+      const priorityIndicator = this.getPriorityIndicator(pattern.priority);
+      
+      lines.push(`### ${i + 1}. ${pattern.patternName} ${priorityIndicator}\n`);
+      lines.push(`- **Occurrences:** ${pattern.occurrences}`);
+      lines.push(`- **Priority:** ${pattern.priority}/10`);
+      lines.push(`- **Category:** ${this.formatCategoryName(pattern.category)}`);
+      lines.push(`- **Affected Files:** ${pattern.affectedFiles.length}`);
+      lines.push(`- **Related Issues:** ${pattern.relatedIssues.length}`);
+      lines.push(`- **Description:** ${pattern.description}`);
+      lines.push(`- **Recommended Action:** ${pattern.recommendedAction}`);
+      lines.push('');
+
+      // Show sample of affected files
+      if (pattern.affectedFiles.length > 0) {
+        lines.push('**Sample Affected Files:**');
+        const sampleFiles = pattern.affectedFiles.slice(0, 5);
+        for (const file of sampleFiles) {
+          lines.push(`  - \`${file}\``);
+        }
+        if (pattern.affectedFiles.length > 5) {
+          lines.push(`  - ... and ${pattern.affectedFiles.length - 5} more`);
+        }
+        lines.push('');
+      }
     }
 
     return lines.join('\n');
+  }
+
+  /**
+   * Get priority indicator emoji
+   * 
+   * @param priority Priority level (1-10)
+   * @returns Priority indicator
+   */
+  private getPriorityIndicator(priority: number): string {
+    if (priority >= 8) return '⚠️ High Priority';
+    if (priority >= 5) return '📋 Medium Priority';
+    return '📝 Low Priority';
   }
 
   /**
@@ -359,7 +523,9 @@ export class ReportGeneratorImpl implements ReportGenerator {
     const lines: string[] = [];
 
     for (const rec of recommendations) {
-      lines.push(`### ${rec.priority}. ${rec.title}\n`);
+      const priorityBadge = rec.priority === 1 ? '🔥' : rec.priority <= 3 ? '⭐' : '📌';
+      
+      lines.push(`### ${priorityBadge} ${rec.priority}. ${rec.title}\n`);
       lines.push(`**Description:** ${rec.description}\n`);
       lines.push(`**Impact:** ${rec.estimatedImpact}\n`);
       lines.push(`**Effort:** ${rec.estimatedEffort}\n`);
@@ -458,30 +624,44 @@ export class ReportGeneratorImpl implements ReportGenerator {
   private formatIssue(issue: Issue): string {
     const lines: string[] = [];
 
-    // Issue header
+    // Issue header with severity badge
     const idPart = this.config.includeIssueIds ? ` [${issue.id}]` : '';
-    lines.push(`**${this.formatIssueTypeName(issue.type)}**${idPart}`);
+    const severityBadge = this.getSeverityBadge(issue.severity);
+    lines.push(`**${this.formatIssueTypeName(issue.type)}** ${severityBadge}${idPart}`);
 
-    // Location
-    lines.push(`- **File:** ${issue.file}:${issue.location.startLine}`);
+    // Location with line range
+    const lineRange = issue.location.startLine === issue.location.endLine
+      ? `${issue.location.startLine}`
+      : `${issue.location.startLine}-${issue.location.endLine}`;
+    lines.push(`- **File:** \`${issue.file}:${lineRange}\``);
 
     // Description
     lines.push(`- **Description:** ${issue.description}`);
 
-    // Code snippet
+    // Code snippet with proper formatting
     if (this.config.includeCodeSnippets && issue.codeSnippet) {
       const snippet = this.truncateSnippet(issue.codeSnippet);
+      const language = this.detectLanguage(issue.file);
       lines.push(`- **Code:**`);
-      lines.push('  ```typescript');
-      lines.push(`  ${snippet}`);
+      lines.push(`  \`\`\`${language}`);
+      // Indent each line of the snippet
+      const snippetLines = snippet.split('\n');
+      for (const line of snippetLines) {
+        lines.push(`  ${line}`);
+      }
       lines.push('  ```');
     }
 
-    // Recommendation
+    // Recommendation with emphasis
     lines.push(`- **Recommendation:** ${issue.recommendation}`);
 
-    // Effort
+    // Effort and tags
     lines.push(`- **Effort:** ${this.formatEffortLevel(issue.estimatedEffort)}`);
+    
+    // Tags if present
+    if (issue.tags && issue.tags.length > 0) {
+      lines.push(`- **Tags:** ${issue.tags.map(t => `\`${t}\``).join(', ')}`);
+    }
 
     lines.push(''); // Empty line between issues
 
@@ -745,6 +925,44 @@ export class ReportGeneratorImpl implements ReportGenerator {
    */
   private formatEffortLevel(effort: string): string {
     return effort.charAt(0).toUpperCase() + effort.slice(1);
+  }
+
+  /**
+   * Get severity badge for Markdown
+   * 
+   * @param severity Issue severity
+   * @returns Severity badge
+   */
+  private getSeverityBadge(severity: Severity): string {
+    const badges: Record<Severity, string> = {
+      'critical': '🔴',
+      'high': '🟠',
+      'medium': '🟡',
+      'low': '🟢',
+    };
+    return badges[severity] || '';
+  }
+
+  /**
+   * Detect programming language from file extension
+   * 
+   * @param filePath File path
+   * @returns Language identifier for syntax highlighting
+   */
+  private detectLanguage(filePath: string): string {
+    const ext = filePath.split('.').pop()?.toLowerCase();
+    const languageMap: Record<string, string> = {
+      'ts': 'typescript',
+      'tsx': 'tsx',
+      'js': 'javascript',
+      'jsx': 'jsx',
+      'json': 'json',
+      'md': 'markdown',
+      'css': 'css',
+      'scss': 'scss',
+      'html': 'html',
+    };
+    return languageMap[ext || ''] || 'typescript';
   }
 }
 

@@ -16,8 +16,8 @@
  */
 
 import { SourceFile, Node, SyntaxKind, FunctionDeclaration, ArrowFunction, ClassDeclaration, VariableDeclaration } from 'ts-morph';
-import { BasePatternAnalyzer } from './pattern-analyzer';
-import type { FileInfo, Issue, FileCategory } from '../types';
+import { BasePatternAnalyzer } from './pattern-analyzer.js';
+import type { FileInfo, Issue, FileCategory } from '../types.js';
 
 /**
  * Information about a discovered React component
