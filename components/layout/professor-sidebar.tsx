@@ -8,7 +8,6 @@ import {
   Layers,
   FolderOpen,
   Users,
-  Eye,
   LayoutDashboard,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -41,11 +40,7 @@ const professorNavItems: NavItem[] = [
     url: "/professor/dashboard",
     icon: LayoutDashboard,
   },
-  {
-    title: "Visualizar como Aluno",
-    url: "/professor/view-as-student",
-    icon: Eye,
-  },
+
   {
     title: "Alunos",
     url: "/aluno",
