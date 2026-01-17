@@ -1,19 +1,21 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 import {
   studentService,
   StudentConflictError,
   StudentValidationError,
-} from '@/backend/services/student';
-import { requireAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
-import type { PaginationParams } from '@/types/shared/dtos/api-responses';
+} from "@/backend/services/student";
+import { requireAuth, AuthenticatedRequest } from "@/backend/auth/middleware";
+import type { PaginationParams } from "@/types/shared/dtos/api-responses";
 
-const serializeStudent = (student: Awaited<ReturnType<typeof studentService.getById>>) => ({
+const serializeStudent = (
+  student: Awaited<ReturnType<typeof studentService.getById>>
+) => ({
   id: student.id,
   fullName: student.fullName ?? null,
   email: student.email,
   cpf: student.cpf ?? null,
   phone: student.phone ?? null,
-  birthDate: student.birthDate?.toISOString().split('T')[0] ?? null,
+  birthDate: student.birthDate?.toISOString().split("T")[0] ?? null,
   address: student.address ?? null,
   zipCode: student.zipCode ?? null,
   enrollmentNumber: student.enrollmentNumber ?? null,
@@ -37,23 +39,31 @@ function handleError(error: unknown) {
   }
 
   // Log detalhado do erro
-  console.error('Student API Error:', error);
-  
+  console.error("Student API Error:", error);
+
   // Extrair mensagem de erro mais detalhada
-  let errorMessage = 'Internal server error';
+  let errorMessage = "Internal server error";
   if (error instanceof Error) {
     errorMessage = error.message || errorMessage;
-    console.error('Error stack:', error.stack);
-  } else if (typeof error === 'string') {
+    console.error("Error stack:", error.stack);
+  } else if (typeof error === "string") {
     errorMessage = error;
-  } else if (error && typeof error === 'object' && 'message' in error) {
+  } else if (error && typeof error === "object" && "message" in error) {
     errorMessage = String(error.message);
   }
-  
-  return NextResponse.json({ 
-    error: errorMessage,
-    details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : String(error)) : undefined
-  }, { status: 500 });
+
+  return NextResponse.json(
+    {
+      error: errorMessage,
+      details:
+        process.env.NODE_ENV === "development"
+          ? error instanceof Error
+            ? error.stack
+            : String(error)
+          : undefined,
+    },
+    { status: 500 }
+  );
 }
 
 // GET - RLS filtra automaticamente (alunos veem apenas seu próprio perfil, superadmin vê todos)
@@ -61,37 +71,70 @@ async function getHandler(request: AuthenticatedRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const params: PaginationParams = {};
-    
-    const page = searchParams.get('page');
+
+    const page = searchParams.get("page");
     if (page) {
       const pageNum = parseInt(page, 10);
       if (!isNaN(pageNum) && pageNum > 0) {
         params.page = pageNum;
       }
     }
-    
-    const perPage = searchParams.get('perPage');
+
+    const perPage = searchParams.get("perPage");
     if (perPage) {
       const perPageNum = parseInt(perPage, 10);
       if (!isNaN(perPageNum) && perPageNum > 0) {
         params.perPage = perPageNum;
       }
     }
-    
-    const sortBy = searchParams.get('sortBy');
+
+    const sortBy = searchParams.get("sortBy");
     if (sortBy) {
       params.sortBy = sortBy;
     }
-    
-    const sortOrder = searchParams.get('sortOrder');
-    if (sortOrder === 'asc' || sortOrder === 'desc') {
+
+    const sortOrder = searchParams.get("sortOrder");
+    if (sortOrder === "asc" || sortOrder === "desc") {
       params.sortOrder = sortOrder;
     }
-    
-    const { data, meta } = await studentService.list(params);
-    return NextResponse.json({ 
+
+    // FIX: Usar cliente com escopo de usuário para respeitar RLS
+    // O service global (studentService) usa admin client e ignora RLS
+    const authHeader = request.headers.get("authorization");
+    const token = authHeader?.replace("Bearer ", "");
+
+    console.log("[API Student] Debug:", {
+      hasAuthHeader: !!authHeader,
+      hasToken: !!token,
+      hasUser: !!request.user,
+      userId: request.user?.id,
+      role: request.user?.role,
+    });
+
+    let service = studentService;
+
+    // Se tivermos um token de usuário, usamos o client com RLS
+    // Se for API Key ou outro método, mantemos o service padrão (admin)
+    if (token && request.user) {
+      console.log("[API Student] Switching to user-scoped client");
+      const { getDatabaseClientAsUser } =
+        await import("@/backend/clients/database");
+      const { StudentRepositoryImpl } =
+        await import("@/backend/services/student/student.repository");
+      const { StudentService } =
+        await import("@/backend/services/student/student.service");
+
+      const client = getDatabaseClientAsUser(token);
+      const repository = new StudentRepositoryImpl(client);
+      service = new StudentService(repository);
+    } else {
+      console.log("[API Student] Using default service (Admin/No-RLS)");
+    }
+
+    const { data, meta } = await service.list(params);
+    return NextResponse.json({
       data: data.map(serializeStudent),
-      meta 
+      meta,
     });
   } catch (error) {
     return handleError(error);
@@ -100,7 +143,7 @@ async function getHandler(request: AuthenticatedRequest) {
 
 // POST - Criação de aluno (geralmente via signup, mas pode ser manual por superadmin)
 async function postHandler(request: AuthenticatedRequest) {
-  console.log('[Student POST] Auth check:', {
+  console.log("[Student POST] Auth check:", {
     hasUser: !!request.user,
     hasApiKey: !!request.apiKey,
     userRole: request.user?.role,
@@ -109,14 +152,17 @@ async function postHandler(request: AuthenticatedRequest) {
 
   try {
     const body = await request.json();
-    console.log('[Student POST] Request body:', body);
-    
+    console.log("[Student POST] Request body:", body);
+
     if (!body?.email) {
-      return NextResponse.json({ 
-        error: 'Campo obrigatório: email é necessário' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Campo obrigatório: email é necessário",
+        },
+        { status: 400 }
+      );
     }
-    
+
     const student = await studentService.create({
       id: body?.id,
       fullName: body?.fullName,
@@ -132,14 +178,16 @@ async function postHandler(request: AuthenticatedRequest) {
       courseIds: body?.courseIds ?? [],
       temporaryPassword: body?.temporaryPassword,
     });
-    console.log('[Student POST] Student created:', student.id);
-    return NextResponse.json({ data: serializeStudent(student) }, { status: 201 });
+    console.log("[Student POST] Student created:", student.id);
+    return NextResponse.json(
+      { data: serializeStudent(student) },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error('[Student POST] Error creating student:', error);
+    console.error("[Student POST] Error creating student:", error);
     return handleError(error);
   }
 }
 
 export const GET = requireAuth(getHandler);
 export const POST = requireAuth(postHandler);
-
