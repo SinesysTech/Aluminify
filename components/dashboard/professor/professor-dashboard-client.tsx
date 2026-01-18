@@ -16,7 +16,7 @@ import { DashboardSkeleton } from '@/components/dashboard/dashboard-skeleton'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
-// Intervalo de refresh automÃ¡tico (5 minutos)
+// Intervalo de refresh automático (5 minutos)
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000
 
 export default function ProfessorDashboardClient() {

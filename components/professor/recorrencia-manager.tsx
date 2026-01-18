@@ -48,11 +48,11 @@ import { cn } from "@/lib/utils"
 const DAYS = [
   "Domingo",
   "Segunda-feira",
-  "Terca-feira",
+  "Terça-feira",
   "Quarta-feira",
   "Quinta-feira",
   "Sexta-feira",
-  "Sabado",
+  "Sábado",
 ]
 
 const DAYS_SHORT = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"]
