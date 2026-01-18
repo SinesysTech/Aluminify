@@ -70,6 +70,7 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
 
   let empresaId: string | undefined;
   let empresaNome: string | undefined;
+  let empresaSlug: string | undefined;
   let isEmpresaAdmin: boolean | undefined;
 
   // Se estiver impersonando, buscar dados do aluno impersonado
@@ -214,6 +215,7 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
       };
       const typedRow = professorRow as unknown as ProfessorWithEmpresa;
       empresaNome = typedRow.empresas?.nome ?? undefined;
+      empresaSlug = typedRow.empresas?.slug ?? undefined;
 
       // Se existir nome_completo, preferir como fullName
       if (professorRow.nome_completo) {
@@ -279,7 +281,7 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
     avatarUrl: user.user_metadata?.avatar_url,
     mustChangePassword,
     empresaId,
-    empresaSlug: empresaNome ? (professorRow as any).empresas?.slug : undefined,
+    empresaSlug,
     empresaNome,
     isEmpresaAdmin,
     // Adicionar contexto de impersonação se estiver impersonando
