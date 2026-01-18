@@ -15,7 +15,7 @@ export default async function RelatoriosPage() {
   // Get professor's empresa_id
   const { data: professor } = await supabase
     .from("professores")
-    .select("empresa_id, admin")
+    .select("empresa_id, is_admin")
     .eq("id", user.id)
     .single()
 

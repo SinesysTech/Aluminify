@@ -15,7 +15,7 @@ export default async function BloqueiosPage() {
   // Get professor's empresa_id and admin status
   const { data: professor } = await supabase
     .from("professores")
-    .select("empresa_id, admin")
+    .select("empresa_id, is_admin")
     .eq("id", user.id)
     .single()
 
@@ -44,7 +44,7 @@ export default async function BloqueiosPage() {
       <BloqueiosManager
         professorId={user.id}
         empresaId={professor.empresa_id}
-        isAdmin={professor.admin === true}
+        isAdmin={professor.is_admin === true}
       />
     </div>
   )
