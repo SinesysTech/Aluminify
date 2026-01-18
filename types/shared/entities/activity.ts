@@ -252,11 +252,13 @@ export type MetodoEstudo =
   | 'intervalo_curto'
   | 'intervalo_longo';
 
-export type LogPausaTipo = 'pausa' | 'retomada';
+export type LogPausaTipo = 'pausa' | 'retomada' | 'manual' | 'distracao';
 
 export interface LogPausa {
   tipo: LogPausaTipo;
-  timestamp: string;
+  timestamp?: string;
+  inicio?: string;
+  fim?: string;
 }
 
 export type SessaoStatus = 
