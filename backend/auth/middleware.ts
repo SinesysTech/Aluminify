@@ -41,26 +41,16 @@ export async function getAuthUser(
     const isSuperAdmin =
       role === "superadmin" || user.user_metadata?.is_superadmin === true;
     const empresaId = user.user_metadata?.empresa_id as string | undefined;
-    const isEmpresaAdmin =
-      user.user_metadata?.is_empresa_admin === true ||
-      user.user_metadata?.is_empresa_admin === "true";
-
-    console.log("[Auth] User authenticated:", {
-      id: user.id,
-      email: user.email,
-      user_metadata: user.user_metadata,
-      role,
-      isSuperAdmin,
-      isEmpresaAdmin,
-      empresaId,
-    });
+    const isAdmin =
+      user.user_metadata?.is_admin === true ||
+      user.user_metadata?.is_admin === "true";
 
     return {
       id: user.id,
       email: user.email!,
       role: isSuperAdmin ? "superadmin" : role,
       isSuperAdmin,
-      isEmpresaAdmin,
+      isAdmin,
       empresaId,
     };
   } catch (err) {

@@ -19,14 +19,14 @@ export async function POST(request: NextRequest) {
     if (!email || !password || !fullName) {
       return NextResponse.json(
         { error: "email, password e fullName são obrigatórios" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!empresaNome || !empresaNome.trim()) {
       return NextResponse.json(
         { error: "nome da empresa é obrigatório" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       } catch (deleteError) {
         console.error(
           "Error deleting empresa after user creation failure:",
-          deleteError
+          deleteError,
         );
       }
 
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
       ) {
         return NextResponse.json(
           { error: "Este email já está cadastrado" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -85,14 +85,14 @@ export async function POST(request: NextRequest) {
         {
           error: `Erro ao criar usuário: ${userError.message || "Erro desconhecido"}`,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
     if (!newUser.user) {
       return NextResponse.json(
         { error: "Erro ao criar usuário" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       } catch (deleteUserError) {
         console.error(
           "Error deleting user after professor insert failure:",
-          deleteUserError
+          deleteUserError,
         );
       }
       try {
@@ -129,14 +129,14 @@ export async function POST(request: NextRequest) {
       } catch (deleteEmpresaError) {
         console.error(
           "Error deleting empresa after professor insert failure:",
-          deleteEmpresaError
+          deleteEmpresaError,
         );
       }
       return NextResponse.json(
         {
           error: `Erro ao criar registro de professor: ${insertProfessorError.message}`,
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
         message:
           "Conta e empresa criadas com sucesso! Você é o administrador da empresa.",
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error in signup-with-empresa:", error);

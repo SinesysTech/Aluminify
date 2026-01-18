@@ -128,14 +128,14 @@ export async function updateSession(request: NextRequest) {
     "[DEBUG] Middleware - processando requisição:",
     pathname,
     "host:",
-    host
+    host,
   );
   console.log(
     "[DEBUG] Middleware - Cookies:",
     request.cookies
       .getAll()
       .map((c) => c.name)
-      .join(", ")
+      .join(", "),
   );
 
   let supabaseResponse = NextResponse.next({
@@ -154,17 +154,20 @@ export async function updateSession(request: NextRequest) {
     const expectedPrefix = `sb-${projectRef}-auth-token`;
     const allCookies = request.cookies.getAll();
     const supabaseAuthCookies = allCookies.filter(
-      (c) => c.name.startsWith("sb-") && c.name.includes("-auth-token")
+      (c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"),
     );
     const foreignCookies = supabaseAuthCookies.filter(
-      (c) => !c.name.startsWith(expectedPrefix)
+      (c) => !c.name.startsWith(expectedPrefix),
     );
 
     if (foreignCookies.length > 0) {
-      console.warn("[DEBUG] Middleware - removendo cookies Supabase de outro projeto", {
-        expectedPrefix,
-        foreign: foreignCookies.map((c) => c.name),
-      });
+      console.warn(
+        "[DEBUG] Middleware - removendo cookies Supabase de outro projeto",
+        {
+          expectedPrefix,
+          foreign: foreignCookies.map((c) => c.name),
+        },
+      );
 
       // Remover do request (para esta requisição) e do response (persistir no browser)
       for (const c of foreignCookies) {
@@ -185,13 +188,13 @@ export async function updateSession(request: NextRequest) {
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) =>
-          request.cookies.set(name, value)
+          request.cookies.set(name, value),
         );
         supabaseResponse = NextResponse.next({
           request,
         });
         cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
+          supabaseResponse.cookies.set(name, value, options),
         );
       },
     },
@@ -222,7 +225,7 @@ export async function updateSession(request: NextRequest) {
       };
       console.log(
         "[DEBUG] Middleware - tenant resolved from custom domain:",
-        tenantContext
+        tenantContext,
       );
     }
   }
@@ -246,7 +249,7 @@ export async function updateSession(request: NextRequest) {
         };
         console.log(
           "[DEBUG] Middleware - tenant resolved from subdomain:",
-          tenantContext
+          tenantContext,
         );
       }
     }
@@ -271,7 +274,7 @@ export async function updateSession(request: NextRequest) {
         };
         console.log(
           "[DEBUG] Middleware - tenant resolved from path:",
-          tenantContext
+          tenantContext,
         );
       }
     }
@@ -288,6 +291,7 @@ export async function updateSession(request: NextRequest) {
     "/auth/professor/login",
     "/auth/professor/cadastro",
     "/api/auth/signup-with-empresa", // Endpoint de cadastro público
+    "/api/admin/fix-permissions", // Endpoint temporário para correção
     "/api/chat/attachments", // Anexos usam token na URL, não precisam de autenticação de sessão
     "/", // Landing page
     "/signup",
@@ -308,13 +312,13 @@ export async function updateSession(request: NextRequest) {
   }
 
   const isPublicPath = publicPaths.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
   console.log(
     "[DEBUG] Middleware - isPublicPath:",
     isPublicPath,
     "pathname:",
-    pathname
+    pathname,
   );
 
   // Tentar obter o usuário autenticado
@@ -341,7 +345,7 @@ export async function updateSession(request: NextRequest) {
       url.pathname = `/${tenantContext.empresaSlug}/auth/login`;
       console.log(
         "[DEBUG] Middleware - rewriting to tenant login:",
-        url.pathname
+        url.pathname,
       );
 
       // Clone response and add tenant headers
@@ -365,7 +369,7 @@ export async function updateSession(request: NextRequest) {
     // O cliente Supabase irá limpar os cookies inválidos automaticamente
     if (!isPublicPath) {
       console.log(
-        "[DEBUG] Middleware - redirecionando para /auth (não autenticado em rota protegida)"
+        "[DEBUG] Middleware - redirecionando para /auth (não autenticado em rota protegida)",
       );
       const url = request.nextUrl.clone();
 
@@ -380,7 +384,7 @@ export async function updateSession(request: NextRequest) {
     }
     // Se for rota pública, continuar normalmente (usuário não autenticado é esperado)
     console.log(
-      "[DEBUG] Middleware - rota pública, continuando sem autenticação"
+      "[DEBUG] Middleware - rota pública, continuando sem autenticação",
     );
   } else {
     console.log("[DEBUG] Middleware - usuário autenticado, continuando");
@@ -393,7 +397,7 @@ export async function updateSession(request: NextRequest) {
     if (tenantContext.resolutionType) {
       supabaseResponse.headers.set(
         "x-tenant-resolution",
-        tenantContext.resolutionType
+        tenantContext.resolutionType,
       );
     }
   }

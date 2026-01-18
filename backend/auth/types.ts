@@ -5,7 +5,7 @@ export interface AuthUser {
   email: string;
   role: UserRole;
   isSuperAdmin?: boolean;
-  isEmpresaAdmin?: boolean;
+  isAdmin?: boolean;
   empresaId?: string;
 }
 
