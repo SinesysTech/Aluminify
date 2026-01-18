@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useEffect, useState, useCallback } from "react"
@@ -257,10 +258,10 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
   const formatDateRange = (inicio: string, fim: string | null) => {
     const dataInicio = new Date(inicio + "T12:00:00")
     if (!fim) {
-      return `A partir de ${format(dataInicio, "dd/MM/yyyy", { locale: ptBR })}`
+      return `A partir de ${format(dataInicio, "dd/MM/yyyy", { locale: ptBR })} `
     }
     const dataFim = new Date(fim + "T12:00:00")
-    return `${format(dataInicio, "dd/MM/yyyy")} - ${format(dataFim, "dd/MM/yyyy")}`
+    return `${format(dataInicio, "dd/MM/yyyy")} - ${format(dataFim, "dd/MM/yyyy")} `
   }
 
   const calculateSlots = (inicio: string, fim: string, duracao: number) => {
@@ -553,7 +554,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
                     {CALENDAR_HOURS.map((hour, hourIdx) => (
                       <>
                         <div
-                          key={`hour-${hour}`}
+                          key={`hour - ${hour} `}
                           className={cn(
                             "p-2 text-sm text-muted-foreground border-r text-center",
                             hourIdx < CALENDAR_HOURS.length - 1 && "border-b"
@@ -565,7 +566,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
                           const slotStyle = getSlotStyle(dayIdx, hour)
                           return (
                             <div
-                              key={`slot-${hour}-${dayIdx}`}
+                              key={`slot - ${hour} -${dayIdx} `}
                               className={cn(
                                 "p-2 text-xs text-center transition-colors",
                                 slotStyle.bg,
