@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server'
-import { requireAuth, AuthenticatedRequest } from '@/backend/auth/middleware'
+import { requireUserAuth, AuthenticatedRequest } from '@/backend/auth/middleware'
 import { dashboardAnalyticsService } from '@/backend/services/dashboard-analytics'
 
 /**
  * GET /api/dashboard/analytics
- * 
+ *
  * Retorna dados agregados do dashboard analytics do aluno.
- * 
+ * Suporta modo de impersonação: quando um admin/professor está visualizando
+ * como aluno, usa o ID do aluno impersonado.
+ *
  * Agrega dados de:
  * - Progresso de atividades (progresso_atividades)
  * - Sessões de estudo (sessoes_estudo)
@@ -19,22 +21,27 @@ import { dashboardAnalyticsService } from '@/backend/services/dashboard-analytic
  */
 async function getHandler(request: AuthenticatedRequest) {
   try {
-    const userId = request.user?.id
+    const realUserId = request.user?.id
 
-    if (!userId) {
+    if (!realUserId) {
       return NextResponse.json(
         { error: 'Usuário não autenticado' },
         { status: 401 }
       )
     }
 
-    // Permitir acesso para alunos, professores e superadmins
-    if (!['aluno', 'professor', 'superadmin'].includes(request.user?.role || '')) {
+    // Permitir acesso para alunos, professores, empresa e superadmins
+    if (!['aluno', 'professor', 'empresa', 'superadmin'].includes(request.user?.role || '')) {
       return NextResponse.json(
         { error: 'Acesso negado. Apenas alunos, professores e superadmins podem acessar o dashboard.' },
         { status: 403 }
       )
     }
+
+    // Verificar contexto de impersonação
+    // Se estiver impersonando um aluno, usar o ID do aluno impersonado
+    const impersonationContext = request.impersonationContext
+    const targetUserId = impersonationContext?.impersonatedUserId || realUserId
 
     // Obter parâmetro de período (semanal, mensal, anual)
     const { searchParams } = new URL(request.url)
@@ -48,8 +55,8 @@ async function getHandler(request: AuthenticatedRequest) {
       )
     }
 
-    // Buscar dados agregados do dashboard
-    const dashboardData = await dashboardAnalyticsService.getDashboardData(userId, period)
+    // Buscar dados agregados do dashboard (usa ID do aluno impersonado se aplicável)
+    const dashboardData = await dashboardAnalyticsService.getDashboardData(targetUserId, period)
 
     return NextResponse.json({ data: dashboardData })
   } catch (error) {
@@ -75,5 +82,5 @@ async function getHandler(request: AuthenticatedRequest) {
   }
 }
 
-export const GET = requireAuth(getHandler)
+export const GET = requireUserAuth(getHandler)
 
