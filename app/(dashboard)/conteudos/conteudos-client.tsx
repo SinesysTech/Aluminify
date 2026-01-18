@@ -1658,13 +1658,15 @@ export default function ConteudosClientPage() {
   }
 
   return (
-    <div className="w-full space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Importar Conteúdo Programático</h1>
-        <p className="text-muted-foreground">
-          Faça upload de arquivos CSV para cadastrar ou atualizar o conteúdo programático
-        </p>
-      </div>
+    <div className="flex flex-col gap-8 h-full pb-10">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E4E4E7] pb-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Importar Conteúdo Programático</h1>
+          <p className="text-sm text-[#71717A]">
+            Faça upload de arquivos CSV para cadastrar ou atualizar o conteúdo programático
+          </p>
+        </div>
+      </header>
 
       {/* Card de Upload */}
       {/* Seção de Upload */}

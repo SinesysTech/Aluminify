@@ -100,7 +100,7 @@ export function DisciplinaTable() {
   const [mounted, setMounted] = React.useState(false)
   const [filterValue, setFilterValue] = React.useState('')
   const filterTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
-  
+
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
   const [editDialogOpen, setEditDialogOpen] = React.useState(false)
@@ -134,11 +134,11 @@ export function DisciplinaTable() {
       const startTime = performance.now()
       const response = await apiClient.get<{ data: Disciplina[] }>('/api/discipline')
       const endTime = performance.now()
-      
+
       if (endTime - startTime > 1000) {
         console.warn(`[DisciplinaTable] Carregamento lento: ${Math.round(endTime - startTime)}ms`)
       }
-      
+
       if (response && 'data' in response) {
         setData(response.data)
       } else {
@@ -232,8 +232,8 @@ export function DisciplinaTable() {
       await fetchDisciplinas()
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
-      const errorMessage = err instanceof ApiClientError 
-        ? err.data?.error || err.message 
+      const errorMessage = err instanceof ApiClientError
+        ? err.data?.error || err.message
         : 'Erro ao atualizar disciplina'
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
@@ -260,8 +260,8 @@ export function DisciplinaTable() {
       await fetchDisciplinas()
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
-      const errorMessage = err instanceof ApiClientError 
-        ? err.data?.error || err.message 
+      const errorMessage = err instanceof ApiClientError
+        ? err.data?.error || err.message
         : 'Erro ao excluir disciplina'
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
@@ -361,11 +361,11 @@ export function DisciplinaTable() {
     if (filterTimeoutRef.current) {
       clearTimeout(filterTimeoutRef.current)
     }
-    
+
     filterTimeoutRef.current = setTimeout(() => {
       table.getColumn('name')?.setFilterValue(filterValue)
     }, 300)
-    
+
     return () => {
       if (filterTimeoutRef.current) {
         clearTimeout(filterTimeoutRef.current)
@@ -374,7 +374,7 @@ export function DisciplinaTable() {
   }, [filterValue, table])
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-8 h-full pb-10">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E4E4E7] pb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Disciplinas</h1>
@@ -473,9 +473,9 @@ export function DisciplinaTable() {
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                       </TableHead>
                     )
                   })}
@@ -556,9 +556,9 @@ export function DisciplinaTable() {
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                         </TableHead>
                       )
                     })}
@@ -629,73 +629,73 @@ export function DisciplinaTable() {
       {/* Edit Dialog */}
       {mounted && (
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-[95vw] md:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Editar Disciplina</DialogTitle>
-            <DialogDescription>
-              Atualize as informações da disciplina.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(handleUpdate)} className="space-y-4">
-              <FormField
-                control={editForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: Matemática" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Nome da disciplina
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setEditDialogOpen(false)}
-                  disabled={isSubmitting}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Atualizando...' : 'Atualizar'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
+          <DialogContent className="max-w-[95vw] md:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Editar Disciplina</DialogTitle>
+              <DialogDescription>
+                Atualize as informações da disciplina.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...editForm}>
+              <form onSubmit={editForm.handleSubmit(handleUpdate)} className="space-y-4">
+                <FormField
+                  control={editForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Matemática" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Nome da disciplina
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEditDialogOpen(false)}
+                    disabled={isSubmitting}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Atualizando...' : 'Atualizar'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
         </Dialog>
       )}
 
       {/* Delete Alert Dialog */}
       {mounted && (
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir a disciplina &quot;{deletingDisciplina?.name}&quot;?
-              Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isSubmitting}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isSubmitting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isSubmitting ? 'Excluindo...' : 'Excluir'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir a disciplina &quot;{deletingDisciplina?.name}&quot;?
+                Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isSubmitting}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                disabled={isSubmitting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isSubmitting ? 'Excluindo...' : 'Excluir'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   )
