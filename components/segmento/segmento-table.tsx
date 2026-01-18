@@ -13,7 +13,7 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
-import { ArrowUpDown, MoreHorizontal, Pencil, Trash2, Plus } from 'lucide-react'
+import { ArrowUpDown, MoreHorizontal, Pencil, Trash2, Plus, Search } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -100,7 +100,7 @@ export function SegmentoTable() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [mounted, setMounted] = React.useState(false)
-  
+
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
   const [editDialogOpen, setEditDialogOpen] = React.useState(false)
@@ -228,8 +228,8 @@ export function SegmentoTable() {
       await fetchSegmentos()
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
-      const errorMessage = err instanceof ApiClientError 
-        ? err.data?.error || err.message 
+      const errorMessage = err instanceof ApiClientError
+        ? err.data?.error || err.message
         : 'Erro ao atualizar segmento'
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
@@ -256,8 +256,8 @@ export function SegmentoTable() {
       await fetchSegmentos()
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
-      const errorMessage = err instanceof ApiClientError 
-        ? err.data?.error || err.message 
+      const errorMessage = err instanceof ApiClientError
+        ? err.data?.error || err.message
         : 'Erro ao excluir segmento'
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
@@ -461,15 +461,19 @@ export function SegmentoTable() {
         </div>
       )}
 
-      <div className="flex items-center">
-        <Input
-          placeholder="Filtrar por nome..."
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('name')?.setFilterValue(event.target.value)
-          }
-          className="w-full md:max-w-sm"
-        />
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 w-5 h-5 text-zinc-400" strokeWidth={1.5} />
+          <input
+            type="text"
+            placeholder="Filtrar por nome..."
+            className="w-full h-10 pl-9 pr-4 rounded-md border border-[#E4E4E7] bg-white text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] transition-all"
+            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+            onChange={(event) =>
+              table.getColumn('name')?.setFilterValue(event.target.value)
+            }
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -523,34 +527,35 @@ export function SegmentoTable() {
             })}
           </div>
           {/* Desktop Table View */}
-          <div className="hidden md:block rounded-lg border border-[#E4E4E7] bg-white shadow-sm overflow-hidden">
-            <Table>
-              <TableHeader>
+          <div className="hidden md:block overflow-hidden flex-1 rounded-lg border border-[#E4E4E7] bg-white shadow-sm">
+            <Table className="w-full text-left text-sm">
+              <TableHeader className="border-b border-[#E4E4E7]">
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                  <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id}>
+                        <TableHead key={header.id} className="h-10 px-4 font-mono text-xs font-medium text-[#71717A] uppercase tracking-wider">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                         </TableHead>
                       )
                     })}
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody>
+              <TableBody className="divide-y divide-[#E4E4E7]">
                 {table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
+                    className="group hover:bg-zinc-50 transition-colors"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="p-4">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -580,16 +585,17 @@ export function SegmentoTable() {
         </Empty>
       )}
 
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 py-4">
-        <div className="text-sm text-muted-foreground">
-          {table.getFilteredRowModel().rows.length} registro(s) encontrado(s).
-        </div>
-        <div className="flex items-center gap-2">
+      <div className="border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
+        <span className="text-xs text-[#71717A]">
+          Mostrando <strong>{table.getFilteredRowModel().rows.length}</strong> resultados
+        </span>
+        <div className="flex gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50 h-auto"
           >
             Anterior
           </Button>
@@ -598,6 +604,7 @@ export function SegmentoTable() {
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 h-auto"
           >
             Próxima
           </Button>
@@ -607,89 +614,89 @@ export function SegmentoTable() {
       {/* Edit Dialog */}
       {mounted && (
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-[95vw] md:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Editar Segmento</DialogTitle>
-            <DialogDescription>
-              Atualize as informações do segmento.
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...editForm}>
-            <form onSubmit={editForm.handleSubmit(handleUpdate)} className="space-y-4">
-              <FormField
-                control={editForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nome</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: Ensino Fundamental" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Nome do segmento
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={editForm.control}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Slug</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Ex: ensino-fundamental" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Identificador único (apenas letras minúsculas, números e hífens)
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setEditDialogOpen(false)}
-                  disabled={isSubmitting}
-                >
-                  Cancelar
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Atualizando...' : 'Atualizar'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
+          <DialogContent className="max-w-[95vw] md:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Editar Segmento</DialogTitle>
+              <DialogDescription>
+                Atualize as informações do segmento.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...editForm}>
+              <form onSubmit={editForm.handleSubmit(handleUpdate)} className="space-y-4">
+                <FormField
+                  control={editForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Ensino Fundamental" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Nome do segmento
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editForm.control}
+                  name="slug"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Slug</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: ensino-fundamental" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Identificador único (apenas letras minúsculas, números e hífens)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setEditDialogOpen(false)}
+                    disabled={isSubmitting}
+                  >
+                    Cancelar
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? 'Atualizando...' : 'Atualizar'}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
         </Dialog>
       )}
 
       {/* Delete Alert Dialog */}
       {mounted && (
         <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir o segmento &quot;{deletingSegmento?.name}&quot;?
-              Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isSubmitting}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isSubmitting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isSubmitting ? 'Excluindo...' : 'Excluir'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir o segmento &quot;{deletingSegmento?.name}&quot;?
+                Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isSubmitting}>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                disabled={isSubmitting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isSubmitting ? 'Excluindo...' : 'Excluir'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   )

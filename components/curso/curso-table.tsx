@@ -13,7 +13,7 @@ import {
   useReactTable,
   VisibilityState,
 } from '@tanstack/react-table'
-import { ArrowUpDown, MoreHorizontal, Pencil, Trash2, Plus, BookOpen } from 'lucide-react'
+import { ArrowUpDown, MoreHorizontal, Pencil, Trash2, Plus, BookOpen, Search } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
@@ -809,15 +809,19 @@ export function CursoTable() {
         </div>
       )}
 
-      <div className="flex items-center">
-        <Input
-          placeholder="Filtrar por nome..."
-          value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-          onChange={(event) =>
-            table.getColumn('name')?.setFilterValue(event.target.value)
-          }
-          className="w-full md:max-w-sm"
-        />
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 w-5 h-5 text-zinc-400" strokeWidth={1.5} />
+          <input
+            type="text"
+            placeholder="Filtrar por nome..."
+            className="w-full h-10 pl-9 pr-4 rounded-md border border-[#E4E4E7] bg-white text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] transition-all"
+            value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
+            onChange={(event) =>
+              table.getColumn('name')?.setFilterValue(event.target.value)
+            }
+          />
+        </div>
       </div>
 
       {loading ? (
@@ -873,14 +877,14 @@ export function CursoTable() {
             })}
           </div>
           {/* Desktop Table View */}
-          <div className="hidden md:block rounded-lg border border-[#E4E4E7] bg-white shadow-sm overflow-hidden">
-            <Table>
-              <TableHeader>
+          <div className="hidden md:block overflow-hidden flex-1 rounded-lg border border-[#E4E4E7] bg-white shadow-sm">
+            <Table className="w-full text-left text-sm">
+              <TableHeader className="border-b border-[#E4E4E7]">
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <TableRow key={headerGroup.id}>
+                  <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id}>
+                        <TableHead key={header.id} className="h-10 px-4 font-mono text-xs font-medium text-[#71717A] uppercase tracking-wider">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -893,14 +897,15 @@ export function CursoTable() {
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody>
+              <TableBody className="divide-y divide-[#E4E4E7]">
                 {table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
+                    className="group hover:bg-zinc-50 transition-colors"
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="p-4">
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </TableCell>
                     ))}
@@ -931,16 +936,17 @@ export function CursoTable() {
       )}
 
       {table.getRowModel().rows?.length > 0 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 py-4">
-          <div className="text-sm text-muted-foreground">
-            {table.getFilteredRowModel().rows.length} registro(s) encontrado(s).
-          </div>
-          <div className="flex items-center gap-2">
+        <div className="border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
+          <span className="text-xs text-[#71717A]">
+            Mostrando <strong>{table.getFilteredRowModel().rows.length}</strong> resultados
+          </span>
+          <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
+              className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50 h-auto"
             >
               Anterior
             </Button>
@@ -949,6 +955,7 @@ export function CursoTable() {
               size="sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
+              className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 h-auto"
             >
               Próxima
             </Button>
