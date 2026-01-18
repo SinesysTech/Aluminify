@@ -20,11 +20,11 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const themeSettings = {
-    preset: (cookieStore.get("theme_preset")?.value ?? DEFAULT_THEME.preset) as any,
-    scale: (cookieStore.get("theme_scale")?.value ?? DEFAULT_THEME.scale) as any,
-    radius: (cookieStore.get("theme_radius")?.value ?? DEFAULT_THEME.radius) as any,
-    contentLayout: (cookieStore.get("theme_content_layout")?.value ??
-      DEFAULT_THEME.contentLayout) as any
+    preset: cookieStore.get("theme_preset")?.value ?? DEFAULT_THEME.preset,
+    scale: cookieStore.get("theme_scale")?.value ?? DEFAULT_THEME.scale,
+    radius: cookieStore.get("theme_radius")?.value ?? DEFAULT_THEME.radius,
+    contentLayout: cookieStore.get("theme_content_layout")?.value ??
+      DEFAULT_THEME.contentLayout
   };
 
   const bodyAttributes = Object.fromEntries(
