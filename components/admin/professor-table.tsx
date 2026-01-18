@@ -118,7 +118,7 @@ export function ProfessorTable() {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [mounted, setMounted] = React.useState(false)
-  
+
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false)
   const [editDialogOpen, setEditDialogOpen] = React.useState(false)
@@ -262,7 +262,7 @@ export function ProfessorTable() {
         photoUrl?: string | null
         specialty?: string | null
       } = {}
-      
+
       // Sempre incluir fullName e email (são obrigatórios)
       if (values.fullName !== undefined) {
         updatePayload.fullName = values.fullName
@@ -270,14 +270,14 @@ export function ProfessorTable() {
       if (values.email !== undefined) {
         updatePayload.email = values.email
       }
-      
+
       // Campos opcionais
       updatePayload.cpf = values.cpf || null
       updatePayload.phone = values.phone || null
       updatePayload.biography = values.biography || null
       updatePayload.photoUrl = values.photoUrl || null
       updatePayload.specialty = values.specialty || null
-      
+
       await apiClient.put<{ data: Professor }>(`/api/teacher/${editingProfessor.id}`, updatePayload)
       setSuccessMessage('Professor atualizado com sucesso!')
       setEditDialogOpen(false)
@@ -286,8 +286,8 @@ export function ProfessorTable() {
       await fetchProfessores()
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
-      const errorMessage = err instanceof ApiClientError 
-        ? err.data?.error || err.message 
+      const errorMessage = err instanceof ApiClientError
+        ? err.data?.error || err.message
         : 'Erro ao atualizar professor'
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
@@ -314,8 +314,8 @@ export function ProfessorTable() {
       await fetchProfessores()
       setTimeout(() => setSuccessMessage(null), 3000)
     } catch (err) {
-      const errorMessage = err instanceof ApiClientError 
-        ? err.data?.error || err.message 
+      const errorMessage = err instanceof ApiClientError
+        ? err.data?.error || err.message
         : 'Erro ao excluir professor'
       setError(errorMessage)
       setTimeout(() => setError(null), 5000)
@@ -436,7 +436,7 @@ export function ProfessorTable() {
   })
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-8 h-full pb-10">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E4E4E7] pb-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Professores</h1>
@@ -452,110 +452,23 @@ export function ProfessorTable() {
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-[95vw] md:max-w-4xl">
-                  <DialogHeader>
-                    <DialogTitle>Criar Professor</DialogTitle>
-                    <DialogDescription>
-                      Adicione um novo professor ao sistema.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Form {...createForm}>
-                    <form onSubmit={createForm.handleSubmit(handleCreate)} className="space-y-3">
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                        <FormField
-                          control={createForm.control}
-                          name="fullName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Nome Completo *</FormLabel>
-                              <FormControl>
-                                <Input placeholder="João Silva" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="email"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Email *</FormLabel>
-                              <FormControl>
-                                <Input type="email" placeholder="joao@example.com" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                        <FormField
-                          control={createForm.control}
-                          name="cpf"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>CPF</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="000.000.000-00"
-                                  inputMode="numeric"
-                                  maxLength={14}
-                                  {...field}
-                                  value={field.value || ''}
-                                  onChange={(e) => field.onChange(formatCPF(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="phone"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Telefone</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="(11) 99999-9999"
-                                  inputMode="numeric"
-                                  maxLength={15}
-                                  {...field}
-                                  value={field.value || ''}
-                                  onChange={(e) => field.onChange(formatBRPhone(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="specialty"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Especialidade</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Ex: Matemática, Física" {...field} value={field.value || ''} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
+                <DialogHeader>
+                  <DialogTitle>Criar Professor</DialogTitle>
+                  <DialogDescription>
+                    Adicione um novo professor ao sistema.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...createForm}>
+                  <form onSubmit={createForm.handleSubmit(handleCreate)} className="space-y-3">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                       <FormField
                         control={createForm.control}
-                        name="biography"
+                        name="fullName"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Biografia</FormLabel>
+                            <FormLabel>Nome Completo *</FormLabel>
                             <FormControl>
-                              <Textarea
-                                placeholder="Biografia do professor..."
-                                {...field}
-                                value={field.value || ''}
-                                rows={2}
-                              />
+                              <Input placeholder="João Silva" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -563,38 +476,125 @@ export function ProfessorTable() {
                       />
                       <FormField
                         control={createForm.control}
-                        name="photoUrl"
+                        name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>URL da Foto</FormLabel>
+                            <FormLabel>Email *</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="joao@example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                      <FormField
+                        control={createForm.control}
+                        name="cpf"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>CPF</FormLabel>
                             <FormControl>
                               <Input
-                                type="url"
-                                placeholder="https://..."
+                                placeholder="000.000.000-00"
+                                inputMode="numeric"
+                                maxLength={14}
                                 {...field}
                                 value={field.value || ''}
+                                onChange={(e) => field.onChange(formatCPF(e.target.value))}
                               />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      <DialogFooter>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => setCreateDialogOpen(false)}
-                          disabled={isSubmitting}
-                        >
-                          Cancelar
-                        </Button>
-                        <Button type="submit" disabled={isSubmitting}>
-                          {isSubmitting ? 'Criando...' : 'Criar'}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
-                </DialogContent>
+                      <FormField
+                        control={createForm.control}
+                        name="phone"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Telefone</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="(11) 99999-9999"
+                                inputMode="numeric"
+                                maxLength={15}
+                                {...field}
+                                value={field.value || ''}
+                                onChange={(e) => field.onChange(formatBRPhone(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={createForm.control}
+                        name="specialty"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Especialidade</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Ex: Matemática, Física" {...field} value={field.value || ''} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={createForm.control}
+                      name="biography"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Biografia</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Biografia do professor..."
+                              {...field}
+                              value={field.value || ''}
+                              rows={2}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={createForm.control}
+                      name="photoUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>URL da Foto</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="url"
+                              placeholder="https://..."
+                              {...field}
+                              value={field.value || ''}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setCreateDialogOpen(false)}
+                        disabled={isSubmitting}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting ? 'Criando...' : 'Criar'}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
             </Dialog>
           ) : (
             <Button onClick={() => setCreateDialogOpen(true)}>
@@ -706,9 +706,9 @@ export function ProfessorTable() {
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                         </TableHead>
                       )
                     })}
