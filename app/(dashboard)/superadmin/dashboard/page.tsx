@@ -40,6 +40,3 @@ export default async function SuperAdminDashboardPage() {
   )
 }
 
-
-
-

@@ -13,22 +13,3 @@ export default async function PerfilPage() {
   )
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

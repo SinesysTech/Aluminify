@@ -8,21 +8,3 @@ export default async function FlashcardsAdminPage() {
   return <FlashcardsAdminClient />
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

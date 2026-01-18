@@ -65,6 +65,3 @@ export function BottomNavigation() {
   )
 }
 
-
-
-

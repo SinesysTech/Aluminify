@@ -8,5 +8,3 @@ export default async function MateriaisPage() {
   return <MateriaisClientPage />
 }
 
-
-

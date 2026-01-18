@@ -8,23 +8,3 @@ export default async function BibliotecaPage() {
   return <SalaEstudosClientPage title="Biblioteca" description="Preview da experiência do aluno" />
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
