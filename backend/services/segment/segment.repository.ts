@@ -1,7 +1,14 @@
-import { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/lib/database.types';
-import { Segment, CreateSegmentInput, UpdateSegmentInput } from './segment.types';
-import type { PaginationParams, PaginationMeta } from '@/types/shared/dtos/api-responses';
+import { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/database.types";
+import {
+  Segment,
+  CreateSegmentInput,
+  UpdateSegmentInput,
+} from "./segment.types";
+import type {
+  PaginationParams,
+  PaginationMeta,
+} from "@/types/shared/dtos/api-responses";
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -18,12 +25,12 @@ export interface SegmentRepository {
   delete(id: string): Promise<void>;
 }
 
-const TABLE = 'segmentos';
+const TABLE = "segmentos";
 
 // Use generated Database types instead of manual definitions
-type SegmentRow = Database['public']['Tables']['segmentos']['Row'];
-type SegmentInsert = Database['public']['Tables']['segmentos']['Insert'];
-type SegmentUpdate = Database['public']['Tables']['segmentos']['Update'];
+type SegmentRow = Database["public"]["Tables"]["segmentos"]["Row"];
+type SegmentInsert = Database["public"]["Tables"]["segmentos"]["Insert"];
+type SegmentUpdate = Database["public"]["Tables"]["segmentos"]["Update"];
 
 function mapRow(row: SegmentRow): Segment {
   return {
@@ -41,16 +48,16 @@ export class SegmentRepositoryImpl implements SegmentRepository {
   async list(params?: PaginationParams): Promise<PaginatedResult<Segment>> {
     const page = params?.page ?? 1;
     const perPage = params?.perPage ?? 50;
-    const sortBy = params?.sortBy ?? 'nome';
-    const sortOrder = params?.sortOrder === 'desc' ? false : true;
-    
+    const sortBy = params?.sortBy ?? "nome";
+    const sortOrder = params?.sortOrder === "desc" ? false : true;
+
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
 
     // Get total count
     const { count, error: countError } = await this.client
       .from(TABLE)
-      .select('*', { count: 'exact', head: true });
+      .select("*", { count: "exact", head: true });
 
     if (countError) {
       throw new Error(`Failed to count segments: ${countError.message}`);
@@ -62,7 +69,7 @@ export class SegmentRepositoryImpl implements SegmentRepository {
     // Get paginated data
     const { data, error } = await this.client
       .from(TABLE)
-      .select('*')
+      .select("*")
       .order(sortBy, { ascending: sortOrder })
       .range(from, to);
 
@@ -82,7 +89,11 @@ export class SegmentRepositoryImpl implements SegmentRepository {
   }
 
   async findById(id: string): Promise<Segment | null> {
-    const { data, error } = await this.client.from(TABLE).select('*').eq('id', id).maybeSingle();
+    const { data, error } = await this.client
+      .from(TABLE)
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
 
     if (error) {
       throw new Error(`Failed to fetch segment: ${error.message}`);
@@ -92,7 +103,11 @@ export class SegmentRepositoryImpl implements SegmentRepository {
   }
 
   async findByName(name: string): Promise<Segment | null> {
-    const { data, error } = await this.client.from(TABLE).select('*').eq('nome', name).maybeSingle();
+    const { data, error } = await this.client
+      .from(TABLE)
+      .select("*")
+      .eq("nome", name)
+      .maybeSingle();
 
     if (error) {
       throw new Error(`Failed to fetch segment by name: ${error.message}`);
@@ -102,7 +117,11 @@ export class SegmentRepositoryImpl implements SegmentRepository {
   }
 
   async findBySlug(slug: string): Promise<Segment | null> {
-    const { data, error } = await this.client.from(TABLE).select('*').eq('slug', slug).maybeSingle();
+    const { data, error } = await this.client
+      .from(TABLE)
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle();
 
     if (error) {
       throw new Error(`Failed to fetch segment by slug: ${error.message}`);
@@ -115,12 +134,14 @@ export class SegmentRepositoryImpl implements SegmentRepository {
     const insertData: SegmentInsert = {
       nome: payload.name,
       slug: payload.slug ?? null,
+      empresa_id: payload.empresaId,
+      created_by: payload.createdBy,
     };
 
     const { data, error } = await this.client
       .from(TABLE)
       .insert(insertData)
-      .select('*')
+      .select("*")
       .single();
 
     if (error) {
@@ -132,11 +153,11 @@ export class SegmentRepositoryImpl implements SegmentRepository {
 
   async update(id: string, payload: UpdateSegmentInput): Promise<Segment> {
     const updateData: SegmentUpdate = {};
-    
+
     if (payload.name !== undefined) {
       updateData.nome = payload.name;
     }
-    
+
     if (payload.slug !== undefined) {
       updateData.slug = payload.slug;
     }
@@ -144,8 +165,8 @@ export class SegmentRepositoryImpl implements SegmentRepository {
     const { data, error } = await this.client
       .from(TABLE)
       .update(updateData)
-      .eq('id', id)
-      .select('*')
+      .eq("id", id)
+      .select("*")
       .single();
 
     if (error) {
@@ -156,11 +177,10 @@ export class SegmentRepositoryImpl implements SegmentRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.client.from(TABLE).delete().eq('id', id);
+    const { error } = await this.client.from(TABLE).delete().eq("id", id);
 
     if (error) {
       throw new Error(`Failed to delete segment: ${error.message}`);
     }
   }
 }
-

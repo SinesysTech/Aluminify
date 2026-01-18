@@ -1,7 +1,14 @@
-import { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/lib/database.types';
-import { Discipline, CreateDisciplineInput, UpdateDisciplineInput } from './discipline.types';
-import type { PaginationParams, PaginationMeta } from '@/types/shared/dtos/api-responses';
+import { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/database.types";
+import {
+  Discipline,
+  CreateDisciplineInput,
+  UpdateDisciplineInput,
+} from "./discipline.types";
+import type {
+  PaginationParams,
+  PaginationMeta,
+} from "@/types/shared/dtos/api-responses";
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -17,12 +24,12 @@ export interface DisciplineRepository {
   delete(id: string): Promise<void>;
 }
 
-const TABLE = 'disciplinas';
+const TABLE = "disciplinas";
 
 // Use generated Database types instead of manual definitions
-type DisciplineRow = Database['public']['Tables']['disciplinas']['Row'];
-type DisciplineInsert = Database['public']['Tables']['disciplinas']['Insert'];
-type DisciplineUpdate = Database['public']['Tables']['disciplinas']['Update'];
+type DisciplineRow = Database["public"]["Tables"]["disciplinas"]["Row"];
+type DisciplineInsert = Database["public"]["Tables"]["disciplinas"]["Insert"];
+type DisciplineUpdate = Database["public"]["Tables"]["disciplinas"]["Update"];
 
 function mapRow(row: DisciplineRow): Discipline {
   return {
@@ -39,16 +46,16 @@ export class DisciplineRepositoryImpl implements DisciplineRepository {
   async list(params?: PaginationParams): Promise<PaginatedResult<Discipline>> {
     const page = params?.page ?? 1;
     const perPage = params?.perPage ?? 50;
-    const sortBy = params?.sortBy ?? 'nome';
-    const sortOrder = params?.sortOrder === 'desc' ? false : true;
-    
+    const sortBy = params?.sortBy ?? "nome";
+    const sortOrder = params?.sortOrder === "desc" ? false : true;
+
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
 
     // Get total count
     const { count, error: countError } = await this.client
       .from(TABLE)
-      .select('*', { count: 'exact', head: true });
+      .select("*", { count: "exact", head: true });
 
     if (countError) {
       throw new Error(`Failed to count disciplines: ${countError.message}`);
@@ -60,7 +67,7 @@ export class DisciplineRepositoryImpl implements DisciplineRepository {
     // Get paginated data
     const { data, error } = await this.client
       .from(TABLE)
-      .select('*')
+      .select("*")
       .order(sortBy, { ascending: sortOrder })
       .range(from, to);
 
@@ -80,7 +87,11 @@ export class DisciplineRepositoryImpl implements DisciplineRepository {
   }
 
   async findById(id: string): Promise<Discipline | null> {
-    const { data, error } = await this.client.from(TABLE).select('*').eq('id', id).maybeSingle();
+    const { data, error } = await this.client
+      .from(TABLE)
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
 
     if (error) {
       throw new Error(`Failed to fetch discipline: ${error.message}`);
@@ -90,7 +101,11 @@ export class DisciplineRepositoryImpl implements DisciplineRepository {
   }
 
   async findByName(name: string): Promise<Discipline | null> {
-    const { data, error } = await this.client.from(TABLE).select('*').eq('nome', name).maybeSingle();
+    const { data, error } = await this.client
+      .from(TABLE)
+      .select("*")
+      .eq("nome", name)
+      .maybeSingle();
 
     if (error) {
       throw new Error(`Failed to fetch discipline by name: ${error.message}`);
@@ -102,12 +117,14 @@ export class DisciplineRepositoryImpl implements DisciplineRepository {
   async create(payload: CreateDisciplineInput): Promise<Discipline> {
     const insertData: DisciplineInsert = {
       nome: payload.name,
+      empresa_id: payload.empresaId,
+      created_by: payload.createdBy,
     };
 
     const { data, error } = await this.client
       .from(TABLE)
       .insert(insertData)
-      .select('*')
+      .select("*")
       .single();
 
     if (error) {
@@ -117,7 +134,10 @@ export class DisciplineRepositoryImpl implements DisciplineRepository {
     return mapRow(data);
   }
 
-  async update(id: string, payload: UpdateDisciplineInput): Promise<Discipline> {
+  async update(
+    id: string,
+    payload: UpdateDisciplineInput,
+  ): Promise<Discipline> {
     const updateData: DisciplineUpdate = {
       nome: payload.name,
     };
@@ -125,8 +145,8 @@ export class DisciplineRepositoryImpl implements DisciplineRepository {
     const { data, error } = await this.client
       .from(TABLE)
       .update(updateData)
-      .eq('id', id)
-      .select('*')
+      .eq("id", id)
+      .select("*")
       .single();
 
     if (error) {
@@ -137,7 +157,7 @@ export class DisciplineRepositoryImpl implements DisciplineRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.client.from(TABLE).delete().eq('id', id);
+    const { error } = await this.client.from(TABLE).delete().eq("id", id);
 
     if (error) {
       throw new Error(`Failed to delete discipline: ${error.message}`);

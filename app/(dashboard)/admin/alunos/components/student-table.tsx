@@ -70,9 +70,9 @@ export function StudentTable({ students }: StudentTableProps) {
     }
 
     return (
-        <div className="rounded-lg border border-[#E4E4E7] bg-white shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] overflow-hidden flex-1">
+        <div className="overflow-hidden flex-1">
             <table className="w-full text-left text-sm">
-                <thead className="bg-zinc-50 border-b border-[#E4E4E7]">
+                <thead className="border-b border-[#E4E4E7]">
                     <tr>
                         <th className="h-10 px-4 font-mono text-xs font-medium text-[#71717A] uppercase tracking-wider w-[120px]">ID Sistema</th>
                         <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs">Aluno / Email</th>
@@ -156,7 +156,7 @@ export function StudentTable({ students }: StudentTableProps) {
                 </tbody>
             </table>
 
-            <div className="bg-zinc-50 border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
+            <div className="border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
                 {/* Simple pagination mock for UI parity - logic to be added with real pagination props */}
                 <span className="text-xs text-[#71717A]">Mostrando <strong>{students.length}</strong> resultados</span>
                 <div className="flex gap-2">

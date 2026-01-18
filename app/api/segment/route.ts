@@ -1,12 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 import {
   segmentService,
   SegmentConflictError,
   SegmentValidationError,
-} from '@/backend/services/segment';
-import { requireAuth, AuthenticatedRequest } from '@/backend/auth/middleware';
+} from "@/backend/services/segment";
+import { requireAuth, AuthenticatedRequest } from "@/backend/auth/middleware";
 
-const serializeSegment = (segment: Awaited<ReturnType<typeof segmentService.getById>>) => ({
+const serializeSegment = (
+  segment: Awaited<ReturnType<typeof segmentService.getById>>,
+) => ({
   id: segment.id,
   name: segment.name,
   slug: segment.slug,
@@ -24,23 +26,31 @@ function handleError(error: unknown) {
   }
 
   // Log detalhado do erro
-  console.error('Segment API Error:', error);
-  
+  console.error("Segment API Error:", error);
+
   // Extrair mensagem de erro mais detalhada
-  let errorMessage = 'Internal server error';
+  let errorMessage = "Internal server error";
   if (error instanceof Error) {
     errorMessage = error.message || errorMessage;
-    console.error('Error stack:', error.stack);
-  } else if (typeof error === 'string') {
+    console.error("Error stack:", error.stack);
+  } else if (typeof error === "string") {
     errorMessage = error;
-  } else if (error && typeof error === 'object' && 'message' in error) {
+  } else if (error && typeof error === "object" && "message" in error) {
     errorMessage = String(error.message);
   }
-  
-  return NextResponse.json({ 
-    error: errorMessage,
-    details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : String(error)) : undefined
-  }, { status: 500 });
+
+  return NextResponse.json(
+    {
+      error: errorMessage,
+      details:
+        process.env.NODE_ENV === "development"
+          ? error instanceof Error
+            ? error.stack
+            : String(error)
+          : undefined,
+    },
+    { status: 500 },
+  );
 }
 
 // GET é público (catálogo)
@@ -56,36 +66,50 @@ export async function GET() {
 
 // POST requer autenticação de professor (JWT ou API Key)
 async function postHandler(request: AuthenticatedRequest) {
-  console.log('[Segment POST] Auth check:', {
+  console.log("[Segment POST] Auth check:", {
     hasUser: !!request.user,
     hasApiKey: !!request.apiKey,
     userRole: request.user?.role,
     userIsSuperAdmin: request.user?.isSuperAdmin,
   });
 
-  if (request.user && request.user.role !== 'professor' && request.user.role !== 'superadmin') {
-    console.log('[Segment POST] Forbidden - user role:', request.user.role);
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (
+    request.user &&
+    request.user.role !== "professor" &&
+    request.user.role !== "superadmin"
+  ) {
+    console.log("[Segment POST] Forbidden - user role:", request.user.role);
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   try {
     const body = await request.json();
-    console.log('[Segment POST] Request body:', body);
-    
+    console.log("[Segment POST] Request body:", body);
+
     if (!body?.name || !body?.slug) {
-      return NextResponse.json({ 
-        error: 'Campos obrigatórios: name e slug são necessários' 
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Campos obrigatórios: name e slug são necessários",
+        },
+        { status: 400 },
+      );
     }
-    
-    const segment = await segmentService.create({ name: body.name, slug: body.slug });
-    console.log('[Segment POST] Segment created:', segment.id);
-    return NextResponse.json({ data: serializeSegment(segment) }, { status: 201 });
+
+    const segment = await segmentService.create({
+      name: body.name,
+      slug: body.slug,
+      empresaId: request.user?.empresaId,
+      createdBy: request.user?.id,
+    });
+    console.log("[Segment POST] Segment created:", segment.id);
+    return NextResponse.json(
+      { data: serializeSegment(segment) },
+      { status: 201 },
+    );
   } catch (error) {
-    console.error('[Segment POST] Error creating segment:', error);
+    console.error("[Segment POST] Error creating segment:", error);
     return handleError(error);
   }
 }
 
 export const POST = requireAuth(postHandler);
-

@@ -2,17 +2,14 @@ import {
   Segment,
   CreateSegmentInput,
   UpdateSegmentInput,
-} from './segment.types';
-import {
-  SegmentRepository,
-  PaginatedResult,
-} from './segment.repository';
+} from "./segment.types";
+import { SegmentRepository, PaginatedResult } from "./segment.repository";
 import {
   SegmentConflictError,
   SegmentNotFoundError,
   SegmentValidationError,
-} from './errors';
-import type { PaginationParams } from '@/types/shared/dtos/api-responses';
+} from "./errors";
+import type { PaginationParams } from "@/types/shared/dtos/api-responses";
 
 const NAME_MIN_LENGTH = 3;
 const NAME_MAX_LENGTH = 120;
@@ -32,17 +29,26 @@ export class SegmentService {
 
     const existingByName = await this.repository.findByName(name);
     if (existingByName) {
-      throw new SegmentConflictError(`Segment with name "${name}" already exists`);
+      throw new SegmentConflictError(
+        `Segment with name "${name}" already exists`,
+      );
     }
 
     if (slug) {
       const existingBySlug = await this.repository.findBySlug(slug);
       if (existingBySlug) {
-        throw new SegmentConflictError(`Segment with slug "${slug}" already exists`);
+        throw new SegmentConflictError(
+          `Segment with slug "${slug}" already exists`,
+        );
       }
     }
 
-    return this.repository.create({ name, slug });
+    return this.repository.create({
+      name,
+      slug,
+      empresaId: payload.empresaId,
+      createdBy: payload.createdBy,
+    });
   }
 
   async update(id: string, payload: UpdateSegmentInput): Promise<Segment> {
@@ -51,19 +57,28 @@ export class SegmentService {
     }
 
     const name = payload.name ? this.validateName(payload.name) : undefined;
-    const slug = payload.slug !== undefined ? (payload.slug ? this.validateSlug(payload.slug) : null) : undefined;
+    const slug =
+      payload.slug !== undefined
+        ? payload.slug
+          ? this.validateSlug(payload.slug)
+          : null
+        : undefined;
 
     if (name) {
       const existingByName = await this.repository.findByName(name);
       if (existingByName && existingByName.id !== id) {
-        throw new SegmentConflictError(`Segment with name "${name}" already exists`);
+        throw new SegmentConflictError(
+          `Segment with name "${name}" already exists`,
+        );
       }
     }
 
     if (slug !== undefined && slug !== null) {
       const existingBySlug = await this.repository.findBySlug(slug);
       if (existingBySlug && existingBySlug.id !== id) {
-        throw new SegmentConflictError(`Segment with slug "${slug}" already exists`);
+        throw new SegmentConflictError(
+          `Segment with slug "${slug}" already exists`,
+        );
       }
     }
 
@@ -86,7 +101,7 @@ export class SegmentService {
   private validateName(name?: string): string {
     const trimmed = name?.trim();
     if (!trimmed) {
-      throw new SegmentValidationError('Name is required');
+      throw new SegmentValidationError("Name is required");
     }
 
     if (trimmed.length < NAME_MIN_LENGTH) {
@@ -106,9 +121,9 @@ export class SegmentService {
 
   private validateSlug(slug: string): string {
     const trimmed = slug.trim().toLowerCase();
-    
+
     if (!trimmed) {
-      throw new SegmentValidationError('Slug cannot be empty');
+      throw new SegmentValidationError("Slug cannot be empty");
     }
 
     if (trimmed.length < SLUG_MIN_LENGTH) {
@@ -126,7 +141,7 @@ export class SegmentService {
     // Slug deve conter apenas letras minúsculas, números, hífens e underscores
     if (!/^[a-z0-9_-]+$/.test(trimmed)) {
       throw new SegmentValidationError(
-        'Slug can only contain lowercase letters, numbers, hyphens and underscores',
+        "Slug can only contain lowercase letters, numbers, hyphens and underscores",
       );
     }
 
@@ -142,4 +157,3 @@ export class SegmentService {
     return segment;
   }
 }
-

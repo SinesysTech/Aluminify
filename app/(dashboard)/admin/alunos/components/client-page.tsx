@@ -20,7 +20,7 @@ export function AlunosClientPage({ students, meta, courses }: AlunosClientPagePr
     const hasStudents = meta.total > 0
 
     return (
-        <div className="flex flex-col gap-8 h-full">
+        <div className="flex flex-col gap-8 h-full pb-10">
 
             {/* SECTION 1: HEADER & POPULATED STATE (Always visible if we have students OR we are filtering) */}
             {(hasStudents || meta.total === 0 /* show even if 0 if we assume it's filtered result, but for empty state logic: */) ? (

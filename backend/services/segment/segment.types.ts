@@ -16,3 +16,9 @@ export interface UpdateSegmentInput {
   slug?: string;
 }
 
+export interface CreateSegmentInput {
+  name: string;
+  slug?: string;
+  empresaId?: string | null;
+  createdBy?: string;
+}

@@ -13,4 +13,8 @@ export interface UpdateDisciplineInput {
   name?: string;
 }
 
-
+export interface CreateDisciplineInput {
+  name: string;
+  empresaId?: string | null;
+  createdBy?: string;
+}
