@@ -247,6 +247,8 @@ export interface OrdenacaoAtividade {
 export type MetodoEstudo = 
   | 'pomodoro'
   | 'livre'
+  | 'cronometro'
+  | 'timer'
   | 'intervalo_curto'
   | 'intervalo_longo';
 
@@ -300,4 +302,23 @@ export interface CalculoTempoResultado {
   tempo_total_minutos: number;
   tempo_efetivo_minutos: number;
   pausas: LogPausa[];
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Determina se uma atividade requer registro de desempenho (check qualificado)
+ * 
+ * Check Simples (sem modal): Apenas Revisao
+ * Check Qualificado (com modal): Todos os outros tipos
+ * 
+ * @param tipo - Tipo da atividade
+ * @returns true se requer desempenho, false caso contrário
+ */
+export function atividadeRequerDesempenho(tipo: string): boolean {
+  // Check simples: Apenas Revisao
+  // Check qualificado: Todos os outros tipos (incluindo Conceituario)
+  return tipo !== 'Revisao';
 }
