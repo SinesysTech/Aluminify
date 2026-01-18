@@ -535,13 +535,13 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
               <AccordionItem value="ranking" className="border border-border rounded-lg shadow-sm mb-3 last:mb-0 bg-background border-b-0 px-3">
                 <AccordionTrigger className="py-3">
                   <div className="flex items-center gap-2">
-                    <span>Ranking de mÃ³dulos (estratÃ©gicos)</span>
+                    <span>Ranking de módulos (estratégicos)</span>
                     <TooltipProvider delayDuration={200}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <span
                             className="text-muted-foreground hover:text-foreground transition-colors rounded inline-flex"
-                            aria-label="O que Ã© o ranking de mÃ³dulos estratÃ©gicos?"
+                            aria-label="O que é o ranking de módulos estratégicos?"
                             onPointerDown={(e) => e.stopPropagation()}
                             onClick={(e) => e.stopPropagation()}
                           >
@@ -578,15 +578,15 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                     className="underline decoration-dotted underline-offset-2"
                                     aria-label="O que significa F?"
                                   >
-                                    F: {m.flashcardsScore ?? 'â€”'}%
+                                    F: {m.flashcardsScore ?? '–'}%
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" align="start" className="max-w-xs">
-                                  **F** Ã© seu desempenho em flashcards neste mÃ³dulo (memÃ³ria/recall nas revisÃµes).
+                                  **F** é seu desempenho em flashcards neste módulo (memória/recall nas revisões).
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
-                            {' Â· '}
+                            {' · '}
                             <TooltipProvider delayDuration={200}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -595,16 +595,16 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                     className="underline decoration-dotted underline-offset-2"
                                     aria-label="O que significa Q?"
                                   >
-                                    Q: {m.questionsScore ?? 'â€”'}%
+                                    Q: {m.questionsScore ?? '–'}%
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" align="start" className="max-w-xs">
-                                  **Q** Ã© sua taxa de acerto em questÃµes neste mÃ³dulo (acertos Ã· questÃµes respondidas).
+                                  **Q** é sua taxa de acerto em questões neste módulo (acertos ÷ questões respondidas).
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
                             {m.risk == null && (
-                              <span className="ml-2 italic">Sem evidÃªncia</span>
+                              <span className="ml-2 italic">Sem evidência</span>
                             )}
                           </div>
                         </div>
