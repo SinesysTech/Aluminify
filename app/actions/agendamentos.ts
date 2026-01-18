@@ -215,7 +215,7 @@ export async function upsertDisponibilidade(data: Disponibilidade) {
   const payload = {
     ...data,
     professor_id: user.id
-  }
+  } as any // Type assertion para contornar erro de tipos do Supabase
 
   const { error } = await supabase
     .from('agendamento_disponibilidade')
@@ -381,7 +381,7 @@ export async function createAgendamento(data: Omit<Agendamento, 'id' | 'created_
 
   const { data: result, error } = await supabase
     .from('agendamentos')
-    .insert(payload)
+    .insert(payload as any)
     .select()
     .single()
 
