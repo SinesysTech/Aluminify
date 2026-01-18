@@ -6,16 +6,16 @@ O sistema Aluminify atende **cursos livres** (preparatórios para ENEM, concurso
 
 ```
 Empresa (Tenant/Cursinho)
-├── Segmentos (ex: "ENEM", "Concursos")
-├── Disciplinas (ex: "Matemática", "Português") - globais da empresa
-│   └── Cronograma base da disciplina
+├── Segmentos (ex: "ENEM", "Concursos") - por tenant
+├── Disciplinas (ex: "Matemática", "Português") - por tenant
+│   └── Frentes → Módulos → Aulas
 ├── Cursos (ex: "Extensivo ENEM 2025") - com data_inicio e data_fim
-│   ├── cursos_disciplinas (N:N)
+│   ├── cursos_disciplinas (N:N - quais disciplinas o curso oferece)
 │   └── Turmas (opcional) - ex: "Manhã", "Tarde"
 │       └── alunos_turmas (N:N)
-├── Professores
+├── Professores - por tenant
 │   └── professores_disciplinas (flexível: geral, curso, turma, frente, módulo)
-└── Alunos
+└── Alunos - por tenant
     ├── Cronograma inteligente (gerado pelo aluno)
     ├── Progresso (professor vê só da disciplina dele)
     └── Chat (isolado por empresa)
