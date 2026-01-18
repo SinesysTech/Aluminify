@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface FirstAccessFormProps {
   userId: string
@@ -35,7 +36,7 @@ export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
       if ('code' in err && typeof err.code === 'string') {
         errorCode = err.code
       }
-      
+
       // Get message
       if ('message' in err && typeof err.message === 'string') {
         message = err.message
@@ -47,6 +48,9 @@ export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
     } else if (typeof err === 'string') {
       message = err
     }
+
+    // DEBUG: Log the resolved error details to help investigate the "same password" issue
+    console.warn('[FirstAccessForm] Error details:', { errorCode, message, originalError: err })
 
     // Handle specific error codes
     if (errorCode === 'same_password' || message?.toLowerCase().includes('new password should be different')) {
@@ -97,9 +101,9 @@ export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
     try {
       // Verify current user session
       const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser()
-      
+
       if (userError) {
-        console.error('[FirstAccessForm] Erro ao obter usuário atual:', userError)
+        console.warn('[FirstAccessForm] Erro ao obter usuário atual:', userError)
         throw new Error('Sua sessão expirou. Faça login novamente.')
       }
 
@@ -125,7 +129,7 @@ export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
       })
 
       if (updateError) {
-        console.error('[FirstAccessForm] Erro ao atualizar senha no Auth:', updateError)
+        console.warn('[FirstAccessForm] Erro ao atualizar senha no Auth:', updateError)
         throw updateError
       }
 
@@ -147,14 +151,14 @@ export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
-          console.error('[FirstAccessForm] Erro ao atualizar aluno via API:', errorData)
+          console.warn('[FirstAccessForm] Erro ao atualizar aluno via API:', errorData)
           throw new Error(errorData.error || 'Erro ao atualizar dados do aluno')
         }
 
         const result = await response.json()
         console.log('[FirstAccessForm] Registro do aluno atualizado com sucesso via API:', result.data)
       } catch (apiError) {
-        console.error('[FirstAccessForm] Erro ao chamar API de atualização:', apiError)
+        console.warn('[FirstAccessForm] Erro ao chamar API de atualização:', apiError)
         // Não lançar erro aqui - a senha já foi atualizada no Auth, que é o mais importante
         // O flag must_change_password pode ser atualizado depois
         console.warn('[FirstAccessForm] Continuando mesmo com erro na atualização do aluno (senha já foi atualizada)')
@@ -163,21 +167,22 @@ export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
       router.push(getDefaultRouteForRole(role))
       router.refresh()
     } catch (err) {
-      console.error('[FirstAccessForm] Erro ao atualizar senha do primeiro acesso:', err)
-      console.error('[FirstAccessForm] Tipo do erro:', typeof err)
-      
+      console.warn('[FirstAccessForm] Erro ao atualizar senha do primeiro acesso:', err)
+
       // Try to serialize error with all properties
       try {
         const errorKeys = err && typeof err === 'object' ? Object.getOwnPropertyNames(err) : []
         const errorSerialized = JSON.stringify(err, errorKeys.length > 0 ? errorKeys : undefined, 2)
-        console.error('[FirstAccessForm] Erro serializado:', errorSerialized)
+        // Use warn to avoid Next.js error overlay
+        console.warn('[FirstAccessForm] Erro serializado:', errorSerialized)
       } catch (serializeError) {
-        console.error('[FirstAccessForm] Não foi possível serializar o erro:', serializeError)
+        console.warn('[FirstAccessForm] Não foi possível serializar o erro:', serializeError)
       }
-      
+
       const errorMessage = resolveErrorMessage(err)
-      console.log('[FirstAccessForm] Mensagem de erro resolvida:', errorMessage)
+      console.warn('[FirstAccessForm] Mensagem de erro resolvida:', errorMessage)
       setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
