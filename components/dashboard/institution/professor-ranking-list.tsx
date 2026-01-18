@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { RankingList, type RankingItem } from '@/components/dashboard/shared/ranking-list'
 import type { ProfessorRankingItem } from '@/types/dashboard-institution'
 

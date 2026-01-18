@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { createClient } from '@/lib/server'
 import { createStudentService } from '@/backend/services/student'
 import { createCourseService } from '@/backend/services/course'

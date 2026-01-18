@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { Moon, Sun } from 'lucide-react'
 import { useThemeContext } from '@/components/providers/theme-provider'
 import { SidebarMenuButton } from '@/components/ui/sidebar'

@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"
 import { ConfiguracoesForm } from "@/components/professor/configuracoes-form"

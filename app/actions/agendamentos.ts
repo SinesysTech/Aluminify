@@ -550,7 +550,13 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
 // Legacy function for backwards compatibility - returns only slot strings
 export async function getAvailableSlotsLegacy(professorId: string, dateStr: string): Promise<string[]> {
   const result = await getAvailableSlots(professorId, dateStr)
-  return result.slots
+  
+  // Type guard para garantir que result tem a estrutura esperada
+  if (result && typeof result === 'object' && 'slots' in result && Array.isArray(result.slots)) {
+    return result.slots as string[]
+  }
+  
+  return []
 }
 
 // Get availability summary for a month (which days have available slots)

@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { BloqueiosManager } from "@/components/professor/bloqueios-manager"
 import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"

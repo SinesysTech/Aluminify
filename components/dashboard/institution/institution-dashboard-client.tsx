@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { RefreshCw, AlertCircle } from 'lucide-react'
 import type { InstitutionDashboardData } from '@/types/dashboard-institution'

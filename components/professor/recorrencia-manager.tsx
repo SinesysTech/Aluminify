@@ -1,3 +1,5 @@
+import React from 'react'
+
 "use client"
 
 import { useEffect, useState } from "react"
@@ -637,7 +639,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {formatDateRange(rec.data_inicio, rec.data_fim)}
+                    {formatDateRange(rec.data_inicio, rec.data_fim ?? null)}
                   </TableCell>
                   <TableCell>
                     <Badge

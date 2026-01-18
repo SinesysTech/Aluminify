@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { Building2, Users, GraduationCap, BookOpen } from 'lucide-react'
 
 interface InstitutionHeaderProps {

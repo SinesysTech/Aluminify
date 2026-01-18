@@ -1,3 +1,5 @@
+import React from 'react'
+
 "use client";
 
 import { DEFAULT_THEME, THEMES } from "@/lib/themes";

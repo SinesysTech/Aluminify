@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { SegmentoTable } from '@/components/segmento/segmento-table'
 import { requireUser } from '@/lib/auth'
 

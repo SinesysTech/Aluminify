@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
 import { TenantLogo } from '@/components/shared/tenant-logo';
 

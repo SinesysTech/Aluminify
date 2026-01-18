@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { Check, ChevronRight, Loader2 } from 'lucide-react'
 
 export function SignupDecorativeTerminal() {

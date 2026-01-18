@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { requireUser } from '@/lib/auth';
 import ModoFocoClient from './modo-foco-client';
 

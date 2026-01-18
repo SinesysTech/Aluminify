@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { LoginPageClient } from '@/components/auth/login-page-client'
 import { Suspense } from 'react'
 

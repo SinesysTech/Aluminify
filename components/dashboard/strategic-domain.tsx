@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { useEffect, useMemo, useState } from 'react'
 import type { StrategicDomain } from '@/types/dashboard'
 import type { DashboardScopeLevel, PerformanceItem, StrategicDomainModuleItem } from '@/types/dashboard'

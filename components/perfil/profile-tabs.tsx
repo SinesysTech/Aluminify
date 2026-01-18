@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { ProfileSettings } from "./profile-settings"
 import type { AppUser } from "@/types/user"
 

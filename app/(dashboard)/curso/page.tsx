@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { CursoTable } from '@/components/curso/curso-table'
 import { requireUser } from '@/lib/auth'
 

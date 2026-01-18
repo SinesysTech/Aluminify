@@ -1,3 +1,5 @@
+import React from 'react'
+
 "use client"
 
 import { SuperAdminSidebar } from "@/components/layout/superadmin-sidebar"

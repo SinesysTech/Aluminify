@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { Users, Calendar, CheckCircle2, Clock } from 'lucide-react'
 import { MetricCard } from '@/components/dashboard/metric-card'
 import type { ProfessorSummary } from '@/types/dashboard-professor'

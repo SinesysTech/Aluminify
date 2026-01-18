@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { createContext, useContext, useMemo } from 'react'
 
 import type { AppUser } from '@/types/user'

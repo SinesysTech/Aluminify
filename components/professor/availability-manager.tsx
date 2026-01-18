@@ -1,3 +1,5 @@
+import React from 'react'
+
 /**
  * @deprecated Use RecorrenciaManager instead.
  * This component uses the legacy agendamento_disponibilidade table.

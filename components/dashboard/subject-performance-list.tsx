@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { useEffect, useMemo, useState } from 'react'
 import type { DashboardGroupBy, DashboardPeriod, DashboardScopeLevel, PerformanceItem, SubjectPerformance } from '@/types/dashboard'
 import { Card, CardContent } from '@/components/ui/card'

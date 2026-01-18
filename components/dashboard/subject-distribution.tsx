@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { useEffect, useMemo, useState } from 'react'
 import type { SubjectDistributionItem } from '@/types/dashboard'
 import type { DashboardGroupBy, DashboardPeriod, DashboardScopeLevel, PerformanceItem, SubjectDistributionExtendedItem } from '@/types/dashboard'

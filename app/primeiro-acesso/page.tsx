@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { redirect } from 'next/navigation'
 
 import { requireUser } from '@/lib/auth'

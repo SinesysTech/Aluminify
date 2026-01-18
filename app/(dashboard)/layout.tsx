@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { UserProvider } from '@/components/providers/user-provider'
 import { BottomNavigation } from '@/components/layout/bottom-navigation'

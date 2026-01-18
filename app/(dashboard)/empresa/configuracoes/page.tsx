@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { SettingsTabs } from '@/components/configuracoes/settings-tabs'
 import { requireUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'

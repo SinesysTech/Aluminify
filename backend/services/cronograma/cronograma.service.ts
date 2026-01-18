@@ -1160,9 +1160,15 @@ export class CronogramaService {
           return acc;
         }, {} as FrenteComCursoDiferenteAccumulator);
 
+        interface FrenteInfo {
+          frente_nome: string;
+          curso_id: string | null;
+          total: number;
+        }
+
         console.error('🔍 [CronogramaService] ❌❌❌ Nenhuma aula encontrada após filtro de curso:', {
           curso_id_esperado: cursoId,
-          frentes_encontradas: Object.values(frentesComCursoDiferente).map((f: { frente_nome: string; curso_id: string | null; total: number }) => ({
+          frentes_encontradas: Object.values(frentesComCursoDiferente).map((f: FrenteInfo) => ({
             frente_nome: f.frente_nome,
             curso_id: f.curso_id,
             total_aulas: f.total,

@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { useState } from 'react'
 import type { HeatmapDay } from '@/types/dashboard'
 import { Card, CardContent } from '@/components/ui/card'

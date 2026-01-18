@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
@@ -37,10 +39,17 @@ export function RightPanel({
       try {
         const dateStr = date.toISOString()
         const result = await getAvailableSlots(professorId, dateStr)
-        // Remove duplicatas usando Set para garantir chaves unicas no React
-        const uniqueSlots = Array.from(new Set(result.slots))
-        setSlots(uniqueSlots)
-        setSlotDuration(result.slotDurationMinutes)
+        
+        // Type guard para verificar se result tem a estrutura esperada
+        if (result && typeof result === 'object' && 'slots' in result && Array.isArray(result.slots)) {
+          // Remove duplicatas usando Set para garantir chaves unicas no React
+          const uniqueSlots = Array.from(new Set(result.slots)) as string[]
+          setSlots(uniqueSlots)
+          
+          if ('slotDurationMinutes' in result) {
+            setSlotDuration(result.slotDurationMinutes as number)
+          }
+        }
       } catch (error) {
         console.error("Failed to fetch slots", error)
       } finally {

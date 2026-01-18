@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { useCallback, useEffect, useState } from 'react'
 import { Plus, Search, UserCog, GraduationCap, Users, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'

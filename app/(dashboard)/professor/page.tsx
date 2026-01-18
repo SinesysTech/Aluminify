@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { ProfessorTable } from '@/components/admin/professor-table'
 import { requireUser } from '@/lib/auth'
 

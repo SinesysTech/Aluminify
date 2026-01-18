@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { ImageResponse } from "next/og";
 
 export const size = 64;

@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { SiGoogle, SiGithub } from '@icons-pack/react-simple-icons'
 
 interface OAuthButtonsProps {

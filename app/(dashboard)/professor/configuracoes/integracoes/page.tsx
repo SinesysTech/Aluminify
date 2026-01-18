@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { IntegracaoManager } from "@/components/professor/integracao-manager"
 import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"

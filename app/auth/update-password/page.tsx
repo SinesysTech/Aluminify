@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { UpdatePasswordForm } from '@/components/auth/update-password-form'
 import { TenantLogo } from '@/components/shared/tenant-logo';
 

@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { RecorrenciaManager } from "@/components/professor/recorrencia-manager"
 import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"

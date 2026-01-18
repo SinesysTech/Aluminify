@@ -1,5 +1,7 @@
 'use client'
 
+import React from 'react'
+
 import { MessageSquare, Pin, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import {
   DropdownMenu,
