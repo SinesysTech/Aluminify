@@ -1,0 +1,24 @@
+# Análise Rápida de Qualidade de Código
+
+**Total de Issues:** 1
+
+## Resumo por Severidade
+
+- 🔴 **High:** 0
+- 🟡 **Medium:** 1
+- 🟢 **Low:** 0
+
+## Resumo por Tipo
+
+- **type-safety:** 1 ocorrências
+
+## Top 20 Issues Críticos
+
+*Nenhum issue crítico encontrado!* ✅
+
+## Detalhes por Tipo de Issue
+
+### type-safety (1 ocorrências)
+
+- `types\exceljs-browser.d.ts:3` - Uso de tipo "unknown" sem type guard
+

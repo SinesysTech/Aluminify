@@ -1,0 +1,139 @@
+🔍 Iniciando análise rápida...
+📁 Diretório: ../app
+
+✅ Análise concluída em 695ms
+📊 Total de issues encontrados: 201
+
+# Análise Rápida de Qualidade de Código
+
+**Total de Issues:** 201
+
+## Resumo por Severidade
+
+- 🔴 **High:** 11
+- 🟡 **Medium:** 71
+- 🟢 **Low:** 119
+
+## Resumo por Tipo
+
+- **debug-code:** 116 ocorrências
+- **type-safety:** 71 ocorrências
+- **missing-react-import:** 10 ocorrências
+- **incomplete-code:** 3 ocorrências
+- **error-handling:** 1 ocorrências
+
+## Top 20 Issues Críticos
+
+### 1. missing-react-import
+- **Arquivo:** `app\(dashboard)\admin\alunos\components\student-filters.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 2. missing-react-import
+- **Arquivo:** `app\(dashboard)\admin\flashcards\flashcards-admin-client.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 3. missing-react-import
+- **Arquivo:** `app\(dashboard)\admin\materiais\materiais-client.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 4. missing-react-import
+- **Arquivo:** `app\(dashboard)\aluno\cronograma\novo\novo-cronograma-client.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 5. missing-react-import
+- **Arquivo:** `app\(dashboard)\aluno\sala-de-estudos\sala-estudos-client.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 6. missing-react-import
+- **Arquivo:** `app\(dashboard)\conteudos\conteudos-client.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 7. missing-react-import
+- **Arquivo:** `app\(dashboard)\professor\flashcards\flashcards-admin-client.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 8. missing-react-import
+- **Arquivo:** `app\(dashboard)\professor\materiais\materiais-client.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 9. error-handling
+- **Arquivo:** `app\layout.tsx:75`
+- **Severidade:** high
+- **Mensagem:** Bloco catch vazio - erros sendo silenciados
+
+### 10. missing-react-import
+- **Arquivo:** `app\swagger\swagger-client.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 11. missing-react-import
+- **Arquivo:** `app\[tenant]\tenant-context.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+## Detalhes por Tipo de Issue
+
+### debug-code (116 ocorrências)
+
+- `app\(dashboard)\admin\flashcards\flashcards-admin-client.tsx:314` - Console.log deixado no código
+- `app\(dashboard)\admin\flashcards\flashcards-admin-client.tsx:326` - Console.log deixado no código
+- `app\(dashboard)\admin\flashcards\flashcards-admin-client.tsx:327` - Console.log deixado no código
+- `app\(dashboard)\admin\flashcards\flashcards-admin-client.tsx:334` - Console.log deixado no código
+- `app\(dashboard)\admin\flashcards\flashcards-admin-client.tsx:355` - Console.log deixado no código
+- `app\(dashboard)\aluno\dashboard\dashboard-client.tsx:163` - Console.log deixado no código
+- `app\(dashboard)\aluno\flashcards\flashcards-client.tsx:234` - Console.log deixado no código
+- `app\(dashboard)\aluno\flashcards\flashcards-client.tsx:237` - Console.log deixado no código
+- `app\(dashboard)\aluno\flashcards\flashcards-client.tsx:240` - Console.log deixado no código
+- `app\(dashboard)\aluno\flashcards\flashcards-client.tsx:258` - Console.log deixado no código
+
+*... e mais 106 ocorrências*
+
+### type-safety (71 ocorrências)
+
+- `app\(dashboard)\admin\materiais\materiais-client.tsx:243` - Uso de tipo "unknown" sem type guard
+- `app\(dashboard)\aluno\flashcards\flashcards-client.tsx:333` - Uso de tipo "unknown" sem type guard
+- `app\(dashboard)\aluno\flashcards\flashcards-client.tsx:348` - Uso de tipo "unknown" sem type guard
+- `app\(dashboard)\aluno\sala-de-estudos\sala-estudos-client.tsx:22` - Uso de tipo "unknown" sem type guard
+- `app\(dashboard)\conteudos\conteudos-client.tsx:711` - Uso de tipo "unknown" sem type guard
+- `app\(dashboard)\conteudos\conteudos-client.tsx:733` - Uso de tipo "unknown" sem type guard
+- `app\(dashboard)\conteudos\conteudos-client.tsx:1326` - Uso de tipo "unknown" sem type guard
+- `app\(dashboard)\conteudos\conteudos-client.tsx:1334` - Uso de tipo "unknown" sem type guard
+- `app\(dashboard)\conteudos\conteudos-client.tsx:2085` - Uso de tipo "unknown" sem type guard
+- `app\(dashboard)\professor\materiais\materiais-client.tsx:235` - Uso de tipo "unknown" sem type guard
+
+*... e mais 61 ocorrências*
+
+### missing-react-import (10 ocorrências)
+
+- `app\(dashboard)\admin\alunos\components\student-filters.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `app\(dashboard)\admin\flashcards\flashcards-admin-client.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `app\(dashboard)\admin\materiais\materiais-client.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `app\(dashboard)\aluno\cronograma\novo\novo-cronograma-client.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `app\(dashboard)\aluno\sala-de-estudos\sala-estudos-client.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `app\(dashboard)\conteudos\conteudos-client.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `app\(dashboard)\professor\flashcards\flashcards-admin-client.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `app\(dashboard)\professor\materiais\materiais-client.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `app\swagger\swagger-client.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `app\[tenant]\tenant-context.tsx:1` - React usado mas não importado (pode causar erro em produção)
+
+### incomplete-code (3 ocorrências)
+
+- `app\(dashboard)\admin\alunos\components\student-sheet.tsx:44` - Código incompleto (TODO/FIXME/HACK)
+- `app\actions\agendamentos.ts:32` - Código incompleto (TODO/FIXME/HACK)
+- `app\[tenant]\auth\sign-up\page.tsx:28` - Código incompleto (TODO/FIXME/HACK)
+
+### error-handling (1 ocorrências)
+
+- `app\layout.tsx:75` - Bloco catch vazio - erros sendo silenciados
+
+
+
+💾 Relatório salvo em: ..\reports\quick-analysis.md
