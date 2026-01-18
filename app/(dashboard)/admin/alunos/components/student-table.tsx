@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { MoreHorizontal, Eye } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Student } from '@/types/shared/entities/user'
@@ -18,7 +18,12 @@ interface StudentTableProps {
 
 export function StudentTable({ students }: StudentTableProps) {
     const [loadingId, setLoadingId] = useState<string | null>(null)
+    const [mounted, setMounted] = useState(false)
     const router = useRouter()
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     const handleViewAsStudent = async (studentId: string) => {
         setLoadingId(studentId)
@@ -131,23 +136,29 @@ export function StudentTable({ students }: StudentTableProps) {
                                         </div>
                                     </td>
                                     <td className="p-4 text-right">
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <button className="text-zinc-400 hover:text-zinc-900 transition-colors">
-                                                    <MoreHorizontal className="w-5 h-5" strokeWidth={1.5} />
-                                                </button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem
-                                                    onClick={() => handleViewAsStudent(student.id)}
-                                                    disabled={loadingId === student.id}
-                                                    className="cursor-pointer"
-                                                >
-                                                    <Eye className="mr-2 h-4 w-4" />
-                                                    {loadingId === student.id ? 'Carregando...' : 'Visualizar como Aluno'}
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
+                                        {mounted ? (
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <button className="text-zinc-400 hover:text-zinc-900 transition-colors">
+                                                        <MoreHorizontal className="w-5 h-5" strokeWidth={1.5} />
+                                                    </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleViewAsStudent(student.id)}
+                                                        disabled={loadingId === student.id}
+                                                        className="cursor-pointer"
+                                                    >
+                                                        <Eye className="mr-2 h-4 w-4" />
+                                                        {loadingId === student.id ? 'Carregando...' : 'Visualizar como Aluno'}
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        ) : (
+                                            <button className="text-zinc-400" disabled>
+                                                <MoreHorizontal className="w-5 h-5" strokeWidth={1.5} />
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             )
