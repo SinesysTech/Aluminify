@@ -39,7 +39,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2, Trash2, Plus } from 'lucide-react'
+import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2, Trash2, Plus, Info, FileUp } from 'lucide-react'
 import Papa from 'papaparse'
 import { useRouter } from 'next/navigation'
 import AddActivityModal from '../../../components/conteudos/add-activity-modal'
@@ -168,6 +168,40 @@ export default function ConteudosClientPage() {
   const [isCreatingActivity, setIsCreatingActivity] = React.useState(false)
   const [isUpdatingEstrutura, setIsUpdatingEstrutura] = React.useState(false)
   const [showUpdateDialog, setShowUpdateDialog] = React.useState(false)
+  const [isDragging, setIsDragging] = React.useState(false)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  const handleDragOver = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }, [])
+
+  const handleDrop = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const file = e.dataTransfer.files?.[0]
+    if (file) {
+      if (!file.name.endsWith('.csv') && !file.name.endsWith('.xlsx')) {
+        setError('Por favor, selecione um arquivo CSV ou XLSX')
+        return
+      }
+      setArquivo(file)
+      setError(null)
+    }
+  }, [])
+
+  const handleDropzoneClick = () => {
+    fileInputRef.current?.click()
+  }
 
   const fetchWithAuth = React.useCallback(
     async (input: string, init?: RequestInit) => {
@@ -1658,153 +1692,243 @@ export default function ConteudosClientPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 h-full pb-10">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E4E4E7] pb-4">
+    <div className="flex flex-col gap-6 h-full pb-10">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Importar Conteúdo Programático</h1>
-          <p className="text-sm text-[#71717A]">
-            Faça upload de arquivos CSV para cadastrar ou atualizar o conteúdo programático
+          <h1 className="text-2xl font-bold tracking-tight">Importar Conteudo Programatico</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Faca upload de arquivos CSV para cadastrar ou atualizar o conteudo programatico
           </p>
         </div>
       </header>
 
       {/* Card de Upload */}
-      {/* Seção de Upload */}
-      <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-        <div className="flex flex-col space-y-1.5 p-6">
-          <h3 className="font-semibold leading-none tracking-tight">Upload de Arquivo</h3>
-          <p className="text-sm text-muted-foreground">
-            Escolha o curso, informe a disciplina e a frente correspondente, depois envie o arquivo da planilha.
-          </p>
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm max-w-3xl">
+        {/* Header */}
+        <div className="flex items-center gap-3 p-6 border-b">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <FileUp className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold leading-none tracking-tight">Upload de Arquivo</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              Importe seu conteudo programatico via planilha
+            </p>
+          </div>
         </div>
-        <div className="p-6 pt-0 space-y-4">
+
+        <div className="p-6 space-y-6">
+          {/* Alerts */}
           {error && (
-            <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
-              {error}
+            <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4 text-sm text-destructive flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
+              <span>{error}</span>
             </div>
           )}
 
           {successMessage && (
-            <div className="rounded-md bg-green-500/15 p-3 text-sm text-black flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-black" />
-              {successMessage}
+            <div className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 p-4 text-sm text-emerald-700 dark:text-emerald-400 flex items-start gap-3">
+              <CheckCircle2 className="h-5 w-5 shrink-0 mt-0.5" />
+              <span>{successMessage}</span>
             </div>
           )}
 
           {cursos.length === 0 && (
-            <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+            <div className="rounded-lg border-2 border-dashed p-4 text-sm text-muted-foreground text-center">
               Nenhum curso encontrado.{' '}
               <Button variant="link" className="h-auto p-0 align-baseline" onClick={() => router.push('/curso')}>
-                Crie um curso antes de importar conteúdos.
+                Crie um curso antes de importar conteudos.
               </Button>
             </div>
           )}
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="curso">Curso</Label>
-              <Select value={cursoSelecionado} onValueChange={handleCursoChange}>
-                <SelectTrigger id="curso">
-                  <SelectValue placeholder="Selecione um curso" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cursos.map((curso) => (
-                    <SelectItem key={curso.id} value={curso.id}>
-                      {curso.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="text-xs text-muted-foreground">
-                Precisa de um curso novo?{' '}
-                <Button
-                  type="button"
-                  variant="link"
-                  className="h-auto p-0 align-baseline"
-                  onClick={() => router.push('/curso')}
-                >
-                  Abrir gestão de cursos
-                </Button>
+          {/* Section 1: Contexto da Disciplina */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                1
+              </span>
+              <h4 className="text-base font-medium">Contexto da Disciplina</h4>
+            </div>
+
+            <div className="ml-10 space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="curso">Curso</Label>
+                  <Select value={cursoSelecionado} onValueChange={handleCursoChange}>
+                    <SelectTrigger id="curso">
+                      <SelectValue placeholder="Selecione um curso" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cursos.map((curso) => (
+                        <SelectItem key={curso.id} value={curso.id}>
+                          {curso.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Precisa de um curso novo?{' '}
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="h-auto p-0 align-baseline text-xs"
+                      onClick={() => router.push('/curso')}
+                    >
+                      Abrir gestao de cursos
+                    </Button>
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="disciplina">Disciplina do Curso</Label>
+                  {!cursoSelecionado ? (
+                    <Input
+                      id="disciplina"
+                      value="Selecione um curso primeiro"
+                      disabled
+                    />
+                  ) : disciplinasDoCurso.length === 0 ? (
+                    <Input
+                      id="disciplina"
+                      value="Este curso nao possui disciplinas cadastradas"
+                      disabled
+                    />
+                  ) : disciplinasDoCurso.length === 1 ? (
+                    <Input
+                      id="disciplina"
+                      value={disciplinasDoCurso[0].nome}
+                      disabled
+                    />
+                  ) : (
+                    <Select
+                      value={disciplinaSelecionada}
+                      onValueChange={(value) => {
+                        setDisciplinaSelecionada(value)
+                        setFrenteSelecionada('')
+                        setModulos([])
+                      }}
+                    >
+                      <SelectTrigger id="disciplina">
+                        <SelectValue placeholder="Selecione uma disciplina do curso" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {disciplinasDoCurso.map((disciplina) => (
+                          <SelectItem key={disciplina.id} value={disciplina.id}>
+                            {disciplina.nome}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="frente">Nome da Frente</Label>
+                <Input
+                  id="frente"
+                  placeholder="Ex: Frente A, Frente B..."
+                  value={frenteNome}
+                  onChange={(e) => setFrenteNome(e.target.value)}
+                />
               </div>
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="disciplina">Disciplina do Curso</Label>
-              {!cursoSelecionado ? (
-                <Input
-                  id="disciplina"
-                  value="Selecione um curso primeiro"
-                  disabled
-                />
-              ) : disciplinasDoCurso.length === 0 ? (
-                <Input
-                  id="disciplina"
-                  value="Este curso não possui disciplinas cadastradas"
-                  disabled
-                />
-              ) : disciplinasDoCurso.length === 1 ? (
-                <Input
-                  id="disciplina"
-                  value={disciplinasDoCurso[0].nome}
-                  disabled
-                />
-              ) : (
-                <Select
-                  value={disciplinaSelecionada}
-                  onValueChange={(value) => {
-                    setDisciplinaSelecionada(value)
-                    setFrenteSelecionada('')
-                    setModulos([])
-                  }}
-                >
-                  <SelectTrigger id="disciplina">
-                    <SelectValue placeholder="Selecione uma disciplina do curso" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {disciplinasDoCurso.map((disciplina) => (
-                      <SelectItem key={disciplina.id} value={disciplina.id}>
-                        {disciplina.nome}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+          {/* Separator */}
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border" />
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="frente">Nome da Frente</Label>
-            <Input
-              id="frente"
-              placeholder="Ex: Frente A"
-              value={frenteNome}
-              onChange={(e) => setFrenteNome(e.target.value)}
-            />
-          </div>
+          {/* Section 2: Arquivo de Dados */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">
+                2
+              </span>
+              <h4 className="text-base font-medium">Arquivo de Dados</h4>
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="csv-file">Arquivo CSV</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="csv-file"
-                type="file"
-                accept=".csv,.xlsx"
-                onChange={handleFileChange}
-                className="cursor-pointer py-0 leading-9 file:h-9 file:py-0 file:leading-9"
-              />
-              {arquivo && (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <FileText className="h-4 w-4" />
-                  {arquivo.name}
+            <div className="ml-10 space-y-4">
+              {/* Dropzone */}
+              <div
+                onClick={handleDropzoneClick}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`
+                  relative cursor-pointer rounded-lg border-2 border-dashed p-8
+                  transition-all duration-200 ease-in-out
+                  ${isDragging
+                    ? 'border-primary bg-primary/5 scale-[1.02]'
+                    : arquivo
+                      ? 'border-emerald-500 bg-emerald-500/5'
+                      : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50'
+                  }
+                `}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv,.xlsx"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <div className="flex flex-col items-center justify-center text-center">
+                  {arquivo ? (
+                    <>
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500/10 mb-3">
+                        <FileText className="h-6 w-6 text-emerald-600" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground">{arquivo.name}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Clique para trocar o arquivo
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-3">
+                        <Upload className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground">
+                        Arraste e solte seu arquivo aqui
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        ou clique para selecionar
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        Formatos aceitos: <span className="font-medium">CSV</span> ou <span className="font-medium">XLSX</span>
+                      </p>
+                    </>
+                  )}
                 </div>
-              )}
+              </div>
+
+              {/* Info Box */}
+              <div className="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 p-4">
+                <div className="flex gap-3">
+                  <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                      Colunas necessarias no arquivo:
+                    </p>
+                    <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1 list-disc list-inside">
+                      <li><span className="font-semibold">Modulo</span> ou <span className="font-semibold">Nome do Modulo</span> (obrigatorio)</li>
+                      <li><span className="font-semibold">Aula</span> ou <span className="font-semibold">Nome da Aula</span> (obrigatorio)</li>
+                      <li><span className="font-semibold">Tempo</span> - tempo estimado em minutos (opcional)</li>
+                      <li><span className="font-semibold">Prioridade</span> - valor de 0 a 5 (opcional)</li>
+                      <li><span className="font-semibold">Importancia</span> - Alta, Media, Baixa ou Base (opcional)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Formatos aceitos: CSV (padrão ; e UTF-8) ou XLSX. O arquivo deve conter colunas: Módulo (ou Nome do Módulo), Aula (ou Nome da Aula), Tempo (opcional), Prioridade (opcional, 0-5) e Importância (opcional: Alta, Media, Baixa, Base).
-            </p>
           </div>
 
+          {/* Submit Button */}
           <Button
             onClick={handleImport}
             disabled={
@@ -1814,13 +1938,17 @@ export default function ConteudosClientPage() {
               !frenteNome.trim() ||
               !arquivo
             }
-            className="w-full"
+            className="w-full h-11 text-base"
+            size="lg"
           >
             {isLoading ? (
-              <>Processando...</>
+              <>
+                <div className="h-4 w-4 mr-2 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Processando...
+              </>
             ) : (
               <>
-                <Upload className="mr-2 h-4 w-4" />
+                <Upload className="mr-2 h-5 w-5" />
                 Importar e Atualizar
               </>
             )}
@@ -1828,16 +1956,21 @@ export default function ConteudosClientPage() {
         </div>
       </div>
 
-      {/* Seção de Visualização */}
+      {/* Secao de Visualizacao */}
       {disciplinaSelecionada && (
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-          <div className="flex flex-col space-y-1.5 p-6">
-            <h3 className="font-semibold leading-none tracking-tight">Conteúdo Atual</h3>
-            <p className="text-sm text-muted-foreground">
-              Visualize o conteúdo programático cadastrado para esta disciplina
-            </p>
+          <div className="flex items-center gap-3 p-6 border-b">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold leading-none tracking-tight">Conteudo Atual</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Visualize o conteudo programatico cadastrado para esta disciplina
+              </p>
+            </div>
           </div>
-          <div className="p-6 pt-0">
+          <div className="p-6">
             {frentes.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 Nenhuma frente cadastrada para esta disciplina
