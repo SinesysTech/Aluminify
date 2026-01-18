@@ -1,0 +1,28 @@
+🔍 Iniciando análise rápida...
+📁 Diretório: ../hooks
+
+✅ Análise concluída em 6ms
+📊 Total de issues encontrados: 0
+
+# Análise Rápida de Qualidade de Código
+
+**Total de Issues:** 0
+
+## Resumo por Severidade
+
+- 🔴 **High:** 0
+- 🟡 **Medium:** 0
+- 🟢 **Low:** 0
+
+## Resumo por Tipo
+
+
+## Top 20 Issues Críticos
+
+*Nenhum issue crítico encontrado!* ✅
+
+## Detalhes por Tipo de Issue
+
+
+
+💾 Relatório salvo em: ..\reports\quick-analysis.md

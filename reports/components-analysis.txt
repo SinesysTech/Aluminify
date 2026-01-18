@@ -1,0 +1,182 @@
+🔍 Iniciando análise rápida...
+📁 Diretório: ../components
+
+✅ Análise concluída em 754ms
+📊 Total de issues encontrados: 314
+
+# Análise Rápida de Qualidade de Código
+
+**Total de Issues:** 314
+
+## Resumo por Severidade
+
+- 🔴 **High:** 115
+- 🟡 **Medium:** 45
+- 🟢 **Low:** 154
+
+## Resumo por Tipo
+
+- **debug-code:** 150 ocorrências
+- **missing-react-import:** 115 ocorrências
+- **type-safety:** 45 ocorrências
+- **incomplete-code:** 4 ocorrências
+
+## Top 20 Issues Críticos
+
+### 1. missing-react-import
+- **Arquivo:** `components\active-theme.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 2. missing-react-import
+- **Arquivo:** `components\admin\professor-table.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 3. missing-react-import
+- **Arquivo:** `components\agendamento\index.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 4. missing-react-import
+- **Arquivo:** `components\agendamento\left-panel.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 5. missing-react-import
+- **Arquivo:** `components\aluno\aluno-table.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 6. missing-react-import
+- **Arquivo:** `components\aluno\atividade-checklist-row.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 7. missing-react-import
+- **Arquivo:** `components\aluno\modulo-activities-accordion.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 8. missing-react-import
+- **Arquivo:** `components\aluno\progresso-stats-card.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 9. missing-react-import
+- **Arquivo:** `components\aluno\registrar-desempenho-modal.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 10. missing-react-import
+- **Arquivo:** `components\aluno\sala-estudos-filters.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 11. missing-react-import
+- **Arquivo:** `components\aluno\schedule-wizard.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 12. missing-react-import
+- **Arquivo:** `components\auth\login-decorative-card.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 13. missing-react-import
+- **Arquivo:** `components\auth\magic-link-button.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 14. missing-react-import
+- **Arquivo:** `components\auth\oauth-buttons.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 15. missing-react-import
+- **Arquivo:** `components\auth\signup-decorative-terminal.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 16. missing-react-import
+- **Arquivo:** `components\brand-customization\color-palette-editor.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 17. missing-react-import
+- **Arquivo:** `components\brand-customization\logo-upload-component.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 18. missing-react-import
+- **Arquivo:** `components\calendar\demo\form-panel.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 19. missing-react-import
+- **Arquivo:** `components\calendar\demo\index.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+### 20. missing-react-import
+- **Arquivo:** `components\calendar\index.tsx:1`
+- **Severidade:** high
+- **Mensagem:** React usado mas não importado (pode causar erro em produção)
+
+## Detalhes por Tipo de Issue
+
+### debug-code (150 ocorrências)
+
+- `components\aluno\schedule-calendar-view.tsx:227` - Console.log deixado no código
+- `components\aluno\schedule-calendar-view.tsx:234` - Console.log deixado no código
+- `components\aluno\schedule-calendar-view.tsx:449` - Console.log deixado no código
+- `components\aluno\schedule-calendar-view.tsx:450` - Console.log deixado no código
+- `components\aluno\schedule-calendar-view.tsx:451` - Console.log deixado no código
+- `components\aluno\schedule-calendar-view.tsx:471` - Console.log deixado no código
+- `components\aluno\schedule-calendar-view.tsx:472` - Console.log deixado no código
+- `components\aluno\schedule-calendar-view.tsx:509` - Console.log deixado no código
+- `components\aluno\schedule-calendar-view.tsx:534` - Console.log deixado no código
+- `components\aluno\schedule-calendar-view.tsx:560` - Console.log deixado no código
+
+*... e mais 140 ocorrências*
+
+### missing-react-import (115 ocorrências)
+
+- `components\active-theme.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `components\admin\professor-table.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `components\agendamento\index.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `components\agendamento\left-panel.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `components\aluno\aluno-table.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `components\aluno\atividade-checklist-row.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `components\aluno\modulo-activities-accordion.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `components\aluno\progresso-stats-card.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `components\aluno\registrar-desempenho-modal.tsx:1` - React usado mas não importado (pode causar erro em produção)
+- `components\aluno\sala-estudos-filters.tsx:1` - React usado mas não importado (pode causar erro em produção)
+
+*... e mais 105 ocorrências*
+
+### type-safety (45 ocorrências)
+
+- `components\aluno\aluno-table.tsx:591` - Uso de tipo "unknown" sem type guard
+- `components\aluno\schedule-calendar-view.tsx:287` - Uso de tipo "unknown" sem type guard
+- `components\aluno\schedule-calendar-view.tsx:303` - Uso de tipo "unknown" sem type guard
+- `components\aluno\schedule-calendar-view.tsx:327` - Uso de tipo "unknown" sem type guard
+- `components\aluno\schedule-calendar-view.tsx:424` - Uso de tipo "unknown" sem type guard
+- `components\aluno\schedule-calendar-view.tsx:426` - Uso de tipo "unknown" sem type guard
+- `components\aluno\schedule-calendar-view.tsx:496` - Uso de tipo "unknown" sem type guard
+- `components\aluno\schedule-calendar-view.tsx:1245` - Uso de tipo "unknown" sem type guard
+- `components\aluno\schedule-calendar-view.tsx:1267` - Uso de tipo "unknown" sem type guard
+- `components\aluno\schedule-calendar-view.tsx:1315` - Uso de tipo "unknown" sem type guard
+
+*... e mais 35 ocorrências*
+
+### incomplete-code (4 ocorrências)
+
+- `components\ui\theme-customizer\panel.tsx:28` - Código incompleto (TODO/FIXME/HACK)
+- `components\ui\theme-customizer\panel.tsx:31` - Código incompleto (TODO/FIXME/HACK)
+- `components\ui\theme-customizer\panel.tsx:36` - Código incompleto (TODO/FIXME/HACK)
+- `components\ui\theme-customizer\panel.tsx:46` - Código incompleto (TODO/FIXME/HACK)
+
+
+
+💾 Relatório salvo em: ..\reports\quick-analysis.md
