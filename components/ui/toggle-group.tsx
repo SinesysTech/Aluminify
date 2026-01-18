@@ -1,88 +1,73 @@
-import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group";
-import { type VariantProps, cva } from "class-variance-authority";
-import * as React from "react";
+"use client"
 
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"
+import { type VariantProps } from "class-variance-authority"
 
-const toggleGroupVariants = cva(
-  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors",
-  {
-    variants: {
-      variant: {
-        default: "bg-transparent",
-        outline:
-          "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground",
-        segmented:
-          // Segmentado: borda só no container, itens ocupam 100% da altura/largura.
-          // Importante: remove o padding lateral do size (px-1) para o highlight não “sobrar” nas bordas.
-          // Não usar `overflow-hidden`: ele corta o botão (ex.: focus ring / arredondamento) em alguns layouts.
-          "inline-flex items-stretch justify-center overflow-visible border border-input bg-transparent shadow-sm divide-x divide-border p-0 !px-0",
-      },
-      size: {
-        default: "h-9 px-1",
-        sm: "h-8 px-1",
-        lg: "h-10 px-1",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  },
-);
+import { cn } from "@/lib/utils"
+import { toggleVariants } from "@/components/ui/toggle"
 
-const ToggleGroup = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Root> &
-    VariantProps<typeof toggleGroupVariants>
->(({ className, variant, size, ...props }, ref) => (
-  <ToggleGroupPrimitive.Root
-    ref={ref}
-    className={cn(toggleGroupVariants({ variant, size }), className)}
-    {...props}
-  />
-));
-ToggleGroup.displayName = ToggleGroupPrimitive.Root.displayName;
+const ToggleGroupContext = React.createContext<
+  VariantProps<typeof toggleVariants>
+>({
+  size: "default",
+  variant: "default",
+})
 
-const toggleGroupItemVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground hover:bg-accent hover:text-accent-foreground",
-  {
-    variants: {
-      variant: {
-        default: "bg-transparent",
-        outline:
-          "border border-input bg-transparent shadow-sm hover:bg-accent hover:text-accent-foreground",
-        segmented:
-          // Segmentado: cada item preenche a altura do container e respeita o arredondamento externo.
-          // Remove “retângulo”/borda extra no selecionado (sem inset border), deixando o highlight limpo.
-          // Destaque do selecionado: mesmo padrão dos toggles "Semanal/Mensal/Anual" (bg-primary).
-          // Obs: não usamos `shadow` no selecionado aqui porque o container é `overflow-hidden` (senão o highlight fica “cortado”).
-          "h-full flex-1 rounded-none border-0 bg-transparent shadow-none leading-none hover:bg-accent hover:text-accent-foreground data-[state=on]:bg-primary data-[state=on]:text-primary-foreground hover:data-[state=on]:bg-primary/90 data-[state=on]:font-semibold focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0 first:rounded-l-md last:rounded-r-md",
-      },
-      size: {
-        default: "h-9 px-3",
-        sm: "h-8 px-2",
-        lg: "h-10 px-4",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  },
-);
+function ToggleGroup({
+  className,
+  variant,
+  size,
+  children,
+  ...props
+}: React.ComponentProps<typeof ToggleGroupPrimitive.Root> &
+  VariantProps<typeof toggleVariants>) {
+  return (
+    <ToggleGroupPrimitive.Root
+      data-slot="toggle-group"
+      data-variant={variant}
+      data-size={size}
+      className={cn(
+        "group/toggle-group flex w-fit items-center rounded-md data-[variant=outline]:shadow-xs",
+        className
+      )}
+      {...props}
+    >
+      <ToggleGroupContext.Provider value={{ variant, size }}>
+        {children}
+      </ToggleGroupContext.Provider>
+    </ToggleGroupPrimitive.Root>
+  )
+}
 
-const ToggleGroupItem = React.forwardRef<
-  React.ElementRef<typeof ToggleGroupPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof ToggleGroupPrimitive.Item> &
-    VariantProps<typeof toggleGroupItemVariants>
->(({ className, variant, size, ...props }, ref) => (
-  <ToggleGroupPrimitive.Item
-    ref={ref}
-    className={cn(toggleGroupItemVariants({ variant, size }), className)}
-    {...props}
-  />
-));
-ToggleGroupItem.displayName = ToggleGroupPrimitive.Item.displayName;
+function ToggleGroupItem({
+  className,
+  children,
+  variant,
+  size,
+  ...props
+}: React.ComponentProps<typeof ToggleGroupPrimitive.Item> &
+  VariantProps<typeof toggleVariants>) {
+  const context = React.useContext(ToggleGroupContext)
 
-export { ToggleGroup, ToggleGroupItem };
+  return (
+    <ToggleGroupPrimitive.Item
+      data-slot="toggle-group-item"
+      data-variant={context.variant || variant}
+      data-size={context.size || size}
+      className={cn(
+        toggleVariants({
+          variant: context.variant || variant,
+          size: context.size || size,
+        }),
+        "min-w-0 flex-1 shrink-0 rounded-none shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10 data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </ToggleGroupPrimitive.Item>
+  )
+}
+
+export { ToggleGroup, ToggleGroupItem }
