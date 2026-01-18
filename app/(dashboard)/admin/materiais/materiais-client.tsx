@@ -321,11 +321,6 @@ export default function MateriaisClientPage() {
       return
     }
 
-    if (!frenteCursoId) {
-      setError('Não foi possível identificar o curso da frente selecionada')
-      return
-    }
-
     try {
       setIsGenerating(true)
       setError(null)
@@ -343,7 +338,7 @@ export default function MateriaisClientPage() {
           'Authorization': `Bearer ${session.access_token}`,
         },
         body: JSON.stringify({
-          curso_id: frenteCursoId,
+          curso_id: cursoSelecionado,
           frente_id: frenteSelecionada,
         }),
       })
