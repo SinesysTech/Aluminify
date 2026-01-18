@@ -1,15 +1,16 @@
-export type UserRole = 'aluno' | 'professor' | 'superadmin' | 'empresa';
+export type UserRole = "aluno" | "professor" | "superadmin" | "empresa";
 
 export interface AuthUser {
   id: string;
   email: string;
   role: UserRole;
   isSuperAdmin?: boolean;
+  isEmpresaAdmin?: boolean;
   empresaId?: string;
 }
 
 export interface ApiKeyAuth {
-  type: 'api_key';
+  type: "api_key";
   apiKeyId: string;
   createdBy: string;
 }
@@ -33,4 +34,3 @@ export interface AuthResponse {
     refreshToken: string;
   };
 }
-
