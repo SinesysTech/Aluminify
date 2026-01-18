@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
     // Save tokens to database
     const supabase = await createClient()
 
-    const { error: upsertError } = await supabase
+    const { error: upsertError } = await (supabase as any)
       .from("agendamento_integracoes")
       .upsert({
         professor_id: professorId,

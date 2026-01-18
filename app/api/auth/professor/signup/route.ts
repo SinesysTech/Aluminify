@@ -68,11 +68,10 @@ export async function POST(request: NextRequest) {
       is_admin: false,
       cpf: null,
       telefone: null,
-    } as any);
       biografia: null,
       foto_url: null,
       especialidade: null,
-    });
+    } as any);
 
     if (insertProfessorError) {
       // rollback best-effort
