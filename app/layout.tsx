@@ -1,89 +1,55 @@
-import React from 'react'
+import React from "react";
+import { cookies } from "next/headers";
+import { cn } from "@/lib/utils";
+import { ThemeProvider } from "next-themes";
+import GoogleAnalyticsInit from "@/lib/ga";
+import { fontVariables } from "@/lib/fonts";
+import NextTopLoader from "nextjs-toploader";
 
-import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/providers/theme-provider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import { ActiveThemeProvider } from "@/components/active-theme";
+import { DEFAULT_THEME } from "@/lib/themes";
+import { Toaster } from "@/components/ui/sonner";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-export const metadata: Metadata = {
-  title: {
-    default: "Aluminify",
-    template: "%s · Aluminify",
-  },
-  description: "Portal do aluno com chat assistido por IA e recursos acadêmicos",
-  applicationName: "Aluminify",
-  keywords: ["aluno", "educação", "chat", "IA", "portal"],
-  authors: [{ name: "Aluminify" }],
-  creator: "Aluminify",
-  publisher: "Aluminify",
-  category: "education",
-  openGraph: {
-    title: "Aluminify",
-    description: "Portal do aluno com chat assistido por IA e recursos acadêmicos",
-    url: "https://localhost/",
-    siteName: "Aluminify",
-    locale: "pt_BR",
-    type: "website",
-  },
-  twitter: {
-    card: "summary",
-    title: "Aluminify",
-    description: "Portal do aluno com chat assistido por IA e recursos acadêmicos",
-  },
-};
-
-export default function RootLayout({
-  children,
+export default async function RootLayout({
+  children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const themeSettings = {
+    preset: (cookieStore.get("theme_preset")?.value ?? DEFAULT_THEME.preset) as any,
+    scale: (cookieStore.get("theme_scale")?.value ?? DEFAULT_THEME.scale) as any,
+    radius: (cookieStore.get("theme_radius")?.value ?? DEFAULT_THEME.radius) as any,
+    contentLayout: (cookieStore.get("theme_content_layout")?.value ??
+      DEFAULT_THEME.contentLayout) as any
+  };
+
+  const bodyAttributes = Object.fromEntries(
+    Object.entries(themeSettings)
+      .filter(([_, value]) => value)
+      .map(([key, value]) => [`data-theme-${key.replace(/([A-Z])/g, "-$1").toLowerCase()}`, value])
+  );
+
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <head>
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const theme = localStorage.getItem('theme');
-                  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  const shouldBeDark = theme === 'dark' || (!theme && prefersDark);
-                  if (shouldBeDark) {
-                    document.documentElement.classList.add('dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
-      </head>
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${plusJakartaSans.variable} antialiased`}
-      >
-        <ThemeProvider>{children}</ThemeProvider>
+        suppressHydrationWarning
+        className={cn("bg-background group/layout font-sans", fontVariables)}
+        {...bodyAttributes}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem
+          disableTransitionOnChange>
+          <ActiveThemeProvider initialTheme={themeSettings}>
+            {children}
+            <Toaster position="top-center" richColors />
+            <NextTopLoader color="var(--primary)" showSpinner={false} height={2} shadow-sm="none" />
+            {process.env.NODE_ENV === "production" ? <GoogleAnalyticsInit /> : null}
+          </ActiveThemeProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
