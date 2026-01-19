@@ -192,7 +192,7 @@ function ChartTooltipContent({
                 indicator === "dot" && "items-center"
               )}>
               {formatter && item?.value !== undefined && item.name ? (
-                formatter(item.value, item.name, item as never, index, item.payload ?? [])
+                formatter(item.value, item.name, item as never, index, (payload as never) ?? [])
               ) : (
                 <>
                   {itemConfig?.icon ? (
@@ -255,11 +255,11 @@ function ChartLegendContent({
   verticalAlign = "bottom",
   nameKey
 }: React.ComponentProps<"div"> & {
-    payload?: LegendPayloadItem[];
-    verticalAlign?: "top" | "bottom" | "middle";
-    hideIcon?: boolean;
-    nameKey?: string;
-  }) {
+  payload?: LegendPayloadItem[];
+  verticalAlign?: "top" | "bottom" | "middle";
+  hideIcon?: boolean;
+  nameKey?: string;
+}) {
   const { config } = useChart();
 
   if (!payload?.length) {
