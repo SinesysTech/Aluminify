@@ -11,7 +11,7 @@ interface RouteContext {
 }
 
 async function getHandler(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {

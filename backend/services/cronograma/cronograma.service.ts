@@ -2875,7 +2875,7 @@ export class CronogramaService {
     const { data: cronogramaRaw, error: cronogramaError } = await client
       .from("cronogramas")
       .select(
-        "id, aluno_id, data_inicio, data_fim, horas_estudo_dia, dias_estudo_semana, periodos_ferias, velocidade_reproducao",
+        "id, aluno_id, data_inicio, data_fim, horas_estudo_dia, dias_estudo_semana, periodos_ferias",
       )
       .eq("id", cronogramaId)
       .single();
@@ -2892,7 +2892,6 @@ export class CronogramaService {
       horas_estudo_dia: number;
       dias_estudo_semana: number;
       periodos_ferias: unknown;
-      velocidade_reproducao: number;
     };
 
     if (cronograma.aluno_id !== userId) {
