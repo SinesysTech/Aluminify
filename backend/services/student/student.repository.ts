@@ -121,7 +121,9 @@ export class StudentRepositoryImpl implements StudentRepository {
     const { count, error: countError } = await queryBuilder;
 
     if (countError) {
-      throw new Error(`Failed to count students: ${countError.message}`);
+      throw new Error(
+        `Failed to count students: ${countError.message} (Details: ${JSON.stringify(countError)})`,
+      );
     }
 
     const total = count ?? 0;

@@ -7,14 +7,10 @@ export interface Discipline {
 
 export interface CreateDisciplineInput {
   name: string;
+  empresaId: string;
+  createdBy?: string;
 }
 
 export interface UpdateDisciplineInput {
   name?: string;
-}
-
-export interface CreateDisciplineInput {
-  name: string;
-  empresaId?: string | null;
-  createdBy?: string;
 }

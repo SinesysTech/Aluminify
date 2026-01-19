@@ -36,6 +36,7 @@ build
 *.swo
 *~
 .DS_Store
+.brain
 
 # Testing
 coverage

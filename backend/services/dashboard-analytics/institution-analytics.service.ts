@@ -93,7 +93,9 @@ export class InstitutionAnalyticsService {
       .gte("created_at", thirtyDaysAgo.toISOString());
 
     const alunosComAtividade = new Set(
-      (alunosSessoes ?? []).map((s: { aluno_id: string }) => s.aluno_id),
+      (alunosSessoes ?? [])
+        .filter((s): s is { aluno_id: string } => s.aluno_id !== null)
+        .map((s) => s.aluno_id),
     );
 
     // Filtrar apenas alunos da empresa
@@ -255,6 +257,7 @@ export class InstitutionAnalyticsService {
     // Agrupar por dia
     const dayMap = new Map<string, number>();
     for (const sessao of sessoes ?? []) {
+      if (!sessao.created_at) continue;
       const date = new Date(sessao.created_at).toISOString().split("T")[0];
       const currentSeconds = dayMap.get(date) ?? 0;
       dayMap.set(
@@ -311,24 +314,16 @@ export class InstitutionAnalyticsService {
     client: ReturnType<typeof getDatabaseClient>,
     limit = 10,
   ): Promise<StudentRankingItem[]> {
-    // Buscar alunos da empresa com seus dados de usuário
+    // Buscar alunos da empresa
     const { data: alunos } = await client
       .from("alunos")
-      .select(
-        `
-        id,
-        users!inner (
-          full_name,
-          avatar_url
-        )
-      `,
-      )
+      .select("id, nome_completo")
       .eq("empresa_id", empresaId)
       .limit(100);
 
     if (!alunos || alunos.length === 0) return [];
 
-    const alunoIds = alunos.map((a: { id: string }) => a.id);
+    const alunoIds = alunos.map((a) => a.id);
 
     // Buscar tempo de estudo de cada aluno (últimos 30 dias)
     const thirtyDaysAgo = new Date();
@@ -368,26 +363,21 @@ export class InstitutionAnalyticsService {
     }
 
     // Montar ranking
-    const ranking: StudentRankingItem[] = alunos.map(
-      (aluno: {
-        id: string;
-        users: { full_name: string | null; avatar_url: string | null };
-      }) => {
-        const segundos = tempoMap.get(aluno.id) ?? 0;
-        const horas = Math.floor(segundos / 3600);
-        const minutos = Math.floor((segundos % 3600) / 60);
+    const ranking: StudentRankingItem[] = alunos.map((aluno) => {
+      const segundos = tempoMap.get(aluno.id) ?? 0;
+      const horas = Math.floor(segundos / 3600);
+      const minutos = Math.floor((segundos % 3600) / 60);
 
-        return {
-          id: aluno.id,
-          name: aluno.users?.full_name ?? "Aluno",
-          avatarUrl: aluno.users?.avatar_url ?? null,
-          horasEstudo: `${horas}h ${minutos}m`,
-          horasEstudoMinutos: Math.floor(segundos / 60),
-          aproveitamento: aproveitamentoMap.get(aluno.id) ?? 0,
-          streakDays: streakMap.get(aluno.id) ?? 0,
-        };
-      },
-    );
+      return {
+        id: aluno.id,
+        name: aluno.nome_completo ?? "Aluno",
+        avatarUrl: null,
+        horasEstudo: `${horas}h ${minutos}m`,
+        horasEstudoMinutos: Math.floor(segundos / 60),
+        aproveitamento: aproveitamentoMap.get(aluno.id) ?? 0,
+        streakDays: streakMap.get(aluno.id) ?? 0,
+      };
+    });
 
     // Ordenar por tempo de estudo (maior primeiro)
     ranking.sort((a, b) => b.horasEstudoMinutos - a.horasEstudoMinutos);
@@ -414,10 +404,9 @@ export class InstitutionAnalyticsService {
     // Extrair datas únicas
     const datas = [
       ...new Set(
-        sessoes.map(
-          (s: { created_at: string }) =>
-            new Date(s.created_at).toISOString().split("T")[0],
-        ),
+        sessoes
+          .filter((s): s is { created_at: string } => s.created_at !== null)
+          .map((s) => new Date(s.created_at).toISOString().split("T")[0]),
       ),
     ]
       .sort()
@@ -460,17 +449,23 @@ export class InstitutionAnalyticsService {
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
   ): Promise<number> {
-    const { data: respostas } = await client
-      .from("respostas_questoes")
-      .select("correta")
+    // Use progresso_atividades instead of respostas_questoes (which doesn't exist)
+    const { data: progressos } = await client
+      .from("progresso_atividades")
+      .select("questoes_totais, questoes_acertos")
       .eq("aluno_id", alunoId);
 
-    if (!respostas || respostas.length === 0) return 0;
+    if (!progressos || progressos.length === 0) return 0;
 
-    const corretas = respostas.filter(
-      (r: { correta: boolean }) => r.correta,
-    ).length;
-    return Math.round((corretas / respostas.length) * 100);
+    let totalQuestoes = 0;
+    let totalAcertos = 0;
+    for (const p of progressos) {
+      totalQuestoes += p.questoes_totais ?? 0;
+      totalAcertos += p.questoes_acertos ?? 0;
+    }
+
+    if (totalQuestoes === 0) return 0;
+    return Math.round((totalAcertos / totalQuestoes) * 100);
   }
 
   /**
@@ -484,15 +479,7 @@ export class InstitutionAnalyticsService {
     // Buscar professores da empresa
     const { data: professores } = await client
       .from("professores")
-      .select(
-        `
-        id,
-        users!inner (
-          full_name,
-          avatar_url
-        )
-      `,
-      )
+      .select("id, nome_completo, foto_url")
       .eq("empresa_id", empresaId)
       .limit(100);
 
@@ -510,7 +497,7 @@ export class InstitutionAnalyticsService {
         .from("agendamentos")
         .select("id", { count: "exact", head: true })
         .eq("professor_id", professor.id)
-        .eq("status", "realizado")
+        .eq("status", "concluido")
         .gte("created_at", thirtyDaysAgo.toISOString());
 
       // Contar alunos únicos atendidos
@@ -521,20 +508,13 @@ export class InstitutionAnalyticsService {
         .gte("created_at", thirtyDaysAgo.toISOString());
 
       const alunosUnicos = new Set(
-        (agendamentos ?? []).map((a: { aluno_id: string }) => a.aluno_id),
+        (agendamentos ?? []).map((a) => a.aluno_id),
       );
 
       ranking.push({
         id: professor.id,
-        name:
-          (
-            professor as {
-              users: { full_name: string | null; avatar_url: string | null };
-            }
-          ).users?.full_name ?? "Professor",
-        avatarUrl:
-          (professor as { users: { avatar_url: string | null } }).users
-            ?.avatar_url ?? null,
+        name: professor.nome_completo ?? "Professor",
+        avatarUrl: professor.foto_url ?? null,
         alunosAtendidos: alunosUnicos.size,
         agendamentosRealizados: agendamentosRealizados ?? 0,
       });
@@ -553,10 +533,11 @@ export class InstitutionAnalyticsService {
     empresaId: string,
     client: ReturnType<typeof getDatabaseClient>,
   ): Promise<DisciplinaPerformance[]> {
-    // Buscar disciplinas
+    // Buscar disciplinas da empresa
     const { data: disciplinas } = await client
       .from("disciplinas")
       .select("id, nome")
+      .eq("empresa_id", empresaId)
       .limit(20);
 
     if (!disciplinas || disciplinas.length === 0) return [];
@@ -567,48 +548,48 @@ export class InstitutionAnalyticsService {
       .select("id")
       .eq("empresa_id", empresaId);
 
-    const alunoIds = (alunos ?? []).map((a: { id: string }) => a.id);
+    const alunoIds = (alunos ?? []).map((a) => a.id);
+    if (alunoIds.length === 0) return [];
 
     const performance: DisciplinaPerformance[] = [];
 
     for (const disciplina of disciplinas) {
-      // Buscar questões da disciplina respondidas pelos alunos da empresa
-      const { data: respostas } = await client
-        .from("respostas_questoes")
-        .select(
-          `
-          correta,
-          aluno_id,
-          questoes!inner (
-            modulos!inner (
-              frentes!inner (
-                disciplina_id
-              )
-            )
-          )
-        `,
-        )
+      // Buscar sessões de estudo da disciplina pelos alunos da empresa
+      const { data: sessoes } = await client
+        .from("sessoes_estudo")
+        .select("aluno_id")
         .in("aluno_id", alunoIds)
-        .eq("questoes.modulos.frentes.disciplina_id", disciplina.id);
+        .eq("disciplina_id", disciplina.id);
 
-      if (!respostas || respostas.length === 0) {
+      if (!sessoes || sessoes.length === 0) {
         continue;
       }
 
-      const corretas = respostas.filter(
-        (r: { correta: boolean }) => r.correta,
-      ).length;
-      const aproveitamento = Math.round((corretas / respostas.length) * 100);
-      const alunosAtivos = new Set(
-        respostas.map((r: { aluno_id: string }) => r.aluno_id),
-      ).size;
+      // Buscar aproveitamento agregado dos alunos nesta disciplina (usando progresso_atividades)
+      const { data: progressos } = await client
+        .from("progresso_atividades")
+        .select("aluno_id, questoes_totais, questoes_acertos")
+        .in("aluno_id", alunoIds);
+
+      let totalQuestoes = 0;
+      let totalAcertos = 0;
+      const alunosSet = new Set<string>();
+
+      for (const p of progressos ?? []) {
+        if (p.aluno_id) alunosSet.add(p.aluno_id);
+        totalQuestoes += p.questoes_totais ?? 0;
+        totalAcertos += p.questoes_acertos ?? 0;
+      }
+
+      const aproveitamento =
+        totalQuestoes > 0 ? Math.round((totalAcertos / totalQuestoes) * 100) : 0;
 
       performance.push({
         id: disciplina.id,
         name: disciplina.nome,
         aproveitamento,
-        totalQuestoes: respostas.length,
-        alunosAtivos,
+        totalQuestoes,
+        alunosAtivos: alunosSet.size,
       });
     }
 

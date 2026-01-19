@@ -9,10 +9,10 @@ const useAutoScroll = (
 ) => {
   const [autoScrollEnabled, setAutoScrollEnabled] = useState(true)
   const lastScrollTopRef = useRef(0)
-  const autoScrollingRef = useRef(false)
+  const [isScrolling, setIsScrolling] = useState(false)
   const [newMessageAdded, setNewMessageAdded] = useState(false)
   const prevChildrenCountRef = useRef(0)
-  const scrollTriggeredRef = useRef(false)
+  const [scrollTriggered, setScrollTriggered] = useState(false)
 
   const isAtBottom = useCallback((element: HTMLDivElement) => {
     const { scrollTop, scrollHeight, clientHeight } = element
@@ -24,8 +24,8 @@ const useAutoScroll = (
       const container = containerRef.current
       if (!container) return
 
-      autoScrollingRef.current = true
-      scrollTriggeredRef.current = true
+      setIsScrolling(true)
+      setScrollTriggered(true)
 
       const targetScrollTop = container.scrollHeight - container.clientHeight
 
@@ -36,8 +36,8 @@ const useAutoScroll = (
 
       const checkScrollEnd = () => {
         if (Math.abs(container.scrollTop - targetScrollTop) < 5) {
-          autoScrollingRef.current = false
-          scrollTriggeredRef.current = false
+          setIsScrolling(false)
+          setScrollTriggered(false)
           return
         }
 
@@ -47,14 +47,14 @@ const useAutoScroll = (
       requestAnimationFrame(checkScrollEnd)
 
       const safetyTimeout = setTimeout(() => {
-        autoScrollingRef.current = false
-        scrollTriggeredRef.current = false
+        setIsScrolling(false)
+        setScrollTriggered(false)
       }, 500)
 
       try {
         const handleScrollEnd = () => {
-          autoScrollingRef.current = false
-          scrollTriggeredRef.current = false
+          setIsScrolling(false)
+          setScrollTriggered(false)
           clearTimeout(safetyTimeout)
           container.removeEventListener("scrollend", handleScrollEnd)
         }
@@ -62,7 +62,7 @@ const useAutoScroll = (
         container.addEventListener("scrollend", handleScrollEnd, {
           once: true,
         })
-      } catch (e) {
+      } catch (_e) {
         // scrollend event not supported in this browser, fallback to requestAnimationFrame
       }
     },
@@ -78,7 +78,7 @@ const useAutoScroll = (
     lastScrollTopRef.current = container.scrollTop
 
     const handleScroll = () => {
-      if (autoScrollingRef.current) return
+      if (isScrolling) return
 
       const currentScrollTop = container.scrollTop
 
@@ -132,13 +132,13 @@ const useAutoScroll = (
       container.removeEventListener("touchmove", handleTouchMove)
       container.removeEventListener("touchend", handleTouchEnd)
     }
-  }, [containerRef, enabled, autoScrollEnabled, isAtBottom])
+  }, [containerRef, enabled, autoScrollEnabled, isAtBottom, isScrolling])
 
   return {
     autoScrollEnabled,
     scrollToBottom,
-    isScrolling: autoScrollingRef.current,
-    scrollTriggered: scrollTriggeredRef.current,
+    isScrolling,
+    scrollTriggered,
     newMessageAdded,
     setNewMessageAdded,
     prevChildrenCountRef,
@@ -190,7 +190,7 @@ function ChatContainer({
 
     prevChildrenCountRef.current = currentChildrenCount
     prevChildrenRef.current = children
-  }, [children, setNewMessageAdded])
+  }, [children, setNewMessageAdded, prevChildrenCountRef])
 
   useEffect(() => {
     if (!autoScroll) return
@@ -233,7 +233,7 @@ function ChatContainer({
       {children}
       <div
         ref={bottomRef}
-        className="h-[1px] w-full flex-shrink-0 scroll-mt-4"
+        className="h-px w-full shrink-0 scroll-mt-4"
         aria-hidden="true"
       />
     </div>

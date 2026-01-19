@@ -8,8 +8,9 @@ export default async function EmpresaAlunosPage({ searchParams }: { searchParams
   // Ensure only empresa admins and superadmins can access
   await requireUser({ allowedRoles: ['professor', 'empresa', 'superadmin'] })
 
-  const page = Number(searchParams.page) || 1
-  const query = searchParams.query || ''
+  const { page: pageStr, query: queryStr } = await searchParams
+  const page = Number(pageStr) || 1
+  const query = queryStr || ''
 
   // Usar cliente com contexto do usuÃ¡rio para respeitar RLS
   const supabase = await createClient()

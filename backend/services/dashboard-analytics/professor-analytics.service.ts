@@ -20,19 +20,11 @@ export class ProfessorAnalyticsService {
     // Buscar nome do professor
     const { data: professor } = await client
       .from("professores")
-      .select(
-        `
-        users!inner (
-          full_name
-        )
-      `,
-      )
+      .select("nome_completo")
       .eq("id", professorId)
       .single();
 
-    const professorNome =
-      (professor as { users: { full_name: string | null } })?.users
-        ?.full_name ?? "Professor";
+    const professorNome = professor?.nome_completo ?? "Professor";
 
     // Buscar métricas em paralelo
     const [summary, alunos, agendamentos, performanceAlunos] =
@@ -66,7 +58,7 @@ export class ProfessorAnalyticsService {
       .eq("professor_id", professorId);
 
     const alunosUnicos = new Set(
-      (agendamentosTodos ?? []).map((a: { aluno_id: string }) => a.aluno_id),
+      (agendamentosTodos ?? []).map((a) => a.aluno_id),
     );
 
     // Buscar agendamentos pendentes
@@ -75,7 +67,7 @@ export class ProfessorAnalyticsService {
       .select("id", { count: "exact", head: true })
       .eq("professor_id", professorId)
       .eq("status", "pendente")
-      .gte("data_hora", new Date().toISOString());
+      .gte("data_inicio", new Date().toISOString());
 
     // Buscar agendamentos realizados no mês
     const inicioMes = new Date();
@@ -86,17 +78,17 @@ export class ProfessorAnalyticsService {
       .from("agendamentos")
       .select("id", { count: "exact", head: true })
       .eq("professor_id", professorId)
-      .eq("status", "realizado")
-      .gte("data_hora", inicioMes.toISOString());
+      .eq("status", "concluido")
+      .gte("data_inicio", inicioMes.toISOString());
 
     // Buscar próximo agendamento
     const { data: proximoAgendamentoData } = await client
       .from("agendamentos")
-      .select("data_hora")
+      .select("data_inicio")
       .eq("professor_id", professorId)
       .in("status", ["pendente", "confirmado"])
-      .gte("data_hora", new Date().toISOString())
-      .order("data_hora", { ascending: true })
+      .gte("data_inicio", new Date().toISOString())
+      .order("data_inicio", { ascending: true })
       .limit(1)
       .maybeSingle();
 
@@ -104,7 +96,7 @@ export class ProfessorAnalyticsService {
       alunosAtendidos: alunosUnicos.size,
       agendamentosPendentes: agendamentosPendentes ?? 0,
       agendamentosRealizadosMes: agendamentosRealizadosMes ?? 0,
-      proximoAgendamento: proximoAgendamentoData?.data_hora ?? null,
+      proximoAgendamento: proximoAgendamentoData?.data_inicio ?? null,
     };
   }
 
@@ -117,27 +109,27 @@ export class ProfessorAnalyticsService {
     client: ReturnType<typeof getDatabaseClient>,
     limit = 20,
   ): Promise<StudentUnderCare[]> {
-    // Buscar alunos com agendamentos com este professor
+    // Buscar agendamentos do professor
     const { data: agendamentos } = await client
       .from("agendamentos")
-      .select(
-        `
-        aluno_id,
-        alunos!inner (
-          id,
-          empresa_id,
-          users!inner (
-            full_name,
-            avatar_url
-          )
-        )
-      `,
-      )
+      .select("aluno_id")
       .eq("professor_id", professorId)
-      .order("data_hora", { ascending: false })
+      .order("data_inicio", { ascending: false })
       .limit(100);
 
     if (!agendamentos || agendamentos.length === 0) return [];
+
+    // Extrair IDs únicos de alunos
+    const alunoIdsUnicos = [...new Set(agendamentos.map((a) => a.aluno_id))];
+
+    // Buscar dados dos alunos
+    const { data: alunos } = await client
+      .from("alunos")
+      .select("id, nome_completo, empresa_id")
+      .in("id", alunoIdsUnicos)
+      .eq("empresa_id", empresaId);
+
+    if (!alunos || alunos.length === 0) return [];
 
     // Extrair alunos únicos
     const alunosMap = new Map<
@@ -149,21 +141,12 @@ export class ProfessorAnalyticsService {
       }
     >();
 
-    for (const agendamento of agendamentos) {
-      const aluno = agendamento.alunos as {
-        id: string;
-        empresa_id: string;
-        users: { full_name: string | null; avatar_url: string | null };
-      };
-
-      // Filtrar apenas alunos da mesma empresa
-      if (aluno.empresa_id !== empresaId) continue;
-
+    for (const aluno of alunos) {
       if (!alunosMap.has(aluno.id)) {
         alunosMap.set(aluno.id, {
           id: aluno.id,
-          name: aluno.users?.full_name ?? "Aluno",
-          avatarUrl: aluno.users?.avatar_url ?? null,
+          name: aluno.nome_completo ?? "Aluno",
+          avatarUrl: null,
         });
       }
     }
@@ -257,30 +240,35 @@ export class ProfessorAnalyticsService {
       .from("cronograma_itens")
       .select("id", { count: "exact", head: true })
       .eq("cronograma_id", cronograma.id)
-      .eq("aula_assistida", true);
+      .eq("concluido", true);
 
     if (!totalItens || totalItens === 0) return 0;
     return Math.round(((itensAssistidos ?? 0) / totalItens) * 100);
   }
 
   /**
-   * Calcula aproveitamento do aluno
+   * Calcula aproveitamento do aluno (usando progresso_atividades)
    */
   private async getStudentAproveitamento(
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
   ): Promise<number> {
-    const { data: respostas } = await client
-      .from("respostas_questoes")
-      .select("correta")
+    const { data: progressos } = await client
+      .from("progresso_atividades")
+      .select("questoes_totais, questoes_acertos")
       .eq("aluno_id", alunoId);
 
-    if (!respostas || respostas.length === 0) return 0;
+    if (!progressos || progressos.length === 0) return 0;
 
-    const corretas = respostas.filter(
-      (r: { correta: boolean }) => r.correta,
-    ).length;
-    return Math.round((corretas / respostas.length) * 100);
+    let totalQuestoes = 0;
+    let totalAcertos = 0;
+    for (const p of progressos) {
+      totalQuestoes += p.questoes_totais ?? 0;
+      totalAcertos += p.questoes_acertos ?? 0;
+    }
+
+    if (totalQuestoes === 0) return 0;
+    return Math.round((totalAcertos / totalQuestoes) * 100);
   }
 
   /**
@@ -293,60 +281,52 @@ export class ProfessorAnalyticsService {
   ): Promise<UpcomingAppointment[]> {
     const { data: agendamentos } = await client
       .from("agendamentos")
-      .select(
-        `
-        id,
-        aluno_id,
-        data_hora,
-        duracao_minutos,
-        status,
-        titulo,
-        notas,
-        alunos!inner (
-          users!inner (
-            full_name,
-            avatar_url
-          )
-        )
-      `,
-      )
+      .select("id, aluno_id, data_inicio, data_fim, status, observacoes")
       .eq("professor_id", professorId)
       .in("status", ["pendente", "confirmado"])
-      .gte("data_hora", new Date().toISOString())
-      .order("data_hora", { ascending: true })
+      .gte("data_inicio", new Date().toISOString())
+      .order("data_inicio", { ascending: true })
       .limit(limit);
 
     if (!agendamentos || agendamentos.length === 0) return [];
 
+    // Buscar nomes dos alunos
+    const alunoIds = [...new Set(agendamentos.map((a) => a.aluno_id))];
+    const { data: alunos } = await client
+      .from("alunos")
+      .select("id, nome_completo")
+      .in("id", alunoIds);
+
+    const alunoMap = new Map(
+      (alunos ?? []).map((a) => [a.id, a.nome_completo]),
+    );
+
     return agendamentos.map((agendamento) => {
-      const aluno = (
-        Array.isArray(agendamento.alunos)
-          ? agendamento.alunos[0]
-          : agendamento.alunos
-      ) as {
-        users: { full_name: string | null; avatar_url: string | null };
-      };
+      // Calculate duration in minutes from data_inicio to data_fim
+      const inicio = new Date(agendamento.data_inicio);
+      const fim = new Date(agendamento.data_fim);
+      const duracao = Math.round((fim.getTime() - inicio.getTime()) / 60000);
 
       return {
         id: agendamento.id,
         alunoId: agendamento.aluno_id,
-        alunoNome: aluno.users?.full_name ?? "Aluno",
-        alunoAvatar: aluno.users?.avatar_url ?? null,
-        dataHora: agendamento.data_hora,
-        duracao: agendamento.duracao_minutos ?? 60,
+        alunoNome: alunoMap.get(agendamento.aluno_id) ?? "Aluno",
+        alunoAvatar: null,
+        dataHora: agendamento.data_inicio,
+        duracao: duracao > 0 ? duracao : 60,
         status: agendamento.status as
           | "pendente"
           | "confirmado"
           | "cancelado"
-          | "realizado",
-        titulo: agendamento.titulo ?? null,
-        notas: agendamento.notas ?? null,
+          | "concluido",
+        titulo: null,
+        notas: agendamento.observacoes ?? null,
       };
     });
   }
 
   /**
-   * Busca performance dos alunos por disciplina
+   * Busca performance dos alunos por disciplina (usando progresso_atividades)
    */
   private async getPerformanceAlunos(
     professorId: string,
@@ -361,14 +341,13 @@ export class ProfessorAnalyticsService {
 
     if (!agendamentos || agendamentos.length === 0) return [];
 
-    const alunoIds = [
-      ...new Set(agendamentos.map((a: { aluno_id: string }) => a.aluno_id)),
-    ];
+    const alunoIds = [...new Set(agendamentos.map((a) => a.aluno_id))];
 
-    // Buscar disciplinas
+    // Buscar disciplinas da empresa
     const { data: disciplinas } = await client
       .from("disciplinas")
       .select("id, nome")
+      .eq("empresa_id", empresaId)
       .limit(10);
 
     if (!disciplinas || disciplinas.length === 0) return [];
@@ -376,41 +355,39 @@ export class ProfessorAnalyticsService {
     const performance: ProfessorDisciplinaPerformance[] = [];
 
     for (const disciplina of disciplinas) {
-      const { data: respostas } = await client
-        .from("respostas_questoes")
-        .select(
-          `
-          correta,
-          aluno_id,
-          questoes!inner (
-            modulos!inner (
-              frentes!inner (
-                disciplina_id
-              )
-            )
-          )
-        `,
-        )
+      // Buscar sessões de estudo para esta disciplina
+      const { data: sessoes } = await client
+        .from("sessoes_estudo")
+        .select("aluno_id")
         .in("aluno_id", alunoIds)
-        .eq("questoes.modulos.frentes.disciplina_id", disciplina.id);
+        .eq("disciplina_id", disciplina.id);
 
-      if (!respostas || respostas.length === 0) continue;
+      if (!sessoes || sessoes.length === 0) continue;
 
-      const corretas = respostas.filter(
-        (r: { correta: boolean }) => r.correta,
-      ).length;
-      const aproveitamentoMedio = Math.round(
-        (corretas / respostas.length) * 100,
-      );
-      const totalAlunos = new Set(
-        respostas.map((r: { aluno_id: string }) => r.aluno_id),
-      ).size;
+      // Buscar aproveitamento agregado dos alunos (usando progresso_atividades)
+      const { data: progressos } = await client
+        .from("progresso_atividades")
+        .select("aluno_id, questoes_totais, questoes_acertos")
+        .in("aluno_id", alunoIds);
+
+      let totalQuestoes = 0;
+      let totalAcertos = 0;
+      const alunosSet = new Set<string>();
+
+      for (const p of progressos ?? []) {
+        if (p.aluno_id) alunosSet.add(p.aluno_id);
+        totalQuestoes += p.questoes_totais ?? 0;
+        totalAcertos += p.questoes_acertos ?? 0;
+      }
+
+      const aproveitamentoMedio =
+        totalQuestoes > 0 ? Math.round((totalAcertos / totalQuestoes) * 100) : 0;
 
       performance.push({
         id: disciplina.id,
         name: disciplina.nome,
         aproveitamentoMedio,
-        totalAlunos,
+        totalAlunos: alunosSet.size,
       });
     }
 

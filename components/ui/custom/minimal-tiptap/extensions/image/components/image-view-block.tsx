@@ -57,6 +57,7 @@ export const ImageViewBlock: React.FC<NodeViewProps> = ({
   });
 
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const [containerMaxWidth, setContainerMaxWidth] = React.useState(Infinity);
   const [activeResizeHandle, setActiveResizeHandle] = React.useState<"left" | "right" | null>(null);
 
   const onDimensionsChange = React.useCallback(
@@ -68,9 +69,14 @@ export const ImageViewBlock: React.FC<NodeViewProps> = ({
 
   const aspectRatio = imageState.naturalSize.width / imageState.naturalSize.height;
   const maxWidth = MAX_HEIGHT * aspectRatio;
-  const containerMaxWidth = containerRef.current
-    ? parseFloat(getComputedStyle(containerRef.current).getPropertyValue("--editor-width"))
-    : Infinity;
+
+  React.useEffect(() => {
+    if (containerRef.current) {
+      setContainerMaxWidth(
+        parseFloat(getComputedStyle(containerRef.current).getPropertyValue("--editor-width"))
+      );
+    }
+  }, []);
 
   const { isLink, onView, onDownload, onCopy, onCopyLink, onRemoveImg } = useImageActions({
     editor,
@@ -179,7 +185,7 @@ export const ImageViewBlock: React.FC<NodeViewProps> = ({
         }));
 
         updateAttributes(normalizedData);
-      } catch (error) {
+      } catch (_error) {
         setImageState((prev) => ({
           ...prev,
           error: true,

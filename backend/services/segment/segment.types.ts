@@ -9,16 +9,11 @@ export interface Segment {
 export interface CreateSegmentInput {
   name: string;
   slug?: string;
+  empresaId: string;
+  createdBy?: string;
 }
 
 export interface UpdateSegmentInput {
   name?: string;
   slug?: string;
-}
-
-export interface CreateSegmentInput {
-  name: string;
-  slug?: string;
-  empresaId?: string | null;
-  createdBy?: string;
 }

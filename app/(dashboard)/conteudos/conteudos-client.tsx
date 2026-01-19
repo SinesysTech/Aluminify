@@ -1353,7 +1353,7 @@ export default function ConteudosClientPage() {
 
       // Forçar refresh da página para atualizar seletores
       router.refresh()
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Erro ao importar cronograma:', err)
 
       // Log detalhado para debug

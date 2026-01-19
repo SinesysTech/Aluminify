@@ -12,10 +12,10 @@ export const MeasuredContainer = React.forwardRef(
     { as: Component, name, children, style = {}, ...props }: MeasuredContainerProps<T> & React.ComponentProps<T>,
     ref: React.Ref<HTMLElement>
   ) => {
-    const innerRef = React.useRef<HTMLElement>(null)
-    const rect = useContainerSize(innerRef.current)
+    const [container, setContainer] = React.useState<HTMLElement | null>(null)
+    const rect = useContainerSize(container)
 
-    React.useImperativeHandle(ref, () => innerRef.current as HTMLElement)
+    React.useImperativeHandle(ref, () => container as HTMLElement)
 
     const customStyle = {
       [`--${name}-width`]: `${rect.width}px`,
@@ -23,7 +23,7 @@ export const MeasuredContainer = React.forwardRef(
     }
 
     return (
-      <Component {...props} ref={innerRef} style={{ ...customStyle, ...style }}>
+      <Component {...props} ref={setContainer} style={{ ...customStyle, ...style }}>
         {children}
       </Component>
     )
