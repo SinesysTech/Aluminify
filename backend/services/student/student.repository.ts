@@ -63,12 +63,15 @@ function mapRow(
   row: StudentRow,
   courses: StudentCourseSummary[] = [],
 ): Student {
-  // Cast para acessar empresa_id (será gerado após migration)
-  const rowWithEmpresa = row as StudentRow & { empresa_id?: string | null };
+  // Cast para acessar empresa_id e deleted_at
+  const rowWithExtras = row as StudentRow & {
+    empresa_id?: string | null;
+    deleted_at?: string | null;
+  };
 
   return {
     id: row.id,
-    empresaId: rowWithEmpresa.empresa_id ?? null,
+    empresaId: rowWithExtras.empresa_id ?? null,
     fullName: row.nome_completo,
     email: row.email,
     cpf: row.cpf,
@@ -84,6 +87,9 @@ function mapRow(
     temporaryPassword: row.senha_temporaria,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
+    deletedAt: rowWithExtras.deleted_at
+      ? new Date(rowWithExtras.deleted_at)
+      : null,
   };
 }
 
@@ -101,7 +107,8 @@ export class StudentRepositoryImpl implements StudentRepository {
 
     let queryBuilder = this.client
       .from(TABLE)
-      .select("*", { count: "exact", head: true });
+      .select("*", { count: "exact", head: true })
+      .is("deleted_at", null);
 
     if (params?.query) {
       const q = params.query;
@@ -124,6 +131,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     let dataQuery = this.client
       .from(TABLE)
       .select("*")
+      .is("deleted_at", null)
       .order(sortBy, { ascending: sortOrder })
       .range(from, to);
 
@@ -158,6 +166,7 @@ export class StudentRepositoryImpl implements StudentRepository {
       .from(TABLE)
       .select("*")
       .eq("id", id)
+      .is("deleted_at", null)
       .maybeSingle();
 
     if (error) {
@@ -177,6 +186,7 @@ export class StudentRepositoryImpl implements StudentRepository {
       .from(TABLE)
       .select("*")
       .eq("email", email.toLowerCase())
+      .is("deleted_at", null)
       .maybeSingle();
 
     if (error) {
@@ -196,6 +206,7 @@ export class StudentRepositoryImpl implements StudentRepository {
       .from(TABLE)
       .select("*")
       .eq("cpf", cpf)
+      .is("deleted_at", null)
       .maybeSingle();
 
     if (error) {
@@ -217,6 +228,7 @@ export class StudentRepositoryImpl implements StudentRepository {
       .from(TABLE)
       .select("*")
       .eq("numero_matricula", enrollmentNumber)
+      .is("deleted_at", null)
       .maybeSingle();
 
     if (error) {
