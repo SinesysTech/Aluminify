@@ -1,5 +1,10 @@
 # Aluminify
 
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?logo=supabase&logoColor=white)
+
 A infraestrutura invisível da educação. Sistema completo de gerenciamento educacional multi-tenant para **cursos livres** (preparatórios para ENEM, concursos, residência médica).
 
 ## Arquitetura
@@ -299,10 +304,73 @@ N8N_WEBHOOK_URL=https://xxx
 
 ### Instalação
 
+**Opção 1: Executar com Docker (Recomendado)**
+
 ```bash
+# 1. Clone o repositório
+git clone https://github.com/seu-usuario/aluminify.git
+cd aluminify
+
+# 2. Configure variáveis de ambiente
+cp .env.docker.example .env.local
+# Edite .env.local com suas credenciais
+
+# 3. Inicie com Docker Compose
+docker-compose up
+
+# Ou em produção
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+**Opção 2: Executar Localmente**
+
+```bash
+# 1. Instale dependências
 npm install
+
+# 2. Configure .env.local
+
+# 3. Execute em desenvolvimento
 npm run dev
 ```
+
+Para instruções completas de Docker, consulte: [docs/DOCKER.md](./docs/DOCKER.md)
+
+## Docker
+
+O Aluminify suporta deployment via Docker com configurações otimizadas para desenvolvimento e produção.
+
+### Quick Start
+
+```bash
+# Desenvolvimento (com hot-reload)
+docker-compose up
+
+# Produção (otimizado)
+docker-compose -f docker-compose.prod.yml up -d
+
+# Build manual
+docker build -t aluminify:latest .
+
+# Run manual
+docker run -p 3000:3000 --env-file .env.local aluminify:latest
+```
+
+### Características
+
+- ✅ Multi-stage build otimizado
+- ✅ Imagem Alpine Linux (tamanho reduzido)
+- ✅ Usuário não-root (segurança)
+- ✅ Health checks automáticos
+- ✅ Redis incluído para cache
+- ✅ Hot-reload em desenvolvimento
+- ✅ Resource limits em produção
+
+### Documentação Completa
+
+Para instruções detalhadas, troubleshooting e deploy em cloud:
+- [docs/DOCKER.md](./docs/DOCKER.md) - Documentação completa de Docker
+- [docs/SETUP.md](./docs/SETUP.md) - Guia de configuração do ambiente
 
 ## Scripts
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { MoreHorizontal, Eye } from 'lucide-react'
+import { MoreHorizontal, Eye, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Student } from '@/types/shared/entities/user'
 import { createClient } from '@/lib/client'
@@ -9,8 +9,10 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { DeleteStudentDialog } from './delete-student-dialog'
 
 interface StudentTableProps {
     students: Student[]
@@ -19,11 +21,18 @@ interface StudentTableProps {
 export function StudentTable({ students }: StudentTableProps) {
     const [loadingId, setLoadingId] = useState<string | null>(null)
     const [mounted, setMounted] = useState(false)
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [studentToDelete, setStudentToDelete] = useState<Student | null>(null)
     const router = useRouter()
 
     useEffect(() => {
         setMounted(true)
     }, [])
+
+    const handleDeleteClick = (student: Student) => {
+        setStudentToDelete(student)
+        setDeleteDialogOpen(true)
+    }
 
     const handleViewAsStudent = async (studentId: string) => {
         setLoadingId(studentId)
@@ -75,8 +84,9 @@ export function StudentTable({ students }: StudentTableProps) {
     }
 
     return (
-        <div className="overflow-hidden flex-1">
-            <table className="w-full text-left text-sm">
+        <>
+            <div className="overflow-hidden flex-1">
+                <table className="w-full text-left text-sm">
                 <thead className="border-b border-[#E4E4E7]">
                     <tr>
                         <th className="h-10 px-4 font-mono text-xs font-medium text-[#71717A] uppercase tracking-wider w-[120px]">ID Sistema</th>
@@ -152,6 +162,14 @@ export function StudentTable({ students }: StudentTableProps) {
                                                         <Eye className="mr-2 h-4 w-4" />
                                                         {loadingId === student.id ? 'Carregando...' : 'Visualizar como Aluno'}
                                                     </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleDeleteClick(student)}
+                                                        className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                                                    >
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        Excluir Aluno
+                                                    </DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
                                         ) : (
@@ -164,17 +182,24 @@ export function StudentTable({ students }: StudentTableProps) {
                             )
                         })
                     )}
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
 
-            <div className="border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
-                {/* Simple pagination mock for UI parity - logic to be added with real pagination props */}
-                <span className="text-xs text-[#71717A]">Mostrando <strong>{students.length}</strong> resultados</span>
-                <div className="flex gap-2">
-                    <button className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50" disabled>Anterior</button>
-                    <button className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50">Próximo</button>
+                <div className="border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
+                    {/* Simple pagination mock for UI parity - logic to be added with real pagination props */}
+                    <span className="text-xs text-[#71717A]">Mostrando <strong>{students.length}</strong> resultados</span>
+                    <div className="flex gap-2">
+                        <button className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50" disabled>Anterior</button>
+                        <button className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50">Proximo</button>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            <DeleteStudentDialog
+                student={studentToDelete}
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+            />
+        </>
     )
 }

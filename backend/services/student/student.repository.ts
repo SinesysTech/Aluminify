@@ -358,7 +358,11 @@ export class StudentRepositoryImpl implements StudentRepository {
   }
 
   async delete(id: string): Promise<void> {
-    const { error } = await this.client.from(TABLE).delete().eq("id", id);
+    const { error } = await this.client
+      .from(TABLE)
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", id)
+      .is("deleted_at", null);
 
     if (error) {
       throw new Error(`Failed to delete student: ${error.message}`);
@@ -476,6 +480,7 @@ export class StudentRepositoryImpl implements StudentRepository {
       .from(TABLE)
       .select("*")
       .in("id", alunoIds)
+      .is("deleted_at", null)
       .order("nome_completo", { ascending: true });
 
     if (error) {

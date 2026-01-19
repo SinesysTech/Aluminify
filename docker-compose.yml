@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    container_name: aluminify-app-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      # Hot-reload volumes for development
+      - ./app:/app/app
+      - ./components:/app/components
+      - ./lib:/app/lib
+      - ./backend:/app/backend
+      - ./hooks:/app/hooks
+      - ./types:/app/types
+      - ./public:/app/public
+      - ./styles:/app/styles
+      # Prevent overwriting node_modules
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    command: npm run dev
+    depends_on:
+      - redis
+    networks:
+      - aluminify-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: aluminify-redis-dev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - aluminify-network
+    restart: unless-stopped
+
+networks:
+  aluminify-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

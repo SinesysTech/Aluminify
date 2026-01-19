@@ -6,6 +6,37 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { CreateStudentInput } from "@/types/shared/entities/user";
 import { revalidatePath } from "next/cache";
 
+export async function deleteStudentAction(studentId: string) {
+  try {
+    const user = await getAuthenticatedUser();
+
+    if (!user) {
+      return { success: false, error: "Usuário não autenticado" };
+    }
+
+    // Apenas superadmin e empresa admins podem deletar alunos
+    if (user.role !== "superadmin" && !user.isEmpresaAdmin) {
+      return {
+        success: false,
+        error: "Permissão negada. Apenas administradores podem excluir alunos.",
+      };
+    }
+
+    const supabase = await createClient();
+    const studentService = createStudentService(supabase);
+
+    await studentService.delete(studentId);
+
+    revalidatePath("/admin/alunos");
+    revalidatePath("/admin/empresa/alunos");
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error deleting student:", error);
+    return { success: false, error: (error as Error).message };
+  }
+}
+
 export async function createStudentAction(data: CreateStudentInput) {
   try {
     // Obter usuário autenticado para pegar empresaId

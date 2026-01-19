@@ -127,6 +127,43 @@ Ou instale manualmente através da aba Extensions.
 
 ## 🚀 Executar o Projeto
 
+### Opção 1: Executar com Docker (Recomendado para Produção)
+
+**Pré-requisitos:**
+- Docker Desktop instalado e rodando
+- Arquivo `.env.local` configurado
+
+**Desenvolvimento:**
+```powershell
+# Iniciar aplicação e Redis com hot-reload
+docker-compose up
+
+# Ou em background
+docker-compose up -d
+```
+
+**Produção:**
+```powershell
+# Build e iniciar em modo produção
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+**Comandos úteis:**
+```powershell
+# Ver logs
+docker-compose logs -f app
+
+# Parar containers
+docker-compose down
+
+# Rebuild
+docker-compose up --build
+```
+
+Para instruções completas de Docker, consulte: [docs/DOCKER.md](./DOCKER.md)
+
+### Opção 2: Executar Localmente (Desenvolvimento)
+
 Após configurar tudo:
 
 ```powershell

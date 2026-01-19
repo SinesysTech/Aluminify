@@ -40,6 +40,7 @@ export interface Student {
   temporaryPassword: string | null;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }
 
 export interface CreateStudentInput {

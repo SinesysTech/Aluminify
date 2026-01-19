@@ -7,10 +7,12 @@ const nextConfig: NextConfig = {
   // Evita warning de cross-origin em desenvolvimento ao acessar via IP da rede
   // (ex.: http://192.168.1.100:3000)
   allowedDevOrigins: ["192.168.1.100"],
-  
-  // Configuração para Vercel (SSR por padrão)
-  output: undefined,
-  
+
+  // Configuração de output
+  // Para Docker: usar 'standalone' para build otimizado
+  // Para Vercel: usar undefined (SSR por padrão)
+  output: process.env.DOCKER_BUILD === "true" ? "standalone" : undefined,
+
   // Otimizações de imagens
   images: {
     formats: ["image/avif", "image/webp"],
@@ -21,13 +23,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  
+
   // Compressão e otimizações
   compress: true,
-  
+
   // Configurações de produção
   poweredByHeader: false,
-  
+
   // Otimizações de bundle
   experimental: {
     optimizePackageImports: [
@@ -43,7 +45,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     resolveAlias: {
       // Stub vazio para dependências opcionais não utilizadas
-      '@aws-sdk/client-s3': '@/lib/stubs/empty.js',
+      "@aws-sdk/client-s3": "@/lib/stubs/empty.js",
     },
   },
 
@@ -52,7 +54,7 @@ const nextConfig: NextConfig = {
     // Ignorar dependências opcionais do unzipper
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@aws-sdk/client-s3': false,
+      "@aws-sdk/client-s3": false,
     };
 
     // Ignorar módulos opcionais
