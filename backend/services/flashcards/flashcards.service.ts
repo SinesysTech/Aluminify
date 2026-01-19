@@ -1558,9 +1558,8 @@ export class FlashcardsService {
     // Construir query de flashcards
     console.log("[flashcards] Construindo query de flashcards");
     console.log("[flashcards] moduloIds:", moduloIds);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const applyListFilters = <
-      T extends { in: any; or: any; order: any; range: any },
+      T extends { in: unknown; or: unknown; order: unknown; range: unknown },
     >(
       baseQuery: T,
     ): T | null => {
