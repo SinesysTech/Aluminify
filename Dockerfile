@@ -106,7 +106,19 @@ COPY --from=builder /app/public ./public
 # 3. Cleanup.
 
 # Let's adjust to be robust.
-COPY --from=builder --chown=nextjs:nodejs /app/.next /app/.next_source
+# Copy .next to temporary location for processing
+COPY --from=builder /app/.next /app/.temp_next
+
+# Process .next files based on build type
+RUN if [ "$DOCKER_BUILD" = "true" ]; then \
+      cp -r /app/.temp_next/standalone/. . && \
+      mkdir -p .next/static && \
+      cp -r /app/.temp_next/static/. .next/static; \
+    else \
+      cp -r /app/.temp_next/. .next; \
+    fi && \
+    rm -rf /app/.temp_next && \
+    chown -R nextjs:nodejs /app
 
 # Switch to non-root user
 USER nextjs
@@ -119,35 +131,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Start the application
-# We need to set the CMD conditionally too.
-# CMD ["node", "$DOCKER_BUILD" = "true" ? "server.js" : "node_modules/.bin/next", "start"]
-# Shell form is needed for variable expansion/logic? Or use the entrypoint script?
-# User suggestion: CMD ["node", "$DOCKER_BUILD" = "true" ? "server.js" : "node_modules/.bin/next", "start"]
-# This syntax `? :` is not valid in CMD array [].
-# It must be handled via sh -c or similar.
-# "CMD sh -c 'if ...'"
-
-# Let's look at the RUN block again.
-# The user specified:
-# RUN if [ "$DOCKER_BUILD" = "true" ]; then \n    cp -r /app/.next/standalone . && cp -r /app/.next/static ./.next/static; \n  else \n    cp -r /app/.next ./.next; \n  fi
-# This requires /app/.next (from builder) to be available at /app/.next (or similar) BEFORE this runs?
-# But `COPY --from=builder` is how we get files.
-# So I will COPY to a temporary location first.
-
-COPY --from=builder --chown=nextjs:nodejs /app/.next /app/.temp_next
-
-RUN if [ "$DOCKER_BUILD" = "true" ]; then \
-      cp -r /app/.temp_next/standalone/. . && \
-      mkdir -p .next/static && \
-      cp -r /app/.temp_next/static/. .next/static; \
-    else \
-      cp -r /app/.temp_next/. .next; \
-    fi && \
-    rm -rf /app/.temp_next
-
-# Correct CMD
-CMD if [ "$DOCKER_BUILD" = "true" ]; then \
-      node server.js; \
-    else \
-      npm start; \
-    fi
+CMD ["npm", "start"]
