@@ -1767,7 +1767,7 @@ export class FlashcardsService {
     );
 
     // Montar resposta final
-    const flashcards = flashcardsData
+    const flashcards: FlashcardAdmin[] = flashcardsData
       .map((item) => {
         // After migration, modulo_id is guaranteed to be non-null
         const modulo = modulosMap.get(item.modulo_id as string);
@@ -1786,11 +1786,11 @@ export class FlashcardsService {
               .resposta_imagem_path ?? null,
           created_at: item.created_at as string,
           modulo,
-        } satisfies FlashcardAdmin;
+        } as FlashcardAdmin;
       })
       .filter((f): f is FlashcardAdmin => f !== null);
 
-    const result = {
+    const result: { data: FlashcardAdmin[]; total: number } = {
       data: flashcards,
       total: count || 0,
     };

@@ -2933,7 +2933,7 @@ export class CronogramaService {
       (cronograma.periodos_ferias as unknown as FeriasPeriodo[]) || [];
     const horasDia = cronograma.horas_estudo_dia || 0;
     const diasSemana = cronograma.dias_estudo_semana || 0;
-    const velocidadeReproducao = cronograma.velocidade_reproducao ?? 1.0;
+    const velocidadeReproducao = (cronograma as unknown as { velocidade_reproducao?: number }).velocidade_reproducao ?? 1.0;
 
     const semanas = this.calcularSemanas(
       dataInicio,

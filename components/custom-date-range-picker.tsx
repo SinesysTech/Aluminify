@@ -166,11 +166,10 @@ export default function CalendarDateRangePicker({
                 {dateFilterPresets.map((item, key) => (
                   <ToggleGroupItem
                     key={key}
-                    className="text-muted-foreground w-full"
+                    className="text-muted-foreground w-full justify-start rounded-md"
                     value={item.value}
-                    onClick={() => changeHandle(item.value)}
-                    asChild>
-                    <Button className="justify-start rounded-md">{item.name}</Button>
+                    onClick={() => changeHandle(item.value)}>
+                    {item.name}
                   </ToggleGroupItem>
                 ))}
               </ToggleGroup>

@@ -477,15 +477,17 @@ export class AuthPatternAnalyzer extends BasePatternAnalyzer {
    * Check if a function is a simple pass-through wrapper
    */
   private isPassThroughWrapper(func: Node): boolean {
-    const funcText = func.getText();
-
     // Get the function body
     let body: Node | undefined;
 
-    if (Node.isFunctionDeclaration(func) || Node.isFunctionExpression(func)) {
-      body = (func as any).getBody();
+    if (
+      Node.isFunctionDeclaration(func) ||
+      Node.isFunctionExpression(func) ||
+      Node.isMethodDeclaration(func)
+    ) {
+      body = func.getBody();
     } else if (Node.isArrowFunction(func)) {
-      const _arrowBody = (func as ArrowFunction).getBody();
+      body = func.getBody();
     }
 
     if (!body) {

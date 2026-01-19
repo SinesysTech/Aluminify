@@ -307,6 +307,14 @@ export class ProfessorAnalyticsService {
       const fim = new Date(agendamento.data_fim);
       const duracao = Math.round((fim.getTime() - inicio.getTime()) / 60000);
 
+      // Map DB status to interface status (concluido -> realizado)
+      const statusMap: Record<string, UpcomingAppointment["status"]> = {
+        pendente: "pendente",
+        confirmado: "confirmado",
+        cancelado: "cancelado",
+        concluido: "realizado",
+      };
+
       return {
         id: agendamento.id,
         alunoId: agendamento.aluno_id,
@@ -314,11 +322,7 @@ export class ProfessorAnalyticsService {
         alunoAvatar: null,
         dataHora: agendamento.data_inicio,
         duracao: duracao > 0 ? duracao : 60,
-        status: agendamento.status as
-          | "pendente"
-          | "confirmado"
-          | "cancelado"
-          | "concluido",
+        status: statusMap[agendamento.status] ?? "pendente",
         titulo: null,
         notas: agendamento.observacoes ?? null,
       };

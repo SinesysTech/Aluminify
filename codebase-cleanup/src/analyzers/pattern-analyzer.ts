@@ -3,8 +3,8 @@
  * Provides common utilities for AST traversal and issue creation
  */
 
-import { SourceFile, Node, SyntaxKind } from 'ts-morph';
-import { randomUUID } from 'crypto';
+import { SourceFile, Node, SyntaxKind } from "ts-morph";
+import { randomUUID } from "crypto";
 import type {
   PatternAnalyzer,
   FileInfo,
@@ -15,7 +15,7 @@ import type {
   EffortLevel,
   CodeLocation,
   FileCategory,
-} from '../types.js';
+} from "../types.js";
 
 /**
  * Abstract base class that all pattern analyzers must extend
@@ -113,7 +113,7 @@ export abstract class BasePatternAnalyzer implements PatternAnalyzer {
     if (text.length <= maxLength) {
       return text;
     }
-    return text.substring(0, maxLength) + '...';
+    return text.substring(0, maxLength) + "...";
   }
 
   // ============================================================================
@@ -128,7 +128,7 @@ export abstract class BasePatternAnalyzer implements PatternAnalyzer {
    */
   protected findNodesByKind(ast: SourceFile, kind: SyntaxKind): Node[] {
     const nodes: Node[] = [];
-    
+
     const traverse = (node: Node) => {
       if (node.getKind() === kind) {
         nodes.push(node);
@@ -146,9 +146,12 @@ export abstract class BasePatternAnalyzer implements PatternAnalyzer {
    * @param predicate Function to test each node
    * @returns Array of matching nodes
    */
-  protected findNodes(ast: SourceFile, predicate: (node: Node) => boolean): Node[] {
+  protected findNodes(
+    ast: SourceFile,
+    predicate: (node: Node) => boolean,
+  ): Node[] {
     const nodes: Node[] = [];
-    
+
     const traverse = (node: Node) => {
       if (predicate(node)) {
         nodes.push(node);
@@ -319,18 +322,14 @@ export abstract class BasePatternAnalyzer implements PatternAnalyzer {
    */
   protected getNodeName(node: Node): string | undefined {
     // Try to get name from various node types
-    const nodeWithName = node as any;
-    
-    if (nodeWithName.getName && typeof nodeWithName.getName === 'function') {
-      return nodeWithName.getName();
+    if (Node.isNameable(node) || Node.isNamedNode(node)) {
+      return node.getName();
     }
-    
-    if (nodeWithName.name) {
-      return typeof nodeWithName.name === 'string' 
-        ? nodeWithName.name 
-        : nodeWithName.name.getText?.();
+
+    if (Node.isVariableDeclaration(node) || Node.isPropertyAssignment(node)) {
+      return node.getName();
     }
-    
+
     return undefined;
   }
 
@@ -340,26 +339,19 @@ export abstract class BasePatternAnalyzer implements PatternAnalyzer {
    * @returns True if the node is exported
    */
   protected isExported(node: Node): boolean {
-    const nodeWithModifiers = node as any;
-    
-    // First check the node itself
-    if (nodeWithModifiers.getModifiers) {
-      const modifiers = nodeWithModifiers.getModifiers();
-      if (modifiers.some((mod: any) => mod.getKind() === SyntaxKind.ExportKeyword)) {
-        return true;
-      }
+    if (Node.isExportable(node)) {
+      return node.isExported();
     }
-    
+
     // For variable declarations, check the parent VariableStatement
     if (Node.isVariableDeclaration(node)) {
       const parent = node.getParent(); // VariableDeclarationList
       const grandParent = parent?.getParent(); // VariableStatement
-      if (grandParent && (grandParent as any).getModifiers) {
-        const modifiers = (grandParent as any).getModifiers();
-        return modifiers.some((mod: any) => mod.getKind() === SyntaxKind.ExportKeyword);
+      if (grandParent && Node.isVariableStatement(grandParent)) {
+        return grandParent.isExported();
       }
     }
-    
+
     return false;
   }
 
@@ -372,19 +364,19 @@ export abstract class BasePatternAnalyzer implements PatternAnalyzer {
     const comments: string[] = [];
     const sourceFile = node.getSourceFile();
     const fullText = sourceFile.getFullText();
-    
+
     // Get leading comments
     const leadingCommentRanges = node.getLeadingCommentRanges();
     for (const range of leadingCommentRanges) {
       comments.push(fullText.substring(range.getPos(), range.getEnd()));
     }
-    
+
     // Get trailing comments
     const trailingCommentRanges = node.getTrailingCommentRanges();
     for (const range of trailingCommentRanges) {
       comments.push(fullText.substring(range.getPos(), range.getEnd()));
     }
-    
+
     return comments;
   }
 

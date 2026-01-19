@@ -1,9 +1,9 @@
 /**
  * Type Pattern Analyzer
- * 
+ *
  * Analyzes TypeScript type definitions and usage patterns in the codebase
  * to identify inconsistencies, redundancies, and type safety issues.
- * 
+ *
  * Detects:
  * - All type definitions (interfaces, types, enums)
  * - Type usage across files
@@ -14,16 +14,16 @@
  * - Mismatches between Supabase generated types and manual types
  */
 
-import { SourceFile, Node, SyntaxKind } from 'ts-morph';
-import { BasePatternAnalyzer } from './pattern-analyzer.js';
-import type { FileInfo, Issue, FileCategory } from '../types.js';
+import { SourceFile, Node, SyntaxKind } from "ts-morph";
+import { BasePatternAnalyzer } from "./pattern-analyzer.js";
+import type { FileInfo, Issue, FileCategory } from "../types.js";
 
 /**
  * Information about a type definition
  */
 interface TypeDefinition {
   name: string;
-  kind: 'interface' | 'type' | 'enum';
+  kind: "interface" | "type" | "enum";
   node: Node;
   file: string;
   definition: string;
@@ -43,7 +43,7 @@ interface TypeUsage {
  * Analyzer for TypeScript type patterns
  */
 export class TypePatternAnalyzer extends BasePatternAnalyzer {
-  readonly name = 'TypePatternAnalyzer';
+  readonly name = "TypePatternAnalyzer";
 
   // Track type definitions across files for cross-file analysis
   private typeDefinitions: TypeDefinition[] = [];
@@ -53,7 +53,7 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    * Get supported file types for this analyzer
    */
   getSupportedFileTypes(): FileCategory[] {
-    return ['type', 'component', 'api-route', 'service', 'util'];
+    return ["type", "component", "api-route", "service", "util"];
   }
 
   /**
@@ -107,10 +107,10 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
     const interfaces = ast.getInterfaces();
     for (const interfaceDecl of interfaces) {
       const name = interfaceDecl.getName();
-      
+
       this.typeDefinitions.push({
         name,
-        kind: 'interface',
+        kind: "interface",
         node: interfaceDecl,
         file: file.relativePath,
         definition: interfaceDecl.getText(),
@@ -121,10 +121,10 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
     const typeAliases = ast.getTypeAliases();
     for (const typeAlias of typeAliases) {
       const name = typeAlias.getName();
-      
+
       this.typeDefinitions.push({
         name,
-        kind: 'type',
+        kind: "type",
         node: typeAlias,
         file: file.relativePath,
         definition: typeAlias.getText(),
@@ -135,10 +135,10 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
     const enums = ast.getEnums();
     for (const enumDecl of enums) {
       const name = enumDecl.getName();
-      
+
       this.typeDefinitions.push({
         name,
-        kind: 'enum',
+        kind: "enum",
         node: enumDecl,
         file: file.relativePath,
         definition: enumDecl.getText(),
@@ -164,7 +164,7 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
             typeName,
             node: varDecl,
             file: file.relativePath,
-            context: 'variable',
+            context: "variable",
           });
         }
       }
@@ -191,7 +191,7 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
               typeName,
               node: param,
               file: file.relativePath,
-              context: 'parameter',
+              context: "parameter",
             });
           }
         }
@@ -200,8 +200,12 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
       // Track return type usage
       // Check if this is a function-like node with getReturnTypeNode
       let returnTypeNode: Node | undefined;
-      if (Node.isFunctionDeclaration(func) || Node.isArrowFunction(func) || 
-          Node.isFunctionExpression(func) || Node.isMethodDeclaration(func)) {
+      if (
+        Node.isFunctionDeclaration(func) ||
+        Node.isArrowFunction(func) ||
+        Node.isFunctionExpression(func) ||
+        Node.isMethodDeclaration(func)
+      ) {
         returnTypeNode = func.getReturnTypeNode();
       }
       if (returnTypeNode) {
@@ -211,7 +215,7 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
             typeName,
             node: func,
             file: file.relativePath,
-            context: 'return',
+            context: "return",
           });
         }
       }
@@ -230,7 +234,7 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
               typeName,
               node: prop,
               file: file.relativePath,
-              context: 'property',
+              context: "property",
             });
           }
         }
@@ -247,7 +251,7 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
             typeName,
             node: typeAlias,
             file: file.relativePath,
-            context: 'property',
+            context: "property",
           });
         }
       }
@@ -274,8 +278,8 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
     }
 
     // Handle union types (e.g., "User | null")
-    if (typeText.includes('|')) {
-      const types = typeText.split('|').map(t => t.trim());
+    if (typeText.includes("|")) {
+      const types = typeText.split("|").map((t) => t.trim());
       // Return the first non-primitive type
       for (const type of types) {
         if (/^[A-Z][a-zA-Z0-9_]*$/.test(type)) {
@@ -285,8 +289,8 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
     }
 
     // Handle intersection types (e.g., "User & Timestamps")
-    if (typeText.includes('&')) {
-      const types = typeText.split('&').map(t => t.trim());
+    if (typeText.includes("&")) {
+      const types = typeText.split("&").map((t) => t.trim());
       // Return the first type
       for (const type of types) {
         if (/^[A-Z][a-zA-Z0-9_]*$/.test(type)) {
@@ -302,7 +306,7 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
     }
 
     // Handle Supabase Database types (e.g., "Database['public']['Tables']['users']['Row']")
-    if (typeText.includes('Database[')) {
+    if (typeText.includes("Database[")) {
       const tableMatch = typeText.match(/\['Tables'\]\['([^']+)'\]/);
       if (tableMatch) {
         // Return a normalized name for the table type
@@ -324,9 +328,14 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    * Get parameters from a function node
    */
   private getFunctionParameters(func: Node): Node[] {
-    const funcWithParams = func as any;
-    if (funcWithParams.getParameters && typeof funcWithParams.getParameters === 'function') {
-      return funcWithParams.getParameters();
+    if (
+      Node.isFunctionDeclaration(func) ||
+      Node.isArrowFunction(func) ||
+      Node.isFunctionExpression(func) ||
+      Node.isMethodDeclaration(func) ||
+      Node.isConstructorDeclaration(func)
+    ) {
+      return func.getParameters();
     }
     return [];
   }
@@ -355,14 +364,14 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    * Get type definitions by name
    */
   public getTypeDefinitionsByName(name: string): TypeDefinition[] {
-    return this.typeDefinitions.filter(def => def.name === name);
+    return this.typeDefinitions.filter((def) => def.name === name);
   }
 
   /**
    * Get type usages by name
    */
   public getTypeUsagesByName(name: string): TypeUsage[] {
-    return this.typeUsages.filter(usage => usage.typeName === name);
+    return this.typeUsages.filter((usage) => usage.typeName === name);
   }
 
   /**
@@ -396,26 +405,28 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
     for (const [typeName, definitions] of typesByName.entries()) {
       if (definitions.length > 1) {
         // We have duplicate type definitions
-        const files = definitions.map(d => d.file).join(', ');
-        
+        const files = definitions.map((d) => d.file).join(", ");
+
         // Check if definitions are identical or different
-        const uniqueDefinitions = new Set(definitions.map(d => this.normalizeTypeDefinition(d.definition)));
-        
+        const uniqueDefinitions = new Set(
+          definitions.map((d) => this.normalizeTypeDefinition(d.definition)),
+        );
+
         if (uniqueDefinitions.size === 1) {
           // Identical definitions - code duplication
           for (const def of definitions) {
             issues.push(
               this.createIssue({
-                type: 'code-duplication',
-                severity: 'medium',
-                category: 'types',
+                type: "code-duplication",
+                severity: "medium",
+                category: "types",
                 file: def.file,
                 node: def.node,
                 description: `Duplicate type definition '${typeName}' found in ${definitions.length} files: ${files}`,
                 recommendation: `Consolidate the type definition '${typeName}' into a single shared type file and import it where needed. This reduces maintenance burden and ensures consistency.`,
-                estimatedEffort: 'small',
-                tags: ['duplicate-type', 'type-consolidation', typeName],
-              })
+                estimatedEffort: "small",
+                tags: ["duplicate-type", "type-consolidation", typeName],
+              }),
             );
           }
         } else {
@@ -423,16 +434,16 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
           for (const def of definitions) {
             issues.push(
               this.createIssue({
-                type: 'inconsistent-pattern',
-                severity: 'high',
-                category: 'types',
+                type: "inconsistent-pattern",
+                severity: "high",
+                category: "types",
                 file: def.file,
                 node: def.node,
                 description: `Inconsistent type definition for '${typeName}' found across ${definitions.length} files: ${files}. The definitions differ in structure or properties.`,
                 recommendation: `Review all definitions of '${typeName}' and establish a single canonical definition. Ensure all usages align with the canonical type. Consider if these should be different types with different names.`,
-                estimatedEffort: 'medium',
-                tags: ['inconsistent-type', 'type-mismatch', typeName],
-              })
+                estimatedEffort: "medium",
+                tags: ["inconsistent-type", "type-mismatch", typeName],
+              }),
             );
           }
         }
@@ -448,51 +459,58 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    */
   private detectSupabaseTypeMismatches(): Issue[] {
     const issues: Issue[] = [];
-    
+
     // Find Supabase database type definitions
-    const supabaseTypes = this.typeDefinitions.filter(def => 
-      def.file.includes('database.types') || 
-      def.file.includes('supabase') ||
-      def.definition.includes("Database['public']['Tables']")
+    const supabaseTypes = this.typeDefinitions.filter(
+      (def) =>
+        def.file.includes("database.types") ||
+        def.file.includes("supabase") ||
+        def.definition.includes("Database['public']['Tables']"),
     );
 
     // Find manual type definitions that might correspond to database entities
-    const manualTypes = this.typeDefinitions.filter(def => 
-      !def.file.includes('database.types') && 
-      !def.file.includes('supabase')
+    const manualTypes = this.typeDefinitions.filter(
+      (def) =>
+        !def.file.includes("database.types") && !def.file.includes("supabase"),
     );
 
     // Check for potential mismatches
     for (const manualType of manualTypes) {
       // Check if there's a corresponding Supabase type
-      const potentialSupabaseType = this.findCorrespondingSupabaseType(manualType, supabaseTypes);
-      
+      const potentialSupabaseType = this.findCorrespondingSupabaseType(
+        manualType,
+        supabaseTypes,
+      );
+
       if (potentialSupabaseType) {
         // We found a potential mismatch - manual type exists alongside Supabase type
         issues.push(
           this.createIssue({
-            type: 'inconsistent-pattern',
-            severity: 'high',
-            category: 'types',
+            type: "inconsistent-pattern",
+            severity: "high",
+            category: "types",
             file: manualType.file,
             node: manualType.node,
             description: `Manual type definition '${manualType.name}' may conflict with Supabase generated type. Found potential Supabase type in ${potentialSupabaseType.file}.`,
             recommendation: `Use Supabase generated types instead of manual definitions to ensure type safety with the database schema. Import the type from the generated types file: import type { ${manualType.name} } from '@/types/database.types'`,
-            estimatedEffort: 'small',
-            tags: ['supabase-type-mismatch', 'database-type', manualType.name],
-          })
+            estimatedEffort: "small",
+            tags: ["supabase-type-mismatch", "database-type", manualType.name],
+          }),
         );
       }
     }
 
     // Check for usage of Database['public']['Tables'] pattern outside of type files
     for (const usage of this.typeUsages) {
-      if (usage.typeName.startsWith('Db') && !usage.file.includes('database.types')) {
+      if (
+        usage.typeName.startsWith("Db") &&
+        !usage.file.includes("database.types")
+      ) {
         // This is likely a Supabase type being used directly
         // Check if there's a manual type that should be used instead
-        const manualType = this.typeDefinitions.find(def => 
-          def.name === usage.typeName && 
-          !def.file.includes('database.types')
+        const manualType = this.typeDefinitions.find(
+          (def) =>
+            def.name === usage.typeName && !def.file.includes("database.types"),
         );
 
         if (!manualType) {
@@ -510,43 +528,47 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    * Find a corresponding Supabase type for a manual type definition
    */
   private findCorrespondingSupabaseType(
-    manualType: TypeDefinition, 
-    supabaseTypes: TypeDefinition[]
+    manualType: TypeDefinition,
+    supabaseTypes: TypeDefinition[],
   ): TypeDefinition | null {
     // Look for Supabase types with similar names
     const manualName = manualType.name.toLowerCase();
-    
+
     for (const supabaseType of supabaseTypes) {
       const supabaseName = supabaseType.name.toLowerCase();
-      
+
       // Check for exact match
       if (manualName === supabaseName) {
         return supabaseType;
       }
-      
+
       // Check for common patterns:
       // - User vs users (singular vs plural)
       // - User vs DbUser
       // - UserProfile vs user_profiles
-      
+
       if (
-        manualName === supabaseName + 's' ||
-        manualName + 's' === supabaseName ||
-        manualName === 'db' + supabaseName ||
-        'db' + manualName === supabaseName ||
-        manualName.replace(/_/g, '') === supabaseName.replace(/_/g, '')
+        manualName === supabaseName + "s" ||
+        manualName + "s" === supabaseName ||
+        manualName === "db" + supabaseName ||
+        "db" + manualName === supabaseName ||
+        manualName.replace(/_/g, "") === supabaseName.replace(/_/g, "")
       ) {
         return supabaseType;
       }
-      
+
       // Check if the Supabase type definition references a table with similar name
-      if (supabaseType.definition.includes(`['${manualName}']`) ||
-          supabaseType.definition.includes(`['${manualName}s']`) ||
-          supabaseType.definition.includes(`['${manualName.replace(/([A-Z])/g, '_$1').toLowerCase()}']`)) {
+      if (
+        supabaseType.definition.includes(`['${manualName}']`) ||
+        supabaseType.definition.includes(`['${manualName}s']`) ||
+        supabaseType.definition.includes(
+          `['${manualName.replace(/([A-Z])/g, "_$1").toLowerCase()}']`,
+        )
+      ) {
         return supabaseType;
       }
     }
-    
+
     return null;
   }
 
@@ -556,9 +578,9 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    */
   private normalizeTypeDefinition(definition: string): string {
     return definition
-      .replace(/\s+/g, ' ')  // Normalize whitespace
-      .replace(/,\s*}/g, '}')  // Remove trailing commas
-      .replace(/;\s*}/g, '}')  // Remove trailing semicolons
+      .replace(/\s+/g, " ") // Normalize whitespace
+      .replace(/,\s*}/g, "}") // Remove trailing commas
+      .replace(/;\s*}/g, "}") // Remove trailing semicolons
       .trim();
   }
 
@@ -579,20 +601,20 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
     for (const node of anyTypeNodes) {
       // Determine the context of the 'any' usage
       const context = this.getAnyTypeContext(node);
-      
+
       // Create an issue for each 'any' usage
       issues.push(
         this.createIssue({
-          type: 'type-safety',
-          severity: 'medium',
-          category: 'types',
+          type: "type-safety",
+          severity: "medium",
+          category: "types",
           file: file.relativePath,
           node: node,
           description: `Excessive use of 'any' type detected in ${context}. This bypasses TypeScript's type checking and reduces type safety.`,
           recommendation: `Replace 'any' with a specific type. Consider using: 1) A proper interface or type definition, 2) Generic types for flexible but type-safe code, 3) 'unknown' if the type is truly unknown (requires type guards), 4) Union types for multiple possible types.`,
-          estimatedEffort: 'small',
-          tags: ['any-type', 'type-safety', context],
-        })
+          estimatedEffort: "small",
+          tags: ["any-type", "type-safety", context],
+        }),
       );
     }
 
@@ -603,7 +625,10 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    * Detect unnecessary type assertions
    * Validates Requirements: 7.3
    */
-  private detectUnnecessaryTypeAssertions(file: FileInfo, ast: SourceFile): Issue[] {
+  private detectUnnecessaryTypeAssertions(
+    file: FileInfo,
+    ast: SourceFile,
+  ): Issue[] {
     const issues: Issue[] = [];
 
     // Find all type assertions (as Type and <Type>)
@@ -613,19 +638,19 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
       // Check if the type assertion is unnecessary
       if (this.isTypeAssertionUnnecessary(assertion)) {
         const assertedType = this.getAssertedType(assertion);
-        
+
         issues.push(
           this.createIssue({
-            type: 'type-safety',
-            severity: 'low',
-            category: 'types',
+            type: "type-safety",
+            severity: "low",
+            category: "types",
             file: file.relativePath,
             node: assertion,
             description: `Unnecessary type assertion to '${assertedType}' detected. The expression already has the correct type or TypeScript can infer it.`,
             recommendation: `Remove the type assertion and let TypeScript infer the type naturally. If the assertion is needed for a specific reason, add a comment explaining why. Type assertions should only be used when you have more information about the type than TypeScript can infer.`,
-            estimatedEffort: 'trivial',
-            tags: ['type-assertion', 'type-safety', 'unnecessary-assertion'],
-          })
+            estimatedEffort: "trivial",
+            tags: ["type-assertion", "type-safety", "unnecessary-assertion"],
+          }),
         );
       }
     }
@@ -645,7 +670,7 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
       if (node.getKind() === SyntaxKind.AnyKeyword) {
         anyNodes.push(node);
       }
-      
+
       node.forEachChild(traverse);
     };
 
@@ -658,47 +683,52 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    */
   private getAnyTypeContext(node: Node): string {
     let parent = node.getParent();
-    
+
     // Traverse up to find the meaningful context
     while (parent) {
       const kind = parent.getKind();
-      
+
       if (kind === SyntaxKind.Parameter) {
-        const paramName = this.getNodeName(parent) || 'parameter';
+        const paramName = this.getNodeName(parent) || "parameter";
         return `function parameter '${paramName}'`;
       }
-      
+
       if (kind === SyntaxKind.VariableDeclaration) {
-        const varName = this.getNodeName(parent) || 'variable';
+        const varName = this.getNodeName(parent) || "variable";
         return `variable declaration '${varName}'`;
       }
-      
-      if (kind === SyntaxKind.PropertySignature || kind === SyntaxKind.PropertyDeclaration) {
-        const propName = this.getNodeName(parent) || 'property';
+
+      if (
+        kind === SyntaxKind.PropertySignature ||
+        kind === SyntaxKind.PropertyDeclaration
+      ) {
+        const propName = this.getNodeName(parent) || "property";
         return `property '${propName}'`;
       }
-      
-      if (kind === SyntaxKind.FunctionDeclaration || 
-          kind === SyntaxKind.MethodDeclaration ||
-          kind === SyntaxKind.ArrowFunction) {
-        const funcName = this.getNodeName(parent) || 'function';
+
+      if (
+        kind === SyntaxKind.FunctionDeclaration ||
+        kind === SyntaxKind.MethodDeclaration ||
+        kind === SyntaxKind.ArrowFunction
+      ) {
+        const funcName = this.getNodeName(parent) || "function";
         return `return type of '${funcName}'`;
       }
-      
+
       if (kind === SyntaxKind.TypeAliasDeclaration) {
-        const typeName = this.getNodeName(parent) || 'type';
+        const typeName = this.getNodeName(parent) || "type";
         return `type alias '${typeName}'`;
       }
-      
+
       if (kind === SyntaxKind.InterfaceDeclaration) {
-        const interfaceName = this.getNodeName(parent) || 'interface';
+        const interfaceName = this.getNodeName(parent) || "interface";
         return `interface '${interfaceName}'`;
       }
-      
+
       parent = parent.getParent();
     }
-    
-    return 'unknown context';
+
+    return "unknown context";
   }
 
   /**
@@ -712,11 +742,17 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
     assertions.push(...asAssertions);
 
     // Find angle bracket type assertions (TypeReference)
-    const typeAssertions = this.findNodesByKind(ast, SyntaxKind.TypeAssertionExpression);
+    const typeAssertions = this.findNodesByKind(
+      ast,
+      SyntaxKind.TypeAssertionExpression,
+    );
     assertions.push(...typeAssertions);
 
     // Find non-null assertions (!)
-    const nonNullAssertions = this.findNodesByKind(ast, SyntaxKind.NonNullExpression);
+    const nonNullAssertions = this.findNodesByKind(
+      ast,
+      SyntaxKind.NonNullExpression,
+    );
     assertions.push(...nonNullAssertions);
 
     return assertions;
@@ -727,42 +763,45 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    */
   private isTypeAssertionUnnecessary(assertion: Node): boolean {
     const assertionText = assertion.getText();
-    
+
     // Check for common patterns of unnecessary assertions
-    
+
     // Pattern 1: Asserting to the same type as the literal
     // e.g., "hello" as string, 123 as number, true as boolean
     if (this.isLiteralToSameTypeAssertion(assertion)) {
       return true;
     }
-    
+
     // Pattern 2: Double assertions (as any as Type)
     // These are sometimes necessary for complex type conversions, so we're lenient
-    if (assertionText.includes(' as any as ')) {
+    if (assertionText.includes(" as any as ")) {
       return false; // Not flagging double assertions as they're often intentional
     }
-    
+
     // Pattern 3: Asserting after a type guard
     // This is harder to detect statically, so we skip it for now
-    
+
     // Pattern 4: Asserting to 'any' (this is caught by excessive any detection)
-    if (assertionText.includes(' as any') || assertionText.includes('<any>')) {
+    if (assertionText.includes(" as any") || assertionText.includes("<any>")) {
       return false; // Let the 'any' detection handle this
     }
-    
+
     // Pattern 5: Non-null assertion on optional chaining result
     // e.g., obj?.prop! - this is often unnecessary
-    if (assertion.getKind() === SyntaxKind.NonNullExpression) {
-      const expression = (assertion as any).getExpression?.();
+    if (
+      assertion.getKind() === SyntaxKind.NonNullExpression &&
+      Node.isNonNullExpression(assertion)
+    ) {
+      const expression = assertion.getExpression();
       if (expression) {
         const exprText = expression.getText();
         // Check if the expression uses optional chaining
-        if (exprText.includes('?.')) {
+        if (exprText.includes("?.")) {
           return true; // Likely unnecessary
         }
       }
     }
-    
+
     // For other cases, we need more sophisticated type inference
     // which would require the TypeScript type checker
     // For now, we're conservative and don't flag them
@@ -774,33 +813,33 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    */
   private isLiteralToSameTypeAssertion(assertion: Node): boolean {
     const assertionText = assertion.getText();
-    
+
     // Check for string literal to string
     if (assertionText.match(/["'`][^"'`]*["'`]\s+as\s+string/)) {
       return true;
     }
-    
+
     // Check for number literal to number
     if (assertionText.match(/\d+(\.\d+)?\s+as\s+number/)) {
       return true;
     }
-    
+
     // Check for boolean literal to boolean
     if (assertionText.match(/(true|false)\s+as\s+boolean/)) {
       return true;
     }
-    
+
     // Check for array literal to array type
     if (assertionText.match(/\[.*\]\s+as\s+.*\[\]/)) {
       return true;
     }
-    
+
     // Check for object literal to object type
     if (assertionText.match(/\{.*\}\s+as\s+\{.*\}/)) {
       // This might be necessary for specific object shapes, so we're lenient
       return false;
     }
-    
+
     return false;
   }
 
@@ -809,25 +848,24 @@ export class TypePatternAnalyzer extends BasePatternAnalyzer {
    */
   private getAssertedType(assertion: Node): string {
     const assertionText = assertion.getText();
-    
+
     // Extract type from 'as Type' syntax
     const asMatch = assertionText.match(/\s+as\s+(.+)$/);
     if (asMatch) {
       return asMatch[1].trim();
     }
-    
+
     // Extract type from '<Type>' syntax
     const angleMatch = assertionText.match(/^<(.+)>/);
     if (angleMatch) {
       return angleMatch[1].trim();
     }
-    
+
     // Non-null assertion
     if (assertion.getKind() === SyntaxKind.NonNullExpression) {
-      return 'non-null';
+      return "non-null";
     }
-    
-    return 'unknown';
+
+    return "unknown";
   }
 }
-

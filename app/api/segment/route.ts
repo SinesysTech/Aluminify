@@ -128,10 +128,17 @@ async function postHandler(request: AuthenticatedRequest) {
       );
     }
 
+    if (!request.user?.empresaId) {
+      return NextResponse.json(
+        { error: "empresaId é obrigatório" },
+        { status: 400 },
+      );
+    }
+
     const segment = await segmentService.create({
       name: body.name,
       slug: body.slug,
-      empresaId: request.user?.empresaId,
+      empresaId: request.user.empresaId,
       createdBy: request.user?.id,
     });
     console.log("[Segment POST] Segment created:", segment.id);

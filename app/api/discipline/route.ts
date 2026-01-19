@@ -138,9 +138,16 @@ async function postHandler(request: AuthenticatedRequest) {
       );
     }
 
+    if (!request.user?.empresaId) {
+      return NextResponse.json(
+        { error: "empresaId é obrigatório" },
+        { status: 400 },
+      );
+    }
+
     const discipline = await disciplineService.create({
       name: body.name,
-      empresaId: request.user?.empresaId,
+      empresaId: request.user.empresaId,
       createdBy: request.user?.id,
     });
     console.log("[Discipline POST] Discipline created:", discipline.id);

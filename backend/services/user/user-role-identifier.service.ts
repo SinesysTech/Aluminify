@@ -232,7 +232,17 @@ export class UserRoleIdentifierService {
       // Continua para fallback por email se disponível
     }
 
-    const rows = (data || []) as UserRoleDetail[];
+    // Type for raw query result
+    type ProfessorQueryRow = {
+      id: string;
+      empresa_id: string;
+      is_admin: boolean;
+      empresas:
+        | { id: string; nome: string; slug: string }
+        | { id: string; nome: string; slug: string }[];
+    };
+
+    const rows = (data || []) as ProfessorQueryRow[];
 
     // Fallback: algumas bases podem ter professor cadastrado por email (ou id divergente)
     if (!rows.length && email) {
@@ -263,31 +273,22 @@ export class UserRoleIdentifierService {
           emailError,
         );
       } else {
-        rows.push(...((emailData || []) as UserRoleDetail[]));
+        rows.push(...((emailData || []) as ProfessorQueryRow[]));
       }
     }
 
-    return rows.map(
-      (row: {
-        id: string;
-        empresa_id: string;
-        is_admin: boolean;
-        empresas:
-          | { id: string; nome: string; slug: string }
-          | { id: string; nome: string; slug: string }[];
-      }) => {
-        const empresa = Array.isArray(row.empresas)
-          ? row.empresas[0]
-          : row.empresas;
-        return {
-          role: "professor" as const,
-          empresaId: row.empresa_id,
-          empresaNome: empresa.nome,
-          empresaSlug: empresa.slug,
-          isAdmin: row.is_admin,
-        };
-      },
-    );
+    return rows.map((row) => {
+      const empresa = Array.isArray(row.empresas)
+        ? row.empresas[0]
+        : row.empresas;
+      return {
+        role: "professor" as const,
+        empresaId: row.empresa_id,
+        empresaNome: empresa.nome,
+        empresaSlug: empresa.slug,
+        isAdmin: row.is_admin,
+      };
+    });
   }
 
   /**

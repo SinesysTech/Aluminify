@@ -8,7 +8,7 @@ import { requireAuth, AuthenticatedRequest } from "@/backend/auth/middleware";
 const serializeAtividade = (
   atividade: Awaited<ReturnType<typeof atividadeService.getById>>,
 ) => {
-  const a = atividade as Record<string, unknown>;
+  const a = atividade as unknown as Record<string, unknown>;
   return {
     id: a.id as string,
     moduloId: (a.moduloId || a.modulo_id) as string,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabaseClient } from "@/backend/clients/database";
+import type { Database } from "@/lib/database.types";
 
 /**
  * POST /api/auth/professor/signup

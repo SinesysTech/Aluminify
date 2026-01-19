@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/server";
+import type { Database } from "@/lib/database.types";
 import type {
   Conversation,
   ChatMessage,

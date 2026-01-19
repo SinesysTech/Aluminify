@@ -105,10 +105,10 @@ export class SessaoEstudoService {
 
     return this.repository.create({
       alunoId,
-      disciplinaId: input.disciplinaId,
-      frenteId: input.frenteId,
-      moduloId: input.moduloId,
-      atividadeRelacionadaId: input.atividadeRelacionadaId,
+      disciplinaId: input.disciplinaId ?? undefined,
+      frenteId: input.frenteId ?? undefined,
+      moduloId: input.moduloId ?? undefined,
+      atividadeRelacionadaId: input.atividadeRelacionadaId ?? undefined,
       metodoEstudo: input.metodoEstudo,
       inicioIso: input.inicioIso,
     });

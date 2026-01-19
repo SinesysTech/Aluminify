@@ -1367,15 +1367,18 @@ export default function ConteudosClientPage() {
 
       let errorMessage = 'Erro ao importar cronograma'
 
+      // Type guard para objetos de erro
+      const errObj = err as { message?: string; details?: string; hint?: string; error_description?: string } | null
+
       if (typeof err === 'string') {
         errorMessage = err
-      } else if (err?.message) {
+      } else if (errObj?.message) {
         // Supabase PostgrestError usually has a message property
-        errorMessage = err.message
-        if (err.details) errorMessage += ` (${err.details})`
-        if (err.hint) errorMessage += ` - Dica: ${err.hint}`
-      } else if (err?.error_description) {
-        errorMessage = err.error_description
+        errorMessage = errObj.message
+        if (errObj.details) errorMessage += ` (${errObj.details})`
+        if (errObj.hint) errorMessage += ` - Dica: ${errObj.hint}`
+      } else if (errObj?.error_description) {
+        errorMessage = errObj.error_description
       } else {
         // Fallback para objetos estranhos ou vazios
         try {
