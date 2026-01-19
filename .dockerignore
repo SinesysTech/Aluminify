@@ -61,6 +61,7 @@ reports
 .eslintcache
 *.pem
 Thumbs.db
+codebase-cleanup
 
 # Docker
 Dockerfile
