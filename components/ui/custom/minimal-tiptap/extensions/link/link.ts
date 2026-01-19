@@ -25,7 +25,6 @@ export const Link = TiptapLink.extend({
   },
 
   addOptions() {
-    // @ts-expect-error - parent type inference with extended options
     return {
       ...this.parent?.(),
       autolink: true,
@@ -33,7 +32,7 @@ export const Link = TiptapLink.extend({
       HTMLAttributes: {
         class: "link"
       }
-    };
+    } as ReturnType<(typeof TiptapLink)["config"]["addOptions"]>;
   },
 
   addProseMirrorPlugins() {

@@ -42,10 +42,10 @@ function formatSupabaseError(error: unknown): string {
 function isMissingFlashcardsImageColumnsError(error: unknown): boolean {
   const formatted = formatSupabaseError(error);
   // Postgres undefined_column
-  if (formatted.includes('[42703]')) return true;
+  if (formatted.includes("[42703]")) return true;
   return (
-    formatted.includes('pergunta_imagem_path') ||
-    formatted.includes('resposta_imagem_path')
+    formatted.includes("pergunta_imagem_path") ||
+    formatted.includes("resposta_imagem_path")
   );
 }
 
@@ -658,12 +658,15 @@ export class FlashcardsService {
             (c as unknown as { respostaImagemPath?: string | null })
               .respostaImagemPath ?? null,
           );
-          const { perguntaImagemPath: _perguntaImagemPath, respostaImagemPath: _respostaImagemPath, ...rest } =
-            c as unknown as {
-              perguntaImagemPath?: string | null;
-              respostaImagemPath?: string | null;
-              [key: string]: unknown;
-            };
+          const {
+            perguntaImagemPath: _perguntaImagemPath,
+            respostaImagemPath: _respostaImagemPath,
+            ...rest
+          } = c as unknown as {
+            perguntaImagemPath?: string | null;
+            respostaImagemPath?: string | null;
+            [key: string]: unknown;
+          };
           return {
             ...(rest as unknown as FlashcardReviewItem),
             perguntaImagemUrl,
@@ -1267,12 +1270,15 @@ export class FlashcardsService {
             (c as unknown as { respostaImagemPath?: string | null })
               .respostaImagemPath ?? null,
           );
-          const { perguntaImagemPath: _perguntaImagemPath, respostaImagemPath: _respostaImagemPath, ...rest } =
-            c as unknown as {
-              perguntaImagemPath?: string | null;
-              respostaImagemPath?: string | null;
-              [key: string]: unknown;
-            };
+          const {
+            perguntaImagemPath: _perguntaImagemPath,
+            respostaImagemPath: _respostaImagemPath,
+            ...rest
+          } = c as unknown as {
+            perguntaImagemPath?: string | null;
+            respostaImagemPath?: string | null;
+            [key: string]: unknown;
+          };
           return {
             ...(rest as unknown as FlashcardReviewItem),
             perguntaImagemUrl,
@@ -1550,49 +1556,60 @@ export class FlashcardsService {
     }
 
     // Construir query de flashcards
-    console.log('[flashcards] Construindo query de flashcards');
-    console.log('[flashcards] moduloIds:', moduloIds);
+    console.log("[flashcards] Construindo query de flashcards");
+    console.log("[flashcards] moduloIds:", moduloIds);
 
-    const applyListFilters = <T extends ReturnType<typeof this.client.from>>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const applyListFilters = <T extends { in: any; or: any; order: any; range: any }>(
       baseQuery: T,
-    ) => {
+    ): T | null => {
       let q = baseQuery;
 
       if (moduloIds !== null) {
         if (moduloIds.length === 0) {
           // Nenhum módulo encontrado, retornar vazio
-          console.log('[flashcards] Nenhum módulo encontrado, retornando vazio');
+          console.log(
+            "[flashcards] Nenhum módulo encontrado, retornando vazio",
+          );
           return null;
         }
-        console.log('[flashcards] Aplicando filtro de módulos:', moduloIds.length, 'módulos');
-        q = q.in('modulo_id', moduloIds) as unknown as T;
+        console.log(
+          "[flashcards] Aplicando filtro de módulos:",
+          moduloIds.length,
+          "módulos",
+        );
+        q = q.in("modulo_id", moduloIds);
       }
 
       if (filters.search) {
         const searchTerm = `%${filters.search}%`;
-        console.log('[flashcards] Aplicando busca:', searchTerm);
-        q = q.or(`pergunta.ilike.${searchTerm},resposta.ilike.${searchTerm}`) as unknown as T;
+        console.log("[flashcards] Aplicando busca:", searchTerm);
+        q = q.or(
+          `pergunta.ilike.${searchTerm},resposta.ilike.${searchTerm}`,
+        );
       }
 
-      const orderBy = filters.orderBy || 'created_at';
-      const orderDirection = filters.orderDirection || 'desc';
-      q = q.order(orderBy, { ascending: orderDirection === 'asc' }) as unknown as T;
+      const orderBy = filters.orderBy || "created_at";
+      const orderDirection = filters.orderDirection || "desc";
+      q = q.order(orderBy, {
+        ascending: orderDirection === "asc",
+      });
 
       const page = filters.page || 1;
       const limit = filters.limit || 50;
       const from = (page - 1) * limit;
       const to = from + limit - 1;
-      q = q.range(from, to) as unknown as T;
+      q = q.range(from, to);
 
       return q;
     };
 
-    let query = applyListFilters(
+    const query = applyListFilters(
       this.client
-        .from('flashcards')
+        .from("flashcards")
         .select(
-          'id, modulo_id, pergunta, resposta, pergunta_imagem_path, resposta_imagem_path, created_at',
-          { count: 'exact' },
+          "id, modulo_id, pergunta, resposta, pergunta_imagem_path, resposta_imagem_path, created_at",
+          { count: "exact" },
         ),
     );
 
@@ -1600,24 +1617,30 @@ export class FlashcardsService {
       return { data: [], total: 0 };
     }
 
-    console.log('[flashcards] Executando query de flashcards...');
+    console.log("[flashcards] Executando query de flashcards...");
     let { data: flashcardsData, error, count } = await query;
 
     // Compatibilidade: bancos ainda sem as colunas de imagem
     if (error && isMissingFlashcardsImageColumnsError(error)) {
       console.warn(
-        '[flashcards] Colunas pergunta_imagem_path/resposta_imagem_path não existem no banco; refazendo query sem elas.',
+        "[flashcards] Colunas pergunta_imagem_path/resposta_imagem_path não existem no banco; refazendo query sem elas.",
       );
       const fallbackQuery = applyListFilters(
         this.client
-          .from('flashcards')
-          .select('id, modulo_id, pergunta, resposta, created_at', { count: 'exact' }),
+          .from("flashcards")
+          .select("id, modulo_id, pergunta, resposta, created_at", {
+            count: "exact",
+          }),
       );
       if (!fallbackQuery) {
         return { data: [], total: 0 };
       }
       const fallback = await fallbackQuery;
-      flashcardsData = fallback.data;
+      flashcardsData = fallback.data?.map((item) => ({
+        ...item,
+        pergunta_imagem_path: null,
+        resposta_imagem_path: null,
+      })) ?? null;
       error = fallback.error;
       count = fallback.count;
     }
@@ -1885,22 +1908,30 @@ export class FlashcardsService {
     await this.ensureProfessor(userId);
 
     let { data: flashcard, error } = await this.client
-      .from('flashcards')
-      .select('id, modulo_id, pergunta, resposta, pergunta_imagem_path, resposta_imagem_path, created_at')
-      .eq('id', id)
+      .from("flashcards")
+      .select(
+        "id, modulo_id, pergunta, resposta, pergunta_imagem_path, resposta_imagem_path, created_at",
+      )
+      .eq("id", id)
       .maybeSingle();
 
     // Compatibilidade: bancos ainda sem as colunas de imagem
     if (error && isMissingFlashcardsImageColumnsError(error)) {
       console.warn(
-        '[flashcards] Colunas pergunta_imagem_path/resposta_imagem_path não existem no banco (getById); fazendo fallback.',
+        "[flashcards] Colunas pergunta_imagem_path/resposta_imagem_path não existem no banco (getById); fazendo fallback.",
       );
       const fallback = await this.client
-        .from('flashcards')
-        .select('id, modulo_id, pergunta, resposta, created_at')
-        .eq('id', id)
+        .from("flashcards")
+        .select("id, modulo_id, pergunta, resposta, created_at")
+        .eq("id", id)
         .maybeSingle();
-      flashcard = fallback.data;
+      flashcard = fallback.data
+        ? {
+            ...fallback.data,
+            pergunta_imagem_path: null,
+            resposta_imagem_path: null,
+          }
+        : null;
       error = fallback.error;
     }
 

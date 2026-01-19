@@ -4,7 +4,6 @@ import { common, createLowlight } from "lowlight";
 
 export const CodeBlockLowlight = TiptapCodeBlockLowlight.extend({
   addOptions() {
-    // @ts-expect-error - parent spread with extended options causes type mismatch
     return {
       ...this.parent?.(),
       lowlight: createLowlight(common),
@@ -12,7 +11,7 @@ export const CodeBlockLowlight = TiptapCodeBlockLowlight.extend({
       HTMLAttributes: {
         class: "block-node",
       },
-    };
+    } as ReturnType<(typeof TiptapCodeBlockLowlight)["config"]["addOptions"]>;
   },
 });
 
