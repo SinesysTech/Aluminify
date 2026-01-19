@@ -1559,7 +1559,12 @@ export class FlashcardsService {
     console.log("[flashcards] Construindo query de flashcards");
     console.log("[flashcards] moduloIds:", moduloIds);
     const applyListFilters = <
-      T extends { in: unknown; or: unknown; order: unknown; range: unknown },
+      T extends {
+        in: (column: string, values: string[]) => T;
+        or: (filters: string) => T;
+        order: (column: string, options: { ascending: boolean }) => T;
+        range: (from: number, to: number) => T;
+      },
     >(
       baseQuery: T,
     ): T | null => {

@@ -33,7 +33,7 @@ export const Link = TiptapLink.extend({
   },
 
   addOptions() {
-    const parentOptions = this.parent?.() ?? {};
+    const parentOptions = (this.parent?.() ?? {}) as Record<string, unknown>;
     return {
       ...parentOptions,
       defaultProtocol: "https",
