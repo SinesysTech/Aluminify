@@ -293,6 +293,7 @@ export async function updateSession(request: NextRequest) {
     "/api/auth/signup-with-empresa", // Endpoint de cadastro público
     "/api/admin/fix-permissions", // Endpoint temporário para correção
     "/api/chat/attachments", // Anexos usam token na URL, não precisam de autenticação de sessão
+    "/api/health", // Health check para Docker/Kubernetes
     "/", // Landing page
     "/signup",
     "/features.html",
