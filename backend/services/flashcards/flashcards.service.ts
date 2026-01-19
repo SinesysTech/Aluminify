@@ -1553,10 +1553,11 @@ export class FlashcardsService {
     console.log('[flashcards] Construindo query de flashcards');
     console.log('[flashcards] moduloIds:', moduloIds);
 
-    const applyListFilters = <T extends ReturnType<typeof this.client.from>>(
-      baseQuery: T,
-    ) => {
-      let q = baseQuery;
+    type FromReturn = ReturnType<typeof this.client.from>;
+    type SelectReturn = ReturnType<FromReturn["select"]>;
+
+    const applyListFilters = (baseQuery: SelectReturn) => {
+      let q: SelectReturn | null = baseQuery;
 
       if (moduloIds !== null) {
         if (moduloIds.length === 0) {
@@ -1565,24 +1566,26 @@ export class FlashcardsService {
           return null;
         }
         console.log('[flashcards] Aplicando filtro de módulos:', moduloIds.length, 'módulos');
-        q = q.in('modulo_id', moduloIds) as unknown as T;
+        q = q.in("modulo_id", moduloIds) as SelectReturn;
       }
 
       if (filters.search) {
         const searchTerm = `%${filters.search}%`;
         console.log('[flashcards] Aplicando busca:', searchTerm);
-        q = q.or(`pergunta.ilike.${searchTerm},resposta.ilike.${searchTerm}`) as unknown as T;
+        q = q.or(
+          `pergunta.ilike.${searchTerm},resposta.ilike.${searchTerm}`,
+        ) as SelectReturn;
       }
 
       const orderBy = filters.orderBy || 'created_at';
       const orderDirection = filters.orderDirection || 'desc';
-      q = q.order(orderBy, { ascending: orderDirection === 'asc' }) as unknown as T;
+      q = q.order(orderBy, { ascending: orderDirection === "asc" }) as SelectReturn;
 
       const page = filters.page || 1;
       const limit = filters.limit || 50;
       const from = (page - 1) * limit;
       const to = from + limit - 1;
-      q = q.range(from, to) as unknown as T;
+      q = q.range(from, to) as SelectReturn;
 
       return q;
     };
@@ -1648,8 +1651,15 @@ export class FlashcardsService {
     }
 
     // Buscar módulos relacionados
+    const flashcardsWithModulo = flashcardsData as Array<{
+      modulo_id: string | null;
+    }>;
     const moduloIdsFromFlashcards = [
-      ...new Set(flashcardsData.map((f) => f.modulo_id as string)),
+      ...new Set(
+        flashcardsWithModulo
+          .map((f) => f.modulo_id)
+          .filter((id): id is string => typeof id === "string" && id.length > 0),
+      ),
     ];
 
     if (moduloIdsFromFlashcards.length === 0) {
@@ -1833,7 +1843,16 @@ export class FlashcardsService {
 
     // Montar resposta final
     const flashcards: FlashcardAdmin[] = flashcardsData
-      .map((item) => {
+      .map(
+        (
+          item: {
+            id: string;
+            modulo_id: string | null;
+            pergunta: string;
+            resposta: string;
+            created_at: string | null;
+          } & Record<string, unknown>,
+        ) => {
         // After migration, modulo_id is guaranteed to be non-null
         const modulo = modulosMap.get(item.modulo_id as string);
         if (!modulo) return null;
@@ -1852,8 +1871,9 @@ export class FlashcardsService {
           created_at: item.created_at as string,
           modulo,
         } as FlashcardAdmin;
-      })
-      .filter((f): f is FlashcardAdmin => f !== null);
+      },
+      )
+      .filter((f: FlashcardAdmin | null): f is FlashcardAdmin => f !== null);
 
     const result: { data: FlashcardAdmin[]; total: number } = {
       data: flashcards,
@@ -1900,7 +1920,7 @@ export class FlashcardsService {
         .select('id, modulo_id, pergunta, resposta, created_at')
         .eq('id', id)
         .maybeSingle();
-      flashcard = fallback.data;
+      flashcard = fallback.data as unknown as typeof flashcard;
       error = fallback.error;
     }
 

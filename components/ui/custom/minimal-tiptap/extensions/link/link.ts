@@ -25,14 +25,29 @@ export const Link = TiptapLink.extend({
   },
 
   addOptions() {
-    // @ts-expect-error - parent type inference with extended options
+    const parentOptions = this.parent?.();
+
     return {
-      ...this.parent?.(),
+      ...parentOptions,
+      // TipTap expects these options as required in newer typings
+      protocols: parentOptions?.protocols ?? ["http", "https"],
+      defaultProtocol: parentOptions?.defaultProtocol ?? "https",
+      enableClickSelection: parentOptions?.enableClickSelection ?? false,
+      linkOnPaste: parentOptions?.linkOnPaste ?? true,
+      validate:
+        parentOptions?.validate ??
+        ((url: string) => !url.toLowerCase().startsWith("javascript:")),
+      isAllowedUri:
+        parentOptions?.isAllowedUri ??
+        ((url: string, ctx: { defaultValidate: (u: string) => boolean }) =>
+          ctx.defaultValidate(url)),
+      shouldAutoLink:
+        parentOptions?.shouldAutoLink ?? ((_url: string) => true),
       autolink: true,
       openOnClick: false,
       HTMLAttributes: {
-        class: "link"
-      }
+        class: "link",
+      },
     };
   },
 

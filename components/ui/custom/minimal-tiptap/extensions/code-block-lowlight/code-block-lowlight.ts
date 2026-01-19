@@ -4,11 +4,17 @@ import { common, createLowlight } from "lowlight";
 
 export const CodeBlockLowlight = TiptapCodeBlockLowlight.extend({
   addOptions() {
-    // @ts-expect-error - parent spread with extended options causes type mismatch
     return {
       ...this.parent?.(),
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       lowlight: createLowlight(common),
+      // TipTap expects a non-optional prefix (TS requirement in newer versions)
+      languageClassPrefix: "language-",
+      // Required options in newer @tiptap/extension-code-block-lowlight typings
+      exitOnTripleEnter: true,
+      exitOnArrowDown: true,
+      enableTabIndentation: false,
+      tabSize: 2,
       defaultLanguage: null,
       HTMLAttributes: {
         class: "block-node",
