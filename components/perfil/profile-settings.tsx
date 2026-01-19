@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
-
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Save } from 'lucide-react'
 
 import type { AppUser } from '@/types/user'
 import { createClient } from '@/lib/client'
@@ -10,21 +10,21 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
+import { Spinner } from '@/components/ui/spinner'
 import { AvatarUpload } from '@/components/shared/avatar-upload'
+import { useToast } from '@/hooks/use-toast'
 
 type ProfileSettingsProps = {
   user: AppUser
+  section: 'dados' | 'seguranca' | 'avatar'
 }
 
-export function ProfileSettings({ user }: ProfileSettingsProps) {
+export function ProfileSettings({ user, section }: ProfileSettingsProps) {
+  const router = useRouter()
+  const { toast } = useToast()
   const supabase = createClient()
+
   const [fullName, setFullName] = useState(user.fullName || '')
-  const [profileMessage, setProfileMessage] = useState<string | null>(null)
-  const [profileError, setProfileError] = useState<string | null>(null)
-  const [passwordMessage, setPasswordMessage] = useState<string | null>(null)
-  const [passwordError, setPasswordError] = useState<string | null>(null)
   const [password, setPassword] = useState('')
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [isSavingProfile, setIsSavingProfile] = useState(false)
@@ -32,9 +32,17 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
 
   const handleProfileSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
+
+    if (!fullName.trim()) {
+      toast({
+        title: 'Campo obrigatório',
+        description: 'O nome completo é obrigatório.',
+        variant: 'destructive',
+      })
+      return
+    }
+
     setIsSavingProfile(true)
-    setProfileMessage(null)
-    setProfileError(null)
 
     try {
       const { error } = await supabase.auth.updateUser({
@@ -45,11 +53,18 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
         throw error
       }
 
-      setProfileMessage('Dados atualizados com sucesso.')
+      toast({
+        title: 'Dados atualizados',
+        description: 'Suas informações foram salvas com sucesso.',
+      })
+
+      router.refresh()
     } catch (error) {
-      setProfileError(
-        error instanceof Error ? error.message : 'Não foi possível atualizar os dados.'
-      )
+      toast({
+        title: 'Erro ao salvar',
+        description: error instanceof Error ? error.message : 'Não foi possível atualizar os dados.',
+        variant: 'destructive',
+      })
     } finally {
       setIsSavingProfile(false)
     }
@@ -57,16 +72,31 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
 
   const handlePasswordSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
-    setPasswordError(null)
-    setPasswordMessage(null)
+
+    if (!password) {
+      toast({
+        title: 'Campo obrigatório',
+        description: 'Digite a nova senha.',
+        variant: 'destructive',
+      })
+      return
+    }
 
     if (password !== passwordConfirmation) {
-      setPasswordError('As senhas precisam ser iguais.')
+      toast({
+        title: 'Senhas diferentes',
+        description: 'As senhas precisam ser iguais.',
+        variant: 'destructive',
+      })
       return
     }
 
     if (password.length < 8) {
-      setPasswordError('A senha deve possuir ao menos 8 caracteres.')
+      toast({
+        title: 'Senha muito curta',
+        description: 'A senha deve ter pelo menos 8 caracteres.',
+        variant: 'destructive',
+      })
       return
     }
 
@@ -83,7 +113,6 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
       }
 
       // Atualizar must_change_password apenas se o usuário for aluno
-      // Para professores, o flag está no user_metadata e já foi atualizado acima
       if (user.role === 'aluno') {
         const { error: alunoError } = await supabase
           .from('alunos')
@@ -91,52 +120,57 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
           .eq('id', user.id)
 
         if (alunoError) {
-          // Não falhar se a atualização na tabela alunos falhar
-          // O importante é que a senha foi atualizada no auth
           console.warn('Erro ao atualizar flag must_change_password na tabela alunos:', alunoError)
         }
       }
 
       setPassword('')
       setPasswordConfirmation('')
-      setPasswordMessage('Senha atualizada com sucesso.')
+
+      toast({
+        title: 'Senha atualizada',
+        description: 'Sua senha foi alterada com sucesso.',
+      })
     } catch (error) {
-      setPasswordError(
-        error instanceof Error ? error.message : 'Não foi possível atualizar a senha.'
-      )
+      toast({
+        title: 'Erro ao atualizar senha',
+        description: error instanceof Error ? error.message : 'Não foi possível atualizar a senha.',
+        variant: 'destructive',
+      })
     } finally {
       setIsSavingPassword(false)
     }
   }
 
-  return (
-    <div className="space-y-6">
+  const handleAvatarSuccess = () => {
+    toast({
+      title: 'Avatar atualizado',
+      description: 'Sua foto de perfil foi alterada com sucesso.',
+    })
+    router.refresh()
+  }
+
+  if (section === 'dados') {
+    return (
       <Card>
         <CardHeader>
           <CardTitle>Dados cadastrais</CardTitle>
-          <CardDescription>Atualize como o seu nome aparece dentro da plataforma.</CardDescription>
+          <CardDescription>
+            Atualize como o seu nome aparece dentro da plataforma.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {profileMessage && (
-            <Alert variant="default" className="mb-4">
-              <AlertTitle>Pronto!</AlertTitle>
-              <AlertDescription>{profileMessage}</AlertDescription>
-            </Alert>
-          )}
-          {profileError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertTitle>Erro</AlertTitle>
-              <AlertDescription>{profileError}</AlertDescription>
-            </Alert>
-          )}
           <form className="space-y-4" onSubmit={handleProfileSubmit}>
             <div className="grid gap-2">
-              <Label htmlFor="full_name">Nome completo</Label>
+              <Label htmlFor="full_name">
+                Nome completo <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="full_name"
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
                 placeholder="Como deseja ser identificado(a)?"
+                required
               />
             </div>
             <div className="grid gap-2">
@@ -146,66 +180,88 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
                 Para alterar o email, entre em contato com o suporte.
               </p>
             </div>
-            <div className="grid gap-2">
-              <Label>Biografia</Label>
-              <Textarea disabled placeholder="Disponível em breve" />
-            </div>
-            <Button type="submit" disabled={isSavingProfile}>
-              {isSavingProfile ? 'Salvando...' : 'Salvar alterações'}
+            <Button type="submit" disabled={isSavingProfile} className="gap-2">
+              {isSavingProfile ? (
+                <>
+                  <Spinner />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Salvar alterações
+                </>
+              )}
             </Button>
           </form>
         </CardContent>
       </Card>
+    )
+  }
 
+  if (section === 'seguranca') {
+    return (
       <Card>
         <CardHeader>
           <CardTitle>Senha de acesso</CardTitle>
-          <CardDescription>Defina uma nova senha sempre que achar necessário.</CardDescription>
+          <CardDescription>
+            Defina uma nova senha sempre que achar necessário.
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          {passwordMessage && (
-            <Alert variant="default" className="mb-4">
-              <AlertTitle>Senha atualizada</AlertTitle>
-              <AlertDescription>{passwordMessage}</AlertDescription>
-            </Alert>
-          )}
-          {passwordError && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertTitle>Erro</AlertTitle>
-              <AlertDescription>{passwordError}</AlertDescription>
-            </Alert>
-          )}
           <form className="space-y-4" onSubmit={handlePasswordSubmit}>
             <div className="grid gap-2">
-              <Label htmlFor="password">Nova senha</Label>
+              <Label htmlFor="password">
+                Nova senha <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                placeholder="********"
+                placeholder="Mínimo 8 caracteres"
+                minLength={8}
+                required
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password_confirmation">Confirme a senha</Label>
+              <Label htmlFor="password_confirmation">
+                Confirme a senha <span className="text-destructive">*</span>
+              </Label>
               <Input
                 id="password_confirmation"
                 type="password"
                 value={passwordConfirmation}
                 onChange={(event) => setPasswordConfirmation(event.target.value)}
-                placeholder="********"
+                placeholder="Digite novamente"
+                minLength={8}
+                required
               />
             </div>
-            <Button type="submit" disabled={isSavingPassword}>
-              {isSavingPassword ? 'Atualizando...' : 'Atualizar senha'}
+            <Button type="submit" disabled={isSavingPassword} className="gap-2">
+              {isSavingPassword ? (
+                <>
+                  <Spinner />
+                  Atualizando...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Atualizar senha
+                </>
+              )}
             </Button>
           </form>
         </CardContent>
       </Card>
+    )
+  }
 
+  if (section === 'avatar') {
+    return (
       <Card>
         <CardHeader>
-          <CardTitle>Avatar e imagem de perfil</CardTitle>
+          <CardTitle>Foto de perfil</CardTitle>
           <CardDescription>
             Envie uma foto para personalizar seu avatar. A foto aparecerá em toda a plataforma.
           </CardDescription>
@@ -214,18 +270,12 @@ export function ProfileSettings({ user }: ProfileSettingsProps) {
           <AvatarUpload
             currentAvatarUrl={user.avatarUrl}
             userName={user.fullName || user.email}
-            onUploadSuccess={() => {
-              setProfileMessage('Avatar atualizado com sucesso.')
-              setProfileError(null)
-              // Recarregar página após um breve delay para atualizar a UI
-              setTimeout(() => {
-                window.location.reload()
-              }, 1000)
-            }}
+            onUploadSuccess={handleAvatarSuccess}
           />
         </CardContent>
       </Card>
-    </div>
-  )
-}
+    )
+  }
 
+  return null
+}
