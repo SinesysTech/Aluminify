@@ -1529,7 +1529,11 @@ export class DashboardAnalyticsService {
     }
 
     // Contar flashcards únicos (um flashcard pode ter múltiplas revisões)
-    const flashcardsUnicos = new Set(progressosFlashcards.map((p: { flashcard_id: string }) => p.flashcard_id))
+    const flashcardsUnicos = new Set(
+      progressosFlashcards
+        .map((p) => p.flashcard_id)
+        .filter((id): id is string => id !== null)
+    )
     return flashcardsUnicos.size
   }
 
