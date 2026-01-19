@@ -21,13 +21,11 @@ const serializeAtividade = (
     obrigatorio: a.obrigatorio as boolean,
     ordemExibicao: (a.ordemExibicao || a.ordem_exibicao) as number,
     createdAt:
-      a.createdAt instanceof Date
-        ? a.createdAt.toISOString()
-        : ((a.createdAt || a.created_at) as string),
+      (a.createdAt as { toISOString?: () => string })?.toISOString?.() ||
+      (a.created_at as string),
     updatedAt:
-      a.updatedAt instanceof Date
-        ? a.updatedAt.toISOString()
-        : ((a.updatedAt || a.updated_at) as string),
+      (a.updatedAt as { toISOString?: () => string })?.toISOString?.() ||
+      (a.updated_at as string),
   };
 };
 

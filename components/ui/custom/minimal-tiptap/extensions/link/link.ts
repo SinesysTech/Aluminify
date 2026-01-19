@@ -35,7 +35,7 @@ export const Link = TiptapLink.extend({
 
   addOptions() {
     const parentOptions = this.parent?.();
-    return ({
+    return {
       ...parentOptions,
       defaultProtocol: "https",
       autolink: true,
@@ -55,7 +55,7 @@ export const Link = TiptapLink.extend({
           ctx.defaultValidate(url)),
       shouldAutoLink: parentOptions?.shouldAutoLink ?? ((_url: string) => true),
       // Tipagem: manter compatibilidade entre versões do TipTap sem quebrar o build
-    }) as unknown as LinkOptions;
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
   },
 
   addProseMirrorPlugins() {
