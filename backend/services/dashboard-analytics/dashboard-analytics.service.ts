@@ -1117,14 +1117,16 @@ export class DashboardAnalyticsService {
     
     // Buscar nome do professor se for professor
     let professorName: string | null = null
+    let professorEmpresaId: string | null = null
     if (isProfessor) {
       const { data: professor } = await client
         .from('professores')
-        .select('nome_completo')
+        .select('nome_completo, empresa_id')
         .eq('id', alunoId)
         .maybeSingle()
-      
+
       professorName = professor?.nome_completo || null
+      professorEmpresaId = professor?.empresa_id || null
     }
     
     // Buscar dados do aluno (professores também precisam ter registro aqui para dados de sessões/progresso)
@@ -1156,28 +1158,35 @@ export class DashboardAnalyticsService {
     // Se o registro não existe, criar um registro básico
     if (!alunoFinal) {
       console.log(`[DashboardAnalytics] Registro não encontrado na tabela alunos para ${isProfessor ? 'professor' : 'aluno'}, criando registro...`)
-      
+
       if (!userEmail) {
         throw new Error('Email do usuário é necessário para criar o registro')
       }
 
+      // Obter empresa_id do professor ou do metadata do usuário
+      const empresaId = professorEmpresaId || (authUser.user.user_metadata?.empresa_id as string) || null
+      if (!empresaId) {
+        throw new Error('Empresa do usuário não encontrada. Não é possível criar o registro de aluno.')
+      }
+
       // Usar nome do professor se disponível, senão usar metadata
-      const fullName = professorName || 
-                       authUser.user.user_metadata?.full_name || 
-                       authUser.user.user_metadata?.name || 
-                       userEmail.split('@')[0] || 
+      const fullName = professorName ||
+                       authUser.user.user_metadata?.full_name ||
+                       authUser.user.user_metadata?.name ||
+                       userEmail.split('@')[0] ||
                        (isProfessor ? 'Professor' : 'Aluno')
 
       // Tentar inserir com o cliente normal primeiro (pode funcionar se RLS permitir)
       let insertClient = client
       let insertError = null
-      
+
       const { error: normalInsertError } = await client
         .from('alunos')
         .insert({
           id: alunoId,
           email: userEmail,
           nome_completo: fullName,
+          empresa_id: empresaId,
         })
 
       if (normalInsertError) {
@@ -1190,8 +1199,9 @@ export class DashboardAnalyticsService {
             id: alunoId,
             email: userEmail,
             nome_completo: fullName,
+            empresa_id: empresaId,
           })
-        
+
         if (adminInsertError) {
           insertError = adminInsertError
         }
@@ -1503,36 +1513,15 @@ export class DashboardAnalyticsService {
     // Buscar flashcards revisados diretamente da tabela progresso_flashcards
     // Cada registro nesta tabela representa um flashcard que foi revisado pelo aluno
     // (mesmo que tenha sido revisado múltiplas vezes, cada flashcard_id único conta como 1)
-    // `ultima_revisao` pode não existir; fazemos fallback sem filtro por período.
-    let progressosFlashcards: Array<{ flashcard_id: string }> | null = null
-
-    const attempt = await client
+    const { data: progressosFlashcards, error: queryError } = await client
       .from('progresso_flashcards')
-      .select('flashcard_id, ultima_revisao')
+      .select('flashcard_id')
       .eq('aluno_id', alunoId)
-      .gte('ultima_revisao', inicioPeriodo.toISOString())
+      .gte('updated_at', inicioPeriodo.toISOString())
 
-    if (attempt.error) {
-      const msg = attempt.error.message || ''
-      const missingUltimaRevisao = msg.includes('ultima_revisao') && msg.toLowerCase().includes('does not exist')
-      if (!missingUltimaRevisao) {
-        console.error('[dashboard-analytics] Erro ao buscar flashcards revisados:', attempt.error)
-        return 0
-      }
-
-      const fallback = await client
-        .from('progresso_flashcards')
-        .select('flashcard_id')
-        .eq('aluno_id', alunoId)
-
-      if (fallback.error) {
-        console.error('[dashboard-analytics] Erro ao buscar flashcards revisados:', fallback.error)
-        return 0
-      }
-
-      progressosFlashcards = (fallback.data ?? []) as Array<{ flashcard_id: string }>
-    } else {
-      progressosFlashcards = ((attempt.data ?? []) as Array<{ flashcard_id: string }>) ?? []
+    if (queryError) {
+      console.error('[dashboard-analytics] Erro ao buscar flashcards revisados:', queryError)
+      return 0
     }
 
     if (!progressosFlashcards || progressosFlashcards.length === 0) {
