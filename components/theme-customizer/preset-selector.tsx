@@ -1,6 +1,6 @@
 "use client";
 
-import { DEFAULT_THEME, THEMES } from "@/lib/themes";
+import { THEMES } from "@/lib/themes";
 import { useThemeConfig } from "@/components/active-theme";
 import {
   Select,
@@ -14,36 +14,37 @@ import { Label } from "@/components/ui/label";
 export function PresetSelector() {
   const { theme, setTheme } = useThemeConfig();
 
-  setTheme({
-    ...theme,
-    ...DEFAULT_THEME,
-    preset: value as any // Using any here temporarily if types don't align perfectly, but ideally should be typed matches. Or better:
-  } as any);
-};
+  const handlePreset = (value: string) => {
+    setTheme({
+      ...theme,
+      preset: value as any // eslint-disable-line @typescript-eslint/no-explicit-any
+    });
+  };
 
-return (
-  <div className="flex flex-col gap-4">
-    <Label>Theme preset:</Label>
-    <Select value={theme.preset} onValueChange={(value) => handlePreset(value)}>
-      <SelectTrigger className="w-full">
-        <SelectValue placeholder="Select a theme" />
-      </SelectTrigger>
-      <SelectContent align="end">
-        {THEMES.map((theme) => (
-          <SelectItem key={theme.name} value={theme.value}>
-            <div className="flex shrink-0 gap-1">
-              {theme.colors.map((color, key) => (
-                <span
-                  key={key}
-                  className="size-2 rounded-full"
-                  style={{ backgroundColor: color }}></span>
-              ))}
-            </div>
-            {theme.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-);
+  return (
+    <div className="flex flex-col gap-4">
+      <Label>Theme preset:</Label>
+      <Select value={theme.preset} onValueChange={(value) => handlePreset(value)}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select a theme" />
+        </SelectTrigger>
+        <SelectContent align="end">
+          {THEMES.map((theme) => (
+            <SelectItem key={theme.name} value={theme.value}>
+              <div className="flex shrink-0 gap-1">
+                {theme.colors.map((color, key) => (
+                  <span
+                    key={key}
+                    className="size-2 rounded-full"
+                    style={{ backgroundColor: color }}></span>
+                ))}
+              </div>
+              {theme.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 }
+
