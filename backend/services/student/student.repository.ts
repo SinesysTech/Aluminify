@@ -33,6 +33,35 @@ const TABLE = "alunos";
 const COURSE_LINK_TABLE = "alunos_cursos";
 const COURSES_TABLE = "cursos";
 
+function formatSupabaseError(error: unknown): string {
+  if (!error) return "Erro desconhecido (vazio)";
+  if (error instanceof Error) return error.message || "Erro sem mensagem";
+  if (typeof error === "string") return error;
+  if (typeof error === "object") {
+    const e = error as Record<string, unknown>;
+    const code = e.code ? `[${String(e.code)}]` : "";
+    const message =
+      typeof e.message === "string" && e.message.trim()
+        ? e.message
+        : typeof e.error === "string" && e.error.trim()
+          ? e.error
+          : "";
+    const details = e.details ? ` Detalhes: ${String(e.details)}` : "";
+    const hint = e.hint ? ` Hint: ${String(e.hint)}` : "";
+
+    if (code || message || details || hint) {
+      return `${[code, message].filter(Boolean).join(" ")}${details}${hint}`.trim();
+    }
+
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return "Erro desconhecido (objeto não serializável)";
+    }
+  }
+  return String(error);
+}
+
 // Use generated Database types instead of manual definitions
 type StudentRow = Database["public"]["Tables"]["alunos"]["Row"];
 type StudentInsert = Database["public"]["Tables"]["alunos"]["Insert"];
@@ -105,9 +134,10 @@ export class StudentRepositoryImpl implements StudentRepository {
     const from = (page - 1) * perPage;
     const to = from + perPage - 1;
 
+    // Para count, selecione apenas `id` para evitar falhas por permissões em outras colunas.
     let queryBuilder = this.client
       .from(TABLE)
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
       .is("deleted_at", null);
 
     if (params?.query) {
@@ -121,10 +151,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     const { count, error: countError } = await queryBuilder;
 
     if (countError) {
-      console.error("Failed to count students. Error object:", countError);
-      throw new Error(
-        `Failed to count students: ${countError.message || "Unknown error"} (Code: ${countError.code}, Details: ${countError.details})`,
-      );
+      throw new Error(`Failed to count students: ${formatSupabaseError(countError)}`);
     }
 
     const total = count ?? 0;
@@ -148,7 +175,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     const { data, error } = await dataQuery;
 
     if (error) {
-      throw new Error(`Failed to list students: ${error.message}`);
+      throw new Error(`Failed to list students: ${formatSupabaseError(error)}`);
     }
 
     const students = await this.attachCourses(data ?? []);
