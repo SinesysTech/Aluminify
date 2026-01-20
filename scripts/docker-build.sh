@@ -49,16 +49,48 @@ fi
 # Build for multiple platforms if buildx is available
 if docker buildx version &> /dev/null; then
     echo -e "${GREEN}Using Docker Buildx for multi-platform build...${NC}"
+    
+    # Load environment variables from .env.local if it exists
+    BUILD_ARGS=""
+    if [ -f .env.local ]; then
+        echo -e "${GREEN}Loading environment variables from .env.local...${NC}"
+        # Export required variables as build args
+        while IFS='=' read -r key value; do
+            # Skip comments and empty lines
+            [[ $key =~ ^#.*$ ]] && continue
+            [[ -z $key ]] && continue
+            # Only pass NEXT_PUBLIC_* and UPSTASH_* variables
+            if [[ $key =~ ^NEXT_PUBLIC_ ]] || [[ $key =~ ^UPSTASH_ ]]; then
+                BUILD_ARGS="$BUILD_ARGS --build-arg $key=$value"
+            fi
+        done < .env.local
+    fi
+    
     docker buildx build \
         --platform "${PLATFORMS}" \
+        $BUILD_ARGS \
         -t "${FULL_IMAGE_NAME}" \
         -t "${IMAGE_NAME}:latest" \
         --load \
         .
 else
     echo -e "${YELLOW}Docker Buildx not available. Building for current platform only...${NC}"
+    
+    # Load environment variables from .env.local if it exists
+    BUILD_ARGS=""
+    if [ -f .env.local ]; then
+        echo -e "${GREEN}Loading environment variables from .env.local...${NC}"
+        while IFS='=' read -r key value; do
+            [[ $key =~ ^#.*$ ]] && continue
+            [[ -z $key ]] && continue
+            if [[ $key =~ ^NEXT_PUBLIC_ ]] || [[ $key =~ ^UPSTASH_ ]]; then
+                BUILD_ARGS="$BUILD_ARGS --build-arg $key=$value"
+            fi
+        done < .env.local
+    fi
+    
     docker build \
-        --build-arg DOCKER_BUILD=true \
+        $BUILD_ARGS \
         -t "${FULL_IMAGE_NAME}" \
         -t "${IMAGE_NAME}:latest" \
         .
