@@ -140,7 +140,7 @@ export default function EmpresaProfessoresPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Senha TemporÃ¡ria</Label>
+                    <Label htmlFor="password">Senha Temporária</Label>
                     <Input
                       id="password"
                       type="password"

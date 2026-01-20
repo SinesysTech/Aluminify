@@ -11,7 +11,7 @@ interface ProfessorMetricsProps {
 }
 
 export function ProfessorMetrics({ summary }: ProfessorMetricsProps) {
-  // Formatar prÃ³ximo agendamento
+  // Formatar próximo agendamento
   const formatNextAppointment = () => {
     if (!summary.proximoAgendamento) return 'Sem agendamentos'
     try {
@@ -32,38 +32,38 @@ export function ProfessorMetrics({ summary }: ProfessorMetricsProps) {
         subtext="total de alunos"
         icon={Users}
         tooltip={[
-          'NÃºmero de alunos Ãºnicos que vocÃª atendeu em agendamentos.',
+          'Número de alunos únicos que você atendeu em agendamentos.',
           'Inclui todos os alunos com pelo menos um agendamento realizado.',
         ]}
       />
       <MetricCard
         label="Agendamentos Pendentes"
         value={summary.agendamentosPendentes}
-        subtext="prÃ³ximos"
+        subtext="próximos"
         icon={Calendar}
         tooltip={[
-          'Agendamentos futuros que ainda nÃ£o foram realizados.',
+          'Agendamentos futuros que ainda não foram realizados.',
           'Inclui agendamentos pendentes e confirmados.',
         ]}
       />
       <MetricCard
-        label="Realizados no MÃªs"
+        label="Realizados no Mês"
         value={summary.agendamentosRealizadosMes}
         subtext="agendamentos"
         icon={CheckCircle2}
         tooltip={[
-          'Agendamentos concluÃ­dos neste mÃªs.',
+          'Agendamentos concluídos neste mês.',
           'Conta apenas agendamentos marcados como realizados.',
         ]}
       />
       <MetricCard
-        label="PrÃ³ximo Agendamento"
+        label="Próximo Agendamento"
         value={summary.proximoAgendamento ? formatNextAppointment() : '-'}
         subtext={summary.proximoAgendamento ? 'agendado' : 'nenhum'}
         icon={Clock}
         tooltip={[
-          'Quando serÃ¡ seu prÃ³ximo agendamento.',
-          'Mostra o tempo restante atÃ© o prÃ³ximo atendimento.',
+          'Quando será seu próximo agendamento.',
+          'Mostra o tempo restante até o próximo atendimento.',
         ]}
       />
     </div>

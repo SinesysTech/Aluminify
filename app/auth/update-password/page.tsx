@@ -9,7 +9,7 @@ export default function Page() {
         <div className="flex justify-center">
           <TenantLogo
             logoType="login"
-            fallbackText="Sistema de GestÃ£o"
+            fallbackText="Sistema de Gestão"
             width={160}
             height={50}
           />

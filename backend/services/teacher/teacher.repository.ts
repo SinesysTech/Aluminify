@@ -109,6 +109,7 @@ function mapRow(row: TeacherRow): Teacher {
     email: row.email,
     cpf: row.cpf,
     phone: row.telefone,
+    pixKey: row.chave_pix,
     biography: row.biografia,
     photoUrl: row.foto_url,
     specialty: row.especialidade,
@@ -227,6 +228,7 @@ export class TeacherRepositoryImpl implements TeacherRepository {
       is_admin: payload.isAdmin ?? false,
       cpf: payload.cpf ?? null,
       telefone: payload.phone ?? null,
+      chave_pix: payload.pixKey ?? null,
       biografia: payload.biography ?? null,
       foto_url: payload.photoUrl ?? null,
       especialidade: payload.specialty ?? null,
@@ -289,6 +291,10 @@ export class TeacherRepositoryImpl implements TeacherRepository {
 
     if (payload.phone !== undefined) {
       updateData.telefone = payload.phone;
+    }
+
+    if (payload.pixKey !== undefined) {
+      updateData.chave_pix = payload.pixKey;
     }
 
     if (payload.biography !== undefined) {

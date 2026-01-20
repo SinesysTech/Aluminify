@@ -391,7 +391,7 @@ export function BrandCustomizationPanel({
                         </div>
                       ) : (
                         <div className="text-sm text-muted-foreground">
-                          Nenhuma paleta personalizada ativa. Usando cores padrÃ£o do sistema.
+                          Nenhuma paleta personalizada ativa. Usando cores padrão do sistema.
                         </div>
                       )}
                     </div>
@@ -415,7 +415,7 @@ export function BrandCustomizationPanel({
                         </div>
                       ) : (
                         <div className="text-sm text-muted-foreground">
-                          Nenhum esquema de fonte personalizado ativo. Usando fontes padrÃ£o do sistema.
+                          Nenhum esquema de fonte personalizado ativo. Usando fontes padrão do sistema.
                         </div>
                       )}
                     </div>

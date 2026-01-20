@@ -7,7 +7,7 @@ interface ProfessorHeaderProps {
 }
 
 export function ProfessorHeader({ professorNome }: ProfessorHeaderProps) {
-  // Determinar saudaÃ§Ã£o baseada no horÃ¡rio
+  // Determinar saudação baseada no horário
   const getGreeting = () => {
     const hour = new Date().getHours()
     if (hour < 12) return 'Bom dia'

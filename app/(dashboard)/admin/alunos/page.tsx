@@ -11,7 +11,7 @@ export default async function AlunosPage({ searchParams }: { searchParams: { pag
   const page = Number(searchParams.page) || 1
   const query = searchParams.query || ''
 
-  // Usar cliente com contexto do usuÃ¡rio para respeitar RLS
+  // Usar cliente com contexto do usuário para respeitar RLS
   const supabase = await createClient()
   const studentService = createStudentService(supabase)
   const courseService = createCourseService(supabase)

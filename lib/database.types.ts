@@ -330,6 +330,7 @@ export type Database = {
           cpf: string | null
           created_at: string
           data_nascimento: string | null
+          deleted_at: string | null
           email: string
           empresa_id: string
           endereco: string | null
@@ -348,6 +349,7 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           data_nascimento?: string | null
+          deleted_at?: string | null
           email: string
           empresa_id: string
           endereco?: string | null
@@ -366,6 +368,7 @@ export type Database = {
           cpf?: string | null
           created_at?: string
           data_nascimento?: string | null
+          deleted_at?: string | null
           email?: string
           empresa_id?: string
           endereco?: string | null
@@ -930,7 +933,6 @@ export type Database = {
           periodos_ferias: Json | null
           prioridade_minima: number
           updated_at: string | null
-          velocidade_reproducao: number
         }
         Insert: {
           aluno_id: string
@@ -951,7 +953,6 @@ export type Database = {
           periodos_ferias?: Json | null
           prioridade_minima?: number
           updated_at?: string | null
-          velocidade_reproducao?: number
         }
         Update: {
           aluno_id?: string
@@ -972,7 +973,6 @@ export type Database = {
           periodos_ferias?: Json | null
           prioridade_minima?: number
           updated_at?: string | null
-          velocidade_reproducao?: number
         }
         Relationships: [
           {
@@ -1507,6 +1507,7 @@ export type Database = {
       professores: {
         Row: {
           biografia: string | null
+          chave_pix: string | null
           cpf: string | null
           created_at: string
           email: string
@@ -1521,6 +1522,7 @@ export type Database = {
         }
         Insert: {
           biografia?: string | null
+          chave_pix?: string | null
           cpf?: string | null
           created_at?: string
           email: string
@@ -1535,6 +1537,7 @@ export type Database = {
         }
         Update: {
           biografia?: string | null
+          chave_pix?: string | null
           cpf?: string | null
           created_at?: string
           email?: string
@@ -2070,27 +2073,18 @@ export type Database = {
       }
       get_professor_disciplinas: { Args: never; Returns: string[] }
       get_user_empresa_id: { Args: never; Returns: string }
-      importar_cronograma_aulas:
-        | {
-            Args: {
-              p_conteudo: Json
-              p_curso_id: string
-              p_disciplina_nome: string
-              p_frente_nome: string
-            }
-            Returns: {
-              aulas_importadas: number
-              modulos_importados: number
-            }[]
-          }
-        | {
-            Args: {
-              p_conteudo: Json
-              p_disciplina_nome: string
-              p_frente_nome: string
-            }
-            Returns: undefined
-          }
+      importar_cronograma_aulas: {
+        Args: {
+          p_conteudo: Json
+          p_curso_id: string
+          p_disciplina_nome: string
+          p_frente_nome: string
+        }
+        Returns: {
+          aulas_importadas: number
+          modulos_importados: number
+        }[]
+      }
       is_aluno: { Args: never; Returns: boolean }
       is_empresa_admin:
         | { Args: never; Returns: boolean }

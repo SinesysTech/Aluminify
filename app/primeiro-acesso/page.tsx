@@ -18,9 +18,9 @@ export default async function PrimeiroAcessoPage() {
         <CardHeader>
           <CardTitle>Defina sua nova senha</CardTitle>
           <CardDescription>
-            Por seguranÃ§a, vocÃª precisa criar uma nova senha antes de acessar sua Ã¡rea.
+            Por segurança, você precisa criar uma nova senha antes de acessar sua área.
             <br />
-            <strong>Importante:</strong> A nova senha deve ser diferente da senha temporÃ¡ria que vocÃª recebeu.
+            <strong>Importante:</strong> A nova senha deve ser diferente da senha temporária que você recebeu.
           </CardDescription>
         </CardHeader>
         <CardContent>

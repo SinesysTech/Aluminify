@@ -40,7 +40,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2, Trash2, Plus, Info, FileUp } from 'lucide-react'
+import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2, Trash2, Plus, Info, FileUp, Download } from 'lucide-react'
 import Papa from 'papaparse'
 import { useRouter } from 'next/navigation'
 import AddActivityModal from '../../../components/conteudos/add-activity-modal'
@@ -728,6 +728,132 @@ export default function ConteudosClientPage() {
       }
       setArquivo(file)
       setError(null)
+    }
+  }
+
+  const downloadTemplate = async () => {
+    try {
+      const ExcelJS = await loadExcelJS()
+      const workbook = new ExcelJS.Workbook()
+      workbook.creator = 'Aluminify'
+      workbook.created = new Date()
+
+      const worksheet = workbook.addWorksheet('Conteudos', {
+        properties: { defaultColWidth: 25 },
+      })
+
+      // Definir headers
+      worksheet.columns = [
+        { header: 'Modulo', key: 'modulo', width: 30 },
+        { header: 'Aula', key: 'aula', width: 40 },
+        { header: 'Tempo', key: 'tempo', width: 15 },
+        { header: 'Prioridade', key: 'prioridade', width: 15 },
+        { header: 'Importancia', key: 'importancia', width: 15 },
+      ]
+
+      // Estilizar header
+      const headerRow = worksheet.getRow(1)
+      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } }
+      headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FF6B21A8' }, // violet-800
+      }
+      headerRow.alignment = { horizontal: 'center', vertical: 'middle' }
+      headerRow.height = 24
+
+      // Adicionar linhas de exemplo
+      const exemplos = [
+        { modulo: 'Modulo 1 - Introducao', aula: 'Aula 1 - Conceitos Basicos', tempo: '30', prioridade: '5', importancia: 'Alta' },
+        { modulo: 'Modulo 1 - Introducao', aula: 'Aula 2 - Fundamentos', tempo: '45', prioridade: '4', importancia: 'Alta' },
+        { modulo: 'Modulo 2 - Aprofundamento', aula: 'Aula 1 - Teoria Avancada', tempo: '60', prioridade: '3', importancia: 'Media' },
+        { modulo: 'Modulo 2 - Aprofundamento', aula: 'Aula 2 - Pratica', tempo: '90', prioridade: '3', importancia: 'Media' },
+        { modulo: 'Modulo 3 - Exercicios', aula: 'Aula 1 - Revisao', tempo: '45', prioridade: '2', importancia: 'Baixa' },
+      ]
+
+      exemplos.forEach((exemplo) => {
+        const row = worksheet.addRow(exemplo)
+        row.alignment = { vertical: 'middle' }
+      })
+
+      // Adicionar validacao para Importancia (dropdown)
+      worksheet.dataValidations.add('E2:E1000', {
+        type: 'list',
+        allowBlank: true,
+        formulae: ['"Alta,Media,Baixa,Base"'],
+        showErrorMessage: true,
+        errorTitle: 'Valor invalido',
+        error: 'Selecione: Alta, Media, Baixa ou Base',
+      })
+
+      // Adicionar validacao para Prioridade (1-5)
+      worksheet.dataValidations.add('D2:D1000', {
+        type: 'list',
+        allowBlank: true,
+        formulae: ['"0,1,2,3,4,5"'],
+        showErrorMessage: true,
+        errorTitle: 'Valor invalido',
+        error: 'Selecione um valor de 0 a 5',
+      })
+
+      // Adicionar bordas nas celulas
+      for (let i = 1; i <= exemplos.length + 1; i++) {
+        const row = worksheet.getRow(i)
+        row.eachCell({ includeEmpty: true }, (cell) => {
+          cell.border = {
+            top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+            right: { style: 'thin', color: { argb: 'FFD1D5DB' } },
+          }
+        })
+      }
+
+      // Adicionar planilha de instrucoes
+      const instrucoes = workbook.addWorksheet('Instrucoes')
+      instrucoes.columns = [{ header: 'Instrucoes de Preenchimento', key: 'instrucao', width: 80 }]
+
+      const headerInstrucoes = instrucoes.getRow(1)
+      headerInstrucoes.font = { bold: true, size: 14 }
+      headerInstrucoes.height = 24
+
+      const textoInstrucoes = [
+        '',
+        'COMO PREENCHER A PLANILHA:',
+        '',
+        '1. MODULO (obrigatorio): Nome do modulo. Aulas com mesmo nome de modulo serao agrupadas.',
+        '2. AULA (obrigatorio): Nome da aula dentro do modulo.',
+        '3. TEMPO (opcional): Duracao em minutos. Ex: 30, 45, 60.',
+        '4. PRIORIDADE (opcional): Nivel de prioridade de 0 a 5 (5 = mais importante).',
+        '5. IMPORTANCIA (opcional): Classificacao do conteudo - Alta, Media, Baixa ou Base.',
+        '',
+        'DICAS:',
+        '- Mantenha os nomes dos modulos consistentes para agrupar as aulas corretamente.',
+        '- Use numeros no inicio para ordenar (ex: "Modulo 1 - Nome", "Modulo 2 - Nome").',
+        '- A ordem das linhas determina a ordem das aulas.',
+        '- Remova as linhas de exemplo antes de importar.',
+      ]
+
+      textoInstrucoes.forEach((texto) => {
+        instrucoes.addRow({ instrucao: texto })
+      })
+
+      // Gerar e baixar arquivo
+      const buffer = await workbook.xlsx.writeBuffer()
+      const blob = new Blob([buffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'modelo_importacao_conteudos.xlsx'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Erro ao gerar template:', err)
+      setError('Erro ao gerar o modelo de planilha')
     }
   }
 
@@ -1921,6 +2047,15 @@ export default function ConteudosClientPage() {
                     <li><span className="font-semibold text-violet-700 dark:text-[#A78BFA]">Prioridade</span> - valor de 0 a 5 (opcional)</li>
                     <li><span className="font-semibold text-violet-700 dark:text-[#A78BFA]">Importancia</span> - Alta, Media, Baixa ou Base (opcional)</li>
                   </ul>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={downloadTemplate}
+                    className="mt-3 border-violet-400 text-violet-700 hover:bg-violet-200 hover:text-violet-800 dark:border-violet-700 dark:text-violet-300 dark:hover:bg-violet-900/50 dark:hover:text-violet-200"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Baixar modelo de planilha
+                  </Button>
                 </AlertDescription>
               </Alert>
             </div>

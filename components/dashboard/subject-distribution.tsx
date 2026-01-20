@@ -62,7 +62,7 @@ export function SubjectDistribution({
     }
   }, [])
 
-  // Resetar seleÃ§Ãµes dependentes quando subir no nÃ­vel
+  // Resetar seleções dependentes quando subir no nível
   useEffect(() => {
     if (groupBy === 'curso') {
       setSelectedDisciplineId(null)
@@ -84,7 +84,7 @@ export function SubjectDistribution({
     }
   }, [groupBy])
 
-  // Garantir disciplina selecionada quando necessÃ¡rio (groupBy=frente)
+  // Garantir disciplina selecionada quando necessário (groupBy=frente)
   useEffect(() => {
     let cancelled = false
     async function ensureDiscipline() {
@@ -92,8 +92,8 @@ export function SubjectDistribution({
       if (selectedDisciplineId) return
       setIsLoading(true)
       try {
-        // Importante: opÃ§Ãµes de disciplina vÃªm da estrutura (performance), nÃ£o do tempo (distribuiÃ§Ã£o),
-        // para nÃ£o ficar vazio quando ainda nÃ£o hÃ¡ sessÃµes suficientes.
+        // Importante: opções de disciplina vêm da estrutura (performance), não do tempo (distribuição),
+        // para não ficar vazio quando ainda não há sessões suficientes.
         const res = await fetchPerformance({
           groupBy: 'disciplina',
           scope: 'curso',
@@ -114,7 +114,7 @@ export function SubjectDistribution({
     }
   }, [groupBy, selectedDisciplineId, selectedCourseId, period])
 
-  // Garantir frente selecionada quando necessÃ¡rio (groupBy=modulo)
+  // Garantir frente selecionada quando necessário (groupBy=modulo)
   useEffect(() => {
     let cancelled = false
     async function ensureFront() {
@@ -123,7 +123,7 @@ export function SubjectDistribution({
       if (selectedFrontId) return
       setIsLoading(true)
       try {
-        // OpÃ§Ãµes de frente tambÃ©m vÃªm da estrutura (performance), para evitar dropdown vazio.
+        // Opções de frente também vêm da estrutura (performance), para evitar dropdown vazio.
         const res = await fetchPerformance({
           groupBy: 'frente',
           scope: 'disciplina',
@@ -148,7 +148,7 @@ export function SubjectDistribution({
   useEffect(() => {
     let cancelled = false
     async function load() {
-      // NÃ£o disparar fetch enquanto faltar escopo obrigatÃ³rio
+      // Não disparar fetch enquanto faltar escopo obrigatório
       if ((groupBy === 'frente' && !scopeParams.scopeId) || (groupBy === 'modulo' && !scopeParams.scopeId)) {
         return
       }
@@ -245,10 +245,10 @@ export function SubjectDistribution({
           <ToggleGroupItem value="curso" variant="segmented" size="sm">Curso</ToggleGroupItem>
           <ToggleGroupItem value="disciplina" variant="segmented" size="sm">Disciplina</ToggleGroupItem>
           <ToggleGroupItem value="frente" variant="segmented" size="sm">Frente</ToggleGroupItem>
-          <ToggleGroupItem value="modulo" variant="segmented" size="sm">MÃ³dulo</ToggleGroupItem>
+          <ToggleGroupItem value="modulo" variant="segmented" size="sm">Módulo</ToggleGroupItem>
         </ToggleGroup>
 
-        {/* Filtros dependentes (mantÃ©m UI simples: sÃ³ aparece quando necessÃ¡rio) */}
+        {/* Filtros dependentes (mantém UI simples: só aparece quando necessário) */}
         <div className="flex flex-wrap gap-2 mb-2">
           {groupBy !== 'curso' && courses.length > 1 && (
             <Select
@@ -275,8 +275,8 @@ export function SubjectDistribution({
                 <SelectValue placeholder="Disciplina" />
               </SelectTrigger>
               <SelectContent>
-                {/* opÃ§Ãµes de disciplina sÃ£o obtidas via fetch quando necessÃ¡rio */}
-                {/** Reaproveitamos a chamada em ensureDiscipline; se ainda nÃ£o hÃ¡, a UI fica carregando */}
+                {/* opções de disciplina são obtidas via fetch quando necessário */}
+                {/** Reaproveitamos a chamada em ensureDiscipline; se ainda não há, a UI fica carregando */}
                 {disciplineOptions.map((i) => (
                   <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>
                 ))}
@@ -302,7 +302,7 @@ export function SubjectDistribution({
         </div>
 
         {isLoading && (
-          <p className="text-xs text-muted-foreground mb-2">Atualizandoâ€¦</p>
+          <p className="text-xs text-muted-foreground mb-2">Atualizando…</p>
         )}
 
         {renderItems.length === 0 ? (

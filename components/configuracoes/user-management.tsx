@@ -173,7 +173,7 @@ export function UserManagement({ empresaId }: UserManagementProps) {
 
       toast({
         title: 'Sucesso',
-        description: currentStatus ? 'PrivilÃ©gios de admin removidos' : 'Professor promovido a admin',
+        description: currentStatus ? 'Privilégios de admin removidos' : 'Professor promovido a admin',
       })
       fetchProfessores()
     } catch (error) {
@@ -277,7 +277,7 @@ export function UserManagement({ empresaId }: UserManagementProps) {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="prof-password">Senha TemporÃ¡ria</Label>
+                    <Label htmlFor="prof-password">Senha Temporária</Label>
                     <Input
                       id="prof-password"
                       type="password"
@@ -295,7 +295,7 @@ export function UserManagement({ empresaId }: UserManagementProps) {
                         setProfessorForm({ ...professorForm, isAdmin: checked === true })
                       }
                     />
-                    <Label htmlFor="prof-isAdmin">Ã‰ administrador?</Label>
+                    <Label htmlFor="prof-isAdmin">É administrador?</Label>
                   </div>
                   <Button onClick={handleCreateProfessor} className="w-full">
                     Criar Professor
@@ -404,8 +404,8 @@ export function UserManagement({ empresaId }: UserManagementProps) {
         <TabsContent value="admins" className="space-y-4 mt-4">
           <div className="bg-muted/50 p-4 rounded-lg mb-4">
             <p className="text-sm text-muted-foreground">
-              Administradores sÃ£o professores com privilÃ©gios elevados para gerenciar a empresa.
-              Para adicionar um novo administrador, vÃ¡ atÃ© a aba de Professores e marque a opÃ§Ã£o &quot;Ã‰ administrador?&quot;
+              Administradores são professores com privilégios elevados para gerenciar a empresa.
+              Para adicionar um novo administrador, vá até a aba de Professores e marque a opção &quot;É administrador?&quot;
               ao criar ou editar um professor.
             </p>
           </div>

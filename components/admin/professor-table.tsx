@@ -74,6 +74,7 @@ export type Professor = {
   email: string
   cpf: string | null
   phone: string | null
+  pixKey: string | null
   biography: string | null
   photoUrl: string | null
   specialty: string | null
@@ -94,6 +95,7 @@ const professorSchema = z.object({
     .optional()
     .nullable()
     .refine((v) => !v || v.trim() === '' || isValidBRPhone(v), 'Telefone inválido'),
+  pixKey: z.string().optional().nullable(),
   biography: z.string().optional().nullable(),
   photoUrl: z.string().url('URL inválida').optional().nullable().or(z.literal('')),
   specialty: z.string().optional().nullable(),
@@ -130,6 +132,7 @@ export function ProfessorTable() {
       email: '',
       cpf: null,
       phone: null,
+      pixKey: null,
       biography: null,
       photoUrl: null,
       specialty: null,
@@ -143,6 +146,7 @@ export function ProfessorTable() {
       email: '',
       cpf: null,
       phone: null,
+      pixKey: null,
       biography: null,
       photoUrl: null,
       specialty: null,
@@ -193,6 +197,7 @@ export function ProfessorTable() {
         ...values,
         cpf: values.cpf || undefined,
         phone: values.phone || undefined,
+        pixKey: values.pixKey || undefined,
         biography: values.biography || undefined,
         photoUrl: values.photoUrl || undefined,
         specialty: values.specialty || undefined,
@@ -231,6 +236,7 @@ export function ProfessorTable() {
       email: professor.email,
       cpf: professor.cpf,
       phone: professor.phone,
+      pixKey: professor.pixKey,
       biography: professor.biography,
       photoUrl: professor.photoUrl,
       specialty: professor.specialty,
@@ -250,6 +256,7 @@ export function ProfessorTable() {
         email?: string
         cpf?: string | null
         phone?: string | null
+        pixKey?: string | null
         biography?: string | null
         photoUrl?: string | null
         specialty?: string | null
@@ -266,6 +273,7 @@ export function ProfessorTable() {
       // Campos opcionais
       updatePayload.cpf = values.cpf || null
       updatePayload.phone = values.phone || null
+      updatePayload.pixKey = values.pixKey || null
       updatePayload.biography = values.biography || null
       updatePayload.photoUrl = values.photoUrl || null
       updatePayload.specialty = values.specialty || null
@@ -480,7 +488,7 @@ export function ProfessorTable() {
                         )}
                       />
                     </div>
-                    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                       <FormField
                         control={createForm.control}
                         name="cpf"
@@ -515,6 +523,25 @@ export function ProfessorTable() {
                                 {...field}
                                 value={field.value || ''}
                                 onChange={(e) => field.onChange(formatBRPhone(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <FormField
+                        control={createForm.control}
+                        name="pixKey"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Chave PIX</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="CPF, email, telefone ou chave aleatória"
+                                {...field}
+                                value={field.value || ''}
                               />
                             </FormControl>
                             <FormMessage />
@@ -687,6 +714,12 @@ export function ProfessorTable() {
                           <span>{professor.cpf}</span>
                         </div>
                       )}
+                      {professor.pixKey && (
+                        <div>
+                          <span className="text-muted-foreground">Chave PIX: </span>
+                          <span>{professor.pixKey}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -819,7 +852,7 @@ export function ProfessorTable() {
                     )}
                   />
                 </div>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <FormField
                     control={editForm.control}
                     name="cpf"
@@ -854,6 +887,25 @@ export function ProfessorTable() {
                             {...field}
                             value={field.value || ''}
                             onChange={(e) => field.onChange(formatBRPhone(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <FormField
+                    control={editForm.control}
+                    name="pixKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Chave PIX</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="CPF, email, telefone ou chave aleatória"
+                            {...field}
+                            value={field.value || ''}
                           />
                         </FormControl>
                         <FormMessage />

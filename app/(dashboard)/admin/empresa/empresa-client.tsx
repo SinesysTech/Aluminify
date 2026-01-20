@@ -41,10 +41,10 @@ export default function EmpresaClientPage() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        throw new Error('SessÃ£o expirada. FaÃ§a login novamente.');
+        throw new Error('Sessão expirada. Faça login novamente.');
       }
 
-      // Buscar empresa do usuÃ¡rio logado
+      // Buscar empresa do usuário logado
       const profileResponse = await fetch('/api/user/profile', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -52,7 +52,7 @@ export default function EmpresaClientPage() {
       });
 
       if (!profileResponse.ok) {
-        throw new Error('Erro ao buscar dados do usuÃ¡rio');
+        throw new Error('Erro ao buscar dados do usuário');
       }
       const userData = await profileResponse.json();
 
@@ -105,7 +105,7 @@ export default function EmpresaClientPage() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        throw new Error('SessÃ£o expirada. FaÃ§a login novamente.');
+        throw new Error('Sessão expirada. Faça login novamente.');
       }
 
       // Preparar payload - normalizar CNPJ antes de enviar
@@ -119,13 +119,13 @@ export default function EmpresaClientPage() {
       if (formData.cnpj && formData.cnpj.trim()) {
         const cnpjClean = formData.cnpj.replace(/\D/g, '');
         if (cnpjClean.length === 14) {
-          // Verificar se todos os dÃ­gitos sÃ£o iguais
+          // Verificar se todos os dígitos são iguais
           if (!/^(\d)\1+$/.test(cnpjClean)) {
             payload.cnpj = cnpjClean;
           } else {
             toast({
               title: 'Erro',
-              description: 'CNPJ invÃ¡lido: todos os dÃ­gitos sÃ£o iguais',
+              description: 'CNPJ inválido: todos os dígitos são iguais',
               variant: 'destructive',
             });
             setSaving(false);
@@ -134,7 +134,7 @@ export default function EmpresaClientPage() {
         } else if (cnpjClean.length > 0) {
           toast({
             title: 'Erro',
-            description: 'CNPJ deve ter 14 dÃ­gitos',
+            description: 'CNPJ deve ter 14 dígitos',
             variant: 'destructive',
           });
           setSaving(false);
@@ -187,9 +187,9 @@ export default function EmpresaClientPage() {
       <div className="container mx-auto py-8 max-w-xl">
         <Card>
           <CardHeader>
-            <CardTitle>Empresa nÃ£o encontrada</CardTitle>
+            <CardTitle>Empresa não encontrada</CardTitle>
             <CardDescription>
-              Seu usuÃ¡rio ainda nÃ£o estÃ¡ vinculado a uma empresa. Para continuar, crie sua empresa.
+              Seu usuário ainda não está vinculado a uma empresa. Para continuar, crie sua empresa.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -229,7 +229,7 @@ export default function EmpresaClientPage() {
             id="cnpj"
             value={formData.cnpj}
             onChange={(e) => {
-              // Normalizar para apenas dÃ­gitos e formatar
+              // Normalizar para apenas dígitos e formatar
               const digits = e.target.value.replace(/\D/g, '');
               const formatted = formatCNPJ(digits);
               setFormData({ ...formData, cnpj: formatted });
@@ -273,7 +273,7 @@ export default function EmpresaClientPage() {
 
         <div className="flex justify-end gap-2">
           <Button onClick={handleSave} disabled={saving}>
-            {saving ? 'Salvando...' : 'Salvar AlteraÃ§Ãµes'}
+            {saving ? 'Salvando...' : 'Salvar Alterações'}
           </Button>
         </div>
       </div>

@@ -45,17 +45,17 @@ export default function CompletarCadastroEmpresaPage() {
           return;
         }
 
-        // Tentar obter empresaId de mÃºltiplas fontes
+        // Tentar obter empresaId de múltiplas fontes
         let empresaIdToUse = user?.empresaId;
 
-        // Se nÃ£o tiver empresaId do user context, tentar buscar do metadata ou da tabela professores
+        // Se não tiver empresaId do user context, tentar buscar do metadata ou da tabela professores
         if (!empresaIdToUse) {
           const { data: { user: authUser } } = await supabase.auth.getUser();
 
           // Tentar do metadata primeiro
           empresaIdToUse = authUser?.user_metadata?.empresa_id;
 
-          // Se ainda nÃ£o tiver, buscar da tabela professores
+          // Se ainda não tiver, buscar da tabela professores
           if (!empresaIdToUse && authUser?.id) {
             // Aguardar um pouco para garantir que o registro do professor foi criado
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -75,7 +75,7 @@ export default function CompletarCadastroEmpresaPage() {
         if (!empresaIdToUse) {
           toast({
             title: 'Erro',
-            description: 'VocÃª nÃ£o estÃ¡ vinculado a uma empresa. Entre em contato com o suporte.',
+            description: 'Você não está vinculado a uma empresa. Entre em contato com o suporte.',
             variant: 'destructive',
           });
           router.push('/professor/dashboard');
@@ -102,7 +102,7 @@ export default function CompletarCadastroEmpresaPage() {
 
         const empresaData = await response.json();
 
-        // Verificar se empresa jÃ¡ estÃ¡ completa (se tiver pelo menos um dos campos)
+        // Verificar se empresa já está completa (se tiver pelo menos um dos campos)
         // Campos podem ser null, undefined ou string vazia
         const temCnpj = empresaData.cnpj && empresaData.cnpj.trim() !== '';
         const temEmail = empresaData.emailContato && empresaData.emailContato.trim() !== '';
@@ -110,17 +110,17 @@ export default function CompletarCadastroEmpresaPage() {
         const empresaCompleta = temCnpj || temEmail || temTelefone;
 
         if (empresaCompleta) {
-          // Se empresa jÃ¡ estÃ¡ completa, redirecionar para dashboard
+          // Se empresa já está completa, redirecionar para dashboard
           toast({
-            title: 'InformaÃ§Ã£o',
-            description: 'O cadastro da empresa jÃ¡ estÃ¡ completo.',
+            title: 'Informação',
+            description: 'O cadastro da empresa já está completo.',
           });
           router.push('/empresa/dashboard');
           return;
         }
 
         setEmpresa(empresaData);
-        // Formatar CNPJ se existir, senÃ£o string vazia
+        // Formatar CNPJ se existir, senão string vazia
         const cnpjFormatted = empresaData.cnpj ? formatCNPJ(empresaData.cnpj) : '';
         setFormData({
           nome: empresaData.nome || '',
@@ -146,11 +146,11 @@ export default function CompletarCadastroEmpresaPage() {
   async function handleComplete() {
     if (!empresa) return;
 
-    // ValidaÃ§Ã£o bÃ¡sica
+    // Validação básica
     if (!formData.nome.trim()) {
       toast({
         title: 'Erro',
-        description: 'O nome da empresa Ã© obrigatÃ³rio',
+        description: 'O nome da empresa é obrigatório',
         variant: 'destructive',
       });
       return;
@@ -162,35 +162,35 @@ export default function CompletarCadastroEmpresaPage() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        throw new Error('SessÃ£o expirada. FaÃ§a login novamente.');
+        throw new Error('Sessão expirada. Faça login novamente.');
       }
 
-      // Preparar dados para atualizaÃ§Ã£o
-      // CNPJ Ã© opcional - sÃ³ enviar se preenchido e vÃ¡lido
-      // Normalizar CNPJ removendo mÃ¡scara antes de enviar
+      // Preparar dados para atualização
+      // CNPJ é opcional - só enviar se preenchido e válido
+      // Normalizar CNPJ removendo máscara antes de enviar
       let cnpjToSend: string | undefined = undefined;
       if (formData.cnpj && formData.cnpj.trim()) {
-        // Remover todos os caracteres nÃ£o numÃ©ricos
+        // Remover todos os caracteres não numéricos
         const cnpjClean = formData.cnpj.replace(/\D/g, '');
 
-        // SÃ³ enviar se tiver exatamente 14 dÃ­gitos E nÃ£o for todos iguais
+        // Só enviar se tiver exatamente 14 dígitos E não for todos iguais
         if (cnpjClean.length === 14) {
-          // Verificar se todos os dÃ­gitos sÃ£o iguais (CNPJ invÃ¡lido)
+          // Verificar se todos os dígitos são iguais (CNPJ inválido)
           if (/^(\d)\1+$/.test(cnpjClean)) {
             toast({
               title: 'Erro',
-              description: 'CNPJ invÃ¡lido: todos os dÃ­gitos sÃ£o iguais. Por favor, informe um CNPJ vÃ¡lido ou deixe o campo vazio.',
+              description: 'CNPJ inválido: todos os dígitos são iguais. Por favor, informe um CNPJ válido ou deixe o campo vazio.',
               variant: 'destructive',
             });
             setLoading(false);
             return;
           }
 
-          // Validar dÃ­gitos verificadores
+          // Validar dígitos verificadores
           if (!isValidCNPJ(cnpjClean)) {
             toast({
               title: 'Erro',
-              description: 'CNPJ invÃ¡lido: dÃ­gitos verificadores incorretos. Por favor, verifique o CNPJ ou deixe o campo vazio.',
+              description: 'CNPJ inválido: dígitos verificadores incorretos. Por favor, verifique o CNPJ ou deixe o campo vazio.',
               variant: 'destructive',
             });
             setLoading(false);
@@ -199,10 +199,10 @@ export default function CompletarCadastroEmpresaPage() {
 
           cnpjToSend = cnpjClean;
         } else if (cnpjClean.length > 0) {
-          // Se preencheu mas nÃ£o tem 14 dÃ­gitos, mostrar erro antes de enviar
+          // Se preencheu mas não tem 14 dígitos, mostrar erro antes de enviar
           toast({
             title: 'Erro',
-            description: 'CNPJ deve ter 14 dÃ­gitos',
+            description: 'CNPJ deve ter 14 dígitos',
             variant: 'destructive',
           });
           setLoading(false);
@@ -216,7 +216,7 @@ export default function CompletarCadastroEmpresaPage() {
         telefone: formData.telefone?.trim() || undefined,
       };
 
-      // SÃ³ incluir CNPJ no payload se foi preenchido e validado
+      // Só incluir CNPJ no payload se foi preenchido e validado
       if (cnpjToSend !== undefined) {
         payload.cnpj = cnpjToSend;
       }
@@ -308,7 +308,7 @@ export default function CompletarCadastroEmpresaPage() {
             id="cnpj"
             value={formData.cnpj}
             onChange={(e) => {
-              // Normalizar para apenas dÃ­gitos e formatar
+              // Normalizar para apenas dígitos e formatar
               const digits = e.target.value.replace(/\D/g, '');
               const formatted = formatCNPJ(digits);
               setFormData({ ...formData, cnpj: formatted });
@@ -320,7 +320,7 @@ export default function CompletarCadastroEmpresaPage() {
             disabled={loading}
           />
           <p className="text-xs text-muted-foreground">
-            Opcional. Se informar, deve ter 14 dÃ­gitos.
+            Opcional. Se informar, deve ter 14 dígitos.
           </p>
         </div>
 

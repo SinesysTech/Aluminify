@@ -608,7 +608,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                             )}
                           </div>
                         </div>
-                        {/* â€œRiscoâ€ Ã© usado apenas para ordenar; nÃ£o renderizamos ao usuÃ¡rio. */}
+                        {/* "Risco" é usado apenas para ordenar; não renderizamos ao usuário. */}
                       </div>
                     ))}
                   </div>

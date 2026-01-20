@@ -85,6 +85,7 @@ export interface Teacher {
   email: string;
   cpf: string | null;
   phone: string | null;
+  pixKey: string | null;
   biography: string | null;
   photoUrl: string | null;
   specialty: string | null;
@@ -100,6 +101,7 @@ export interface CreateTeacherInput {
   email: string;
   cpf?: string;
   phone?: string;
+  pixKey?: string;
   biography?: string;
   photoUrl?: string;
   specialty?: string;
@@ -110,6 +112,7 @@ export interface UpdateTeacherInput {
   email?: string;
   cpf?: string | null;
   phone?: string | null;
+  pixKey?: string | null;
   biography?: string | null;
   photoUrl?: string | null;
   specialty?: string | null;

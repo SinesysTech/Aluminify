@@ -12,7 +12,7 @@ export default async function EmpresaAlunosPage({ searchParams }: { searchParams
   const page = Number(pageStr) || 1
   const query = queryStr || ''
 
-  // Usar cliente com contexto do usuÃ¡rio para respeitar RLS
+  // Usar cliente com contexto do usuário para respeitar RLS
   const supabase = await createClient()
   const studentService = createStudentService(supabase)
   const courseService = createCourseService(supabase)

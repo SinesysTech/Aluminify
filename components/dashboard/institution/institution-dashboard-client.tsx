@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-// Intervalo de refresh automÃ¡tico (5 minutos)
+// Intervalo de refresh automático (5 minutos)
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000
 
 type DashboardPeriod = 'semanal' | 'mensal' | 'anual'
@@ -58,12 +58,12 @@ export default function InstitutionDashboardClient() {
           errorMessage = err.message
 
           if ((err as InstitutionDashboardServiceError).isAuthError) {
-            errorMessage = 'Sua sessÃ£o expirou. Por favor, faÃ§a login novamente.'
+            errorMessage = 'Sua sessão expirou. Por favor, faça login novamente.'
           } else if ((err as InstitutionDashboardServiceError).isForbidden) {
-            errorMessage = 'VocÃª nÃ£o tem permissÃ£o de administrador da instituiÃ§Ã£o para acessar este dashboard.'
+            errorMessage = 'Você não tem permissão de administrador da instituição para acessar este dashboard.'
           } else if ((err as InstitutionDashboardServiceError).isNetworkError) {
             errorMessage =
-              'Erro de conexÃ£o. Verifique sua internet e tente novamente.'
+              'Erro de conexão. Verifique sua internet e tente novamente.'
           }
         }
 
@@ -85,7 +85,7 @@ export default function InstitutionDashboardClient() {
     loadDashboardData()
   }, [loadDashboardData])
 
-  // Handler para mudanÃ§a de perÃ­odo
+  // Handler para mudança de período
   const handlePeriodChange = useCallback(
     (newPeriod: DashboardPeriod) => {
       setPeriod(newPeriod)
@@ -94,7 +94,7 @@ export default function InstitutionDashboardClient() {
     [loadDashboardData]
   )
 
-  // Refresh automÃ¡tico
+  // Refresh automático
   useEffect(() => {
     if (refreshIntervalRef.current) {
       clearInterval(refreshIntervalRef.current)
@@ -111,7 +111,7 @@ export default function InstitutionDashboardClient() {
     }
   }, [loadDashboardData])
 
-  // FunÃ§Ã£o para refresh manual
+  // Função para refresh manual
   const handleManualRefresh = () => {
     loadDashboardData(true)
   }
@@ -146,7 +146,7 @@ export default function InstitutionDashboardClient() {
   if (!data) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Nenhum dado disponÃ­vel</p>
+        <p className="text-muted-foreground">Nenhum dado disponível</p>
       </div>
     )
   }

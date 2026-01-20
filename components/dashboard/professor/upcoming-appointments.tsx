@@ -50,7 +50,7 @@ function formatAppointmentDate(dateString: string): string {
   }
 
   if (isTomorrow(date)) {
-    return `AmanhÃ£, ${format(date, 'HH:mm', { locale: ptBR })}`
+    return `Amanhã, ${format(date, 'HH:mm', { locale: ptBR })}`
   }
 
   return format(date, "dd/MM 'Ã s' HH:mm", { locale: ptBR })

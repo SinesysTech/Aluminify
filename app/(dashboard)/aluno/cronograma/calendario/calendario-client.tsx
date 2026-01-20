@@ -77,7 +77,7 @@ export default function CalendarioClientPage() {
               Crie seu Cronograma de Estudos
             </CardTitle>
             <CardDescription className="text-base">
-              Para visualizar seu cronograma no calendÃ¡rio, vocÃª precisa criar
+              Para visualizar seu cronograma no calendário, você precisa criar
               um cronograma primeiro
             </CardDescription>
           </CardHeader>
