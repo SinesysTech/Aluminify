@@ -10,10 +10,25 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install all dependencies (including dev dependencies)
-RUN npm ci --ignore-scripts
+# Using npm install instead of npm ci to handle lock file sync issues
+RUN npm install --no-audit --prefer-offline --ignore-scripts
 
 # Copy source code
 COPY . .
+
+# Build-time environment variables (NEXT_PUBLIC_* are embedded in the build)
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY
+ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
+ARG UPSTASH_REDIS_REST_URL
+ARG UPSTASH_REDIS_REST_TOKEN
+
+# Set environment variables for the build
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY
+ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
+ENV UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL
+ENV UPSTASH_REDIS_REST_TOKEN=$UPSTASH_REDIS_REST_TOKEN
 
 # Build Next.js application
 RUN npm run build
