@@ -10,7 +10,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install all dependencies (including dev dependencies)
-RUN npm ci --ignore-scripts
+# Using npm install instead of npm ci to handle lock file sync issues
+RUN npm install --no-audit --prefer-offline --ignore-scripts
 
 # Copy source code
 COPY . .
