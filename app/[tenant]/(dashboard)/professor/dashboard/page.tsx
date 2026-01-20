@@ -4,7 +4,11 @@ import { createClient } from '@/lib/server'
 import { InstitutionDashboardClient } from '@/components/dashboard/institution'
 import { ProfessorDashboardClient } from '@/components/dashboard/professor'
 
-export default async function ProfessorDashboardPage() {
+export default async function ProfessorDashboardPage(props: {
+  params: Promise<{ tenant: string }>
+}) {
+  const params = await props.params
+  const { tenant } = params
   const user = await requireUser({ allowedRoles: ['professor', 'superadmin'] })
 
   // Verificar se precisa completar cadastro da empresa
@@ -20,7 +24,7 @@ export default async function ProfessorDashboardPage() {
         .maybeSingle()
 
       if (!error && empresa) {
-        // Verificar se empresa estÃ¡ incompleta (sem CNPJ, email ou telefone)
+        // Verificar se empresa está incompleta (sem CNPJ, email ou telefone)
         // Campos podem ser null ou string vazia
         const cnpjVazio = !empresa.cnpj || empresa.cnpj.trim() === ''
         const emailVazio =
@@ -35,11 +39,11 @@ export default async function ProfessorDashboardPage() {
   }
 
   if (shouldRedirectToComplete) {
-    redirect('/professor/empresa/completar')
+    redirect(`/${tenant}/professor/empresa/completar`)
   }
 
-  // Se Ã© admin da empresa (ou superadmin), mostrar dashboard da instituiÃ§Ã£o
-  // Caso contrÃ¡rio, mostrar dashboard do professor
+  // Se é admin da empresa (ou superadmin), mostrar dashboard da instituição
+  // Caso contrário, mostrar dashboard do professor
   if (user.isEmpresaAdmin || user.role === 'superadmin') {
     return <InstitutionDashboardClient />
   }
