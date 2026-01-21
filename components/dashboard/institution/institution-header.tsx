@@ -12,7 +12,7 @@ interface InstitutionHeaderProps {
 
 export function InstitutionHeader({
   userName,
-  empresaNome,
+  empresaNome: _empresaNome,
   totalAlunos,
   totalProfessores,
   totalCursos,

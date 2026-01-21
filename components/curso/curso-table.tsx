@@ -879,7 +879,7 @@ export function CursoTable() {
                   <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} className="h-10 px-4 font-mono text-xs font-medium text-[#71717A] uppercase tracking-wider">
+                        <TableHead key={header.id} className="h-10 px-4 font-mono text-xs font-medium text-[#71717A] tracking-wider">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -936,7 +936,7 @@ export function CursoTable() {
       {table.getRowModel().rows?.length > 0 && (
         <div className="border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
           <span className="text-xs text-[#71717A]">
-            Mostrando <strong>{table.getFilteredRowModel().rows.length}</strong> resultados
+            Mostrando <strong>{table.getFilteredRowModel().rows.length}</strong> {table.getFilteredRowModel().rows.length === 1 ? 'resultado' : 'resultados'}
           </span>
           <div className="flex gap-2">
             <button

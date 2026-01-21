@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Palette,
   Upload,
@@ -91,15 +91,14 @@ export function BrandCustomizationPanel({
     }
   }, [currentBranding]);
 
-  const handleLogoUpload = async (file: File, type: LogoType): Promise<LogoUploadResult> => {
+  const handleLogoUpload = useCallback(async (file: File, type: LogoType): Promise<LogoUploadResult> => {
     try {
-      console.log('Uploading logo for empresa:', empresaId);
-
       const formData = new FormData();
       formData.append('file', file);
       formData.append('logoType', type);
 
       const authHeaders = await getAuthHeaders();
+
       const response = await fetch(`/api/tenant-branding/${empresaId}/logos`, {
         method: 'POST',
         headers: authHeaders,
@@ -112,7 +111,7 @@ export function BrandCustomizationPanel({
         throw new Error(data.error || 'Falha no upload do logo');
       }
 
-      // Update local state with the returned URL (not blob)
+      // Update local state with the returned URL
       setBrandingState(prev => ({
         ...prev,
         logos: {
@@ -121,20 +120,16 @@ export function BrandCustomizationPanel({
         }
       }));
 
-      // Logos are saved instantly, so we don't set hasUnsavedChanges
-      // setHasUnsavedChanges(true); 
-
       return { success: true, logoUrl: data.logoUrl };
     } catch (error) {
-      console.error('Upload failed:', error);
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Falha no upload do logo'
       };
     }
-  };
+  }, [empresaId]);
 
-  const handleLogoRemove = async (type: LogoType): Promise<void> => {
+  const handleLogoRemove = useCallback(async (type: LogoType): Promise<void> => {
     try {
       const authHeaders = await getAuthHeaders();
       const response = await fetch(`/api/tenant-branding/${empresaId}/logos/${type}`, {
@@ -152,14 +147,11 @@ export function BrandCustomizationPanel({
         delete newLogos[type];
         return { ...prev, logos: newLogos };
       });
-
-      // Logos are removed instantly
-      // setHasUnsavedChanges(true);
     } catch (error) {
       console.error('Removal failed:', error);
-      throw error; // Re-throw to let child component handle if needed, though handleLogoRemove signature returns Promise<void>
+      throw error;
     }
-  };
+  }, [empresaId]);
 
   const handleColorPaletteSave = async (paletteRequest: CreateColorPaletteRequest): Promise<void> => {
     try {

@@ -43,12 +43,15 @@ export function TenantLogo({
       setError(false);
 
       try {
-        const response = await fetch(`/api/tenant-branding/${empresaId}/logos/${logoType}`);
-        
+        // Use public endpoint (no authentication required)
+        const response = await fetch(`/api/tenant-branding/${empresaId}/logos/${logoType}/public`);
+
         if (response.ok) {
-          const data = await response.json();
-          if (data.logoUrl) {
-            setLogoUrl(data.logoUrl);
+          const result = await response.json();
+          // API returns { success: true, data: TenantLogo }
+          // TenantLogo has .logoUrl property
+          if (result.success && result.data?.logoUrl) {
+            setLogoUrl(result.data.logoUrl);
           } else {
             setLogoUrl(null);
           }
