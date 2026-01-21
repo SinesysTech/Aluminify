@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (user.role !== "usuario" && user.role !== "usuario") {
+    if (user.role !== "usuario") {
       return NextResponse.json(
         {
           error:

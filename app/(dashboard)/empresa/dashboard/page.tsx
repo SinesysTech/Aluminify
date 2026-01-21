@@ -7,7 +7,7 @@ import { requireUser } from '@/lib/auth'
  * has been migrated to 'usuario' with appropriate roleType.
  */
 export default async function EmpresaDashboardRedirectPage() {
-  const user = await requireUser({ allowedRoles: ['professor', 'usuario', 'superadmin'] })
+  const user = await requireUser({ allowedRoles: ['usuario', 'superadmin'] })
 
   if (user.empresaSlug) {
     redirect(`/${user.empresaSlug}/professor/dashboard`)

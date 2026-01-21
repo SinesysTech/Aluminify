@@ -35,7 +35,6 @@ async function deleteHandler(
   // Verificar se o usuário é professor/usuario
   if (
     request.user.role !== "usuario" &&
-    request.user.role !== "usuario" &&
     request.user.role !== "superadmin"
   ) {
     return NextResponse.json(
@@ -52,10 +51,7 @@ async function deleteHandler(
   try {
     // Resolver empresa_id do usuario (preferir metadata, mas cair para tabela usuarios)
     let empresaId: string | undefined = metadataEmpresaId;
-    if (
-      !empresaId &&
-      (request.user.role === "usuario" || request.user.role === "usuario")
-    ) {
+    if (!empresaId && request.user.role === "usuario") {
       const { data: usuario, error: usuarioError } = await client
         .from("usuarios")
         .select("empresa_id")

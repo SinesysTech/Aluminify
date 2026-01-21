@@ -293,8 +293,8 @@ export class UsuarioRepositoryImpl implements UsuarioRepository {
   }
 
   async create(payload: CreateUsuarioInput): Promise<Usuario> {
-    const insertData: UsuarioInsert = {
-      id: payload.id,
+    const insertData = {
+      ...(payload.id && { id: payload.id }),
       empresa_id: payload.empresaId,
       papel_id: payload.papelId,
       nome_completo: payload.nomeCompleto,
@@ -306,7 +306,7 @@ export class UsuarioRepositoryImpl implements UsuarioRepository {
       biografia: payload.biografia ?? null,
       especialidade: payload.especialidade ?? null,
       ativo: true,
-    };
+    } as unknown as UsuarioInsert;
 
     const { data, error } = await this.client
       .from(TABLE)

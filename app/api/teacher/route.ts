@@ -80,7 +80,6 @@ export async function POST(request: NextRequest) {
     // Apenas usuarios (staff) e superadmins podem criar professores
     if (
       user.role !== "usuario" &&
-      user.role !== "usuario" &&
       user.role !== "superadmin"
     ) {
       return NextResponse.json(
