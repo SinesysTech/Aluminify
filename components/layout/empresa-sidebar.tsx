@@ -113,6 +113,10 @@ export function EmpresaSidebar({ ...props }: React.ComponentProps<typeof Sidebar
     isActive: pathname === item.url || pathname?.startsWith(item.url + "/"),
   }))
 
+  // Get organization name and first letter for fallback
+  const organizationName = user.empresaNome || 'Organização'
+  const fallbackLetter = organizationName.charAt(0).toUpperCase()
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -126,11 +130,10 @@ export function EmpresaSidebar({ ...props }: React.ComponentProps<typeof Sidebar
                     empresaId={user.empresaId}
                     width={32}
                     height={32}
-                    fallbackText="E"
+                    fallbackText={fallbackLetter}
                   />
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-medium">Área da Empresa</span>
-                    <span className="truncate text-xs">Sistema de Gestão</span>
+                    <span className="truncate font-medium">{organizationName}</span>
                   </div>
                 </div>
               </a>

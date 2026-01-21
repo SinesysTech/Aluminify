@@ -297,9 +297,7 @@ export function useLogoUrl(logoType: LogoType, empresaId?: string): {
     if (isConnected || !empresaId) return;
 
     const fetchLogo = async () => {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStandaloneLoading(true);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStandaloneError(false);
 
       try {
@@ -307,23 +305,17 @@ export function useLogoUrl(logoType: LogoType, empresaId?: string): {
         if (response.ok) {
           const result = await response.json();
           if (result.success && result.data?.logoUrl) {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setStandaloneUrl(result.data.logoUrl);
           } else {
-            // eslint-disable-next-line react-hooks/set-state-in-effect
             setStandaloneUrl(null);
           }
         } else {
-          // eslint-disable-next-line react-hooks/set-state-in-effect
           setStandaloneUrl(null);
         }
       } catch {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setStandaloneError(true);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setStandaloneUrl(null);
       } finally {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setStandaloneLoading(false);
       }
     };

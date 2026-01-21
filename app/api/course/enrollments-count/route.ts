@@ -5,7 +5,7 @@ import { getDatabaseClient } from '@/backend/clients/database';
 async function getEnrollmentsCountHandler(request: AuthenticatedRequest) {
   try {
     const db = getDatabaseClient();
-    const empresaId = request.empresaId;
+    const empresaId = request.user?.empresaId;
 
     if (!empresaId) {
       return NextResponse.json({ error: 'Empresa não identificada' }, { status: 400 });
