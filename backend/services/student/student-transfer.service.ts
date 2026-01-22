@@ -3,7 +3,6 @@ import type {
   BulkTransferCourseRequest,
   BulkTransferTurmaRequest,
   TransferResult,
-  TurmaStatus,
   StudentSummary,
   TurmaSummary,
   CourseSummary,

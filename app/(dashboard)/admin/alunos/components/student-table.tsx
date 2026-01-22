@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { Eye, Trash2 } from 'lucide-react'
+import { Eye, Trash2, UserCog } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Student } from '@/types/shared/entities/user'
 import { createClient } from '@/lib/client'
@@ -175,6 +175,19 @@ export function StudentTable({ students }: StudentTableProps) {
                                                             variant="ghost"
                                                             size="sm"
                                                             className="h-8 w-8 p-0"
+                                                            onClick={() => router.push(`/admin/alunos/${student.id}`)}
+                                                        >
+                                                            <UserCog className="h-4 w-4" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>Ver Perfil</TooltipContent>
+                                                </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-8 w-8 p-0"
                                                             onClick={() => handleViewAsStudent(student.id)}
                                                             disabled={loadingId === student.id}
                                                         >
@@ -201,6 +214,9 @@ export function StudentTable({ students }: StudentTableProps) {
                                             </div>
                                         ) : (
                                             <div className="flex items-center justify-end gap-1">
+                                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled>
+                                                    <UserCog className="h-4 w-4" />
+                                                </Button>
                                                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled>
                                                     <Eye className="h-4 w-4" />
                                                 </Button>
