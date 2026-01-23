@@ -117,6 +117,7 @@ export class AtividadeService {
 
   async listByAlunoMatriculas(
     alunoId: string,
+    options?: { empresaId?: string },
   ): Promise<AtividadeComProgressoEHierarquia[]> {
     if (!alunoId || !alunoId.trim()) {
       throw new AtividadeValidationError("aluno_id is required");
@@ -125,7 +126,7 @@ export class AtividadeService {
     const client = getDatabaseClient();
     const { listByAlunoMatriculasHelper } =
       await import("./atividade.repository-helper");
-    return listByAlunoMatriculasHelper(client, alunoId);
+    return listByAlunoMatriculasHelper(client, alunoId, options?.empresaId);
   }
 
   async gerarAtividadesPersonalizadas(

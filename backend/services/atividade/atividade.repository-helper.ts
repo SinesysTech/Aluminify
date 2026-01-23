@@ -51,11 +51,13 @@ function mapRow(row: AtividadeRow): Atividade {
 export async function listByAlunoMatriculasHelper(
   client: SupabaseClient,
   alunoId: string,
+  empresaId?: string,
 ): Promise<AtividadeComProgressoEHierarquia[]> {
-  // 1. Buscar cursos do aluno através da tabela alunos_cursos (mesmo método do cronograma)
+  // 1. Buscar cursos do aluno através da tabela alunos_cursos
+  // Include empresa_id join if filtering by organization (multi-org students)
   const { data: alunosCursos, error: alunosCursosError } = await client
     .from("alunos_cursos")
-    .select("curso_id")
+    .select("curso_id, cursos!inner(id, empresa_id)")
     .eq("aluno_id", alunoId);
 
   if (alunosCursosError) {
@@ -68,7 +70,22 @@ export async function listByAlunoMatriculasHelper(
     return [];
   }
 
-  const cursoIds = alunosCursos.map((ac: { curso_id: string }) => ac.curso_id);
+  // Filter by empresa_id if specified (for multi-org students)
+  let filteredCursos = alunosCursos as Array<{
+    curso_id: string;
+    cursos: { id: string; empresa_id: string } | null;
+  }>;
+  if (empresaId) {
+    filteredCursos = filteredCursos.filter(
+      (ac) => ac.cursos?.empresa_id === empresaId
+    );
+  }
+
+  if (filteredCursos.length === 0) {
+    return [];
+  }
+
+  const cursoIds = filteredCursos.map((ac) => ac.curso_id);
 
   // 2. Buscar cursos_disciplinas para esses cursos
   const { data: cursosDisciplinas, error: cdError } = await client
