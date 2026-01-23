@@ -94,7 +94,10 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
         email: alunoData.email || "",
         role: "aluno" as AppUserRole,
         fullName: alunoData.nome_completo || undefined,
-        mustChangePassword: alunoData.must_change_password || false,
+        // Impersonação é uma visualização (read-only). Não devemos forçar troca de senha
+        // do usuário impersonado, porque o usuário autenticado no Supabase Auth é o "real"
+        // e isso pode causar loop em /primeiro-acesso para admins/professores.
+        mustChangePassword: false,
         // Manter informações do usuário real para contexto
         _impersonationContext: impersonationContext,
       } as AppUser & { _impersonationContext?: typeof impersonationContext };

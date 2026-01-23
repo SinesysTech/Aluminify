@@ -237,6 +237,24 @@ export function TenantLoginPageClient({
         return;
       }
 
+      // Garantia: se este navegador ficou com cookie de impersonação (httpOnly) de uma sessão anterior,
+      // ao logar novamente o usuário deve voltar para o próprio contexto.
+      // Best-effort: se não existir cookie, a API pode retornar 400/401 e tudo bem.
+      try {
+        const token = data.session?.access_token;
+        if (token) {
+          await fetch('/api/auth/stop-impersonate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }).catch(() => null);
+        }
+      } catch {
+        // noop
+      }
+
       // Validate user belongs to this tenant
       console.log('[DEBUG] Validando pertencimento ao tenant...');
       const validateResponse = await fetch('/api/auth/validate-tenant', {

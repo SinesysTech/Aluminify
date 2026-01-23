@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/server'
+import { clearImpersonationContext } from '@/lib/auth-impersonate'
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { type NextRequest } from 'next/server'
@@ -18,6 +19,9 @@ export async function GET(request: NextRequest) {
       token_hash,
     })
     if (!error) {
+      // Garantia: se este navegador ficou com cookie de impersonação (httpOnly) de uma sessão anterior,
+      // ao concluir login via OTP o usuário deve voltar para o próprio contexto.
+      await clearImpersonationContext()
       // redirect user to specified redirect URL or root of app
       redirect(next)
     } else {
