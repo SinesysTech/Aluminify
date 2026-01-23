@@ -256,7 +256,6 @@ type RequireUserOptions = {
    */
   allowedRoles?: (AppUserRole | LegacyAppUserRole)[];
   ignorePasswordRequirement?: boolean;
-  allowedRoles?: AppUserRole[];
 };
 
 export async function requireUser(

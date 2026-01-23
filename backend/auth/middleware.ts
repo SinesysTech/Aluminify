@@ -206,12 +206,24 @@ export async function isSuperAdmin(userId: string): Promise<boolean> {
 }
 
 export function requireAuth(
+  handler: (request: AuthenticatedRequest) => Promise<NextResponse>,
+): (request: NextRequest) => Promise<NextResponse>;
+export function requireAuth<TContext = unknown>(
+  handler: (request: AuthenticatedRequest, context: TContext) => Promise<NextResponse>,
+): (request: NextRequest, context: TContext) => Promise<NextResponse>;
+export function requireAuth<TContext = unknown>(
   handler: (
     request: AuthenticatedRequest,
-    context?: any,
+    context?: TContext,
+  ) => Promise<NextResponse>,
+): (request: NextRequest, context?: TContext) => Promise<NextResponse>;
+export function requireAuth<TContext = unknown>(
+  handler: (
+    request: AuthenticatedRequest,
+    context?: TContext,
   ) => Promise<NextResponse>,
 ) {
-  return async (request: NextRequest, context?: any) => {
+  return async (request: NextRequest, context?: TContext) => {
     const auth = await getAuth(request);
 
     if (!auth) {
@@ -226,13 +238,17 @@ export function requireAuth(
     }
 
     // Unwrap params if it's a Promise (Next.js 16+)
-    let unwrappedContext = context;
-    if (context && "params" in context && context.params instanceof Promise) {
-      const params = await context.params;
-      unwrappedContext = { ...context, params };
+    let unwrappedContext: unknown = context;
+    if (context && typeof context === "object" && "params" in (context as Record<string, unknown>)) {
+      const record = context as Record<string, unknown>;
+      const paramsValue = record.params;
+      if (paramsValue instanceof Promise) {
+        const params = await paramsValue;
+        unwrappedContext = { ...record, params };
+      }
     }
 
-    return handler(authenticatedRequest, unwrappedContext);
+    return handler(authenticatedRequest, unwrappedContext as TContext);
   };
 }
 

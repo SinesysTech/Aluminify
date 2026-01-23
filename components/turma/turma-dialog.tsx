@@ -63,7 +63,7 @@ export function TurmaDialog({
   const isEditing = !!turma
 
   const form = useForm<TurmaFormData>({
-    resolver: zodResolver(turmaSchema) as any,
+    resolver: zodResolver(turmaSchema),
     defaultValues: {
       nome: '',
       dataInicio: null,

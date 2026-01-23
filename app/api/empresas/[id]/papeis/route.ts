@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAuth, AuthenticatedRequest } from "@/backend/auth/middleware";
 import { getDatabaseClient } from "@/backend/clients/database";
 import { isAdminRoleTipo } from "@/lib/roles";
+import type { Database } from "@/lib/database.types";
 import type { RolePermissions, RoleTipo } from "@/types/shared/entities/papel";
 
 interface RouteContext {
@@ -94,16 +95,19 @@ async function postHandler(
 
     const client = getDatabaseClient();
 
+    type PapelInsert = Database["public"]["Tables"]["papeis"]["Insert"];
+    const insertData: PapelInsert = {
+      nome,
+      descricao: descricao ?? null,
+      permissoes: permissoes as unknown as PapelInsert["permissoes"],
+      tipo: "custom",
+      empresa_id: empresaId,
+      is_system: false,
+    };
+
     const { data: papel, error } = await client
       .from("papeis")
-      .insert({
-        nome,
-        descricao,
-        permissoes,
-        tipo: "custom",
-        empresa_id: empresaId,
-        is_system: false,
-      } as any)
+      .insert(insertData)
 
       .select()
       .single();
