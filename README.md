@@ -308,7 +308,7 @@ N8N_WEBHOOK_URL=https://xxx
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/seu-usuario/aluminify.git
+git clone https://github.com/SinesysTech/aluminify.git
 cd aluminify
 
 # 2. Configure variáveis de ambiente
