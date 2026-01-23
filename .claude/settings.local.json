@@ -31,7 +31,8 @@
       "Bash(npx openspec:*)",
       "Bash(docker build:*)",
       "Bash(git log:*)",
-      "Bash(git fetch:*)"
+      "Bash(git fetch:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
