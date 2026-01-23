@@ -99,7 +99,7 @@
 - **Objetos Escritos**: 102
 - **Tamanho**: 128.13 KiB
 - **Branch**: `main -> main`
-- **Remote**: `https://github.com/BrenoMeira/areadoaluno.git`
+- **Remote**: `https://github.com/SinesysTech/aluminify.git`
 
 ---
 
