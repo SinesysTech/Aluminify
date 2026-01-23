@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDatabaseClient } from "@/backend/clients/database";
 import { createCouponRepository, type CouponListParams } from "@/backend/services/financial";
 import { requireAuth, AuthenticatedRequest } from "@/backend/auth/middleware";
+import { isAdminRoleTipo } from "@/lib/roles";
 
 const serializeCoupon = (
   coupon: Awaited<ReturnType<ReturnType<typeof createCouponRepository>["findById"]>>
@@ -118,7 +119,8 @@ async function postHandler(request: AuthenticatedRequest) {
     }
 
     // Check if user is admin
-    if (!user.isAdmin && !user.isSuperAdmin) {
+    const isAdmin = user.role === "usuario" && !!user.roleType && isAdminRoleTipo(user.roleType);
+    if (!user.isSuperAdmin && !isAdmin) {
       return NextResponse.json(
         { error: "Only admins can create coupons" },
         { status: 403 }

@@ -23,8 +23,9 @@ const turmaSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
   dataInicio: z.string().optional().nullable(),
   dataFim: z.string().optional().nullable(),
-  acessoAposTermino: z.boolean().default(false),
-  diasAcessoExtra: z.coerce.number().min(0).default(0),
+  // Esses campos já têm `defaultValues` no react-hook-form; manter required evita conflito de tipos no resolver.
+  acessoAposTermino: z.boolean(),
+  diasAcessoExtra: z.number().min(0),
 })
 
 type TurmaFormData = z.infer<typeof turmaSchema>
@@ -197,7 +198,7 @@ export function TurmaDialog({
                   type="number"
                   min={0}
                   placeholder="30"
-                  {...form.register('diasAcessoExtra')}
+                  {...form.register('diasAcessoExtra', { valueAsNumber: true })}
                 />
               </div>
             )}

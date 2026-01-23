@@ -7,6 +7,7 @@ import type {
   TransactionStatus,
   Provider,
 } from "@/backend/services/financial/financial.types";
+import { isAdminRoleTipo } from "@/lib/roles";
 
 const serializeTransaction = (
   transaction: Awaited<ReturnType<ReturnType<typeof createFinancialService>["getTransaction"]>>
@@ -171,7 +172,8 @@ async function postHandler(request: AuthenticatedRequest) {
     }
 
     // Check if user is admin
-    if (!user.isAdmin && !user.isSuperAdmin) {
+    const isAdmin = user.role === "usuario" && !!user.roleType && isAdminRoleTipo(user.roleType);
+    if (!user.isSuperAdmin && !isAdmin) {
       return NextResponse.json(
         { error: "Only admins can create transactions" },
         { status: 403 }

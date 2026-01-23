@@ -53,12 +53,17 @@ export class StudentImportService {
     private readonly client = getDatabaseClient(),
   ) {}
 
-  async import(rows: StudentImportInputRow[]): Promise<StudentImportSummary> {
+  async import(
+    rows: StudentImportInputRow[],
+    options?: { empresaId?: string | null },
+  ): Promise<StudentImportSummary> {
     if (!rows || rows.length === 0) {
       throw new StudentValidationError('Nenhum aluno encontrado para importação.');
     }
 
-    const courseLookup = await this.buildCourseLookup();
+    const empresaId = options?.empresaId ?? undefined;
+
+    const courseLookup = await this.buildCourseLookup(options?.empresaId ?? null);
 
     const summary: StudentImportSummary = {
       total: rows.length,
@@ -104,6 +109,7 @@ export class StudentImportService {
         batch.map(async ({ row, courseIds }) => {
           try {
             await this.studentService.create({
+              empresaId: empresaId || undefined,
               fullName: row.fullName,
               email: row.email,
               cpf: row.cpf,
@@ -168,10 +174,15 @@ export class StudentImportService {
     return summary;
   }
 
-  private async buildCourseLookup(): Promise<Map<string, CourseRow>> {
-    const { data, error } = await this.client
-      .from('cursos')
-      .select('id, nome');
+  private async buildCourseLookup(
+    empresaId?: string | null,
+  ): Promise<Map<string, CourseRow>> {
+    let query = this.client.from('cursos').select('id, nome');
+    if (empresaId) {
+      query = query.eq('empresa_id', empresaId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       throw new Error(`Erro ao carregar cursos para importação: ${error.message}`);

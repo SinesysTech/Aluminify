@@ -3,7 +3,7 @@ import {
   requireAuth,
   type AuthenticatedRequest,
 } from "@/backend/auth/middleware";
-import { createSupabaseServerClient } from "@/lib/server";
+import { createClient } from "@/lib/server";
 import { createStudentOrganizationsService } from "@/backend/services/student";
 
 function handleError(error: unknown) {
@@ -46,7 +46,7 @@ async function getHandler(request: AuthenticatedRequest) {
     }
 
     // Create Supabase client with user context for RLS
-    const supabase = await createSupabaseServerClient();
+    const supabase = await createClient();
 
     // Create service and fetch organizations
     const service = createStudentOrganizationsService(supabase);

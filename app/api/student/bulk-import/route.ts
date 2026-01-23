@@ -31,7 +31,16 @@ const STUDENT_IMPORT_COLUMN_ALIASES = {
 type ParsedSpreadsheetRow = Record<string, string>;
 
 const normalizeColumnName = (value?: string | null) =>
-  (value ?? "").toLowerCase().trim().replace(/\s+/g, " ");
+  (value ?? "")
+    .toLowerCase()
+    .trim()
+    // Remove acentos para bater headers tipo "Número" vs "Numero"
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    // Remove marcadores e pontuação (ex.: "*" do template)
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const splitCourses = (value: string) =>
   value
@@ -192,9 +201,12 @@ async function postHandler(request: AuthenticatedRequest) {
     // Buscar cursos para validação
     const { getDatabaseClient } = await import("@/backend/clients/database");
     const client = getDatabaseClient();
-    const { data: coursesData, error: coursesError } = await client
-      .from("cursos")
-      .select("id, nome");
+    let coursesQuery = client.from("cursos").select("id, nome");
+    if (request.user.empresaId) {
+      coursesQuery = coursesQuery.eq("empresa_id", request.user.empresaId);
+    }
+
+    const { data: coursesData, error: coursesError } = await coursesQuery;
 
     // Type assertion: Query result properly typed from Database schema
     type CourseBasic = Pick<
@@ -311,10 +323,19 @@ async function postHandler(request: AuthenticatedRequest) {
       };
     });
 
-    // Filtrar apenas linhas válidas
+    // Separar linhas inválidas vs válidas (não descartar silenciosamente)
+    const invalidRows = importRows.filter((row) => row.errors.length > 0);
     const validRows = importRows.filter((row) => row.errors.length === 0);
 
     if (validRows.length === 0) {
+      console.warn("[bulk-import] Nenhuma linha válida para importação", {
+        totalRows: importRows.length,
+        sample: importRows.slice(0, 5).map((row) => ({
+          rowNumber: row.rowNumber,
+          email: row.email,
+          errors: row.errors,
+        })),
+      });
       return NextResponse.json(
         {
           error: "Nenhuma linha válida para importação.",
@@ -341,9 +362,31 @@ async function postHandler(request: AuthenticatedRequest) {
     }));
 
     // Executar importação
-    const result = await studentImportService.import(importData);
+    const result = await studentImportService.import(importData, {
+      empresaId: request.user.empresaId,
+    });
 
-    return NextResponse.json({ data: result }, { status: 201 });
+    const invalidPreview = invalidRows.slice(0, 50).map((row) => ({
+      rowNumber: row.rowNumber,
+      email: row.email,
+      errors: row.errors,
+    }));
+
+    if (invalidRows.length > 0) {
+      console.warn("[bulk-import] Linhas rejeitadas por validação", {
+        rejected: invalidRows.length,
+        sample: invalidPreview,
+      });
+    }
+
+    return NextResponse.json(
+      {
+        data: result,
+        rejected: invalidRows.length,
+        rejectedPreview: invalidPreview,
+      },
+      { status: 201 },
+    );
   } catch (error) {
     return handleError(error);
   }

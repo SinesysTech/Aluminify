@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/server'
 import { createStudentService } from '@/backend/services/student'
 import { createCourseService } from '@/backend/services/course'
@@ -23,16 +23,19 @@ export default async function AlunosPage({ searchParams }: { searchParams: { pag
   const studentService = createStudentService(supabase)
   const courseService = createCourseService(supabase)
 
-  const [studentsResult, coursesResult] = await Promise.all([
+  const [studentsResult, coursesResult, allStudentsMetaResult] = await Promise.all([
     studentService.list({ page, perPage: 10, query, courseId, turmaId }),
-    courseService.list({ perPage: 100, sortBy: 'name', sortOrder: 'asc' })
+    courseService.list({ perPage: 100, sortBy: 'name', sortOrder: 'asc' }),
+    // Para mostrar o total geral no topo (independente de filtros)
+    studentService.list({ page: 1, perPage: 1 }),
   ])
 
   const { data: students, meta } = studentsResult
   const { data: courses } = coursesResult
+  const totalAll = allStudentsMetaResult.meta?.total ?? 0
 
   // Map courses to lighter object with usaTurmas info
   const coursesSimple = courses.map(c => ({ id: c.id, name: c.name, usaTurmas: c.usaTurmas ?? false }))
 
-  return <AlunosClientPage students={students} meta={meta} courses={coursesSimple} />
+  return <AlunosClientPage students={students} meta={meta} courses={coursesSimple} totalAll={totalAll} />
 }
