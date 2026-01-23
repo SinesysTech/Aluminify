@@ -10,6 +10,7 @@ import { ModuloActivitiesAccordion } from '@/components/aluno/modulo-activities-
 import { ProgressoStatsCard } from '@/components/aluno/progresso-stats-card'
 import { useCurrentUser } from '@/components/providers/user-provider'
 import { OrganizationSwitcher } from '@/components/dashboard/organization-switcher'
+import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
 import {
   AtividadeComProgresso,
   ModuloComAtividades,
@@ -56,6 +57,10 @@ export default function SalaEstudosClientPage({
 }: SalaEstudosClientProps) {
   const currentUser = useCurrentUser()
   const supabase = createClient()
+
+  // Get active organization for filtering (multi-org students)
+  const { activeOrganization } = useStudentOrganizations()
+  const activeOrgId = activeOrganization?.id
 
   const [atividades, setAtividades] = React.useState<AtividadeComProgresso[]>([])
   const [cursos, setCursos] = React.useState<Array<{ id: string; nome: string }>>([])
@@ -178,7 +183,13 @@ export default function SalaEstudosClientPage({
         // ALUNO: buscar via backend (mesmo padrão do cronograma)
         // ======================================================
         if (userRole !== 'professor' && userRole !== 'superadmin') {
-          const response = await fetch(`/api/atividade/aluno/${alunoId}`, {
+          // Build URL with optional empresa_id filter for multi-org students
+          const url = new URL(`/api/atividade/aluno/${alunoId}`, window.location.origin)
+          if (activeOrgId) {
+            url.searchParams.set('empresa_id', activeOrgId)
+          }
+
+          const response = await fetch(url.toString(), {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -322,11 +333,12 @@ export default function SalaEstudosClientPage({
           cursoIds = cursosData?.map((c) => c.id) || []
         } else {
           // Se for aluno, buscar cursos através da tabela alunos_cursos (mesmo método do cronograma)
+          // Inclui empresa_id para permitir filtro por organização (multi-org students)
           const { data: alunosCursos, error: alunosCursosError } = await supabase
             .from('alunos_cursos')
-            .select('curso_id, cursos(*)')
+            .select('curso_id, cursos!inner(id, empresa_id)')
             .eq('aluno_id', alunoId)
-            .returns<Array<{ curso_id: string; cursos: { id: string } | null }>>()
+            .returns<Array<{ curso_id: string; cursos: { id: string; empresa_id: string } | null }>>()
 
           if (alunosCursosError) {
             console.error('Erro ao buscar cursos do aluno (atividades):', alunosCursosError)
@@ -342,9 +354,15 @@ export default function SalaEstudosClientPage({
           }
 
           // Extrair os cursos do resultado (mesmo método do cronograma)
-          const cursosData = alunosCursos
+          // Filter by active organization if one is selected (multi-org students)
+          let cursosData = alunosCursos
             .map((ac) => ac.cursos)
-            .filter((c): c is { id: string } => c !== null)
+            .filter((c): c is { id: string; empresa_id: string } => c !== null)
+
+          if (activeOrgId) {
+            cursosData = cursosData.filter((c) => c.empresa_id === activeOrgId)
+          }
+
           cursoIds = cursosData.map((c) => c.id)
         }
 
@@ -721,7 +739,7 @@ export default function SalaEstudosClientPage({
     }
 
     fetchAtividades()
-  }, [alunoId, userRole, supabase])
+  }, [alunoId, userRole, supabase, activeOrgId])
 
   // Filtrar atividades baseado nos filtros
   const atividadesFiltradas = React.useMemo(() => {

@@ -16,17 +16,38 @@ export interface DashboardServiceError extends Error {
   isAuthError?: boolean
 }
 
+export interface FetchDashboardDataOptions {
+  period?: HeatmapPeriod
+  /** Filter by organization ID (for multi-org students) */
+  empresaId?: string | null
+}
+
 /**
  * Service layer para buscar dados do Dashboard Analytics
- * 
- * @param period - Período do heatmap: 'semanal', 'mensal' ou 'anual' (padrão: 'anual')
+ *
+ * @param periodOrOptions - Período do heatmap ou objeto de opções
  * @returns Promise<DashboardData> - Dados completos do dashboard
  * @throws DashboardServiceError - Em caso de erro
  */
-export async function fetchDashboardData(period: HeatmapPeriod = 'anual'): Promise<DashboardData> {
+export async function fetchDashboardData(
+  periodOrOptions: HeatmapPeriod | FetchDashboardDataOptions = 'anual'
+): Promise<DashboardData> {
+  // Normalize options
+  const options: FetchDashboardDataOptions = typeof periodOrOptions === 'string'
+    ? { period: periodOrOptions }
+    : periodOrOptions
+
+  const period = options.period ?? 'anual'
+  const empresaId = options.empresaId
+
   try {
+    const params = new URLSearchParams({ period })
+    if (empresaId) {
+      params.set('empresa_id', empresaId)
+    }
+
     const response = await apiClient.get<{ data: DashboardData }>(
-      `/api/dashboard/analytics?period=${period}`
+      `/api/dashboard/analytics?${params.toString()}`
     )
 
     if (response && 'data' in response && response.data) {

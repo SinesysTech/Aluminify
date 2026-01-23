@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { Clock, CheckCircle2, Brain, RefreshCw, AlertCircle } from 'lucide-react'
@@ -8,6 +8,7 @@ import {
   type DashboardServiceError,
 } from '@/lib/services/dashboardService'
 import { DashboardHeader } from '@/components/dashboard/dashboard-header'
+import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
 import { ScheduleProgress } from '@/components/dashboard/schedule-progress'
 import { MetricCard } from '@/components/dashboard/metric-card'
 import {
@@ -34,6 +35,10 @@ export default function StudentDashboardClientPage() {
   const [heatmapPeriod, setHeatmapPeriod] = useState<HeatmapPeriod>('anual')
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Get active organization for filtering (multi-org students)
+  const { activeOrganization } = useStudentOrganizations()
+  const activeOrgId = activeOrganization?.id ?? undefined
+
   const loadDashboardData = useCallback(
     async (showRefreshing = false, period?: HeatmapPeriod) => {
       const periodToUse = period ?? heatmapPeriod
@@ -45,7 +50,11 @@ export default function StudentDashboardClientPage() {
         }
         setError(null)
 
-        const dashboardData = await fetchDashboardData(periodToUse)
+        // Pass empresaId to filter data by organization (for multi-org students)
+        const dashboardData = await fetchDashboardData({
+          period: periodToUse,
+          empresaId: activeOrgId,
+        })
         setData(dashboardData)
         setLastRefresh(new Date())
       } catch (err) {
@@ -75,7 +84,7 @@ export default function StudentDashboardClientPage() {
         setIsRefreshing(false)
       }
     },
-    [heatmapPeriod]
+    [heatmapPeriod, activeOrgId]
   )
 
   // Carregamento inicial

@@ -1,195 +1,211 @@
-import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/server";
-import { PapelRepositoryImpl } from "@/backend/services/papel";
-import { getAuthUser } from "@/backend/auth/middleware";
-import {
-  getEmpresaContext,
-  validateEmpresaAccess,
-} from "@/backend/middleware/empresa-context";
-import type { UpdatePapelInput } from "@/types/shared/entities/papel";
+import { NextResponse } from 'next/server'
+import { requireAuth, AuthenticatedRequest } from '@/backend/auth/middleware'
+import { getDatabaseClient } from '@/backend/clients/database'
+import { isAdminRoleTipo } from '@/lib/roles'
+import type { RolePermissions } from '@/types/shared/entities/papel'
 
 interface RouteContext {
-  params: Promise<{ id: string; papelId: string }>;
+  params: Promise<{ id: string; papelId: string }>
 }
 
 /**
  * GET /api/empresas/[id]/papeis/[papelId]
- * Busca um papel específico
+ * Get a specific papel
  */
-export async function GET(request: NextRequest, { params }: RouteContext) {
-  try {
-    const { id, papelId } = await params;
-    const user = await getAuthUser(request);
+async function getHandler(request: AuthenticatedRequest, context: RouteContext) {
+  const { id: empresaId, papelId } = await context.params
+  const user = request.user
 
-    if (!user) {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
-    }
-
-    const supabase = await createClient();
-
-    const context = await getEmpresaContext(supabase, user.id, request, user);
-    if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
-      return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-    }
-
-    const repository = new PapelRepositoryImpl(supabase);
-    const papel = await repository.findById(papelId);
-
-    if (!papel) {
-      return NextResponse.json(
-        { error: "Papel não encontrado" },
-        { status: 404 }
-      );
-    }
-
-    // Verify papel belongs to empresa or is a system role
-    if (papel.empresaId !== null && papel.empresaId !== id) {
-      return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-    }
-
-    return NextResponse.json(papel);
-  } catch (error) {
-    console.error("Error fetching papel:", error);
-    return NextResponse.json(
-      { error: "Erro ao buscar papel" },
-      { status: 500 }
-    );
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  // Check if user belongs to this empresa or is superadmin
+  if (!user.isSuperAdmin && user.empresaId !== empresaId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const client = getDatabaseClient()
+
+  const { data: papel, error } = await client
+    .from('papeis')
+    .select('*')
+    .eq('id', papelId)
+    .or(`empresa_id.is.null,empresa_id.eq.${empresaId}`)
+    .single()
+
+  if (error) {
+    console.error('Error fetching papel:', error)
+    return NextResponse.json({ error: 'Papel not found' }, { status: 404 })
+  }
+
+  return NextResponse.json({ papel })
 }
 
 /**
  * PATCH /api/empresas/[id]/papeis/[papelId]
- * Atualiza um papel customizado
+ * Update a custom papel
  */
-export async function PATCH(request: NextRequest, { params }: RouteContext) {
+async function patchHandler(request: AuthenticatedRequest, context: RouteContext) {
+  const { id: empresaId, papelId } = await context.params
+  const user = request.user
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  // Only admins can update papeis
+  const isAdmin = user.isSuperAdmin || (user.roleType && isAdminRoleTipo(user.roleType))
+  if (!isAdmin) {
+    return NextResponse.json({ error: 'Forbidden: Admin privileges required' }, { status: 403 })
+  }
+
+  // Check if user belongs to this empresa or is superadmin
+  if (!user.isSuperAdmin && user.empresaId !== empresaId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const client = getDatabaseClient()
+
+  // First check if the papel exists and is not a system papel
+  const { data: existingPapel, error: fetchError } = await client
+    .from('papeis')
+    .select('*')
+    .eq('id', papelId)
+    .single()
+
+  if (fetchError || !existingPapel) {
+    return NextResponse.json({ error: 'Papel not found' }, { status: 404 })
+  }
+
+  if (existingPapel.is_system) {
+    return NextResponse.json(
+      { error: 'Cannot update system papel' },
+      { status: 403 }
+    )
+  }
+
+  // Check if papel belongs to the empresa
+  if (existingPapel.empresa_id !== empresaId) {
+    return NextResponse.json({ error: 'Papel does not belong to this empresa' }, { status: 403 })
+  }
+
   try {
-    const { id, papelId } = await params;
-    const user = await getAuthUser(request);
-
-    if (!user) {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+    const body = await request.json()
+    const { nome, descricao, permissoes } = body as {
+      nome?: string
+      descricao?: string
+      permissoes?: RolePermissions
     }
 
-    // Only admins can update roles
-    if (!user.isSuperAdmin && !user.isAdmin) {
-      return NextResponse.json(
-        { error: "Apenas administradores podem atualizar papéis" },
-        { status: 403 }
-      );
+    const updateData: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
     }
 
-    const supabase = await createClient();
+    if (nome !== undefined) updateData.nome = nome
+    if (descricao !== undefined) updateData.descricao = descricao
+    if (permissoes !== undefined) updateData.permissoes = permissoes
 
-    const context = await getEmpresaContext(supabase, user.id, request, user);
-    if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
-      return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
+    const { data: papel, error } = await client
+      .from('papeis')
+      .update(updateData)
+      .eq('id', papelId)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error updating papel:', error)
+      return NextResponse.json({ error: 'Database error' }, { status: 500 })
     }
 
-    const repository = new PapelRepositoryImpl(supabase);
-
-    // Verify papel exists and belongs to empresa
-    const existingPapel = await repository.findById(papelId);
-    if (!existingPapel) {
-      return NextResponse.json(
-        { error: "Papel não encontrado" },
-        { status: 404 }
-      );
-    }
-
-    // Cannot update system roles
-    if (existingPapel.isSystem) {
-      return NextResponse.json(
-        { error: "Não é possível atualizar papéis do sistema" },
-        { status: 403 }
-      );
-    }
-
-    // Verify papel belongs to empresa
-    if (existingPapel.empresaId !== id) {
-      return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-    }
-
-    const body = await request.json();
-    const { nome, descricao, permissoes } = body;
-
-    const input: UpdatePapelInput = {};
-    if (nome !== undefined) input.nome = nome;
-    if (descricao !== undefined) input.descricao = descricao;
-    if (permissoes !== undefined) input.permissoes = permissoes;
-
-    const papel = await repository.update(papelId, input);
-
-    return NextResponse.json(papel);
+    return NextResponse.json({ papel })
   } catch (error) {
-    console.error("Error updating papel:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Erro ao atualizar papel";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    console.error('Error parsing request:', error)
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 }
 
 /**
  * DELETE /api/empresas/[id]/papeis/[papelId]
- * Remove um papel customizado
+ * Delete a custom papel
  */
-export async function DELETE(request: NextRequest, { params }: RouteContext) {
-  try {
-    const { id, papelId } = await params;
-    const user = await getAuthUser(request);
+async function deleteHandler(request: AuthenticatedRequest, context: RouteContext) {
+  const { id: empresaId, papelId } = await context.params
+  const user = request.user
 
-    if (!user) {
-      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
-    }
-
-    // Only admins can delete roles
-    if (!user.isSuperAdmin && !user.isAdmin) {
-      return NextResponse.json(
-        { error: "Apenas administradores podem remover papéis" },
-        { status: 403 }
-      );
-    }
-
-    const supabase = await createClient();
-
-    const context = await getEmpresaContext(supabase, user.id, request, user);
-    if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
-      return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-    }
-
-    const repository = new PapelRepositoryImpl(supabase);
-
-    // Verify papel exists and belongs to empresa
-    const existingPapel = await repository.findById(papelId);
-    if (!existingPapel) {
-      return NextResponse.json(
-        { error: "Papel não encontrado" },
-        { status: 404 }
-      );
-    }
-
-    // Cannot delete system roles
-    if (existingPapel.isSystem) {
-      return NextResponse.json(
-        { error: "Não é possível remover papéis do sistema" },
-        { status: 403 }
-      );
-    }
-
-    // Verify papel belongs to empresa
-    if (existingPapel.empresaId !== id) {
-      return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
-    }
-
-    // TODO: Check if any usuarios are using this papel before deleting
-    // For now, the database constraint will prevent deletion if in use
-
-    await repository.delete(papelId);
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting papel:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Erro ao remover papel";
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  // Only admins can delete papeis
+  const isAdmin = user.isSuperAdmin || (user.roleType && isAdminRoleTipo(user.roleType))
+  if (!isAdmin) {
+    return NextResponse.json({ error: 'Forbidden: Admin privileges required' }, { status: 403 })
+  }
+
+  // Check if user belongs to this empresa or is superadmin
+  if (!user.isSuperAdmin && user.empresaId !== empresaId) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const client = getDatabaseClient()
+
+  // First check if the papel exists and is not a system papel
+  const { data: existingPapel, error: fetchError } = await client
+    .from('papeis')
+    .select('*')
+    .eq('id', papelId)
+    .single()
+
+  if (fetchError || !existingPapel) {
+    return NextResponse.json({ error: 'Papel not found' }, { status: 404 })
+  }
+
+  if (existingPapel.is_system) {
+    return NextResponse.json(
+      { error: 'Cannot delete system papel' },
+      { status: 403 }
+    )
+  }
+
+  // Check if papel belongs to the empresa
+  if (existingPapel.empresa_id !== empresaId) {
+    return NextResponse.json({ error: 'Papel does not belong to this empresa' }, { status: 403 })
+  }
+
+  // Check if any usuarios are using this papel
+  const { count, error: countError } = await client
+    .from('usuarios')
+    .select('*', { count: 'exact', head: true })
+    .eq('papel_id', papelId)
+    .is('deleted_at', null)
+
+  if (countError) {
+    console.error('Error checking usuarios:', countError)
+    return NextResponse.json({ error: 'Database error' }, { status: 500 })
+  }
+
+  if (count && count > 0) {
+    return NextResponse.json(
+      { error: `Cannot delete papel: ${count} user(s) are still using it` },
+      { status: 409 }
+    )
+  }
+
+  // Delete the papel
+  const { error } = await client
+    .from('papeis')
+    .delete()
+    .eq('id', papelId)
+
+  if (error) {
+    console.error('Error deleting papel:', error)
+    return NextResponse.json({ error: 'Database error' }, { status: 500 })
+  }
+
+  return NextResponse.json({ success: true })
 }
+
+export const GET = requireAuth(getHandler)
+export const PATCH = requireAuth(patchHandler)
+export const DELETE = requireAuth(deleteHandler)

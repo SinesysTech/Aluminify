@@ -84,6 +84,10 @@ async function getHandler(
   try {
     const alunoId = params.alunoId;
 
+    // Get optional empresa_id filter (for multi-org students)
+    const { searchParams } = new URL(request.url);
+    const empresaId = searchParams.get("empresa_id") || undefined;
+
     // Verificar permissão: aluno só pode ver suas próprias atividades
     if (
       request.user &&
@@ -98,7 +102,7 @@ async function getHandler(
       }
     }
 
-    const atividades = await atividadeService.listByAlunoMatriculas(alunoId);
+    const atividades = await atividadeService.listByAlunoMatriculas(alunoId, { empresaId });
     return NextResponse.json({
       data: atividades.map(serializeAtividadeComProgresso),
     });

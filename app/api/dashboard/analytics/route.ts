@@ -43,9 +43,10 @@ async function getHandler(request: AuthenticatedRequest) {
     const impersonationContext = request.impersonationContext
     const targetUserId = impersonationContext?.impersonatedUserId || realUserId
 
-    // Obter parâmetro de período (semanal, mensal, anual)
+    // Obter parâmetros
     const { searchParams } = new URL(request.url)
     const period = (searchParams.get('period') || 'anual') as 'semanal' | 'mensal' | 'anual'
+    const empresaId = searchParams.get('empresa_id') || undefined
 
     // Validar período
     if (!['semanal', 'mensal', 'anual'].includes(period)) {
@@ -56,7 +57,11 @@ async function getHandler(request: AuthenticatedRequest) {
     }
 
     // Buscar dados agregados do dashboard (usa ID do aluno impersonado se aplicável)
-    const dashboardData = await dashboardAnalyticsService.getDashboardData(targetUserId, period)
+    // Se empresa_id for passado, filtra apenas cursos dessa organização (para alunos multi-org)
+    const dashboardData = await dashboardAnalyticsService.getDashboardData(targetUserId, {
+      period,
+      empresaId,
+    })
 
     return NextResponse.json({ data: dashboardData })
   } catch (error) {

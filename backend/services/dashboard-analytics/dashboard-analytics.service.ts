@@ -52,14 +52,30 @@ type StrategicDomainFilteredResult = {
   }>
 }
 
+export interface DashboardDataOptions {
+  period?: 'semanal' | 'mensal' | 'anual'
+  /** Filter by organization ID (for multi-org students) */
+  empresaId?: string
+}
+
 export class DashboardAnalyticsService {
   /**
    * Busca dados agregados do dashboard para um aluno
+   * @param alunoId - ID do aluno
+   * @param periodOrOptions - Período ou objeto de opções com empresaId para filtro
    */
   async getDashboardData(
-    alunoId: string, 
-    period: 'semanal' | 'mensal' | 'anual' = 'anual'
+    alunoId: string,
+    periodOrOptions: 'semanal' | 'mensal' | 'anual' | DashboardDataOptions = 'anual'
   ): Promise<DashboardData> {
+    // Normalize options
+    const options: DashboardDataOptions = typeof periodOrOptions === 'string'
+      ? { period: periodOrOptions }
+      : periodOrOptions
+
+    const period = options.period ?? 'anual'
+    const empresaId = options.empresaId
+
     const client = getDatabaseClient()
 
     // Buscar dados do usuário
@@ -74,12 +90,12 @@ export class DashboardAnalyticsService {
       strategicDomain,
       subjectDistribution,
     ] = await Promise.all([
-      this.getMetrics(alunoId, client, period),
-      this.getHeatmapData(alunoId, client, period),
-      this.getSubjectPerformance(alunoId, client, period),
-      this.getFocusEfficiency(alunoId, client, period),
-      this.getStrategicDomain(alunoId, client, period),
-      this.getSubjectDistribution(alunoId, client, period),
+      this.getMetrics(alunoId, client, period, empresaId),
+      this.getHeatmapData(alunoId, client, period, empresaId),
+      this.getSubjectPerformance(alunoId, client, period, empresaId),
+      this.getFocusEfficiency(alunoId, client, period, empresaId),
+      this.getStrategicDomain(alunoId, client, period, empresaId),
+      this.getSubjectDistribution(alunoId, client, period, empresaId),
     ])
 
     return {
@@ -110,10 +126,12 @@ export class DashboardAnalyticsService {
   /**
    * Resolve o escopo de cursos do usuário (aluno vs professor/superadmin).
    * Reutiliza a mesma lógica do dashboard atual, mas centraliza para endpoints filtráveis.
+   * @param empresaId - Optional: filter courses to only those belonging to this organization
    */
   private async resolveCursoScope(
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
+    empresaId?: string,
   ): Promise<{ isProfessor: boolean; cursoIds: string[] }> {
     const { data: professorData } = await client
       .from('professores')
@@ -137,14 +155,28 @@ export class DashboardAnalyticsService {
 
     let cursoIds: string[] = []
     if (isProfessor) {
-      const { data: todosCursos } = await client.from('cursos').select('id')
+      // For professors, get all courses (optionally filtered by empresa)
+      let query = client.from('cursos').select('id')
+      if (empresaId) {
+        query = query.eq('empresa_id', empresaId)
+      }
+      const { data: todosCursos } = await query
       cursoIds = (todosCursos ?? []).map((c: { id: string }) => c.id)
     } else {
+      // For students, get enrolled courses (optionally filtered by empresa)
       const { data: alunosCursos } = await client
         .from('alunos_cursos')
-        .select('curso_id')
+        .select('curso_id, cursos!inner(empresa_id)')
         .eq('aluno_id', alunoId)
-      cursoIds = (alunosCursos ?? []).map((ac: { curso_id: string }) => ac.curso_id)
+
+      if (empresaId) {
+        // Filter to only courses from the specified empresa
+        cursoIds = (alunosCursos ?? [])
+          .filter((ac: { cursos: { empresa_id: string } }) => ac.cursos?.empresa_id === empresaId)
+          .map((ac: { curso_id: string }) => ac.curso_id)
+      } else {
+        cursoIds = (alunosCursos ?? []).map((ac: { curso_id: string }) => ac.curso_id)
+      }
     }
 
     return { isProfessor, cursoIds }
