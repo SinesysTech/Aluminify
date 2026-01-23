@@ -45,7 +45,7 @@ async function getEnrollmentsHandler(request: AuthenticatedRequest, courseId: st
     // Get course info
     const { data: course, error: courseError } = await db
       .from('cursos')
-      .select('id, nome, modalidade, tipo, ano_vigencia')
+      .select('id, nome, modalidade, tipo, ano_vigencia, usa_turmas')
       .eq('id', courseId)
       .eq('empresa_id', empresaId)
       .single();
@@ -85,6 +85,7 @@ async function getEnrollmentsHandler(request: AuthenticatedRequest, courseId: st
           modality: course.modalidade,
           type: course.tipo,
           year: course.ano_vigencia,
+          usaTurmas: course.usa_turmas ?? false,
         },
         enrollments: serializedEnrollments,
         total: serializedEnrollments.length,

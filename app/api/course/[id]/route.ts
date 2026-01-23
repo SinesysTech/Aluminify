@@ -22,6 +22,7 @@ const serializeCourse = (course: Awaited<ReturnType<typeof courseService.getById
   accessMonths: course.accessMonths,
   planningUrl: course.planningUrl,
   coverImageUrl: course.coverImageUrl,
+  usaTurmas: course.usaTurmas,
   createdAt: course.createdAt.toISOString(),
   updatedAt: course.updatedAt.toISOString(),
 });
@@ -88,6 +89,7 @@ async function putHandler(request: AuthenticatedRequest, params: { id: string })
       accessMonths: body?.accessMonths,
       planningUrl: body?.planningUrl,
       coverImageUrl: body?.coverImageUrl,
+      usaTurmas: body?.usaTurmas,
     });
     return NextResponse.json({ data: serializeCourse(course) });
   } catch (error) {

@@ -36,6 +36,7 @@ import { apiClient } from '@/lib/api-client'
 import { BulkActionsBar } from '@/components/aluno/bulk-actions-bar'
 import { TransferStudentsDialog } from '@/components/aluno/transfer-students-dialog'
 import type { CourseOption, Aluno } from '@/components/aluno/aluno-table'
+import { TurmasList } from '@/components/turma'
 
 interface Student {
   id: string
@@ -61,6 +62,7 @@ interface CourseData {
   modality: string
   type: string
   year: number
+  usaTurmas?: boolean
 }
 
 interface EnrollmentsResponse {
@@ -297,6 +299,11 @@ export default function CourseDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Turmas Section - Only shown when usaTurmas is enabled */}
+        {course.usaTurmas && (
+          <TurmasList cursoId={courseId} cursoNome={course.name} />
+        )}
 
         {/* Search and Selection */}
         <div className="flex flex-col sm:flex-row gap-3">
