@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useCallback, useRef } from
 import { useThemeConfig } from '@/components/active-theme';
 import { getBrandingSyncManager } from '@/lib/services/branding-sync-manager';
 import type { CompleteBrandingConfig, LogoType } from '@/types/brand-customization';
+import { createClient } from '@/lib/client';
 
 interface User {
   empresaId?: string;
@@ -27,9 +28,9 @@ export const TenantBrandingContext = createContext<TenantBrandingContextType>({
   loadingBranding: false,
   error: null,
   currentBranding: null,
-  refreshBranding: async () => {},
-  clearError: () => {},
-  triggerCrossTabUpdate: () => {},
+  refreshBranding: async () => { },
+  clearError: () => { },
+  triggerCrossTabUpdate: () => { },
   logoVersion: 0,
   getLogoUrl: () => null,
 });
@@ -73,7 +74,17 @@ export function TenantBrandingProvider({ children, user }: TenantBrandingProvide
 
   const loadBrandingData = useCallback(async (empresaId: string): Promise<CompleteBrandingConfig | null> => {
     try {
-      const response = await fetch(`/api/tenant-branding/${empresaId}`);
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+
+      const headers: HeadersInit = {};
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+
+      const response = await fetch(`/api/tenant-branding/${empresaId}`, {
+        headers
+      });
       if (response.ok) {
         const branding: CompleteBrandingConfig = await response.json();
         return branding;
@@ -148,7 +159,7 @@ export function TenantBrandingProvider({ children, user }: TenantBrandingProvide
     pollingInterval.current = setInterval(async () => {
       try {
         const branding = await loadBrandingData(empresaId);
-        
+
         // Only update if branding has changed
         if (JSON.stringify(branding) !== JSON.stringify(currentBranding)) {
           if (branding) {
@@ -195,7 +206,7 @@ export function TenantBrandingProvider({ children, user }: TenantBrandingProvide
       if (empresaId) {
         // Load branding for new empresa
         refreshBranding();
-        
+
         // Setup real-time updates
         setupRealTimeUpdates(empresaId);
       } else {
