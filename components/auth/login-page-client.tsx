@@ -130,6 +130,24 @@ export function LoginPageClient() {
 
       console.log('[DEBUG] Login bem-sucedido')
 
+      // Garantia: se este navegador ficou com cookie de impersonação (httpOnly) de uma sessão anterior,
+      // ao logar novamente o usuário deve voltar para o próprio contexto.
+      // Fazemos best-effort aqui: se não existir cookie, a API pode retornar 400/401 e tudo bem.
+      try {
+        const token = data.session?.access_token
+        if (token) {
+          await fetch('/api/auth/stop-impersonate', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+          }).catch(() => null)
+        }
+      } catch {
+        // noop
+      }
+
       // Identify user role to determine redirect URL
       const { identifyUserRoleAction } = await import('@/app/actions/auth-actions')
       const roleResult = await identifyUserRoleAction(data.user.id)
