@@ -6,6 +6,7 @@
  */
 
 import { SupabaseClient } from "@supabase/supabase-js";
+import { randomUUID } from "crypto";
 import type { Database } from "@/lib/database.types";
 import type {
   Usuario,
@@ -294,7 +295,7 @@ export class UsuarioRepositoryImpl implements UsuarioRepository {
 
   async create(payload: CreateUsuarioInput): Promise<Usuario> {
     const insertData: UsuarioInsert = {
-      id: payload.id,
+      id: payload.id ?? randomUUID(),
       empresa_id: payload.empresaId,
       papel_id: payload.papelId,
       nome_completo: payload.nomeCompleto,

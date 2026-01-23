@@ -38,7 +38,6 @@ async function handler(request: AuthenticatedRequest) {
   // Apenas usuarios (staff) podem criar API keys
   if (
     request.user.role !== "usuario" &&
-    request.user.role !== "usuario" &&
     request.user.role !== "superadmin"
   ) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
