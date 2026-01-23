@@ -79,7 +79,7 @@ export class DisciplineService {
       throw new DisciplineConflictError(`Discipline "${name}" already exists`);
     }
 
-    const discipline = await this.repository.update(id, { name });
+    const discipline = await this.repository.update(id, { name, empresaId: payload.empresaId });
 
     // Invalidar cache de estrutura hierárquica e listagem
     const { courseStructureCacheService, cacheService } =
