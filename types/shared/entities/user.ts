@@ -2,13 +2,18 @@
  * Tipos de entidades de usuário compartilhados
  */
 
-import type { RoleTipo, RolePermissions } from './papel';
+import type { RoleTipo, RolePermissions } from "./papel";
 
 // Roles principais do app
 // - aluno: estudante
 // - usuario: staff da instituição (professor, admin, staff, monitor)
 // - superadmin: administrador do sistema
-export type AppUserRole = "aluno" | "usuario" | "superadmin";
+export type AppUserRole =
+  | "aluno"
+  | "usuario"
+  | "superadmin"
+  | "professor"
+  | "empresa";
 
 export interface AppUser {
   id: string;
@@ -27,7 +32,7 @@ export interface AppUser {
 }
 
 // Re-export tipos de papel para conveniência
-export type { RoleTipo, RolePermissions } from './papel';
+export type { RoleTipo, RolePermissions } from "./papel";
 
 export interface StudentCourseSummary {
   id: string;

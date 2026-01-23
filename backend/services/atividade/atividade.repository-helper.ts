@@ -71,14 +71,26 @@ export async function listByAlunoMatriculasHelper(
   }
 
   // Filter by empresa_id if specified (for multi-org students)
-  let filteredCursos = alunosCursos as Array<{
+  let filteredCursos: Array<{
     curso_id: string;
-    cursos: { id: string; empresa_id: string } | null;
+    cursos:
+      | { id: string; empresa_id: string }
+      | { id: string; empresa_id: string }[]
+      | null;
+  }> = alunosCursos as unknown as Array<{
+    curso_id: string;
+    cursos:
+      | { id: string; empresa_id: string }
+      | { id: string; empresa_id: string }[]
+      | null;
   }>;
   if (empresaId) {
-    filteredCursos = filteredCursos.filter(
-      (ac) => ac.cursos?.empresa_id === empresaId
-    );
+    filteredCursos = filteredCursos.filter((ac) => {
+      const c = ac.cursos;
+      if (!c) return false;
+      const empresa = Array.isArray(c) ? c[0] : c;
+      return empresa?.empresa_id === empresaId;
+    });
   }
 
   if (filteredCursos.length === 0) {

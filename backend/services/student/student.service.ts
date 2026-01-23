@@ -209,11 +209,9 @@ export class StudentService {
     // Vincular aluno à turma se turmaId foi fornecido
     if (payload.turmaId) {
       try {
-        const { turmaService } = await import("@/backend/services/turma");
-        await turmaService.vincularAluno({
-          turmaId: payload.turmaId,
-          alunoId: student.id,
-        });
+        const { createTurmaService } = await import("@/backend/services/turma");
+        const turmaService = createTurmaService(getAdminClient());
+        await turmaService.vincularAluno(payload.turmaId, student.id);
       } catch (turmaError) {
         console.error("Error linking student to turma:", turmaError);
         // Não lançar erro aqui - o aluno já foi criado

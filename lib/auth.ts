@@ -244,6 +244,7 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
 
 type RequireUserOptions = {
   ignorePasswordRequirement?: boolean;
+  allowedRoles?: AppUserRole[];
 };
 
 export async function requireUser(

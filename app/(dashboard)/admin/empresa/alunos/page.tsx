@@ -30,7 +30,11 @@ export default async function EmpresaAlunosPage({ searchParams }: { searchParams
   const { data: students, meta } = studentsResult
   const { data: courses } = coursesResult
 
-  const coursesSimple = courses.map(c => ({ id: c.id, name: c.name }))
+  const coursesSimple = courses.map(c => ({
+    id: c.id,
+    name: c.name,
+    usaTurmas: c.usaTurmas
+  }))
 
   return <AlunosClientPage students={students} meta={meta} courses={coursesSimple} />
 }

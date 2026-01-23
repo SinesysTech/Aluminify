@@ -88,42 +88,42 @@ export function PermissionsMatrix({
           create: false,
           edit: false,
           delete: false,
-        } as RolePermissions[typeof resource]
+        } as any
       } else if (isSimplePermissions(resourcePerms)) {
         newPermissions[resource] = {
           view: false,
           edit: false,
-        } as RolePermissions[typeof resource]
+        } as any
       } else {
-        newPermissions[resource] = { view: false } as RolePermissions[typeof resource]
+        newPermissions[resource] = { view: false } as any
       }
     }
     // Handle dependency: if enabling create/edit/delete, enable view
     else if (['create', 'edit', 'delete'].includes(action) && checked) {
       if (isResourcePermissions(resourcePerms)) {
-        (resourcePerms as ResourcePermissions)[action as keyof ResourcePermissions] = checked
+        (resourcePerms as any)[action] = checked
         resourcePerms.view = true
-        newPermissions[resource] = resourcePerms as RolePermissions[typeof resource]
+        newPermissions[resource] = resourcePerms as any
       } else if (isSimplePermissions(resourcePerms) && action === 'edit') {
         (resourcePerms as SimplePermissions).edit = checked
         resourcePerms.view = true
-        newPermissions[resource] = resourcePerms as RolePermissions[typeof resource]
+        newPermissions[resource] = resourcePerms as any
       }
     }
     // Normal case
     else {
       if (isResourcePermissions(resourcePerms)) {
-        (resourcePerms as ResourcePermissions)[action as keyof ResourcePermissions] = checked
-        newPermissions[resource] = resourcePerms as RolePermissions[typeof resource]
+        (resourcePerms as any)[action] = checked
+        newPermissions[resource] = resourcePerms as any
       } else if (isSimplePermissions(resourcePerms)) {
         if (action === 'view') {
           (resourcePerms as SimplePermissions).view = checked
         } else if (action === 'edit') {
           (resourcePerms as SimplePermissions).edit = checked
         }
-        newPermissions[resource] = resourcePerms as RolePermissions[typeof resource]
+        newPermissions[resource] = resourcePerms as any
       } else if (action === 'view') {
-        newPermissions[resource] = { view: checked } as RolePermissions[typeof resource]
+        newPermissions[resource] = { view: checked } as any
       }
     }
 

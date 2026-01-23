@@ -10,6 +10,8 @@ const DEFAULT_ROUTE_BY_ROLE: Record<AppUserRole, string> = {
   aluno: "/aluno/dashboard",
   usuario: "/professor/dashboard",
   superadmin: "/superadmin/dashboard",
+  professor: "/professor/dashboard",
+  empresa: "/empresa/dashboard",
 };
 
 /**
@@ -96,7 +98,10 @@ export function getDefaultRouteForRole(role: AppUserRole): string {
 /**
  * Check if user can impersonate other users
  */
-export function canImpersonate(role: AppUserRole, roleType?: RoleTipo): boolean {
+export function canImpersonate(
+  role: AppUserRole,
+  roleType?: RoleTipo,
+): boolean {
   if (role === "superadmin") return true;
   if (roleType && isAdminRoleTipo(roleType)) return true;
   return false;

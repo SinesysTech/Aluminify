@@ -15,6 +15,7 @@ export interface AuthUser {
   // Role permissions
   permissions?: RolePermissions;
   isSuperAdmin?: boolean;
+  isAdmin?: boolean;
   empresaId?: string;
 }
 

@@ -14,6 +14,8 @@ export interface AuthenticatedRequest extends NextRequest {
   impersonationContext?: Awaited<ReturnType<typeof getImpersonationContext>>;
 }
 
+import { isAdminRoleTipo } from "@/lib/roles";
+
 export async function mapSupabaseUserToAuthUser(
   user: User,
 ): Promise<AuthUser | null> {
@@ -30,6 +32,7 @@ export async function mapSupabaseUserToAuthUser(
       email: user.email!,
       role: "superadmin",
       isSuperAdmin: true,
+      isAdmin: true,
       empresaId: user.user_metadata?.empresa_id as string | undefined,
     };
   }
@@ -50,6 +53,7 @@ export async function mapSupabaseUserToAuthUser(
     };
     const roleType = papelData.tipo as RoleTipo;
     const permissions = papelData.permissoes as RolePermissions;
+    const isAdmin = isAdminRoleTipo(roleType);
 
     return {
       id: user.id,
@@ -58,6 +62,7 @@ export async function mapSupabaseUserToAuthUser(
       roleType,
       permissions,
       isSuperAdmin: false,
+      isAdmin,
       empresaId: usuarioData.empresa_id,
     };
   }
@@ -76,6 +81,7 @@ export async function mapSupabaseUserToAuthUser(
       email: user.email!,
       role: "aluno",
       isSuperAdmin: false,
+      isAdmin: false,
       empresaId: alunoData.empresa_id ?? undefined,
     };
   }
@@ -89,6 +95,7 @@ export async function mapSupabaseUserToAuthUser(
     email: user.email!,
     role,
     isSuperAdmin: false,
+    isAdmin: false,
     empresaId,
   };
 }
@@ -201,15 +208,10 @@ export async function isSuperAdmin(userId: string): Promise<boolean> {
 export function requireAuth(
   handler: (
     request: AuthenticatedRequest,
-    context?: Record<string, unknown>,
+    context?: any,
   ) => Promise<NextResponse>,
 ) {
-  return async (
-    request: NextRequest,
-    context?:
-      | Record<string, unknown>
-      | { params?: Promise<Record<string, string>> },
-  ) => {
+  return async (request: NextRequest, context?: any) => {
     const auth = await getAuth(request);
 
     if (!auth) {
