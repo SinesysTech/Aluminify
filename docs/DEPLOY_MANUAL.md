@@ -28,7 +28,7 @@ O comando `vercel link` irá:
 2. **Abra o projeto existente**
 3. **Vá em:** Settings → Git
 4. **Verifique se o repositório está conectado:**
-   - Se não estiver: conecte o repositório `BrenoMeira/areadoaluno`
+   - Se não estiver: conecte o repositório `SinesysTech/aluminify`
    - Se já estiver: verifique se está apontando para a branch `main`
 5. **Faça o deploy:**
    - Clique em "Redeploy" na última versão, OU
