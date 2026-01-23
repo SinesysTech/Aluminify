@@ -35,7 +35,9 @@
       "Bash(git commit:*)",
       "Bash(npm audit:*)",
       "Bash(npm view:*)",
-      "Bash(npm install)"
+      "Bash(npm install)",
+      "Skill(openspec:archive)",
+      "Skill(openspec:archive:*)"
     ],
     "deny": [],
     "ask": []
