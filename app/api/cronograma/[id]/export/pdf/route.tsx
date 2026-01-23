@@ -198,6 +198,35 @@ function buildPdf(cronograma: CronogramaExport, itens: ItemExport[]) {
     flexAula: { flexGrow: 1, flexShrink: 1, flexBasis: 0 },
     footer: { position: 'absolute', left: 28, right: 28, bottom: 12, flexDirection: 'row', justifyContent: 'space-between' },
     footerText: { fontSize: 9, color: '#888' },
+    // Estilos para hierarquia Disciplina -> Frente -> Módulo
+    disciplinaHeader: {
+      backgroundColor: '#1e3a5f',
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      marginTop: 12,
+      borderRadius: 6,
+    },
+    disciplinaHeaderText: {
+      fontSize: 12,
+      fontWeight: 700,
+      color: '#ffffff',
+    },
+    frenteHeader: {
+      backgroundColor: '#e5e7eb',
+      paddingVertical: 6,
+      paddingHorizontal: 10,
+      marginTop: 8,
+      marginLeft: 8,
+      borderRadius: 4,
+    },
+    frenteHeaderText: {
+      fontSize: 11,
+      fontWeight: 700,
+      color: '#374151',
+    },
+    moduloContainer: {
+      marginLeft: 8,
+    },
   })
 
   const velocidade = Math.max(1, asNumberSafe(cronograma.velocidade_reproducao, 1))
@@ -348,7 +377,7 @@ function buildPdf(cronograma: CronogramaExport, itens: ItemExport[]) {
               </View>
 
               {(() => {
-                // Agrupar por Frente -> Módulo preservando ordem do banco
+                // Agrupar por Disciplina -> Frente -> Módulo preservando ordem do banco
                 type ModuloGroup = {
                   moduloLabel: string
                   itens: ItemExport[]
@@ -357,70 +386,118 @@ function buildPdf(cronograma: CronogramaExport, itens: ItemExport[]) {
                   frenteNome: string
                   modulos: Map<string, ModuloGroup>
                 }
+                type DisciplinaGroup = {
+                  disciplinaNome: string
+                  frentes: Map<string, FrenteGroup>
+                }
 
-                const frentesMap = new Map<string, FrenteGroup>()
+                const disciplinasMap = new Map<string, DisciplinaGroup>()
                 const weekOrdenado = [...weekItens].sort((a, b) => (a.ordem_na_semana || 0) - (b.ordem_na_semana || 0))
 
                 weekOrdenado.forEach((it) => {
+                  // Extrair dados da disciplina
+                  const disciplinaId = it.aulas?.modulos?.frentes?.disciplinas?.id
+                    ? String(it.aulas.modulos.frentes.disciplinas.id)
+                    : 'sem-disciplina'
+                  const disciplinaNome = it.aulas?.modulos?.frentes?.disciplinas?.nome || 'Sem Disciplina'
+
+                  // Extrair dados da frente
                   const frenteId = it.aulas?.modulos?.frentes?.id ? String(it.aulas.modulos.frentes.id) : 'sem-frente'
                   const frenteNome = it.aulas?.modulos?.frentes?.nome || 'Sem Frente'
 
+                  // Extrair dados do módulo
                   const moduloId = it.aulas?.modulos?.id ? String(it.aulas.modulos.id) : 'sem-modulo'
                   const moduloNome = it.aulas?.modulos?.nome || ''
                   const moduloNumero = it.aulas?.modulos?.numero_modulo ?? null
                   const moduloLabel = formatModuloLabel(moduloNumero, moduloNome)
 
-                  if (!frentesMap.has(frenteId)) {
-                    frentesMap.set(frenteId, { frenteNome, modulos: new Map() })
+                  // Agrupar: Disciplina -> Frente -> Módulo
+                  if (!disciplinasMap.has(disciplinaId)) {
+                    disciplinasMap.set(disciplinaId, { disciplinaNome, frentes: new Map() })
                   }
-                  const fg = frentesMap.get(frenteId)!
+                  const dg = disciplinasMap.get(disciplinaId)!
+
+                  if (!dg.frentes.has(frenteId)) {
+                    dg.frentes.set(frenteId, { frenteNome, modulos: new Map() })
+                  }
+                  const fg = dg.frentes.get(frenteId)!
+
                   if (!fg.modulos.has(moduloId)) {
                     fg.modulos.set(moduloId, { moduloLabel, itens: [] })
                   }
                   fg.modulos.get(moduloId)!.itens.push(it)
                 })
 
-                const frentesOrdenadas = Array.from(frentesMap.entries())
-                return frentesOrdenadas.map(([frenteId, fg]) => {
-                  const modulosOrdenados = Array.from(fg.modulos.entries())
-                  return modulosOrdenados.map(([moduloId, mg]) => {
-                    return (
-                      <View key={`${semanaNumero}-${frenteId}-${moduloId}`} style={styles.group} wrap={false}>
-                        <View style={styles.groupHeader}>
-                          <Text style={styles.groupHeaderLeft}>{truncateText(fg.frenteNome, 40)}</Text>
-                          <Text style={styles.groupHeaderRight}>{truncateText(mg.moduloLabel, 52)}</Text>
+                const disciplinasOrdenadas = Array.from(disciplinasMap.entries())
+                return disciplinasOrdenadas.map(([disciplinaId, dg]) => (
+                  <View key={`${semanaNumero}-${disciplinaId}`}>
+                    {/* Cabeçalho da Disciplina */}
+                    <View style={styles.disciplinaHeader}>
+                      <Text style={styles.disciplinaHeaderText}>
+                        {truncateText(dg.disciplinaNome, 60)}
+                      </Text>
+                    </View>
+
+                    {/* Frentes dentro da disciplina */}
+                    {Array.from(dg.frentes.entries()).map(([frenteId, fg]) => (
+                      <View key={`${semanaNumero}-${disciplinaId}-${frenteId}`}>
+                        {/* Cabeçalho da Frente */}
+                        <View style={styles.frenteHeader}>
+                          <Text style={styles.frenteHeaderText}>
+                            {truncateText(fg.frenteNome, 50)}
+                          </Text>
                         </View>
 
-                        <View style={styles.tableHeaderRow}>
-                          <Text style={[styles.cell, styles.headerCell, styles.flexAula]}>Aula</Text>
-                          <Text style={[styles.cell, styles.headerCell, styles.cellCenterText, { width: COL_TEMPO }]}>Tempo (aula)</Text>
-                          <Text style={[styles.cell, styles.headerCell, styles.cellCenterText, { width: COL_CHECK }]}>Assistida</Text>
-                        </View>
-
-                        {mg.itens.map((it, idx) => {
-                          const isAlt = idx % 2 === 1
-                          const aula = it.aulas?.nome || ''
-                          const tempoAula = it.aulas?.tempo_estimado_minutos || 0
-                          const tempoAulaAdj = tempoAula > 0 ? tempoAula / velocidade : 0
-                          const checked = Boolean(it.concluido)
-
-                          return (
+                        {/* Módulos dentro da frente */}
+                        <View style={styles.moduloContainer}>
+                          {Array.from(fg.modulos.entries()).map(([moduloId, mg]) => (
                             <View
-                              key={it.id || `${semanaNumero}-${frenteId}-${moduloId}-${idx}`}
-                              style={[styles.tableRow, ...(isAlt ? [styles.tableRowAlt] : [])]}
+                              key={`${semanaNumero}-${disciplinaId}-${frenteId}-${moduloId}`}
+                              style={styles.group}
+                              wrap={false}
                             >
-                              <Text style={[styles.cell, styles.flexAula]}>{truncateText(aula, 92)}</Text>
-                              <Text style={[styles.cell, styles.cellCenterText, { width: COL_TEMPO }]}>{formatTempo(tempoAulaAdj)}</Text>
-                              <View style={[{ width: COL_CHECK }, styles.cellCenterBox]}>
-                                <CheckboxBox checked={checked} />
+                              {/* Cabeçalho do Módulo */}
+                              <View style={styles.groupHeader}>
+                                <Text style={styles.groupHeaderLeft}>
+                                  {truncateText(mg.moduloLabel, 80)}
+                                </Text>
                               </View>
+
+                              {/* Cabeçalho da tabela */}
+                              <View style={styles.tableHeaderRow}>
+                                <Text style={[styles.cell, styles.headerCell, styles.flexAula]}>Aula</Text>
+                                <Text style={[styles.cell, styles.headerCell, styles.cellCenterText, { width: COL_TEMPO }]}>Tempo (aula)</Text>
+                                <Text style={[styles.cell, styles.headerCell, styles.cellCenterText, { width: COL_CHECK }]}>Assistida</Text>
+                              </View>
+
+                              {/* Linhas da tabela (aulas) */}
+                              {mg.itens.map((it, idx) => {
+                                const isAlt = idx % 2 === 1
+                                const aula = it.aulas?.nome || ''
+                                const tempoAula = it.aulas?.tempo_estimado_minutos || 0
+                                const tempoAulaAdj = tempoAula > 0 ? tempoAula / velocidade : 0
+                                const checked = Boolean(it.concluido)
+
+                                return (
+                                  <View
+                                    key={it.id || `${semanaNumero}-${disciplinaId}-${frenteId}-${moduloId}-${idx}`}
+                                    style={[styles.tableRow, ...(isAlt ? [styles.tableRowAlt] : [])]}
+                                  >
+                                    <Text style={[styles.cell, styles.flexAula]}>{truncateText(aula, 92)}</Text>
+                                    <Text style={[styles.cell, styles.cellCenterText, { width: COL_TEMPO }]}>{formatTempo(tempoAulaAdj)}</Text>
+                                    <View style={[{ width: COL_CHECK }, styles.cellCenterBox]}>
+                                      <CheckboxBox checked={checked} />
+                                    </View>
+                                  </View>
+                                )
+                              })}
                             </View>
-                          )
-                        })}
+                          ))}
+                        </View>
                       </View>
-                    )
-                  })
-                })
+                    ))}
+                  </View>
+                ))
               })()}
             </View>
 

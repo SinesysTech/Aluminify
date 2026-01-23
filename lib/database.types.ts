@@ -1044,6 +1044,7 @@ export type Database = {
           segmento_id: string | null
           tipo: Database["public"]["Enums"]["enum_tipo_curso"]
           updated_at: string
+          usa_turmas: boolean
         }
         Insert: {
           ano_vigencia: number
@@ -1063,6 +1064,7 @@ export type Database = {
           segmento_id?: string | null
           tipo: Database["public"]["Enums"]["enum_tipo_curso"]
           updated_at?: string
+          usa_turmas?: boolean
         }
         Update: {
           ano_vigencia?: number
@@ -1082,6 +1084,7 @@ export type Database = {
           segmento_id?: string | null
           tipo?: Database["public"]["Enums"]["enum_tipo_curso"]
           updated_at?: string
+          usa_turmas?: boolean
         }
         Relationships: [
           {
