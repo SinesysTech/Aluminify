@@ -43,7 +43,8 @@ export class DisciplineService {
   async create(payload: CreateDisciplineInput): Promise<Discipline> {
     const name = this.validateName(payload.name);
 
-    const existing = await this.repository.findByName(name);
+    // Check for duplicate within the same tenant (empresa)
+    const existing = await this.repository.findByName(name, payload.empresaId);
     if (existing) {
       throw new DisciplineConflictError(`Discipline "${name}" already exists`);
     }
@@ -72,7 +73,8 @@ export class DisciplineService {
     }
 
     const name = this.validateName(payload.name);
-    const existing = await this.repository.findByName(name);
+    // Check for duplicate within the same tenant (empresa)
+    const existing = await this.repository.findByName(name, payload.empresaId);
     if (existing && existing.id !== id) {
       throw new DisciplineConflictError(`Discipline "${name}" already exists`);
     }
