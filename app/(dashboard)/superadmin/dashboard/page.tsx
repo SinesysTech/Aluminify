@@ -1,4 +1,9 @@
-﻿import { requireUser } from '@/lib/auth'
+﻿import type { Metadata } from 'next'
+import { requireUser } from '@/lib/auth'
+
+export const metadata: Metadata = {
+  title: 'Super Admin'
+}
 
 export default async function SuperAdminDashboardPage() {
   const user = await requireUser({ allowedRoles: ['superadmin'] })

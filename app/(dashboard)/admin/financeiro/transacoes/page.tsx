@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Suspense } from "react";
 import { createClient } from "@/lib/server";
 import { requireUser } from "@/lib/auth";
@@ -26,6 +27,10 @@ import {
 import { createFinancialService } from "@/backend/services/financial";
 import type { TransactionStatus, Provider } from "@/types/shared/entities/financial";
 import { ArrowLeft } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: 'Transações'
+}
 
 interface TransactionRow {
   id: string;

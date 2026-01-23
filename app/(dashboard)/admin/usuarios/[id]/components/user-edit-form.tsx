@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { ArrowLeft, Loader2, Save, X } from 'lucide-react'
+import { ArrowLeft, Eye, EyeOff, Loader2, Save, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -65,6 +65,11 @@ export function UserEditForm({ user, empresaId, papeis, onCancel, onSuccess }: U
     papelId: user.papelId,
     ativo: user.ativo,
   })
+  const [password, setPassword] = React.useState('')
+  const [confirmPassword, setConfirmPassword] = React.useState('')
+  const [showPassword, setShowPassword] = React.useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
+  const [passwordError, setPasswordError] = React.useState('')
 
   const handleChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -72,10 +77,24 @@ export function UserEditForm({ user, empresaId, papeis, onCancel, onSuccess }: U
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setPasswordError('')
+
+    // Validate password if provided
+    if (password) {
+      if (password.length < 6) {
+        setPasswordError('A senha deve ter pelo menos 6 caracteres')
+        return
+      }
+      if (password !== confirmPassword) {
+        setPasswordError('As senhas não coincidem')
+        return
+      }
+    }
+
     setSaving(true)
 
     try {
-      const payload = {
+      const payload: Record<string, unknown> = {
         nomeCompleto: formData.nomeCompleto,
         email: formData.email,
         cpf: formData.cpf || null,
@@ -86,6 +105,11 @@ export function UserEditForm({ user, empresaId, papeis, onCancel, onSuccess }: U
         especialidade: formData.especialidade || null,
         papelId: formData.papelId,
         ativo: formData.ativo,
+      }
+
+      // Include password if provided
+      if (password) {
+        payload.password = password
       }
 
       const response = await fetch(`/api/empresas/${empresaId}/usuarios/${user.id}`, {
@@ -287,6 +311,76 @@ export function UserEditForm({ user, empresaId, papeis, onCancel, onSuccess }: U
                   />
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Alterar Senha */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-base">Alterar Senha</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Deixe em branco para manter a senha atual.
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="password">Nova senha</Label>
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirmar nova senha</Label>
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Digite a senha novamente"
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              {passwordError && (
+                <p className="text-sm text-destructive">{passwordError}</p>
+              )}
             </CardContent>
           </Card>
         </div>

@@ -1,8 +1,13 @@
-﻿import { createClient } from '@/lib/server'
+﻿import type { Metadata } from 'next'
+import { createClient } from '@/lib/server'
 import { createStudentService } from '@/backend/services/student'
 import { createCourseService } from '@/backend/services/course'
 import { AlunosClientPage } from '@/app/(dashboard)/admin/alunos/components/client-page'
 import { requireUser } from '@/lib/auth'
+
+export const metadata: Metadata = {
+  title: 'Alunos da Empresa'
+}
 
 export default async function EmpresaAlunosPage({ searchParams }: { searchParams: { page?: string, query?: string } }) {
   // Ensure only empresa admins and superadmins can access

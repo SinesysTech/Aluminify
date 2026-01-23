@@ -1,5 +1,10 @@
-﻿import { UpdatePasswordForm } from '@/components/auth/update-password-form'
+﻿import type { Metadata } from 'next'
+import { UpdatePasswordForm } from '@/components/auth/update-password-form'
 import { TenantLogo } from '@/components/shared/tenant-logo';
+
+export const metadata: Metadata = {
+  title: 'Atualizar Senha'
+}
 
 export default function Page() {
   return (

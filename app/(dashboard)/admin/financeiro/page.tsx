@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { createClient } from "@/lib/server";
 import { requireUser } from "@/lib/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +8,10 @@ import { StatsCards } from "@/components/financial/stats-cards";
 import { RecentTransactions } from "@/components/financial/recent-transactions";
 import { createFinancialService } from "@/backend/services/financial";
 import type { TransactionStatus, Provider } from "@/types/shared/entities/financial";
+
+export const metadata: Metadata = {
+  title: 'Financeiro'
+}
 
 interface TransactionStats {
   totalAmountCents: number;

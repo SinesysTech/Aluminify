@@ -1,5 +1,10 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth'
+
+export const metadata: Metadata = {
+  title: 'Dashboard do Professor'
+}
 
 export default async function ProfessorDashboardRedirectPage() {
     const user = await requireUser({ allowedRoles: ['usuario'] })

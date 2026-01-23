@@ -1,5 +1,10 @@
+import type { Metadata } from 'next'
 import { ProfileTabs } from '@/components/perfil/profile-tabs'
 import { requireUser } from '@/lib/auth'
+
+export const metadata: Metadata = {
+  title: 'Meu Perfil'
+}
 
 export default async function PerfilPage() {
   const user = await requireUser()

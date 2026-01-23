@@ -1,12 +1,18 @@
 "use client"
 
 import { useState } from 'react'
-import { Plus, Upload, UserPlus } from 'lucide-react'
+import { Plus, Upload, UserPlus, Download, ChevronDown } from 'lucide-react'
 import { Student } from '@/types/shared/entities/user'
 import { StudentFilters } from './student-filters'
 import { StudentTable } from './student-table'
 import { StudentSheet } from './student-sheet'
 import { PaginationMeta } from '@/types/shared/dtos/api-responses'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 interface AlunosClientPageProps {
     students: Student[]
@@ -16,8 +22,32 @@ interface AlunosClientPageProps {
 
 export function AlunosClientPage({ students, meta, courses }: AlunosClientPageProps) {
     const [isSheetOpen, setIsSheetOpen] = useState(false)
+    const [isDownloading, setIsDownloading] = useState(false)
 
     const hasStudents = meta.total > 0
+
+    const handleDownloadTemplate = async () => {
+        setIsDownloading(true)
+        try {
+            const response = await fetch('/api/student/template')
+            if (!response.ok) {
+                throw new Error('Erro ao baixar modelo')
+            }
+            const blob = await response.blob()
+            const url = window.URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `modelo-importacao-alunos-${new Date().toISOString().split('T')[0]}.xlsx`
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(url)
+            document.body.removeChild(a)
+        } catch (error) {
+            console.error('Erro ao baixar template:', error)
+        } finally {
+            setIsDownloading(false)
+        }
+    }
 
     return (
         <div className="flex flex-col gap-8 h-full pb-10">
@@ -42,10 +72,25 @@ export function AlunosClientPage({ students, meta, courses }: AlunosClientPagePr
                                     <p className="page-subtitle">Gerencie matrículas, progresso e status financeiro.</p>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <button className="h-9 px-4 rounded-md border border-[#E4E4E7] bg-white text-sm font-medium hover:bg-zinc-50 transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center gap-2 text-zinc-900">
-                                        <Upload className="w-5 h-5" strokeWidth={1.5} />
-                                        Importar CSV
-                                    </button>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <button className="h-9 px-4 rounded-md border border-[#E4E4E7] bg-white text-sm font-medium hover:bg-zinc-50 transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center gap-2 text-zinc-900">
+                                                <Upload className="w-5 h-5" strokeWidth={1.5} />
+                                                Importar
+                                                <ChevronDown className="w-4 h-4" strokeWidth={1.5} />
+                                            </button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={handleDownloadTemplate} disabled={isDownloading}>
+                                                <Download className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                                                {isDownloading ? 'Baixando...' : 'Baixar Modelo'}
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem>
+                                                <Upload className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                                                Importar Planilha
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                     <button
                                         onClick={() => setIsSheetOpen(true)}
                                         className="h-9 px-4 rounded-md bg-[#09090B] text-white text-sm font-medium hover:bg-[#27272A] transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center gap-2"
@@ -78,10 +123,25 @@ export function AlunosClientPage({ students, meta, courses }: AlunosClientPagePr
                     </p>
 
                     <div className="flex items-center gap-3">
-                        <button className="h-10 px-6 rounded-md border border-[#E4E4E7] bg-white text-sm font-medium hover:bg-zinc-50 transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center gap-2 text-zinc-900">
-                            <Upload className="w-5 h-5" strokeWidth={1.5} />
-                            Importar Planilha
-                        </button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <button className="h-10 px-6 rounded-md border border-[#E4E4E7] bg-white text-sm font-medium hover:bg-zinc-50 transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center gap-2 text-zinc-900">
+                                    <Upload className="w-5 h-5" strokeWidth={1.5} />
+                                    Importar Planilha
+                                    <ChevronDown className="w-4 h-4" strokeWidth={1.5} />
+                                </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="center">
+                                <DropdownMenuItem onClick={handleDownloadTemplate} disabled={isDownloading}>
+                                    <Download className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                                    {isDownloading ? 'Baixando...' : 'Baixar Modelo'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <Upload className="w-4 h-4 mr-2" strokeWidth={1.5} />
+                                    Importar Planilha
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         <button
                             onClick={() => setIsSheetOpen(true)}
                             className="h-10 px-6 rounded-md bg-[#09090B] text-white text-sm font-medium hover:bg-[#27272A] transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center gap-2"

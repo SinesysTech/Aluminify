@@ -1,4 +1,5 @@
-﻿import { createClient } from "@/lib/server"
+﻿import type { Metadata } from 'next'
+import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"
 import { getAgendamentosAluno } from "@/app/actions/agendamentos"
 import { MeusAgendamentosList } from "@/components/agendamento/meus-agendamentos-list"
@@ -7,6 +8,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus } from "lucide-react"
+
+export const metadata: Metadata = {
+  title: 'Meus Agendamentos'
+}
 
 export default async function MeusAgendamentosPage() {
   const supabase = await createClient()

@@ -1,9 +1,14 @@
-﻿import { ProfessorSelector } from "@/components/agendamento/professor-selector"
+﻿import type { Metadata } from 'next'
+import { ProfessorSelector } from "@/components/agendamento/professor-selector"
 import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"
 import { getProfessoresDisponiveis } from "@/app/actions/agendamentos"
 import { Suspense } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
+
+export const metadata: Metadata = {
+  title: 'Agendar Mentoria'
+}
 
 export default async function AgendamentosPage() {
   const supabase = await createClient()

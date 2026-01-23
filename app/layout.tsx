@@ -1,4 +1,5 @@
 import React from "react";
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { cn } from "@/lib/utils";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
@@ -12,6 +13,14 @@ import "./globals.css";
 
 import { DEFAULT_THEME } from "@/lib/themes";
 import { Toaster } from "@/components/ui/sonner";
+
+export const metadata: Metadata = {
+  title: {
+    default: "Aluminify",
+    template: "%s | Aluminify"
+  },
+  description: "Plataforma de ensino e aprendizado personalizado"
+};
 
 export default async function RootLayout({
   children

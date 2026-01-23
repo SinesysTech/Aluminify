@@ -99,4 +99,5 @@ export * from './student-import.service';
 export * from './student-transfer.types';
 export * from './student-transfer.repository';
 export * from './student-transfer.service';
+export * from './student-template.service';
 

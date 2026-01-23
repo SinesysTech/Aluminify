@@ -1,5 +1,10 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth'
+
+export const metadata: Metadata = {
+  title: 'Dashboard da Empresa'
+}
 
 /**
  * Legacy empresa dashboard page.

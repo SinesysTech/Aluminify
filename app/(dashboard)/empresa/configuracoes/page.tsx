@@ -1,6 +1,11 @@
-﻿import { SettingsTabs } from '@/components/configuracoes/settings-tabs'
+﻿import type { Metadata } from 'next'
+import { SettingsTabs } from '@/components/configuracoes/settings-tabs'
 import { requireUser } from '@/lib/auth'
 import { redirect } from 'next/navigation'
+
+export const metadata: Metadata = {
+  title: 'Configurações da Empresa'
+}
 
 interface ConfiguracoesPageProps {
   searchParams: Promise<{ tab?: string }>

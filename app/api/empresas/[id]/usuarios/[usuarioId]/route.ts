@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/lib/database.types";
 import { createClient } from "@/lib/server";
 import { UsuarioRepositoryImpl } from "@/backend/services/usuario";
 import { PapelRepositoryImpl } from "@/backend/services/papel";
@@ -8,6 +10,18 @@ import {
   validateEmpresaAccess,
 } from "@/backend/middleware/empresa-context";
 import type { UpdateUsuarioInput } from "@/types/shared/entities/usuario";
+
+function createAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceRoleKey = process.env.SUPABASE_SECRET_KEY!;
+
+  return createSupabaseClient<Database>(supabaseUrl, serviceRoleKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
 
 interface RouteContext {
   params: Promise<{ id: string; usuarioId: string }>;
@@ -130,6 +144,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       biografia,
       especialidade,
       ativo,
+      password,
     } = body;
 
     // If changing papel, verify permission and papel exists
@@ -194,6 +209,31 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     }
 
     const usuario = await repository.update(usuarioId, input);
+
+    // If password is provided, update auth user password (admin only)
+    if (password && password.length >= 6) {
+      // Only admins can change other users' passwords
+      if (!user.isSuperAdmin && !user.permissions?.usuarios?.edit) {
+        return NextResponse.json(
+          { error: "Sem permissão para alterar senha do usuário" },
+          { status: 403 }
+        );
+      }
+
+      const adminClient = createAdminClient();
+      const { error: passwordError } = await adminClient.auth.admin.updateUserById(
+        usuarioId,
+        { password }
+      );
+
+      if (passwordError) {
+        console.error("Error updating password:", passwordError);
+        return NextResponse.json(
+          { error: "Erro ao atualizar senha: " + passwordError.message },
+          { status: 500 }
+        );
+      }
+    }
 
     return NextResponse.json(usuario);
   } catch (error) {

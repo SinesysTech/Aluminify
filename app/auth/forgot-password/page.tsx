@@ -1,5 +1,10 @@
-﻿import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
+﻿import type { Metadata } from 'next'
+import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
 import { TenantLogo } from '@/components/shared/tenant-logo';
+
+export const metadata: Metadata = {
+  title: 'Esqueci Minha Senha'
+}
 
 export default function Page() {
   return (

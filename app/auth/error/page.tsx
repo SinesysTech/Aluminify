@@ -1,4 +1,9 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+﻿import type { Metadata } from 'next'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+
+export const metadata: Metadata = {
+  title: 'Erro'
+}
 
 export default async function Page({
   searchParams,
