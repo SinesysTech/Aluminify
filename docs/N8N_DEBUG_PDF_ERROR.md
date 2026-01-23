@@ -106,7 +106,7 @@ Options → Response → Response Format: File ⚠️
 
 1. Copie a URL do log:
    ```
-   https://areadoaluno-xi.vercel.app/api/chat/attachments/d1ed4bd6-9b9e-4b69-a444-48fdbee3a2ea/Metodologia%20CDF%20-%202026.pdf?token=47af6eea-7766-4ad3-815e-38629625c563
+   https://aluminify.vercel.app/api/chat/attachments/d1ed4bd6-9b9e-4b69-a444-48fdbee3a2ea/Metodologia%20CDF%20-%202026.pdf?token=47af6eea-7766-4ad3-815e-38629625c563
    ```
 
 2. Cole no navegador

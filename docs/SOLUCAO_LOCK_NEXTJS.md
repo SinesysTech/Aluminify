@@ -3,7 +3,7 @@
 ## ❌ Problema
 
 ```
-⨯ Unable to acquire lock at C:\areadoaluno\.next\dev\lock, is another instance of next dev running?
+⨯ Unable to acquire lock at C:\aluminify\.next\dev\lock, is another instance of next dev running?
 ```
 
 ## ✅ Solução

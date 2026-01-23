@@ -171,7 +171,7 @@ npm list lucide-react
 
 **Exemplo**:
 ```
-Module '"C:/Development/areadoaluno/node_modules/@types/react/index"' 
+Module '"C:/Development/aluminify/node_modules/@types/react/index"'
 can only be default-imported using the 'allowSyntheticDefaultImports' flag
 ```
 

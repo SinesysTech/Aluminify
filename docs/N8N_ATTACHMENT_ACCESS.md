@@ -8,7 +8,7 @@ Quando o N8N tenta baixar um arquivo (PDF, imagem) através do HTTP Request, pod
 ### 1. A URL já contém o token
 A URL enviada para o N8N já inclui o token como query parameter:
 ```
-https://areadoaluno-xi.vercel.app/api/chat/attachments/{id}/{filename}?token={token}
+https://aluminify.vercel.app/api/chat/attachments/{id}/{filename}?token={token}
 ```
 
 ### 2. Configuração no N8N HTTP Request Node
@@ -22,7 +22,7 @@ https://areadoaluno-xi.vercel.app/api/chat/attachments/{id}/{filename}?token={to
 
 **Ou manualmente:**
 ```
-https://areadoaluno-xi.vercel.app/api/chat/attachments/{{ $json.attachments_metadata[0].id }}/{{ $json.attachments_metadata[0].name }}?token={{ $json.attachments_metadata[0].token }}
+https://aluminify.vercel.app/api/chat/attachments/{{ $json.attachments_metadata[0].id }}/{{ $json.attachments_metadata[0].name }}?token={{ $json.attachments_metadata[0].token }}
 ```
 
 ### 3. Headers (Opcional)
