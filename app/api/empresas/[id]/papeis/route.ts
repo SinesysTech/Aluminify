@@ -14,7 +14,7 @@ interface RouteContext {
  */
 async function getHandler(
   request: AuthenticatedRequest,
-  context: RouteContext,
+  context?: RouteContext,
 ) {
   const { id: empresaId } = await context.params;
   const user = request.user;
@@ -51,7 +51,7 @@ async function getHandler(
  */
 async function postHandler(
   request: AuthenticatedRequest,
-  context: RouteContext,
+  context?: RouteContext,
 ) {
   const { id: empresaId } = await context.params;
   const user = request.user;
@@ -103,8 +103,8 @@ async function postHandler(
         tipo: "custom",
         empresa_id: empresaId,
         is_system: false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
-
       .select()
       .single();
 

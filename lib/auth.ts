@@ -21,7 +21,6 @@ import { createClient } from "@/lib/server";
 import { getDatabaseClient } from "@/backend/clients/database";
 import type { AppUser, AppUserRole } from "@/types/user";
 import type { RoleTipo, RolePermissions } from "@/types/shared/entities/papel";
-import { getDefaultRouteForRole } from "@/lib/roles";
 import { getImpersonationContext } from "@/lib/auth-impersonate";
 
 export async function getAuthenticatedUser(): Promise<AppUser | null> {

@@ -1661,7 +1661,7 @@ export class DashboardAnalyticsService {
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: DashboardPeriod,
-    empresaId?: string,
+    _empresaId?: string,
   ) {
     // Progresso do cronograma (simplificado - pode ser melhorado)
     const scheduleProgress = await this.getScheduleProgress(alunoId, client);
@@ -1910,7 +1910,7 @@ export class DashboardAnalyticsService {
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: "semanal" | "mensal" | "anual" = "anual",
-    empresaId?: string,
+    _empresaId?: string,
   ) {
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0); // Normalizar para início do dia
@@ -1998,7 +1998,7 @@ export class DashboardAnalyticsService {
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: DashboardPeriod,
-    empresaId?: string,
+    _empresaId?: string,
   ) {
     // 1. Buscar cursos do aluno (ou todos se for professor)
     const { data: professorData } = await client
@@ -2213,7 +2213,7 @@ export class DashboardAnalyticsService {
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: DashboardPeriod,
-    empresaId?: string,
+    _empresaId?: string,
   ) {
     const inicioPeriodo = this.getPeriodStart(period);
 
@@ -2267,7 +2267,7 @@ export class DashboardAnalyticsService {
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: DashboardPeriod,
-    empresaId?: string,
+    _empresaId?: string,
   ): Promise<SubjectDistributionItem[]> {
     const filtered = await this.getSubjectDistributionFiltered(alunoId, {
       groupBy: "disciplina",
@@ -2285,7 +2285,7 @@ export class DashboardAnalyticsService {
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: DashboardPeriod,
-    empresaId?: string,
+    _empresaId?: string,
   ): Promise<StrategicDomain> {
     // Reusar a versão filtrável para manter consistência e respeitar o período selecionado.
     // (Mantemos a implementação antiga abaixo como fallback/legado.)

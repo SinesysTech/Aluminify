@@ -88,42 +88,42 @@ export function PermissionsMatrix({
           create: false,
           edit: false,
           delete: false,
-        } as any
+        } as any // eslint-disable-line @typescript-eslint/no-explicit-any
       } else if (isSimplePermissions(resourcePerms)) {
         newPermissions[resource] = {
           view: false,
           edit: false,
-        } as any
+        } as any // eslint-disable-line @typescript-eslint/no-explicit-any
       } else {
-        newPermissions[resource] = { view: false } as any
+        newPermissions[resource] = { view: false } as any // eslint-disable-line @typescript-eslint/no-explicit-any
       }
     }
     // Handle dependency: if enabling create/edit/delete, enable view
     else if (['create', 'edit', 'delete'].includes(action) && checked) {
       if (isResourcePermissions(resourcePerms)) {
-        (resourcePerms as any)[action] = checked
+        (resourcePerms as any)[action] = checked // eslint-disable-line @typescript-eslint/no-explicit-any
         resourcePerms.view = true
-        newPermissions[resource] = resourcePerms as any
+        newPermissions[resource] = resourcePerms as any // eslint-disable-line @typescript-eslint/no-explicit-any
       } else if (isSimplePermissions(resourcePerms) && action === 'edit') {
         (resourcePerms as SimplePermissions).edit = checked
         resourcePerms.view = true
-        newPermissions[resource] = resourcePerms as any
+        newPermissions[resource] = resourcePerms as any // eslint-disable-line @typescript-eslint/no-explicit-any
       }
     }
     // Normal case
     else {
       if (isResourcePermissions(resourcePerms)) {
-        (resourcePerms as any)[action] = checked
-        newPermissions[resource] = resourcePerms as any
+        (resourcePerms as any)[action] = checked // eslint-disable-line @typescript-eslint/no-explicit-any
+        newPermissions[resource] = resourcePerms as any // eslint-disable-line @typescript-eslint/no-explicit-any
       } else if (isSimplePermissions(resourcePerms)) {
         if (action === 'view') {
           (resourcePerms as SimplePermissions).view = checked
         } else if (action === 'edit') {
           (resourcePerms as SimplePermissions).edit = checked
         }
-        newPermissions[resource] = resourcePerms as any
+        newPermissions[resource] = resourcePerms as any // eslint-disable-line @typescript-eslint/no-explicit-any
       } else if (action === 'view') {
-        newPermissions[resource] = { view: checked } as any
+        newPermissions[resource] = { view: checked } as any // eslint-disable-line @typescript-eslint/no-explicit-any
       }
     }
 

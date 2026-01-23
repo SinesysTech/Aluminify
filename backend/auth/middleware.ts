@@ -205,13 +205,13 @@ export async function isSuperAdmin(userId: string): Promise<boolean> {
   }
 }
 
-export function requireAuth(
+export function requireAuth<TContext = Record<string, unknown>>(
   handler: (
     request: AuthenticatedRequest,
-    context?: any,
+    context?: TContext,
   ) => Promise<NextResponse>,
 ) {
-  return async (request: NextRequest, context?: any) => {
+  return async (request: NextRequest, context?: TContext) => {
     const auth = await getAuth(request);
 
     if (!auth) {
@@ -229,7 +229,7 @@ export function requireAuth(
     let unwrappedContext = context;
     if (context && "params" in context && context.params instanceof Promise) {
       const params = await context.params;
-      unwrappedContext = { ...context, params };
+      unwrappedContext = { ...context, params } as TContext;
     }
 
     return handler(authenticatedRequest, unwrappedContext);
