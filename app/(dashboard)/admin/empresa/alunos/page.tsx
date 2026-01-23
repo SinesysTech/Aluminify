@@ -1,4 +1,4 @@
-﻿import type { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/server'
 import { createStudentService } from '@/backend/services/student'
 import { createCourseService } from '@/backend/services/course'
@@ -9,32 +9,38 @@ export const metadata: Metadata = {
   title: 'Alunos da Empresa'
 }
 
-export default async function EmpresaAlunosPage({ searchParams }: { searchParams: { page?: string, query?: string } }) {
+export default async function EmpresaAlunosPage({
+  searchParams,
+}: {
+  searchParams: { page?: string; query?: string; courseId?: string; turmaId?: string };
+}) {
   // Ensure only empresa admins and superadmins can access
   await requireUser({ allowedRoles: ['professor', 'usuario', 'superadmin'] })
 
-  const { page: pageStr, query: queryStr } = await searchParams
+  const { page: pageStr, query: queryStr, courseId: courseIdStr, turmaId: turmaIdStr } = await searchParams
   const page = Number(pageStr) || 1
   const query = queryStr || ''
+  const courseId = courseIdStr || undefined
+  const turmaId = turmaIdStr || undefined
 
   // Usar cliente com contexto do usuário para respeitar RLS
   const supabase = await createClient()
   const studentService = createStudentService(supabase)
   const courseService = createCourseService(supabase)
 
-  const [studentsResult, coursesResult] = await Promise.all([
-    studentService.list({ page, perPage: 10, query }),
+  const [studentsResult, coursesResult, allStudentsMetaResult] = await Promise.all([
+    studentService.list({ page, perPage: 10, query, courseId, turmaId }),
     courseService.list({ perPage: 100, sortBy: 'name', sortOrder: 'asc' })
+    ,
+    // Para mostrar o total da empresa no topo (independente de filtros)
+    studentService.list({ page: 1, perPage: 1 }),
   ])
 
   const { data: students, meta } = studentsResult
   const { data: courses } = coursesResult
+  const totalAll = allStudentsMetaResult.meta.total
 
-  const coursesSimple = courses.map(c => ({
-    id: c.id,
-    name: c.name,
-    usaTurmas: c.usaTurmas
-  }))
+  const coursesSimple = courses.map(c => ({ id: c.id, name: c.name, usaTurmas: c.usaTurmas ?? false }))
 
-  return <AlunosClientPage students={students} meta={meta} courses={coursesSimple} />
+  return <AlunosClientPage students={students} meta={meta} courses={coursesSimple} totalAll={totalAll} />
 }

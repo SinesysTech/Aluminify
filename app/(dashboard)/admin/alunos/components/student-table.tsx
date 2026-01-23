@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Eye, Trash2, UserCog } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Student } from '@/types/shared/entities/user'
 import { createClient } from '@/lib/client'
 import {
@@ -14,21 +14,32 @@ import {
 import { Button } from "@/components/ui/button"
 import { DeleteStudentDialog } from './delete-student-dialog'
 import { toast } from '@/hooks/use-toast'
+import type { PaginationMeta } from '@/types/shared/dtos/api-responses'
 
 interface StudentTableProps {
     students: Student[]
+    meta: PaginationMeta
 }
 
-export function StudentTable({ students }: StudentTableProps) {
+export function StudentTable({ students, meta }: StudentTableProps) {
     const [loadingId, setLoadingId] = useState<string | null>(null)
     const [mounted, setMounted] = useState(false)
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [studentToDelete, setStudentToDelete] = useState<Student | null>(null)
     const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
 
     useEffect(() => {
         setMounted(true)
     }, [])
+
+    const goToPage = (page: number) => {
+        const nextPage = Math.max(1, page)
+        const params = new URLSearchParams(searchParams)
+        params.set('page', String(nextPage))
+        router.push(`${pathname}?${params.toString()}`)
+    }
 
     const handleDeleteClick = (student: Student) => {
         setStudentToDelete(student)
@@ -249,11 +260,35 @@ export function StudentTable({ students }: StudentTableProps) {
                 </table>
 
                 <div className="border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
-                    {/* Simple pagination mock for UI parity - logic to be added with real pagination props */}
-                    <span className="text-xs text-[#71717A]">Mostrando <strong>{students.length}</strong> resultados</span>
+                    <span className="text-xs text-[#71717A]">
+                        {meta.total === 0 ? (
+                            <>Mostrando <strong>0</strong> resultados</>
+                        ) : (
+                            <>
+                                Mostrando{' '}
+                                <strong>{(meta.page - 1) * meta.perPage + 1}</strong>
+                                {'-'}
+                                <strong>{Math.min(meta.page * meta.perPage, meta.total)}</strong>
+                                {' '}de <strong>{meta.total}</strong>
+                            </>
+                        )}
+                        {meta.totalPages > 1 ? <> • Página <strong>{meta.page}</strong> de <strong>{meta.totalPages}</strong></> : null}
+                    </span>
                     <div className="flex gap-2">
-                        <button className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50" disabled>Anterior</button>
-                        <button className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50">Proximo</button>
+                        <button
+                            className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+                            disabled={meta.page <= 1}
+                            onClick={() => goToPage(meta.page - 1)}
+                        >
+                            Anterior
+                        </button>
+                        <button
+                            className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+                            disabled={meta.page >= meta.totalPages}
+                            onClick={() => goToPage(meta.page + 1)}
+                        >
+                            Próximo
+                        </button>
                     </div>
                 </div>
             </div>

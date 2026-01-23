@@ -77,30 +77,42 @@ export function PermissionsMatrix({
   ) => {
     if (readOnly || !onChange) return
 
-    const newPermissions = { ...permissions }
-    const resourcePerms = { ...newPermissions[resource] }
+    const newPermissions: RolePermissions = { ...permissions }
+    const resourcePerms = newPermissions[resource]
+    let updatedResourcePerms: RolePermissions[keyof RolePermissions] = resourcePerms
 
     // Handle dependency: if disabling view, disable all other actions
     if (action === 'view' && !checked) {
       if (isResourcePermissions(resourcePerms)) {
-        newPermissions[resource] = {
+        updatedResourcePerms = {
           view: false,
           create: false,
           edit: false,
           delete: false,
+<<<<<<< HEAD
         } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+=======
+        }
+>>>>>>> 14850b2e1b3b595dfafc362dbb09004e3694c226
       } else if (isSimplePermissions(resourcePerms)) {
-        newPermissions[resource] = {
+        updatedResourcePerms = {
           view: false,
           edit: false,
+<<<<<<< HEAD
         } as any // eslint-disable-line @typescript-eslint/no-explicit-any
       } else {
         newPermissions[resource] = { view: false } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+=======
+        }
+      } else {
+        updatedResourcePerms = { view: false }
+>>>>>>> 14850b2e1b3b595dfafc362dbb09004e3694c226
       }
     }
     // Handle dependency: if enabling create/edit/delete, enable view
     else if (['create', 'edit', 'delete'].includes(action) && checked) {
       if (isResourcePermissions(resourcePerms)) {
+<<<<<<< HEAD
         (resourcePerms as any)[action] = checked // eslint-disable-line @typescript-eslint/no-explicit-any
         resourcePerms.view = true
         newPermissions[resource] = resourcePerms as any // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -108,26 +120,52 @@ export function PermissionsMatrix({
         (resourcePerms as SimplePermissions).edit = checked
         resourcePerms.view = true
         newPermissions[resource] = resourcePerms as any // eslint-disable-line @typescript-eslint/no-explicit-any
+=======
+        const next = { ...resourcePerms } as ResourcePermissions
+        next[action as keyof ResourcePermissions] = checked
+        next.view = true
+        updatedResourcePerms = next
+      } else if (isSimplePermissions(resourcePerms) && action === 'edit') {
+        const next = { ...resourcePerms } as SimplePermissions
+        next.edit = checked
+        next.view = true
+        updatedResourcePerms = next
+>>>>>>> 14850b2e1b3b595dfafc362dbb09004e3694c226
       }
     }
     // Normal case
     else {
       if (isResourcePermissions(resourcePerms)) {
+<<<<<<< HEAD
         (resourcePerms as any)[action] = checked // eslint-disable-line @typescript-eslint/no-explicit-any
         newPermissions[resource] = resourcePerms as any // eslint-disable-line @typescript-eslint/no-explicit-any
+=======
+        const next = { ...resourcePerms } as ResourcePermissions
+        next[action as keyof ResourcePermissions] = checked
+        updatedResourcePerms = next
+>>>>>>> 14850b2e1b3b595dfafc362dbb09004e3694c226
       } else if (isSimplePermissions(resourcePerms)) {
+        const next = { ...resourcePerms } as SimplePermissions
         if (action === 'view') {
-          (resourcePerms as SimplePermissions).view = checked
+          next.view = checked
         } else if (action === 'edit') {
-          (resourcePerms as SimplePermissions).edit = checked
+          next.edit = checked
         }
+<<<<<<< HEAD
         newPermissions[resource] = resourcePerms as any // eslint-disable-line @typescript-eslint/no-explicit-any
       } else if (action === 'view') {
         newPermissions[resource] = { view: checked } as any // eslint-disable-line @typescript-eslint/no-explicit-any
+=======
+        updatedResourcePerms = next
+      } else if (action === 'view') {
+        updatedResourcePerms = { view: checked }
+>>>>>>> 14850b2e1b3b595dfafc362dbb09004e3694c226
       }
     }
 
-    onChange(newPermissions)
+    // Ao atribuir via índice com key union, o TS exige interseção dos tipos.
+    // Fazemos o merge com computed key e consolidamos em RolePermissions.
+    onChange({ ...newPermissions, [resource]: updatedResourcePerms } as RolePermissions)
   }
 
   const getPermissionValue = (

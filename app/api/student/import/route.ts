@@ -54,6 +54,13 @@ async function postHandler(request: AuthenticatedRequest) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  if (!request.user.empresaId && !request.user.isSuperAdmin) {
+    return NextResponse.json(
+      { error: "Empresa não encontrada para o usuário autenticado." },
+      { status: 403 },
+    );
+  }
+
   try {
     const body = await request.json();
 
@@ -65,7 +72,9 @@ async function postHandler(request: AuthenticatedRequest) {
     }
 
     const rows = normalizeRowPayload(body.rows);
-    const result = await studentImportService.import(rows);
+    const result = await studentImportService.import(rows, {
+      empresaId: request.user.empresaId,
+    });
 
     return NextResponse.json({ data: result }, { status: 201 });
   } catch (error) {

@@ -3,6 +3,7 @@ import { getDatabaseClient } from "@/backend/clients/database";
 import { createProductRepository } from "@/backend/services/financial";
 import { requireAuth, AuthenticatedRequest } from "@/backend/auth/middleware";
 import type { UpdateProductInput } from "@/backend/services/financial/financial.types";
+import { isAdminRoleTipo } from "@/lib/roles";
 
 interface RouteContext {
   params: { id: string };
@@ -97,7 +98,8 @@ async function patchHandler(request: AuthenticatedRequest, context?: Record<stri
     }
 
     // Check if user is admin
-    if (!user.isAdmin && !user.isSuperAdmin) {
+    const isAdmin = user.role === "usuario" && !!user.roleType && isAdminRoleTipo(user.roleType);
+    if (!user.isSuperAdmin && !isAdmin) {
       return NextResponse.json(
         { error: "Only admins can update products" },
         { status: 403 }
@@ -159,7 +161,8 @@ async function deleteHandler(request: AuthenticatedRequest, context?: Record<str
     }
 
     // Check if user is admin
-    if (!user.isAdmin && !user.isSuperAdmin) {
+    const isAdmin = user.role === "usuario" && !!user.roleType && isAdminRoleTipo(user.roleType);
+    if (!user.isSuperAdmin && !isAdmin) {
       return NextResponse.json(
         { error: "Only admins can delete products" },
         { status: 403 }

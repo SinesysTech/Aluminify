@@ -205,10 +205,29 @@ export async function isSuperAdmin(userId: string): Promise<boolean> {
   }
 }
 
+<<<<<<< HEAD
 export function requireAuth<TContext = Record<string, unknown>>(
   handler: (
     request: AuthenticatedRequest,
     context?: TContext,
+=======
+export function requireAuth(
+  handler: (request: AuthenticatedRequest) => Promise<NextResponse>,
+): (request: NextRequest) => Promise<NextResponse>;
+export function requireAuth<TContext = unknown>(
+  handler: (request: AuthenticatedRequest, context: TContext) => Promise<NextResponse>,
+): (request: NextRequest, context: TContext) => Promise<NextResponse>;
+export function requireAuth<TContext = unknown>(
+  handler: (
+    request: AuthenticatedRequest,
+    context?: TContext,
+  ) => Promise<NextResponse>,
+): (request: NextRequest, context?: TContext) => Promise<NextResponse>;
+export function requireAuth<TContext = unknown>(
+  handler: (
+    request: AuthenticatedRequest,
+    context?: TContext,
+>>>>>>> 14850b2e1b3b595dfafc362dbb09004e3694c226
   ) => Promise<NextResponse>,
 ) {
   return async (request: NextRequest, context?: TContext) => {
@@ -226,6 +245,7 @@ export function requireAuth<TContext = Record<string, unknown>>(
     }
 
     // Unwrap params if it's a Promise (Next.js 16+)
+<<<<<<< HEAD
     let unwrappedContext = context;
     if (
       context &&
@@ -237,9 +257,19 @@ export function requireAuth<TContext = Record<string, unknown>>(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const params = await (context as any).params;
       unwrappedContext = { ...context, params } as TContext;
+=======
+    let unwrappedContext: unknown = context;
+    if (context && typeof context === "object" && "params" in (context as Record<string, unknown>)) {
+      const record = context as Record<string, unknown>;
+      const paramsValue = record.params;
+      if (paramsValue instanceof Promise) {
+        const params = await paramsValue;
+        unwrappedContext = { ...record, params };
+      }
+>>>>>>> 14850b2e1b3b595dfafc362dbb09004e3694c226
     }
 
-    return handler(authenticatedRequest, unwrappedContext);
+    return handler(authenticatedRequest, unwrappedContext as TContext);
   };
 }
 

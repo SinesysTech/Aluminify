@@ -23,6 +23,8 @@ import type { AppUser, AppUserRole } from "@/types/user";
 import type { RoleTipo, RolePermissions } from "@/types/shared/entities/papel";
 import { getImpersonationContext } from "@/lib/auth-impersonate";
 
+type LegacyAppUserRole = "professor" | "empresa";
+
 export async function getAuthenticatedUser(): Promise<AppUser | null> {
   const supabase = await createClient();
   const {
@@ -50,9 +52,14 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
   const metadataRole =
     isImpersonating && impersonationContext
       ? impersonationContext.impersonatedUserRole
-      : (user.user_metadata?.role as AppUserRole) || "aluno";
+      : ((user.user_metadata?.role as AppUserRole | LegacyAppUserRole) ||
+          "aluno");
 
-  let role: AppUserRole = metadataRole as AppUserRole;
+  // Back-compat: map legacy roles to the unified staff role ("usuario")
+  let role: AppUserRole =
+    metadataRole === "professor" || metadataRole === "empresa"
+      ? "usuario"
+      : (metadataRole as AppUserRole);
 
   let mustChangePassword = Boolean(user.user_metadata?.must_change_password);
   let roleType: RoleTipo | undefined;
@@ -242,8 +249,12 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
 }
 
 type RequireUserOptions = {
+  /**
+   * Back-compat: ainda existem páginas usando roles legadas ("professor"/"empresa").
+   * Internamente isso é tratado como "usuario".
+   */
+  allowedRoles?: (AppUserRole | LegacyAppUserRole)[];
   ignorePasswordRequirement?: boolean;
-  allowedRoles?: AppUserRole[];
 };
 
 export async function requireUser(
@@ -253,6 +264,18 @@ export async function requireUser(
 
   if (!user) {
     redirect("/auth");
+  }
+
+  if (options?.allowedRoles && options.allowedRoles.length > 0) {
+    const normalizedAllowed = new Set<AppUserRole>(
+      options.allowedRoles.map((r) =>
+        r === "professor" || r === "empresa" ? "usuario" : (r as AppUserRole),
+      ),
+    );
+
+    if (!normalizedAllowed.has(user.role)) {
+      redirect(getDefaultRouteForRole(user.role));
+    }
   }
 
   if (!options?.ignorePasswordRequirement && user.mustChangePassword) {

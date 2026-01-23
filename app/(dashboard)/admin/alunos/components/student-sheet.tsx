@@ -37,7 +37,6 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
 
     // Get selected course
     const selectedCourse = courses.find(c => c.id === formData.courseId)
-    const showTurmaSelector = selectedCourse?.usaTurmas && turmas.length > 0
 
     // Load turmas when course changes and it uses turmas
     useEffect(() => {
