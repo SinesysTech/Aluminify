@@ -162,7 +162,20 @@ export const ActiveThemeProvider = ThemeConfigProvider;
 export function useThemeConfig() {
   const context = useContext(ThemeConfigContext);
   if (!context) {
-    throw new Error('useThemeConfig must be used within a ThemeConfigProvider');
+    if (process.env.NODE_ENV !== 'production') {
+      // Evita quebrar a UI inteira em casos onde o Provider ainda não foi montado
+      // (ex.: boundaries de layout, HMR, ou usos acidentais fora da árvore esperada).
+      console.warn(
+        '[ThemeConfig] useThemeConfig usado fora de ThemeConfigProvider; usando fallback.',
+      )
+    }
+    return {
+      theme: DEFAULT_THEME,
+      setTheme: () => {},
+      loadTenantBranding: async () => {},
+      applyBrandingToTheme: () => {},
+      resetBrandingToDefaults: () => {},
+    } as const
   }
   return context;
 }
