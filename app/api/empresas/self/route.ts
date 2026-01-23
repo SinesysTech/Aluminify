@@ -132,11 +132,35 @@ export async function POST(request: NextRequest) {
       // O professor já foi vinculado como admin na tabela professores
     }
 
-    // 4) Atualizar metadata do usuário (melhora UX de contexto no frontend)
+    // 4) Atualizar registro em usuarios para papel professor_admin
+    // Buscar papel_id do professor_admin
+    const { data: papelAdmin } = await adminClient
+      .from("papeis")
+      .select("id")
+      .eq("tipo", "professor_admin")
+      .eq("is_system", true)
+      .single();
+
+    if (papelAdmin) {
+      const { error: updateUsuarioError } = await adminClient
+        .from("usuarios")
+        .update({
+          empresa_id: empresa.id,
+          papel_id: papelAdmin.id,
+        })
+        .eq("id", user.id);
+
+      if (updateUsuarioError) {
+        console.error("Error updating usuario:", updateUsuarioError);
+      }
+    }
+
+    // 5) Atualizar metadata do usuário (melhora UX de contexto no frontend)
     try {
       await adminClient.auth.admin.updateUserById(user.id, {
         user_metadata: {
-          role: "professor",
+          role: "usuario",
+          role_type: "professor_admin",
           empresa_id: empresa.id,
           is_admin: true,
         },

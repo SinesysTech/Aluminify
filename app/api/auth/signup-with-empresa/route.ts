@@ -46,16 +46,19 @@ export async function POST(request: NextRequest) {
     });
 
     // 2. Criar usuário com empresa_id
+    // IMPORTANTE: role_type define o papel na tabela usuarios via trigger handle_new_user()
+    // O primeiro usuário que cria a empresa deve ser professor_admin (administrador)
     const { data: newUser, error: userError } =
       await adminClient.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
         user_metadata: {
-          role: "professor",
+          role: "usuario",
+          role_type: "professor_admin", // Define papel como Professor Administrador
           full_name: fullName,
           empresa_id: empresa.id,
-          is_admin: true, // Primeiro professor da empresa é admin
+          is_admin: true,
         },
       });
 

@@ -110,8 +110,8 @@ export function StudentTable({ students }: StudentTableProps) {
                 <table className="w-full text-left text-sm">
                 <thead className="border-b border-[#E4E4E7]">
                     <tr>
-                        <th className="h-10 px-4 font-mono text-xs font-medium text-[#71717A] uppercase tracking-wider w-[120px]">ID Sistema</th>
                         <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs">Aluno / Email</th>
+                        <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs">Cursos</th>
                         <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs w-[150px]">Status</th>
                         <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs w-[200px]">Progresso</th>
                         <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs text-right w-[60px]">Ações</th>
@@ -135,7 +135,6 @@ export function StudentTable({ students }: StudentTableProps) {
 
                             return (
                                 <tr key={student.id} className="group hover:bg-zinc-50 transition-colors">
-                                    <td className="p-4 font-mono text-xs text-[#71717A]">{student.id.substring(0, 8)}...</td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-8 h-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-xs font-bold text-zinc-600">
@@ -146,6 +145,22 @@ export function StudentTable({ students }: StudentTableProps) {
                                                 <div className="font-mono text-xs text-[#71717A]">{student.email}</div>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td className="p-4">
+                                        {student.courses && student.courses.length > 0 ? (
+                                            <div className="flex flex-wrap gap-1">
+                                                {student.courses.map((course) => (
+                                                    <span
+                                                        key={course.id}
+                                                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700 border border-zinc-200"
+                                                    >
+                                                        {course.name}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <span className="text-xs text-zinc-400">-</span>
+                                        )}
                                     </td>
                                     <td className="p-4">
                                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${status === 'Ativo'
