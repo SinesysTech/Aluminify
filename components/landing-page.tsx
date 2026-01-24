@@ -4,100 +4,95 @@ import Link from "next/link";
 
 export function LandingPage() {
     return (
-        <div className="min-h-screen bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark font-sans antialiased selection:bg-gray-200 dark:selection:bg-gray-700 transition-colors duration-200 overflow-x-hidden">
+        <div className="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark font-sans antialiased selection:bg-zinc-200 dark:selection:bg-zinc-800 transition-colors duration-200">
             <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute inset-0 bg-(image:--color-grid-pattern) dark:bg-(image:--color-grid-pattern-dark) opacity-[0.3] grid-bg"></div>
+                <div className="absolute inset-0 bg-grid-pattern dark:bg-grid-pattern-dark opacity-[0.4] grid-bg"></div>
             </div>
 
-            <nav className="sticky top-0 z-50 w-full border-b border-border-light/60 dark:border-border-dark/60 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
+            <nav className="sticky top-0 z-50 w-full border-b border-border-light/80 dark:border-border-dark/80 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between h-16 items-center">
-                        <Link className="flex items-center gap-2" href="/">
-                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold font-display text-xl">
-                                A
+                        <div className="flex items-center gap-8">
+                            <Link className="flex items-center gap-2" href="/">
+                                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold font-display text-xl">
+                                    A
+                                </div>
+                                <span className="font-display font-bold text-lg tracking-tight">
+                                    Aluminify
+                                </span>
+                            </Link>
+                            <div className="hidden md:flex gap-6 text-sm font-medium text-text-muted-light dark:text-text-muted-dark">
+                                <a
+                                    className="hover:text-primary dark:hover:text-white transition-colors"
+                                    href="#recursos"
+                                >
+                                    Recursos
+                                </a>
+                                <a
+                                    className="hover:text-primary dark:hover:text-white transition-colors"
+                                    href="#manifesto"
+                                >
+                                    Manifesto
+                                </a>
+                                <a
+                                    className="hover:text-primary dark:hover:text-white transition-colors"
+                                    href="/pricing.html"
+                                >
+                                    Planos
+                                </a>
                             </div>
-                            <span className="font-display font-bold text-lg tracking-tight">
-                                Aluminify
-                            </span>
-                        </Link>
-                        <div className="hidden md:flex gap-6 text-sm font-medium text-text-muted-light dark:text-text-muted-dark absolute left-1/2 -translate-x-1/2">
-                            <a
-                                className="hover:text-primary dark:hover:text-white transition-colors"
-                                href="/features.html"
-                            >
-                                Produto
-                            </a>
-                            <a
-                                className="hover:text-primary dark:hover:text-white transition-colors"
-                                href="/open-source.html"
-                            >
-                                Open Source
-                            </a>
-                            <a
-                                className="hover:text-primary dark:hover:text-white transition-colors"
-                                href="/pricing.html"
-                            >
-                                Preços
-                            </a>
-                            <a
-                                className="hover:text-primary dark:hover:text-white transition-colors"
-                                href="/docs.html"
-                            >
-                                Docs
-                            </a>
                         </div>
                         <div className="flex items-center gap-4">
-                            <Link
+                            <a
                                 className="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-white transition-colors hidden sm:block"
-                                href="/login"
+                                href="/login.html"
                             >
                                 Login
-                            </Link>
-                            <Link
-                                className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm shadow-gray-300 dark:shadow-none"
-                                href="/signup"
+                            </a>
+                            <a
+                                className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm shadow-zinc-300 dark:shadow-none"
+                                href="/signup.html"
                             >
-                                Criar Conta
-                            </Link>
+                                Criar Instância
+                            </a>
                         </div>
                     </div>
                 </div>
             </nav>
 
             <main className="relative z-10">
-                <section className="pt-24 pb-20 lg:pt-32 lg:pb-28 overflow-hidden">
+                <section className="pt-24 pb-16 lg:pt-32 lg:pb-24 overflow-hidden">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 mb-8">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 mb-8">
                             <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
-                            <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                                v2.0 Beta já disponível
+                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
+                                LMS v2.0 Beta Disponível
                             </span>
                         </div>
-                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight mb-6 text-transparent bg-clip-text bg-linear-to-b from-gray-900 to-gray-600 dark:from-white dark:to-gray-400 pb-2">
-                            A infraestrutura invisível <br className="hidden md:block" /> da
-                            educação.
+
+                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight mb-6 text-primary dark:text-white">
+                            A infraestrutura invisível <br className="hidden md:block" /> da educação.
                         </h1>
-                        <p className="text-lg md:text-xl text-text-muted-light dark:text-text-muted-dark max-w-2xl mx-auto mb-10 leading-relaxed">
-                            A primeira área do aluno Open Source e White Label. Crie
-                            experiências de aprendizado de alta performance com a robustez
-                            técnica de uma fintech.
+
+                        <p className="text-lg md:text-xl text-text-muted-light dark:text-text-muted-dark max-w-2xl mx-auto mb-10 leading-relaxed text-balance">
+                            O primeiro <strong>LMS Open Source</strong> desenhado para cursos de alta performance.
+                            Tenha a tecnologia das grandes plataformas, com a sua marca e controle total sobre seus alunos.
                         </p>
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-                            <Link
-                                className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition-all flex items-center justify-center gap-2 shadow-lg shadow-gray-200 dark:shadow-none"
-                                href="/signup"
-                            >
-                                Começar Agora (Cloud)
-                                <span className="material-icons-outlined text-sm">
-                                    arrow_forward
-                                </span>
-                            </Link>
+
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
                             <a
-                                className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-main-light dark:text-text-main-dark font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex items-center justify-center gap-2 group"
+                                className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition-all flex items-center justify-center gap-2 shadow-lg shadow-zinc-200 dark:shadow-none"
+                                href="/signup.html"
+                            >
+                                Começar Agora
+                                <span className="material-icons-outlined text-sm">arrow_forward</span>
+                            </a>
+                            <a
+                                className="w-full sm:w-auto px-8 py-3.5 bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark text-text-main-light dark:text-text-main-dark font-medium rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 group"
                                 href="https://github.com/aluminify"
                             >
                                 <svg
-                                    className="w-5 h-5 text-gray-500 group-hover:text-black dark:text-gray-400 dark:group-hover:text-white transition-colors"
+                                    className="w-5 h-5 text-zinc-500 group-hover:text-black dark:text-zinc-400 dark:group-hover:text-white transition-colors"
                                     fill="currentColor"
                                     viewBox="0 0 24 24"
                                     aria-hidden="true"
@@ -108,159 +103,88 @@ export function LandingPage() {
                                         clipRule="evenodd"
                                     ></path>
                                 </svg>
-                                Star on GitHub
+                                Ver no GitHub
                             </a>
                         </div>
 
                         <div className="relative max-w-5xl mx-auto">
-                            <div className="absolute -inset-1 bg-linear-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded-xl blur opacity-30"></div>
-                            <div className="relative bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl shadow-2xl overflow-hidden aspect-16/10 md:aspect-video">
-                                <div className="border-b border-border-light dark:border-border-dark bg-gray-50 dark:bg-gray-800/50 p-4 flex items-center gap-4">
+                            <div className="absolute -inset-1 bg-linear-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 rounded-xl blur opacity-40"></div>
+
+                            <div className="relative bg-surface-light dark:bg-surface-dark border border-border-light dark:border-border-dark rounded-xl shadow-2xl overflow-hidden aspect-16/10 md:aspect-video flex flex-col">
+                                <div className="border-b border-border-light dark:border-border-dark bg-zinc-50 dark:bg-zinc-900/50 p-3 flex items-center gap-4">
                                     <div className="flex gap-2">
                                         <div className="w-3 h-3 rounded-full bg-red-400"></div>
                                         <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
                                         <div className="w-3 h-3 rounded-full bg-green-400"></div>
                                     </div>
-                                    <div className="h-6 w-64 bg-white dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-700 flex items-center px-3 text-[10px] text-gray-400 font-mono shadow-sm">
-                                        https://aluno.suaescola.com
+                                    <div className="h-7 w-full max-w-lg bg-white dark:bg-zinc-950 rounded border border-zinc-200 dark:border-zinc-800 flex items-center px-3 text-[11px] text-zinc-400 font-mono shadow-sm mx-auto">
+                                        <span className="material-icons-outlined text-[12px] mr-2">lock</span>
+                                        https://aluno.seupreparatorio.com.br
                                     </div>
                                 </div>
-                                <div className="flex h-full">
-                                    <div className="w-64 border-r border-border-light dark:border-border-dark p-6 hidden md:block bg-gray-50/50 dark:bg-gray-900/30">
-                                        <div className="space-y-3 font-mono text-xs">
-                                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                                                <span className="material-icons-outlined text-sm">
-                                                    folder
-                                                </span>{" "}
-                                                components
+
+                                <div className="flex-1 flex overflow-hidden bg-zinc-50 dark:bg-[#09090b]">
+                                    <div className="w-14 md:w-56 border-r border-border-light dark:border-border-dark bg-white dark:bg-surface-dark hidden sm:flex flex-col p-4 justify-between">
+                                        <div>
+                                            <div className="flex items-center gap-3 mb-8">
+                                                <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-white text-sm font-bold font-display">A</div>
+                                                <div className="h-3 w-24 bg-zinc-200 dark:bg-zinc-800 rounded hidden md:block"></div>
                                             </div>
-                                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 pl-4">
-                                                <span className="material-icons-outlined text-sm">
-                                                    folder
-                                                </span>{" "}
-                                                ui
+                                            <div className="space-y-2">
+                                                <div className="h-9 bg-zinc-100 dark:bg-zinc-800/50 rounded flex items-center px-2 gap-3 border border-zinc-200 dark:border-zinc-700">
+                                                    <span className="material-icons-outlined text-sm text-primary">dashboard</span>
+                                                    <div className="h-2 w-20 bg-zinc-300 dark:bg-zinc-600 rounded hidden md:block"></div>
+                                                </div>
+                                                <div className="h-9 flex items-center px-2 gap-3 text-zinc-400">
+                                                    <span className="material-icons-outlined text-sm">library_books</span>
+                                                    <div className="h-2 w-16 bg-zinc-100 dark:bg-zinc-800 rounded hidden md:block"></div>
+                                                </div>
+                                                <div className="h-9 flex items-center px-2 gap-3 text-zinc-400">
+                                                    <span className="material-icons-outlined text-sm">style</span>
+                                                    <div className="h-2 w-14 bg-zinc-100 dark:bg-zinc-800 rounded hidden md:block"></div>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 pl-4 bg-blue-50 dark:bg-blue-900/20 py-1 rounded">
-                                                <span className="material-icons-outlined text-sm">
-                                                    description
-                                                </span>{" "}
-                                                Player.tsx
-                                            </div>
-                                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 pl-4">
-                                                <span className="material-icons-outlined text-sm">
-                                                    description
-                                                </span>{" "}
-                                                Sidebar.tsx
-                                            </div>
-                                            <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                                                <span className="material-icons-outlined text-sm">
-                                                    folder
-                                                </span>{" "}
-                                                lib
+                                        </div>
+                                        <div className="flex items-center gap-3 pt-4 border-t border-border-light dark:border-border-dark">
+                                            <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700"></div>
+                                            <div className="hidden md:block space-y-1">
+                                                <div className="h-2 w-20 bg-zinc-200 dark:bg-zinc-700 rounded"></div>
+                                                <div className="h-1.5 w-12 bg-zinc-100 dark:bg-zinc-800 rounded"></div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex-1 p-6 md:p-8 bg-white dark:bg-background-dark">
-                                        <div className="flex flex-col gap-8 h-full">
-                                            <div className="bg-gray-900 rounded-lg p-4 shadow-lg overflow-hidden relative">
-                                                <div className="absolute top-2 right-2 text-[10px] text-gray-500 font-bold">
-                                                    TSX
+
+                                    <div className="flex-1 p-6 md:p-8 overflow-hidden flex flex-col gap-6">
+                                        <div className="flex justify-between items-end">
+                                            <div>
+                                                <div className="h-6 w-48 bg-zinc-200 dark:bg-zinc-800 rounded mb-2"></div>
+                                                <div className="h-3 w-64 bg-zinc-100 dark:bg-zinc-900 rounded"></div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
+                                            <div className="col-span-2 bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-0 overflow-hidden flex flex-col">
+                                                <div className="h-32 bg-zinc-100 dark:bg-zinc-800 relative flex items-center justify-center">
+                                                    <span className="material-icons-outlined text-4xl text-zinc-300 dark:text-zinc-600">play_circle</span>
+                                                    <div className="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-1 rounded font-mono">12:40</div>
                                                 </div>
-                                                <div className="font-mono text-xs leading-relaxed text-gray-300">
-                                                    <div className="flex">
-                                                        <span className="text-gray-600 w-6 select-none">
-                                                            1
-                                                        </span>
-                                                        <span className="text-purple-400">import</span>{" "}
-                                                        {"{ Aluminify }"} <span className="text-purple-400">from</span>{" "}
-                                                        <span className="text-green-400">&apos;@core/sdk&apos;</span>
-                                                        ;
+                                                <div className="p-4 flex-1 flex flex-col justify-center">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                                        <div className="h-2 w-16 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
                                                     </div>
-                                                    <div className="flex">
-                                                        <span className="text-gray-600 w-6 select-none">
-                                                            2
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex">
-                                                        <span className="text-gray-600 w-6 select-none">
-                                                            3
-                                                        </span>
-                                                        <span className="text-purple-400">
-                                                            export default
-                                                        </span>{" "}
-                                                        <span className="text-blue-400">function</span>{" "}
-                                                        <span className="text-yellow-300">App</span>() {"{"}
-                                                    </div>
-                                                    <div className="flex">
-                                                        <span className="text-gray-600 w-6 select-none">
-                                                            4
-                                                        </span>{" "}
-                                                        <span className="text-purple-400">return</span> (
-                                                    </div>
-                                                    <div className="flex">
-                                                        <span className="text-gray-600 w-6 select-none">
-                                                            5
-                                                        </span>{" "}
-                                                        &lt;
-                                                        <span className="text-yellow-300">
-                                                            Aluminify.Provider
-                                                        </span>{" "}
-                                                        <span className="text-blue-300">theme</span>=
-                                                        <span className="text-green-400">&quot;dark&quot;</span>&gt;
-                                                    </div>
-                                                    <div className="flex">
-                                                        <span className="text-gray-600 w-6 select-none">
-                                                            6
-                                                        </span>{" "}
-                                                        &lt;<span className="text-yellow-300">StudentDashboard</span> /&gt;
-                                                    </div>
-                                                    <div className="flex">
-                                                        <span className="text-gray-600 w-6 select-none">
-                                                            7
-                                                        </span>{" "}
-                                                        &lt;/
-                                                        <span className="text-yellow-300">
-                                                            Aluminify.Provider
-                                                        </span>
-                                                        &gt;
-                                                    </div>
-                                                    <div className="flex">
-                                                        <span className="text-gray-600 w-6 select-none">
-                                                            8
-                                                        </span>{" "}
-                                                        );
-                                                    </div>
-                                                    <div className="flex">
-                                                        <span className="text-gray-600 w-6 select-none">
-                                                            9
-                                                        </span>
-                                                        {"}"}
+                                                    <div className="h-4 w-3/4 bg-zinc-800 dark:bg-zinc-200 rounded mb-2"></div>
+                                                    <div className="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded mb-4">
+                                                        <div className="h-full w-1/3 bg-blue-500 rounded"></div>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            <div className="border border-border-light dark:border-border-dark rounded-lg p-4 flex-1 flex flex-col">
-                                                <div className="flex justify-between items-center mb-4">
-                                                    <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300">
-                                                        Engajamento Semanal
-                                                    </h4>
-                                                    <span className="text-xs text-green-500 font-bold bg-green-50 px-2 py-1 rounded">
-                                                        +24%
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-end justify-between flex-1 gap-2">
-                                                    <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-t h-[40%]"></div>
-                                                    <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-t h-[60%]"></div>
-                                                    <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-t h-[30%]"></div>
-                                                    <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-t h-[80%]"></div>
-                                                    <div className="w-full bg-blue-500 rounded-t h-[95%] relative group">
-                                                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] bg-black text-white px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            95%
-                                                        </div>
-                                                    </div>
-                                                    <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-t h-[50%]"></div>
-                                                    <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-t h-[70%]"></div>
-                                                </div>
+                                            <div className="bg-white dark:bg-surface-dark rounded-xl shadow-sm border border-border-light dark:border-border-dark p-6 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                                                <div className="absolute top-0 right-0 w-16 h-16 bg-red-50 dark:bg-red-900/10 rounded-bl-full -mr-8 -mt-8"></div>
+                                                <span className="material-icons-outlined text-3xl text-red-500 mb-2">style</span>
+                                                <div className="h-3 w-16 bg-zinc-800 dark:bg-white rounded mb-1"></div>
+                                                <div className="h-2 w-10 bg-zinc-300 dark:bg-zinc-700 rounded"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -270,12 +194,38 @@ export function LandingPage() {
                     </div>
                 </section>
 
-                <section className="py-20 border-t border-border-light dark:border-border-dark bg-white dark:bg-background-dark">
+                <section className="py-24 bg-zinc-50 dark:bg-zinc-900 border-y border-border-light dark:border-border-dark" id="manifesto">
+                    <div className="max-w-4xl mx-auto px-6 text-center">
+                        <span className="text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase mb-6 block">Nossa Filosofia</span>
+
+                        <h2 className="text-3xl md:text-4xl font-display font-bold text-primary dark:text-white mb-8 leading-tight">
+                            Ensinar é, antes de tudo, <br className="hidden md:block" /> um ato de autonomia.
+                        </h2>
+
+                        <div className="prose prose-zinc dark:prose-invert mx-auto text-text-muted-light dark:text-text-muted-dark leading-relaxed text-lg max-w-2xl">
+                            <p>
+                                Quando você fecha a porta da sala de aula, aquele espaço é seu. A didática é sua. A conexão é sua. Mas, no digital, tentaram convencer você a abrir mão disso.
+                            </p>
+                            <p>
+                                Disseram que, para ensinar online, você precisava alugar um terreno em plataformas que não são suas. Nós discordamos. O Aluminify nasceu para devolver a soberania à sua instituição.
+                            </p>
+                        </div>
+
+                        <div className="mt-10">
+                            <a href="/manifesto.html" className="inline-flex items-center gap-2 text-primary dark:text-white font-medium border-b border-primary dark:border-white pb-0.5 hover:opacity-70 transition-opacity group">
+                                Ler manifesto completo
+                                <span className="material-icons-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </a>
+                        </div>
+                    </div>
+                </section>
+
+                <section className="py-24 bg-white dark:bg-background-dark" id="recursos">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="grid md:grid-cols-3 gap-12">
                             <div className="group">
-                                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <span className="material-icons-outlined text-gray-700 dark:text-gray-300">
+                                <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <span className="material-icons-outlined text-zinc-700 dark:text-zinc-300">
                                         verified_user
                                     </span>
                                 </div>
@@ -283,234 +233,87 @@ export function LandingPage() {
                                     Soberania de Dados
                                 </h3>
                                 <p className="text-text-muted-light dark:text-text-muted-dark leading-relaxed">
-                                    Seus dados, suas regras. Hospede onde quiser e mantenha
-                                    controle total sobre as informações dos seus alunos, sem
-                                    lock-in.
+                                    Sua lista de alunos é o ativo mais valioso da sua instituição. Aqui, o banco de dados é seu, sem intermediários ou bloqueios.
                                 </p>
                             </div>
                             <div className="group">
-                                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <span className="material-icons-outlined text-gray-700 dark:text-gray-300">
+                                <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <span className="material-icons-outlined text-zinc-700 dark:text-zinc-300">
                                         branding_watermark
                                     </span>
                                 </div>
                                 <h3 className="text-xl font-display font-semibold mb-3">
-                                    White Label Nativo
+                                    Sua Marca em 1º Lugar
                                 </h3>
                                 <p className="text-text-muted-light dark:text-text-muted-dark leading-relaxed">
-                                    Personalização profunda via CSS variables e React Components.
-                                    Sua marca brilha, nós ficamos invisíveis no backend.
+                                    O aluno acessa o <strong>seu domínio</strong> (ex: aluno.seucurso.com). Personalize cores, logos e identidade. Nós somos o palco invisível.
                                 </p>
                             </div>
                             <div className="group">
-                                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <span className="material-icons-outlined text-gray-700 dark:text-gray-300">
+                                <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <span className="material-icons-outlined text-zinc-700 dark:text-zinc-300">
                                         psychology
                                     </span>
                                 </div>
                                 <h3 className="text-xl font-display font-semibold mb-3">
-                                    Inteligência Contextual (RAG)
+                                    Monitoria com IA
                                 </h3>
                                 <p className="text-text-muted-light dark:text-text-muted-dark leading-relaxed">
-                                    Infraestrutura pronta para IA. Vetorização automática de
-                                    conteúdo para tutores inteligentes que conhecem o seu
-                                    material.
+                                    Um tutor digital treinado *apenas* com as suas apostilas e aulas. Ele tira dúvidas dos alunos 24h usando a sua metodologia.
                                 </p>
                             </div>
                         </div>
                     </div>
                 </section>
-
-                <section className="py-24 bg-background-light dark:bg-background-dark relative">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-16">
-                            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-                                Construído para Performance
-                            </h2>
-                            <p className="text-text-muted-light dark:text-text-muted-dark max-w-2xl mx-auto">
-                                Cada pixel foi pensado para maximizar a retenção e o engajamento
-                                do aluno.
-                            </p>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-auto md:h-[600px]">
-                            <div className="md:col-span-2 md:row-span-2 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark p-8 shadow-sm overflow-hidden relative group">
-                                <div className="absolute top-0 right-0 p-8 z-10">
-                                    <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                                        Focus Mode
-                                    </div>
-                                </div>
-                                <div className="relative z-10 mb-8">
-                                    <h3 className="text-2xl font-bold font-display mb-2">
-                                        Aluminify Zen
-                                    </h3>
-                                    <p className="text-text-muted-light dark:text-text-muted-dark">
-                                        Interface livre de distrações, otimizada para longas sessões
-                                        de estudo.
-                                    </p>
-                                </div>
-                                <div className="absolute bottom-0 left-0 right-0 h-2/3 bg-gray-50 dark:bg-gray-800 border-t border-border-light dark:border-border-dark translate-y-8 group-hover:translate-y-4 transition-transform duration-500 rounded-t-xl mx-8 shadow-inner p-6">
-                                    <div className="flex gap-4">
-                                        <div className="w-1/3 space-y-3">
-                                            <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                                            <div className="h-2 w-2/3 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                                            <div className="h-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                                        </div>
-                                        <div className="w-2/3 h-32 bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-border-light dark:border-border-dark flex items-center justify-center">
-                                            <span className="material-icons-outlined text-4xl text-gray-300">
-                                                play_circle_filled
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="md:col-span-1 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark p-6 shadow-sm overflow-hidden relative group hover:border-blue-200 dark:hover:border-blue-900 transition-colors">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                                        <span className="material-icons-outlined text-sm">style</span>
-                                    </div>
-                                    <h3 className="font-bold font-display">
-                                        Flashcards Algorítmicos
-                                    </h3>
-                                </div>
-                                <p className="text-sm text-text-muted-light dark:text-text-muted-dark mb-4">
-                                    Sistema de repetição espaçada (SRS) integrado nativamente.
-                                </p>
-                                <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-border-light dark:border-border-dark text-center group-hover:scale-105 transition-transform">
-                                    <div className="text-xs font-mono text-gray-400 mb-2">
-                                        CARD_FRONT
-                                    </div>
-                                    <div className="font-medium">O que é a Aluminify?</div>
-                                </div>
-                            </div>
-                            <div className="md:col-span-1 bg-white dark:bg-surface-dark rounded-2xl border border-border-light dark:border-border-dark p-6 shadow-sm overflow-hidden relative group hover:border-purple-200 dark:hover:border-purple-900 transition-colors">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                                        <span className="material-icons-outlined text-sm">
-                                            calendar_today
-                                        </span>
-                                    </div>
-                                    <h3 className="font-bold font-display">Agenda Inteligente</h3>
-                                </div>
-                                <p className="text-sm text-text-muted-light dark:text-text-muted-dark mb-4">
-                                    Sincronização bidirecional com Google Calendar e Notion.
-                                </p>
-                                <div className="flex flex-col gap-2">
-                                    <div className="h-8 bg-gray-50 dark:bg-gray-800 border-l-4 border-purple-500 rounded p-1 text-xs flex items-center pl-2 group-hover:translate-x-1 transition-transform">
-                                        Live Class: React Hooks
-                                    </div>
-                                    <div className="h-8 bg-gray-50 dark:bg-gray-800 border-l-4 border-blue-500 rounded p-1 text-xs flex items-center pl-2 group-hover:translate-x-1 transition-transform delay-75">
-                                        Mentoria Individual
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
                 <section className="py-24 border-t border-border-light dark:border-border-dark bg-white dark:bg-background-dark">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-16">
-                            <h2 className="text-3xl font-display font-bold mb-4">
-                                Dois modelos, a mesma potência
-                            </h2>
+                            <h2 className="text-3xl font-display font-bold mb-4">Escolha o modelo ideal</h2>
                         </div>
                         <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                            <div className="bg-gray-50 dark:bg-gray-800/40 rounded-2xl p-8 border border-border-light dark:border-border-dark flex flex-col h-full">
+                            <div className="bg-zinc-50 dark:bg-zinc-800/40 rounded-2xl p-8 border border-border-light dark:border-border-dark flex flex-col h-full">
                                 <div className="mb-6">
-                                    <h3 className="text-2xl font-bold mb-2">Community</h3>
-                                    <div className="text-sm text-text-muted-light dark:text-text-muted-dark font-mono">
-                                        SELF-HOSTED
-                                    </div>
+                                    <h3 className="text-2xl font-bold mb-2">Comunidade</h3>
+                                    <div className="text-sm text-text-muted-light dark:text-text-muted-dark font-mono">SELF-HOSTED</div>
                                 </div>
-                                <div className="text-4xl font-bold mb-6">
-                                    R$ 0
-                                    <span className="text-lg font-normal text-text-muted-light dark:text-text-muted-dark">
-                                        /mês
-                                    </span>
-                                </div>
+                                <div className="text-4xl font-bold mb-6">R$ 0<span className="text-lg font-normal text-text-muted-light dark:text-text-muted-dark">/mês</span></div>
                                 <p className="text-text-muted-light dark:text-text-muted-dark mb-8 grow">
-                                    Perfeito para desenvolvedores e edtechs em estágio inicial com
-                                    capacidade técnica. Código aberto, licença permissiva.
+                                    Para instituições que possuem equipe técnica de TI. Baixe o código, instale nos seus servidores e tenha controle absoluto sem custo de licença.
                                 </p>
                                 <ul className="space-y-3 mb-8 text-sm">
-                                    <li className="flex items-center gap-2">
-                                        <span className="material-icons-outlined text-green-500 text-base">
-                                            check
-                                        </span>{" "}
-                                        Código fonte completo
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <span className="material-icons-outlined text-green-500 text-base">
-                                            check
-                                        </span>{" "}
-                                        Deploy na sua infra
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <span className="material-icons-outlined text-green-500 text-base">
-                                            check
-                                        </span>{" "}
-                                        Suporte da comunidade
-                                    </li>
+                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-500 text-base">check</span> Sem custo de licença (Open Source)</li>
+                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-500 text-base">check</span> Instale onde quiser</li>
+                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-500 text-base">check</span> Suporte da comunidade</li>
                                 </ul>
-                                <a
-                                    className="w-full py-3 border border-gray-300 dark:border-gray-600 rounded-lg text-center font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                                    href="/open-source.html"
-                                >
-                                    Ver no GitHub
+                                <a className="w-full py-3 border border-zinc-300 dark:border-zinc-600 rounded-lg text-center font-medium hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors" href="/open-source.html">
+                                    Acessar Código
                                 </a>
                             </div>
+
                             <div className="bg-primary text-white rounded-2xl p-8 shadow-2xl flex flex-col h-full relative overflow-hidden">
-                                <div className="absolute top-0 right-0 bg-white/10 px-3 py-1 rounded-bl-lg text-xs font-bold uppercase tracking-wider">
-                                    Popular
-                                </div>
+                                <div className="absolute top-0 right-0 bg-white/10 px-3 py-1 rounded-bl-lg text-xs font-bold uppercase tracking-wider">Recomendado</div>
                                 <div className="mb-6 relative z-10">
                                     <h3 className="text-2xl font-bold mb-2">Aluminify Cloud</h3>
-                                    <div className="text-sm text-gray-400 font-mono">MANAGED</div>
+                                    <div className="text-sm text-zinc-400 font-mono">GERENCIADO</div>
                                 </div>
-                                <div className="text-4xl font-bold mb-6 relative z-10">
-                                    Escala
-                                    <span className="text-lg font-normal text-gray-400">
-                                        {" "}
-                                        com você
-                                    </span>
-                                </div>
-                                <p className="text-gray-300 mb-8 grow relative z-10">
-                                    Nós gerenciamos a infraestrutura, atualizações e segurança.
-                                    Você foca apenas no conteúdo e nos alunos.
+                                <div className="text-4xl font-bold mb-6 relative z-10">Escala<span className="text-lg font-normal text-zinc-400"> com você</span></div>
+                                <p className="text-zinc-300 mb-8 grow relative z-10">
+                                    Para quem quer focar apenas no ensino. Nós cuidamos dos servidores, backups, segurança e atualizações. Sua escola no ar em minutos.
                                 </p>
-                                <ul className="space-y-3 mb-8 text-sm text-gray-200 relative z-10">
-                                    <li className="flex items-center gap-2">
-                                        <span className="material-icons-outlined text-green-400 text-base">
-                                            check
-                                        </span>{" "}
-                                        Setup instantâneo
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <span className="material-icons-outlined text-green-400 text-base">
-                                            check
-                                        </span>{" "}
-                                        CDN Global otimizado
-                                    </li>
-                                    <li className="flex items-center gap-2">
-                                        <span className="material-icons-outlined text-green-400 text-base">
-                                            check
-                                        </span>{" "}
-                                        Suporte dedicado
-                                    </li>
+                                <ul className="space-y-3 mb-8 text-sm text-zinc-200 relative z-10">
+                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-400 text-base">check</span> Setup instantâneo</li>
+                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-400 text-base">check</span> Vídeos de alta velocidade (CDN)</li>
+                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-400 text-base">check</span> Suporte dedicado</li>
                                 </ul>
-                                <Link
-                                    className="w-full py-3 bg-white text-primary rounded-lg text-center font-bold hover:bg-gray-100 transition-colors relative z-10"
-                                    href="/signup"
-                                >
-                                    Começar Trial
-                                </Link>
-                                <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-gray-800 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+                                <a className="w-full py-3 bg-white text-primary rounded-lg text-center font-bold hover:bg-zinc-100 transition-colors relative z-10" href="/signup.html">
+                                    Criar Instância
+                                </a>
+                                <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-zinc-800 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
                             </div>
                         </div>
                     </div>
                 </section>
-
-                <section className="py-24 bg-background-light dark:bg-background-dark overflow-x-hidden">
+                <section className="py-24 bg-background-light dark:bg-background-dark">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
@@ -520,89 +323,72 @@ export function LandingPage() {
                                             Plano
                                         </th>
                                         <th className="py-4 px-6 text-sm font-bold text-text-muted-light dark:text-text-muted-dark uppercase tracking-wider">
-                                            Alunos Ativos
+                                            Capacidade
                                         </th>
                                         <th className="py-4 px-6 text-sm font-bold text-text-muted-light dark:text-text-muted-dark uppercase tracking-wider">
                                             Investimento
                                         </th>
                                         <th className="py-4 px-6 text-sm font-bold text-text-muted-light dark:text-text-muted-dark uppercase tracking-wider">
-                                            O que inclui
+                                            Destaques
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border-light dark:divide-border-dark">
                                     <tr
-                                        className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                                        className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
                                         onClick={() => (window.location.href = "/pricing.html")}
                                     >
                                         <td className="py-6 px-6 font-bold text-lg">Start</td>
                                         <td className="py-6 px-6 text-text-muted-light dark:text-text-muted-dark">
-                                            Até 500
+                                            Até 500 alunos
                                         </td>
                                         <td className="py-6 px-6 font-mono">
                                             R$ 299
-                                            <span className="text-xs text-gray-500">/mês</span>
+                                            <span className="text-xs text-zinc-500">/mês</span>
                                         </td>
                                         <td className="py-6 px-6 text-sm text-text-muted-light dark:text-text-muted-dark">
-                                            Hospedagem básica, 50GB storage, Domínio personalizado
+                                            LMS Completo, Domínio personalizado, Hospedagem básica
                                         </td>
                                     </tr>
 
                                     <tr
-                                        className="bg-blue-50/30 dark:bg-blue-900/10 border-2 border-blue-500 shadow-md relative z-10 cursor-pointer transition-colors"
+                                        className="bg-blue-50/30 dark:bg-blue-900/10 border-2 border-blue-500 shadow-md relative z-10 cursor-pointer transform scale-[1.01] transition-transform"
                                         onClick={() => (window.location.href = "/pricing.html")}
                                     >
                                         <td className="py-6 px-6 font-bold text-lg text-primary dark:text-white flex items-center gap-2">
-                                            Growth
+                                            Crescimento
                                             <span className="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded font-bold uppercase border border-blue-200">
                                                 Recomendado
                                             </span>
                                         </td>
                                         <td className="py-6 px-6 text-text-muted-light dark:text-text-muted-dark font-medium">
-                                            Até 5.000
+                                            Até 5.000 alunos
                                         </td>
                                         <td className="py-6 px-6 font-mono text-blue-700 dark:text-blue-300 font-bold">
                                             R$ 899
-                                            <span className="text-xs text-gray-500 font-normal">
+                                            <span className="text-xs text-zinc-500 font-normal">
                                                 /mês
                                             </span>
                                         </td>
                                         <td className="py-6 px-6 text-sm text-text-muted-light dark:text-text-muted-dark">
-                                            Analytics avançado, RAG AI (Beta), Storage ilimitado, API
-                                            Access
+                                            Tutor IA (RAG), Relatórios de Desempenho, Espaço Ilimitado
                                         </td>
                                     </tr>
 
                                     <tr
-                                        className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                                        className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors cursor-pointer"
                                         onClick={() => (window.location.href = "/pricing.html")}
                                     >
-                                        <td className="py-6 px-6 font-bold text-lg">Scale</td>
+                                        <td className="py-6 px-6 font-bold text-lg">Escala</td>
                                         <td className="py-6 px-6 text-text-muted-light dark:text-text-muted-dark">
-                                            Até 25.000
+                                            Até 25.000 alunos
                                         </td>
                                         <td className="py-6 px-6 font-mono">
                                             R$ 2.499
-                                            <span className="text-xs text-gray-500">/mês</span>
+                                            <span className="text-xs text-zinc-500">/mês</span>
                                         </td>
                                         <td className="py-6 px-6 text-sm text-text-muted-light dark:text-text-muted-dark">
-                                            SLA 99.9%, Gerente de conta, Customização CSS total, SSO
-                                        </td>
-                                    </tr>
-                                    <tr
-                                        className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-                                        onClick={() => (window.location.href = "/pricing.html")}
-                                    >
-                                        <td className="py-6 px-6 font-bold text-lg">Enterprise</td>
-                                        <td className="py-6 px-6 text-text-muted-light dark:text-text-muted-dark">
-                                            Ilimitado
-                                        </td>
-                                        <td className="py-6 px-6 font-mono text-text-muted-light dark:text-text-muted-dark">
-                                            Sob consulta
-                                        </td>
-                                        <td className="py-6 px-6 text-sm text-text-muted-light dark:text-text-muted-dark">
-                                            Instância isolada, Auditoria de segurança, Contrato
-                                            dedicado
+                                            Gerente de conta, Personalização Visual, API Aberta
                                         </td>
                                     </tr>
                                 </tbody>
@@ -625,12 +411,11 @@ export function LandingPage() {
                                 </span>
                             </div>
                             <p className="text-text-muted-light dark:text-text-muted-dark text-sm max-w-xs mb-6">
-                                Construindo a camada de infraestrutura para a próxima geração de
-                                educação online. Open Source e transparente.
+                                A plataforma que empodera educadores com a tecnologia de elite que eles merecem.
                             </p>
                             <div className="flex gap-4">
                                 <a
-                                    className="text-gray-400 hover:text-primary dark:hover:text-white transition-colors"
+                                    className="text-zinc-400 hover:text-primary dark:hover:text-white transition-colors"
                                     href="https://github.com/aluminify"
                                 >
                                     <span className="sr-only">GitHub</span>
@@ -647,24 +432,6 @@ export function LandingPage() {
                                         ></path>
                                     </svg>
                                 </a>
-                                <a
-                                    className="text-gray-400 hover:text-primary dark:hover:text-white transition-colors"
-                                    href="#"
-                                >
-                                    <span className="sr-only">Discord</span>
-                                    <svg
-                                        aria-hidden="true"
-                                        className="h-6 w-6"
-                                        fill="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            clipRule="evenodd"
-                                            d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.419-2.1568 2.419zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.419-2.1568 2.419z"
-                                            fillRule="evenodd"
-                                        ></path>
-                                    </svg>
-                                </a>
                             </div>
                         </div>
                         <div>
@@ -675,7 +442,7 @@ export function LandingPage() {
                                         className="hover:text-primary dark:hover:text-white transition-colors"
                                         href="/features.html"
                                     >
-                                        Features
+                                        Recursos
                                     </a>
                                 </li>
                                 <li>
@@ -691,7 +458,7 @@ export function LandingPage() {
                                         className="hover:text-primary dark:hover:text-white transition-colors"
                                         href="/changelog.html"
                                     >
-                                        Changelog
+                                        Novidades
                                     </a>
                                 </li>
                                 <li>
@@ -705,14 +472,14 @@ export function LandingPage() {
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-bold mb-4">Recursos</h4>
+                            <h4 className="font-bold mb-4">Suporte</h4>
                             <ul className="space-y-2 text-sm text-text-muted-light dark:text-text-muted-dark">
                                 <li>
                                     <a
                                         className="hover:text-primary dark:hover:text-white transition-colors"
                                         href="/docs.html"
                                     >
-                                        Documentação
+                                        Central de Ajuda
                                     </a>
                                 </li>
                                 <li>
@@ -720,7 +487,7 @@ export function LandingPage() {
                                         className="hover:text-primary dark:hover:text-white transition-colors"
                                         href="/docs.html#api"
                                     >
-                                        API Reference
+                                        Documentação Técnica
                                     </a>
                                 </li>
                                 <li>
@@ -728,7 +495,7 @@ export function LandingPage() {
                                         className="hover:text-primary dark:hover:text-white transition-colors"
                                         href="#"
                                     >
-                                        Community
+                                        Comunidade
                                     </a>
                                 </li>
                                 <li>
@@ -736,7 +503,7 @@ export function LandingPage() {
                                         className="hover:text-primary dark:hover:text-white transition-colors"
                                         href="/status.html"
                                     >
-                                        Status
+                                        Status do Sistema
                                     </a>
                                 </li>
                             </ul>
@@ -746,9 +513,9 @@ export function LandingPage() {
                         <p className="text-xs text-text-muted-light dark:text-text-muted-dark">
                             © 2026 Aluminify Inc. Apache 2.0 License.
                         </p>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-full">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-full">
                             <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-                            <span className="text-xs font-mono font-medium text-gray-600 dark:text-gray-400">
+                            <span className="text-xs font-mono font-medium text-zinc-600 dark:text-zinc-400">
                                 Powered by Sinesys Intelligence
                             </span>
                         </div>
