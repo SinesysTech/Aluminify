@@ -57,6 +57,19 @@
     --space-empty-text-mb: 2rem;      /* 32px - mb-8 */
     --space-empty-actions-gap: 0.75rem; /* 12px - gap-3 */
 
+    /* === Responsive Spacing Tokens === */
+    --space-page-x: 1rem;             /* Mobile: 16px */
+    --space-page-y: 1rem;             /* Mobile: 16px */
+    --space-section: 0.75rem;         /* Mobile: 12px */
+    --space-component: 0.5rem;        /* Mobile: 8px */
+
+    /* === Touch Target Sizing === */
+    --touch-target-min: 44px;         /* Mínimo recomendado WCAG */
+
+    /* === Bottom Navigation === */
+    --bottom-nav-height: 64px;        /* Altura da bottom nav */
+    --bottom-nav-safe-area: env(safe-area-inset-bottom, 0px);
+
     /* Decoração (grade/quadriculado) do fundo */
     --deco-line: var(--border);
     --deco-alpha: 0.55;
@@ -117,6 +130,28 @@
     --sidebar-accent-foreground: hsl(var(--foreground));
     --sidebar-border: hsl(var(--border));
     --sidebar-ring: hsl(var(--ring));
+  }
+
+  /* === Responsive Spacing - Tablet (768px+) === */
+  @media (min-width: 768px) {
+    :root,
+    .dark {
+      --space-page-x: 1.5rem;         /* Tablet: 24px */
+      --space-page-y: 1.5rem;         /* Tablet: 24px */
+      --space-section: 1rem;          /* Tablet: 16px */
+      --space-component: 0.75rem;     /* Tablet: 12px */
+    }
+  }
+
+  /* === Responsive Spacing - Desktop (1024px+) === */
+  @media (min-width: 1024px) {
+    :root,
+    .dark {
+      --space-page-x: 2rem;           /* Desktop: 32px */
+      --space-page-y: 2rem;           /* Desktop: 32px */
+      --space-section: 1.5rem;        /* Desktop: 24px */
+      --space-component: 1rem;        /* Desktop: 16px */
+    }
   }
 }
 
@@ -280,5 +315,52 @@
   /* Títulos de estados vazios */
   .empty-state-title {
     @apply text-lg font-semibold text-zinc-900 dark:text-zinc-50;
+  }
+
+  /* === Responsive Form Utilities === */
+
+  /* Grid de formulário responsivo: 1 col mobile, 2 cols tablet+, 3+ cols desktop */
+  .form-grid {
+    @apply grid gap-4 grid-cols-1 md:grid-cols-2;
+  }
+
+  .form-grid-3 {
+    @apply grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .form-grid-4 {
+    @apply grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4;
+  }
+
+  /* Campo que ocupa linha inteira mesmo em grid */
+  .form-field-full {
+    @apply col-span-full;
+  }
+
+  /* Container de página com padding responsivo */
+  .page-container {
+    @apply px-4 py-4 md:px-6 md:py-6 lg:px-8;
+  }
+
+  /* Section com espaçamento responsivo */
+  .section-container {
+    @apply space-y-4 md:space-y-6;
+  }
+
+  /* === Mobile-first visibility utilities === */
+
+  /* Visível apenas em mobile (<768px) */
+  .mobile-only {
+    @apply block md:hidden;
+  }
+
+  /* Visível apenas em desktop (>=768px) */
+  .desktop-only {
+    @apply hidden md:block;
+  }
+
+  /* Padding extra no bottom para compensar bottom nav em mobile */
+  .pb-bottom-nav {
+    @apply pb-20 md:pb-0;
   }
 }
