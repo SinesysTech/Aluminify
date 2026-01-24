@@ -5,9 +5,9 @@ import { createClient } from '@/lib/client'
 
 import { AlertCircle, School } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { SalaEstudosFilters } from '../../components/sala-estudos-filters'
-import { ModuloActivitiesAccordion } from '../../components/modulo-activities-accordion'
-import { ProgressoStatsCard } from '../../components/progresso-stats-card'
+import { SalaEstudosFilters } from '../components/sala-estudos-filters'
+import { ModuloActivitiesAccordion } from '../components/modulo-activities-accordion'
+import { ProgressoStatsCard } from '../components/progresso-stats-card'
 import { useCurrentUser } from '@/components/providers/user-provider'
 import { OrganizationSwitcher } from '@/components/dashboard/organization-switcher'
 import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
@@ -1047,12 +1047,14 @@ export default function SalaEstudosClientPage({
         cursoSelecionado={cursoSelecionado}
         disciplinaSelecionada={disciplinaSelecionada}
         frenteSelecionada={frenteSelecionada}
-        onCursoChange={(id) => {
-          setCursoSelecionado(id)
-          setDisciplinaSelecionada('')
-          setFrenteSelecionada('')
+        onCursoChange={(id: string) => {
+          setFilters((prev) => ({
+            ...prev,
+            cursoId: id,
+            disciplinaId: 'todos', // Resetar disciplina ao trocar frequencia
+          }))
         }}
-        onDisciplinaChange={(id) => {
+        onDisciplinaChange={(id: string) => {
           setDisciplinaSelecionada(id)
           setFrenteSelecionada('')
         }}

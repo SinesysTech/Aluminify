@@ -7,11 +7,15 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { AtividadeChecklistRow } from './atividade-checklist-row'
-import { ModuloComAtividades } from '@/app/(dashboard)/aluno/sala-de-estudos/types'
+import { ModuloComAtividades, AtividadeComProgresso } from '@/app/[tenant]/(dashboard)/aluno/sala-de-estudos/types'
 import { StatusAtividade, DificuldadePercebida } from '@/backend/services/progresso-atividade'
+import { cn } from '@/lib/utils'
 
 interface ModuloActivitiesAccordionProps {
   modulo: ModuloComAtividades
+  isExpanded: boolean
+  onToggle: () => void
+  isLocked?: boolean
   onStatusChange?: (atividadeId: string, status: StatusAtividade) => Promise<void>
   onStatusChangeWithDesempenho?: (
     atividadeId: string,
@@ -27,14 +31,17 @@ interface ModuloActivitiesAccordionProps {
 
 export function ModuloActivitiesAccordion({
   modulo,
+  isExpanded,
+  onToggle,
+  isLocked = false,
   onStatusChange,
   onStatusChangeWithDesempenho,
 }: ModuloActivitiesAccordionProps) {
-  const atividadesConcluidas = modulo.atividades.filter(
-    (a) => a.progressoStatus === 'Concluido',
+  const completedCount = modulo.atividades.filter(
+    (a: AtividadeComProgresso) => a.progressoStatus === 'Concluido',
   ).length
   const totalAtividades = modulo.atividades.length
-  const percentual = totalAtividades > 0 ? Math.round((atividadesConcluidas / totalAtividades) * 100) : 0
+  const percentual = totalAtividades > 0 ? Math.round((completedCount / totalAtividades) * 100) : 0
 
   return (
     <Accordion type="single" collapsible className="w-full">
@@ -47,7 +54,7 @@ export function ModuloActivitiesAccordion({
               </span>
             </div>
             <div className="text-sm text-muted-foreground">
-              {atividadesConcluidas}/{totalAtividades} atividades concluídas ({percentual}%)
+              {completedCount}/{totalAtividades} atividades concluídas ({percentual}%)
             </div>
           </div>
         </AccordionTrigger>
@@ -58,7 +65,7 @@ export function ModuloActivitiesAccordion({
                 Nenhuma atividade disponível
               </p>
             ) : (
-              modulo.atividades.map((atividade) => (
+              modulo.atividades.map((atividade: AtividadeComProgresso) => (
                 <AtividadeChecklistRow
                   key={atividade.id}
                   atividade={atividade}

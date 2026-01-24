@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils'
 import { StatusAtividade, DificuldadePercebida } from '@/backend/services/progresso-atividade'
 import { atividadeRequerDesempenho } from '@/backend/services/atividade'
-import { AtividadeComProgresso } from '@/app/(dashboard)/aluno/sala-de-estudos/types'
+import { AtividadeComProgresso } from '@/app/[tenant]/(dashboard)/aluno/sala-de-estudos/types'
 import { RegistrarDesempenhoModal } from './registrar-desempenho-modal'
 import { PdfViewerModal } from '@/components/shared/pdf-viewer-modal'
 import Link from 'next/link'

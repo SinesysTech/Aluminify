@@ -7,7 +7,7 @@ import type {
   ProfessorRankingItem,
   DisciplinaPerformance,
 } from "@/types/dashboard-institution";
-import type { HeatmapDay } from "@/types/dashboard";
+import type { HeatmapDay } from "@/app/[tenant]/(dashboard)/aluno/types/dashboard";
 
 type DashboardPeriod = "semanal" | "mensal" | "anual";
 
@@ -524,9 +524,7 @@ export class InstitutionAnalyticsService {
         .eq("professor_id", professor.id)
         .gte("created_at", thirtyDaysAgo.toISOString());
 
-      const alunosUnicos = new Set(
-        (agendamentos ?? []).map((a) => a.aluno_id),
-      );
+      const alunosUnicos = new Set((agendamentos ?? []).map((a) => a.aluno_id));
 
       ranking.push({
         id: professor.id,
@@ -599,7 +597,9 @@ export class InstitutionAnalyticsService {
       }
 
       const aproveitamento =
-        totalQuestoes > 0 ? Math.round((totalAcertos / totalQuestoes) * 100) : 0;
+        totalQuestoes > 0
+          ? Math.round((totalAcertos / totalQuestoes) * 100)
+          : 0;
 
       performance.push({
         id: disciplina.id,

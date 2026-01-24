@@ -1,7 +1,7 @@
 'use client'
 
 import { Users, Clock, CheckCircle2 } from 'lucide-react'
-import { MetricCard } from '@/components/dashboard/metric-card'
+import { MetricCard } from '@/app/[tenant]/(dashboard)/aluno/components/dashboard/metric-card'
 import type { InstitutionSummary, InstitutionEngagement } from '@/types/dashboard-institution'
 
 interface InstitutionMetricsProps {

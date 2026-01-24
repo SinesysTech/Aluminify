@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import type { DashboardGroupBy, DashboardPeriod, DashboardScopeLevel, PerformanceItem, SubjectPerformance } from '@/types/dashboard'
+import type { DashboardGroupBy, DashboardPeriod, DashboardScopeLevel, PerformanceItem, SubjectPerformance } from '../../types/dashboard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -20,7 +20,7 @@ import {
 import { Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { fetchDashboardCourses, fetchPerformance, type DashboardCourse } from '@/lib/services/dashboardService'
+import { fetchDashboardCourses, fetchPerformance, type DashboardCourse } from '../../services/dashboard.service'
 import { OrganizationBadge } from '@/components/dashboard/organization-switcher'
 import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
 

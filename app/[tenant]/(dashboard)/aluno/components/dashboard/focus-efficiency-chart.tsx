@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import type { FocusEfficiencyDay } from '@/types/dashboard'
+import type { FocusEfficiencyDay } from '../../types/dashboard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Info } from 'lucide-react'

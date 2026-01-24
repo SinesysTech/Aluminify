@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { Clock, CheckCircle2, Brain, RefreshCw, AlertCircle } from 'lucide-react'
-import type { DashboardData } from '@/types/dashboard'
+import type { DashboardData } from '../types/dashboard'
 import {
   fetchDashboardData,
   type DashboardServiceError,

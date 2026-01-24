@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import type { HeatmapDay } from '@/types/dashboard'
+import type { HeatmapDay } from '../../types/dashboard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
