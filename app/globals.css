@@ -289,32 +289,32 @@
 @layer utilities {
   /* Títulos principais de páginas (H1) */
   .page-title {
-    @apply text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50;
+    @apply text-2xl font-bold tracking-tight text-foreground;
   }
 
   /* Subtítulos/descrições de páginas */
   .page-subtitle {
-    @apply text-sm text-zinc-500 dark:text-zinc-400;
+    @apply text-sm text-muted-foreground;
   }
 
   /* Títulos de seções (H2) */
   .section-title {
-    @apply text-lg font-semibold text-zinc-900 dark:text-zinc-50;
+    @apply text-lg font-semibold text-foreground;
   }
 
   /* Subtítulos de seções */
   .section-subtitle {
-    @apply text-sm text-zinc-500 dark:text-zinc-400;
+    @apply text-sm text-muted-foreground;
   }
 
   /* Títulos de cards (H3) */
   .card-title {
-    @apply text-base font-semibold text-zinc-900 dark:text-zinc-50;
+    @apply text-base font-semibold text-foreground;
   }
 
   /* Títulos de estados vazios */
   .empty-state-title {
-    @apply text-lg font-semibold text-zinc-900 dark:text-zinc-50;
+    @apply text-lg font-semibold text-foreground;
   }
 
   /* === Responsive Form Utilities === */
