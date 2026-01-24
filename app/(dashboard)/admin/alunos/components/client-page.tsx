@@ -25,6 +25,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { downloadFile } from '@/lib/download-file'
 
 type ImportIssueStatus = 'skipped' | 'failed' | 'rejected'
 
@@ -61,31 +62,10 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
     const handleDownloadTemplate = async () => {
         setIsDownloading(true)
         try {
-            const response = await fetch('/api/student/template')
-            if (!response.ok) {
-                let detail = ''
-                try {
-                    const contentType = response.headers.get('content-type') || ''
-                    if (contentType.includes('application/json')) {
-                        const data = await response.json().catch(() => null)
-                        detail = data?.error ? String(data.error) : ''
-                    } else {
-                        detail = (await response.text().catch(() => '')).slice(0, 200)
-                    }
-                } catch {
-                    // noop
-                }
-                throw new Error(detail || `Erro ao baixar modelo (HTTP ${response.status})`)
-            }
-            const blob = await response.blob()
-            const url = window.URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `modelo-importacao-alunos-${new Date().toISOString().split('T')[0]}.xlsx`
-            document.body.appendChild(a)
-            a.click()
-            window.URL.revokeObjectURL(url)
-            document.body.removeChild(a)
+            await downloadFile({
+                url: '/api/student/template',
+                fallbackFilename: `modelo-importacao-alunos-${new Date().toISOString().split('T')[0]}.xlsx`,
+            })
         } catch (error) {
             console.error('Erro ao baixar template:', error)
             toast.error(

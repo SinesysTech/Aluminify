@@ -20,8 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { FileText, Upload, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { FileText, Upload, Loader2, AlertCircle, CheckCircle2, Download } from 'lucide-react'
 import Papa from 'papaparse'
+import { downloadFile } from '@/lib/download-file'
 
 async function loadExcelJS() {
   const mod = await import('exceljs/dist/exceljs.min.js')
@@ -77,10 +78,40 @@ export function FlashcardUploadCard({ cursos, onUploadSuccess }: FlashcardUpload
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
   const [successMessage, setSuccessMessage] = React.useState<string | null>(null)
+  const [isDownloadingTemplate, setIsDownloadingTemplate] = React.useState(false)
 
   React.useEffect(() => {
     setMounted(true)
   }, [])
+
+  const downloadTemplate = async () => {
+    try {
+      setIsDownloadingTemplate(true)
+      setError(null)
+      setSuccessMessage(null)
+
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('Sessão expirada. Faça login novamente.')
+      }
+
+      await downloadFile({
+        url: '/api/flashcards/template',
+        fallbackFilename: 'modelo-importacao-flashcards.xlsx',
+        init: {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        },
+      })
+    } catch (err) {
+      console.error('Erro ao baixar modelo:', err)
+      setError(err instanceof Error ? err.message : 'Erro ao baixar modelo de importação')
+    } finally {
+      setIsDownloadingTemplate(false)
+    }
+  }
 
   // Carregar disciplinas ao selecionar curso
   React.useEffect(() => {
@@ -622,6 +653,26 @@ export function FlashcardUploadCard({ cursos, onUploadSuccess }: FlashcardUpload
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={downloadTemplate}
+          disabled={isDownloadingTemplate}
+          className="w-full"
+        >
+          {isDownloadingTemplate ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Baixando modelo...
+            </>
+          ) : (
+            <>
+              <Download className="mr-2 h-4 w-4" />
+              Baixar modelo de planilha
+            </>
+          )}
+        </Button>
+
         <div className="space-y-2">
           <Label htmlFor={CURSO_SELECT_ID}>Curso</Label>
           <Select

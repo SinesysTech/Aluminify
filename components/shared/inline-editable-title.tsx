@@ -39,7 +39,7 @@ export default function InlineEditableTitle({
   if (!isEditing) {
     return (
       <div className="flex items-center gap-2">
-        <span>{value}</span>
+        <span className="text-sm font-medium leading-none">{value}</span>
         <Button
           type="button"
           size="icon"
@@ -59,7 +59,7 @@ export default function InlineEditableTitle({
       <Input
         value={localValue}
         onChange={(e) => setLocalValue(e.target.value)}
-        className="h-9"
+        className="h-9 text-sm"
         autoFocus
       />
       <Button
