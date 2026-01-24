@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/server"
 import { redirect, notFound } from "next/navigation"
 import { getAgendamentoById } from "@/app/actions/agendamentos"
-import { AgendamentoDetails } from "@/components/professor/agendamento-details"
+import { AgendamentoDetails } from "../components/agendamento-details"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
