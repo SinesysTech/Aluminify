@@ -169,47 +169,37 @@ export function TurmasList({ cursoId, cursoNome }: TurmasListProps) {
             </Button>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="font-medium">Nome</TableHead>
-                <TableHead className="font-medium">Período</TableHead>
-                <TableHead className="font-medium">Alunos</TableHead>
-                <TableHead className="font-medium">Status</TableHead>
-                <TableHead className="w-[100px]">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            {/* Mobile Card View */}
+            <div className="block md:hidden p-4 space-y-3">
               {turmas.map((turma) => (
-                <TableRow key={turma.id}>
-                  <TableCell className="font-medium">{turma.nome}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-sm text-zinc-600">
-                      <Calendar className="w-4 h-4" />
-                      <span>
-                        {formatDate(turma.dataInicio)} - {formatDate(turma.dataFim)}
-                      </span>
+                <div key={turma.id} className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <h4 className="font-semibold">{turma.nome}</h4>
+                      <div className="flex items-center gap-1 text-sm text-zinc-600 mt-1">
+                        <Calendar className="w-4 h-4" />
+                        <span>
+                          {formatDate(turma.dataInicio)} - {formatDate(turma.dataFim)}
+                        </span>
+                      </div>
                     </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4 text-zinc-400" />
-                      <span>{turma.alunosCount ?? 0}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
                     <Badge variant={turma.ativo ? 'default' : 'secondary'}>
                       {turma.ativo ? 'Ativo' : 'Inativo'}
                     </Badge>
-                  </TableCell>
-                  <TableCell>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1 text-sm text-zinc-600">
+                      <Users className="w-4 h-4 text-zinc-400" />
+                      <span>{turma.alunosCount ?? 0} alunos</span>
+                    </div>
                     <div className="flex items-center gap-1">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0"
+                            className="h-9 w-9 p-0"
                             onClick={() => handleEdit(turma)}
                           >
                             <Pencil className="h-4 w-4" />
@@ -222,7 +212,7 @@ export function TurmasList({ cursoId, cursoNome }: TurmasListProps) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                            className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                             onClick={() => handleDeleteClick(turma)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -231,11 +221,81 @@ export function TurmasList({ cursoId, cursoNome }: TurmasListProps) {
                         <TooltipContent>Excluir turma</TooltipContent>
                       </Tooltip>
                     </div>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+            {/* Desktop Table View */}
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="font-medium">Nome</TableHead>
+                    <TableHead className="font-medium">Período</TableHead>
+                    <TableHead className="font-medium">Alunos</TableHead>
+                    <TableHead className="font-medium">Status</TableHead>
+                    <TableHead className="w-[100px]">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {turmas.map((turma) => (
+                    <TableRow key={turma.id}>
+                      <TableCell className="font-medium">{turma.nome}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1 text-sm text-zinc-600">
+                          <Calendar className="w-4 h-4" />
+                          <span>
+                            {formatDate(turma.dataInicio)} - {formatDate(turma.dataFim)}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Users className="w-4 h-4 text-zinc-400" />
+                          <span>{turma.alunosCount ?? 0}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={turma.ativo ? 'default' : 'secondary'}>
+                          {turma.ativo ? 'Ativo' : 'Inativo'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0"
+                                onClick={() => handleEdit(turma)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Editar turma</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => handleDeleteClick(turma)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Excluir turma</TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
 
         {/* Create/Edit Dialog */}

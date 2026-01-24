@@ -1,39 +1,86 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { MessageSquare, Calendar, CalendarCheck, User } from 'lucide-react'
+import {
+  MessageSquare,
+  Calendar,
+  CalendarCheck,
+  User,
+  LayoutDashboard,
+  School,
+  Users,
+  Settings,
+  BrainCircuit,
+  type LucideIcon,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useCurrentUser } from '@/components/providers/user-provider'
+import { isAdminRoleTipo } from '@/lib/roles'
 
-const navigationItems = [
-  {
-    name: 'TobIAs',
-    href: '/tobias',
-    icon: MessageSquare,
-  },
-  {
-    name: 'Calendário',
-    href: '/aluno/cronograma/calendario',
-    icon: Calendar,
-  },
-  {
-    name: 'Cronograma',
-    href: '/aluno/cronograma',
-    icon: CalendarCheck,
-  },
-  {
-    name: 'Perfil',
-    href: '/perfil',
-    icon: User,
-  },
+interface NavItem {
+  name: string
+  href: string
+  icon: LucideIcon
+}
+
+// Itens de navegação por role - máximo 5 itens
+const alunoNavItems: NavItem[] = [
+  { name: 'Início', href: '/aluno/dashboard', icon: LayoutDashboard },
+  { name: 'Estudos', href: '/aluno/sala-de-estudos', icon: School },
+  { name: 'TobIAs', href: '/tobias', icon: MessageSquare },
+  { name: 'Flashcards', href: '/aluno/flashcards', icon: BrainCircuit },
+  { name: 'Perfil', href: '/perfil', icon: User },
+]
+
+const professorNavItems: NavItem[] = [
+  { name: 'Início', href: '/professor/dashboard', icon: LayoutDashboard },
+  { name: 'Alunos', href: '/aluno', icon: Users },
+  { name: 'Agenda', href: '/disponibilidade', icon: Calendar },
+  { name: 'Materiais', href: '/professor/materiais', icon: School },
+  { name: 'Perfil', href: '/perfil', icon: User },
+]
+
+const adminNavItems: NavItem[] = [
+  { name: 'Início', href: '/admin/dashboard', icon: LayoutDashboard },
+  { name: 'Alunos', href: '/aluno', icon: Users },
+  { name: 'Turmas', href: '/turma', icon: School },
+  { name: 'Agenda', href: '/agendamentos', icon: CalendarCheck },
+  { name: 'Config', href: '/admin/configuracoes', icon: Settings },
 ]
 
 export function BottomNavigation() {
   const pathname = usePathname()
+  const user = useCurrentUser()
+
+  // Seleciona itens de navegação baseado no role
+  const getNavItems = (): NavItem[] => {
+    switch (user.role) {
+      case 'aluno':
+        return alunoNavItems
+      case 'usuario':
+        // Admin types see admin navigation
+        if (user.roleType && isAdminRoleTipo(user.roleType)) {
+          return adminNavItems
+        }
+        return professorNavItems
+      case 'superadmin':
+        return adminNavItems
+      default:
+        return alunoNavItems
+    }
+  }
+
+  const navigationItems = getNavItems()
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="flex h-16 items-center justify-around">
+    <nav
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/80"
+      style={{
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+      }}
+    >
+      <div className="flex h-16 items-stretch justify-around">
         {navigationItems.map((item) => {
           const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
           const Icon = item.icon
@@ -43,16 +90,28 @@ export function BottomNavigation() {
               key={item.name}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 flex-1 h-full min-w-0 px-2',
-                'transition-colors hover:bg-accent active:bg-accent/80',
+                // Base styles - garantir touch target mínimo de 44px
+                'flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[64px] min-h-[44px]',
+                // Transições e interações
+                'transition-colors duration-150',
+                'active:bg-accent/80 hover:bg-accent/50',
+                // Estado ativo
                 isActive && 'text-primary'
               )}
             >
-              <Icon className={cn('h-5 w-5', isActive && 'text-primary')} />
-              <span className={cn(
-                'text-xs font-medium truncate w-full text-center',
-                isActive ? 'text-primary' : 'text-muted-foreground'
-              )}>
+              <Icon
+                className={cn(
+                  'h-5 w-5 shrink-0',
+                  isActive ? 'text-primary' : 'text-muted-foreground'
+                )}
+                aria-hidden="true"
+              />
+              <span
+                className={cn(
+                  'text-[10px] font-medium leading-tight truncate max-w-full px-1',
+                  isActive ? 'text-primary' : 'text-muted-foreground'
+                )}
+              >
                 {item.name}
               </span>
             </Link>
@@ -62,4 +121,3 @@ export function BottomNavigation() {
     </nav>
   )
 }
-

@@ -825,7 +825,7 @@ export function ProfessorTable() {
       {/* Edit Dialog */}
       {mounted && editingProfessor && (
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="max-w-4xl">
+          <DialogContent className="max-w-[95vw] md:max-w-4xl">
             <DialogHeader>
               <DialogTitle>Editar Professor</DialogTitle>
               <DialogDescription>

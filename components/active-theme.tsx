@@ -145,11 +145,6 @@ export function ThemeConfigProvider({ children, initialTheme }: ActiveThemeProvi
     localStorage.setItem('theme-config', JSON.stringify(theme));
   }, [theme]);
 
-  // Initial application on mount to ensure CSS matches state
-  useEffect(() => {
-    applyThemeToCSS(theme);
-  }, [theme]);
-
   return (
     <ThemeConfigContext.Provider value={{ theme, setTheme, loadTenantBranding, applyBrandingToTheme, resetBrandingToDefaults }}>
       {children}
@@ -186,9 +181,6 @@ function applyThemeToCSS(theme: ExtendedThemeConfig) {
 
   // Apply basic theme properties (radius, scale)
   cssManager.applyThemeCustomizerProperties(theme.radius, theme.scale);
-
-  // Apply dark/light mode
-  cssManager.applyThemeMode(theme.mode);
 
   // Apply brand customization if available
   if (theme.activeBranding) {

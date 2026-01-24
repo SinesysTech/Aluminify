@@ -46,6 +46,7 @@ import { useRouter } from 'next/navigation'
 import AddActivityModal from '../../../components/conteudos/add-activity-modal'
 import InlineEditableTitle from '@/components/shared/inline-editable-title'
 import { formatTipoAtividade } from '@/lib/utils'
+import { downloadFile } from '@/lib/download-file'
 
 async function loadExcelJS(): Promise<import('exceljs/dist/exceljs.min.js').ExcelJSModule> {
   const mod = await import('exceljs/dist/exceljs.min.js')
@@ -96,10 +97,18 @@ type CSVRow = {
   aula?: string
   'nome da aula'?: string
   'Nome da Aula'?: string
+  disciplina?: string
+  'Disciplina'?: string
+  frente?: string
+  'Frente'?: string
+  'módulo'?: string
+  'Módulo'?: string
+  'tempo em minutos'?: string
+  'Tempo em minutos'?: string
+  'importância'?: string
+  'Importância'?: string
   tempo?: string
   prioridade?: string
-  disciplina?: string
-  frente?: string
 }
 
 type TipoAtividade =
@@ -733,129 +742,21 @@ export default function ConteudosClientPage() {
 
   const downloadTemplate = async () => {
     try {
-      const ExcelJS = await loadExcelJS()
-      const workbook = new ExcelJS.Workbook()
-      workbook.creator = 'Aluminify'
-      workbook.created = new Date()
-
-      const worksheet = workbook.addWorksheet('Conteudos', {
-        properties: { defaultColWidth: 25 },
-      })
-
-      // Definir headers
-      worksheet.columns = [
-        { header: 'Modulo', key: 'modulo', width: 30 },
-        { header: 'Aula', key: 'aula', width: 40 },
-        { header: 'Tempo', key: 'tempo', width: 15 },
-        { header: 'Prioridade', key: 'prioridade', width: 15 },
-        { header: 'Importancia', key: 'importancia', width: 15 },
-      ]
-
-      // Estilizar header
-      const headerRow = worksheet.getRow(1)
-      headerRow.font = { bold: true, color: { argb: 'FFFFFFFF' } }
-      headerRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FF6B21A8' }, // violet-800
-      }
-      headerRow.alignment = { horizontal: 'center', vertical: 'middle' }
-      headerRow.height = 24
-
-      // Adicionar linhas de exemplo
-      const exemplos = [
-        { modulo: 'Modulo 1 - Introducao', aula: 'Aula 1 - Conceitos Basicos', tempo: '30', prioridade: '5', importancia: 'Alta' },
-        { modulo: 'Modulo 1 - Introducao', aula: 'Aula 2 - Fundamentos', tempo: '45', prioridade: '4', importancia: 'Alta' },
-        { modulo: 'Modulo 2 - Aprofundamento', aula: 'Aula 1 - Teoria Avancada', tempo: '60', prioridade: '3', importancia: 'Media' },
-        { modulo: 'Modulo 2 - Aprofundamento', aula: 'Aula 2 - Pratica', tempo: '90', prioridade: '3', importancia: 'Media' },
-        { modulo: 'Modulo 3 - Exercicios', aula: 'Aula 1 - Revisao', tempo: '45', prioridade: '2', importancia: 'Baixa' },
-      ]
-
-      exemplos.forEach((exemplo) => {
-        const row = worksheet.addRow(exemplo)
-        row.alignment = { vertical: 'middle' }
-      })
-
-      // Adicionar validacao para Importancia (dropdown)
-      worksheet.dataValidations.add('E2:E1000', {
-        type: 'list',
-        allowBlank: true,
-        formulae: ['"Alta,Media,Baixa,Base"'],
-        showErrorMessage: true,
-        errorTitle: 'Valor invalido',
-        error: 'Selecione: Alta, Media, Baixa ou Base',
-      })
-
-      // Adicionar validacao para Prioridade (1-5)
-      worksheet.dataValidations.add('D2:D1000', {
-        type: 'list',
-        allowBlank: true,
-        formulae: ['"0,1,2,3,4,5"'],
-        showErrorMessage: true,
-        errorTitle: 'Valor invalido',
-        error: 'Selecione um valor de 0 a 5',
-      })
-
-      // Adicionar bordas nas celulas
-      for (let i = 1; i <= exemplos.length + 1; i++) {
-        const row = worksheet.getRow(i)
-        row.eachCell({ includeEmpty: true }, (cell: import('exceljs/dist/exceljs.min.js').ExcelJSCell) => {
-          cell.border = {
-            top: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-            left: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-            bottom: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-            right: { style: 'thin', color: { argb: 'FFD1D5DB' } },
-          }
-        })
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error('Sessão expirada. Faça login novamente.')
       }
 
-      // Adicionar planilha de instrucoes
-      const instrucoes = workbook.addWorksheet('Instrucoes')
-      instrucoes.columns = [{ header: 'Instrucoes de Preenchimento', key: 'instrucao', width: 80 }]
-
-      const headerInstrucoes = instrucoes.getRow(1)
-      headerInstrucoes.font = { bold: true, size: 14 }
-      headerInstrucoes.height = 24
-
-      const textoInstrucoes = [
-        '',
-        'COMO PREENCHER A PLANILHA:',
-        '',
-        '1. MODULO (obrigatorio): Nome do modulo. Aulas com mesmo nome de modulo serao agrupadas.',
-        '2. AULA (obrigatorio): Nome da aula dentro do modulo.',
-        '3. TEMPO (opcional): Duracao em minutos. Ex: 30, 45, 60.',
-        '4. PRIORIDADE (opcional): Nivel de prioridade de 0 a 5 (5 = mais importante).',
-        '5. IMPORTANCIA (opcional): Classificacao do conteudo - Alta, Media, Baixa ou Base.',
-        '',
-        'DICAS:',
-        '- Mantenha os nomes dos modulos consistentes para agrupar as aulas corretamente.',
-        '- Use numeros no inicio para ordenar (ex: "Modulo 1 - Nome", "Modulo 2 - Nome").',
-        '- A ordem das linhas determina a ordem das aulas.',
-        '- Remova as linhas de exemplo antes de importar.',
-      ]
-
-      textoInstrucoes.forEach((texto) => {
-        instrucoes.addRow({ instrucao: texto })
+      await downloadFile({
+        url: '/api/conteudos/template',
+        fallbackFilename: 'modelo_importacao_conteudos.xlsx',
+        init: {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        },
       })
-
-      // Gerar e baixar arquivo
-      const buffer = await workbook.xlsx.writeBuffer()
-      // ExcelJS pode retornar Uint8Array com buffer baseado em SharedArrayBuffer em alguns ambientes.
-      // BlobPart não aceita SharedArrayBuffer; copiamos para um Uint8Array "seguro".
-      const bytes =
-        buffer instanceof Uint8Array ? new Uint8Array(buffer) : new Uint8Array(buffer as ArrayBuffer)
-
-      const blob = new Blob([bytes], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-      })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = 'modelo_importacao_conteudos.xlsx'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
     } catch (err) {
       console.error('Erro ao gerar template:', err)
       setError('Erro ao gerar o modelo de planilha')
@@ -1080,28 +981,57 @@ export default function ConteudosClientPage() {
     }
 
     const firstRow = rows[0]
-    const moduloNome = getColumnValue(firstRow, [
+
+    const hasColumn = (row: CSVRow, possibleNames: string[]): boolean => {
+      const rowObj = row as Record<string, unknown>
+      const rowKeys = Object.keys(rowObj)
+      const normalizedRowKeys = rowKeys.map(k => ({
+        original: k,
+        normalized: k.toLowerCase().trim().replace(/\s+/g, ' '),
+      }))
+      return possibleNames.some((name) => {
+        const normalizedName = name.toLowerCase().trim().replace(/\s+/g, ' ')
+        return normalizedRowKeys.some(
+          nk => nk.normalized === normalizedName || nk.normalized.includes(normalizedName) || normalizedName.includes(nk.normalized)
+        )
+      })
+    }
+
+    // Novo padrão (Frente A.xlsx): Disciplina; Frente; Módulo; Nome do Módulo; Aula; Nome da Aula; ...
+    const isNewTemplate =
+      hasColumn(firstRow, ['disciplina', 'Disciplina']) &&
+      hasColumn(firstRow, ['frente', 'Frente']) &&
+      hasColumn(firstRow, ['módulo', 'Módulo', 'modulo']) &&
+      hasColumn(firstRow, ['nome do módulo', 'nome do modulo', 'Nome do Módulo']) &&
+      hasColumn(firstRow, ['aula', 'Aula']) &&
+      hasColumn(firstRow, ['nome da aula', 'Nome da Aula'])
+
+    if (isNewTemplate) {
+      return null
+    }
+
+    // Formato legado (aceito): Módulo/Nome do módulo + Aula/Nome da aula
+    const hasModulo = hasColumn(firstRow, [
       'modulo',
       'nome do modulo',
       'nome do módulo',
       'módulo',
       'Módulo',
       'Nome do Módulo',
-      'nome do modulo',
     ])
-    const aulaNome = getColumnValue(firstRow, [
+    const hasAula = hasColumn(firstRow, [
       'aula',
       'nome da aula',
       'Nome da Aula',
       'Aula',
     ])
 
-    if (!moduloNome) {
-      return 'O CSV deve conter uma coluna "Módulo" ou "Nome do Módulo"'
+    if (!hasModulo) {
+      return 'O arquivo deve conter uma coluna "Módulo" ou "Nome do Módulo"'
     }
 
-    if (!aulaNome) {
-      return 'O CSV deve conter uma coluna "Aula" ou "Nome da Aula"'
+    if (!hasAula) {
+      return 'O arquivo deve conter uma coluna "Aula" ou "Nome da Aula"'
     }
 
     return null
@@ -1185,15 +1115,35 @@ export default function ConteudosClientPage() {
     const aulaMap = new Map<string, number>()
 
     rows.forEach((row) => {
-      const moduloNome = getColumnValue(row, [
-        'modulo',
-        'nome do modulo',
-        'nome do módulo',
+      // Novo padrão (Frente A.xlsx) - priorizar números + nomes explícitos
+      const moduloNumeroStr = getColumnValue(row, [
         'módulo',
         'Módulo',
-        'Nome do Módulo',
-        'nome do modulo',
+        'modulo',
+        'numero do modulo',
+        'número do módulo',
       ])
+      const moduloNumeroParsed = moduloNumeroStr ? Number(moduloNumeroStr) : NaN
+
+      const moduloNome = getColumnValue(row, [
+        'nome do módulo',
+        'nome do modulo',
+        'Nome do Módulo',
+      ]) || (
+        // Fallback: se "modulo" for texto e não número, usar como nome
+        (!Number.isFinite(moduloNumeroParsed) || moduloNumeroParsed <= 0)
+          ? getColumnValue(row, ['modulo', 'módulo', 'Módulo'])
+          : ''
+      )
+
+      const aulaNumeroStr = getColumnValue(row, [
+        'aula',
+        'Aula',
+        'numero da aula',
+        'número da aula',
+      ])
+      const aulaNumeroParsed = aulaNumeroStr ? Number(aulaNumeroStr) : NaN
+
       // Buscar Nome da Aula - PRIORIDADE para nomes completos, evitar "Aula" que pode ter números
       // Primeiro, buscar colunas que claramente são nomes
       const aulaNome = getColumnValue(row, [
@@ -1278,25 +1228,44 @@ export default function ConteudosClientPage() {
         })
       }
 
-      // Obter ou criar número do módulo
-      let moduloNumero = moduloMap.get(moduloNome)
+      // Número do módulo:
+      // - Se veio explícito (coluna "Módulo"), usar.
+      // - Senão, manter fallback sequencial por nome.
+      let moduloNumero =
+        Number.isFinite(moduloNumeroParsed) && moduloNumeroParsed > 0
+          ? Math.floor(moduloNumeroParsed)
+          : moduloMap.get(moduloNome)
+
       if (moduloNumero === undefined) {
         moduloNumero = moduloMap.size + 1
         moduloMap.set(moduloNome, moduloNumero)
       }
 
-      // Obter ou criar número da aula (dentro do módulo)
-      const aulaKey = `${moduloNome}-${aulaNomeFinal}`
-      let aulaNumero = aulaMap.get(aulaKey)
+      // Número da aula:
+      // - Se veio explícito (coluna "Aula"), usar.
+      // - Senão, gerar sequencial dentro do módulo.
+      let aulaNumero =
+        Number.isFinite(aulaNumeroParsed) && aulaNumeroParsed > 0
+          ? Math.floor(aulaNumeroParsed)
+          : undefined
+
       if (aulaNumero === undefined) {
-        // Contar quantas aulas já existem neste módulo
-        const aulasNoModulo = Array.from(aulaMap.keys()).filter(k => k.startsWith(`${moduloNome}-`)).length
-        aulaNumero = aulasNoModulo + 1
-        aulaMap.set(aulaKey, aulaNumero)
+        const aulaKey = `${moduloNumero}-${aulaNomeFinal}`
+        const existing = aulaMap.get(aulaKey)
+        if (existing !== undefined) {
+          aulaNumero = existing
+        } else {
+          const aulasNoModulo = Array.from(aulaMap.keys()).filter(k => k.startsWith(`${moduloNumero}-`)).length
+          aulaNumero = aulasNoModulo + 1
+          aulaMap.set(aulaKey, aulaNumero)
+        }
       }
 
       // Buscar tempo e prioridade de forma flexível
       const tempoStr = getColumnValue(row, [
+        'tempo em minutos',
+        'Tempo em minutos',
+        'tempo (minutos)',
         'tempo',
         'Tempo',
         'tempo estimado',
@@ -1321,7 +1290,7 @@ export default function ConteudosClientPage() {
       const tempo = parseTempoParaMinutos(tempoStr)
       const prioridade = prioridadeStr ? parseInt(prioridadeStr, 10) : null
       const importancia = normalizeImportancia(
-        getColumnValue(row, ['importancia', 'prioridade', 'importância', 'Importancia', 'Prioridade']),
+        getColumnValue(row, ['importância', 'importancia', 'Importancia', 'Importância']),
       )
 
       const aulaData = {
@@ -1349,16 +1318,6 @@ export default function ConteudosClientPage() {
   }
 
   const handleImport = async () => {
-    if (!disciplinaSelecionada) {
-      setError('Por favor, selecione uma disciplina')
-      return
-    }
-
-    if (!frenteNome.trim()) {
-      setError('Por favor, informe o nome da frente')
-      return
-    }
-
     if (!arquivo) {
       setError('Por favor, selecione um arquivo CSV ou XLSX')
       return
@@ -1391,6 +1350,54 @@ export default function ConteudosClientPage() {
         return
       }
 
+      // Descobrir Disciplina/Frente do arquivo (modelo Frente A.xlsx), se não informado na UI
+      const firstNonEmpty = csvRows.find((r) =>
+        Object.values(r as Record<string, unknown>).some((v) => String(v ?? '').trim()),
+      ) ?? csvRows[0]
+
+      const disciplinaFromFile = firstNonEmpty
+        ? getColumnValue(firstNonEmpty, ['disciplina', 'Disciplina'])
+        : ''
+      const frenteFromFile = firstNonEmpty
+        ? getColumnValue(firstNonEmpty, ['frente', 'Frente'])
+        : ''
+
+      const normalizeName = (v: string) =>
+        v
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+
+      const disciplinaIdFromFile = disciplinaFromFile
+        ? (disciplinasDoCurso.find((d) => normalizeName(d.nome) === normalizeName(disciplinaFromFile))?.id ??
+          disciplinas.find((d) => normalizeName(d.nome) === normalizeName(disciplinaFromFile))?.id ??
+          '')
+        : ''
+
+      const disciplinaIdFinal = disciplinaSelecionada || disciplinaIdFromFile
+      const frenteNomeFinal = frenteNome.trim() || frenteFromFile.trim()
+
+      if (disciplinaSelecionada && disciplinaFromFile && normalizeName(disciplinas.find(d => d.id === disciplinaSelecionada)?.nome ?? '') !== normalizeName(disciplinaFromFile)) {
+        setError(`A disciplina selecionada (${disciplinas.find(d => d.id === disciplinaSelecionada)?.nome}) não coincide com a disciplina do arquivo (${disciplinaFromFile}).`)
+        return
+      }
+
+      if (frenteNome.trim() && frenteFromFile && normalizeName(frenteNome) !== normalizeName(frenteFromFile)) {
+        setError(`O nome da frente informado (${frenteNome.trim()}) não coincide com a frente do arquivo (${frenteFromFile}).`)
+        return
+      }
+
+      if (!disciplinaIdFinal) {
+        setError('Selecione uma disciplina ou preencha a coluna "Disciplina" na planilha.')
+        return
+      }
+
+      if (!frenteNomeFinal) {
+        setError('Informe o nome da frente ou preencha a coluna "Frente" na planilha.')
+        return
+      }
+
       // Transformar em JSON
       const jsonData = transformCSVToJSON(csvRows)
 
@@ -1405,7 +1412,7 @@ export default function ConteudosClientPage() {
       }
 
       // Buscar nome da disciplina
-      const disciplina = disciplinas.find(d => d.id === disciplinaSelecionada)
+      const disciplina = disciplinas.find(d => d.id === disciplinaIdFinal) ?? disciplinasDoCurso.find(d => d.id === disciplinaIdFinal)
       if (!disciplina) {
         setError('Disciplina não encontrada')
         return
@@ -1415,7 +1422,7 @@ export default function ConteudosClientPage() {
       const { data: rpcData, error: rpcError } = await supabase.rpc('importar_cronograma_aulas', {
         p_curso_id: cursoSelecionado,
         p_disciplina_nome: disciplina.nome,
-        p_frente_nome: frenteNome.trim(),
+        p_frente_nome: frenteNomeFinal,
         p_conteudo: jsonData,
       })
 
@@ -1430,7 +1437,7 @@ export default function ConteudosClientPage() {
 
       setSuccessMessage('Cronograma importado com sucesso!')
       setArquivo(null)
-      const createdFrenteNome = frenteNome.trim()
+      const createdFrenteNome = frenteNomeFinal
 
       // Resetar input de arquivo
       const fileInput = document.getElementById('csv-file') as HTMLInputElement
