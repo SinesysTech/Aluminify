@@ -1,14 +1,14 @@
 ﻿'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import type { SubjectDistributionItem } from '../../types/dashboard'
-import type { DashboardGroupBy, DashboardPeriod, DashboardScopeLevel, PerformanceItem, SubjectDistributionExtendedItem } from '../../types/dashboard'
+import type { SubjectDistributionItem } from '../types'
+import type { DashboardGroupBy, DashboardPeriod, DashboardScopeLevel, PerformanceItem, SubjectDistributionExtendedItem } from '../types'
 import { Card, CardContent } from '@/components/ui/card'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Info } from 'lucide-react'
-import { fetchDashboardCourses, fetchPerformance, fetchSubjectDistribution } from '../../services/dashboard.service'
+import { fetchDashboardCourses, fetchPerformance, fetchSubjectDistribution } from '../services/dashboard.service'
 
 interface SubjectDistributionProps {
   data: SubjectDistributionItem[]

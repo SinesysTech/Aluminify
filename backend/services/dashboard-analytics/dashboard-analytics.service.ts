@@ -6,7 +6,7 @@ import type {
   StrategicDomain,
   StrategicDomainRecommendation,
   SubjectDistributionItem,
-} from "@/app/[tenant]/(dashboard)/aluno/types/dashboard";
+} from "@/app/[tenant]/(dashboard)/aluno/dashboard/types";
 
 type DashboardScopeLevel = "curso" | "disciplina" | "frente" | "modulo";
 type DashboardGroupBy = "curso" | "disciplina" | "frente" | "modulo";

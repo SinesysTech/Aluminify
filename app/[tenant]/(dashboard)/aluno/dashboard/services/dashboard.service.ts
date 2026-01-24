@@ -6,9 +6,9 @@ import type {
   PerformanceItem,
   StrategicDomainResponse,
   SubjectDistributionResponse,
-} from "../types/dashboard";
+} from "../types";
 import { apiClient, ApiClientError } from "@/lib/api-client";
-import type { HeatmapPeriod } from "../components/dashboard/consistency-heatmap";
+import type { HeatmapPeriod } from "../components/consistency-heatmap";
 
 export interface DashboardServiceError extends Error {
   status?: number;

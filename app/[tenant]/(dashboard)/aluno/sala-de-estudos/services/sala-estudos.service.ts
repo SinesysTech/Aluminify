@@ -233,9 +233,9 @@ export class SalaEstudosService {
     for (const atv of aData) {
       if (!atv.modulo_id) continue;
       const mod = mMap.get(atv.modulo_id);
-      if (!mod) continue;
+      if (!mod || !mod.frente_id) continue;
       const fre = fMap.get(mod.frente_id);
-      if (!fre) continue;
+      if (!fre || !fre.disciplina_id) continue;
       const disc = dMap.get(fre.disciplina_id);
       if (!disc) continue;
 
@@ -265,11 +265,11 @@ export class SalaEstudosService {
         arquivoUrl: atv.arquivo_url,
         gabaritoUrl: atv.gabarito_url,
         linkExterno: atv.link_externo,
-        obrigatorio: atv.obrigatorio,
-        ordemExibicao: atv.ordem_exibicao,
+        obrigatorio: atv.obrigatorio ?? false,
+        ordemExibicao: atv.ordem_exibicao ?? 0,
         createdBy: atv.created_by,
-        createdAt: atv.created_at,
-        updatedAt: atv.updated_at,
+        createdAt: atv.created_at || "",
+        updatedAt: atv.updated_at || "",
         moduloNome: mod.nome,
         moduloNumero: mod.numero_modulo,
         frenteNome: fre.nome,
@@ -278,10 +278,9 @@ export class SalaEstudosService {
         disciplinaId: disc.id,
         cursoNome: cur.nome,
         cursoId: cur.id,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         progressoStatus: (prog?.status as StatusAtividade) || null,
-        progressoDataInicio: prog?.data_inicio,
-        progressoDataConclusao: prog?.data_conclusao,
+        progressoDataInicio: prog?.data_inicio ?? null,
+        progressoDataConclusao: prog?.data_conclusao ?? null,
         questoesTotais: prog?.questoes_totais,
         questoesAcertos: prog?.questoes_acertos,
         dificuldadePercebida: prog?.dificuldade_percebida,

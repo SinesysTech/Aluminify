@@ -1,8 +1,8 @@
 ﻿'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import type { StrategicDomain } from '../../types/dashboard'
-import type { DashboardScopeLevel, PerformanceItem, StrategicDomainModuleItem } from '../../types/dashboard'
+import type { StrategicDomain } from '../types'
+import type { DashboardScopeLevel, PerformanceItem, StrategicDomainModuleItem } from '../types'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -10,7 +10,7 @@ import { Info } from 'lucide-react'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { fetchDashboardCourses, fetchPerformance, fetchStrategicDomain } from '../../services/dashboard.service'
+import { fetchDashboardCourses, fetchPerformance, fetchStrategicDomain } from '../services/dashboard.service'
 
 interface StrategicDomainProps {
   data: StrategicDomain

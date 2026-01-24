@@ -1,5 +1,5 @@
 ﻿import type { Metadata } from 'next'
-import StudentDashboardClientPage from './dashboard-client'
+import StudentDashboardClientPage from './client'
 
 export const metadata: Metadata = {
   title: 'Dashboard'

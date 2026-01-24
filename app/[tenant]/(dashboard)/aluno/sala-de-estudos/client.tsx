@@ -12,6 +12,9 @@ import { useStudentOrganizations } from '@/components/providers/student-organiza
 import {
     AtividadeComProgresso,
     CursoComDisciplinas,
+    DisciplinaComFrentes,
+    FrenteComModulos,
+    ModuloComAtividades,
 } from './types'
 import { StatusAtividade, DificuldadePercebida } from '@/backend/services/progresso-atividade'
 import { salaEstudosService } from './services/sala-estudos.service'
@@ -100,9 +103,9 @@ export default function SalaEstudosClientPage({
                 setEstruturaHierarquica(data.estrutura)
                 setCursos(data.cursos)
 
-                // Select first course if only one exists
-                if (data.cursos.length === 1 && !cursoSelecionado) {
-                    setCursoSelecionado(data.cursos[0].id)
+                // Select first course if only one exists and none is currently selected
+                if (data.cursos.length === 1) {
+                    setCursoSelecionado((prev) => prev || data.cursos[0].id)
                 }
             } catch (err) {
                 console.error('Erro ao carregar dados:', err)
@@ -192,9 +195,9 @@ export default function SalaEstudosClientPage({
         // For now, let's create a minimal hierarchy from 'atividadesFiltradas'
         const estrutura: CursoComDisciplinas[] = []
         const mapC = new Map<string, CursoComDisciplinas>()
-        const mapD = new Map<string, any>()
-        const mapF = new Map<string, any>()
-        const mapM = new Map<string, any>()
+        const mapD = new Map<string, DisciplinaComFrentes>()
+        const mapF = new Map<string, FrenteComModulos>()
+        const mapM = new Map<string, ModuloComAtividades>()
 
         atividadesFiltradas.forEach(atv => {
             if (!mapC.has(atv.cursoId)) {
