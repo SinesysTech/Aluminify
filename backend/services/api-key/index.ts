@@ -1,6 +1,5 @@
-import { getDatabaseClient } from '@/backend/clients/database';
-import { ApiKeyRepositoryImpl } from './api-key.repository';
-import { ApiKeyService } from './api-key.service';
+import { getDatabaseClient } from "@/backend/clients/database";
+import { ApiKeyRepositoryImpl, ApiKeyService } from "./api-key.service";
 
 let _apiKeyService: ApiKeyService | null = null;
 
@@ -19,8 +18,4 @@ export const apiKeyService = new Proxy({} as ApiKeyService, {
   },
 });
 
-export * from './api-key.types';
-export * from './api-key.service';
-export * from './api-key.repository';
-export * from './errors';
-
+export * from "./api-key.service";
