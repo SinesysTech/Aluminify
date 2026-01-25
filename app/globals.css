@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@import "./themes.css";
+
 @layer theme {
   :root {
-    /* --- Radical White Palette (Base Variables) --- */
+    /* --- Radical White Palette (Fallback Variables) --- */
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     
@@ -13,7 +19,6 @@
     --popover-foreground: 240 10% 3.9%;
     
     --primary: 240 5.9% 10%;
-    /* No modo claro, o primary é escuro, então o foreground precisa ser claro */
     --primary-foreground: 0 0% 98%;
     
     --secondary: 240 4.8% 95.9%;
@@ -28,7 +33,7 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Status (usado em botões/indicadores do app) */
+    /* Status */
     --status-warning: 45 93% 47%;
     --status-warning-foreground: 0 0% 98%;
     --status-info: 217 91% 60%;
@@ -42,45 +47,43 @@
     
     --radius: 0.75rem;
 
-    /* === Spacing Tokens (Data Pages) === */
-    --space-page-gap: 2rem;           /* 32px - gap-8 */
-    --space-page-pb: 2.5rem;          /* 40px - pb-10 */
-    --space-section-gap: 1rem;        /* 16px - gap-4 */
-    --space-filter-gap: 0.75rem;      /* 12px - gap-3 */
-    --space-table-header-h: 2.5rem;   /* 40px - h-10 */
-    --space-table-cell: 1rem;         /* 16px - p-4 */
-    --space-pagination-x: 1rem;       /* 16px - px-4 */
-    --space-pagination-y: 0.75rem;    /* 12px - py-3 */
-    --space-button-gap: 0.5rem;       /* 8px - gap-2 */
-    --space-empty-icon-mb: 1.5rem;    /* 24px - mb-6 */
-    --space-empty-title-mb: 0.5rem;   /* 8px - mb-2 */
-    --space-empty-text-mb: 2rem;      /* 32px - mb-8 */
-    --space-empty-actions-gap: 0.75rem; /* 12px - gap-3 */
+    /* === Spacing Tokens === */
+    --space-page-gap: 2rem;
+    --space-page-pb: 2.5rem;
+    --space-section-gap: 1rem;
+    --space-filter-gap: 0.75rem;
+    --space-table-header-h: 2.5rem;
+    --space-table-cell: 1rem;
+    --space-pagination-x: 1rem;
+    --space-pagination-y: 0.75rem;
+    --space-button-gap: 0.5rem;
+    --space-empty-icon-mb: 1.5rem;
+    --space-empty-title-mb: 0.5rem;
+    --space-empty-text-mb: 2rem;
+    --space-empty-actions-gap: 0.75rem;
 
     /* === Responsive Spacing Tokens === */
-    --space-page-x: 1rem;             /* Mobile: 16px */
-    --space-page-y: 1rem;             /* Mobile: 16px */
-    --space-section: 0.75rem;         /* Mobile: 12px */
-    --space-component: 0.5rem;        /* Mobile: 8px */
+    --space-page-x: 1rem;
+    --space-page-y: 1rem;
+    --space-section: 0.75rem;
+    --space-component: 0.5rem;
 
     /* === Touch Target Sizing === */
-    --touch-target-min: 44px;         /* Mínimo recomendado WCAG */
+    --touch-target-min: 44px;
 
     /* === Bottom Navigation === */
-    --bottom-nav-height: 64px;        /* Altura da bottom nav */
+    --bottom-nav-height: 64px;
     --bottom-nav-safe-area: env(safe-area-inset-bottom, 0px);
 
-    /* Decoração (grade/quadriculado) do fundo */
+    /* Deco */
     --deco-line: var(--border);
     --deco-alpha: 0.55;
 
-    /* Sidebar (usado por `components/ui/sidebar.tsx`) */
-    /* Leve contraste com o fundo no modo claro (sem textura) */
+    /* Sidebar Variables */
     --sidebar: hsl(240 5% 96%);
     --sidebar-foreground: hsl(var(--foreground));
     --sidebar-primary: hsl(var(--primary));
     --sidebar-primary-foreground: hsl(var(--primary-foreground));
-    /* sidebar-accent: cor de destaque para itens selecionados (mais escura para contraste) */
     --sidebar-accent: hsl(240 5% 88%);
     --sidebar-accent-foreground: hsl(var(--foreground));
     --sidebar-border: hsl(var(--border));
@@ -105,27 +108,17 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Status (modo escuro) */
-    --status-warning: 45 93% 47%;
-    --status-warning-foreground: 0 0% 98%;
-    --status-info: 217 91% 60%;
-    --status-info-foreground: 0 0% 98%;
-    --status-success: 142 71% 45%;
-    --status-success-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
 
-    /* Decoração (grade/quadriculado) do fundo */
     --deco-line: var(--border);
     --deco-alpha: 0.25;
 
-    /* Sidebar: leve contraste com o fundo no modo escuro (sem textura) */
     --sidebar: hsl(240 6% 10%);
     --sidebar-foreground: hsl(var(--foreground));
     --sidebar-primary: hsl(var(--primary));
     --sidebar-primary-foreground: hsl(var(--primary-foreground));
-    /* sidebar-accent: cor de destaque para itens selecionados (mais clara para contraste) */
     --sidebar-accent: hsl(240 5% 20%);
     --sidebar-accent-foreground: hsl(var(--foreground));
     --sidebar-border: hsl(var(--border));
@@ -136,10 +129,10 @@
   @media (min-width: 768px) {
     :root,
     .dark {
-      --space-page-x: 1.5rem;         /* Tablet: 24px */
-      --space-page-y: 1.5rem;         /* Tablet: 24px */
-      --space-section: 1rem;          /* Tablet: 16px */
-      --space-component: 0.75rem;     /* Tablet: 12px */
+      --space-page-x: 1.5rem;
+      --space-page-y: 1.5rem;
+      --space-section: 1rem;
+      --space-component: 0.75rem;
     }
   }
 
@@ -147,10 +140,10 @@
   @media (min-width: 1024px) {
     :root,
     .dark {
-      --space-page-x: 2rem;           /* Desktop: 32px */
-      --space-page-y: 2rem;           /* Desktop: 32px */
-      --space-section: 1.5rem;        /* Desktop: 24px */
-      --space-component: 1rem;        /* Desktop: 16px */
+      --space-page-x: 2rem;
+      --space-page-y: 2rem;
+      --space-section: 1.5rem;
+      --space-component: 1rem;
     }
   }
 }
@@ -282,6 +275,23 @@
   [data-slot="sidebar-container"],
   [data-slot="sidebar-inner"] {
     background-image: none !important;
+  }
+
+  [data-slot="button"],
+  [data-slot="dialog-trigger"],
+  [data-slot="dropdown-menu-item"],
+  [data-slot="command-item"],
+  [data-slot="toggle-group-item"],
+  [data-slot="dropdown-menu-trigger"],
+  [data-slot="popover-trigger"],
+  [data-slot="tooltip-trigger"],
+  [data-slot="sheet-trigger"],
+  [data-slot="collapsible-trigger"]{
+    @apply cursor-pointer!
+  }
+
+  [data-slot="dialog-overlay"], [data-slot="sheet-overlay"], [data-slot="drawer-overlay"] {
+    @apply bg-black/20! backdrop-blur-sm;
   }
 }
 
