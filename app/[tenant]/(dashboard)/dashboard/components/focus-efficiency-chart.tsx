@@ -4,7 +4,7 @@ import type { FocusEfficiencyDay } from '../types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { Info } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 
 interface FocusEfficiencyChartProps {
   data: FocusEfficiencyDay[]

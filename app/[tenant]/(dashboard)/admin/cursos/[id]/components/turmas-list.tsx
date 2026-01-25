@@ -32,7 +32,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { TurmaDialog, type Turma } from './turma-dialog'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/shared/library/api-client'
 
 interface TurmasListProps {
   cursoId: string

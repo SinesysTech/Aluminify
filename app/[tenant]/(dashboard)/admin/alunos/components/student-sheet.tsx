@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { X, Loader2 } from 'lucide-react'
 import { createStudentAction } from '../actions'
 import { useRouter } from 'next/navigation'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/shared/library/api-client'
 
 interface Turma {
     id: string

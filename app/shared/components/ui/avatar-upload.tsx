@@ -7,7 +7,7 @@ import { Upload, X, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { createClient } from '@/lib/client'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null

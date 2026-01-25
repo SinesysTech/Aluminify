@@ -13,7 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Loader2, Trash2, Plus, HelpCircle } from 'lucide-react';
-import { formatTipoAtividade } from '@/lib/utils';
+import { formatTipoAtividade } from '@/shared/library/utils';
 
 type TipoAtividade =
   | 'Nivel_1'

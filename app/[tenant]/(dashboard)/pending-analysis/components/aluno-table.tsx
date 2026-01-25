@@ -73,9 +73,9 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { apiClient, ApiClientError } from '@/lib/api-client'
+import { apiClient, ApiClientError } from '@/shared/library/api-client'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
-import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/lib/br'
+import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/shared/library/br'
 import { BulkActionsBar } from './bulk-actions-bar'
 import { TransferStudentsDialog } from './transfer-students-dialog'
 

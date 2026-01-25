@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select'
 import { FileText, Upload, Loader2, AlertCircle, CheckCircle2, Download } from 'lucide-react'
 import Papa from 'papaparse'
-import { downloadFile } from '@/lib/download-file'
+import { downloadFile } from '@/shared/library/download-file'
 
 async function loadExcelJS() {
   const mod = await import('exceljs/dist/exceljs.min.js')

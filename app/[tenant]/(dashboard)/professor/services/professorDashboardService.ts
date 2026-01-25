@@ -1,5 +1,5 @@
 import type { ProfessorDashboardData } from '@/types/dashboard-professor'
-import { apiClient, ApiClientError } from '@/lib/api-client'
+import { apiClient, ApiClientError } from '@/shared/library/api-client'
 
 export interface ProfessorDashboardServiceError extends Error {
   status?: number

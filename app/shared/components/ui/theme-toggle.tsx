@@ -6,7 +6,7 @@ import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { SidebarMenuButton } from '@/components/ui/sidebar'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 
 interface ThemeToggleProps {
   iconOnly?: boolean

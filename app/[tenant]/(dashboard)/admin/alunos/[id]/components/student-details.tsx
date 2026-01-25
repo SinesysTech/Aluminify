@@ -43,7 +43,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/shared/library/api-client'
 import { createClient } from '@/lib/client'
 import { StudentEditForm } from './student-edit-form'
 

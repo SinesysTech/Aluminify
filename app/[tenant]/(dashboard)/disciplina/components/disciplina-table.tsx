@@ -63,7 +63,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { FileText } from 'lucide-react'
-import { apiClient, ApiClientError } from '@/lib/api-client'
+import { apiClient, ApiClientError } from '@/shared/library/api-client'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export type Disciplina = {

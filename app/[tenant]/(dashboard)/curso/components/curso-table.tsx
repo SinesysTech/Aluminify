@@ -75,7 +75,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Switch } from '@/components/ui/switch'
-import { apiClient, ApiClientError } from '@/lib/api-client'
+import { apiClient, ApiClientError } from '@/shared/library/api-client'
 import { format, parse } from 'date-fns'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
 

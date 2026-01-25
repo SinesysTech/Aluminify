@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Loader2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/shared/library/api-client'
 import { StudentDetails } from './components/student-details'
 
 interface StudentData {

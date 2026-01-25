@@ -4,7 +4,7 @@ import * as React from 'react';
 import { motion, type Transition } from 'motion/react';
 import { Children } from 'react';
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/library/utils';
 import {
   TooltipContent,
   TooltipProvider,

@@ -6,7 +6,7 @@ import type { ProfessorDashboardData } from '@/types/dashboard-professor'
 import {
   fetchProfessorDashboardData,
   type ProfessorDashboardServiceError,
-} from '@/lib/services/professorDashboardService'
+} from '@/professor/services/professorDashboardService'
 import { ProfessorHeader } from './professor-header'
 import { ProfessorMetrics } from './professor-metrics'
 import { StudentsUnderCareList } from './students-under-care-list'

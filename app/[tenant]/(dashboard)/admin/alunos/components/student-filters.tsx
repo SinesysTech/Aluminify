@@ -4,7 +4,7 @@ import { Search } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useDebouncedCallback } from 'use-debounce'
 import { useEffect, useState } from 'react'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/shared/library/api-client'
 
 interface TurmaOption {
     id: string

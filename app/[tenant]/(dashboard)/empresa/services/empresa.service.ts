@@ -1,7 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { EmpresaRepositoryImpl } from './empresa.repository';
 import { Empresa, CreateEmpresaInput, UpdateEmpresaInput } from './empresa.types';
-import { isValidCNPJ, normalizeCnpj } from '@/lib/br';
+import { isValidCNPJ, normalizeCnpj } from '@/shared/library/br';
 
 export class EmpresaService {
   constructor(

@@ -63,7 +63,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { Layers } from 'lucide-react'
-import { apiClient, ApiClientError } from '@/lib/api-client'
+import { apiClient, ApiClientError } from '@/shared/library/api-client'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
 
 export type Segmento = {

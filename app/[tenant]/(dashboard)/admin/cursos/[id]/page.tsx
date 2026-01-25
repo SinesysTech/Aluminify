@@ -32,7 +32,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/shared/library/api-client'
 import { BulkActionsBar } from '@/app/[tenant]/(dashboard)/aluno/components/bulk-actions-bar'
 import { TransferStudentsDialog } from '@/app/[tenant]/(dashboard)/aluno/components/transfer-students-dialog'
 import type { CourseOption, Aluno } from '@/app/[tenant]/(dashboard)/aluno/components/aluno-table'

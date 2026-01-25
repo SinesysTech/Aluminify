@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 import { createClient } from '@/lib/client'
 import { Button } from '@/components/ui/button'
 import {

@@ -25,7 +25,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { downloadFile } from '@/lib/download-file'
+import { downloadFile } from '@/shared/library/download-file'
 
 type ImportIssueStatus = 'skipped' | 'failed' | 'rejected'
 

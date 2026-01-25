@@ -8,7 +8,7 @@ import { Plus, MessageSquare, X } from 'lucide-react'
 import { ConversationListItem } from './conversation-list-item'
 import { RenameConversationDialog } from './rename-conversation-dialog'
 import type { Conversation } from '@/backend/services/conversation/conversation.types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { ListSkeleton } from '@/components/ui/list-skeleton'
 

@@ -6,7 +6,7 @@ import type { InstitutionDashboardData } from '@/types/dashboard-institution'
 import {
   fetchInstitutionDashboardData,
   type InstitutionDashboardServiceError,
-} from '@/lib/services/institutionDashboardService'
+} from '@/dashboard/services/institutionDashboardService'
 import { InstitutionHeader } from './institution-header'
 import { InstitutionMetrics } from './institution-metrics'
 import { StudentRankingList } from './student-ranking-list'

@@ -1,6 +1,6 @@
 import type React from 'react'
 import Link from 'next/link'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 import { Card } from '@/components/ui/card'
 
 interface AuthPageLayoutProps {

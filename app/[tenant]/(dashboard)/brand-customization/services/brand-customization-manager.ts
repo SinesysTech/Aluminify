@@ -1,7 +1,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { BrandCustomizationRepositoryImpl } from './brand-customization.repository';
-import { getBrandingCacheManager } from '@/lib/services/branding-cache-manager';
-import { getBrandingPerformanceMonitor } from '@/lib/services/branding-performance-monitor';
+import { getBrandingCacheManager } from '@/brand-customization/services/branding-cache-manager';
+import { getBrandingPerformanceMonitor } from '@/brand-customization/services/branding-performance-monitor';
 import type {
   CompleteBrandingConfig,
   CSSCustomProperties,

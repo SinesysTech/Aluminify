@@ -45,8 +45,8 @@ import Papa from 'papaparse'
 import { useRouter } from 'next/navigation'
 import { AddActivityModal } from './shared/add-activity-modal'
 import InlineEditableTitle from '@/components/shared/inline-editable-title'
-import { formatTipoAtividade } from '@/lib/utils'
-import { downloadFile } from '@/lib/download-file'
+import { formatTipoAtividade } from '@/shared/library/utils'
+import { downloadFile } from '@/shared/library/download-file'
 
 async function loadExcelJS(): Promise<import('exceljs/dist/exceljs.min.js').ExcelJSModule> {
   const mod = await import('exceljs/dist/exceljs.min.js')

@@ -26,7 +26,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { format, addDays } from 'date-fns'
 import { GripVertical } from 'lucide-react'
 import { createClient } from '@/lib/client'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 
 interface CronogramaItem {
   id: string

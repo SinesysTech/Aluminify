@@ -14,7 +14,7 @@ import {
   BrainCircuit,
   type LucideIcon,
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 import { useCurrentUser } from '@/components/providers/user-provider'
 import { isAdminRoleTipo } from '@/lib/roles'
 

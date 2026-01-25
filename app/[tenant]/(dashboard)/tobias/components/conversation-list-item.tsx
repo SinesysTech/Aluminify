@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import type { Conversation } from '@/backend/services/conversation/conversation.types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 
 interface ConversationListItemProps {
   conversation: Conversation

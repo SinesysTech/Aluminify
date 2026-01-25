@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import { useToast } from '@/hooks/use-toast';
-import { formatBRPhone, formatCNPJ, isValidCNPJ } from '@/lib/br';
+import { formatBRPhone, formatCNPJ, isValidCNPJ } from '@/shared/library/br';
 import { useCurrentUser } from '@/components/providers/user-provider';
 
 interface Empresa {

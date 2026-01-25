@@ -5,7 +5,7 @@ import * as React from 'react'
 import { Upload, FileText, CheckCircle2, Loader2, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { createClient } from '@/lib/client'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 import { PdfViewerModal } from '@/components/shared/pdf-viewer-modal'
 
 const MATERIAIS_BUCKET = 'materiais_didaticos'

@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import type { Conversation } from '@/backend/services/conversation/conversation.types'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/library/utils'
 
 interface ConversationItemProps {
   conversation: Conversation

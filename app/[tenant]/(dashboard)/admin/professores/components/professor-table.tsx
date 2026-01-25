@@ -62,9 +62,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { apiClient, ApiClientError } from '@/lib/api-client'
+import { apiClient, ApiClientError } from '@/shared/library/api-client'
 import { TableSkeleton } from '@/components/ui/table-skeleton'
-import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/lib/br'
+import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/shared/library/br'
 
 export type Professor = {
   id: string
