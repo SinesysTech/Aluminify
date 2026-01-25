@@ -4,7 +4,7 @@ import { getDatabaseClient } from "@/backend/clients/database";
 import {
   EmpresaRepositoryImpl,
   EmpresaService,
-} from "@/backend/services/empresa";
+} from "@/app/[tenant]/(dashboard)/empresa/services";
 import type { Database } from "@/lib/database.types";
 
 /**

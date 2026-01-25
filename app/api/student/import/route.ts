@@ -3,7 +3,7 @@ import {
   studentImportService,
   StudentValidationError,
   StudentImportInputRow,
-} from "@/backend/services/student";
+} from "@/app/[tenant]/(dashboard)/aluno/services";
 import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
 
 function handleError(error: unknown) {

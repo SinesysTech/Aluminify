@@ -3,7 +3,7 @@ import {
   studentService,
   StudentConflictError,
   StudentValidationError,
-} from "@/backend/services/student";
+} from "@/app/[tenant]/(dashboard)/aluno/services";
 import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
 import type { PaginationParams } from "@/types/shared/dtos/api-responses";
 
@@ -120,9 +120,9 @@ async function getHandler(request: AuthenticatedRequest) {
       const { getDatabaseClientAsUser } =
         await import("@/backend/clients/database");
       const { StudentRepositoryImpl } =
-        await import("@/backend/services/student/student.repository");
+        await import("@/app/[tenant]/(dashboard)/aluno/services/student.repository");
       const { StudentService } =
-        await import("@/backend/services/student/student.service");
+        await import("@/app/[tenant]/(dashboard)/aluno/services/student.service");
 
       const client = getDatabaseClientAsUser(token);
       const repository = new StudentRepositoryImpl(client);
@@ -185,9 +185,9 @@ async function postHandler(request: AuthenticatedRequest) {
       const { getDatabaseClientAsUser } =
         await import("@/backend/clients/database");
       const { StudentRepositoryImpl } =
-        await import("@/backend/services/student/student.repository");
+        await import("@/app/[tenant]/(dashboard)/aluno/services/student.repository");
       const { StudentService } =
-        await import("@/backend/services/student/student.service");
+        await import("@/app/[tenant]/(dashboard)/aluno/services/student.service");
 
       const client = getDatabaseClientAsUser(token);
       const repository = new StudentRepositoryImpl(client);

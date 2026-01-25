@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/server";
-import { createStudentService } from "@/backend/services/student";
+import { createStudentService } from "@/app/[tenant]/(dashboard)/aluno/services";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { CreateStudentInput } from "@/types/shared/entities/user";
 import { revalidatePath } from "next/cache";

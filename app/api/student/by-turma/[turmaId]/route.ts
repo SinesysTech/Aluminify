@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/server';
-import { createStudentTransferService } from '@/backend/services/student';
+import { createStudentTransferService } from '@/app/[tenant]/(dashboard)/aluno/services';
 
 interface RouteContext {
   params: Promise<{ turmaId: string }>;

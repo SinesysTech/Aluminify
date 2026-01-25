@@ -4,7 +4,7 @@ import {
   StudentConflictError,
   StudentNotFoundError,
   StudentValidationError,
-} from '@/backend/services/student';
+} from '@/app/[tenant]/(dashboard)/aluno/services';
 import { requireAuth, AuthenticatedRequest } from '@/app/[tenant]/auth/middleware';
 
 const serializeStudent = (student: Awaited<ReturnType<typeof studentService.getById>>) => ({

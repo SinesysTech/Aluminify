@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import {
   studentImportService,
   StudentValidationError,
-} from "@/backend/services/student";
+} from "@/app/[tenant]/(dashboard)/aluno/services";
 import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
 import Papa from "papaparse";
 import ExcelJS from "exceljs";

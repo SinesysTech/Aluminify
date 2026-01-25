@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/server';
-import { createStudentTransferService } from '@/backend/services/student';
-import type { BulkTransferTurmaRequest } from '@/backend/services/student/student-transfer.types';
+import { createStudentTransferService } from '@/app/[tenant]/(dashboard)/aluno/services';
+import type { BulkTransferTurmaRequest } from '@/app/[tenant]/(dashboard)/aluno/services/student-transfer.types';
 
 export async function POST(request: NextRequest) {
   try {

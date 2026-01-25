@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/server'
-import { createStudentService } from '@/backend/services/student'
+import { createStudentService } from '@/app/[tenant]/(dashboard)/aluno/services'
 import { createCursoService } from '@/app/[tenant]/(dashboard)/curso/services'
 import { AlunosClientPage } from '@/app/(dashboard)/admin/alunos/components/client-page'
 import { requireUser } from '@/lib/auth'

@@ -4,7 +4,7 @@ import {
   type AuthenticatedRequest,
 } from "@/app/[tenant]/auth/middleware";
 import { createClient } from "@/lib/server";
-import { createStudentOrganizationsService } from "@/backend/services/student";
+import { createStudentOrganizationsService } from "@/app/[tenant]/(dashboard)/aluno/services";
 
 function handleError(error: unknown) {
   console.error("Student Courses by Org API Error:", error);

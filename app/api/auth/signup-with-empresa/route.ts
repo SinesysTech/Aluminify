@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   EmpresaService,
   EmpresaRepositoryImpl,
-} from "@/backend/services/empresa";
+} from "@/app/[tenant]/(dashboard)/empresa/services";
 import { getDatabaseClient } from "@/backend/clients/database";
 
 /**

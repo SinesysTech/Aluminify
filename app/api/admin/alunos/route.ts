@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDatabaseClient } from '@/backend/clients/database';
 import { getAuthUser } from '@/app/[tenant]/auth/middleware';
-import { StudentRepositoryImpl } from '@/backend/services/student';
-import { studentService } from '@/backend/services/student';
+import { StudentRepositoryImpl } from '@/app/[tenant]/(dashboard)/aluno/services';
+import { studentService } from '@/app/[tenant]/(dashboard)/aluno/services';
 import { randomBytes } from 'crypto';
 
 /**

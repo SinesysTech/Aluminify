@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/database.types";
 import { createClient } from "@/lib/server";
-import { TeacherRepositoryImpl } from "@/backend/services/teacher";
+import { TeacherRepositoryImpl } from "@/app/[tenant]/(dashboard)/professor/services";
 import { getAuthUser } from "@/app/[tenant]/auth/middleware";
 import {
   getEmpresaContext,
