@@ -209,7 +209,7 @@ export class StudentService {
     // Vincular aluno à turma se turmaId foi fornecido
     if (payload.turmaId) {
       try {
-        const { createTurmaService } = await import("@/backend/services/turma");
+        const { createTurmaService } = await import("@/app/[tenant]/(dashboard)/curso/services/turma");
         const turmaService = createTurmaService(getAdminClient());
         await turmaService.vincularAluno(payload.turmaId, student.id);
       } catch (turmaError) {

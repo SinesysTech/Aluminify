@@ -4,7 +4,7 @@ import {
   SegmentConflictError,
   SegmentNotFoundError,
   SegmentValidationError,
-} from '@/backend/services/segment';
+} from '@/app/[tenant]/(dashboard)/segmento/services';
 import { requireAuth, AuthenticatedRequest } from '@/app/[tenant]/auth/middleware';
 
 const serializeSegment = (segment: Awaited<ReturnType<typeof segmentService.getById>>) => ({

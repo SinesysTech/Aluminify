@@ -15,7 +15,7 @@
     "typecheck:ci": "tsc -p tsconfig.json --noEmit --pretty false",
     "test": "jest",
     "test:watch": "jest --watch",
-    "check:colors": "node scripts/check-status-colors.mjs",
+    "check:colors": "node scripts/5-geral/design/check-status-colors.mjs",
     "check:quick": "npm run lint && npm run typecheck && npm run check:colors",
     "check": "npm run check:quick && npm test",
     "check:ci": "npm run lint:ci && npm run typecheck:ci && npm run check:colors && npm test"

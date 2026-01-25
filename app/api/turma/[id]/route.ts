@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/server";
-import { createTurmaService } from "@/backend/services/turma";
+import { createTurmaService } from "@/app/[tenant]/(dashboard)/curso/services/turma";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
