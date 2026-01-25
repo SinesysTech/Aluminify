@@ -105,12 +105,12 @@ const empresaNavItems: NavItem[] = [
   },
   {
     title: "Disponibilidade",
-    url: "/professor/disponibilidade",
+    url: "/agendamentos/disponibilidade",
     icon: CalendarCheck,
   },
   {
     title: "Agendamentos",
-    url: "/professor/agendamentos",
+    url: "/agendamentos",
     icon: Calendar,
   },
 ]

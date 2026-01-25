@@ -1,55 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Nav } from "../../components/nav";
+import { Footer } from "../../components/footer";
 
 export function PricingPage() {
-    const [scrolled, setScrolled] = useState(false);
-
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 50);
-        };
-
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
-
     return (
         <div className="bg-background-light dark:bg-background-dark text-text-main-light dark:text-text-main-dark font-sans antialiased selection:bg-zinc-200 dark:selection:bg-zinc-800 transition-colors duration-200">
-            <nav
-                className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled
-                    ? "bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-border-light dark:border-border-dark"
-                    : "bg-transparent border-b border-transparent"
-                    }`}
-            >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-20 items-center">
-                        <Link className="flex items-center gap-2 group" href="/">
-                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold font-display text-xl group-hover:scale-105 transition-transform">
-                                A
-                            </div>
-                            <span className="font-display font-bold text-lg tracking-tight">
-                                Aluminify
-                            </span>
-                        </Link>
-                        <div className="flex items-center gap-4">
-                            <Link
-                                className="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-white transition-colors"
-                                href="/"
-                            >
-                                Voltar para Home
-                            </Link>
-                            <Link
-                                href="/signup"
-                                className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors"
-                            >
-                                Criar Instância
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+            <Nav activeLink="precos" transparent />
 
             <main className="pt-24">
                 <section className="py-20 text-center px-4">
@@ -313,11 +271,7 @@ export function PricingPage() {
                 </section>
             </main>
 
-            <footer className="border-t border-border-light dark:border-border-dark bg-white dark:bg-surface-dark py-12 text-center">
-                <p className="text-xs text-text-muted-light dark:text-text-muted-dark font-mono">
-                    © 2026 Aluminify Inc. A infraestrutura invisível da educação.
-                </p>
-            </footer>
+            <Footer />
         </div>
     );
 }

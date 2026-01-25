@@ -1,0 +1,286 @@
+/**
+ * Aluminify Landing Page - Design Tokens
+ *
+ * Tokens padronizados para uso em toda a landing page.
+ * Importe este arquivo em componentes TSX ou inclua via CDN nos arquivos HTML.
+ */
+
+:root {
+  /* ===========================
+   * CORES - LANDING PAGE
+   * =========================== */
+
+  /* Cores Primárias */
+  --lp-primary: #111827;
+  --lp-primary-hover: #374151;
+  --lp-primary-foreground: #ffffff;
+
+  /* Background */
+  --lp-bg-light: #F9FAFB;
+  --lp-bg-dark: #0F172A;
+
+  /* Surface (Cards, Modais) */
+  --lp-surface-light: #FFFFFF;
+  --lp-surface-dark: #1E293B;
+
+  /* Borders */
+  --lp-border-light: #E5E7EB;
+  --lp-border-dark: #334155;
+
+  /* Text */
+  --lp-text-main-light: #111827;
+  --lp-text-main-dark: #F8FAFC;
+  --lp-text-muted-light: #6B7280;
+  --lp-text-muted-dark: #94A3B8;
+
+  /* Status */
+  --lp-success: #22c55e;
+  --lp-info: #3b82f6;
+  --lp-warning: #facc15;
+  --lp-error: #f87171;
+  --lp-accent: #a855f7;
+
+  /* ===========================
+   * ESPAÇAMENTO
+   * =========================== */
+
+  /* Base: 4px (Tailwind default) */
+  --lp-space-1: 0.25rem;   /* 4px */
+  --lp-space-2: 0.5rem;    /* 8px */
+  --lp-space-3: 0.75rem;   /* 12px */
+  --lp-space-4: 1rem;      /* 16px */
+  --lp-space-5: 1.25rem;   /* 20px */
+  --lp-space-6: 1.5rem;    /* 24px */
+  --lp-space-8: 2rem;      /* 32px */
+  --lp-space-10: 2.5rem;   /* 40px */
+  --lp-space-12: 3rem;     /* 48px */
+  --lp-space-16: 4rem;     /* 64px */
+  --lp-space-20: 5rem;     /* 80px */
+  --lp-space-24: 6rem;     /* 96px */
+  --lp-space-32: 8rem;     /* 128px */
+
+  /* Container Padding */
+  --lp-container-x-sm: 1rem;      /* Mobile: 16px */
+  --lp-container-x-md: 1.5rem;    /* Tablet: 24px */
+  --lp-container-x-lg: 2rem;      /* Desktop: 32px */
+
+  /* Section Padding */
+  --lp-section-y-sm: 5rem;        /* 80px - py-20 */
+  --lp-section-y-lg: 6rem;        /* 96px - py-24 */
+
+  /* Hero Section */
+  --lp-hero-pt-sm: 6rem;          /* 96px - pt-24 */
+  --lp-hero-pt-lg: 8rem;          /* 128px - lg:pt-32 */
+  --lp-hero-pb-sm: 5rem;          /* 80px - pb-20 */
+  --lp-hero-pb-lg: 6rem;          /* 96px - lg:pb-24 */
+
+  /* Gaps */
+  --lp-gap-nav-links: 1.5rem;     /* 24px - gap-6 */
+  --lp-gap-cards: 2rem;           /* 32px - gap-8 */
+  --lp-gap-features: 3rem;        /* 48px - gap-12 */
+  --lp-gap-sections: 4rem;        /* 64px */
+
+  /* ===========================
+   * TIPOGRAFIA
+   * =========================== */
+
+  /* Font Families */
+  --lp-font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --lp-font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --lp-font-mono: ui-monospace, SFMono-Regular, 'Menlo', 'Monaco', 'Consolas', monospace;
+
+  /* Font Sizes */
+  --lp-text-xs: 0.75rem;          /* 12px */
+  --lp-text-sm: 0.875rem;         /* 14px */
+  --lp-text-base: 1rem;           /* 16px */
+  --lp-text-lg: 1.125rem;         /* 18px */
+  --lp-text-xl: 1.25rem;          /* 20px */
+  --lp-text-2xl: 1.5rem;          /* 24px */
+  --lp-text-3xl: 1.875rem;        /* 30px */
+  --lp-text-4xl: 2.25rem;         /* 36px */
+  --lp-text-5xl: 3rem;            /* 48px */
+  --lp-text-6xl: 3.75rem;         /* 60px */
+  --lp-text-7xl: 4.5rem;          /* 72px */
+
+  /* Font Weights */
+  --lp-font-regular: 400;
+  --lp-font-medium: 500;
+  --lp-font-semibold: 600;
+  --lp-font-bold: 700;
+
+  /* Line Heights */
+  --lp-leading-tight: 1.25;
+  --lp-leading-normal: 1.5;
+  --lp-leading-relaxed: 1.625;
+
+  /* Letter Spacing */
+  --lp-tracking-tight: -0.025em;
+  --lp-tracking-normal: 0;
+  --lp-tracking-wide: 0.025em;
+  --lp-tracking-wider: 0.05em;
+
+  /* ===========================
+   * BORDER RADIUS
+   * =========================== */
+
+  --lp-radius-sm: 0.375rem;       /* 6px */
+  --lp-radius-md: 0.5rem;         /* 8px - rounded-lg */
+  --lp-radius-lg: 0.75rem;        /* 12px - rounded-xl */
+  --lp-radius-xl: 1rem;           /* 16px - rounded-2xl */
+  --lp-radius-2xl: 1.5rem;        /* 24px */
+  --lp-radius-full: 9999px;       /* rounded-full */
+
+  /* ===========================
+   * SHADOWS
+   * =========================== */
+
+  --lp-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --lp-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --lp-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --lp-shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --lp-shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+  /* ===========================
+   * COMPONENTES
+   * =========================== */
+
+  /* Navegação */
+  --lp-nav-height: 4rem;          /* 64px - h-16 */
+  --lp-nav-border-opacity: 0.8;   /* 80% */
+
+  /* Botões */
+  --lp-btn-padding-x: 2rem;       /* 32px - px-8 */
+  --lp-btn-padding-y: 0.875rem;   /* 14px - py-3.5 */
+  --lp-btn-padding-x-sm: 1rem;    /* 16px - px-4 */
+  --lp-btn-padding-y-sm: 0.5rem;  /* 8px - py-2 */
+
+  /* Cards */
+  --lp-card-padding: 2rem;        /* 32px - p-8 */
+  --lp-card-padding-sm: 1.5rem;   /* 24px - p-6 */
+
+  /* Grid Pattern */
+  --lp-grid-size: 40px;
+  --lp-grid-opacity-light: 0.3;
+  --lp-grid-opacity-dark: 0.4;
+
+  /* ===========================
+   * TRANSIÇÕES
+   * =========================== */
+
+  --lp-transition-fast: 150ms;
+  --lp-transition-normal: 200ms;
+  --lp-transition-slow: 300ms;
+  --lp-transition-slower: 500ms;
+  --lp-easing-default: ease-out;
+  --lp-easing-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ===========================
+   * Z-INDEX
+   * =========================== */
+
+  --lp-z-background: 0;
+  --lp-z-content: 10;
+  --lp-z-sticky: 40;
+  --lp-z-nav: 50;
+  --lp-z-modal: 100;
+  --lp-z-tooltip: 110;
+
+  /* ===========================
+   * BREAKPOINTS (para referência)
+   * =========================== */
+
+  /*
+   * sm: 640px
+   * md: 768px
+   * lg: 1024px
+   * xl: 1280px
+   * 2xl: 1536px
+   */
+
+  /* Max Width Containers */
+  --lp-max-w-2xl: 42rem;          /* 672px */
+  --lp-max-w-3xl: 48rem;          /* 768px */
+  --lp-max-w-4xl: 56rem;          /* 896px */
+  --lp-max-w-5xl: 64rem;          /* 1024px */
+  --lp-max-w-6xl: 72rem;          /* 1152px */
+  --lp-max-w-7xl: 80rem;          /* 1280px */
+}
+
+/* Dark Mode Overrides */
+.dark {
+  --lp-primary-foreground: #111827;
+
+  /* Ajustes específicos dark mode se necessário */
+}
+
+/* ===========================
+ * CLASSES UTILITÁRIAS
+ * =========================== */
+
+/* Container com padding responsivo */
+.lp-container {
+  max-width: var(--lp-max-w-7xl);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--lp-container-x-sm);
+  padding-right: var(--lp-container-x-sm);
+}
+
+@media (min-width: 640px) {
+  .lp-container {
+    padding-left: var(--lp-container-x-md);
+    padding-right: var(--lp-container-x-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .lp-container {
+    padding-left: var(--lp-container-x-lg);
+    padding-right: var(--lp-container-x-lg);
+  }
+}
+
+/* Section com padding vertical */
+.lp-section {
+  padding-top: var(--lp-section-y-sm);
+  padding-bottom: var(--lp-section-y-sm);
+}
+
+@media (min-width: 1024px) {
+  .lp-section {
+    padding-top: var(--lp-section-y-lg);
+    padding-bottom: var(--lp-section-y-lg);
+  }
+}
+
+/* Hero Section */
+.lp-hero {
+  padding-top: var(--lp-hero-pt-sm);
+  padding-bottom: var(--lp-hero-pb-sm);
+}
+
+@media (min-width: 1024px) {
+  .lp-hero {
+    padding-top: var(--lp-hero-pt-lg);
+    padding-bottom: var(--lp-hero-pb-lg);
+  }
+}
+
+/* Transições padrão */
+.lp-transition {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: var(--lp-easing-smooth);
+  transition-duration: var(--lp-transition-normal);
+}
+
+.lp-transition-all {
+  transition-property: all;
+  transition-timing-function: var(--lp-easing-smooth);
+  transition-duration: var(--lp-transition-normal);
+}
+
+.lp-transition-transform {
+  transition-property: transform;
+  transition-timing-function: var(--lp-easing-smooth);
+  transition-duration: var(--lp-transition-slow);
+}

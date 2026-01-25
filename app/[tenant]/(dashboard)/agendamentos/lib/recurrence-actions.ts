@@ -86,7 +86,7 @@ export async function createRecorrencia(
     throw new Error("Failed to create recorrencia");
   }
 
-  revalidatePath("/professor/disponibilidade");
+  revalidatePath("/agendamentos/disponibilidade");
   revalidatePath("/agendamentos");
 
   const typedResult = result as unknown as DbAgendamentoRecorrencia;
@@ -159,7 +159,7 @@ export async function updateRecorrencia(
     throw new Error("Failed to update recorrencia");
   }
 
-  revalidatePath("/professor/disponibilidade");
+  revalidatePath("/agendamentos/disponibilidade");
   revalidatePath("/agendamentos");
 
   const typedResult = result as unknown as DbAgendamentoRecorrencia;
@@ -212,7 +212,7 @@ export async function deleteRecorrencia(
     throw new Error("Failed to delete recorrencia");
   }
 
-  revalidatePath("/professor/disponibilidade");
+  revalidatePath("/agendamentos/disponibilidade");
   revalidatePath("/agendamentos");
   return { success: true };
 }
@@ -344,7 +344,7 @@ export async function createBloqueio(
     }
   }
 
-  revalidatePath("/professor/agendamentos");
+  revalidatePath("/agendamentos");
   revalidatePath("/agendamentos");
 
   return {
@@ -423,7 +423,7 @@ export async function updateBloqueio(
     throw new Error("Failed to update bloqueio");
   }
 
-  revalidatePath("/professor/agendamentos");
+  revalidatePath("/agendamentos");
   revalidatePath("/agendamentos");
 
   return {
@@ -476,7 +476,7 @@ export async function deleteBloqueio(
     throw new Error("Failed to delete bloqueio");
   }
 
-  revalidatePath("/professor/agendamentos");
+  revalidatePath("/agendamentos/disponibilidade");
   revalidatePath("/agendamentos");
   return { success: true };
 }
