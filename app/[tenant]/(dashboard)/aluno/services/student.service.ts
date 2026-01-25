@@ -16,7 +16,7 @@ import {
   isValidCPF,
   normalizeBRPhone,
   normalizeCpf,
-} from "@/app/shared/core/br";
+} from "@/app/shared/library/br";
 
 const FULL_NAME_MIN_LENGTH = 3;
 const FULL_NAME_MAX_LENGTH = 200;
