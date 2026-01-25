@@ -18,6 +18,15 @@ import { createClient } from '@/lib/client';
 import { LogoUploadComponent } from './logo-upload-component';
 import { ColorPaletteEditor } from './color-palette-editor';
 import { FontSchemeSelector } from './font-scheme-selector';
+import {
+  PresetSelector,
+  ThemeScaleSelector,
+  ThemeRadiusSelector,
+  ColorModeSelector,
+  ContentLayoutSelector,
+  SidebarModeSelector,
+  ResetThemeButton
+} from './theme-customizer';
 import { useTenantBrandingOptional } from '@/hooks/use-tenant-branding';
 import type {
   BrandCustomizationState,
@@ -279,11 +288,12 @@ export function BrandCustomizationPanel({
       <CardContent className="p-0">
         <div className="flex flex-col space-y-6">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="overview">Visão Geral</TabsTrigger>
               <TabsTrigger value="logos">Logos</TabsTrigger>
               <TabsTrigger value="colors">Cores</TabsTrigger>
               <TabsTrigger value="fonts">Fontes</TabsTrigger>
+              <TabsTrigger value="theme">Tema</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-6 space-y-6">
@@ -479,6 +489,34 @@ export function BrandCustomizationPanel({
                 onPreview={handleFontSchemePreview}
                 onLoadGoogleFont={handleLoadGoogleFont}
               />
+            </TabsContent>
+
+            <TabsContent value="theme" className="space-y-6 mt-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Configurações de Tema</CardTitle>
+                  <CardDescription>
+                    Customize a aparência e layout do sistema para sua empresa
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <PresetSelector />
+                    <ThemeScaleSelector />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ThemeRadiusSelector />
+                    <ColorModeSelector />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <ContentLayoutSelector />
+                    <SidebarModeSelector />
+                  </div>
+                  <div className="pt-4 border-t">
+                    <ResetThemeButton />
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
 

@@ -209,7 +209,7 @@ export default function BrandingPage() {
       <div>
         <h1 className="page-title">Personalização da Marca</h1>
         <p className="page-subtitle">
-          Personalize a identidade visual da sua empresa: logos, cores e fontes
+          Personalize a identidade visual e tema da sua empresa: logos, cores, fontes e layout
         </p>
       </div>
       <BrandCustomizationPanel
