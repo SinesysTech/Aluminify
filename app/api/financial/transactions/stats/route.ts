@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getDatabaseClient } from "@/backend/clients/database";
-import { createFinancialService } from "@/backend/services/financial";
+import { createFinancialService } from "@/app/[tenant]/(dashboard)/admin/services/financial";
 import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
 
 function handleError(error: unknown) {

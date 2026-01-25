@@ -22,7 +22,7 @@ import { Loader } from '@/components/ui/shadcn-io/ai/loader'
 import { ConversationsPanel } from './components/conversations-panel'
 import { Button } from '@/components/ui/button'
 import { MessageSquare, Paperclip, X } from 'lucide-react'
-import type { Conversation as ConversationType } from '@/backend/services/conversation/conversation.types'
+import type { Conversation as ConversationType } from '@/app/[tenant]/(dashboard)/tobias/services/conversation/conversation.types'
 
 interface ChatMessage {
   id: string

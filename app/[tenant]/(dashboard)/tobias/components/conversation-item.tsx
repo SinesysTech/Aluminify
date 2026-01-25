@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { Conversation } from '@/backend/services/conversation/conversation.types'
+import type { Conversation } from '@/app/[tenant]/(dashboard)/tobias/services/conversation/conversation.types'
 import { cn } from '@/shared/library/utils'
 
 interface ConversationItemProps {

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { TransactionStatusBadge } from "@/components/financial/transaction-status-badge";
-import { createFinancialService } from "@/backend/services/financial";
+import { createFinancialService } from "@/app/[tenant]/(dashboard)/admin/services/financial";
 import type { TransactionStatus, Provider, PaymentMethod } from "@/types/shared/entities/financial";
 import { ArrowLeft, User, CreditCard, Calendar, Package, Hash } from "lucide-react";
 

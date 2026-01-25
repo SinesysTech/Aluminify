@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { getDatabaseClient } from "@/backend/clients/database";
-import { createFinancialService } from "@/backend/services/financial";
+import { createFinancialService } from "@/app/[tenant]/(dashboard)/admin/services/financial";
 import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
 import type {
   TransactionListParams,
   TransactionStatus,
   Provider,
-} from "@/backend/services/financial/financial.types";
+} from "@/app/[tenant]/(dashboard)/admin/services/financial/financial.types";
 import { isAdminRoleTipo } from "@/lib/roles";
 
 const serializeTransaction = (

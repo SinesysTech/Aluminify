@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getDatabaseClient } from "@/backend/clients/database";
-import { createTransactionRepository } from "@/backend/services/financial";
+import { createTransactionRepository } from "@/app/[tenant]/(dashboard)/admin/services/financial";
 import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
 import type {
   TransactionImportResult,
   CreateTransactionInput,
-} from "@/backend/services/financial/financial.types";
+} from "@/app/[tenant]/(dashboard)/admin/services/financial/financial.types";
 import { isAdminRoleTipo } from "@/lib/roles";
 
 function handleError(error: unknown) {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { conversationService } from '@/backend/services/conversation';
+import { conversationService } from '@/app/[tenant]/(dashboard)/tobias/services/conversation';
 import { requireAuth, AuthenticatedRequest } from '@/app/[tenant]/auth/middleware';
 import { cacheService } from '@/backend/services/cache';
 

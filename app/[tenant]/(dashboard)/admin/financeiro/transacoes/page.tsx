@@ -24,7 +24,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { createFinancialService } from "@/backend/services/financial";
+import { createFinancialService } from "@/app/[tenant]/(dashboard)/admin/services/financial";
 import type { TransactionStatus, Provider } from "@/types/shared/entities/financial";
 import { ArrowLeft } from "lucide-react";
 

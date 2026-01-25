@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { StatsCards } from "./components/stats-cards";
 import { RecentTransactions } from "./components/recent-transactions";
-import { createFinancialService } from "@/backend/services/financial";
+import { createFinancialService } from "@/app/[tenant]/(dashboard)/admin/services/financial";
 import type { TransactionStatus, Provider } from "@/types/shared/entities/financial";
 
 export const metadata: Metadata = {
