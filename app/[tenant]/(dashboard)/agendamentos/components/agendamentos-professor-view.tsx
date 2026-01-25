@@ -1,4 +1,4 @@
-import { getAgendamentosProfessor, getAgendamentoStats } from "@/app/actions/agendamentos"
+import { getAgendamentosProfessor, getAgendamentoStats } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 import { AgendamentosDashboard } from "./agendamentos-dashboard"
 import { Suspense } from "react"
 import { Skeleton } from "@/components/ui/skeleton"

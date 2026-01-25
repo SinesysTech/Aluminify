@@ -149,7 +149,7 @@ export function LoginPageClient() {
       }
 
       // Identify user role to determine redirect URL
-      const { identifyUserRoleAction } = await import('@/app/actions/auth-actions')
+      const { identifyUserRoleAction } = await import('@/lib/actions/auth-actions')
       const roleResult = await identifyUserRoleAction(data.user.id)
 
       let targetUrl = next

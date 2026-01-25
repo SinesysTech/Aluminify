@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useEffect, useState } from "react"
-import { getAvailableSlots } from "@/app/actions/agendamentos"
+import { getAvailableSlots } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 import { Clock } from "lucide-react"
 
 interface RightPanelProps {

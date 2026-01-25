@@ -1,7 +1,12 @@
 import { AgendamentoScheduler } from "../components/scheduler"
 import { createClient } from "@/lib/server"
 import { redirect, notFound } from "next/navigation"
-import { getProfessorById } from "@/app/actions/agendamentos"
+import {
+  getAvailableSlots,
+  getDisponibilidade,
+  upsertDisponibilidade,
+  createAgendamento,
+} from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions";
 import { Suspense } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"

@@ -1,7 +1,7 @@
 ﻿import type { Metadata } from 'next'
 import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"
-import { getAgendamentosAluno } from "@/app/actions/agendamentos"
+import { getAgendamentosAluno } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions";
 import { MeusAgendamentosList } from "../components/meus-agendamentos-list"
 import { Suspense } from "react"
 import { Skeleton } from "@/components/ui/skeleton"

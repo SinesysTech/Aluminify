@@ -35,7 +35,7 @@ import {
   getRelatorioById,
   type Relatorio,
   type RelatorioTipo,
-} from "@/app/actions/agendamentos"
+} from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 import { cn } from "@/lib/utils"
 
 interface RelatoriosDashboardProps {

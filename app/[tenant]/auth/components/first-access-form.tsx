@@ -150,7 +150,7 @@ export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
 
       // Step 1.5: Finalizar primeiro acesso no servidor (garante flag must_change_password=false)
       // Isso evita loops quando o estado do Auth/DB não está consistente imediatamente.
-      const { finalizeFirstAccessAction } = await import('@/app/actions/first-access-actions')
+      const { finalizeFirstAccessAction } = await import('@/app/primeiro-acesso/actions')
       const finalizeResult = await finalizeFirstAccessAction()
       if (!finalizeResult.success) {
         throw new Error(finalizeResult.error || 'Não foi possível finalizar o primeiro acesso. Tente novamente.')

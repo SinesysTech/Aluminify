@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ProfessorDisponivel } from "@/app/actions/agendamentos"
+import { ProfessorDisponivel } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"

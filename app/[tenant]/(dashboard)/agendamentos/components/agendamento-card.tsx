@@ -1,6 +1,6 @@
 "use client"
 
-import { AgendamentoComDetalhes } from "@/app/actions/agendamentos"
+import { AgendamentoComDetalhes } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"

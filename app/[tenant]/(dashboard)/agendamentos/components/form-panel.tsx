@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useState } from "react"
-import { createAgendamento } from "@/app/actions/agendamentos"
+import { createAgendamento } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 import { Loader2, Clock, Calendar } from "lucide-react"
 import { toast } from "sonner"
 

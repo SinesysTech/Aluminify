@@ -279,7 +279,7 @@ export function TenantLoginPageClient({
       // Identify user roles for this tenant
       console.log('[DEBUG] Identificando roles do usuário...');
       // Use Server Action instead of broken API route
-      const { identifyUserRoleAction } = await import('@/app/actions/auth-actions');
+      const { identifyUserRoleAction } = await import('@/lib/actions/auth-actions');
       const roleResult = await identifyUserRoleAction(data.user.id);
 
       if (roleResult.success) {

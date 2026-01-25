@@ -2,7 +2,7 @@
 import { createClient } from "@/lib/server"
 import { redirect } from "next/navigation"
 import { ConfiguracoesForm } from "../components/configuracoes-form"
-import { getConfiguracoesProfessor } from "@/app/actions/agendamentos"
+import { getConfiguracoesProfessor } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 
 export default async function ConfiguracoesAvancadasPage() {
   const supabase = await createClient()

@@ -2,7 +2,7 @@
 
 import type { ElementType } from "react"
 import { useEffect, useState } from "react"
-import { AgendamentoComDetalhes } from "@/app/actions/agendamentos"
+import { AgendamentoComDetalhes } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AgendamentosList } from "./agendamentos-list"

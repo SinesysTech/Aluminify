@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { AgendamentoComDetalhes, cancelAgendamentoWithReason } from "@/app/actions/agendamentos"
+import { AgendamentoComDetalhes, cancelAgendamentoWithReason } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"

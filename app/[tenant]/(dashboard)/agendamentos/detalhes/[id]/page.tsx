@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/server"
 import { redirect, notFound } from "next/navigation"
-import { getAgendamentoById } from "@/app/actions/agendamentos"
+import { getAgendamentoById } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions";
 import { AgendamentoDetails } from "../../components/agendamento-details"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"

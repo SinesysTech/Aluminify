@@ -7,7 +7,7 @@ import { FormPanel } from "./form-panel"
 import { LeftPanel } from "./left-panel"
 import { RightPanel } from "./right-panel"
 import { ptBR } from "date-fns/locale"
-import { getAvailabilityForMonth } from "@/app/actions/agendamentos"
+import { getAvailabilityForMonth } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 
 interface AgendamentoSchedulerProps {
   professorId: string

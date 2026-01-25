@@ -18,7 +18,7 @@ import {
   updateConfiguracoesProfessor,
   type ProfessorIntegracao,
   type ConfiguracoesProfessor,
-} from "@/app/actions/agendamentos"
+} from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
 import { Loader2, Video, Link2, Check, X, ExternalLink, AlertCircle, Settings2 } from "lucide-react"
 import { toast } from "sonner"
 
