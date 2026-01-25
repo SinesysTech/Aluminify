@@ -1,9 +1,12 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { BrandCustomizationManager } from '@/backend/services/brand-customization';
-import { requireBrandCustomizationAccess, BrandCustomizationRequest } from '@/backend/middleware/brand-customization-access';
-import { getPublicSupabaseConfig } from '@/lib/supabase-public-env';
-import type { SaveTenantBrandingRequest } from '@/types/brand-customization';
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { BrandCustomizationManager } from "@/brand-customization/services";
+import {
+  requireBrandCustomizationAccess,
+  BrandCustomizationRequest,
+} from "@/backend/middleware/brand-customization-access";
+import { getPublicSupabaseConfig } from "@/lib/supabase-public-env";
+import type { SaveTenantBrandingRequest } from "@/types/brand-customization";
 
 interface RouteContext {
   params: Promise<{ empresaId: string }>;
@@ -15,13 +18,13 @@ interface RouteContext {
  */
 async function getHandler(
   request: BrandCustomizationRequest,
-  { params }: { params: Promise<{ empresaId: string }> }
+  { params }: { params: Promise<{ empresaId: string }> },
 ) {
   try {
     const { empresaId } = await params;
 
     // Create Supabase client with user authentication
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient(url, anonKey, {
       global: {
@@ -45,10 +48,7 @@ async function getHandler(
     });
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -57,10 +57,10 @@ async function getHandler(
       warnings: result.warnings,
     });
   } catch (error) {
-    console.error('Error loading tenant branding:', error);
+    console.error("Error loading tenant branding:", error);
     return NextResponse.json(
-      { error: 'Failed to load tenant branding configuration' },
-      { status: 500 }
+      { error: "Failed to load tenant branding configuration" },
+      { status: 500 },
     );
   }
 }
@@ -71,22 +71,22 @@ async function getHandler(
  */
 async function postHandler(
   request: BrandCustomizationRequest,
-  { params }: { params: Promise<{ empresaId: string }> }
+  { params }: { params: Promise<{ empresaId: string }> },
 ) {
   try {
     const { empresaId } = await params;
-    const body = await request.json() as SaveTenantBrandingRequest;
+    const body = (await request.json()) as SaveTenantBrandingRequest;
 
     // Validate request body
-    if (!body || typeof body !== 'object') {
+    if (!body || typeof body !== "object") {
       return NextResponse.json(
-        { error: 'Invalid request body' },
-        { status: 400 }
+        { error: "Invalid request body" },
+        { status: 400 },
       );
     }
 
     // Create Supabase client with user authentication
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient(url, anonKey, {
       global: {
@@ -108,21 +108,21 @@ async function postHandler(
     });
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
-    return NextResponse.json({
-      success: true,
-      data: result.data,
-    }, { status: 201 });
-  } catch (error) {
-    console.error('Error saving tenant branding:', error);
     return NextResponse.json(
-      { error: 'Failed to save tenant branding configuration' },
-      { status: 500 }
+      {
+        success: true,
+        data: result.data,
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    console.error("Error saving tenant branding:", error);
+    return NextResponse.json(
+      { error: "Failed to save tenant branding configuration" },
+      { status: 500 },
     );
   }
 }
@@ -133,16 +133,17 @@ async function postHandler(
  */
 async function deleteHandler(
   request: BrandCustomizationRequest,
-  { params }: { params: Promise<{ empresaId: string }> }
+  { params }: { params: Promise<{ empresaId: string }> },
 ) {
   try {
     const { empresaId } = await params;
-    
+
     // Check query parameters for options
-    const preserveLogos = request.nextUrl.searchParams.get('preserveLogos') === 'true';
+    const preserveLogos =
+      request.nextUrl.searchParams.get("preserveLogos") === "true";
 
     // Create Supabase client with user authentication
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient(url, anonKey, {
       global: {
@@ -164,38 +165,35 @@ async function deleteHandler(
     });
 
     if (!result.success) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: result.error }, { status: 500 });
     }
 
     return NextResponse.json({
       success: true,
       data: result.data,
-      message: 'Tenant branding reset to default successfully',
+      message: "Tenant branding reset to default successfully",
     });
   } catch (error) {
-    console.error('Error resetting tenant branding:', error);
+    console.error("Error resetting tenant branding:", error);
     return NextResponse.json(
-      { error: 'Failed to reset tenant branding to default' },
-      { status: 500 }
+      { error: "Failed to reset tenant branding to default" },
+      { status: 500 },
     );
   }
 }
 
 // Apply access control middleware and export handlers
 export const GET = requireBrandCustomizationAccess(
-  async (request: BrandCustomizationRequest, context: RouteContext) => 
-    getHandler(request, context)
+  async (request: BrandCustomizationRequest, context: RouteContext) =>
+    getHandler(request, context),
 );
 
 export const POST = requireBrandCustomizationAccess(
-  async (request: BrandCustomizationRequest, context: RouteContext) => 
-    postHandler(request, context)
+  async (request: BrandCustomizationRequest, context: RouteContext) =>
+    postHandler(request, context),
 );
 
 export const DELETE = requireBrandCustomizationAccess(
-  async (request: BrandCustomizationRequest, context: RouteContext) => 
-    deleteHandler(request, context)
+  async (request: BrandCustomizationRequest, context: RouteContext) =>
+    deleteHandler(request, context),
 );

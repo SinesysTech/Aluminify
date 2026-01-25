@@ -1,9 +1,12 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { LogoManagerImpl } from '@/backend/services/brand-customization';
-import { requireBrandCustomizationAccess, BrandCustomizationRequest } from '@/backend/middleware/brand-customization-access';
-import { getPublicSupabaseConfig } from '@/lib/supabase-public-env';
-import type { LogoType } from '@/types/brand-customization';
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { LogoManagerImpl } from "@/brand-customization/services";
+import {
+  requireBrandCustomizationAccess,
+  BrandCustomizationRequest,
+} from "@/backend/middleware/brand-customization-access";
+import { getPublicSupabaseConfig } from "@/lib/supabase-public-env";
+import type { LogoType } from "@/types/brand-customization";
 
 interface RouteContext {
   params: Promise<{ empresaId: string; logoType: string }>;
@@ -14,21 +17,21 @@ interface RouteContext {
  */
 async function getHandler(
   request: BrandCustomizationRequest,
-  { params }: { params: Promise<{ empresaId: string; logoType: string }> }
+  { params }: { params: Promise<{ empresaId: string; logoType: string }> },
 ) {
   try {
     const { empresaId, logoType } = await params;
 
     // Validate logoType
-    if (!['login', 'sidebar', 'favicon'].includes(logoType)) {
+    if (!["login", "sidebar", "favicon"].includes(logoType)) {
       return NextResponse.json(
-        { error: 'Invalid logoType. Must be one of: login, sidebar, favicon' },
-        { status: 400 }
+        { error: "Invalid logoType. Must be one of: login, sidebar, favicon" },
+        { status: 400 },
       );
     }
 
     // Create Supabase client with user authentication
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient(url, anonKey, {
       global: {
@@ -50,10 +53,10 @@ async function getHandler(
       data: logo,
     });
   } catch (error) {
-    console.error('Error fetching logo:', error);
+    console.error("Error fetching logo:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch logo' },
-      { status: 500 }
+      { error: "Failed to fetch logo" },
+      { status: 500 },
     );
   }
 }
@@ -64,21 +67,21 @@ async function getHandler(
  */
 async function deleteHandler(
   request: BrandCustomizationRequest,
-  { params }: { params: Promise<{ empresaId: string; logoType: string }> }
+  { params }: { params: Promise<{ empresaId: string; logoType: string }> },
 ) {
   try {
     const { empresaId, logoType } = await params;
 
     // Validate logoType
-    if (!['login', 'sidebar', 'favicon'].includes(logoType)) {
+    if (!["login", "sidebar", "favicon"].includes(logoType)) {
       return NextResponse.json(
-        { error: 'Invalid logoType. Must be one of: login, sidebar, favicon' },
-        { status: 400 }
+        { error: "Invalid logoType. Must be one of: login, sidebar, favicon" },
+        { status: 400 },
       );
     }
 
     // Create Supabase client with user authentication
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient(url, anonKey, {
       global: {
@@ -100,21 +103,21 @@ async function deleteHandler(
       message: `${logoType} logo removed successfully`,
     });
   } catch (error) {
-    console.error('Error removing logo:', error);
+    console.error("Error removing logo:", error);
     return NextResponse.json(
-      { error: 'Failed to remove logo' },
-      { status: 500 }
+      { error: "Failed to remove logo" },
+      { status: 500 },
     );
   }
 }
 
 // Apply access control middleware and export handlers
 export const GET = requireBrandCustomizationAccess(
-  async (request: BrandCustomizationRequest, context: RouteContext) => 
-    getHandler(request, context)
+  async (request: BrandCustomizationRequest, context: RouteContext) =>
+    getHandler(request, context),
 );
 
 export const DELETE = requireBrandCustomizationAccess(
-  async (request: BrandCustomizationRequest, context: RouteContext) => 
-    deleteHandler(request, context)
+  async (request: BrandCustomizationRequest, context: RouteContext) =>
+    deleteHandler(request, context),
 );

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { createClient } from '@/lib/client';
 import { CardSkeleton } from '@/components/ui/card-skeleton';
-import { BrandCustomizationPanel } from '@/components/brand-customization';
+import { BrandCustomizationPanel } from '@/brand-customization/components';
 import type { CompleteBrandingConfig, SaveTenantBrandingRequest } from '@/types/brand-customization';
 
 interface BrandingSettingsProps {

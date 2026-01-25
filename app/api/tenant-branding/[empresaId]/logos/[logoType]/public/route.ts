@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { LogoManagerImpl } from '@/backend/services/brand-customization';
-import { getPublicSupabaseConfig } from '@/lib/supabase-public-env';
-import type { LogoType } from '@/types/brand-customization';
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { LogoManagerImpl } from "@/brand-customization/services";
+import { getPublicSupabaseConfig } from "@/lib/supabase-public-env";
+import type { LogoType } from "@/types/brand-customization";
 
 /**
  * GET /api/tenant-branding/[empresaId]/logos/[logoType]/public
@@ -11,16 +11,16 @@ import type { LogoType } from '@/types/brand-customization';
  */
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ empresaId: string; logoType: string }> }
+  { params }: { params: Promise<{ empresaId: string; logoType: string }> },
 ) {
   try {
     const { empresaId, logoType } = await params;
 
     // Validate logoType
-    if (!['login', 'sidebar', 'favicon'].includes(logoType)) {
+    if (!["login", "sidebar", "favicon"].includes(logoType)) {
       return NextResponse.json(
-        { error: 'Invalid logoType. Must be one of: login, sidebar, favicon' },
-        { status: 400 }
+        { error: "Invalid logoType. Must be one of: login, sidebar, favicon" },
+        { status: 400 },
       );
     }
 
@@ -43,10 +43,10 @@ export async function GET(
       data: logo,
     });
   } catch (error) {
-    console.error('Error fetching public logo:', error);
+    console.error("Error fetching public logo:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch logo' },
-      { status: 500 }
+      { error: "Failed to fetch logo" },
+      { status: 500 },
     );
   }
 }

@@ -1,9 +1,12 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { ColorPaletteManagerImpl } from '@/backend/services/brand-customization';
-import { requireBrandCustomizationAccess, BrandCustomizationRequest } from '@/backend/middleware/brand-customization-access';
-import { getPublicSupabaseConfig } from '@/lib/supabase-public-env';
-import type { CreateColorPaletteRequest } from '@/types/brand-customization';
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { ColorPaletteManagerImpl } from "@/brand-customization/services";
+import {
+  requireBrandCustomizationAccess,
+  BrandCustomizationRequest,
+} from "@/backend/middleware/brand-customization-access";
+import { getPublicSupabaseConfig } from "@/lib/supabase-public-env";
+import type { CreateColorPaletteRequest } from "@/types/brand-customization";
 
 interface RouteContext {
   params: Promise<{ empresaId: string; paletteId: string }>;
@@ -14,13 +17,13 @@ interface RouteContext {
  */
 async function getHandler(
   request: BrandCustomizationRequest,
-  { params }: { params: Promise<{ empresaId: string; paletteId: string }> }
+  { params }: { params: Promise<{ empresaId: string; paletteId: string }> },
 ) {
   try {
     const { empresaId, paletteId } = await params;
 
     // Create Supabase client with user authentication
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient(url, anonKey, {
       global: {
@@ -39,16 +42,16 @@ async function getHandler(
 
     if (!palette) {
       return NextResponse.json(
-        { error: 'Color palette not found' },
-        { status: 404 }
+        { error: "Color palette not found" },
+        { status: 404 },
       );
     }
 
     // Verify the palette belongs to the specified empresa
     if (palette.empresaId !== empresaId) {
       return NextResponse.json(
-        { error: 'Color palette does not belong to the specified empresa' },
-        { status: 403 }
+        { error: "Color palette does not belong to the specified empresa" },
+        { status: 403 },
       );
     }
 
@@ -57,10 +60,10 @@ async function getHandler(
       data: palette,
     });
   } catch (error) {
-    console.error('Error fetching color palette:', error);
+    console.error("Error fetching color palette:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch color palette' },
-      { status: 500 }
+      { error: "Failed to fetch color palette" },
+      { status: 500 },
     );
   }
 }
@@ -71,14 +74,14 @@ async function getHandler(
  */
 async function putHandler(
   request: BrandCustomizationRequest,
-  { params }: { params: Promise<{ empresaId: string; paletteId: string }> }
+  { params }: { params: Promise<{ empresaId: string; paletteId: string }> },
 ) {
   try {
     const { empresaId, paletteId } = await params;
-    const body = await request.json() as Partial<CreateColorPaletteRequest>;
+    const body = (await request.json()) as Partial<CreateColorPaletteRequest>;
 
     // Create Supabase client with user authentication
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient(url, anonKey, {
       global: {
@@ -96,15 +99,15 @@ async function putHandler(
     const existingPalette = await colorPaletteManager.getPalette(paletteId);
     if (!existingPalette) {
       return NextResponse.json(
-        { error: 'Color palette not found' },
-        { status: 404 }
+        { error: "Color palette not found" },
+        { status: 404 },
       );
     }
 
     if (existingPalette.empresaId !== empresaId) {
       return NextResponse.json(
-        { error: 'Color palette does not belong to the specified empresa' },
-        { status: 403 }
+        { error: "Color palette does not belong to the specified empresa" },
+        { status: 403 },
       );
     }
 
@@ -117,22 +120,19 @@ async function putHandler(
     return NextResponse.json({
       success: true,
       data: updatedPalette,
-      message: 'Color palette updated successfully',
+      message: "Color palette updated successfully",
     });
   } catch (error) {
-    console.error('Error updating color palette:', error);
-    
+    console.error("Error updating color palette:", error);
+
     // Handle validation errors specifically
-    if (error instanceof Error && error.name === 'ColorValidationError') {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+    if (error instanceof Error && error.name === "ColorValidationError") {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
     return NextResponse.json(
-      { error: 'Failed to update color palette' },
-      { status: 500 }
+      { error: "Failed to update color palette" },
+      { status: 500 },
     );
   }
 }
@@ -142,13 +142,13 @@ async function putHandler(
  */
 async function deleteHandler(
   request: BrandCustomizationRequest,
-  { params }: { params: Promise<{ empresaId: string; paletteId: string }> }
+  { params }: { params: Promise<{ empresaId: string; paletteId: string }> },
 ) {
   try {
     const { empresaId, paletteId } = await params;
 
     // Create Supabase client with user authentication
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient(url, anonKey, {
       global: {
@@ -166,15 +166,15 @@ async function deleteHandler(
     const existingPalette = await colorPaletteManager.getPalette(paletteId);
     if (!existingPalette) {
       return NextResponse.json(
-        { error: 'Color palette not found' },
-        { status: 404 }
+        { error: "Color palette not found" },
+        { status: 404 },
       );
     }
 
     if (existingPalette.empresaId !== empresaId) {
       return NextResponse.json(
-        { error: 'Color palette does not belong to the specified empresa' },
-        { status: 403 }
+        { error: "Color palette does not belong to the specified empresa" },
+        { status: 403 },
       );
     }
 
@@ -183,38 +183,35 @@ async function deleteHandler(
 
     return NextResponse.json({
       success: true,
-      message: 'Color palette deleted successfully',
+      message: "Color palette deleted successfully",
     });
   } catch (error) {
-    console.error('Error deleting color palette:', error);
-    
+    console.error("Error deleting color palette:", error);
+
     // Handle validation errors specifically
-    if (error instanceof Error && error.name === 'ColorValidationError') {
-      return NextResponse.json(
-        { error: error.message },
-        { status: 400 }
-      );
+    if (error instanceof Error && error.name === "ColorValidationError") {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
     return NextResponse.json(
-      { error: 'Failed to delete color palette' },
-      { status: 500 }
+      { error: "Failed to delete color palette" },
+      { status: 500 },
     );
   }
 }
 
 // Apply access control middleware and export handlers
 export const GET = requireBrandCustomizationAccess(
-  async (request: BrandCustomizationRequest, context: RouteContext) => 
-    getHandler(request, context)
+  async (request: BrandCustomizationRequest, context: RouteContext) =>
+    getHandler(request, context),
 );
 
 export const PUT = requireBrandCustomizationAccess(
-  async (request: BrandCustomizationRequest, context: RouteContext) => 
-    putHandler(request, context)
+  async (request: BrandCustomizationRequest, context: RouteContext) =>
+    putHandler(request, context),
 );
 
 export const DELETE = requireBrandCustomizationAccess(
-  async (request: BrandCustomizationRequest, context: RouteContext) => 
-    deleteHandler(request, context)
+  async (request: BrandCustomizationRequest, context: RouteContext) =>
+    deleteHandler(request, context),
 );

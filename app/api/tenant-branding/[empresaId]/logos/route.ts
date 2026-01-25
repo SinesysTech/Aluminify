@@ -1,9 +1,12 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { LogoManagerImpl } from '@/backend/services/brand-customization';
-import { requireBrandCustomizationAccess, BrandCustomizationRequest } from '@/backend/middleware/brand-customization-access';
-import { getPublicSupabaseConfig } from '@/lib/supabase-public-env';
-import type { LogoType } from '@/types/brand-customization';
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { LogoManagerImpl } from "@/brand-customization/services";
+import {
+  requireBrandCustomizationAccess,
+  BrandCustomizationRequest,
+} from "@/backend/middleware/brand-customization-access";
+import { getPublicSupabaseConfig } from "@/lib/supabase-public-env";
+import type { LogoType } from "@/types/brand-customization";
 
 interface RouteContext {
   params: Promise<{ empresaId: string }>;
@@ -15,49 +18,50 @@ interface RouteContext {
  */
 async function postHandler(
   request: BrandCustomizationRequest,
-  { params }: { params: Promise<{ empresaId: string }> }
+  { params }: { params: Promise<{ empresaId: string }> },
 ) {
   try {
     const { empresaId } = await params;
 
     // Parse multipart form data
     const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const logoType = formData.get('logoType') as LogoType;
+    const file = formData.get("file") as File;
+    const logoType = formData.get("logoType") as LogoType;
 
     // Validate required fields
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No file provided" }, { status: 400 });
     }
 
-    if (!logoType || !['login', 'sidebar', 'favicon'].includes(logoType)) {
+    if (!logoType || !["login", "sidebar", "favicon"].includes(logoType)) {
       return NextResponse.json(
-        { error: 'Invalid or missing logoType. Must be one of: login, sidebar, favicon' },
-        { status: 400 }
+        {
+          error:
+            "Invalid or missing logoType. Must be one of: login, sidebar, favicon",
+        },
+        { status: 400 },
       );
     }
 
     // Validate file is a File-like object
     // In Next.js app router, the File object may not pass instanceof checks
-    const isValidFile = file &&
-      typeof file === 'object' &&
-      'name' in file &&
-      'size' in file &&
-      'type' in file &&
-      typeof (file as File).arrayBuffer === 'function';
+    const isValidFile =
+      file &&
+      typeof file === "object" &&
+      "name" in file &&
+      "size" in file &&
+      "type" in file &&
+      typeof (file as File).arrayBuffer === "function";
 
     if (!isValidFile) {
       return NextResponse.json(
-        { error: 'Invalid file format' },
-        { status: 400 }
+        { error: "Invalid file format" },
+        { status: 400 },
       );
     }
 
     // Create Supabase client with user authentication
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient(url, anonKey, {
       global: {
@@ -78,21 +82,24 @@ async function postHandler(
           error: result.error,
           validationErrors: result.validationErrors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    return NextResponse.json({
-      success: true,
-      logoUrl: result.logoUrl,
-      logoType,
-      message: `${logoType} logo uploaded successfully`,
-    }, { status: 201 });
-  } catch (error) {
-    console.error('Error uploading logo:', error);
     return NextResponse.json(
-      { error: 'Failed to upload logo' },
-      { status: 500 }
+      {
+        success: true,
+        logoUrl: result.logoUrl,
+        logoType,
+        message: `${logoType} logo uploaded successfully`,
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    console.error("Error uploading logo:", error);
+    return NextResponse.json(
+      { error: "Failed to upload logo" },
+      { status: 500 },
     );
   }
 }
@@ -102,13 +109,13 @@ async function postHandler(
  */
 async function getHandler(
   request: BrandCustomizationRequest,
-  { params }: { params: Promise<{ empresaId: string }> }
+  { params }: { params: Promise<{ empresaId: string }> },
 ) {
   try {
     const { empresaId } = await params;
 
     // Create Supabase client with user authentication
-    const authHeader = request.headers.get('authorization');
+    const authHeader = request.headers.get("authorization");
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient(url, anonKey, {
       global: {
@@ -130,21 +137,21 @@ async function getHandler(
       data: logos,
     });
   } catch (error) {
-    console.error('Error fetching logos:', error);
+    console.error("Error fetching logos:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch logos' },
-      { status: 500 }
+      { error: "Failed to fetch logos" },
+      { status: 500 },
     );
   }
 }
 
 // Apply access control middleware and export handlers
 export const POST = requireBrandCustomizationAccess(
-  async (request: BrandCustomizationRequest, context: RouteContext) => 
-    postHandler(request, context)
+  async (request: BrandCustomizationRequest, context: RouteContext) =>
+    postHandler(request, context),
 );
 
 export const GET = requireBrandCustomizationAccess(
-  async (request: BrandCustomizationRequest, context: RouteContext) => 
-    getHandler(request, context)
+  async (request: BrandCustomizationRequest, context: RouteContext) =>
+    getHandler(request, context),
 );
