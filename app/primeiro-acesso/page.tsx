@@ -2,7 +2,7 @@
 
 import { requireUser } from '@/lib/auth'
 import { getDefaultRouteForRole } from '@/lib/roles'
-import { FirstAccessForm } from '@/components/auth/first-access-form'
+import { FirstAccessForm } from '@/app/[tenant]/auth/components/first-access-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default async function PrimeiroAcessoPage() {

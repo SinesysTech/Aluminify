@@ -1,5 +1,5 @@
 ﻿import type { Metadata } from 'next'
-import { LoginPageClient } from '@/components/auth/login-page-client'
+import { LoginPageClient } from '@/app/[tenant]/auth/components/login-page-client'
 import { Suspense } from 'react'
 
 export const metadata: Metadata = {

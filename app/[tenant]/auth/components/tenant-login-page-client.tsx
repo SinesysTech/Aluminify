@@ -7,11 +7,11 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemo, useState, useEffect } from 'react';
 
-import { AuthPageLayout } from '@/components/auth/auth-page-layout';
-import { AuthDivider } from '@/components/auth/auth-divider';
-import { LoginDecorativeCard } from '@/components/auth/login-decorative-card';
-import { MagicLinkButton } from '@/components/auth/magic-link-button';
-import { OAuthButtons } from '@/components/auth/oauth-buttons';
+import { AuthPageLayout } from './auth-page-layout';
+import { AuthDivider } from './auth-divider';
+import { LoginDecorativeCard } from './login-decorative-card';
+import { MagicLinkButton } from './magic-link-button';
+import { OAuthButtons } from './oauth-buttons';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';

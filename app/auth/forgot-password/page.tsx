@@ -1,5 +1,5 @@
 ﻿import type { Metadata } from 'next'
-import { ForgotPasswordForm } from '@/components/auth/forgot-password-form'
+import { ForgotPasswordForm } from '@/app/[tenant]/auth/components/forgot-password-form'
 import { TenantLogo } from '@/components/shared/tenant-logo';
 
 export const metadata: Metadata = {

@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/server';
-import { TenantLoginPageClient } from '@/components/auth/tenant-login-page-client';
+import { TenantLoginPageClient } from '../components/tenant-login-page-client';
 
 interface TenantLoginPageProps {
   params: Promise<{ tenant: string }>;
