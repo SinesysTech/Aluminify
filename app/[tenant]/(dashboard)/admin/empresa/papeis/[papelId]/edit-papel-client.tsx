@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PapelForm, PermissionsMatrix } from '@/components/admin'
+import { PapelForm, PermissionsMatrix } from '../../../components'
 import type { Papel, RoleTipo, RolePermissions } from '@/types/shared/entities/papel'
 import { toast } from 'sonner'
 
