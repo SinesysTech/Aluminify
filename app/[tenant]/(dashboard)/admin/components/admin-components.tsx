@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Loader2 } from 'lucide-react'
-import { cn } from '@/app/shared/core/utils'
+import { cn } from '@/app/shared/library/utils'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'

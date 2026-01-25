@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { cn } from "@/app/shared/core/utils";
+import { cn } from "@/app/shared/library/utils";
 import { Markdown } from "./markdown";
 
 export type MessageProps = {

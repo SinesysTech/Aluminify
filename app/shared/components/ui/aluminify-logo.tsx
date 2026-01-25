@@ -1,4 +1,4 @@
-﻿import { cn } from "@/app/shared/core/utils"
+﻿import { cn } from "@/app/shared/library/utils"
 
 interface AluminifyLogoProps {
     className?: string

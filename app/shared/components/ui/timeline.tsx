@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 
-import { cn } from "@/app/shared/core/utils";
+import { cn } from "@/app/shared/library/utils";
 
 type TimelineContextValue = {
   activeStep: number;

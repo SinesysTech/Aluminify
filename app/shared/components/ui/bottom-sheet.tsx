@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Check } from "lucide-react"
-import { cn } from "@/app/shared/core/utils"
+import { cn } from "@/app/shared/library/utils"
 import {
   Sheet,
   SheetContent,

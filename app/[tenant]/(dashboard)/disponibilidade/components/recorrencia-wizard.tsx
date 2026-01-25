@@ -14,7 +14,7 @@ import { ptBR } from "date-fns/locale"
 import { CalendarIcon, ChevronLeft, ChevronRight, Loader2, Save } from "lucide-react"
 import { toast } from "sonner"
 import { createClient } from "@/app/shared/core/client"
-import { cn } from "@/app/shared/core/utils"
+import { cn } from "@/app/shared/library/utils"
 import type { Database } from "@/app/shared/core/database.types"
 
 const DAYS = [

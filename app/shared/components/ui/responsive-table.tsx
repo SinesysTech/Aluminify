@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { cn } from "@/app/shared/core/utils"
+import { cn } from "@/app/shared/library/utils"
 import { useBreakpoint } from "@/hooks/use-breakpoint"
 import { Card, CardContent } from "@/components/ui/card"
 

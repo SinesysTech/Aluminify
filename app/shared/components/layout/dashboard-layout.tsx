@@ -16,7 +16,7 @@ import { StudentBrandingCoordinator } from '@/components/layout/student-branding
 
 // 1. Importação das fontes do Design System (Aluminify)
 import { Inter, JetBrains_Mono } from "next/font/google"
-import { cn } from "@/app/shared/core/utils"
+import { cn } from "@/app/shared/library/utils"
 
 // 2. Configuração das fontes
 const fontSans = Inter({

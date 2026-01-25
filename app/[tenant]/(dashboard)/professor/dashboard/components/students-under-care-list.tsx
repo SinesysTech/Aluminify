@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import type { StudentUnderCare } from '@/types/dashboard-professor'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { cn } from '@/app/shared/core/utils'
+import { cn } from '@/app/shared/library/utils'
 
 interface StudentsUnderCareListProps {
   students: StudentUnderCare[]

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/app/shared/core/utils";
+import { cn } from "@/app/shared/library/utils";
 import React, { useEffect, useState } from "react";
 import { codeToHtml } from "shiki";
 

@@ -11,7 +11,7 @@ import {
   Kumbh_Sans,
   Outfit
 } from "next/font/google";
-import { cn } from "@/app/shared/core/utils";
+import { cn } from "@/app/shared/library/utils";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 

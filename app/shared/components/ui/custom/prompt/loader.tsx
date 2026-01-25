@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/app/shared/core/utils";
+import { cn } from "@/app/shared/library/utils";
 import React from "react";
 
 export interface LoaderProps {

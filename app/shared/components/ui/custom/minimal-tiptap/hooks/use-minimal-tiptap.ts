@@ -18,7 +18,7 @@ import {
   ResetMarksOnEnter,
   FileHandler
 } from "../extensions";
-import { cn } from "@/app/shared/core/utils";
+import { cn } from "@/app/shared/library/utils";
 import { fileToBase64, getOutput, randomId } from "../utils";
 import { useThrottle } from "../hooks/use-throttle";
 import { toast } from "sonner";

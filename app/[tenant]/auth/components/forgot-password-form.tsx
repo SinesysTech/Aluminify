@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { cn } from '@/app/shared/core/utils'
+import { cn } from '@/app/shared/library/utils'
 import { createClient } from '@/app/shared/core/client'
 import { Button } from '@/components/ui/button'
 import {

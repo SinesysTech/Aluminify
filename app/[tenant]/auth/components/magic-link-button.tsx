@@ -2,7 +2,7 @@
 
 import { Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/app/shared/core/utils'
+import { cn } from '@/app/shared/library/utils'
 
 interface MagicLinkButtonProps {
   onClick?: () => void

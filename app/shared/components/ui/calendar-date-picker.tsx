@@ -17,7 +17,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { DateRange } from "react-day-picker";
 import { ptBR } from "date-fns/locale/pt-BR";
 
-import { cn } from "@/app/shared/core/utils";
+import { cn } from "@/app/shared/library/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {

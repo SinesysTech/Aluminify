@@ -1,7 +1,7 @@
 import * as React from "react"
 import { ChevronDownIcon } from "lucide-react"
 
-import { cn } from "@/app/shared/core/utils"
+import { cn } from "@/app/shared/library/utils"
 
 function NativeSelect({ className, ...props }: React.ComponentProps<"select">) {
   return (

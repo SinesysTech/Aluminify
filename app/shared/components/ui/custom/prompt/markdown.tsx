@@ -1,4 +1,4 @@
-import { cn } from "@/app/shared/core/utils";
+import { cn } from "@/app/shared/library/utils";
 import { marked } from "marked";
 import { memo, useId, useMemo } from "react";
 import ReactMarkdown, { Components } from "react-markdown";

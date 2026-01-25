@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { Building2, Check, ChevronDown, Layers } from "lucide-react";
-import { cn } from "@/app/shared/core/utils";
+import { cn } from "@/app/shared/library/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,

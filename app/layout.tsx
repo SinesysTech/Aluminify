@@ -1,7 +1,7 @@
 import React from "react";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { cn } from "@/app/shared/core/utils";
+import { cn } from "@/app/shared/library/utils";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import GoogleAnalyticsInit from "@/app/shared/core/ga";
