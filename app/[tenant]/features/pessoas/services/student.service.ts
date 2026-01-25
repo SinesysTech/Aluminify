@@ -3,12 +3,17 @@ import {
   CreateStudentInput,
   UpdateStudentInput,
 } from "./student.types";
-import { StudentRepository, PaginatedResult } from "./student.repository";
+import {
+  StudentRepository,
+  StudentRepositoryImpl,
+  PaginatedResult,
+} from "./student.repository";
 import {
   StudentConflictError,
   StudentNotFoundError,
   StudentValidationError,
 } from "./errors";
+import { UserBaseService } from "./user-base.service";
 import { getDatabaseClient } from "@/app/shared/core/database/database";
 import type { PaginationParams } from "@/app/shared/types/dtos/api-responses";
 import {
@@ -17,6 +22,7 @@ import {
   normalizeBRPhone,
   normalizeCpf,
 } from "@/app/shared/library/br";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 const FULL_NAME_MIN_LENGTH = 3;
 const FULL_NAME_MAX_LENGTH = 200;
@@ -27,33 +33,13 @@ const ENROLLMENT_NUMBER_MAX_LENGTH = 50;
 const SOCIAL_HANDLE_MAX_LENGTH = 100;
 const COURSE_MIN_SELECTION = 1;
 
-let _adminClient: ReturnType<typeof getDatabaseClient> | null = null;
-
-function getAdminClient() {
-  if (!_adminClient) {
-    _adminClient = getDatabaseClient();
+export class StudentService extends UserBaseService {
+  constructor(private readonly repository: StudentRepository) {
+    super();
   }
-  return _adminClient;
-}
-
-export class StudentService {
-  constructor(private readonly repository: StudentRepository) {}
 
   async list(params?: PaginationParams): Promise<PaginatedResult<Student>> {
     return this.repository.list(params);
-  }
-
-  private isAuthEmailAlreadyRegistered(message?: string): boolean {
-    const m = (message || "").toLowerCase();
-    return (
-      m.includes("already been registered") ||
-      m.includes("already registered") ||
-      m.includes("user already registered") ||
-      m.includes("email already") ||
-      m.includes("já foi registrado") ||
-      m.includes("já está registrado") ||
-      m.includes("já cadastrado")
-    );
   }
 
   async create(payload: CreateStudentInput): Promise<Student> {
@@ -153,42 +139,30 @@ export class StudentService {
     }
 
     // Se o ID não foi fornecido, precisamos criar o usuário no auth.users primeiro
-    // usando o Admin API do Supabase
     let studentId = payload.id;
     if (!studentId) {
-      // Criar o usuário no auth.users usando Admin API
-      const { data: authUser, error: authError } =
-        await getAdminClient().auth.admin.createUser({
-          email: email,
+      try {
+        const authResult = await this.createAuthUser({
+          email,
           password: temporaryPassword,
-          email_confirm: true, // Confirmar email automaticamente
-          user_metadata: {
-            role: "aluno",
-            full_name: fullName,
-            must_change_password: true,
-            empresa_id: payload.empresaId, // Para isolamento multi-tenant
-          },
+          fullName: fullName,
+          role: "aluno",
+          empresaId: payload.empresaId,
+          mustChangePassword: true,
         });
 
-      if (authError || !authUser?.user) {
-        const authMessage = authError?.message || "Unknown error";
-
-        // Se o usuário já existe no Auth, isso é um conflito (409), não erro interno (500).
-        if (this.isAuthEmailAlreadyRegistered(authMessage)) {
-          throw new StudentConflictError(
-            `Já existe um usuário com o e-mail "${email}" cadastrado no sistema. Por favor, use outro e-mail.`,
-          );
+        studentId = authResult.userId;
+      } catch (error: any) {
+        if (error.message?.includes("Conflict")) {
+          throw new StudentConflictError(error.message);
         }
-
-        throw new Error(`Failed to create auth user: ${authMessage}`);
+        throw error;
       }
-
-      studentId = authUser.user.id;
     }
 
     const student = await this.repository.create({
       id: studentId,
-      empresaId: payload.empresaId, // Para isolamento multi-tenant
+      empresaId: payload.empresaId,
       fullName,
       email,
       cpf,
@@ -209,12 +183,12 @@ export class StudentService {
     // Vincular aluno à turma se turmaId foi fornecido
     if (payload.turmaId) {
       try {
-        const { createTurmaService } = await import("@/app/[tenant]/(dashboard)/curso/services/turma");
-        const turmaService = createTurmaService(getAdminClient());
+        const { createTurmaService } =
+          await import("@/app/[tenant]/(dashboard)/curso/services/turma");
+        const turmaService = createTurmaService(getDatabaseClient());
         await turmaService.vincularAluno(payload.turmaId, student.id);
       } catch (turmaError) {
         console.error("Error linking student to turma:", turmaError);
-        // Não lançar erro aqui - o aluno já foi criado
       }
     }
 
@@ -518,7 +492,7 @@ export class StudentService {
       return [];
     }
 
-    const { data, error } = await getAdminClient()
+    const { data, error } = await getDatabaseClient()
       .from("cursos")
       .select("id, nome")
       .in("id", courseIds);
@@ -545,15 +519,22 @@ export class StudentService {
     newPassword: string,
     mustChangePassword: boolean,
   ): Promise<void> {
-    const { error } = await getAdminClient().auth.admin.updateUserById(userId, {
+    await super.updateAuthUser(userId, {
       password: newPassword,
-      user_metadata: {
-        must_change_password: mustChangePassword,
-      },
+      mustChangePassword: mustChangePassword,
     });
-
-    if (error) {
-      throw new Error(`Failed to update auth password: ${error.message}`);
-    }
   }
+}
+
+/**
+ * Factory function para criar StudentService com cliente Supabase específico.
+ * Use esta função quando precisar que as RLS policies sejam aplicadas
+ * (ex: em páginas de dashboard, APIs com contexto de usuário).
+ *
+ * @param client - Cliente Supabase com contexto do usuário autenticado
+ * @returns Instância de StudentService que respeita RLS
+ */
+export function createStudentService(client: SupabaseClient): StudentService {
+  const repository = new StudentRepositoryImpl(client);
+  return new StudentService(repository);
 }

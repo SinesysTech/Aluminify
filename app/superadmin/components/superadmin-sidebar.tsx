@@ -10,10 +10,10 @@ import {
 import type { LucideIcon } from "lucide-react"
 import { usePathname } from "next/navigation"
 
-import { NavMain } from "@/components/layout/nav-main"
-import { NavUser } from "@/components/layout/nav-user"
-import { useCurrentUser } from "@/components/providers/user-provider"
-import { AluminifyLogo } from "@/components/ui/aluminify-logo"
+import { NavMain } from "@/app/shared/components/layout/nav-main"
+import { NavUser } from "@/app/shared/components/layout/nav-user"
+import { useCurrentUser } from "@/app/shared/components/providers/user-provider"
+import { AluminifyLogo } from "@/app/shared/components/ui/aluminify-logo"
 import {
   Sidebar,
   SidebarContent,
@@ -22,7 +22,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/app/shared/components/ui/sidebar"
 import { getDefaultRouteForRole } from "@/app/shared/core/roles"
 
 type NavItem = {

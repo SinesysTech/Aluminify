@@ -3,7 +3,7 @@ import {
   teacherService,
   TeacherConflictError,
   TeacherValidationError,
-} from "@/app/[tenant]/(dashboard)/professor/services";
+} from "@/app/[tenant]/features/pessoas/services";
 import { getAuthUser } from "@/app/[tenant]/auth/middleware";
 
 const serializeTeacher = (
@@ -78,10 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Apenas usuarios (staff) e superadmins podem criar professores
-    if (
-      user.role !== "usuario" &&
-      user.role !== "superadmin"
-    ) {
+    if (user.role !== "usuario" && user.role !== "superadmin") {
       return NextResponse.json(
         {
           error:

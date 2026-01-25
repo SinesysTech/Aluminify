@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getDatabaseClient } from '@/app/shared/core/database/database';
-import { getAuthUser } from '@/app/[tenant]/auth/middleware';
-import { StudentRepositoryImpl } from '@/app/[tenant]/(dashboard)/aluno/services';
-import { studentService } from '@/app/[tenant]/(dashboard)/aluno/services';
-import { randomBytes } from 'crypto';
+import { NextRequest, NextResponse } from "next/server";
+import { getDatabaseClient } from "@/app/shared/core/database/database";
+import { getAuthUser } from "@/app/[tenant]/auth/middleware";
+import { StudentRepositoryImpl } from "@/app/[tenant]/features/pessoas/services";
+import { studentService } from "@/app/[tenant]/features/pessoas/services";
+import { randomBytes } from "crypto";
 
 /**
  * POST /api/admin/alunos
@@ -14,10 +14,10 @@ export async function POST(request: NextRequest) {
   try {
     const user = await getAuthUser(request);
 
-    if (!user || user.role !== 'superadmin') {
+    if (!user || user.role !== "superadmin") {
       return NextResponse.json(
-        { error: 'Acesso negado. Apenas superadmin pode criar alunos.' },
-        { status: 403 }
+        { error: "Acesso negado. Apenas superadmin pode criar alunos." },
+        { status: 403 },
       );
     }
 
@@ -40,28 +40,29 @@ export async function POST(request: NextRequest) {
     // Validar email obrigatório
     if (!email) {
       return NextResponse.json(
-        { error: 'email é obrigatório' },
-        { status: 400 }
+        { error: "email é obrigatório" },
+        { status: 400 },
       );
     }
 
     // Se courseIds não fornecido ou vazio, garantir que temporaryPassword seja fornecida
-    const hasCourses = courseIds && Array.isArray(courseIds) && courseIds.length > 0;
+    const hasCourses =
+      courseIds && Array.isArray(courseIds) && courseIds.length > 0;
     if (!hasCourses && !temporaryPassword && !cpf) {
       return NextResponse.json(
         {
           error:
-            'Quando não há cursos, é necessário fornecer CPF ou senha temporária (temporaryPassword)',
+            "Quando não há cursos, é necessário fornecer CPF ou senha temporária (temporaryPassword)",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Validar senha temporária se fornecida
     if (temporaryPassword && temporaryPassword.length < 8) {
       return NextResponse.json(
-        { error: 'A senha temporária deve ter pelo menos 8 caracteres' },
-        { status: 400 }
+        { error: "A senha temporária deve ter pelo menos 8 caracteres" },
+        { status: 400 },
       );
     }
 
@@ -70,10 +71,10 @@ export async function POST(request: NextRequest) {
     if (!hasCourses && !finalTemporaryPassword) {
       // Usar CPF como senha padrão (apenas os dígitos)
       if (cpf) {
-        finalTemporaryPassword = cpf.replace(/\D/g, '');
+        finalTemporaryPassword = cpf.replace(/\D/g, "");
       } else {
         // Fallback: gerar senha aleatória segura se não tiver CPF
-        finalTemporaryPassword = randomBytes(16).toString('hex');
+        finalTemporaryPassword = randomBytes(16).toString("hex");
       }
     }
 
@@ -84,21 +85,24 @@ export async function POST(request: NextRequest) {
 
       if (!hasCourses) {
         // Criar aluno sem curso - criar usuário no auth primeiro
-        const { data: authUser, error: authError } = await adminClient.auth.admin.createUser({
-          email,
-          password: finalTemporaryPassword!,
-          email_confirm: true,
-          user_metadata: {
-            role: 'aluno',
-            full_name: fullName,
-            must_change_password: true,
-          },
-        });
+        const { data: authUser, error: authError } =
+          await adminClient.auth.admin.createUser({
+            email,
+            password: finalTemporaryPassword!,
+            email_confirm: true,
+            user_metadata: {
+              role: "aluno",
+              full_name: fullName,
+              must_change_password: true,
+            },
+          });
 
         if (authError || !authUser?.user) {
           return NextResponse.json(
-            { error: `Erro ao criar usuário: ${authError?.message || 'Unknown error'}` },
-            { status: 500 }
+            {
+              error: `Erro ao criar usuário: ${authError?.message || "Unknown error"}`,
+            },
+            { status: 500 },
           );
         }
 
@@ -112,8 +116,11 @@ export async function POST(request: NextRequest) {
 
         if (!aluno) {
           return NextResponse.json(
-            { error: 'Aluno criado mas registro não encontrado. Tente novamente.' },
-            { status: 500 }
+            {
+              error:
+                "Aluno criado mas registro não encontrado. Tente novamente.",
+            },
+            { status: 500 },
           );
         }
 
@@ -153,7 +160,7 @@ export async function POST(request: NextRequest) {
             createdAt: aluno.createdAt,
             updatedAt: aluno.updatedAt,
           },
-          { status: 201 }
+          { status: 201 },
         );
       } else {
         // Se há cursos, usar o service normalmente
@@ -175,14 +182,15 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(student, { status: 201 });
       }
     } catch (error) {
-      console.error('Error creating student:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erro ao criar aluno';
+      console.error("Error creating student:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro ao criar aluno";
       return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
   } catch (error) {
-    console.error('Error in admin alunos endpoint:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Erro ao criar aluno';
+    console.error("Error in admin alunos endpoint:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Erro ao criar aluno";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-

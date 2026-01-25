@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/app/shared/core/database.types";
 import { createClient } from "@/app/shared/core/server";
-import { TeacherRepositoryImpl } from "@/app/[tenant]/(dashboard)/professor/services";
+import { TeacherRepositoryImpl } from "@/app/[tenant]/features/pessoas/services";
 import { getAuthUser } from "@/app/[tenant]/auth/middleware";
 import {
   getEmpresaContext,
@@ -27,7 +27,7 @@ interface RouteContext {
 
 async function getHandler(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -52,14 +52,14 @@ async function getHandler(
     console.error("Error listing professores:", error);
     return NextResponse.json(
       { error: "Erro ao listar professores" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 async function postHandler(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -78,7 +78,7 @@ async function postHandler(
           error:
             "Acesso negado. Apenas admin da empresa pode adicionar professores.",
         },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -88,7 +88,7 @@ async function postHandler(
     if (!email || !fullName || !password) {
       return NextResponse.json(
         { error: "email, fullName e password são obrigatórios" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -114,7 +114,7 @@ async function postHandler(
     if (!newUser.user) {
       return NextResponse.json(
         { error: "Erro ao criar usuário" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -143,7 +143,7 @@ async function postHandler(
           error:
             "Usuário criado mas registro de professor não foi criado automaticamente. Entre em contato com o suporte.",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 

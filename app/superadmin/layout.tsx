@@ -1,4 +1,5 @@
-import { SidebarProvider } from "@/components/ui/sidebar"
+import React from "react"
+import { SidebarProvider } from "@/app/shared/components/ui/sidebar"
 import { SuperAdminSidebar } from "./components/superadmin-sidebar"
 
 export default function SuperAdminLayout({
