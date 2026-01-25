@@ -5,7 +5,7 @@
  * sessions, and potentially multiple users within the same empresa.
  */
 
-import type { CompleteBrandingConfig } from '@/types/brand-customization';
+import type { CompleteBrandingConfig } from '@/brand-customization/services/brand-customization.types';
 
 export interface BrandingSyncEvent {
   type: 'branding-updated' | 'branding-reset' | 'branding-error';

@@ -2,11 +2,11 @@
 
 import { useRef, useState } from 'react'
 import { Plus, Upload, UserPlus, Download, ChevronDown } from 'lucide-react'
-import { Student } from '@/types/shared/entities/user'
+import { Student } from '@/app/shared/types/entities/user'
 import { StudentFilters } from './student-filters'
 import { StudentTable } from './student-table'
 import { StudentSheet } from './student-sheet'
-import { PaginationMeta } from '@/types/shared/dtos/api-responses'
+import { PaginationMeta } from '@/app/shared/types/dtos/api-responses'
 import { useRouter } from 'next/navigation'
 import {
     DropdownMenu,

@@ -1,4 +1,4 @@
-import type { RoleTipo, RolePermissions } from "@/types/shared/entities/papel";
+import type { RoleTipo, RolePermissions } from "@/app/shared/types/entities/papel";
 
 // Main app roles (simplified)
 // - aluno: student

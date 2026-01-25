@@ -1,4 +1,4 @@
-import type { AppUserRole } from "@/types/user";
+import type { AppUserRole } from "@/app/shared/types";
 import { cookies } from "next/headers";
 
 export interface ImpersonationContext {

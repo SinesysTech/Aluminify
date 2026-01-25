@@ -6,7 +6,7 @@ import {
   BrandCustomizationRequest,
 } from "@/app/shared/core/middleware/brand-customization-access";
 import { getPublicSupabaseConfig } from "@/app/shared/core/supabase-public-env";
-import type { SaveTenantBrandingRequest } from "@/types/brand-customization";
+import type { SaveTenantBrandingRequest } from "@/brand-customization/services/brand-customization.types";
 
 interface RouteContext {
   params: Promise<{ empresaId: string }>;

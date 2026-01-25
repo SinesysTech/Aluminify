@@ -6,7 +6,7 @@ import {
   RelatorioTipo,
   DbAgendamentoRelatorio,
   RelatorioDados,
-} from "./types";
+} from "../types";
 
 export async function gerarRelatorio(
   empresaId: string,

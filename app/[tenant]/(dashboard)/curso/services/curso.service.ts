@@ -7,7 +7,7 @@ import {
 } from "./curso.types";
 import { CursoRepository, PaginatedResult } from "./curso.repository";
 import { CourseNotFoundError, CourseValidationError } from "./errors";
-import type { PaginationParams } from "@/types/shared/dtos/api-responses";
+import type { PaginationParams } from "@/app/shared/types/dtos/api-responses";
 
 const NAME_MIN_LENGTH = 3;
 const NAME_MAX_LENGTH = 200;

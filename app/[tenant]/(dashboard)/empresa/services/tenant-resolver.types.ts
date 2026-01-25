@@ -1,4 +1,4 @@
-import type { CompleteBrandingConfig } from '@/types/brand-customization';
+import type { CompleteBrandingConfig } from '@/brand-customization/services/brand-customization.types';
 
 /**
  * Types of tenant resolution

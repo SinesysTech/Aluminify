@@ -9,7 +9,7 @@ import {
   DisciplineNotFoundError,
   DisciplineValidationError,
 } from "./errors";
-import type { PaginationParams } from "@/types/shared/dtos/api-responses";
+import type { PaginationParams } from "@/app/shared/types/dtos/api-responses";
 
 const NAME_MIN_LENGTH = 3;
 const NAME_MAX_LENGTH = 120;

@@ -1,5 +1,5 @@
 /**
- * @deprecated Use types from '@/types/shared/entities/user' instead
+ * @deprecated Use types from '@/app/shared/types/entities/user' instead
  * This file re-exports for backward compatibility
  */
 export type {
@@ -7,5 +7,5 @@ export type {
   StudentCourseSummary,
   CreateStudentInput,
   UpdateStudentInput,
-} from '@/types/shared/entities/user';
+} from '@/app/shared/types/entities/user';
 

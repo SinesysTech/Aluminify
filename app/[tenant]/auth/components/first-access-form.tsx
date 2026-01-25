@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 
 import { createClient } from '@/app/shared/core/client'
 import { getDefaultRouteForRole } from '@/app/shared/core/roles'
-import type { AppUserRole } from '@/types/user'
+import type { AppUserRole } from '@/app/shared/types'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'

@@ -7,7 +7,7 @@ import type {
   Provider,
 } from "./financial.types";
 
-import type { PaginationMeta } from "@/types/shared/dtos/api-responses";
+import type { PaginationMeta } from "@/app/shared/types/dtos/api-responses";
 
 export interface PaginatedResult<T> {
   data: T[];

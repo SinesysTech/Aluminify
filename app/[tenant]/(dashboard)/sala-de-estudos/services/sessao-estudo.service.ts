@@ -4,7 +4,7 @@ import {
   IniciarSessaoInput,
   LogPausa,
   SessaoEstudo,
-} from '@/types/sessao-estudo';
+} from '@/app/[tenant]/(dashboard)/sala-de-estudos/types';
 import { SessaoEstudoRepository } from './sessao-estudo.repository';
 import { SessaoEstudoNotFoundError, SessaoEstudoValidationError } from './errors';
 import { cacheService } from '@/app/shared/core/services/cache';

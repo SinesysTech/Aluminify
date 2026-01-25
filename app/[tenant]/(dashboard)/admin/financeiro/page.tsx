@@ -7,7 +7,7 @@ import Link from "next/link";
 import { StatsCards } from "./components/stats-cards";
 import { RecentTransactions } from "./components/recent-transactions";
 import { createFinancialService } from "@/app/[tenant]/(dashboard)/admin/services/financial";
-import type { TransactionStatus, Provider } from "@/types/shared/entities/financial";
+import type { TransactionStatus, Provider } from "@/app/shared/types/entities/financial";
 
 export const metadata: Metadata = {
   title: 'Financeiro'

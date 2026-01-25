@@ -19,8 +19,8 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/app/shared/core/server";
 import { getDatabaseClient } from "@/app/shared/core/database/database";
-import type { AppUser, AppUserRole } from "@/types/user";
-import type { RoleTipo, RolePermissions } from "@/types/shared/entities/papel";
+import type { AppUser, AppUserRole } from "@/app/shared/types";
+import type { RoleTipo, RolePermissions } from "@/app/shared/types/entities/papel";
 import { getImpersonationContext } from "@/app/shared/core/auth-impersonate";
 import { getDefaultRouteForRole } from "@/app/shared/core/roles";
 

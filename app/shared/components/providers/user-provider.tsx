@@ -4,7 +4,7 @@ import React from 'react'
 
 import { createContext, useContext, useMemo } from 'react'
 
-import type { AppUser } from '@/types/user'
+import type { AppUser } from '@/app/shared/types'
 
 const UserContext = createContext<AppUser | null>(null)
 

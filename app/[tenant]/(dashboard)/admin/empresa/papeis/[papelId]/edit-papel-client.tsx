@@ -6,7 +6,7 @@ import { ArrowLeft, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { PapelForm, PermissionsMatrix } from '../../../components'
-import type { Papel, RoleTipo, RolePermissions } from '@/types/shared/entities/papel'
+import type { Papel, RoleTipo, RolePermissions } from '@/app/shared/types/entities/papel'
 import { toast } from 'sonner'
 
 interface EditPapelClientProps {

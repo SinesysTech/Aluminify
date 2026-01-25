@@ -3,7 +3,7 @@ import { getDatabaseClient } from "@/app/shared/core/database/database";
 import { AuthUser, UserRole, ApiKeyAuth } from "./types";
 import { apiKeyService } from "@/app/shared/core/services/api-key";
 import { getImpersonationContext } from "@/app/shared/core/auth-impersonate";
-import type { RoleTipo, RolePermissions } from "@/types/shared/entities/papel";
+import type { RoleTipo, RolePermissions } from "@/app/shared/types/entities/papel";
 
 import { createClient } from "@/app/shared/core/server";
 import { User } from "@supabase/supabase-js";

@@ -1,4 +1,4 @@
-import type { ProfessorDashboardData } from '@/types/dashboard-professor'
+import type { ProfessorDashboardData } from '@/app/[tenant]/(dashboard)/professor/dashboard/types'
 import { apiClient, ApiClientError } from '@/shared/library/api-client'
 
 export interface ProfessorDashboardServiceError extends Error {

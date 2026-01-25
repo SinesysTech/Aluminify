@@ -6,7 +6,7 @@ import {
   ConfiguracoesProfessor,
   ProfessorIntegracao,
   DbProfessorIntegracao,
-} from "./types";
+} from "../types";
 import type { Database } from "@/app/shared/core/database.types";
 
 export async function getConfiguracoesProfessor(

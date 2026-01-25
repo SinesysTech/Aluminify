@@ -3,7 +3,7 @@ import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middlewar
 import { getDatabaseClient } from "@/app/shared/core/database/database";
 import { isAdminRoleTipo } from "@/app/shared/core/roles";
 import type { Database } from "@/app/shared/core/database.types";
-import type { RolePermissions, RoleTipo } from "@/types/shared/entities/papel";
+import type { RolePermissions, RoleTipo } from "@/app/shared/types/entities/papel";
 
 interface RouteContext {
   params: Promise<{ id: string }>;

@@ -24,7 +24,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/app/shared/core/client'
 import Link from 'next/link'
-import type { RoleTipo } from '@/types/shared/entities/papel'
+import type { RoleTipo } from '@/app/shared/types/entities/papel'
 
 interface Usuario {
   id: string

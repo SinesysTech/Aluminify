@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Slider } from '@/components/ui/slider'
 import { Separator } from '@/components/ui/separator'
 import { Timer, Hourglass, Zap, Play } from 'lucide-react'
-import { MetodoEstudo } from '@/types/sessao-estudo'
+import { MetodoEstudo } from '@/app/[tenant]/(dashboard)/sala-de-estudos/types'
 
 interface TimerConfigProps {
     metodo: MetodoEstudo

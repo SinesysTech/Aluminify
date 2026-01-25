@@ -7,7 +7,7 @@
  * backward compatibility while allowing a more modular and maintainable structure.
  */
 
-export * from "./types";
+export * from "../types";
 export * from "./availability-actions";
 export * from "./appointment-actions";
 export * from "./config-actions";

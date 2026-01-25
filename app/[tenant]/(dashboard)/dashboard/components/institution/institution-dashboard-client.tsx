@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { RefreshCw, AlertCircle } from 'lucide-react'
-import type { InstitutionDashboardData } from '@/types/dashboard-institution'
+import type { InstitutionDashboardData } from '@/app/[tenant]/(dashboard)/dashboard/types'
 import {
   fetchInstitutionDashboardData,
   type InstitutionDashboardServiceError,

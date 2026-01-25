@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { LogPausa, MetodoEstudo } from '@/types/sessao-estudo';
+import { LogPausa, MetodoEstudo } from '@/app/[tenant]/(dashboard)/sala-de-estudos/types';
 
 type Phase = 'focus' | 'short_break' | 'long_break';
 

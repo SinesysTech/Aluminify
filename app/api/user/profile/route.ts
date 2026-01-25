@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/app/shared/core/server';
 import type { Database } from '@/app/shared/core/database.types';
-import type { AppUserRole } from '@/types/shared/entities/user';
-import type { RoleTipo } from '@/types/shared/entities/papel';
+import type { AppUserRole } from '@/app/shared/types/entities/user';
+import type { RoleTipo } from '@/app/shared/types/entities/papel';
 import { isAdminRoleTipo } from '@/app/shared/core/roles';
 
 /**

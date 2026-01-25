@@ -5,7 +5,7 @@ import {
   SessaoEstudo,
   SessaoStatus,
   LogPausa,
-} from "@/types/sessao-estudo";
+} from "@/app/[tenant]/(dashboard)/sala-de-estudos/types";
 
 // Use generated Database types instead of manual definitions
 type SessaoEstudoRow = Database["public"]["Tables"]["sessoes_estudo"]["Row"];

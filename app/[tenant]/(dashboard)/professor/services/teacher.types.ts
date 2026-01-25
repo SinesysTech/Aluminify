@@ -1,10 +1,10 @@
 /**
- * @deprecated Use types from '@/types/shared/entities/user' instead
+ * @deprecated Use types from '@/app/shared/types/entities/user' instead
  * This file re-exports for backward compatibility
  */
 export type {
   Teacher,
   CreateTeacherInput,
   UpdateTeacherInput,
-} from '@/types/shared/entities/user';
+} from '@/app/shared/types/entities/user';
 

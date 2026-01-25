@@ -34,4 +34,4 @@ export type {
   // Import
   TransactionImportRow,
   TransactionImportResult,
-} from '@/types/shared/entities/financial';
+} from '@/app/shared/types/entities/financial';

@@ -1,9 +1,9 @@
-import type { AppUserRole } from "@/types/shared/entities/user";
-import type { RoleTipo, RolePermissions } from "@/types/shared/entities/papel";
+import type { AppUserRole } from "@/app/shared/types/entities/user";
+import type { RoleTipo, RolePermissions } from "@/app/shared/types/entities/papel";
 import {
   ADMIN_ROLES as ADMIN_ROLE_TIPOS,
   TEACHING_ROLES as TEACHING_ROLE_TIPOS,
-} from "@/types/shared/entities/papel";
+} from "@/app/shared/types/entities/papel";
 
 // Default routes by main role
 const DEFAULT_ROUTE_BY_ROLE: Record<AppUserRole, string> = {

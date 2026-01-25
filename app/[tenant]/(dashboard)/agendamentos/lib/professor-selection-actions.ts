@@ -6,7 +6,7 @@ import {
   ProfessorDisponivel,
   DbAgendamentoRecorrencia,
   DbAgendamentoBloqueio,
-} from "./types";
+} from "../types";
 
 export async function getProfessoresDisponiveis(
   empresaId?: string,

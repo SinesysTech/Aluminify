@@ -18,12 +18,12 @@ import type {
   CreateUsuarioDisciplinaInput,
   UsuarioWithDisciplinas,
   DisciplinaBasic,
-} from "@/types/shared/entities/usuario";
+} from "@/app/shared/types/entities/usuario";
 import type {
   Papel,
   RolePermissions,
   RoleTipo,
-} from "@/types/shared/entities/papel";
+} from "@/app/shared/types/entities/papel";
 
 const TABLE = "usuarios";
 const DISCIPLINAS_TABLE = "usuarios_disciplinas";

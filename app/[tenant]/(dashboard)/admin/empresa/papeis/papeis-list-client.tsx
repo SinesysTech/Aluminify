@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Plus, Pencil, Trash2, Shield, Users } from 'lucide-react'
 import { toast } from 'sonner'
-import type { RoleTipo } from '@/types/shared/entities/papel'
+import type { RoleTipo } from '@/app/shared/types/entities/papel'
 
 interface PapelListItem {
   id: string

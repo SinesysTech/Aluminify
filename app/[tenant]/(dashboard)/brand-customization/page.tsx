@@ -7,7 +7,7 @@ import { createClient } from '@/app/shared/core/client';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { CardSkeleton } from '@/components/ui/card-skeleton';
 import { BrandCustomizationPanel } from '@/brand-customization/components';
-import type { CompleteBrandingConfig, SaveTenantBrandingRequest } from '@/types/brand-customization';
+import type { CompleteBrandingConfig, SaveTenantBrandingRequest } from '@/brand-customization/services/brand-customization.types';
 
 export default function BrandingPage() {
   const { toast } = useToast();

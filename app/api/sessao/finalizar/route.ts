@@ -8,7 +8,7 @@ import {
   SessaoEstudoValidationError,
   SessaoEstudoNotFoundError,
 } from "@/app/[tenant]/(dashboard)/sala-de-estudos/services";
-import { SessaoEstudo } from "@/types/sessao-estudo";
+import { SessaoEstudo } from "@/app/[tenant]/(dashboard)/sala-de-estudos/types";
 
 function serialize(sessao: SessaoEstudo) {
   const s = sessao as unknown as Record<string, unknown>;

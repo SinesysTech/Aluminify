@@ -1,6 +1,6 @@
 import { createClient } from "@/app/shared/core/client";
 import type { Option, ModuloOption } from "../types";
-import { MetodoEstudo, LogPausa } from "@/types/sessao-estudo";
+import { MetodoEstudo, LogPausa } from "@/app/[tenant]/(dashboard)/sala-de-estudos/types";
 
 export class FocoService {
   private supabase = createClient();

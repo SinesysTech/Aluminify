@@ -2,7 +2,7 @@
 
 import { Users, Calendar, CheckCircle2, Clock } from 'lucide-react'
 import { MetricCard } from '@/app/[tenant]/(dashboard)/aluno/dashboard/components/metric-card'
-import type { ProfessorSummary } from '@/types/dashboard-professor'
+import type { ProfessorSummary } from '@/app/[tenant]/(dashboard)/professor/dashboard/types'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 

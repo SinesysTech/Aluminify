@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BrandingSettings } from "./perfil/branding-settings"
 import { CompanySettings } from "./perfil/company-settings"
 import { UserManagement } from "./user-management"
-import type { AppUser } from "@/types/user"
+import type { AppUser } from "@/app/shared/types"
 
 interface SettingsTabsProps {
     user: AppUser

@@ -13,7 +13,7 @@ import type {
   UpdatePapelInput,
   RolePermissions,
   RoleTipo,
-} from "@/types/shared/entities/papel";
+} from "@/app/shared/types/entities/papel";
 
 const TABLE = "papeis";
 

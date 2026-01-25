@@ -6,7 +6,7 @@ import type {
   StudentRankingItem,
   ProfessorRankingItem,
   DisciplinaPerformance,
-} from "@/types/dashboard-institution";
+} from "@/app/[tenant]/(dashboard)/dashboard/types";
 import type { HeatmapDay } from "@/app/[tenant]/(dashboard)/aluno/dashboard/types";
 
 type DashboardPeriod = "semanal" | "mensal" | "anual";

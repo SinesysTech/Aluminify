@@ -5,7 +5,7 @@ import type {
   StudentUnderCare,
   UpcomingAppointment,
   ProfessorDisciplinaPerformance,
-} from "@/types/dashboard-professor";
+} from "@/app/[tenant]/(dashboard)/professor/dashboard/types";
 
 export class ProfessorAnalyticsService {
   /**

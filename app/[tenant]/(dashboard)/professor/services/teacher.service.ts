@@ -14,7 +14,7 @@ import {
 } from './errors';
 import { getDatabaseClient } from '@/app/shared/core/database/database';
 import { randomBytes } from 'crypto';
-import type { PaginationParams } from '@/types/shared/dtos/api-responses';
+import type { PaginationParams } from '@/app/shared/types/dtos/api-responses';
 import { isValidBRPhone, isValidCPF, normalizeBRPhone, normalizeCpf } from '@/app/shared/library/br';
 
 const FULL_NAME_MIN_LENGTH = 3;

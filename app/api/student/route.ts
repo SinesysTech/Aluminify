@@ -5,7 +5,7 @@ import {
   StudentValidationError,
 } from "@/app/[tenant]/(dashboard)/aluno/services";
 import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
-import type { PaginationParams } from "@/types/shared/dtos/api-responses";
+import type { PaginationParams } from "@/app/shared/types/dtos/api-responses";
 
 const serializeStudent = (
   student: Awaited<ReturnType<typeof studentService.getById>>

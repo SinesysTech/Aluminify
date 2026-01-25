@@ -3,7 +3,7 @@
 import { createClient } from "@/app/shared/core/server";
 import { createStudentService } from "@/app/[tenant]/(dashboard)/aluno/services";
 import { getAuthenticatedUser } from "@/app/shared/core/auth";
-import { CreateStudentInput } from "@/types/shared/entities/user";
+import { CreateStudentInput } from "@/app/shared/types/entities/user";
 import { revalidatePath } from "next/cache";
 import { canDelete } from "@/app/shared/core/roles";
 

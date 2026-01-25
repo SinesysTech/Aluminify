@@ -116,3 +116,4 @@ export interface DashboardData {
   strategicDomain: StrategicDomain;
   subjectDistribution: SubjectDistributionItem[];
 }
+export * from './institution';

@@ -1,5 +1,5 @@
-import type { AppUserRole } from '@/types/shared';
-import type { RoleTipo, RolePermissions } from '@/types/shared/entities/papel';
+import type { AppUserRole } from '@/app/shared/types';
+import type { RoleTipo, RolePermissions } from '@/app/shared/types/entities/papel';
 
 /**
  * Result of identifying user roles

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PapelForm } from '../../../components'
-import type { RoleTipo, RolePermissions } from '@/types/shared/entities/papel'
+import type { RoleTipo, RolePermissions } from '@/app/shared/types/entities/papel'
 import { toast } from 'sonner'
 
 interface NovoPapelClientProps {

@@ -12,8 +12,8 @@ import type {
   ResourcePermissions,
   SimplePermissions,
   RoleTipo,
-} from "@/types/shared/entities/papel";
-import { ADMIN_ROLES, TEACHING_ROLES } from "@/types/shared/entities/papel";
+} from "@/app/shared/types/entities/papel";
+import { ADMIN_ROLES, TEACHING_ROLES } from "@/app/shared/types/entities/papel";
 
 // Resource names that map to RolePermissions keys
 export type ResourceName = keyof RolePermissions;

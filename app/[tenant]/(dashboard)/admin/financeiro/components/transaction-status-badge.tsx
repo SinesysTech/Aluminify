@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import type { TransactionStatus } from "@/types/shared/entities/financial";
+import type { TransactionStatus } from "@/app/shared/types/entities/financial";
 
 interface TransactionStatusBadgeProps {
   status: TransactionStatus;

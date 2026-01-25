@@ -4,8 +4,8 @@ import type {
   LogoUploadResult,
   ValidationResult,
   TenantLogo,
-} from '@/types/brand-customization';
-import { LogoUploadError } from '@/types/brand-customization';
+} from '@/brand-customization/services/brand-customization.types';
+import { LogoUploadError } from '@/brand-customization/services/brand-customization.types';
 
 /**
  * Logo Manager Interface

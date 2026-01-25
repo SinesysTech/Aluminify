@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useMemo, useCallback } from 'react'
-import type { RolePermissions, RoleTipo } from '@/types/shared/entities/papel'
+import type { RolePermissions, RoleTipo } from '@/app/shared/types/entities/papel'
 import { hasPermission, canView, canCreate, canEdit, canDelete } from '@/app/shared/core/roles'
 
 interface PermissionContextValue {

@@ -5,7 +5,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProfileSettings } from './profile-settings'
-import type { AppUser } from '@/types/user'
+import type { AppUser } from '@/app/shared/types'
 
 interface ProfileTabsProps {
     user: AppUser

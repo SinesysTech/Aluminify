@@ -5,7 +5,7 @@
  * Implements LRU cache with TTL and memory management.
  */
 
-import type { CompleteBrandingConfig } from '@/types/brand-customization';
+import type { CompleteBrandingConfig } from '@/brand-customization/services/brand-customization.types';
 
 interface CacheEntry<T> {
   data: T;

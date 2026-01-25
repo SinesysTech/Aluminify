@@ -29,8 +29,8 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 
-import type { RolePermissions, ResourcePermissions, SimplePermissions, RoleTipo, Papel } from '@/types/shared/entities/papel'
-import { DEFAULT_PERMISSIONS } from '@/types/shared/entities/papel'
+import type { RolePermissions, ResourcePermissions, SimplePermissions, RoleTipo, Papel } from '@/app/shared/types/entities/papel'
+import { DEFAULT_PERMISSIONS } from '@/app/shared/types/entities/papel'
 
 // --- EmpresaSelector ---
 

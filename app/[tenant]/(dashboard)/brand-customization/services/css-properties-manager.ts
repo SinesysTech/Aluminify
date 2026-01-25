@@ -16,7 +16,7 @@ import type {
   FontScheme,
   CSSCustomProperties,
   CompleteBrandingConfig,
-} from "@/types/brand-customization";
+} from "@/brand-customization/services/brand-customization.types";
 
 export class CSSPropertiesManager {
   private static instance: CSSPropertiesManager;

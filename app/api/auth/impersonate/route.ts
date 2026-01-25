@@ -8,7 +8,7 @@ import {
   setImpersonationContext,
   canImpersonateUser,
 } from "@/app/shared/core/auth-impersonate";
-import type { AppUserRole } from "@/types/user";
+import type { AppUserRole } from "@/app/shared/types";
 import type { Database } from "@/app/shared/core/database.types";
 
 async function postHandler(request: AuthenticatedRequest) {

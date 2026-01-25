@@ -1,4 +1,4 @@
-import type { InstitutionDashboardData } from "@/types/dashboard-institution";
+import type { InstitutionDashboardData } from "@/app/[tenant]/(dashboard)/dashboard/types";
 import { apiClient, ApiClientError } from "@/app/shared/core/api-client";
 
 export interface InstitutionDashboardServiceError extends Error {

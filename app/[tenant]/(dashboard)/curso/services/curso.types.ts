@@ -1,5 +1,5 @@
 /**
- * @deprecated Use types from '@/types/shared' instead
+ * @deprecated Use types from '@/app/shared/types' instead
  * This file re-exports for backward compatibility
  */
 export type {
@@ -8,4 +8,4 @@ export type {
   Curso,
   CreateCursoInput,
   UpdateCursoInput,
-} from "@/types/shared";
+} from "@/app/shared/types";

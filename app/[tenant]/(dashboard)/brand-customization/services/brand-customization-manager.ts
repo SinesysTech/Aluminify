@@ -8,7 +8,7 @@ import type {
   TenantBrandingInsert,
   ColorPalette,
   FontScheme,
-} from '@/types/brand-customization';
+} from '@/brand-customization/services/brand-customization.types';
 import type {
   LoadTenantBrandingOptions,
   ApplyTenantBrandingOptions,

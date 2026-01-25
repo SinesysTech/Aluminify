@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useTenantBrandingOptional } from '@/hooks/use-tenant-branding';
-import type { LogoType, TenantLogoMode } from '@/types/brand-customization';
+import type { LogoType, TenantLogoMode } from '@/brand-customization/services/brand-customization.types';
 
 interface TenantLogoProps {
   logoType: LogoType;

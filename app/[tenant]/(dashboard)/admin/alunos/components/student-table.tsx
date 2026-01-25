@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Eye, Trash2, UserCog } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Student } from '@/types/shared/entities/user'
+import { Student } from '@/app/shared/types/entities/user'
 import { createClient } from '@/app/shared/core/client'
 import {
     Tooltip,
@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { DeleteStudentDialog } from './delete-student-dialog'
 import { toast } from '@/hooks/use-toast'
-import type { PaginationMeta } from '@/types/shared/dtos/api-responses'
+import type { PaginationMeta } from '@/app/shared/types/dtos/api-responses'
 
 interface StudentTableProps {
     students: Student[]

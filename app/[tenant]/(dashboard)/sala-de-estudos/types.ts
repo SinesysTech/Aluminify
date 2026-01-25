@@ -1,5 +1,5 @@
 /**
- * @deprecated Use types from '@/types/shared/entities/activity' instead
+ * @deprecated Use types from '@/app/shared/types/entities/activity' instead
  * This file is kept for backward compatibility
  */
 export type {

@@ -1,5 +1,5 @@
 /**
- * @deprecated Use types from '@/types/shared' instead
+ * @deprecated Use types from '@/app/shared/types' instead
  * This file re-exports for backward compatibility
  */
 export type {
@@ -10,7 +10,7 @@ export type {
   CreateAtividadeInput,
   UpdateAtividadeInput,
   AtividadeComProgressoEHierarquia,
-} from '@/types/shared';
+} from '@/app/shared/types';
 
-export { atividadeRequerDesempenho } from '@/types/shared/entities/activity';
+export { atividadeRequerDesempenho } from '@/app/shared/types/entities/activity';
 

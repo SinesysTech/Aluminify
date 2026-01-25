@@ -9,7 +9,7 @@ import {
   getEmpresaContext,
   validateEmpresaAccess,
 } from "@/app/shared/core/middleware/empresa-context";
-import type { UpdateUsuarioInput } from "@/types/shared/entities/usuario";
+import type { UpdateUsuarioInput } from "@/app/shared/types/entities/usuario";
 
 function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;

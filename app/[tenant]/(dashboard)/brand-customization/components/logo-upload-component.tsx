@@ -17,7 +17,7 @@ import {
 import type {
   LogoUploadComponentProps,
   LogoType,
-} from '@/types/brand-customization';
+} from '@/brand-customization/services/brand-customization.types';
 
 interface UploadState {
   isUploading: boolean;

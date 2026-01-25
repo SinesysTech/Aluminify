@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, X } from "lucide-react";
-import type { TransactionStatus, Provider } from "@/types/shared/entities/financial";
+import type { TransactionStatus, Provider } from "@/app/shared/types/entities/financial";
 
 interface TransactionFiltersProps {
   currentStatus?: TransactionStatus;

@@ -9,7 +9,7 @@ import type {
   TenantBrandingInsert,
   TenantBrandingUpdate,
   LogoType,
-} from '@/types/brand-customization';
+} from '@/brand-customization/services/brand-customization.types';
 
 export interface BrandCustomizationRepository {
   // Tenant Branding CRUD

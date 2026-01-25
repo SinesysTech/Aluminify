@@ -1,8 +1,8 @@
 /**
- * @deprecated Use types from '@/types/shared/enums' instead
+ * @deprecated Use types from '@/app/shared/types/enums' instead
  * This file re-exports for backward compatibility
  */
-import type { MaterialType } from "@/types/shared/enums";
+import type { MaterialType } from "@/app/shared/types/enums";
 
 export type { MaterialType };
 

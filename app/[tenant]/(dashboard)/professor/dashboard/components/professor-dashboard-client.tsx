@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { RefreshCw, AlertCircle } from 'lucide-react'
-import type { ProfessorDashboardData } from '@/types/dashboard-professor'
+import type { ProfessorDashboardData } from '@/app/[tenant]/(dashboard)/professor/dashboard/types'
 import {
   fetchProfessorDashboardData,
   type ProfessorDashboardServiceError,

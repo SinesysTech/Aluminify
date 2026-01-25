@@ -10,7 +10,7 @@ import {
   StudentValidationError,
 } from "./errors";
 import { getDatabaseClient } from "@/app/shared/core/database/database";
-import type { PaginationParams } from "@/types/shared/dtos/api-responses";
+import type { PaginationParams } from "@/app/shared/types/dtos/api-responses";
 import {
   isValidBRPhone,
   isValidCPF,

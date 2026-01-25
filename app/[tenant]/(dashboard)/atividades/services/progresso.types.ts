@@ -1,11 +1,11 @@
 /**
- * @deprecated Use types from '@/types/shared/enums' instead
+ * @deprecated Use types from '@/app/shared/types/enums' instead
  * This file re-exports for backward compatibility
  */
 import type {
   StatusAtividade,
   DificuldadePercebida,
-} from '@/types/shared/enums';
+} from '@/app/shared/types/enums';
 
 export type { StatusAtividade, DificuldadePercebida };
 

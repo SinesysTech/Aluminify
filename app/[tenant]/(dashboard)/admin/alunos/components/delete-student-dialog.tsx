@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Student } from "@/types/shared/entities/user";
+import { Student } from "@/app/shared/types/entities/user";
 import { deleteStudentAction } from "../actions";
 import { toast } from "@/hooks/use-toast";
 

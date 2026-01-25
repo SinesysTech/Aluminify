@@ -5,8 +5,8 @@ import type {
   FontSchemeUpdate,
   FontSchemeInsert,
   CSSCustomProperties,
-} from '@/types/brand-customization';
-import { FontLoadingError } from '@/types/brand-customization';
+} from '@/brand-customization/services/brand-customization.types';
+import { FontLoadingError } from '@/brand-customization/services/brand-customization.types';
 
 /**
  * Font Scheme Manager Interface

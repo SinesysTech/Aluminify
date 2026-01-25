@@ -9,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { TransactionStatusBadge } from "./transaction-status-badge";
-import type { TransactionStatus, Provider } from "@/types/shared/entities/financial";
+import type { TransactionStatus, Provider } from "@/app/shared/types/entities/financial";
 
 interface TransactionRow {
   id: string;

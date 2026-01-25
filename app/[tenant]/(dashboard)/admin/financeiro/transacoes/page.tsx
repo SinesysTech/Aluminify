@@ -25,7 +25,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { createFinancialService } from "@/app/[tenant]/(dashboard)/admin/services/financial";
-import type { TransactionStatus, Provider } from "@/types/shared/entities/financial";
+import type { TransactionStatus, Provider } from "@/app/shared/types/entities/financial";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata: Metadata = {

@@ -3,7 +3,7 @@ import { createClient } from '@/app/shared/core/server'
 import { redirect, notFound } from 'next/navigation'
 import { isAdminRoleTipo } from '@/app/shared/core/roles'
 import { EditPapelClient } from './edit-papel-client'
-import type { RolePermissions, RoleTipo } from '@/types/shared/entities/papel'
+import type { RolePermissions, RoleTipo } from '@/app/shared/types/entities/papel'
 
 interface PageProps {
   params: Promise<{ papelId: string }>

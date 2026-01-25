@@ -7,7 +7,7 @@ import {
   Disponibilidade,
   DbAgendamentoRecorrencia,
   DbAgendamentoBloqueio,
-} from "./types";
+} from "../types";
 import { getConfiguracoesProfessor } from "./config-actions";
 
 export async function getDisponibilidade(professorId: string) {

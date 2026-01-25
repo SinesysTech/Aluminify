@@ -10,7 +10,7 @@ import {
   AgendamentoFilters,
   isValidUserObject,
   VAgendamentosEmpresa,
-} from "./types";
+} from "../types";
 import { getConfiguracoesProfessor } from "./config-actions";
 import { validateAgendamento } from "./validation-actions";
 
