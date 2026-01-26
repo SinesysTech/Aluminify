@@ -337,9 +337,9 @@ export function IntegracaoManager({ professorId }: IntegracaoManagerProps) {
               <div className="text-sm text-muted-foreground">
                 <p className="font-medium mb-1">O que acontece ao conectar:</p>
                 <ul className="list-disc list-inside space-y-1">
-                  <li>Reunioes Zoom serao criadas automaticamente</li>
+                  <li>Reuniões Zoom serão criadas automaticamente</li>
                   <li>Links de acesso enviados aos alunos</li>
-                  <li>Configuracoes de sala de espera e video habilitadas</li>
+                  <li>Configurações de sala de espera e vídeo habilitadas</li>
                 </ul>
               </div>
             </>

@@ -968,17 +968,17 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Deletar Cronograma?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Esta a��o n�o pode ser desfeita. O cronograma e todos os seus dados ser�o <strong>permanentemente exclu�dos</strong>, incluindo:
+                      Esta ação não pode ser desfeita. O cronograma e todos os seus dados serão <strong>permanentemente excluídos</strong>, incluindo:
                       <br />
                       <br />
-                      � Todas as aulas agendadas no cronograma
+                      • Todas as aulas agendadas no cronograma
                       <br />
-                      � Progresso e marca��es de conclus�o espec�ficas deste cronograma
+                      • Progresso e marcações de conclusão específicas deste cronograma
                       <br />
-                      � Configura��es e distribui��o das aulas
+                      • Configurações e distribuição das aulas
                       <br />
                       <br />
-                      <strong>Importante:</strong> O <strong>hist�rico de aulas conclu�das</strong> ser� <strong>preservado</strong>. Essas marca��es s�o independentes do cronograma e n�o ser�o deletadas. Quando voc� criar um novo cronograma, poder� escolher excluir automaticamente as aulas j� conclu�das.
+                      <strong>Importante:</strong> O <strong>histórico de aulas concluídas</strong> será <strong>preservado</strong>. Essas marcações são independentes do cronograma e não serão deletadas. Quando você criar um novo cronograma, poderá escolher excluir automaticamente as aulas já concluídas.
                       <br />
                       <br />
                       Tem certeza que deseja continuar?
@@ -1013,10 +1013,10 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
         </CardContent>
       </Card>
 
-      {/* Card de Resumo das Configura��es */}
+      {/* Card de Resumo das Configurações */}
       <Card>
         <CardHeader>
-          <CardTitle>Resumo da Configura��o</CardTitle>
+          <CardTitle>Resumo da Configuração</CardTitle>
           <Separator className="mt-2" />
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
@@ -1104,7 +1104,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
           <Separator />
           {cronograma.velocidade_reproducao && (
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Velocidade de Reprodu��o:</span>
+              <span className="text-muted-foreground">Velocidade de Reprodução:</span>
               <span>{cronograma.velocidade_reproducao.toFixed(2)}x</span>
             </div>
           )}

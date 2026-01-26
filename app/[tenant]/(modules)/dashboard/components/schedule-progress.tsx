@@ -37,7 +37,7 @@ export function ScheduleProgress({ value }: ScheduleProgressProps) {
         <div className="flex flex-col gap-3 md:gap-4">
           <div className="flex justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <h2 className="text-foreground text-base md:text-lg font-semibold">
+              <h2 className="widget-title">
                 Progresso do Cronograma
               </h2>
             <TooltipProvider delayDuration={200}>
@@ -46,7 +46,7 @@ export function ScheduleProgress({ value }: ScheduleProgressProps) {
                   <button
                     type="button"
                     className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-                    aria-label="Informações sobre o progresso do cronograma"
+                    aria-label="Informaï¿½ï¿½es sobre o progresso do cronograma"
                   >
                     <Info className="h-4 w-4" />
                   </button>
@@ -59,14 +59,14 @@ export function ScheduleProgress({ value }: ScheduleProgressProps) {
                 >
                   <div className="space-y-2 text-sm">
                     <p>
-                      Este indicador mostra o percentual de aulas do seu cronograma que você já completou.
+                      Este indicador mostra o percentual de aulas do seu cronograma que vocï¿½ jï¿½ completou.
                     </p>
                     <p>
-                      O cálculo considera todas as aulas previstas no seu cronograma de estudos e quantas
-                      delas você já marcou como concluídas.
+                      O cï¿½lculo considera todas as aulas previstas no seu cronograma de estudos e quantas
+                      delas vocï¿½ jï¿½ marcou como concluï¿½das.
                     </p>
                     <p>
-                      Quanto maior o percentual, mais próximo você está de finalizar todo o conteúdo planejado.
+                      Quanto maior o percentual, mais prï¿½ximo vocï¿½ estï¿½ de finalizar todo o conteï¿½do planejado.
                     </p>
                   </div>
                 </TooltipContent>
@@ -78,7 +78,7 @@ export function ScheduleProgress({ value }: ScheduleProgressProps) {
             </span>
           </div>
           <p className="text-muted-foreground text-sm md:text-base">
-            Você completou {value}% do cronograma previsto.
+            Vocï¿½ completou {value}% do cronograma previsto.
           </p>
           <div className="w-full bg-muted rounded-full h-2.5">
             <div

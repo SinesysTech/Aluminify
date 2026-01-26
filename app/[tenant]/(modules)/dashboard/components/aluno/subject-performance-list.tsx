@@ -231,7 +231,7 @@ export function SubjectPerformanceList({
       <CardContent className="px-4 md:px-6 py-3 md:py-4 h-full flex flex-col min-h-0">
         <div className="flex flex-col gap-3 mb-4 md:mb-6">
           <div className="flex items-center gap-2">
-            <h2 className="text-foreground text-base md:text-lg font-semibold">
+            <h2 className="widget-title">
               Performance por {groupBy === 'curso' ? 'Curso' : groupBy === 'disciplina' ? 'Disciplina' : groupBy === 'frente' ? 'Frente' : 'Módulo'}
             </h2>
             <TooltipProvider delayDuration={200}>

@@ -15,9 +15,12 @@ import {
 import { Input } from '@/app/shared/components/forms/input'
 import { Label } from '@/app/shared/components/forms/label'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { useState } from 'react'
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
+  const params = useParams()
+  const tenant = params?.tenant as string
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -87,7 +90,7 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
               </div>
               <div className="mt-4 text-center text-sm">
                 Already have an account?{' '}
-                <Link href="/auth" className="underline underline-offset-4">
+                <Link href={tenant ? `/${tenant}/auth` : "/auth"} className="underline underline-offset-4">
                   Login
                 </Link>
               </div>

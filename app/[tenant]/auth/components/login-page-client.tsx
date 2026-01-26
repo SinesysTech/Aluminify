@@ -3,7 +3,7 @@
 import React from 'react'
 
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
 
 import { AuthPageLayout } from './auth-page-layout'
@@ -24,6 +24,8 @@ function safeNextPath(next: string | null | undefined) {
 }
 
 export function LoginPageClient() {
+  const params = useParams()
+  const tenant = params?.tenant as string
   const searchParams = useSearchParams()
 
   const next = useMemo(() => {
@@ -187,7 +189,7 @@ export function LoginPageClient() {
       footerContent={
         <p>
           Não tem uma conta?{' '}
-          <Link href="/auth/sign-up" className="font-medium text-primary hover:underline">
+          <Link href={tenant ? `/${tenant}/auth/sign-up` : "/auth/sign-up"} className="font-medium text-primary hover:underline">
             Criar infraestrutura
           </Link>
         </p>
@@ -246,7 +248,7 @@ export function LoginPageClient() {
               </Label>
             </div>
 
-            <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
+            <Link href={tenant ? `/${tenant}/auth/forgot-password` : "/auth/forgot-password"} className="text-sm text-primary hover:underline">
               Esqueceu a senha?
             </Link>
           </div>

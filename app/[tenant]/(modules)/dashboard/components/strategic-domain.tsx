@@ -25,13 +25,13 @@ function ScoreValue({ score }: { score: number | null }) {
             <button
               type="button"
               className="text-xs text-muted-foreground underline decoration-dotted underline-offset-2"
-              aria-label="O que significa sem evidência?"
+              aria-label="O que significa sem evidï¿½ncia?"
             >
-              Sem evidência
+              Sem evidï¿½ncia
             </button>
           </TooltipTrigger>
           <TooltipContent side="top" align="center" className="max-w-xs">
-            Ainda não há dados suficientes para calcular este indicador (por exemplo: poucas questões/flashcards feitos neste tópico).
+            Ainda nï¿½o hï¿½ dados suficientes para calcular este indicador (por exemplo: poucas questï¿½es/flashcards feitos neste tï¿½pico).
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -58,7 +58,7 @@ function ProgressBar({
 }
 
 export function StrategicDomain({ data }: StrategicDomainProps) {
-  // Domínio Estratégico não tem escopo por módulo (evita redundância com "Performance por Módulo")
+  // Domï¿½nio Estratï¿½gico nï¿½o tem escopo por mï¿½dulo (evita redundï¿½ncia com "Performance por Mï¿½dulo")
   const [scope, setScope] = useState<Extract<DashboardScopeLevel, 'curso' | 'disciplina' | 'frente'>>('curso')
   const [courses, setCourses] = useState<Array<{ id: string; nome: string }>>([])
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null)
@@ -98,7 +98,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     }
   }, [])
 
-  // Resetar seleções dependentes
+  // Resetar seleï¿½ï¿½es dependentes
   useEffect(() => {
     if (scope === 'curso') {
       setSelectedDisciplineId(null)
@@ -114,7 +114,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     }
   }, [scope])
 
-  // Garantir disciplina selecionada quando necessário
+  // Garantir disciplina selecionada quando necessï¿½rio
   useEffect(() => {
     let cancelled = false
     async function ensureDiscipline() {
@@ -141,7 +141,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     }
   }, [scope, selectedDisciplineId, selectedCourseId])
 
-  // Garantir frente selecionada quando necessário (frente/modulo)
+  // Garantir frente selecionada quando necessï¿½rio (frente/modulo)
   useEffect(() => {
     let cancelled = false
     async function ensureFront() {
@@ -173,7 +173,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      // Em níveis que dependem de seleção, não fetchar sem id
+      // Em nï¿½veis que dependem de seleï¿½ï¿½o, nï¿½o fetchar sem id
       if ((scope === 'disciplina' && !selectedDisciplineId) || (scope === 'frente' && !selectedFrontId)) return
 
       setIsLoading(true)
@@ -199,8 +199,8 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
       <CardContent className="px-4 md:px-6 py-3 md:py-4">
         <div className="flex flex-col justify-center gap-4 md:gap-6">
           <div className="flex items-center gap-2">
-            <h2 className="text-foreground text-base md:text-lg font-semibold">
-              Domínio Estratégico
+            <h2 className="widget-title">
+              Domï¿½nio Estratï¿½gico
             </h2>
             <TooltipProvider delayDuration={200}>
               <Tooltip>
@@ -208,7 +208,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                   <button
                     type="button"
                     className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-                    aria-label="Informações sobre domínio estratégico"
+                    aria-label="Informaï¿½ï¿½es sobre domï¿½nio estratï¿½gico"
                   >
                     <Info className="h-4 w-4" />
                   </button>
@@ -221,17 +221,17 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                 >
                   <div className="space-y-2 text-sm">
                     <p>
-                      Este indicador mostra seu progresso em áreas estratégicas do conteúdo.
+                      Este indicador mostra seu progresso em ï¿½reas estratï¿½gicas do conteï¿½do.
                     </p>
                     <p>
-                      Aqui, você vê separadamente:
-                      <strong> Flashcards (memória)</strong> e <strong>Questões (aplicação)</strong>.
+                      Aqui, vocï¿½ vï¿½ separadamente:
+                      <strong> Flashcards (memï¿½ria)</strong> e <strong>Questï¿½es (aplicaï¿½ï¿½o)</strong>.
                     </p>
                     <p>
-                      <strong>Módulos de Base</strong> representa conteúdos fundamentais que sustentam o restante.
+                      <strong>Mï¿½dulos de Base</strong> representa conteï¿½dos fundamentais que sustentam o restante.
                     </p>
                     <p>
-                      <strong>Alta Recorrência</strong> representa tópicos que aparecem frequentemente nas provas.
+                      <strong>Alta Recorrï¿½ncia</strong> representa tï¿½picos que aparecem frequentemente nas provas.
                     </p>
                   </div>
                 </TooltipContent>
@@ -310,13 +310,13 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
             <AccordionItem value="base" className="border border-border rounded-lg shadow-sm mb-3 last:mb-0 bg-background border-b-0 px-3">
               <AccordionTrigger className="py-3">
                 <div className="flex items-center gap-2">
-                  <span>Módulos de Base</span>
+                  <span>Mï¿½dulos de Base</span>
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span
                           className="text-muted-foreground hover:text-foreground transition-colors rounded inline-flex"
-                          aria-label="O que são módulos de base?"
+                          aria-label="O que sï¿½o mï¿½dulos de base?"
                           onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -324,7 +324,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                         </span>
                       </TooltipTrigger>
                       <TooltipContent side="top" align="start" className="max-w-xs">
-                        Conteúdos fundamentais que servem de base para entender o restante da matéria. Melhorar aqui tende a destravar evolução em vários tópicos.
+                        Conteï¿½dos fundamentais que servem de base para entender o restante da matï¿½ria. Melhorar aqui tende a destravar evoluï¿½ï¿½o em vï¿½rios tï¿½picos.
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -343,7 +343,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="top" align="center" className="max-w-xs">
-                            Percentual de desempenho em flashcards neste grupo (indica o quão bem você está lembrando do conteúdo nas revisões).
+                            Percentual de desempenho em flashcards neste grupo (indica o quï¿½o bem vocï¿½ estï¿½ lembrando do conteï¿½do nas revisï¿½es).
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -353,7 +353,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                 </div>
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Questões</span>
+                    <span className="text-muted-foreground">Questï¿½es</span>
                     <span className="text-green-600 dark:text-green-500">
                       <TooltipProvider delayDuration={200}>
                         <Tooltip>
@@ -363,7 +363,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="top" align="center" className="max-w-xs">
-                            Percentual de acerto em questões neste grupo (acertos ÷ questões respondidas).
+                            Percentual de acerto em questï¿½es neste grupo (acertos ï¿½ questï¿½es respondidas).
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -377,13 +377,13 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
             <AccordionItem value="high" className="border border-border rounded-lg shadow-sm mb-3 last:mb-0 bg-background border-b-0 px-3">
               <AccordionTrigger className="py-3">
                 <div className="flex items-center gap-2">
-                  <span>Alta Recorrência</span>
+                  <span>Alta Recorrï¿½ncia</span>
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span
                           className="text-muted-foreground hover:text-foreground transition-colors rounded inline-flex"
-                          aria-label="O que significa alta recorrência?"
+                          aria-label="O que significa alta recorrï¿½ncia?"
                           onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -391,7 +391,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                         </span>
                       </TooltipTrigger>
                       <TooltipContent side="top" align="start" className="max-w-xs">
-                        Tópicos que caem com frequência nas provas. Dar atenção a estes conteúdos costuma aumentar o retorno do seu estudo.
+                        Tï¿½picos que caem com frequï¿½ncia nas provas. Dar atenï¿½ï¿½o a estes conteï¿½dos costuma aumentar o retorno do seu estudo.
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -410,7 +410,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="top" align="center" className="max-w-xs">
-                            Percentual de desempenho em flashcards nos tópicos de alta recorrência.
+                            Percentual de desempenho em flashcards nos tï¿½picos de alta recorrï¿½ncia.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -420,7 +420,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                 </div>
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Questões</span>
+                    <span className="text-muted-foreground">Questï¿½es</span>
                     <span className="text-yellow-600 dark:text-yellow-500">
                       <TooltipProvider delayDuration={200}>
                         <Tooltip>
@@ -430,7 +430,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="top" align="center" className="max-w-xs">
-                            Percentual de acerto em questões nos tópicos de alta recorrência.
+                            Percentual de acerto em questï¿½es nos tï¿½picos de alta recorrï¿½ncia.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -445,13 +445,13 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
               <AccordionItem value="recommendations" className="border border-border rounded-lg shadow-sm mb-3 last:mb-0 bg-background border-b-0 px-3">
                 <AccordionTrigger className="py-3">
                   <div className="flex items-center gap-2">
-                    <span>Sugestões de foco</span>
+                    <span>Sugestï¿½es de foco</span>
                     <TooltipProvider delayDuration={200}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <span
                             className="text-muted-foreground hover:text-foreground transition-colors rounded inline-flex"
-                            aria-label="Como calculamos as sugestões de foco"
+                            aria-label="Como calculamos as sugestï¿½es de foco"
                             onPointerDown={(e) => e.stopPropagation()}
                             onClick={(e) => e.stopPropagation()}
                           >
@@ -459,8 +459,8 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                           </span>
                         </TooltipTrigger>
                         <TooltipContent side="right" align="start" className="max-w-xs" sideOffset={8}>
-                          As sugestões de foco priorizam tópicos com maior importância e menor desempenho recente.
-                          Elas combinam seus resultados em questões (Q) e flashcards (F) para indicar onde o estudo tende a trazer mais ganho.
+                          As sugestï¿½es de foco priorizam tï¿½picos com maior importï¿½ncia e menor desempenho recente.
+                          Elas combinam seus resultados em questï¿½es (Q) e flashcards (F) para indicar onde o estudo tende a trazer mais ganho.
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -500,7 +500,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="left" align="center" className="max-w-xs">
-                                  **F** é seu desempenho em flashcards deste tópico (memória/recall nas revisões).
+                                  **F** ï¿½ seu desempenho em flashcards deste tï¿½pico (memï¿½ria/recall nas revisï¿½es).
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -518,7 +518,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="left" align="center" className="max-w-xs">
-                                  **Q** é sua taxa de acerto em questões deste tópico (acertos ÷ questões respondidas).
+                                  **Q** ï¿½ sua taxa de acerto em questï¿½es deste tï¿½pico (acertos ï¿½ questï¿½es respondidas).
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -535,13 +535,13 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
               <AccordionItem value="ranking" className="border border-border rounded-lg shadow-sm mb-3 last:mb-0 bg-background border-b-0 px-3">
                 <AccordionTrigger className="py-3">
                   <div className="flex items-center gap-2">
-                    <span>Ranking de módulos (estratégicos)</span>
+                    <span>Ranking de mï¿½dulos (estratï¿½gicos)</span>
                     <TooltipProvider delayDuration={200}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <span
                             className="text-muted-foreground hover:text-foreground transition-colors rounded inline-flex"
-                            aria-label="O que é o ranking de módulos estratégicos?"
+                            aria-label="O que ï¿½ o ranking de mï¿½dulos estratï¿½gicos?"
                             onPointerDown={(e) => e.stopPropagation()}
                             onClick={(e) => e.stopPropagation()}
                           >
@@ -549,7 +549,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                           </span>
                         </TooltipTrigger>
                         <TooltipContent side="top" align="start" className="max-w-xs">
-                          Este ranking destaca os módulos mais importantes (Base/Alta) e mostra seus indicadores de Flashcards (F) e Questões (Q), para você identificar onde focar primeiro.
+                          Este ranking destaca os mï¿½dulos mais importantes (Base/Alta) e mostra seus indicadores de Flashcards (F) e Questï¿½es (Q), para vocï¿½ identificar onde focar primeiro.
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -557,7 +557,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                 </AccordionTrigger>
                 <AccordionContent className="px-0">
                   <p className="text-xs text-muted-foreground mb-2">
-                    **F** = Flashcards (memória/recall) · **Q** = Questões (acertos ÷ questões respondidas)
+                    **F** = Flashcards (memï¿½ria/recall) ï¿½ **Q** = Questï¿½es (acertos ï¿½ questï¿½es respondidas)
                   </p>
                   <div className="space-y-2">
                     {modulesRanking.slice(0, 8).map((m) => (
@@ -578,15 +578,15 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                     className="underline decoration-dotted underline-offset-2"
                                     aria-label="O que significa F?"
                                   >
-                                    F: {m.flashcardsScore ?? '–'}%
+                                    F: {m.flashcardsScore ?? 'ï¿½'}%
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" align="start" className="max-w-xs">
-                                  **F** é seu desempenho em flashcards neste módulo (memória/recall nas revisões).
+                                  **F** ï¿½ seu desempenho em flashcards neste mï¿½dulo (memï¿½ria/recall nas revisï¿½es).
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
-                            {' · '}
+                            {' ï¿½ '}
                             <TooltipProvider delayDuration={200}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -595,20 +595,20 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                     className="underline decoration-dotted underline-offset-2"
                                     aria-label="O que significa Q?"
                                   >
-                                    Q: {m.questionsScore ?? '–'}%
+                                    Q: {m.questionsScore ?? 'ï¿½'}%
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" align="start" className="max-w-xs">
-                                  **Q** é sua taxa de acerto em questões neste módulo (acertos ÷ questões respondidas).
+                                  **Q** ï¿½ sua taxa de acerto em questï¿½es neste mï¿½dulo (acertos ï¿½ questï¿½es respondidas).
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
                             {m.risk == null && (
-                              <span className="ml-2 italic">Sem evidência</span>
+                              <span className="ml-2 italic">Sem evidï¿½ncia</span>
                             )}
                           </div>
                         </div>
-                        {/* "Risco" é usado apenas para ordenar; não renderizamos ao usuário. */}
+                        {/* "Risco" ï¿½ usado apenas para ordenar; nï¿½o renderizamos ao usuï¿½rio. */}
                       </div>
                     ))}
                   </div>

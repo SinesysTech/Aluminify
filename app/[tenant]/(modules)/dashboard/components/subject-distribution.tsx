@@ -62,7 +62,7 @@ export function SubjectDistribution({
     }
   }, [])
 
-  // Resetar seleções dependentes quando subir no nível
+  // Resetar seleï¿½ï¿½es dependentes quando subir no nï¿½vel
   useEffect(() => {
     if (groupBy === 'curso') {
       setSelectedDisciplineId(null)
@@ -84,7 +84,7 @@ export function SubjectDistribution({
     }
   }, [groupBy])
 
-  // Garantir disciplina selecionada quando necessário (groupBy=frente)
+  // Garantir disciplina selecionada quando necessï¿½rio (groupBy=frente)
   useEffect(() => {
     let cancelled = false
     async function ensureDiscipline() {
@@ -92,8 +92,8 @@ export function SubjectDistribution({
       if (selectedDisciplineId) return
       setIsLoading(true)
       try {
-        // Importante: opções de disciplina vêm da estrutura (performance), não do tempo (distribuição),
-        // para não ficar vazio quando ainda não há sessões suficientes.
+        // Importante: opï¿½ï¿½es de disciplina vï¿½m da estrutura (performance), nï¿½o do tempo (distribuiï¿½ï¿½o),
+        // para nï¿½o ficar vazio quando ainda nï¿½o hï¿½ sessï¿½es suficientes.
         const res = await fetchPerformance({
           groupBy: 'disciplina',
           scope: 'curso',
@@ -114,7 +114,7 @@ export function SubjectDistribution({
     }
   }, [groupBy, selectedDisciplineId, selectedCourseId, period])
 
-  // Garantir frente selecionada quando necessário (groupBy=modulo)
+  // Garantir frente selecionada quando necessï¿½rio (groupBy=modulo)
   useEffect(() => {
     let cancelled = false
     async function ensureFront() {
@@ -123,7 +123,7 @@ export function SubjectDistribution({
       if (selectedFrontId) return
       setIsLoading(true)
       try {
-        // Opções de frente também vêm da estrutura (performance), para evitar dropdown vazio.
+        // Opï¿½ï¿½es de frente tambï¿½m vï¿½m da estrutura (performance), para evitar dropdown vazio.
         const res = await fetchPerformance({
           groupBy: 'frente',
           scope: 'disciplina',
@@ -148,7 +148,7 @@ export function SubjectDistribution({
   useEffect(() => {
     let cancelled = false
     async function load() {
-      // Não disparar fetch enquanto faltar escopo obrigatório
+      // Nï¿½o disparar fetch enquanto faltar escopo obrigatï¿½rio
       if ((groupBy === 'frente' && !scopeParams.scopeId) || (groupBy === 'modulo' && !scopeParams.scopeId)) {
         return
       }
@@ -191,8 +191,8 @@ export function SubjectDistribution({
       <CardContent className="px-4 md:px-6 py-3 md:py-4 h-full flex flex-col min-h-0">
         <div className="flex flex-col gap-3 mb-4 md:mb-6">
           <div className="flex items-center gap-2">
-            <h2 className="text-foreground text-base md:text-lg font-semibold">
-              Distribuição por {groupBy === 'curso' ? 'Curso' : groupBy === 'disciplina' ? 'Disciplina' : groupBy === 'frente' ? 'Frente' : 'Módulo'}
+            <h2 className="widget-title">
+              Distribuiï¿½ï¿½o por {groupBy === 'curso' ? 'Curso' : groupBy === 'disciplina' ? 'Disciplina' : groupBy === 'frente' ? 'Frente' : 'Mï¿½dulo'}
             </h2>
             <TooltipProvider delayDuration={200}>
               <Tooltip>
@@ -200,7 +200,7 @@ export function SubjectDistribution({
                   <button
                     type="button"
                     className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-                    aria-label="Informações sobre distribuição por disciplina"
+                    aria-label="Informaï¿½ï¿½es sobre distribuiï¿½ï¿½o por disciplina"
                   >
                     <Info className="h-4 w-4" />
                   </button>
@@ -213,16 +213,16 @@ export function SubjectDistribution({
                 >
                   <div className="space-y-2 text-sm">
                     <p>
-                      Este gráfico mostra como seu tempo de estudo está distribuído (aulas assistidas no cronograma + tempo registrado em listas de exercícios).
+                      Este grï¿½fico mostra como seu tempo de estudo estï¿½ distribuï¿½do (aulas assistidas no cronograma + tempo registrado em listas de exercï¿½cios).
                     </p>
                     <p>
-                      Cada cor representa um grupo (curso, disciplina, frente ou módulo) e o tamanho do segmento indica a porcentagem do tempo total.
+                      Cada cor representa um grupo (curso, disciplina, frente ou mï¿½dulo) e o tamanho do segmento indica a porcentagem do tempo total.
                     </p>
                     <p>
-                      O número no centro mostra o total de horas estudadas.
+                      O nï¿½mero no centro mostra o total de horas estudadas.
                     </p>
                     <p>
-                      Uma distribuição equilibrada ajuda a manter un bom desempenho em todas as áreas.
+                      Uma distribuiï¿½ï¿½o equilibrada ajuda a manter un bom desempenho em todas as ï¿½reas.
                     </p>
                   </div>
                 </TooltipContent>
@@ -245,10 +245,10 @@ export function SubjectDistribution({
           <ToggleGroupItem value="curso" variant="segmented" size="sm">Curso</ToggleGroupItem>
           <ToggleGroupItem value="disciplina" variant="segmented" size="sm">Disciplina</ToggleGroupItem>
           <ToggleGroupItem value="frente" variant="segmented" size="sm">Frente</ToggleGroupItem>
-          <ToggleGroupItem value="modulo" variant="segmented" size="sm">Módulo</ToggleGroupItem>
+          <ToggleGroupItem value="modulo" variant="segmented" size="sm">Mï¿½dulo</ToggleGroupItem>
         </ToggleGroup>
 
-        {/* Filtros dependentes (mantém UI simples: só aparece quando necessário) */}
+        {/* Filtros dependentes (mantï¿½m UI simples: sï¿½ aparece quando necessï¿½rio) */}
         <div className="flex flex-wrap gap-2 mb-2">
           {groupBy !== 'curso' && courses.length > 1 && (
             <Select
@@ -275,8 +275,8 @@ export function SubjectDistribution({
                 <SelectValue placeholder="Disciplina" />
               </SelectTrigger>
               <SelectContent>
-                {/* opções de disciplina são obtidas via fetch quando necessário */}
-                {/** Reaproveitamos a chamada em ensureDiscipline; se ainda não há, a UI fica carregando */}
+                {/* opï¿½ï¿½es de disciplina sï¿½o obtidas via fetch quando necessï¿½rio */}
+                {/** Reaproveitamos a chamada em ensureDiscipline; se ainda nï¿½o hï¿½, a UI fica carregando */}
                 {disciplineOptions.map((i) => (
                   <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>
                 ))}
@@ -302,13 +302,13 @@ export function SubjectDistribution({
         </div>
 
         {isLoading && (
-          <p className="text-xs text-muted-foreground mb-2">Atualizando…</p>
+          <p className="text-xs text-muted-foreground mb-2">Atualizandoï¿½</p>
         )}
 
         {renderItems.length === 0 ? (
           <div className="py-10 text-center">
             <p className="text-sm text-muted-foreground">
-              Sem dados suficientes no período selecionado.
+              Sem dados suficientes no perï¿½odo selecionado.
             </p>
           </div>
         ) : (
@@ -316,7 +316,7 @@ export function SubjectDistribution({
             <div className="flex flex-1 items-center justify-center py-4">
               <div className="relative flex items-center justify-center w-48 h-48">
                 <svg className="w-full h-full" viewBox="0 0 36 36">
-                  {/* Círculo de fundo */}
+                  {/* Cï¿½rculo de fundo */}
                   <circle
                     cx="18"
                     cy="18"
@@ -326,7 +326,7 @@ export function SubjectDistribution({
                     strokeWidth="4"
                     className="text-muted"
                   />
-                  {/* Segmentos do gráfico */}
+                  {/* Segmentos do grï¿½fico */}
                   {itemsWithOffsets.map(({ item, offset }, index) => {
                     const dashArray = `${(item.percentage / 100) * circumference} ${circumference}`
 
