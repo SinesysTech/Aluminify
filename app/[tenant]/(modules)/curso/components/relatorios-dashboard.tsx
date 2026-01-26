@@ -29,13 +29,8 @@ import {
   XCircle,
 } from "lucide-react"
 import { toast } from "sonner"
-import {
-  gerarRelatorio,
-  getRelatorios,
-  getRelatorioById,
-  type Relatorio,
-  type RelatorioTipo,
-} from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import { getRelatorios } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import type { Relatorio, RelatorioTipo } from "@/app/[tenant]/(modules)/agendamentos/types"
 import { cn } from "@/app/shared/core/utils"
 
 interface RelatoriosDashboardProps {

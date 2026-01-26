@@ -97,7 +97,7 @@ async function getHandler(
   try {
     const supabase = await createClient();
     const service = createStudentService(supabase);
-    const student = await service.findById(params.id);
+    const student = await service.getById(params.id);
     if (!student) throw new StudentNotFoundError(params.id);
     return NextResponse.json({ data: serializeStudent({ ...student, empresaId: student.empresaId || "" }) });
   } catch (error) {

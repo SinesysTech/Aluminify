@@ -760,7 +760,7 @@ export class FlashcardsService {
       console.log(`[flashcards] Usuário é professor da empresa ${professorEmpresaId}, buscando cursos da empresa`);
       const { data: todosCursos, error: cursosError } = await this.client
         .from("cursos")
-        .select("id")
+        .select("id, nome")
         .eq("empresa_id", professorEmpresaId);
 
       if (cursosError) {

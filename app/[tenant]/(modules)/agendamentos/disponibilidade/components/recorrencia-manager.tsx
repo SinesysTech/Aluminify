@@ -36,8 +36,8 @@ import {
   createRecorrencia,
   updateRecorrencia,
   deleteRecorrencia,
-  type Recorrencia,
 } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import type { Recorrencia } from "@/app/[tenant]/(modules)/agendamentos/types"
 import { Loader2, Plus, Pencil, Trash, Calendar, Clock, CalendarDays, List } from "lucide-react"
 import { toast } from "@/app/shared/components/feedback/use-toast"
 import { TableSkeleton } from "@/app/shared/components/ui/table-skeleton"

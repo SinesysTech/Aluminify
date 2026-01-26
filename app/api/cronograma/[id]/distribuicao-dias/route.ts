@@ -1,8 +1,5 @@
 import { NextResponse } from "next/server";
-import {
-  cronogramaService,
-  CronogramaService,
-} from "@/app/[tenant]/(modules)/cronograma/services";
+import { cronogramaService } from "@/app/[tenant]/(modules)/cronograma/services";
 import {
   requireUserAuth,
   AuthenticatedRequest,

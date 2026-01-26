@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { ConfiguracoesProfessor, updateConfiguracoesProfessor } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import { updateConfiguracoesProfessor } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import { ConfiguracoesProfessor } from "@/app/[tenant]/(modules)/agendamentos/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/app/shared/components/forms/input"

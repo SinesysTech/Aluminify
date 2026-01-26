@@ -84,8 +84,9 @@ export function SubjectDistribution({ data, period }: SubjectDistributionProps) 
             <div className="h-[200px] w-full shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
+                  {/* eslint-disable @typescript-eslint/no-explicit-any */}
                   <Pie
-                    data={sortedData as any[]}
+                    data={sortedData as unknown[]}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -94,14 +95,15 @@ export function SubjectDistribution({ data, period }: SubjectDistributionProps) 
                     dataKey="percentage"
                   >
                     {sortedData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={entry.color} 
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={entry.color}
                         strokeWidth={0}
                       />
                     ))}
                   </Pie>
-                  <Tooltip content={CustomTooltip as any} />
+                  <Tooltip content={CustomTooltip as React.ComponentType} />
+                  {/* eslint-enable @typescript-eslint/no-explicit-any */}
                 </PieChart>
               </ResponsiveContainer>
             </div>

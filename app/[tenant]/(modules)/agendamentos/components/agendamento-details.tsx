@@ -1,7 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { AgendamentoComDetalhes, confirmarAgendamento, rejeitarAgendamento, updateAgendamento } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import { AgendamentoComDetalhes } from "@/app/[tenant]/(modules)/agendamentos/types"
+import { confirmarAgendamento, rejeitarAgendamento, updateAgendamento } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
