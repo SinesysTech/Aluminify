@@ -14,21 +14,31 @@ Quick reference for all landing page components with copy-paste examples.
     {/* Logo */}
     <Link href="/" className="flex items-center gap-2">
       <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-        <span className="material-icons-outlined text-white text-sm">dashboard</span>
+        <span className="material-icons-outlined text-white text-sm">
+          dashboard
+        </span>
       </div>
-      <span className="font-display font-bold text-lg tracking-tight">Aluminify</span>
+      <span className="font-display font-bold text-lg tracking-tight">
+        Aluminify
+      </span>
     </Link>
 
     {/* Links */}
     <div className="hidden md:flex items-center gap-6">
-      <Link href="/features" className="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-white transition-colors">
+      <Link
+        href="/features"
+        className="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-white transition-colors"
+      >
         Recursos
       </Link>
       {/* More links... */}
     </div>
 
     {/* CTA */}
-    <Link href="/signup" className="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover shadow-sm transition-all">
+    <Link
+      href="/signup"
+      className="px-4 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary-hover shadow-sm transition-all"
+    >
       Começar Agora
     </Link>
   </div>
@@ -52,7 +62,9 @@ Quick reference for all landing page components with copy-paste examples.
 ```tsx
 <button className="inline-flex items-center gap-2 bg-primary text-white hover:bg-primary-hover px-8 py-3.5 rounded-lg font-medium shadow-lg shadow-zinc-200 dark:shadow-none transition-all group">
   <span>Ver Demo</span>
-  <span className="material-icons-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+  <span className="material-icons-outlined text-sm group-hover:translate-x-1 transition-transform">
+    arrow_forward
+  </span>
 </button>
 ```
 
@@ -89,7 +101,9 @@ Quick reference for all landing page components with copy-paste examples.
 ```tsx
 <div className="p-6 rounded-2xl bg-white dark:bg-surface-dark border border-border-light dark:border-border-dark shadow-sm hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
   <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-4">
-    <span className="material-icons-outlined text-blue-600 dark:text-blue-400">psychology</span>
+    <span className="material-icons-outlined text-blue-600 dark:text-blue-400">
+      psychology
+    </span>
   </div>
   <h3 className="text-xl font-bold mb-2">IA Integrada</h3>
   <p className="text-text-muted-light dark:text-text-muted-dark leading-relaxed">
@@ -108,11 +122,15 @@ Quick reference for all landing page components with copy-paste examples.
   </p>
   <div className="flex items-baseline gap-1 mb-8">
     <span className="text-4xl font-bold">R$199</span>
-    <span className="text-text-muted-light dark:text-text-muted-dark">/mês</span>
+    <span className="text-text-muted-light dark:text-text-muted-dark">
+      /mês
+    </span>
   </div>
   <ul className="space-y-3 mb-8">
     <li className="flex items-center gap-3 text-sm">
-      <span className="material-icons-outlined text-green-500 text-sm">check</span>
+      <span className="material-icons-outlined text-green-500 text-sm">
+        check
+      </span>
       <span>Até 500 alunos</span>
     </li>
     {/* More items... */}
@@ -177,7 +195,7 @@ Quick reference for all landing page components with copy-paste examples.
 ```tsx
 <section className="pt-24 pb-16 lg:pt-32 lg:pb-24 relative overflow-hidden">
   {/* Background Pattern */}
-  <div className="absolute inset-0 bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(circle,#334155_1px,transparent_1px)] bg-[size:40px_40px] opacity-50 z-0 pointer-events-none"></div>
+  <div className="absolute inset-0 bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(circle,#334155_1px,transparent_1px)] bg-size-[40px_40px] opacity-50 z-0 pointer-events-none"></div>
 
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
     {/* Badge */}
@@ -190,7 +208,7 @@ Quick reference for all landing page components with copy-paste examples.
     <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight mb-6">
       O LMS que sua escola
       <br />
-      <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-600 to-black dark:from-zinc-300 dark:to-white">
+      <span className="text-transparent bg-clip-text bg-linear-to-r from-zinc-600 to-black dark:from-zinc-300 dark:to-white">
         merece.
       </span>
     </h1>
@@ -222,9 +240,7 @@ Quick reference for all landing page components with copy-paste examples.
 
 ```tsx
 <section className="py-20 lg:py-24 border-t border-border-light dark:border-border-dark">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    {/* Content */}
-  </div>
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{/* Content */}</div>
 </section>
 ```
 
@@ -232,9 +248,7 @@ Quick reference for all landing page components with copy-paste examples.
 
 ```tsx
 <section className="py-20 lg:py-24 bg-surface-light dark:bg-surface-dark">
-  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    {/* Content */}
-  </div>
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{/* Content */}</div>
 </section>
 ```
 
@@ -265,9 +279,13 @@ Quick reference for all landing page components with copy-paste examples.
       <div className="col-span-2 md:col-span-1">
         <Link href="/" className="flex items-center gap-2 mb-4">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="material-icons-outlined text-white text-sm">dashboard</span>
+            <span className="material-icons-outlined text-white text-sm">
+              dashboard
+            </span>
           </div>
-          <span className="font-display font-bold text-lg tracking-tight">Aluminify</span>
+          <span className="font-display font-bold text-lg tracking-tight">
+            Aluminify
+          </span>
         </Link>
         <p className="text-sm text-text-muted-light dark:text-text-muted-dark">
           O LMS open source para escolas brasileiras.
@@ -279,7 +297,10 @@ Quick reference for all landing page components with copy-paste examples.
         <h4 className="font-bold text-sm mb-4">Produto</h4>
         <ul className="space-y-2">
           <li>
-            <Link href="/features" className="text-sm text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-white transition-colors">
+            <Link
+              href="/features"
+              className="text-sm text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-white transition-colors"
+            >
               Recursos
             </Link>
           </li>
@@ -351,7 +372,8 @@ Quick reference for all landing page components with copy-paste examples.
   {/* Terminal Content */}
   <div className="p-6 font-mono text-sm text-zinc-300">
     <div className="mb-2">
-      <span className="text-green-400">~</span> git clone https://github.com/aluminify/core.git
+      <span className="text-green-400">~</span> git clone
+      https://github.com/aluminify/core.git
     </div>
     <div className="mb-2 text-zinc-500">
       Cloning into &apos;aluminify-core&apos;...
@@ -378,7 +400,9 @@ Quick reference for all landing page components with copy-paste examples.
       <div className="w-3 h-3 rounded-full bg-zinc-300 dark:bg-zinc-600"></div>
     </div>
     <div className="flex-1 bg-white dark:bg-zinc-900 rounded-md px-4 py-1.5 text-xs text-text-muted-light dark:text-text-muted-dark flex items-center gap-2">
-      <span className="material-icons-outlined text-green-500 text-xs">lock</span>
+      <span className="material-icons-outlined text-green-500 text-xs">
+        lock
+      </span>
       app.aluminify.com/dashboard
     </div>
   </div>
@@ -395,18 +419,24 @@ Quick reference for all landing page components with copy-paste examples.
 ## Usage Guidelines
 
 ### Import Icons
+
 ```html
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<link
+  href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined"
+  rel="stylesheet"
+/>
 ```
 
 ### Dark Mode
+
 All components use `dark:` variants. Wrap your app with a dark mode provider that adds the `dark` class to the root element.
 
 ### Responsive Design
+
 - Mobile-first approach
 - Use `md:` and `lg:` breakpoints for larger screens
 - Test at 375px, 768px, 1024px, 1440px
 
 ---
 
-*Part of Aluminify Design System v2.0*
+_Part of Aluminify Design System v2.0_

@@ -1,4 +1,4 @@
-﻿import { LandingPage } from "@/components/landing-page";
+﻿import { LandingPage } from "@/app/(landing-page)/components/landing-page";
 
 export const dynamic = "force-dynamic";
 

@@ -23,7 +23,7 @@ export function FeaturesPage() {
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-6 text-primary dark:text-white max-w-4xl mx-auto">
                             Muito mais que um player de vídeo.<br className="hidden md:block" />
                             Um{" "}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-500 dark:from-white dark:via-zinc-200 dark:to-zinc-400">
+                            <span className="text-transparent bg-clip-text bg-linear-to-r from-zinc-900 via-zinc-700 to-zinc-500 dark:from-white dark:via-zinc-200 dark:to-zinc-400">
                                 Ambiente de Imersão.
                             </span>
                         </h1>
@@ -114,7 +114,7 @@ export function FeaturesPage() {
 
                                 <div className="w-full h-full flex flex-col pt-12">
                                     <div className="flex-1 bg-zinc-900 flex items-center justify-center relative min-h-[200px]">
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
+                                        <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent flex items-end p-8">
                                             <div className="w-full">
                                                 <div className="h-1 bg-zinc-700 w-full mb-4 rounded-full overflow-hidden">
                                                     <div className="h-full bg-blue-500 w-1/3 relative">
@@ -267,7 +267,7 @@ export function FeaturesPage() {
                             </div>
 
                             <div className="relative group">
-                                <div className="absolute -inset-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl opacity-20 blur-lg group-hover:opacity-30 transition-opacity duration-500"></div>
+                                <div className="absolute -inset-2 bg-linear-to-r from-blue-500 to-purple-500 rounded-xl opacity-20 blur-lg group-hover:opacity-30 transition-opacity duration-500"></div>
                                 <div className="relative bg-[#0d1117] rounded-xl border border-zinc-800 shadow-2xl overflow-hidden font-mono text-xs md:text-sm">
                                     <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800 bg-[#161b22]">
                                         <div className="flex gap-1.5">

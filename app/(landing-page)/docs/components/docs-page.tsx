@@ -33,7 +33,7 @@ export function DocsPage() {
                 </div>
             </nav>
 
-            <div className="flex max-w-[90rem] mx-auto">
+            <div className="flex max-w-360 mx-auto">
                 {/* Sidebar */}
                 <aside className="hidden lg:block w-64 border-r border-border h-[calc(100vh-3.5rem)] sticky top-14 overflow-y-auto sidebar-scroll pt-8 pb-10 pl-8 pr-4 bg-background">
                     <div className="space-y-8">
@@ -120,7 +120,7 @@ export function DocsPage() {
                         <p>O Aluminify é distribuído como uma aplicação Next.js containerizada. O método recomendado para produção é via Docker.</p>
 
                         <div className="relative group mt-4 mb-8">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg blur opacity-10 group-hover:opacity-20 transition-opacity"></div>
+                            <div className="absolute -inset-1 bg-linear-to-r from-blue-600 to-indigo-600 rounded-lg blur opacity-10 group-hover:opacity-20 transition-opacity"></div>
                             <div className="relative bg-[#0d1117] rounded-lg border border-border-dark overflow-hidden font-mono text-sm">
                                 <div className="flex items-center justify-between px-4 py-2 bg-[#161b22] border-b border-border-dark">
                                     <span className="text-xs text-zinc-400">bash</span>
@@ -130,13 +130,13 @@ export function DocsPage() {
                                     </button>
                                 </div>
                                 <div className="p-4 text-zinc-300">
-                                    <span className="text-zinc-500"># Clone o repositório</span><br/>
-                                    <span className="text-purple-400">git</span> clone https://github.com/aluminify/core.git<br/><br/>
-                                    <span className="text-zinc-500"># Entre na pasta</span><br/>
-                                    <span className="text-purple-400">cd</span> aluminify-core<br/><br/>
-                                    <span className="text-zinc-500"># Copie as variáveis de ambiente</span><br/>
-                                    <span className="text-purple-400">cp</span> .env.example .env.local<br/><br/>
-                                    <span className="text-zinc-500"># Inicie com Docker</span><br/>
+                                    <span className="text-zinc-500"># Clone o repositório</span><br />
+                                    <span className="text-purple-400">git</span> clone https://github.com/aluminify/core.git<br /><br />
+                                    <span className="text-zinc-500"># Entre na pasta</span><br />
+                                    <span className="text-purple-400">cd</span> aluminify-core<br /><br />
+                                    <span className="text-zinc-500"># Copie as variáveis de ambiente</span><br />
+                                    <span className="text-purple-400">cp</span> .env.example .env.local<br /><br />
+                                    <span className="text-zinc-500"># Inicie com Docker</span><br />
                                     <span className="text-purple-400">docker-compose</span> up -d
                                 </div>
                             </div>

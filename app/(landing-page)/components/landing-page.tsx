@@ -24,7 +24,7 @@ export function LandingPage() {
                             </span>
                         </div>
 
-                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight mb-6 text-transparent bg-clip-text bg-gradient-to-b from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400">
+                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight mb-6 text-transparent bg-clip-text bg-linear-to-b from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400">
                             A infraestrutura invisível <br className="hidden md:block" /> da educação.
                         </h1>
 
@@ -64,9 +64,9 @@ export function LandingPage() {
 
                         {/* Browser Mockup */}
                         <div className="relative max-w-5xl mx-auto">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 rounded-xl blur opacity-40"></div>
+                            <div className="absolute -inset-1 bg-linear-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 rounded-xl blur opacity-40"></div>
 
-                            <div className="relative bg-card border border-border rounded-xl shadow-2xl overflow-hidden aspect-[16/10] md:aspect-video flex flex-col">
+                            <div className="relative bg-card border border-border rounded-xl shadow-2xl overflow-hidden aspect-16/10 md:aspect-video flex flex-col">
                                 <div className="border-b border-border bg-zinc-50 dark:bg-zinc-900/50 p-3 flex items-center gap-4">
                                     <div className="flex gap-2">
                                         <div className="w-3 h-3 rounded-full bg-red-400"></div>

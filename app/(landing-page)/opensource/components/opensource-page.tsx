@@ -12,14 +12,14 @@ export function OpenSourcePage() {
             <main>
                 {/* Hero Section */}
                 <section className="pt-20 pb-16 lg:pt-28 lg:pb-24 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(circle,#334155_1px,transparent_1px)] bg-[size:40px_40px] opacity-50 z-0 pointer-events-none"></div>
+                    <div className="absolute inset-0 bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(circle,#334155_1px,transparent_1px)] bg-size-[40px_40px] opacity-50 z-0 pointer-events-none"></div>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 mb-8">
                             <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400">LICENSE: APACHE 2.0</span>
                         </div>
                         <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold tracking-tight mb-6">
                             Auditável. Customizável. <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-zinc-600 to-black dark:from-zinc-300 dark:to-white">Seu.</span>
+                            <span className="text-transparent bg-clip-text bg-linear-to-r from-zinc-600 to-black dark:from-zinc-300 dark:to-white">Seu.</span>
                         </h1>
                         <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-12 leading-relaxed">
                             Acreditamos que a infraestrutura educacional não deve ser uma caixa preta.
@@ -121,7 +121,7 @@ export function OpenSourcePage() {
                         <h2 className="text-2xl font-display font-bold mb-12">Arquitetura do Sistema</h2>
 
                         <div className="relative p-8 border border-border rounded-2xl bg-white dark:bg-surface-dark overflow-hidden">
-                            <div className="absolute inset-0 bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(circle,#334155_1px,transparent_1px)] bg-[size:40px_40px] opacity-30"></div>
+                            <div className="absolute inset-0 bg-[radial-gradient(circle,#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(circle,#334155_1px,transparent_1px)] bg-size-[40px_40px] opacity-30"></div>
 
                             <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-4">
                                 {/* Client */}
