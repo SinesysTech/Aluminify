@@ -63,7 +63,8 @@
       "Bash(npx mastra --help:*)",
       "Bash(node:*)",
       "Bash(test:*)",
-      "Bash(cmd.exe /c \"cd E:\\\\Development\\\\aluminify && npm install\")"
+      "Bash(cmd.exe /c \"cd E:\\\\Development\\\\aluminify && npm install\")",
+      "Bash(npm help:*)"
     ],
     "deny": [],
     "ask": []
