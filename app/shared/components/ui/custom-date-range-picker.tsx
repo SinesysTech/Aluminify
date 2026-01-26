@@ -18,9 +18,9 @@ import type { DateRange } from "react-day-picker";
 import { cn } from "@/app/shared/library/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/app/shared/components/forms/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/app/shared/components/overlay/popover";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/app/shared/components/overlay/tooltip";
 import {
   Select,
   SelectContent,

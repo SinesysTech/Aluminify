@@ -15,7 +15,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/app/shared/components/overlay/tooltip'
 import { Info, Brain, Target, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import type { StrategicDomain, StrategicDomainRecommendation, ModuloImportancia } from '../types'
 import { cn } from '@/app/shared/library/utils'

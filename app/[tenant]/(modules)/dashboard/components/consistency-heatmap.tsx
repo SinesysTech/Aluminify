@@ -4,7 +4,7 @@ import { useState } from 'react'
 import type { HeatmapDay } from '../types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/app/shared/components/overlay/tooltip'
 import { Info } from 'lucide-react'
 import { cn } from '@/app/shared/library/utils'
 

@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/app/shared/components/dataviz/table'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,13 +24,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '@/app/shared/components/feedback/alert-dialog'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/app/shared/components/overlay/tooltip'
 import { TurmaDialog, type Turma } from './turma-dialog'
 import { apiClient } from '@/shared/library/api-client'
 

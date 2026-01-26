@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/app/shared/components/forms/select';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/app/shared/components/overlay/tooltip';
 import { Loader2, Trash2, Plus, HelpCircle } from 'lucide-react';
 import { formatTipoAtividade } from '@/shared/library/utils';
 

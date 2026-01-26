@@ -7,7 +7,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/app/shared/components/overlay/tooltip'
 import { cn } from '@/app/shared/library/utils'
 import type { HeatmapDay } from '../types'
 import { format, subDays, startOfWeek, addDays, isSameDay } from 'date-fns'

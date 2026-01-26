@@ -1,6 +1,6 @@
 import * as React from 'react'
 import type { TooltipContentProps } from '@radix-ui/react-tooltip'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/app/shared/components/overlay/tooltip'
 import { Toggle } from '@/components/ui/toggle'
 import { cn } from '@/shared/library/utils'
 

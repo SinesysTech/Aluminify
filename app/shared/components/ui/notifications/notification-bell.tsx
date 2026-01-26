@@ -7,7 +7,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
+} from "@/app/shared/components/overlay/popover"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { NotificationItem } from "./notification-item"
 import { getNotificacoesUsuario, NotificacaoAgendamento } from "@/app/[tenant]/(modules)/agendamentos/lib/notificacoes-actions"

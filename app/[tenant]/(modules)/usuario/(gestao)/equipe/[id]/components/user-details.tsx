@@ -32,13 +32,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '@/app/shared/components/feedback/alert-dialog'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/app/shared/components/overlay/tooltip'
 import { toast } from '@/hooks/use-toast'
 import { UserEditForm } from './user-edit-form'
 

@@ -27,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/app/shared/components/dataviz/table'
 import {
   Dialog,
   DialogContent,
@@ -36,7 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from '@/app/shared/components/overlay/dialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,7 +46,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '@/app/shared/components/feedback/alert-dialog'
 import {
   Form,
   FormControl,
@@ -63,18 +63,18 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/app/shared/components/overlay/dropdown-menu'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/app/shared/components/overlay/tooltip'
 import { Checkbox } from '@/app/shared/components/forms/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { apiClient, ApiClientError } from '@/shared/library/api-client'
-import { TableSkeleton } from '@/components/ui/table-skeleton'
+import { TableSkeleton } from '@/app/shared/components/dataviz/table-skeleton'
 import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/shared/library/br'
 import { BulkActionsBar } from './bulk-actions-bar'
 import { TransferStudentsDialog } from './transfer-students-dialog'

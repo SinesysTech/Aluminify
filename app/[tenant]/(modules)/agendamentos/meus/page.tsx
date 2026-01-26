@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 import { getAgendamentosAluno } from "@/app/[tenant]/(modules)/agendamentos/lib/actions";
 import { MeusAgendamentosList } from "../components/meus-agendamentos-list"
 import { Suspense } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus } from "lucide-react"

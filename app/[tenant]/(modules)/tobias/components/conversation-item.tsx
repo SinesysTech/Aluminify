@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/app/shared/components/overlay/dropdown-menu'
 import type { Conversation } from '@/app/[tenant]/(modules)/tobias/services/conversation/conversation.types'
 import { cn } from '@/shared/library/utils'
 

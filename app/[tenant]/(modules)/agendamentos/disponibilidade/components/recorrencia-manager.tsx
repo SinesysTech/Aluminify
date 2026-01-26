@@ -10,7 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/app/shared/components/dataviz/table"
 import { Input } from "@/app/shared/components/forms/input"
 import { Label } from "@/app/shared/components/forms/label"
 import { Checkbox } from "@/app/shared/components/forms/checkbox"
@@ -29,7 +29,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/app/shared/components/overlay/dialog"
 import { Badge } from "@/components/ui/badge"
 import {
   getRecorrencias,
@@ -39,8 +39,8 @@ import {
   type Recorrencia,
 } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
 import { Loader2, Plus, Pencil, Trash, Calendar, Clock, CalendarDays, List } from "lucide-react"
-import { toast } from "@/components/ui/use-toast"
-import { TableSkeleton } from "@/components/ui/table-skeleton"
+import { toast } from "@/app/shared/components/feedback/use-toast"
+import { TableSkeleton } from "@/app/shared/components/dataviz/table-skeleton"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { cn } from "@/app/shared/library/utils"

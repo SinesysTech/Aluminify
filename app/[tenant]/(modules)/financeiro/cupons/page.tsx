@@ -30,7 +30,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/app/shared/components/dataviz/table";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -41,13 +41,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/app/shared/components/feedback/alert-dialog";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/app/shared/components/overlay/dialog";
 import { Label } from "@/app/shared/components/forms/label";
 import { Textarea } from "@/app/shared/components/forms/textarea";
 import { Switch } from "@/app/shared/components/forms/switch";

@@ -8,7 +8,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
+} from "@/app/shared/components/overlay/sheet"
 
 export interface BottomSheetOption {
   value: string

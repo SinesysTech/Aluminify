@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/app/shared/components/forms/input'
 import { Label } from '@/app/shared/components/forms/label'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@/app/shared/components/feedback/spinner'
 import { AvatarUpload } from '@/components/shared/avatar-upload'
 import { useToast } from '@/hooks/use-toast'
 

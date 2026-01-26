@@ -21,7 +21,7 @@ import { SubjectDistribution } from './subject-distribution'
 import { StrategicDomain } from './strategic-domain'
 import { DashboardSkeleton } from './dashboard-skeleton'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/app/shared/components/feedback/alert'
 
 // Intervalo de refresh automático (5 minutos)
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000

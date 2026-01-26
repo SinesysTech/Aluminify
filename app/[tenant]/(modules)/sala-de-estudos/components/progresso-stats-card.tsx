@@ -3,8 +3,8 @@
 import * as React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { TrendingUp, CheckCircle2, Circle, PlayCircle, Info } from 'lucide-react'
-import { Progress } from '@/components/ui/progress'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Progress } from '@/app/shared/components/feedback/progress'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/app/shared/components/overlay/tooltip'
 import { AtividadeComProgresso } from '../types'
 
 interface ProgressoStatsCardProps {

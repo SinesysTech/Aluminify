@@ -1,4 +1,4 @@
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@/app/shared/components/feedback/progress"
 import { Card, CardContent } from "@/components/ui/card"
 import { CalendarDays } from "lucide-react"
 

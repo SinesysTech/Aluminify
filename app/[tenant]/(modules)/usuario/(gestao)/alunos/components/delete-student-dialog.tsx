@@ -11,7 +11,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/app/shared/components/feedback/alert-dialog";
 import { Student } from "@/app/shared/types/entities/user";
 import { deleteStudentAction } from "../actions";
 import { toast } from "@/hooks/use-toast";

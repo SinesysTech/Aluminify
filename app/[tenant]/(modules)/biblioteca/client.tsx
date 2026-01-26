@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { AlertCircle, School } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@/app/shared/components/feedback/skeleton'
 import { useCurrentUser } from '@/components/providers/user-provider'
 import { OrganizationSwitcher } from '@/app/[tenant]/(modules)/dashboard/components/organization-switcher'
 import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'

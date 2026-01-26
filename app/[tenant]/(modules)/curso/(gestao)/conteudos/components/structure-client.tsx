@@ -23,7 +23,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/app/shared/components/dataviz/table'
 import {
   Collapsible,
   CollapsibleContent,
@@ -38,8 +38,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+} from '@/app/shared/components/feedback/alert-dialog'
+import { Alert, AlertDescription, AlertTitle } from '@/app/shared/components/feedback/alert'
 import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2, Trash2, Plus, Info, FileUp, Download } from 'lucide-react'
 import Papa from 'papaparse'
 import { useRouter } from 'next/navigation'

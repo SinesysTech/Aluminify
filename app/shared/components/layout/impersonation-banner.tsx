@@ -1,6 +1,6 @@
 "use client"
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/app/shared/components/feedback/alert"
 import { Button } from "@/components/ui/button"
 import { AlertTriangle, X } from "lucide-react"
 import { useRouter } from "next/navigation"

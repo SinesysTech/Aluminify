@@ -1,16 +1,16 @@
-﻿'use client'
+'use client'
 
 import {
 	Tooltip,
 	TooltipContent,
 	TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/app/shared/components/overlay/tooltip";
 import { CalendarIcon, Clock4, Globe } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 // Timezone display name mapping
 const TIMEZONE_NAMES: Record<string, string> = {
-	'America/Sao_Paulo': 'Brasília (GMT-3)',
+	'America/Sao_Paulo': 'Bras�lia (GMT-3)',
 	'America/New_York': 'Nova York (GMT-5)',
 	'America/Los_Angeles': 'Los Angeles (GMT-8)',
 	'Europe/London': 'Londres (GMT+0)',

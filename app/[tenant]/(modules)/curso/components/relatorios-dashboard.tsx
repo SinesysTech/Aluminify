@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/app/shared/components/forms/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/shared/components/forms/select"
 import { Calendar } from "@/app/shared/components/forms/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger } from "@/app/shared/components/overlay/popover"
 import {
   Table,
   TableBody,
@@ -14,9 +14,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/app/shared/components/dataviz/table"
 import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@/app/shared/components/feedback/progress"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import {

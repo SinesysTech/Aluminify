@@ -17,21 +17,21 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/app/shared/components/dataviz/table'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/app/shared/components/overlay/dropdown-menu'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { TableSkeleton } from '@/components/ui/table-skeleton'
+} from '@/app/shared/components/overlay/tooltip'
+import { TableSkeleton } from '@/app/shared/components/dataviz/table-skeleton'
 import { apiClient } from '@/shared/library/api-client'
 import { BulkActionsBar } from '@/app/[tenant]/(modules)/usuario/components/bulk-actions-bar'
 import { TransferStudentsDialog } from '@/app/[tenant]/(modules)/usuario/components/transfer-students-dialog'

@@ -6,7 +6,7 @@ import type { DashboardGroupBy, DashboardPeriod, DashboardScopeLevel, Performanc
 import { Card, CardContent } from '@/components/ui/card'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/app/shared/components/forms/select'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/app/shared/components/overlay/tooltip'
 import { Info } from 'lucide-react'
 import { fetchDashboardCourses, fetchPerformance, fetchSubjectDistribution } from '../services/dashboard.service'
 

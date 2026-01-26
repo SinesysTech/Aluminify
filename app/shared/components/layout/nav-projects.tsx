@@ -14,7 +14,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/app/shared/components/overlay/dropdown-menu"
 import {
   SidebarGroup,
   SidebarGroupLabel,

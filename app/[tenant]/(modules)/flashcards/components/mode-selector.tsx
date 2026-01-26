@@ -11,7 +11,7 @@ import {
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/app/shared/components/overlay/tooltip'
 import { MODOS } from '../types'
 
 interface ModeSelectorProps {

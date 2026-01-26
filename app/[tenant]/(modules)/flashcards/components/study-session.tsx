@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
+import { Progress } from '@/app/shared/components/feedback/progress'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, RefreshCcw, XCircle, Lightbulb, AlertTriangle } from 'lucide-react'
 import { Flashcard } from '../types'

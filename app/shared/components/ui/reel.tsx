@@ -12,7 +12,7 @@ import type {
 } from "react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "@/app/shared/components/feedback/progress";
 import { cn } from "@/app/shared/library/utils";
 
 // Explicit type for reel items

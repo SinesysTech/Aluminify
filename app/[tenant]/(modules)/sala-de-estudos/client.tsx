@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import { AlertCircle, School } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@/app/shared/components/feedback/skeleton'
 import { SalaEstudosFilters } from './components/sala-estudos-filters'
 import { ModuloActivitiesAccordion } from './components/modulo-activities-accordion'
 import { ProgressoStatsCard } from './components/progresso-stats-card'

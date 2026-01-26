@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/app/shared/components/overlay/sheet'
 import { Plus, MessageSquare, X } from 'lucide-react'
 import { ConversationListItem } from './conversation-list-item'
 import { RenameConversationDialog } from './rename-conversation-dialog'

@@ -1,2 +1,2 @@
-export { useToast, toast } from "@/components/ui/use-toast"
+export { useToast, toast } from "@/app/shared/components/feedback/use-toast"
 

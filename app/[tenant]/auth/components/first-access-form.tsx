@@ -11,7 +11,7 @@ import type { AppUserRole } from '@/app/shared/types'
 import { Input } from '@/app/shared/components/forms/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/app/shared/components/forms/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Alert, AlertDescription } from '@/app/shared/components/feedback/alert'
 import { AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 

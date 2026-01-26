@@ -13,7 +13,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/app/shared/components/overlay/dropdown-menu'
 import { toast } from 'sonner'
 import {
     Dialog,
@@ -21,10 +21,10 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/app/shared/components/overlay/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/app/shared/components/dataviz/table'
 import { downloadFile } from '@/shared/library/download-file'
 
 type ImportIssueStatus = 'skipped' | 'failed' | 'rejected'

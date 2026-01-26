@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { Button } from '@/components/ui/button';
 import {
@@ -6,7 +6,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip';
+} from '@/app/shared/components/overlay/tooltip';
 import { cn } from '@/shared/library/utils';
 import type { ComponentProps } from 'react';
 

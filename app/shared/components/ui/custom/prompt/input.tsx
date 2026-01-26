@@ -1,7 +1,7 @@
 "use client";
 
 import { Textarea } from "@/app/shared/components/forms/textarea";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/app/shared/components/overlay/tooltip";
 import { cn } from "@/app/shared/library/utils";
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 

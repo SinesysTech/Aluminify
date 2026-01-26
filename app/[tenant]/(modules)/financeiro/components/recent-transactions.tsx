@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/app/shared/components/dataviz/table";
 import { TransactionStatusBadge } from "./transaction-status-badge";
 import type { TransactionStatus, Provider } from "@/app/shared/types/entities/financial";
 

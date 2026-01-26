@@ -4,7 +4,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/app/shared/components/overlay/tooltip'
 import type { LucideIcon } from 'lucide-react'
 import { Info } from 'lucide-react'
 import { cn } from '@/app/shared/library/utils'

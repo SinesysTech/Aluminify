@@ -24,7 +24,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from "@/app/shared/components/overlay/popover";
 import {
   Select,
   SelectContent,

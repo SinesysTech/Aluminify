@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogTitle,
   DialogTrigger
-} from '@/components/ui/dialog'
+} from '@/app/shared/components/overlay/dialog'
 import { ImageEditBlock } from './image-edit-block'
 
 interface ImageEditDialogProps extends VariantProps<typeof toggleVariants> {

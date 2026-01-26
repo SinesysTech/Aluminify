@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@/app/shared/components/dataviz/table'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+} from '@/app/shared/components/feedback/alert-dialog'
 import { Plus, Pencil, Trash2, Shield, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import type { RoleTipo } from '@/app/shared/types/entities/papel'

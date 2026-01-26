@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/app/shared/components/forms/input';
 import { Label } from '@/app/shared/components/forms/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/app/shared/components/feedback/alert';
 import { Separator } from '@/components/ui/separator';
 import {
   CheckCircle,

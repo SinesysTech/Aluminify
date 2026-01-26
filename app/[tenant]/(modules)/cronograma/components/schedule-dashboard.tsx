@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/shared/core/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
+import { Progress } from '@/app/shared/components/feedback/progress'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@/app/shared/components/feedback/skeleton'
 import { ScheduleList } from './schedule-list'
 import { Download, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import {
@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+} from '@/app/shared/components/feedback/alert-dialog'
 import { format, addDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 

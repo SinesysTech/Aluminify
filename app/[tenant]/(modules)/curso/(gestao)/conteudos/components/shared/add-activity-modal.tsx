@@ -6,7 +6,7 @@ import {
     DialogHeader,
     DialogTitle,
     DialogFooter,
-} from '@/components/ui/dialog';
+} from '@/app/shared/components/overlay/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/app/shared/components/forms/label';
 import {

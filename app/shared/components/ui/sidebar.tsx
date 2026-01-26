@@ -17,9 +17,9 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle
-} from "@/components/ui/sheet";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+} from "@/app/shared/components/overlay/sheet";
+import { Skeleton } from "@/app/shared/components/feedback/skeleton";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/app/shared/components/overlay/tooltip";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;

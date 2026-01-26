@@ -6,7 +6,7 @@ import { requireUser } from "@/app/shared/core/auth"
 import { redirect } from "next/navigation"
 import { getProfessoresDisponiveis } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
 import { Suspense } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 
 export const metadata: Metadata = {
   title: 'Agendamentos'

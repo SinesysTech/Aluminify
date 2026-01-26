@@ -29,7 +29,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/app/shared/components/dataviz/table";
 import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
@@ -40,7 +40,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from "@/app/shared/components/feedback/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface Product {

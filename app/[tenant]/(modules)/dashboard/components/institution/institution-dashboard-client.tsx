@@ -15,7 +15,7 @@ import { DisciplinaPerformanceList } from './curso/disciplinas-performance'
 import { ConsistencyHeatmap, type HeatmapPeriod } from '@/app/[tenant]/(modules)/dashboard/components/consistency-heatmap'
 import { DashboardSkeleton } from '@/app/[tenant]/(modules)/dashboard/components/dashboard-skeleton'
 import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/app/shared/components/feedback/alert'
 import {
   Select,
   SelectContent,

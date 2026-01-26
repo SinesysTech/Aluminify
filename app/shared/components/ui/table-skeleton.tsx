@@ -1,4 +1,4 @@
-﻿import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 import {
   Table,
   TableBody,
@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/app/shared/components/dataviz/table"
 
 interface TableSkeletonProps {
   rows?: number

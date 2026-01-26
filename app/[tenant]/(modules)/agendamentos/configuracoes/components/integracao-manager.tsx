@@ -10,7 +10,7 @@ import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@/components/ui/alert"
+} from "@/app/shared/components/feedback/alert"
 import {
   getIntegracaoProfessor,
   getConfiguracoesProfessor,

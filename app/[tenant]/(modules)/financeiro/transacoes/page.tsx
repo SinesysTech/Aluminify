@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TransactionFilters } from "@/app/[tenant]/(modules)/financeiro/components/transaction-filters";
 import { TransactionStatusBadge } from "@/app/[tenant]/(modules)/financeiro/components/transaction-status-badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/app/shared/components/feedback/skeleton";
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/app/shared/components/dataviz/table";
 import {
   Pagination,
   PaginationContent,

@@ -3,7 +3,7 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
+import { Progress } from '@/app/shared/components/feedback/progress'
 import { Trophy, TrendingUp, RefreshCw } from 'lucide-react'
 
 type FeedbackCount = {

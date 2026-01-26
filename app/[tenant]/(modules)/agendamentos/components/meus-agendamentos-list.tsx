@@ -14,7 +14,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/app/shared/components/overlay/dialog"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { Textarea } from "@/app/shared/components/forms/textarea"
 import { Label } from "@/app/shared/components/forms/label"

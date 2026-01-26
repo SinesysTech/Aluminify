@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/app/shared/components/overlay/dialog'
 import {
   Select,
   SelectContent,

@@ -1,4 +1,4 @@
-﻿import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 
 interface ListSkeletonProps {
   items?: number

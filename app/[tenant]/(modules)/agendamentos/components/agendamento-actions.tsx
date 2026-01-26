@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/app/shared/components/overlay/dialog"
 import { Input } from "@/app/shared/components/forms/input"
 import { Label } from "@/app/shared/components/forms/label"
 import { Textarea } from "@/app/shared/components/forms/textarea"

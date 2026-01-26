@@ -16,7 +16,7 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@/components/ui/tooltip'
+} from '@/app/shared/components/overlay/tooltip'
 import { Info } from 'lucide-react'
 import { cn } from '@/app/shared/library/utils'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'

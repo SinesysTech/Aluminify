@@ -10,7 +10,7 @@ import {
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/app/shared/components/overlay/tooltip"
 import { Button } from "@/components/ui/button"
 import { DeleteStudentDialog } from './delete-student-dialog'
 import { toast } from '@/hooks/use-toast'

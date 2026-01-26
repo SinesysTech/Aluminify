@@ -8,7 +8,7 @@ import {
   createAgendamento,
 } from "@/app/[tenant]/(modules)/agendamentos/lib/actions";
 import { Suspense } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowLeft, User } from "lucide-react"

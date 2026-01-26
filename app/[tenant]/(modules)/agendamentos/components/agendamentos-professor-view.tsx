@@ -1,7 +1,7 @@
 import { getAgendamentosProfessor, getAgendamentoStats } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
 import { AgendamentosDashboard } from "./agendamentos-dashboard"
 import { Suspense } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 
 interface Props {
     userId: string
