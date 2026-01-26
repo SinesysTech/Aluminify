@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import {
-  courseService,
+  cursoService,
   CourseConflictError,
   CourseValidationError,
 } from "@/app/[tenant]/(modules)/curso/services";
@@ -11,7 +11,7 @@ import {
 } from "@/app/shared/core/database/database";
 
 const serializeCourse = (
-  course: Awaited<ReturnType<typeof courseService.getById>>,
+  course: Awaited<ReturnType<typeof cursoService.getById>>,
 ) => ({
   id: course.id,
   segmentId: course.segmentId,
@@ -222,7 +222,7 @@ async function postHandler(request: AuthenticatedRequest) {
       );
     }
 
-    const course = await courseService.create({
+    const course = await cursoService.create({
       empresaId,
       segmentId: body?.segmentId,
       disciplineId: body?.disciplineId, // Mantido para compatibilidade

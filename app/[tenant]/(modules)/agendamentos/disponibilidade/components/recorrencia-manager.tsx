@@ -40,7 +40,7 @@ import {
 } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
 import { Loader2, Plus, Pencil, Trash, Calendar, Clock, CalendarDays, List } from "lucide-react"
 import { toast } from "@/app/shared/components/feedback/use-toast"
-import { TableSkeleton } from "@/app/shared/components/dataviz/table-skeleton"
+import { TableSkeleton } from "@/app/shared/components/ui/table-skeleton"
 import { format } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { cn } from "@/app/shared/library/utils"

@@ -33,7 +33,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/app/shared/components/feedback/alert-dialog'
+} from '@/app/shared/components/ui/alert-dialog'
 import { Loader2, X, AlertCircle, Info } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'

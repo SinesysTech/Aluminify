@@ -1,5 +1,5 @@
 
-import { DisciplinaTable } from './components/curso/disciplinas-table'
+import { DisciplinaTable } from './components/disciplina-table'
 import { requireUser } from '@/app/shared/core/auth'
 
 export default async function DisciplinaPage() {

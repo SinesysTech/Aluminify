@@ -38,7 +38,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/app/shared/components/feedback/alert-dialog'
+} from '@/app/shared/components/ui/alert-dialog'
 import { Textarea } from '@/app/shared/components/forms/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/app/shared/components/forms/checkbox'

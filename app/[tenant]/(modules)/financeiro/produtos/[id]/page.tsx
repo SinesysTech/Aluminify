@@ -24,7 +24,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/app/shared/components/feedback/alert-dialog";
+} from "@/app/shared/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 interface Product {

@@ -38,7 +38,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/app/shared/components/feedback/alert-dialog'
+} from '@/app/shared/components/ui/alert-dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/app/shared/components/feedback/alert'
 import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2, Trash2, Plus, Info, FileUp, Download } from 'lucide-react'
 import Papa from 'papaparse'
