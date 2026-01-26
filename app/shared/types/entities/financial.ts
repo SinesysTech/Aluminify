@@ -549,23 +549,6 @@ export type HotmartWebhookPayload =
   | HotmartUpdateChargeDatePayload
   | HotmartClubFirstAccessPayload;
 
-/**
- * @deprecated Use HotmartPurchasePayload instead
- * Legacy type for backwards compatibility
- */
-export interface HotmartWebhookPayloadLegacy {
-  hottok: string;
-  data: {
-    product: HotmartProduct;
-    offer?: { code: string };
-    buyer: HotmartBuyer;
-    purchase: HotmartPurchase;
-    subscription?: HotmartSubscription;
-  };
-  event: HotmartEventType;
-  creation_date: number;
-}
-
 // ============================================================================
 // Import Types
 // ============================================================================

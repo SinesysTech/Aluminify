@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import {
   cronogramaService,
-  CronogramaService,
 } from "@/app/[tenant]/(modules)/cronograma/services";
 import { CronogramaConflictError, CronogramaValidationError, CronogramaTempoInsuficienteError } from "@/app/[tenant]/(modules)/cronograma/services/errors";
 import {

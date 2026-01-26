@@ -52,7 +52,7 @@ export default function StudentDashboardClientPage() {
 
                 // Pass empresaId to filter data by organization (for multi-org students)
                 const dashboardData = await fetchDashboardData({
-                    period: periodToUse as any,
+                    period: periodToUse,
                     empresaId: activeOrgId,
                 })
                 setData(dashboardData)
@@ -308,11 +308,9 @@ export default function StudentDashboardClientPage() {
             {/* Linha 3: 2 Colunas - Subject Performance List e Subject Distribution */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8 items-stretch">
                 <div className="lg:col-span-3 lg:h-[446px]">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     <SubjectPerformanceList subjects={data.subjects} period={heatmapPeriod as Parameters<typeof SubjectPerformanceList>[0]['period']} />
                 </div>
                 <div className="lg:col-span-2 lg:h-[446px]">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     <SubjectDistribution data={data.subjectDistribution} period={heatmapPeriod as Parameters<typeof SubjectDistribution>[0]['period']} />
                 </div>
             </div>

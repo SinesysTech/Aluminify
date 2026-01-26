@@ -514,7 +514,8 @@ export class FlashcardsService {
     const { data, error } = await this.client
       .from("frentes")
       .select("id, nome, disciplina_id")
-      .eq("curso_id", cursoId);
+      .eq("curso_id", cursoId)
+      .eq("disciplina_id", disciplinaId);
       
     if (error) throw new Error(error.message);
     return (data || []).map(f => ({
