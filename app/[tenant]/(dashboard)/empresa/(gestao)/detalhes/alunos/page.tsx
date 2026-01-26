@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/app/shared/core/server'
 import { createStudentService } from '@/app/[tenant]/(dashboard)/usuario/services/student.service'
 import { createCursoService } from '@/app/[tenant]/(dashboard)/curso/services'
-import { AlunosClientPage } from '@/app/[tenant]/(dashboard)/usuario/alunos/components/client-page'
+import { AlunosClientPage } from '@/app/[tenant]/(dashboard)/usuario/(gestao)/alunos/components/client-page'
 import { requireUser } from '@/app/shared/core/auth'
 
 export const metadata: Metadata = {

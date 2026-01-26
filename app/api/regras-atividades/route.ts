@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import {
   regraAtividadeService,
   RegraAtividadeValidationError,
-} from "@/app/[tenant]/(dashboard)/atividades/services";
+} from "@/app/[tenant]/(dashboard)/sala-de-estudos/services/atividades";
 import {
   requireAuth,
   AuthenticatedRequest,

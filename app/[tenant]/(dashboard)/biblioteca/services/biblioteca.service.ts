@@ -2,7 +2,7 @@ import { createClient } from "@/app/shared/core/client";
 import {
   StatusAtividade,
   DificuldadePercebida,
-} from "@/app/[tenant]/(dashboard)/atividades/services";
+} from "@/app/[tenant]/(dashboard)/sala-de-estudos/services/atividades";
 import {
   AtividadeComProgresso,
   CursoComDisciplinas,

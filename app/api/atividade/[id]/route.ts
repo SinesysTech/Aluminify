@@ -3,7 +3,7 @@ import {
   atividadeService,
   AtividadeNotFoundError,
   AtividadeValidationError,
-} from "@/app/[tenant]/(dashboard)/atividades/services";
+} from "@/app/[tenant]/(dashboard)/sala-de-estudos/services/atividades";
 import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
 
 const serializeAtividade = (
