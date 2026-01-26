@@ -301,7 +301,7 @@ export function useLogoUrl(logoType: LogoType, empresaId?: string): {
       setStandaloneError(false);
 
       try {
-        const response = await fetch(`/api/tenant-branding/${empresaId}/logos/${logoType}/public`);
+        const response = await fetch(`/api/empresa/personalizacao/${empresaId}/logos/${logoType}/public`);
         if (response.ok) {
           const result = await response.json();
           if (result.success && result.data?.logoUrl) {

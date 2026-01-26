@@ -6,7 +6,7 @@ import type { RoleTipo } from '@/app/shared/types/entities/papel';
 import { isAdminRoleTipo } from '@/app/shared/core/roles';
 
 /**
- * GET /api/user/profile
+ * GET /api/usuario/perfil
  * Retorna dados básicos do usuário logado (role, empresaId, etc).
  *
  * Usado pelas telas em `app/(dashboard)/empresa/detalhes/*`.
@@ -78,7 +78,7 @@ export async function GET() {
       isAdmin: roleType ? isAdminRoleTipo(roleType) : role === 'superadmin',
     });
   } catch (e) {
-    console.error('Error in /api/user/profile:', e);
+    console.error('Error in /api/usuario/perfil:', e);
     return NextResponse.json({ error: 'Erro ao buscar perfil' }, { status: 500 });
   }
 }

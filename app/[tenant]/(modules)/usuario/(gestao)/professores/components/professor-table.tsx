@@ -155,7 +155,7 @@ export function ProfessorTable() {
     try {
       setLoading(true)
       setError(null)
-      const response = await apiClient.get<{ data: Professor[] }>('/api/teacher')
+      const response = await apiClient.get<{ data: Professor[] }>('/api/usuario/professores')
       if (response && 'data' in response) {
         setData(response.data)
       } else {
@@ -191,7 +191,7 @@ export function ProfessorTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.post<{ data: Professor }>('/api/teacher', {
+      await apiClient.post<{ data: Professor }>('/api/usuario/professores', {
         ...values,
         cpf: values.cpf || undefined,
         phone: values.phone || undefined,
@@ -276,7 +276,7 @@ export function ProfessorTable() {
       updatePayload.photoUrl = values.photoUrl || null
       updatePayload.specialty = values.specialty || null
 
-      await apiClient.put<{ data: Professor }>(`/api/teacher/${editingProfessor.id}`, updatePayload)
+      await apiClient.put<{ data: Professor }>(`/api/usuario/professores/${editingProfessor.id}`, updatePayload)
       setSuccessMessage('Professor atualizado com sucesso!')
       setEditDialogOpen(false)
       setEditingProfessor(null)
@@ -305,7 +305,7 @@ export function ProfessorTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.delete(`/api/teacher/${deletingProfessor.id}`)
+      await apiClient.delete(`/api/usuario/professores/${deletingProfessor.id}`)
       setSuccessMessage('Professor excluído com sucesso!')
       setDeleteDialogOpen(false)
       setDeletingProfessor(null)

@@ -454,7 +454,7 @@ export default function StructureManagerClient() {
       }
 
       try {
-        const response = await fetchWithAuth(`/api/regras-atividades?curso_id=${cursoSelecionado}`)
+        const response = await fetchWithAuth(`/api/sala-de-estudos/regras?curso_id=${cursoSelecionado}`)
         const body = await response.json()
         if (!response.ok) {
           throw new Error(body?.error || 'Erro ao carregar regras')
@@ -1598,7 +1598,7 @@ export default function StructureManagerClient() {
       }
 
       // Chamar API para deletar
-      const response = await fetch(`/api/frente/${frenteSelecionada}`, {
+      const response = await fetch(`/api/curso/frentes/${frenteSelecionada}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -1652,7 +1652,7 @@ export default function StructureManagerClient() {
   ) => {
     try {
       setIsCreatingActivity(true)
-      const response = await fetchWithAuth('/api/atividade', {
+      const response = await fetchWithAuth('/api/sala-de-estudos/atividades', {
         method: 'POST',
         body: JSON.stringify({
           modulo_id: moduloId,
@@ -1679,7 +1679,7 @@ export default function StructureManagerClient() {
 
   const handleUpdateActivityTitle = async (atividadeId: string, moduloId: string, titulo: string) => {
     try {
-      const response = await fetchWithAuth(`/api/atividade/${atividadeId}`, {
+      const response = await fetchWithAuth(`/api/sala-de-estudos/atividades/${atividadeId}`, {
         method: 'PATCH',
         body: JSON.stringify({ titulo }),
       })
@@ -1701,7 +1701,7 @@ export default function StructureManagerClient() {
 
   const handleUpdateModuloImportancia = async (moduloId: string, importancia: 'Alta' | 'Media' | 'Baixa' | 'Base') => {
     try {
-      const response = await fetchWithAuth(`/api/modulo/${moduloId}`, {
+      const response = await fetchWithAuth(`/api/curso/modulos/${moduloId}`, {
         method: 'PATCH',
         body: JSON.stringify({ importancia }),
       })
@@ -1727,7 +1727,7 @@ export default function StructureManagerClient() {
 
   const handleDeleteActivity = async (atividadeId: string, moduloId: string) => {
     try {
-      const response = await fetchWithAuth(`/api/atividade/${atividadeId}`, {
+      const response = await fetchWithAuth(`/api/sala-de-estudos/atividades/${atividadeId}`, {
         method: 'DELETE',
       })
       const body = await response.json().catch(() => ({}))
@@ -1753,7 +1753,7 @@ export default function StructureManagerClient() {
     try {
       setIsUpdatingEstrutura(true)
       setError(null)
-      const response = await fetchWithAuth('/api/atividade/gerar-estrutura', {
+      const response = await fetchWithAuth('/api/sala-de-estudos/atividades/gerar-estrutura', {
         method: 'POST',
         body: JSON.stringify({
           curso_id: cursoSelecionado,

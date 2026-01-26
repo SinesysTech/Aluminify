@@ -120,7 +120,7 @@ export default function ProfessorNovaEmpresaPage() {
 
       console.log('[Criar Empresa] Enviando requisição...', payload);
 
-      const response = await fetch('/api/empresas/self', {
+      const response = await fetch('/api/empresa/self', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

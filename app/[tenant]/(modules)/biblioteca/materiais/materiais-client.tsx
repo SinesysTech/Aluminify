@@ -235,7 +235,7 @@ export default function MateriaisClientPage() {
         }
 
         // Buscar atividades da frente
-        const response = await fetch(`/api/atividade?frente_id=${frenteSelecionada}`)
+        const response = await fetch(`/api/sala-de-estudos/atividades?frente_id=${frenteSelecionada}`)
         if (!response.ok) {
           throw new Error('Erro ao carregar atividades')
         }
@@ -295,7 +295,7 @@ export default function MateriaisClientPage() {
       }
 
       try {
-        const response = await fetchWithAuth(`/api/regras-atividades?curso_id=${cursoSelecionado}`)
+        const response = await fetchWithAuth(`/api/sala-de-estudos/regras?curso_id=${cursoSelecionado}`)
         const body = await response.json()
         if (!response.ok) {
           throw new Error(body?.error || 'Erro ao carregar regras')
@@ -331,7 +331,7 @@ export default function MateriaisClientPage() {
         throw new Error('Sessão expirada. Faça login novamente.')
       }
 
-      const response = await fetch('/api/atividade/gerar-estrutura', {
+      const response = await fetch('/api/sala-de-estudos/atividades/gerar-estrutura', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -376,7 +376,7 @@ export default function MateriaisClientPage() {
     try {
       setIsUpdatingEstrutura(true)
       setError(null)
-      const response = await fetchWithAuth('/api/atividade/gerar-estrutura', {
+      const response = await fetchWithAuth('/api/sala-de-estudos/atividades/gerar-estrutura', {
         method: 'POST',
         body: JSON.stringify({
           curso_id: cursoSelecionado,
@@ -418,7 +418,7 @@ export default function MateriaisClientPage() {
     }
 
     try {
-      const response = await fetchWithAuth('/api/regras-atividades', {
+      const response = await fetchWithAuth('/api/sala-de-estudos/regras', {
         method: 'POST',
         body: JSON.stringify({
           curso_id: cursoSelecionado,
@@ -446,7 +446,7 @@ export default function MateriaisClientPage() {
 
   const handleDeleteRegra = async (regraId: string) => {
     try {
-      const response = await fetchWithAuth(`/api/regras-atividades/${regraId}`, {
+      const response = await fetchWithAuth(`/api/sala-de-estudos/regras/${regraId}`, {
         method: 'DELETE',
       })
       const body = await response.json().catch(() => ({}))

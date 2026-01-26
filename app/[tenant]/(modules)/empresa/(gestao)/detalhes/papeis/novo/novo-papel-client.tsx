@@ -24,7 +24,7 @@ export function NovoPapelClient({ empresaId }: NovoPapelClientProps) {
   }) => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/empresas/${empresaId}/papeis`, {
+      const response = await fetch(`/api/empresa/${empresaId}/papeis`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

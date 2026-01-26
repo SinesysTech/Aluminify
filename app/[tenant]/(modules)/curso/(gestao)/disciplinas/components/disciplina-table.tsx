@@ -122,7 +122,7 @@ export function DisciplinaTable() {
       setLoading(true)
       setError(null)
       const startTime = performance.now()
-      const response = await apiClient.get<{ data: Disciplina[] }>('/api/discipline')
+      const response = await apiClient.get<{ data: Disciplina[] }>('/api/curso/disciplinas')
       const endTime = performance.now()
 
       if (endTime - startTime > 1000) {
@@ -168,7 +168,7 @@ export function DisciplinaTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.post<{ data: Disciplina }>('/api/discipline', values)
+      await apiClient.post<{ data: Disciplina }>('/api/curso/disciplinas', values)
       setSuccessMessage('Disciplina criada com sucesso!')
       setCreateDialogOpen(false)
       createForm.reset()
@@ -214,7 +214,7 @@ export function DisciplinaTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.put<{ data: Disciplina }>(`/api/discipline/${editingDisciplina.id}`, values)
+      await apiClient.put<{ data: Disciplina }>(`/api/curso/disciplinas/${editingDisciplina.id}`, values)
       setSuccessMessage('Disciplina atualizada com sucesso!')
       setEditDialogOpen(false)
       setEditingDisciplina(null)
@@ -243,7 +243,7 @@ export function DisciplinaTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.delete(`/api/discipline/${deletingDisciplina.id}`)
+      await apiClient.delete(`/api/curso/disciplinas/${deletingDisciplina.id}`)
       setSuccessMessage('Disciplina excluída com sucesso!')
       setDeleteDialogOpen(false)
       setDeletingDisciplina(null)

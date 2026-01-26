@@ -8,7 +8,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/conversations/[id]
+ * GET /api/tobias/conversations/[id]
  * Obter conversa por ID
  */
 async function getHandler(
@@ -40,7 +40,7 @@ async function getHandler(
 }
 
 /**
- * PUT /api/conversations/[id]
+ * PUT /api/tobias/conversations/[id]
  * Atualizar conversa
  *
  * Body: { title?: string, is_active?: boolean }
@@ -98,7 +98,7 @@ async function putHandler(
 }
 
 /**
- * DELETE /api/conversations/[id]
+ * DELETE /api/tobias/conversations/[id]
  * Deletar conversa
  */
 async function deleteHandler(

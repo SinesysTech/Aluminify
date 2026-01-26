@@ -46,7 +46,7 @@ async function getHandler(
   }
 }
 
-// GET /api/empresas/[id]/alunos - Listar alunos matriculados em cursos da empresa
+// GET /api/empresa/[id]/alunos - Listar alunos matriculados em cursos da empresa
 export async function GET(request: NextRequest, context: RouteContext) {
   return getHandler(request, context);
 }

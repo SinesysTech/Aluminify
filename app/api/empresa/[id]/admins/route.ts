@@ -139,12 +139,12 @@ async function postHandler(
   }
 }
 
-// GET /api/empresas/[id]/admins - Listar admins da empresa
+// GET /api/empresa/[id]/admins - Listar admins da empresa
 export async function GET(request: NextRequest, context: RouteContext) {
   return getHandler(request, context);
 }
 
-// POST /api/empresas/[id]/admins - Adicionar admin
+// POST /api/empresa/[id]/admins - Adicionar admin
 export async function POST(request: NextRequest, context: RouteContext) {
   return postHandler(request, context);
 }

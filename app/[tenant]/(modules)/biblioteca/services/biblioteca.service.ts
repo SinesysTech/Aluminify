@@ -76,7 +76,7 @@ export async function fetchBibliotecaData(
     // ALUNO: buscar via backend (mesmo padrão do cronograma)
     if (userRole !== "professor" && userRole !== "superadmin") {
       const url = new URL(
-        `/api/atividade/aluno/${alunoId}`,
+        `/api/sala-de-estudos/atividades/aluno/${alunoId}`,
         window.location.origin,
       );
       if (activeOrgId) {

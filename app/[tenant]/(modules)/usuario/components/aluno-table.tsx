@@ -200,7 +200,7 @@ export function AlunoTable() {
     const fetchCourses = async () => {
       try {
         setCoursesLoading(true)
-        const response = await apiClient.get<{ data: { id: string; name: string }[] }>('/api/course')
+        const response = await apiClient.get<{ data: { id: string; name: string }[] }>('/api/curso')
         if (response && 'data' in response) {
           setCourseOptions(response.data.map((course) => ({ id: course.id, name: course.name })))
         }
@@ -301,7 +301,7 @@ export function AlunoTable() {
     try {
       setLoading(true)
       setError(null)
-      const response = await apiClient.get<{ data: Aluno[] }>('/api/student')
+      const response = await apiClient.get<{ data: Aluno[] }>('/api/usuario/alunos')
       if (response && 'data' in response) {
         setData(response.data)
       } else {
@@ -407,7 +407,7 @@ export function AlunoTable() {
         headers['Authorization'] = `Bearer ${token}`
       }
 
-      const response = await fetch('/api/student/bulk-import', {
+      const response = await fetch('/api/usuario/alunos/bulk-import', {
         method: 'POST',
         headers,
         body: formData,
@@ -444,7 +444,7 @@ export function AlunoTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.post<{ data: Aluno }>('/api/student', {
+      await apiClient.post<{ data: Aluno }>('/api/usuario/alunos', {
         ...values,
         fullName: values.fullName || undefined,
         cpf: values.cpf || undefined,
@@ -543,7 +543,7 @@ export function AlunoTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.put<{ data: Aluno }>(`/api/student/${editingAluno.id}`, {
+      await apiClient.put<{ data: Aluno }>(`/api/usuario/alunos/${editingAluno.id}`, {
         ...values,
         fullName: values.fullName || null,
         cpf: values.cpf || null,
@@ -627,7 +627,7 @@ export function AlunoTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.delete(`/api/student/${deletingAluno.id}`)
+      await apiClient.delete(`/api/usuario/alunos/${deletingAluno.id}`)
       setSuccessMessage('Aluno excluído com sucesso!')
       setDeleteDialogOpen(false)
       setDeletingAluno(null)

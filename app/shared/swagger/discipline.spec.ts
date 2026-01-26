@@ -40,7 +40,7 @@ export const disciplineSchemas = {
 };
 
 export const disciplinePaths = {
-  '/api/discipline': {
+  '/api/curso/disciplinas': {
     get: {
       tags: ['Discipline'],
       summary: 'List disciplines',
@@ -107,7 +107,7 @@ export const disciplinePaths = {
       },
     },
   },
-  '/api/discipline/{id}': {
+  '/api/curso/disciplinas/{id}': {
     parameters: [
       {
         in: 'path',

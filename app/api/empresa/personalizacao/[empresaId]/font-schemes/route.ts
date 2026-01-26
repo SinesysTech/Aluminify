@@ -13,7 +13,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/tenant-branding/[empresaId]/font-schemes - Get all font schemes for empresa
+ * GET /api/empresa/personalizacao/[empresaId]/font-schemes - Get all font schemes for empresa
  */
 async function getHandler(
   request: BrandCustomizationRequest,
@@ -54,7 +54,7 @@ async function getHandler(
 }
 
 /**
- * POST /api/tenant-branding/[empresaId]/font-schemes - Create new font scheme
+ * POST /api/empresa/personalizacao/[empresaId]/font-schemes - Create new font scheme
  * Validates Requirements 3.2, 3.3: Support Google Fonts and proper fallbacks
  */
 async function postHandler(

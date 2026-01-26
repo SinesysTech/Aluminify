@@ -86,7 +86,7 @@ export function IntegracaoManager({ professorId }: IntegracaoManagerProps) {
       return
     }
 
-    const redirectUri = `${window.location.origin}/api/integrations/google/callback`
+    const redirectUri = `${window.location.origin}/api/empresa/integracoes/google/callback`
     const scope = encodeURIComponent("https://www.googleapis.com/auth/calendar.events")
     const state = encodeURIComponent(JSON.stringify({ professorId }))
 
@@ -110,7 +110,7 @@ export function IntegracaoManager({ professorId }: IntegracaoManagerProps) {
       return
     }
 
-    const redirectUri = `${window.location.origin}/api/integrations/zoom/callback`
+    const redirectUri = `${window.location.origin}/api/empresa/integracoes/zoom/callback`
     const state = encodeURIComponent(JSON.stringify({ professorId }))
 
     const authUrl = `https://zoom.us/oauth/authorize?` +

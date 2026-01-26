@@ -33,7 +33,7 @@ export class SalaEstudosService {
 
     if (userRole !== "professor" && userRole !== "superadmin") {
       const url = new URL(
-        `/api/atividade/aluno/${alunoId}`,
+        `/api/sala-de-estudos/atividades/aluno/${alunoId}`,
         window.location.origin,
       );
       if (activeOrgId) url.searchParams.set("empresa_id", activeOrgId);
@@ -65,7 +65,7 @@ export class SalaEstudosService {
       // Logic for professor/superadmin (simplified from client)
       // This part was quite complex in client.tsx, re-implementing logic to fetch all...
       // Ideally this should be an API endpoint too, but for refactor we keep client-side orchestration if no API exists.
-      // For brevity in this refactor, assuming the API /api/atividade/aluno handles basic fetching.
+      // For brevity in this refactor, assuming the API /api/sala-de-estudos/atividades/aluno handles basic fetching.
       // But looking at client.tsx, there was a HUGE block for "Se for professor..." and manual JOINs.
       // We should encapsulate that complex logic here or better yet, assume the API handles it.
       // Given constraints, I will migrate the logic effectively.
@@ -378,7 +378,7 @@ export class SalaEstudosService {
     } = await this.supabase.auth.getSession();
     if (!session) throw new Error("Sessão inválida");
 
-    await fetch(`/api/progresso-atividade/atividade/${atividadeId}`, {
+    await fetch(`/api/sala-de-estudos/progresso/atividade/${atividadeId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -398,7 +398,7 @@ export class SalaEstudosService {
     } = await this.supabase.auth.getSession();
     if (!session) throw new Error("Sessão inválida");
 
-    await fetch(`/api/progresso-atividade/atividade/${atividadeId}`, {
+    await fetch(`/api/sala-de-estudos/progresso/atividade/${atividadeId}`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",

@@ -156,12 +156,12 @@ async function postHandler(
   }
 }
 
-// GET /api/empresas/[id]/professores - Listar professores da empresa
+// GET /api/empresa/[id]/professores - Listar professores da empresa
 export async function GET(request: NextRequest, context: RouteContext) {
   return getHandler(request, context);
 }
 
-// POST /api/empresas/[id]/professores - Adicionar professor
+// POST /api/empresa/[id]/professores - Adicionar professor
 export async function POST(request: NextRequest, context: RouteContext) {
   return postHandler(request, context);
 }

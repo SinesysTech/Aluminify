@@ -86,7 +86,7 @@ export function ActivityUploadRow({
             const publicUrl = urlData.publicUrl
 
             // Atualizar atividade no banco com a URL
-            const response = await fetch(`/api/atividade/${atividadeId}`, {
+            const response = await fetch(`/api/sala-de-estudos/atividades/${atividadeId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

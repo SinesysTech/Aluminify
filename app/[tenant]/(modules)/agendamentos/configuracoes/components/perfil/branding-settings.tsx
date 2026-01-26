@@ -24,7 +24,7 @@ export function BrandingSettings({ empresaId }: BrandingSettingsProps) {
 
             if (!session) return;
 
-            const response = await fetch(`/api/tenant-branding/${id}`, {
+            const response = await fetch(`/api/empresa/personalizacao/${id}`, {
                 headers: {
                     'Authorization': `Bearer ${session.access_token}`,
                 },
@@ -63,7 +63,7 @@ export function BrandingSettings({ empresaId }: BrandingSettingsProps) {
                 throw new Error('Sessão expirada. Faça login novamente.');
             }
 
-            const response = await fetch(`/api/tenant-branding/${empresaId}`, {
+            const response = await fetch(`/api/empresa/personalizacao/${empresaId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ export function BrandingSettings({ empresaId }: BrandingSettingsProps) {
                 throw new Error('Sessão expirada. Faça login novamente.');
             }
 
-            const response = await fetch(`/api/tenant-branding/${empresaId}`, {
+            const response = await fetch(`/api/empresa/personalizacao/${empresaId}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${session.access_token}`,

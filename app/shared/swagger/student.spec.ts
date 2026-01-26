@@ -147,7 +147,7 @@ export const studentSchemas = {
 };
 
 export const studentPaths = {
-  '/api/student': {
+  '/api/usuario/alunos': {
     get: {
       tags: ['Student'],
       summary: 'List students',
@@ -214,7 +214,7 @@ export const studentPaths = {
       },
     },
   },
-  '/api/student/{id}': {
+  '/api/usuario/alunos/{id}': {
     parameters: [
       {
         in: 'path',

@@ -85,7 +85,7 @@ async function deleteHandler(
   }
 }
 
-// DELETE /api/empresas/[id]/admins/[userId] - Remover admin
+// DELETE /api/empresa/[id]/admins/[userId] - Remover admin
 export async function DELETE(
   request: NextRequest,
   context: RouteContext

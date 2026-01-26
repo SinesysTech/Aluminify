@@ -51,13 +51,13 @@ export default function EmpresaUsuariosPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      const userResponse = await fetch('/api/user/profile')
+      const userResponse = await fetch('/api/usuario/perfil')
       const userData = await userResponse.json()
 
       if (userData.empresaId) {
         const [professoresRes, alunosRes] = await Promise.all([
-          fetch(`/api/empresas/${userData.empresaId}/professores`),
-          fetch(`/api/empresas/${userData.empresaId}/alunos`),
+          fetch(`/api/empresa/${userData.empresaId}/professores`),
+          fetch(`/api/empresa/${userData.empresaId}/alunos`),
         ])
 
         if (professoresRes.ok) {

@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     // Exchange code for tokens
     const clientId = process.env.NEXT_PUBLIC_ZOOM_CLIENT_ID;
     const clientSecret = process.env.ZOOM_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/integrations/zoom/callback`;
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/empresa/integracoes/zoom/callback`;
 
     if (!clientId || !clientSecret) {
       throw new Error("Zoom OAuth credentials not configured");

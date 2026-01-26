@@ -9,7 +9,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/empresas/[id]/papeis/[papelId]
+ * GET /api/empresa/[id]/papeis/[papelId]
  * Get a specific papel
  */
 async function getHandler(
@@ -46,7 +46,7 @@ async function getHandler(
 }
 
 /**
- * PATCH /api/empresas/[id]/papeis/[papelId]
+ * PATCH /api/empresa/[id]/papeis/[papelId]
  * Update a custom papel
  */
 async function patchHandler(
@@ -142,7 +142,7 @@ async function patchHandler(
 }
 
 /**
- * DELETE /api/empresas/[id]/papeis/[papelId]
+ * DELETE /api/empresa/[id]/papeis/[papelId]
  * Delete a custom papel
  */
 async function deleteHandler(

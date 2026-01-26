@@ -13,7 +13,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/tenant-branding/[empresaId]/logos/[logoType] - Get specific logo
+ * GET /api/empresa/personalizacao/[empresaId]/logos/[logoType] - Get specific logo
  */
 async function getHandler(
   request: BrandCustomizationRequest,
@@ -62,7 +62,7 @@ async function getHandler(
 }
 
 /**
- * DELETE /api/tenant-branding/[empresaId]/logos/[logoType] - Remove specific logo
+ * DELETE /api/empresa/personalizacao/[empresaId]/logos/[logoType] - Remove specific logo
  * Validates Requirements 7.2, 7.3: Secure file removal
  */
 async function deleteHandler(

@@ -8,7 +8,7 @@ import {
 import type { Database } from "@/app/shared/core/database.types";
 
 /**
- * POST /api/empresas/self
+ * POST /api/empresa/self
  *
  * Permite que um professor SEM empresa crie sua própria empresa (onboarding)
  * e seja vinculado como owner/admin.

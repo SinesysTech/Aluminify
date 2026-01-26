@@ -83,7 +83,7 @@ export default function CompletarCadastroEmpresaPage() {
         }
 
         // Buscar dados da empresa
-        const response = await fetch(`/api/empresas/${empresaIdToUse}`, {
+        const response = await fetch(`/api/empresa/${empresaIdToUse}`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
           },
@@ -221,7 +221,7 @@ export default function CompletarCadastroEmpresaPage() {
         payload.cnpj = cnpjToSend;
       }
 
-      const response = await fetch(`/api/empresas/${empresa.id}`, {
+      const response = await fetch(`/api/empresa/${empresa.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

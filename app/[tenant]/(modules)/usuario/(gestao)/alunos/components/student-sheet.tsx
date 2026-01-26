@@ -56,7 +56,7 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
         const fetchTurmas = async () => {
             setLoadingTurmas(true)
             try {
-                const response = await apiClient.get<{ data: Turma[] }>(`/api/turma?cursoId=${formData.courseId}`)
+                const response = await apiClient.get<{ data: Turma[] }>(`/api/usuario/turmas?cursoId=${formData.courseId}`)
                 if (response && 'data' in response) {
                     setTurmas(response.data)
                 }

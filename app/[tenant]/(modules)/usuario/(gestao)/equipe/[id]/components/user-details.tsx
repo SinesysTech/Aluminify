@@ -157,7 +157,7 @@ export function UserDetails({ user, empresaId, papeis, onUpdate }: UserDetailsPr
   const handleDelete = async () => {
     try {
       setIsDeleting(true)
-      const response = await fetch(`/api/empresas/${empresaId}/usuarios/${user.id}`, {
+      const response = await fetch(`/api/empresa/${empresaId}/usuarios/${user.id}`, {
         method: 'DELETE',
       })
 

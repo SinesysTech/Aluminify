@@ -26,7 +26,7 @@ export function EditPapelClient({ papel, empresaId }: EditPapelClientProps) {
   }) => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/empresas/${empresaId}/papeis/${papel.id}`, {
+      const response = await fetch(`/api/empresa/${empresaId}/papeis/${papel.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

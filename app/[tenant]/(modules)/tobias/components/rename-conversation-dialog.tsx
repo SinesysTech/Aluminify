@@ -51,7 +51,7 @@ export function RenameConversationDialog({
 
     try {
       setIsSaving(true)
-      const response = await fetch(`/api/conversations/${conversation.id}`, {
+      const response = await fetch(`/api/tobias/conversations/${conversation.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

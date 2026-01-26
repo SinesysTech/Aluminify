@@ -161,7 +161,7 @@ export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
         console.log('[FirstAccessForm] Atualizando registro do aluno via API...', { userId: actualUserId })
 
         try {
-          const response = await fetch(`/api/student/${actualUserId}`, {
+          const response = await fetch(`/api/usuario/alunos/${actualUserId}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',

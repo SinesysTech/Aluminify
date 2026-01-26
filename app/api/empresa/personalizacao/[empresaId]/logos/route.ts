@@ -13,7 +13,7 @@ interface RouteContext {
 }
 
 /**
- * POST /api/tenant-branding/[empresaId]/logos - Upload logo
+ * POST /api/empresa/personalizacao/[empresaId]/logos - Upload logo
  * Validates Requirements 1.3, 1.4, 7.2, 7.3: File validation and secure storage
  */
 async function postHandler(
@@ -105,7 +105,7 @@ async function postHandler(
 }
 
 /**
- * GET /api/tenant-branding/[empresaId]/logos - Get all logos for tenant
+ * GET /api/empresa/personalizacao/[empresaId]/logos - Get all logos for tenant
  */
 async function getHandler(
   request: BrandCustomizationRequest,

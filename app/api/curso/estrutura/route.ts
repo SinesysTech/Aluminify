@@ -3,7 +3,7 @@ import { requireAuth, AuthenticatedRequest } from '@/app/[tenant]/auth/middlewar
 import { courseStructureCacheService } from '@/app/shared/core/services/cache';
 
 /**
- * GET /api/course-structure
+ * GET /api/curso/estrutura
  * Obter estrutura hierárquica de um curso (com cache)
  * 
  * Query params:

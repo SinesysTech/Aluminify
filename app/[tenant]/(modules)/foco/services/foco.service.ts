@@ -99,7 +99,7 @@ export class FocoService {
   }
 
   async getAtividades(moduloId: string): Promise<Option[]> {
-    const resp = await fetch(`/api/atividade?modulo_id=${moduloId}`);
+    const resp = await fetch(`/api/sala-de-estudos/atividades?modulo_id=${moduloId}`);
     if (!resp.ok) throw new Error("Falha ao carregar atividades");
     const { data } = await resp.json();
     return (data || []).map((a: { id: string; titulo: string }) => ({
@@ -130,7 +130,7 @@ export class FocoService {
       inicio: new Date().toISOString(),
     };
 
-    const resp = await fetch("/api/sessao/iniciar", {
+    const resp = await fetch("/api/sala-de-estudos/sessao/iniciar", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -162,7 +162,7 @@ export class FocoService {
     } = await this.supabase.auth.getSession();
     if (error || !session) throw new Error("Sessão expirada");
 
-    const resp = await fetch("/api/sessao/finalizar", {
+    const resp = await fetch("/api/sala-de-estudos/sessao/finalizar", {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
@@ -184,7 +184,7 @@ export class FocoService {
 
     if (concluiuAtividade && atividadeId) {
       try {
-        await fetch(`/api/progresso-atividade/atividade/${atividadeId}`, {
+        await fetch(`/api/sala-de-estudos/progresso/atividade/${atividadeId}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -206,7 +206,7 @@ export class FocoService {
     if (error || !session) return;
 
     try {
-      await fetch("/api/sessao/heartbeat", {
+      await fetch("/api/sala-de-estudos/sessao/heartbeat", {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

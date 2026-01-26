@@ -177,7 +177,7 @@ function StandaloneTenantLogo({
       try {
         // Use public endpoint (no authentication required)
         const response = await fetch(
-          `/api/tenant-branding/${empresaId}/logos/${logoType}/public`
+          `/api/empresa/personalizacao/${empresaId}/logos/${logoType}/public`
         );
 
         if (response.ok) {

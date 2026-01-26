@@ -1,4 +1,4 @@
-Ôªø'use client'
+'use client'
 
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -41,23 +41,23 @@ export default function EmpresaClientPage() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        throw new Error('Sess√£o expirada. Fa√ßa login novamente.');
+        throw new Error('Sess„o expirada. FaÁa login novamente.');
       }
 
-      // Buscar empresa do usu√°rio logado
-      const profileResponse = await fetch('/api/user/profile', {
+      // Buscar empresa do usu·rio logado
+      const profileResponse = await fetch('/api/usuario/perfil', {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
         },
       });
 
       if (!profileResponse.ok) {
-        throw new Error('Erro ao buscar dados do usu√°rio');
+        throw new Error('Erro ao buscar dados do usu·rio');
       }
       const userData = await profileResponse.json();
 
       if (userData.empresaId) {
-        const empresaResponse = await fetch(`/api/empresas/${userData.empresaId}`, {
+        const empresaResponse = await fetch(`/api/empresa/${userData.empresaId}`, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
           },
@@ -105,7 +105,7 @@ export default function EmpresaClientPage() {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        throw new Error('Sess√£o expirada. Fa√ßa login novamente.');
+        throw new Error('Sess„o expirada. FaÁa login novamente.');
       }
 
       // Preparar payload - normalizar CNPJ antes de enviar
@@ -119,13 +119,13 @@ export default function EmpresaClientPage() {
       if (formData.cnpj && formData.cnpj.trim()) {
         const cnpjClean = formData.cnpj.replace(/\D/g, '');
         if (cnpjClean.length === 14) {
-          // Verificar se todos os d√≠gitos s√£o iguais
+          // Verificar se todos os dÌgitos s„o iguais
           if (!/^(\d)\1+$/.test(cnpjClean)) {
             payload.cnpj = cnpjClean;
           } else {
             toast({
               title: 'Erro',
-              description: 'CNPJ inv√°lido: todos os d√≠gitos s√£o iguais',
+              description: 'CNPJ inv·lido: todos os dÌgitos s„o iguais',
               variant: 'destructive',
             });
             setSaving(false);
@@ -134,7 +134,7 @@ export default function EmpresaClientPage() {
         } else if (cnpjClean.length > 0) {
           toast({
             title: 'Erro',
-            description: 'CNPJ deve ter 14 d√≠gitos',
+            description: 'CNPJ deve ter 14 dÌgitos',
             variant: 'destructive',
           });
           setSaving(false);
@@ -142,7 +142,7 @@ export default function EmpresaClientPage() {
         }
       }
 
-      const response = await fetch(`/api/empresas/${empresa.id}`, {
+      const response = await fetch(`/api/empresa/${empresa.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -187,9 +187,9 @@ export default function EmpresaClientPage() {
       <div className="container mx-auto py-8 max-w-xl">
         <Card>
           <CardHeader>
-            <CardTitle>Empresa n√£o encontrada</CardTitle>
+            <CardTitle>Empresa n„o encontrada</CardTitle>
             <CardDescription>
-              Seu usu√°rio ainda n√£o est√° vinculado a uma empresa. Para continuar, crie sua empresa.
+              Seu usu·rio ainda n„o est· vinculado a uma empresa. Para continuar, crie sua empresa.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -229,7 +229,7 @@ export default function EmpresaClientPage() {
             id="cnpj"
             value={formData.cnpj}
             onChange={(e) => {
-              // Normalizar para apenas d√≠gitos e formatar
+              // Normalizar para apenas dÌgitos e formatar
               const digits = e.target.value.replace(/\D/g, '');
               const formatted = formatCNPJ(digits);
               setFormData({ ...formData, cnpj: formatted });
@@ -273,7 +273,7 @@ export default function EmpresaClientPage() {
 
         <div className="flex justify-end gap-2">
           <Button onClick={handleSave} disabled={saving}>
-            {saving ? 'Salvando...' : 'Salvar Altera√ß√µes'}
+            {saving ? 'Salvando...' : 'Salvar AlteraÁıes'}
           </Button>
         </div>
       </div>

@@ -13,7 +13,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/tenant-branding/[empresaId] - Load tenant branding configuration
+ * GET /api/empresa/personalizacao/[empresaId] - Load tenant branding configuration
  * Validates Requirements 4.2: Load customizations specific to empresa
  */
 async function getHandler(
@@ -66,7 +66,7 @@ async function getHandler(
 }
 
 /**
- * POST /api/tenant-branding/[empresaId] - Save tenant branding configuration
+ * POST /api/empresa/personalizacao/[empresaId] - Save tenant branding configuration
  * Validates Requirements 5.3, 5.5: Save and manage customizations
  */
 async function postHandler(
@@ -128,7 +128,7 @@ async function postHandler(
 }
 
 /**
- * DELETE /api/tenant-branding/[empresaId] - Reset tenant branding to default
+ * DELETE /api/empresa/personalizacao/[empresaId] - Reset tenant branding to default
  * Validates Requirements 5.5: Reset functionality
  */
 async function deleteHandler(

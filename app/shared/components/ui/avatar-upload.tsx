@@ -75,7 +75,7 @@ export const AvatarUpload = ({
       const formData = new FormData()
       formData.append('file', file)
 
-      const response = await fetch('/api/user/avatar', {
+      const response = await fetch('/api/usuario/avatar', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -143,7 +143,7 @@ ${instructions.join('\n')}`
         throw new Error('Não autenticado')
       }
 
-      const response = await fetch('/api/user/avatar', {
+      const response = await fetch('/api/usuario/avatar', {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

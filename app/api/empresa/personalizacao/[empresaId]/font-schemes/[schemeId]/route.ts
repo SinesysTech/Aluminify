@@ -13,7 +13,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/tenant-branding/[empresaId]/font-schemes/[schemeId] - Get specific font scheme
+ * GET /api/empresa/personalizacao/[empresaId]/font-schemes/[schemeId] - Get specific font scheme
  */
 async function getHandler(
   request: BrandCustomizationRequest,
@@ -69,7 +69,7 @@ async function getHandler(
 }
 
 /**
- * PUT /api/tenant-branding/[empresaId]/font-schemes/[schemeId] - Update font scheme
+ * PUT /api/empresa/personalizacao/[empresaId]/font-schemes/[schemeId] - Update font scheme
  * Validates Requirements 3.2, 3.3: Update font schemes with Google Fonts and fallbacks
  */
 async function putHandler(
@@ -138,7 +138,7 @@ async function putHandler(
 }
 
 /**
- * DELETE /api/tenant-branding/[empresaId]/font-schemes/[schemeId] - Delete font scheme
+ * DELETE /api/empresa/personalizacao/[empresaId]/font-schemes/[schemeId] - Delete font scheme
  */
 async function deleteHandler(
   request: BrandCustomizationRequest,

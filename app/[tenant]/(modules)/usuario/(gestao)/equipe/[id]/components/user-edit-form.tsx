@@ -112,7 +112,7 @@ export function UserEditForm({ user, empresaId, papeis, onCancel, onSuccess }: U
         payload.password = password
       }
 
-      const response = await fetch(`/api/empresas/${empresaId}/usuarios/${user.id}`, {
+      const response = await fetch(`/api/empresa/${empresaId}/usuarios/${user.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

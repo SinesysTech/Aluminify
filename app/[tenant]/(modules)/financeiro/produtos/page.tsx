@@ -94,7 +94,7 @@ export default function ProductsPage() {
         params.set("active", active);
       }
 
-      const response = await fetch(`/api/financial/products?${params.toString()}`);
+      const response = await fetch(`/api/financeiro/products?${params.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch products");
       }
@@ -123,7 +123,7 @@ export default function ProductsPage() {
 
     setDeleting(productToDelete.id);
     try {
-      const response = await fetch(`/api/financial/products/${productToDelete.id}`, {
+      const response = await fetch(`/api/financeiro/products/${productToDelete.id}`, {
         method: "DELETE",
       });
 

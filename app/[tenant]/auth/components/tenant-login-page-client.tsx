@@ -55,7 +55,7 @@ export function TenantLoginPageClient({
   useEffect(() => {
     async function loadBranding() {
       try {
-        const response = await fetch(`/api/tenant-branding/${empresaId}/public`);
+        const response = await fetch(`/api/empresa/personalizacao/${empresaId}/public`);
         if (response.ok) {
           const result = await response.json();
           if (result.success && result.data) {

@@ -5,7 +5,7 @@ import { getPublicSupabaseConfig } from "@/app/shared/core/supabase-public-env";
 import type { LogoType } from "@/empresa/personalizacao/services/empresa/personalizacao.types";
 
 /**
- * GET /api/tenant-branding/[empresaId]/logos/[logoType]/public
+ * GET /api/empresa/personalizacao/[empresaId]/logos/[logoType]/public
  * Public endpoint to get a specific logo (no authentication required)
  * Used by TenantLogo component in both authenticated and unauthenticated contexts
  */

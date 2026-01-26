@@ -13,7 +13,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/tenant-branding/[empresaId]/color-palettes - Get all color palettes for empresa
+ * GET /api/empresa/personalizacao/[empresaId]/color-palettes - Get all color palettes for empresa
  */
 async function getHandler(
   request: BrandCustomizationRequest,
@@ -54,7 +54,7 @@ async function getHandler(
 }
 
 /**
- * POST /api/tenant-branding/[empresaId]/color-palettes - Create new color palette
+ * POST /api/empresa/personalizacao/[empresaId]/color-palettes - Create new color palette
  * Validates Requirements 2.2: Allow editing of primary, secondary, accent, and background colors
  */
 async function postHandler(

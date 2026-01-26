@@ -57,7 +57,7 @@ export default function ProductDetailPage() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`/api/financial/products/${productId}`);
+        const response = await fetch(`/api/financeiro/products/${productId}`);
         if (!response.ok) {
           if (response.status === 404) {
             toast({
@@ -91,7 +91,7 @@ export default function ProductDetailPage() {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      const response = await fetch(`/api/financial/products/${productId}`, {
+      const response = await fetch(`/api/financeiro/products/${productId}`, {
         method: "DELETE",
       });
 

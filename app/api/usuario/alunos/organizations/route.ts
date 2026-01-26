@@ -30,7 +30,7 @@ function handleError(error: unknown) {
 }
 
 /**
- * GET /api/student/organizations
+ * GET /api/usuario/alunos/organizations
  *
  * Returns all organizations where the current student is enrolled.
  * Only accessible by authenticated students (role: "aluno").

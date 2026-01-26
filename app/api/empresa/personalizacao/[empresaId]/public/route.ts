@@ -4,7 +4,7 @@ import { BrandCustomizationManager } from "@/empresa/personalizacao/services";
 import { getPublicSupabaseConfig } from "@/app/shared/core/supabase-public-env";
 
 /**
- * GET /api/tenant-branding/[empresaId]/public - Load public tenant branding
+ * GET /api/empresa/personalizacao/[empresaId]/public - Load public tenant branding
  * Allows unauthenticated access for login/signup pages
  */
 export async function GET(

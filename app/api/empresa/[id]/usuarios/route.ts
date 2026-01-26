@@ -28,7 +28,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/empresas/[id]/usuarios
+ * GET /api/empresa/[id]/usuarios
  * Lista todos os usuários (staff) da empresa
  */
 export async function GET(request: NextRequest, { params }: RouteContext) {
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 }
 
 /**
- * POST /api/empresas/[id]/usuarios
+ * POST /api/empresa/[id]/usuarios
  * Cria um novo usuário (staff) para a empresa
  */
 export async function POST(request: NextRequest, { params }: RouteContext) {

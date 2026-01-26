@@ -123,7 +123,7 @@ export function SegmentoTable() {
     try {
       setLoading(true)
       setError(null)
-      const response = await apiClient.get<{ data: Segmento[] }>('/api/segment')
+      const response = await apiClient.get<{ data: Segmento[] }>('/api/curso/segmentos')
       if (response && 'data' in response) {
         setData(response.data)
       } else {
@@ -163,7 +163,7 @@ export function SegmentoTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.post<{ data: Segmento }>('/api/segment', values)
+      await apiClient.post<{ data: Segmento }>('/api/curso/segmentos', values)
       setSuccessMessage('Segmento criado com sucesso!')
       setCreateDialogOpen(false)
       createForm.reset()
@@ -210,7 +210,7 @@ export function SegmentoTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.put<{ data: Segmento }>(`/api/segment/${editingSegmento.id}`, values)
+      await apiClient.put<{ data: Segmento }>(`/api/curso/segmentos/${editingSegmento.id}`, values)
       setSuccessMessage('Segmento atualizado com sucesso!')
       setEditDialogOpen(false)
       setEditingSegmento(null)
@@ -239,7 +239,7 @@ export function SegmentoTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.delete(`/api/segment/${deletingSegmento.id}`)
+      await apiClient.delete(`/api/curso/segmentos/${deletingSegmento.id}`)
       setSuccessMessage('Segmento excluído com sucesso!')
       setDeleteDialogOpen(false)
       setDeletingSegmento(null)

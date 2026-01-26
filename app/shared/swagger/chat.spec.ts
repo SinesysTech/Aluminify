@@ -73,7 +73,7 @@ export const chatSchemas = {
 };
 
 export const chatPaths = {
-  '/api/chat': {
+  '/api/tobias/chat': {
     post: {
       tags: ['Chat'],
       summary: 'Send a message to the chat AI',

@@ -60,7 +60,7 @@ export function TurmasList({ cursoId, cursoNome }: TurmasListProps) {
   const fetchTurmas = React.useCallback(async () => {
     try {
       setLoading(true)
-      const response = await apiClient.get<TurmasResponse>(`/api/turma?cursoId=${cursoId}`)
+      const response = await apiClient.get<TurmasResponse>(`/api/usuario/turmas?cursoId=${cursoId}`)
       setTurmas(response.data || [])
       setError(null)
     } catch (err) {
@@ -95,7 +95,7 @@ export function TurmasList({ cursoId, cursoNome }: TurmasListProps) {
 
     setDeleting(true)
     try {
-      await apiClient.delete(`/api/turma/${turmaToDelete.id}`)
+      await apiClient.delete(`/api/usuario/turmas/${turmaToDelete.id}`)
       setDeleteDialogOpen(false)
       setTurmaToDelete(null)
       fetchTurmas()

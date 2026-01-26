@@ -69,7 +69,7 @@ export function PapeisListClient({ papeis, empresaId }: PapeisListClientProps) {
 
     setIsDeleting(true)
     try {
-      const response = await fetch(`/api/empresas/${empresaId}/papeis/${deletingId}`, {
+      const response = await fetch(`/api/empresa/${empresaId}/papeis/${deletingId}`, {
         method: 'DELETE',
       })
 

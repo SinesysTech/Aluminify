@@ -12,7 +12,7 @@ interface RouteContext {
 }
 
 /**
- * POST /api/tenant-branding/[empresaId]/font-schemes/google-fonts - Validate Google Font
+ * POST /api/empresa/personalizacao/[empresaId]/font-schemes/google-fonts - Validate Google Font
  * Validates Requirements 3.2: Support Google Fonts integration
  */
 async function postHandler(
@@ -74,7 +74,7 @@ async function postHandler(
 }
 
 /**
- * GET /api/tenant-branding/[empresaId]/font-schemes/google-fonts - Get popular Google Fonts list
+ * GET /api/empresa/personalizacao/[empresaId]/font-schemes/google-fonts - Get popular Google Fonts list
  * Provides a curated list of popular Google Fonts for the UI
  */
 async function getHandler(

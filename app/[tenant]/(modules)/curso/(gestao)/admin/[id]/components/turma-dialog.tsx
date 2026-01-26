@@ -100,9 +100,9 @@ export function TurmaDialog({
 
     try {
       if (isEditing && turma) {
-        await apiClient.put(`/api/turma/${turma.id}`, data)
+        await apiClient.put(`/api/usuario/turmas/${turma.id}`, data)
       } else {
-        await apiClient.post('/api/turma', {
+        await apiClient.post('/api/usuario/turmas', {
           ...data,
           cursoId,
         })

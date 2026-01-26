@@ -30,7 +30,7 @@ function handleError(error: unknown) {
 }
 
 /**
- * GET /api/student/courses-by-org
+ * GET /api/usuario/alunos/courses-by-org
  *
  * Returns all courses for the current student, grouped by organization.
  * Only accessible by authenticated students (role: "aluno").

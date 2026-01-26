@@ -94,8 +94,8 @@ export default function CourseDetailPage() {
       try {
         setLoading(true)
         const [enrollmentsResponse, coursesResponse] = await Promise.all([
-          apiClient.get<EnrollmentsResponse>(`/api/course/${courseId}/enrollments`),
-          apiClient.get<{ data: { id: string; name: string }[] }>('/api/course'),
+          apiClient.get<EnrollmentsResponse>(`/api/curso/${courseId}/enrollments`),
+          apiClient.get<{ data: { id: string; name: string }[] }>('/api/curso'),
         ])
         if (enrollmentsResponse?.data) {
           setCourse(enrollmentsResponse.data.course)
@@ -200,7 +200,7 @@ export default function CourseDetailPage() {
     // Refresh data
     if (courseId) {
       setLoading(true)
-      apiClient.get<EnrollmentsResponse>(`/api/course/${courseId}/enrollments`)
+      apiClient.get<EnrollmentsResponse>(`/api/curso/${courseId}/enrollments`)
         .then((response) => {
           if (response?.data) {
             setCourse(response.data.course)

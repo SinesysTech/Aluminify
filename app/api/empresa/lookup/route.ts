@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/app/shared/core/server';
 
-// GET /api/empresas/lookup?slug=xxx - Lookup público de empresa por slug (para onboarding)
+// GET /api/empresa/lookup?slug=xxx - Lookup público de empresa por slug (para onboarding)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);

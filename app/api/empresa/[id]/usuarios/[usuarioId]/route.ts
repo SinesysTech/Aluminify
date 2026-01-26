@@ -28,7 +28,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/empresas/[id]/usuarios/[usuarioId]
+ * GET /api/empresa/[id]/usuarios/[usuarioId]
  * Busca um usuário específico
  */
 export async function GET(request: NextRequest, { params }: RouteContext) {
@@ -86,7 +86,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 }
 
 /**
- * PATCH /api/empresas/[id]/usuarios/[usuarioId]
+ * PATCH /api/empresa/[id]/usuarios/[usuarioId]
  * Atualiza um usuário
  */
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
@@ -245,7 +245,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 }
 
 /**
- * DELETE /api/empresas/[id]/usuarios/[usuarioId]
+ * DELETE /api/empresa/[id]/usuarios/[usuarioId]
  * Remove (soft delete) um usuário
  */
 export async function DELETE(request: NextRequest, { params }: RouteContext) {

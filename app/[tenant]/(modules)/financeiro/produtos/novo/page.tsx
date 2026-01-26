@@ -61,7 +61,7 @@ export default function NewProductPage() {
     try {
       const priceCents = Math.round(priceValue * 100);
 
-      const response = await fetch("/api/financial/products", {
+      const response = await fetch("/api/financeiro/products", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

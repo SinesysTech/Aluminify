@@ -110,7 +110,7 @@ export default function TobIAsPage() {
         // Carregar histórico da conversa ativa
         if (currentUserId && currentAccessToken) {
           try {
-            const response = await fetch('/api/conversations?active=true', {
+            const response = await fetch('/api/tobias/conversations?active=true', {
               headers: {
                 'Authorization': `Bearer ${currentAccessToken}`,
               },
@@ -158,7 +158,7 @@ export default function TobIAsPage() {
 
     try {
       // Buscar conversa completa por ID
-      const response = await fetch(`/api/conversations/${conversation.id}`, {
+      const response = await fetch(`/api/tobias/conversations/${conversation.id}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
@@ -194,7 +194,7 @@ export default function TobIAsPage() {
 
     try {
       // Recarregar conversa atual
-      const response = await fetch(`/api/conversations/${selectedConversationId}`, {
+      const response = await fetch(`/api/tobias/conversations/${selectedConversationId}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
@@ -350,7 +350,7 @@ export default function TobIAsPage() {
     // Se não há conversa selecionada, criar ou obter uma ativa
     if (!currentConversation) {
       try {
-        const response = await fetch('/api/conversations?active=true', {
+        const response = await fetch('/api/tobias/conversations?active=true', {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
           },
@@ -369,7 +369,7 @@ export default function TobIAsPage() {
               return
             }
 
-            const createResponse = await fetch('/api/conversations', {
+            const createResponse = await fetch('/api/tobias/conversations', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -448,7 +448,7 @@ export default function TobIAsPage() {
       }
       attachments.forEach((file) => formData.append('attachments', file))
 
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/api/tobias/chat', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${authToken}`,

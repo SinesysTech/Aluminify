@@ -55,7 +55,7 @@ export default function EditProductPage() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`/api/financial/products/${productId}`);
+        const response = await fetch(`/api/financeiro/products/${productId}`);
         if (!response.ok) {
           if (response.status === 404) {
             toast({
@@ -123,7 +123,7 @@ export default function EditProductPage() {
     try {
       const priceCents = Math.round(priceValue * 100);
 
-      const response = await fetch(`/api/financial/products/${productId}`, {
+      const response = await fetch(`/api/financeiro/products/${productId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

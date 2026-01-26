@@ -70,7 +70,7 @@ export const enrollmentSchemas = {
 };
 
 export const enrollmentPaths = {
-  '/api/enrollment': {
+  '/api/usuario/matriculas': {
     get: {
       tags: ['Enrollment'],
       summary: 'List enrollments',
@@ -151,7 +151,7 @@ export const enrollmentPaths = {
       },
     },
   },
-  '/api/enrollment/{id}': {
+  '/api/usuario/matriculas/{id}': {
     parameters: [
       {
         in: 'path',

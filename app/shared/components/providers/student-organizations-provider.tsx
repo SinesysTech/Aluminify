@@ -143,7 +143,7 @@ export function StudentOrganizationsProvider({
         throw new Error("No active session");
       }
 
-      const response = await fetch("/api/student/organizations", {
+      const response = await fetch("/api/usuario/alunos/organizations", {
         headers: {
           Authorization: `Bearer ${session.access_token}`,
         },

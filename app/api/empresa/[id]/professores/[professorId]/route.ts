@@ -8,7 +8,7 @@ interface RouteContext {
   params: Promise<{ id: string; professorId: string }>;
 }
 
-// PATCH /api/empresas/[id]/professores/[professorId] - Atualizar professor (toggle admin, etc)
+// PATCH /api/empresa/[id]/professores/[professorId] - Atualizar professor (toggle admin, etc)
 export async function PATCH(
   request: NextRequest,
   { params }: RouteContext

@@ -109,7 +109,7 @@ export function TenantBrandingProvider({ children, user, overrideEmpresaId }: Te
         headers['Authorization'] = `Bearer ${session.access_token}`;
       }
 
-      const response = await fetch(`/api/tenant-branding/${empresaId}`, {
+      const response = await fetch(`/api/empresa/personalizacao/${empresaId}`, {
         headers
       });
       if (response.ok) {

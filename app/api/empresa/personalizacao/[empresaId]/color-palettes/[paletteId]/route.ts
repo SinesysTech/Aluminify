@@ -13,7 +13,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/tenant-branding/[empresaId]/color-palettes/[paletteId] - Get specific color palette
+ * GET /api/empresa/personalizacao/[empresaId]/color-palettes/[paletteId] - Get specific color palette
  */
 async function getHandler(
   request: BrandCustomizationRequest,
@@ -69,7 +69,7 @@ async function getHandler(
 }
 
 /**
- * PUT /api/tenant-branding/[empresaId]/color-palettes/[paletteId] - Update color palette
+ * PUT /api/empresa/personalizacao/[empresaId]/color-palettes/[paletteId] - Update color palette
  * Validates Requirements 2.2: Allow editing of color palette
  */
 async function putHandler(
@@ -138,7 +138,7 @@ async function putHandler(
 }
 
 /**
- * DELETE /api/tenant-branding/[empresaId]/color-palettes/[paletteId] - Delete color palette
+ * DELETE /api/empresa/personalizacao/[empresaId]/color-palettes/[paletteId] - Delete color palette
  */
 async function deleteHandler(
   request: BrandCustomizationRequest,

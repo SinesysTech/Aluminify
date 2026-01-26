@@ -48,7 +48,7 @@ export function CompanySettings({ empresaId }: CompanySettingsProps) {
                 throw new Error('Sessão expirada. Faça login novamente.');
             }
 
-            const empresaResponse = await fetch(`/api/empresas/${empresaId}`, {
+            const empresaResponse = await fetch(`/api/empresa/${empresaId}`, {
                 headers: {
                     'Authorization': `Bearer ${session.access_token}`,
                 },
@@ -134,7 +134,7 @@ export function CompanySettings({ empresaId }: CompanySettingsProps) {
                 }
             }
 
-            const response = await fetch(`/api/empresas/${empresa.id}`, {
+            const response = await fetch(`/api/empresa/${empresa.id}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

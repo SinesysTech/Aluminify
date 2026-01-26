@@ -112,7 +112,7 @@ export function BrandCustomizationPanel({
 
       const authHeaders = await getAuthHeaders();
 
-      const response = await fetch(`/api/tenant-branding/${empresaId}/logos`, {
+      const response = await fetch(`/api/empresa/personalizacao/${empresaId}/logos`, {
         method: 'POST',
         headers: authHeaders,
         body: formData,
@@ -151,7 +151,7 @@ export function BrandCustomizationPanel({
   const handleLogoRemove = useCallback(async (type: LogoType): Promise<void> => {
     try {
       const authHeaders = await getAuthHeaders();
-      const response = await fetch(`/api/tenant-branding/${empresaId}/logos/${type}`, {
+      const response = await fetch(`/api/empresa/personalizacao/${empresaId}/logos/${type}`, {
         method: 'DELETE',
         headers: authHeaders,
       });
@@ -181,7 +181,7 @@ export function BrandCustomizationPanel({
   const handleColorPaletteSave = async (paletteRequest: CreateColorPaletteRequest): Promise<void> => {
     try {
       const authHeaders = await getAuthHeaders();
-      const response = await fetch(`/api/tenant-branding/${empresaId}/color-palettes`, {
+      const response = await fetch(`/api/empresa/personalizacao/${empresaId}/color-palettes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -216,7 +216,7 @@ export function BrandCustomizationPanel({
   const handleFontSchemeSave = async (schemeRequest: CreateFontSchemeRequest): Promise<void> => {
     try {
       const authHeaders = await getAuthHeaders();
-      const response = await fetch(`/api/tenant-branding/${empresaId}/font-schemes`, {
+      const response = await fetch(`/api/empresa/personalizacao/${empresaId}/font-schemes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

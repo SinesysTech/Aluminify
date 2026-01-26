@@ -30,13 +30,13 @@ export function StudentFilters() {
         const fetchData = async () => {
             try {
                 // Fetch turmas
-                const turmasResponse = await apiClient.get<{ data: Array<{ id: string; nome: string; cursoNome: string }> }>('/api/turma')
+                const turmasResponse = await apiClient.get<{ data: Array<{ id: string; nome: string; cursoNome: string }> }>('/api/usuario/turmas')
                 if (turmasResponse && 'data' in turmasResponse) {
                     setTurmas(turmasResponse.data)
                 }
 
                 // Fetch courses for course filter
-                const coursesResponse = await apiClient.get<{ data: Course[] }>('/api/course')
+                const coursesResponse = await apiClient.get<{ data: Course[] }>('/api/curso')
                 if (coursesResponse && 'data' in coursesResponse) {
                     setCourses(coursesResponse.data)
                 }

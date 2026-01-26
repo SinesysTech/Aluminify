@@ -111,7 +111,7 @@ export const courseSchemas = {
 };
 
 export const coursePaths = {
-  '/api/course': {
+  '/api/curso': {
     get: {
       tags: ['Course'],
       summary: 'List courses',
@@ -178,7 +178,7 @@ export const coursePaths = {
       },
     },
   },
-  '/api/course/{id}': {
+  '/api/curso/{id}': {
     parameters: [
       {
         in: 'path',

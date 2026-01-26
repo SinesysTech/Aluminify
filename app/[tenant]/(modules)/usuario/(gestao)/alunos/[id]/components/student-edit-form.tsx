@@ -98,7 +98,7 @@ export function StudentEditForm({ student, onCancel, onSuccess }: StudentEditFor
         payload.temporaryPassword = formData.temporaryPassword
       }
 
-      await apiClient.put(`/api/student/${student.id}`, payload)
+      await apiClient.put(`/api/usuario/alunos/${student.id}`, payload)
 
       toast({
         title: 'Aluno atualizado',

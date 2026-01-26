@@ -49,7 +49,7 @@ export default function UserDetailPage() {
       setError(null)
 
       // Get empresaId from profile
-      const profileResponse = await fetch('/api/user/profile')
+      const profileResponse = await fetch('/api/usuario/perfil')
       if (!profileResponse.ok) {
         throw new Error('Erro ao obter perfil')
       }
@@ -63,8 +63,8 @@ export default function UserDetailPage() {
 
       // Fetch user data and papeis in parallel
       const [userResponse, papeisResponse] = await Promise.all([
-        fetch(`/api/empresas/${profileData.empresaId}/usuarios/${userId}`),
-        fetch(`/api/empresas/${profileData.empresaId}/papeis`),
+        fetch(`/api/empresa/${profileData.empresaId}/usuarios/${userId}`),
+        fetch(`/api/empresa/${profileData.empresaId}/papeis`),
       ])
 
       if (!userResponse.ok) {

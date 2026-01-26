@@ -90,7 +90,7 @@ export function TransferStudentsDialog({
       try {
         setTurmasLoading(true)
         const response = await apiClient.get<{ data: TurmaSummary[] }>(
-          `/api/course/${currentCourseId}/turmas`
+          `/api/curso/${currentCourseId}/turmas`
         )
         if (response && 'data' in response) {
           // Filter out current turma if set
@@ -139,7 +139,7 @@ export function TransferStudentsDialog({
         }
 
         const response = await apiClient.post<{ data: BulkTransferResult }>(
-          '/api/student/bulk-transfer/course',
+          '/api/usuario/alunos/bulk-transfer/course',
           {
             studentIds,
             sourceCourseId: currentCourseId,
@@ -160,7 +160,7 @@ export function TransferStudentsDialog({
         }
 
         const response = await apiClient.post<{ data: BulkTransferResult }>(
-          '/api/student/bulk-transfer/turma',
+          '/api/usuario/alunos/bulk-transfer/turma',
           {
             studentIds,
             sourceTurmaId: currentTurmaId,

@@ -54,7 +54,7 @@ export default function StudentDetailPage() {
     try {
       setLoading(true)
       setError(null)
-      const response = await apiClient.get<StudentResponse>(`/api/student/${studentId}`)
+      const response = await apiClient.get<StudentResponse>(`/api/usuario/alunos/${studentId}`)
       if (response?.data) {
         setStudent(response.data)
       }

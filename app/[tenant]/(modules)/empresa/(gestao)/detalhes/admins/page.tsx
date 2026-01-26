@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -46,20 +46,20 @@ export default function EmpresaAdminsPage() {
 
   const fetchData = useCallback(async () => {
     try {
-      // Buscar empresa do usuário
-      const userResponse = await fetch('/api/user/profile');
+      // Buscar empresa do usu�rio
+      const userResponse = await fetch('/api/usuario/perfil');
       const userData = await userResponse.json();
 
       if (userData.empresaId) {
         // Buscar admins
-        const adminsResponse = await fetch(`/api/empresas/${userData.empresaId}/admins`);
+        const adminsResponse = await fetch(`/api/empresa/${userData.empresaId}/admins`);
         if (adminsResponse.ok) {
           const adminsData = await adminsResponse.json();
           setAdmins(adminsData);
         }
 
         // Buscar professores
-        const professoresResponse = await fetch(`/api/empresas/${userData.empresaId}/professores`);
+        const professoresResponse = await fetch(`/api/empresa/${userData.empresaId}/professores`);
         if (professoresResponse.ok) {
           const professoresData = await professoresResponse.json();
           setProfessores(professoresData);
@@ -85,10 +85,10 @@ export default function EmpresaAdminsPage() {
     if (!selectedProfessor) return;
 
     try {
-      const userResponse = await fetch('/api/user/profile');
+      const userResponse = await fetch('/api/usuario/perfil');
       const userData = await userResponse.json();
 
-      const response = await fetch(`/api/empresas/${userData.empresaId}/admins`, {
+      const response = await fetch(`/api/empresa/${userData.empresaId}/admins`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ professorId: selectedProfessor }),
@@ -117,10 +117,10 @@ export default function EmpresaAdminsPage() {
 
   async function handleRemoveAdmin(userId: string) {
     try {
-      const userResponse = await fetch('/api/user/profile');
+      const userResponse = await fetch('/api/usuario/perfil');
       const userData = await userResponse.json();
 
-      const response = await fetch(`/api/empresas/${userData.empresaId}/admins/${userId}`, {
+      const response = await fetch(`/api/empresa/${userData.empresaId}/admins/${userId}`, {
         method: 'DELETE',
       });
 

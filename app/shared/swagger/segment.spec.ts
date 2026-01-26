@@ -56,7 +56,7 @@ export const segmentSchemas = {
 };
 
 export const segmentPaths = {
-  '/api/segment': {
+  '/api/curso/segmentos': {
     get: {
       tags: ['Segment'],
       summary: 'List segments',
@@ -123,7 +123,7 @@ export const segmentPaths = {
       },
     },
   },
-  '/api/segment/{id}': {
+  '/api/curso/segmentos/{id}': {
     parameters: [
       {
         in: 'path',

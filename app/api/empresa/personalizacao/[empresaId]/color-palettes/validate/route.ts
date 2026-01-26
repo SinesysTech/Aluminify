@@ -13,7 +13,7 @@ interface RouteContext {
 }
 
 /**
- * POST /api/tenant-branding/[empresaId]/color-palettes/validate - Validate color palette for accessibility
+ * POST /api/empresa/personalizacao/[empresaId]/color-palettes/validate - Validate color palette for accessibility
  * Validates Requirements 2.5: Validate color contrast ratios to ensure accessibility compliance
  */
 async function postHandler(

@@ -201,7 +201,7 @@ export function CursoTable() {
 
   const fetchSegmentos = React.useCallback(async () => {
     try {
-      const response = await apiClient.get<{ data: Segmento[] }>('/api/segment')
+      const response = await apiClient.get<{ data: Segmento[] }>('/api/curso/segmentos')
       if (response && 'data' in response) {
         setSegmentos(response.data)
       }
@@ -212,7 +212,7 @@ export function CursoTable() {
 
   const fetchDisciplinas = React.useCallback(async () => {
     try {
-      const response = await apiClient.get<{ data: Disciplina[] }>('/api/discipline')
+      const response = await apiClient.get<{ data: Disciplina[] }>('/api/curso/disciplinas')
       if (response && 'data' in response) {
         setDisciplinas(response.data)
       }
@@ -225,7 +225,7 @@ export function CursoTable() {
     try {
       setLoading(true)
       setError(null)
-      const response = await apiClient.get<{ data: Curso[] }>('/api/course')
+      const response = await apiClient.get<{ data: Curso[] }>('/api/curso')
       if (response && 'data' in response) {
         setData(response.data)
       } else {
@@ -255,7 +255,7 @@ export function CursoTable() {
 
   const fetchEnrollmentCounts = React.useCallback(async () => {
     try {
-      const response = await apiClient.get<{ data: Record<string, number> }>('/api/course/enrollments-count')
+      const response = await apiClient.get<{ data: Record<string, number> }>('/api/curso/enrollments-count')
       if (response && 'data' in response) {
         setEnrollmentCounts(response.data)
       }
@@ -275,7 +275,7 @@ export function CursoTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.post<{ data: Curso }>('/api/course', {
+      await apiClient.post<{ data: Curso }>('/api/curso', {
         ...values,
         segmentId: values.segmentId || undefined,
         disciplineId: values.disciplineId || undefined, // Mantido para compatibilidade
@@ -338,7 +338,7 @@ export function CursoTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.put<{ data: Curso }>(`/api/course/${editingCurso.id}`, {
+      await apiClient.put<{ data: Curso }>(`/api/curso/${editingCurso.id}`, {
         ...values,
         segmentId: values.segmentId || null,
         disciplineId: values.disciplineId || null, // Mantido para compatibilidade
@@ -375,7 +375,7 @@ export function CursoTable() {
     try {
       setIsSubmitting(true)
       setError(null)
-      await apiClient.delete(`/api/course/${deletingCurso.id}`)
+      await apiClient.delete(`/api/curso/${deletingCurso.id}`)
       setSuccessMessage('Curso excluído com sucesso!')
       setDeleteDialogOpen(false)
       setDeletingCurso(null)

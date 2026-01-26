@@ -73,7 +73,7 @@ export const apiKeySchemas = {
 };
 
 export const apiKeyPaths = {
-  '/api/api-key': {
+  '/api/empresa/api-key': {
     get: {
       tags: ['API Key'],
       summary: 'List API keys',
@@ -166,7 +166,7 @@ export const apiKeyPaths = {
       },
     },
   },
-  '/api/api-key/{id}': {
+  '/api/empresa/api-key/{id}': {
     parameters: [
       {
         in: 'path',

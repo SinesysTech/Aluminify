@@ -149,7 +149,7 @@ export function StudentDetails({ student, onUpdate }: StudentDetailsProps) {
   const handleDelete = async () => {
     try {
       setIsDeleting(true)
-      await apiClient.delete(`/api/student/${student.id}`)
+      await apiClient.delete(`/api/usuario/alunos/${student.id}`)
       toast({
         title: 'Aluno excluído',
         description: 'O aluno foi excluído com sucesso.',

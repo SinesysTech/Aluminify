@@ -203,7 +203,7 @@ async function postHandler(request: AuthenticatedRequest) {
         
         // Incluir nome do arquivo com extensão na URL para o analyzer do N8N conseguir identificar o formato
         const encodedFileName = encodeURIComponent(fileName);
-        const downloadUrl = `${publicBaseUrl}/api/chat/attachments/${attachment.id}/${encodedFileName}?token=${attachment.token}`;
+        const downloadUrl = `${publicBaseUrl}/api/tobias/chat/attachments/${attachment.id}/${encodedFileName}?token=${attachment.token}`;
         
         console.log('[Chat API] URL base pública:', publicBaseUrl);
         console.log('[Chat API] URL do anexo gerada:', downloadUrl);

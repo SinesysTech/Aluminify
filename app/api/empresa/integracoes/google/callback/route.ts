@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     // Exchange code for tokens
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/integrations/google/callback`;
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/empresa/integracoes/google/callback`;
 
     if (!clientId || !clientSecret) {
       throw new Error("Google OAuth credentials not configured");

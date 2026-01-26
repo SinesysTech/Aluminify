@@ -63,7 +63,7 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
         setIsDownloading(true)
         try {
             await downloadFile({
-                url: '/api/student/template',
+                url: '/api/usuario/alunos/template',
                 fallbackFilename: `modelo-importacao-alunos-${new Date().toISOString().split('T')[0]}.xlsx`,
             })
         } catch (error) {
@@ -86,7 +86,7 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
             const formData = new FormData()
             formData.append('file', file)
 
-            const response = await fetch('/api/student/bulk-import', {
+            const response = await fetch('/api/usuario/alunos/bulk-import', {
                 method: 'POST',
                 body: formData,
             })

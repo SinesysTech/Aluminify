@@ -159,7 +159,7 @@ async function deleteHandler(
   }
 }
 
-// GET /api/empresas/[id] - Detalhes da empresa
+// GET /api/empresa/[id] - Detalhes da empresa
 export async function GET(
   request: NextRequest,
   context: RouteContext
@@ -167,7 +167,7 @@ export async function GET(
   return getHandler(request, context);
 }
 
-// PATCH /api/empresas/[id] - Atualizar empresa
+// PATCH /api/empresa/[id] - Atualizar empresa
 export async function PATCH(
   request: NextRequest,
   context: RouteContext
@@ -175,7 +175,7 @@ export async function PATCH(
   return patchHandler(request, context);
 }
 
-// DELETE /api/empresas/[id] - Deletar empresa (apenas superadmin)
+// DELETE /api/empresa/[id] - Deletar empresa (apenas superadmin)
 export async function DELETE(
   request: NextRequest,
   context: RouteContext

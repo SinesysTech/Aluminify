@@ -4,7 +4,7 @@ import { requireAuth, AuthenticatedRequest } from '@/app/[tenant]/auth/middlewar
 import { cacheService } from '@/app/shared/core/services/cache';
 
 /**
- * GET /api/conversations
+ * GET /api/tobias/conversations
  * Listar todas as conversas do usuário
  * Query params: ?active=true para retornar apenas a conversa ativa
  */
@@ -50,7 +50,7 @@ async function getHandler(request: AuthenticatedRequest) {
 }
 
 /**
- * POST /api/conversations
+ * POST /api/tobias/conversations
  * Criar nova conversa
  *
  * Body: { title?: string }

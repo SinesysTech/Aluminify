@@ -117,7 +117,7 @@ export default function CouponsPage() {
         params.set("active", active);
       }
 
-      const response = await fetch(`/api/financial/coupons?${params.toString()}`);
+      const response = await fetch(`/api/financeiro/coupons?${params.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch coupons");
       }
@@ -146,7 +146,7 @@ export default function CouponsPage() {
 
     setDeleting(couponToDelete.id);
     try {
-      const response = await fetch(`/api/financial/coupons/${couponToDelete.id}`, {
+      const response = await fetch(`/api/financeiro/coupons/${couponToDelete.id}`, {
         method: "DELETE",
       });
 
@@ -261,8 +261,8 @@ export default function CouponsPage() {
       };
 
       const url = editingCoupon
-        ? `/api/financial/coupons/${editingCoupon.id}`
-        : "/api/financial/coupons";
+        ? `/api/financeiro/coupons/${editingCoupon.id}`
+        : "/api/financeiro/coupons";
 
       const response = await fetch(url, {
         method: editingCoupon ? "PATCH" : "POST",

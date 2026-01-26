@@ -90,7 +90,7 @@ export function UserManagement({ empresaId }: UserManagementProps) {
   const fetchPapeis = useCallback(async () => {
     if (!accessToken) return
     try {
-      const response = await fetch(`/api/empresas/${empresaId}/papeis`, {
+      const response = await fetch(`/api/empresa/${empresaId}/papeis`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       if (response.ok) {
@@ -106,7 +106,7 @@ export function UserManagement({ empresaId }: UserManagementProps) {
   const fetchUsuarios = useCallback(async () => {
     if (!accessToken) return
     try {
-      const response = await fetch(`/api/empresas/${empresaId}/usuarios`, {
+      const response = await fetch(`/api/empresa/${empresaId}/usuarios`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       })
       if (response.ok) {
@@ -134,7 +134,7 @@ export function UserManagement({ empresaId }: UserManagementProps) {
   async function handleCreateUsuario() {
     if (!accessToken) return
     try {
-      const response = await fetch(`/api/empresas/${empresaId}/usuarios`, {
+      const response = await fetch(`/api/empresa/${empresaId}/usuarios`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ export function UserManagement({ empresaId }: UserManagementProps) {
   async function handleUpdatePapel(usuarioId: string, novoPapelId: string) {
     if (!accessToken) return
     try {
-      const response = await fetch(`/api/empresas/${empresaId}/usuarios/${usuarioId}`, {
+      const response = await fetch(`/api/empresa/${empresaId}/usuarios/${usuarioId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

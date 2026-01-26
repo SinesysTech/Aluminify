@@ -41,7 +41,7 @@ export function ConversationsSidebar({
 
     try {
       setIsLoading(true)
-      const response = await fetch('/api/conversations', {
+      const response = await fetch('/api/tobias/conversations', {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
         },
@@ -67,7 +67,7 @@ export function ConversationsSidebar({
     if (!accessToken) return
 
     try {
-      const response = await fetch('/api/conversations', {
+      const response = await fetch('/api/tobias/conversations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export function ConversationsSidebar({
     if (!accessToken) return
 
     try {
-      const response = await fetch(`/api/conversations/${conversationId}`, {
+      const response = await fetch(`/api/tobias/conversations/${conversationId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -125,7 +125,7 @@ export function ConversationsSidebar({
     if (!accessToken) return
 
     try {
-      const response = await fetch(`/api/conversations/${conversationId}`, {
+      const response = await fetch(`/api/tobias/conversations/${conversationId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

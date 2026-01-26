@@ -3,7 +3,7 @@ import { getDatabaseClient } from '@/app/shared/core/database/database';
 import { EmpresaService, EmpresaRepositoryImpl } from '@/app/[tenant]/(modules)/empresa/services';
 import { getAuthUser } from '@/app/[tenant]/auth/middleware';
 
-// GET /api/empresas - Listar empresas (apenas superadmin)
+// GET /api/empresa - Listar empresas (apenas superadmin)
 export async function GET(request: NextRequest) {
   try {
     const user = await getAuthUser(request);
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/empresas - Criar nova empresa (apenas superadmin)
+// POST /api/empresa - Criar nova empresa (apenas superadmin)
 export async function POST(request: NextRequest) {
   try {
     const user = await getAuthUser(request);

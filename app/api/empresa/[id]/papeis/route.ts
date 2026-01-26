@@ -10,7 +10,7 @@ interface RouteContext {
 }
 
 /**
- * GET /api/empresas/[id]/papeis
+ * GET /api/empresa/[id]/papeis
  * List all available papéis for an empresa (system + custom)
  */
 async function getHandler(
@@ -47,7 +47,7 @@ async function getHandler(
 }
 
 /**
- * POST /api/empresas/[id]/papeis
+ * POST /api/empresa/[id]/papeis
  * Create a custom papel for an empresa
  */
 async function postHandler(

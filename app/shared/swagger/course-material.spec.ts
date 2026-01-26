@@ -96,7 +96,7 @@ export const courseMaterialSchemas = {
 };
 
 export const courseMaterialPaths = {
-  '/api/course-material': {
+  '/api/biblioteca/materiais': {
     get: {
       tags: ['CourseMaterial'],
       summary: 'List course materials',
@@ -163,7 +163,7 @@ export const courseMaterialPaths = {
       },
     },
   },
-  '/api/course-material/{id}': {
+  '/api/biblioteca/materiais/{id}': {
     parameters: [
       {
         in: 'path',

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -37,11 +37,11 @@ export default function EmpresaProfessoresPage() {
 
   const fetchProfessores = useCallback(async () => {
     try {
-      const userResponse = await fetch('/api/user/profile');
+      const userResponse = await fetch('/api/usuario/perfil');
       const userData = await userResponse.json();
       
       if (userData.empresaId) {
-        const response = await fetch(`/api/empresas/${userData.empresaId}/professores`);
+        const response = await fetch(`/api/empresa/${userData.empresaId}/professores`);
         if (response.ok) {
           const data = await response.json();
           setProfessores(data);
@@ -65,10 +65,10 @@ export default function EmpresaProfessoresPage() {
 
   async function handleCreate() {
     try {
-      const userResponse = await fetch('/api/user/profile');
+      const userResponse = await fetch('/api/usuario/perfil');
       const userData = await userResponse.json();
       
-      const response = await fetch(`/api/empresas/${userData.empresaId}/professores`, {
+      const response = await fetch(`/api/empresa/${userData.empresaId}/professores`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -140,7 +140,7 @@ export default function EmpresaProfessoresPage() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Senha Temporária</Label>
+                    <Label htmlFor="password">Senha Tempor�ria</Label>
                     <Input
                       id="password"
                       type="password"
@@ -156,7 +156,7 @@ export default function EmpresaProfessoresPage() {
                         setFormData({ ...formData, isAdmin: checked === true })
                       }
                     />
-                    <Label htmlFor="isAdmin">Ã‰ administrador?</Label>
+                    <Label htmlFor="isAdmin">É administrador?</Label>
                   </div>
                   <Button onClick={handleCreate}>Criar Professor</Button>
                 </div>

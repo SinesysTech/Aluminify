@@ -111,7 +111,7 @@ export const teacherSchemas = {
 };
 
 export const teacherPaths = {
-  '/api/teacher': {
+  '/api/usuario/professores': {
     get: {
       tags: ['Teacher'],
       summary: 'List teachers',
@@ -178,7 +178,7 @@ export const teacherPaths = {
       },
     },
   },
-  '/api/teacher/{id}': {
+  '/api/usuario/professores/{id}': {
     parameters: [
       {
         in: 'path',
