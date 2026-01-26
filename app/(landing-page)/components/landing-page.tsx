@@ -34,7 +34,7 @@ export function LandingPage() {
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
                             <Link
-                                className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white font-medium rounded-lg hover:bg-primary-hover transition-all flex items-center justify-center gap-2 shadow-lg shadow-zinc-200 dark:shadow-none focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                                className="w-full sm:w-auto px-8 py-3.5 bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 font-medium rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 shadow-lg shadow-zinc-200 dark:shadow-none focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 focus:ring-offset-2"
                                 href="/signup"
                             >
                                 Começar Agora
