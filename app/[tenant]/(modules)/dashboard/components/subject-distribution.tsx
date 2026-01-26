@@ -92,8 +92,8 @@ export function SubjectDistribution({
       if (selectedDisciplineId) return
       setIsLoading(true)
       try {
-        // Importante: op��es de disciplina v�m da estrutura (performance), n�o do tempo (distribui��o),
-        // para n�o ficar vazio quando ainda n�o h� sess�es suficientes.
+        // Importante: opções de disciplina vêm da estrutura (performance), não do tempo (distribuição),
+        // para não ficar vazio quando ainda não há sessões suficientes.
         const res = await fetchPerformance({
           groupBy: 'disciplina',
           scope: 'curso',
