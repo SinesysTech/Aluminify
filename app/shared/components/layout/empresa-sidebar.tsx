@@ -49,7 +49,7 @@ const empresaNavItems: NavItem[] = [
     icon: Users,
     items: [
       { title: "Alunos", url: "/empresa/detalhes/alunos" },
-      { title: "Professores", url: "/usuario/professores" },
+      { title: "Professores", url: "/empresa/detalhes/professores" },
       { title: "Equipe", url: "/empresa/detalhes/usuarios" },
       { title: "Administradores", url: "/empresa/detalhes/admins" },
     ],
