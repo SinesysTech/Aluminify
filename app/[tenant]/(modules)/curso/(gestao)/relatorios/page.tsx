@@ -1,7 +1,7 @@
 ﻿
 import { createClient } from "@/app/shared/core/server"
 import { redirect } from "next/navigation"
-import { RelatoriosDashboard } from "../components/relatorios-dashboard"
+import { RelatoriosDashboard } from "../../components/relatorios-dashboard"
 
 export default async function RelatoriosPage() {
   const supabase = await createClient()
@@ -42,7 +42,7 @@ export default async function RelatoriosPage() {
         </p>
       </div>
 
-      <RelatoriosDashboard professorId={user.id} empresaId={professor.empresa_id} />
+      <RelatoriosDashboard empresaId={professor.empresa_id} />
     </div>
   )
 }

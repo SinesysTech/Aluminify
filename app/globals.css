@@ -2,11 +2,11 @@
 
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:where(.dark, .dark *));
 
 @import "./themes.css";
 
-@layer theme {
+@layer base {
   :root {
     /* --- Radical White Palette (Fallback Variables) --- */
     /* Using complete hsl() values for compatibility with @theme inline */
@@ -89,6 +89,13 @@
     --sidebar-accent-foreground: hsl(240 10% 3.9%);
     --sidebar-border: hsl(240 5.9% 90%);
     --sidebar-ring: hsl(240 5.9% 10%);
+
+    /* Chart default colors */
+    --chart-1: hsl(240 5.9% 10%);
+    --chart-2: hsl(240 4.8% 25%);
+    --chart-3: hsl(240 3.8% 46.1%);
+    --chart-4: hsl(240 4.8% 65%);
+    --chart-5: hsl(240 4.8% 85%);
   }
 
   .dark {
@@ -109,6 +116,14 @@
     --destructive: hsl(0 62.8% 30.6%);
     --destructive-foreground: hsl(0 0% 98%);
 
+    /* Status dark */
+    --status-warning: hsl(45 93% 55%);
+    --status-warning-foreground: hsl(0 0% 10%);
+    --status-info: hsl(217 91% 65%);
+    --status-info-foreground: hsl(0 0% 10%);
+    --status-success: hsl(142 71% 50%);
+    --status-success-foreground: hsl(0 0% 10%);
+
     --border: hsl(240 3.7% 15.9%);
     --input: hsl(240 3.7% 15.9%);
     --ring: hsl(240 4.9% 83.9%);
@@ -125,6 +140,13 @@
     --sidebar-accent-foreground: hsl(0 0% 98%);
     --sidebar-border: hsl(240 3.7% 15.9%);
     --sidebar-ring: hsl(240 4.9% 83.9%);
+
+    /* Chart dark colors */
+    --chart-1: hsl(0 0% 98%);
+    --chart-2: hsl(240 4.9% 83.9%);
+    --chart-3: hsl(240 5% 64.9%);
+    --chart-4: hsl(240 3.7% 45%);
+    --chart-5: hsl(240 3.7% 25%);
   }
 
   /* === Responsive Spacing - Tablet (768px+) === */
@@ -157,6 +179,41 @@
    * The 'inline' keyword tells Tailwind to preserve CSS variables at runtime
    * Variables contain complete color values (hsl() or oklch())
    */
+
+  /* Base colors */
+  --color-white: oklch(1 0 0);
+  --color-black: oklch(0 0 0);
+
+  /* Default Tailwind color palette for chart presets */
+  --color-cyan-400: oklch(0.789 0.154 211.53);
+  --color-cyan-500: oklch(0.715 0.143 215.22);
+  --color-cyan-600: oklch(0.609 0.126 221.72);
+  --color-cyan-700: oklch(0.52 0.105 223.13);
+  --color-cyan-800: oklch(0.45 0.085 224.28);
+
+  --color-amber-400: oklch(0.828 0.189 84.43);
+  --color-amber-500: oklch(0.769 0.188 70.08);
+  --color-amber-600: oklch(0.666 0.179 58.32);
+  --color-amber-700: oklch(0.555 0.163 49);
+  --color-amber-800: oklch(0.473 0.137 46.2);
+
+  --color-green-400: oklch(0.792 0.209 151.71);
+  --color-green-500: oklch(0.723 0.219 149.58);
+  --color-green-600: oklch(0.627 0.194 149.21);
+  --color-green-700: oklch(0.527 0.154 150.07);
+  --color-green-800: oklch(0.448 0.119 151.33);
+
+  --color-indigo-400: oklch(0.673 0.182 276.94);
+  --color-indigo-500: oklch(0.585 0.233 277.12);
+  --color-indigo-600: oklch(0.511 0.262 276.97);
+  --color-indigo-700: oklch(0.457 0.24 277.03);
+  --color-indigo-800: oklch(0.398 0.195 277.37);
+
+  --color-fuchsia-400: oklch(0.74 0.238 322.16);
+  --color-fuchsia-500: oklch(0.667 0.295 322.15);
+  --color-fuchsia-600: oklch(0.591 0.293 322.9);
+  --color-fuchsia-700: oklch(0.518 0.253 323.95);
+  --color-fuchsia-800: oklch(0.452 0.211 324.59);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -210,6 +267,13 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Chart colors */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
 
   /* Border Radius */
   --radius-lg: var(--radius);

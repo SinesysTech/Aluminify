@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { AgendamentoComDetalhes, confirmarAgendamento, rejeitarAgendamento } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import { confirmarAgendamento, rejeitarAgendamento } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import type { AgendamentoComDetalhes } from "@/app/[tenant]/(modules)/agendamentos/types"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,

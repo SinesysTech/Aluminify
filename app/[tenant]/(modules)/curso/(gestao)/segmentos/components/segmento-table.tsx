@@ -45,7 +45,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/app/shared/components/feedback/alert-dialog'
+} from '@/app/shared/components/ui/alert-dialog'
 import {
   Form,
   FormControl,
@@ -64,7 +64,7 @@ import {
 } from '@/app/shared/components/overlay/tooltip'
 import { Layers } from 'lucide-react'
 import { apiClient, ApiClientError } from '@/shared/library/api-client'
-import { TableSkeleton } from '@/app/shared/components/dataviz/table-skeleton'
+import { TableSkeleton } from '@/app/shared/components/ui/table-skeleton'
 
 export type Segmento = {
   id: string

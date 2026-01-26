@@ -46,7 +46,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/app/shared/components/feedback/alert-dialog'
+} from '@/app/shared/components/ui/alert-dialog'
 import {
   Form,
   FormControl,
@@ -74,7 +74,7 @@ import { Checkbox } from '@/app/shared/components/forms/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { apiClient, ApiClientError } from '@/shared/library/api-client'
-import { TableSkeleton } from '@/app/shared/components/dataviz/table-skeleton'
+import { TableSkeleton } from '@/app/shared/components/ui/table-skeleton'
 import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/shared/library/br'
 import { BulkActionsBar } from './bulk-actions-bar'
 import { TransferStudentsDialog } from './transfer-students-dialog'

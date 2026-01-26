@@ -21,7 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/app/shared/components/feedback/alert-dialog'
+} from '@/app/shared/components/ui/alert-dialog'
 import { Plus, Pencil, Trash2, Shield, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import type { RoleTipo } from '@/app/shared/types/entities/papel'

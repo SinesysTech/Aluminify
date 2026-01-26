@@ -1,5 +1,5 @@
 ﻿
-import { IntegracaoManager } from "../components/integracao-manager"
+import { IntegracaoManager } from "@/app/[tenant]/(modules)/agendamentos/configuracoes/components/integracao-manager"
 import { createClient } from "@/app/shared/core/server"
 import { redirect } from "next/navigation"
 
@@ -42,7 +42,7 @@ export default async function IntegracoesPage() {
         </p>
       </div>
 
-      <IntegracaoManager professorId={user.id} empresaId={professor.empresa_id} />
+      <IntegracaoManager professorId={user.id} />
     </div>
   )
 }

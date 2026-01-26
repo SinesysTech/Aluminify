@@ -11,7 +11,35 @@ import {
   AuthenticatedRequest,
 } from "@/app/[tenant]/auth/middleware";
 
-const serializeStudent = (student: any) => ({
+interface StudentData {
+  id: string;
+  empresaId: string;
+  fullName: string | null;
+  email: string;
+  cpf: string | null;
+  phone: string | null;
+  birthDate: Date | null;
+  address: string | null;
+  zipCode: string | null;
+  cidade: string | null;
+  estado: string | null;
+  bairro: string | null;
+  pais: string | null;
+  numeroEndereco: string | null;
+  complemento: string | null;
+  enrollmentNumber: string | null;
+  instagram: string | null;
+  twitter: string | null;
+  hotmartId: string | null;
+  origemCadastro: string | null;
+  courses: Array<{ id: string; name: string }>;
+  mustChangePassword: boolean;
+  temporaryPassword: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const serializeStudent = (student: StudentData) => ({
   id: student.id,
   empresaId: student.empresaId,
   fullName: student.fullName,
@@ -70,7 +98,8 @@ async function getHandler(
     const supabase = await createClient();
     const service = createStudentService(supabase);
     const student = await service.getById(params.id);
-    return NextResponse.json({ data: serializeStudent(student) });
+    if (!student) throw new StudentNotFoundError(params.id);
+    return NextResponse.json({ data: serializeStudent({ ...student, empresaId: student.empresaId || "" }) });
   } catch (error) {
     return handleError(error);
   }
@@ -100,7 +129,7 @@ async function putHandler(
       temporaryPassword: body?.temporaryPassword,
       mustChangePassword: body?.mustChangePassword,
     });
-    return NextResponse.json({ data: serializeStudent(student) });
+    return NextResponse.json({ data: serializeStudent({ ...student, empresaId: student.empresaId || "" }) });
   } catch (error) {
     return handleError(error);
   }

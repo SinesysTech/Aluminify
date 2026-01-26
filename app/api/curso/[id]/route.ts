@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  courseService,
+  cursoService,
   CourseConflictError,
   CourseNotFoundError,
   CourseValidationError,
 } from '@/app/[tenant]/(modules)/curso/services';
 import { requireAuth, AuthenticatedRequest } from '@/app/[tenant]/auth/middleware';
 
-const serializeCourse = (course: Awaited<ReturnType<typeof courseService.getById>>) => ({
+const serializeCourse = (course: Awaited<ReturnType<typeof cursoService.getById>>) => ({
   id: course.id,
   segmentId: course.segmentId,
   disciplineId: course.disciplineId, // Mantido para compatibilidade
@@ -59,7 +59,7 @@ interface RouteContext {
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
     const params = await context.params;
-    const course = await courseService.getById(params.id);
+    const course = await cursoService.getById(params.id);
     return NextResponse.json({ data: serializeCourse(course) });
   } catch (error) {
     return handleError(error);
@@ -75,7 +75,7 @@ async function putHandler(request: AuthenticatedRequest, params: { id: string })
     }
     console.log('[Course PUT Handler] Updating course with ID:', params.id);
     const body = await request.json();
-    const course = await courseService.update(params.id, {
+    const course = await cursoService.update(params.id, {
       segmentId: body?.segmentId,
       disciplineId: body?.disciplineId, // Mantido para compatibilidade
       disciplineIds: body?.disciplineIds, // Nova propriedade
@@ -101,7 +101,7 @@ async function putHandler(request: AuthenticatedRequest, params: { id: string })
 // DELETE requer autenticação (JWT ou API Key) - RLS verifica se é o criador ou superadmin
 async function deleteHandler(_request: AuthenticatedRequest, params: { id: string }) {
   try {
-    await courseService.delete(params.id);
+    await cursoService.delete(params.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleError(error);

@@ -1,21 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createFinancialService } from "@/app/[tenant]/(modules)/financeiro/services";
-import type { HotmartWebhookPayload } from "@/app/[tenant]/(modules)/financeiro/services/financial.types";
+import type {
+  HotmartWebhookPayload,
+  HotmartPurchasePayload,
+} from "@/app/[tenant]/(modules)/financeiro/services/financial.types";
 
 /**
- * Hotmart Webhook Handler
+ * Hotmart Webhook Handler (v2.0.0)
  *
- * This endpoint receives webhook notifications from Hotmart.
- * It processes purchase events and creates/updates transactions.
+ * Receives webhook notifications from Hotmart for purchase, subscription, and club events.
  *
- * The endpoint uses a service role client to bypass RLS since
- * webhooks are not authenticated with user tokens.
+ * Security:
+ * - Hottok validated from X-HOTMART-HOTTOK header
+ * - Each empresa has its own webhook secret in payment_providers table
  *
- * Webhook URL format: /api/webhooks/hotmart?empresaId=<empresa_id>
+ * URL format: /api/webhooks/hotmart?empresaId=<empresa_id>
+ *
+ * Supported events:
+ * - Purchase: PURCHASE_APPROVED, PURCHASE_COMPLETE, PURCHASE_CANCELED,
+ *             PURCHASE_REFUNDED, PURCHASE_CHARGEBACK, PURCHASE_PROTEST,
+ *             PURCHASE_DELAYED, PURCHASE_BILLET_PRINTED, PURCHASE_OUT_OF_SHOPPING_CART
+ * - Subscription: SUBSCRIPTION_CANCELLATION, SWITCH_PLAN, UPDATE_SUBSCRIPTION_CHARGE_DATE
+ * - Club: CLUB_FIRST_ACCESS
  */
 
-// Create a service role client for webhook processing
 function getServiceClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SECRET_KEY;
@@ -32,10 +41,6 @@ function getServiceClient() {
   });
 }
 
-/**
- * Get webhook secret for the empresa
- * Returns the hottok configured for Hotmart integration
- */
 async function getWebhookSecret(
   client: ReturnType<typeof getServiceClient>,
   empresaId: string
@@ -52,11 +57,20 @@ async function getWebhookSecret(
   return data.webhook_secret;
 }
 
+function getTransactionFromPayload(payload: HotmartWebhookPayload): string | undefined {
+  if (
+    payload.event.startsWith("PURCHASE_") &&
+    payload.event !== "PURCHASE_OUT_OF_SHOPPING_CART"
+  ) {
+    return (payload as HotmartPurchasePayload).data?.purchase?.transaction;
+  }
+  return undefined;
+}
+
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // Get empresaId from query parameter
     const empresaId = request.nextUrl.searchParams.get("empresaId");
 
     if (!empresaId) {
@@ -67,7 +81,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Parse webhook payload
+    // Get hottok from header (v2.0.0 spec)
+    const hottok = request.headers.get("X-HOTMART-HOTTOK");
+
+    if (!hottok) {
+      console.error("[Hotmart Webhook] Missing X-HOTMART-HOTTOK header");
+      return NextResponse.json(
+        { error: "Missing authentication header" },
+        { status: 401 }
+      );
+    }
+
     let payload: HotmartWebhookPayload;
     try {
       payload = await request.json();
@@ -79,37 +103,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Log webhook receipt (without sensitive data)
     console.log("[Hotmart Webhook] Received:", {
       empresaId,
       event: payload.event,
-      transaction: payload.data?.purchase?.transaction,
+      eventId: payload.id,
+      version: payload.version,
+      transaction: getTransactionFromPayload(payload),
       timestamp: new Date().toISOString(),
     });
 
-    // Get service client
     const client = getServiceClient();
 
-    // Get webhook secret for this empresa
     const webhookSecret = await getWebhookSecret(client, empresaId);
 
     if (!webhookSecret) {
-      console.error("[Hotmart Webhook] No active Hotmart integration for empresa:", empresaId);
-      // Return 200 to prevent Hotmart from retrying
-      // (misconfigured webhook, not a transient error)
+      console.error(
+        "[Hotmart Webhook] No active Hotmart integration for empresa:",
+        empresaId
+      );
       return NextResponse.json({
         success: false,
         message: "No active Hotmart integration configured for this empresa",
       });
     }
 
-    // Process webhook
+    // Validate hottok
+    if (hottok !== webhookSecret) {
+      console.error("[Hotmart Webhook] Invalid hottok for empresa:", empresaId);
+      return NextResponse.json(
+        { error: "Invalid webhook signature" },
+        { status: 401 }
+      );
+    }
+
     const financialService = createFinancialService(client);
-    const result = await financialService.processHotmartWebhook(
-      empresaId,
-      payload,
-      webhookSecret
-    );
+    const result = await financialService.processHotmartWebhook(empresaId, payload);
 
     const processingTime = Date.now() - startTime;
     console.log("[Hotmart Webhook] Processed:", {
@@ -121,18 +149,6 @@ export async function POST(request: NextRequest) {
       processingTime: `${processingTime}ms`,
     });
 
-    if (!result.success) {
-      // Return 401 for invalid signature
-      if (result.message === "Invalid webhook signature") {
-        return NextResponse.json(
-          { error: result.message },
-          { status: 401 }
-        );
-      }
-    }
-
-    // Always return 200 for processed events (even if skipped)
-    // This prevents Hotmart from retrying
     return NextResponse.json({
       success: result.success,
       message: result.message,
@@ -146,7 +162,6 @@ export async function POST(request: NextRequest) {
       processingTime: `${processingTime}ms`,
     });
 
-    // Return 500 for actual errors (Hotmart will retry)
     return NextResponse.json(
       { error: "Internal server error processing webhook" },
       { status: 500 }
@@ -154,11 +169,29 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle GET requests (for testing/verification)
 export async function GET() {
   return NextResponse.json({
     status: "ok",
-    endpoint: "Hotmart Webhook Handler",
+    endpoint: "Hotmart Webhook Handler v2.0.0",
     usage: "POST /api/webhooks/hotmart?empresaId=<empresa_id>",
+    events: {
+      purchase: [
+        "PURCHASE_APPROVED",
+        "PURCHASE_COMPLETE",
+        "PURCHASE_CANCELED",
+        "PURCHASE_REFUNDED",
+        "PURCHASE_CHARGEBACK",
+        "PURCHASE_PROTEST",
+        "PURCHASE_DELAYED",
+        "PURCHASE_BILLET_PRINTED",
+        "PURCHASE_OUT_OF_SHOPPING_CART",
+      ],
+      subscription: [
+        "SUBSCRIPTION_CANCELLATION",
+        "SWITCH_PLAN",
+        "UPDATE_SUBSCRIPTION_CHARGE_DATE",
+      ],
+      club: ["CLUB_FIRST_ACCESS"],
+    },
   });
 }

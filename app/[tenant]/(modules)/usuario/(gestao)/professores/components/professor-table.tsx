@@ -45,7 +45,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/app/shared/components/feedback/alert-dialog'
+} from '@/app/shared/components/ui/alert-dialog'
 import {
   Form,
   FormControl,
@@ -63,7 +63,7 @@ import {
   TooltipTrigger,
 } from '@/app/shared/components/overlay/tooltip'
 import { apiClient, ApiClientError } from '@/shared/library/api-client'
-import { TableSkeleton } from '@/app/shared/components/dataviz/table-skeleton'
+import { TableSkeleton } from '@/app/shared/components/ui/table-skeleton'
 import { formatBRPhone, formatCPF, isValidBRPhone, isValidCPF } from '@/shared/library/br'
 
 export type Professor = {

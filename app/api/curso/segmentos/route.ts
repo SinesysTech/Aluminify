@@ -3,7 +3,7 @@ import {
   segmentService,
   SegmentConflictError,
   SegmentValidationError,
-} from "@/app/[tenant]/(modules)/curso/curso/segmentoss/services";
+} from "@/app/[tenant]/(modules)/curso/(gestao)/segmentos/services";
 import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
 import { getDatabaseClientAsUser } from "@/app/shared/core/database/database";
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { AgendamentoComDetalhes } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import type { AgendamentoComDetalhes } from "@/app/[tenant]/(modules)/agendamentos/types"
 import { AgendamentoCard } from "./agendamento-card"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
 import { CalendarX } from "lucide-react"

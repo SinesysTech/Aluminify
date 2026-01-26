@@ -489,6 +489,61 @@ export class FlashcardsService {
     return moduloIds;
   }
 
+  async getCursos(): Promise<CursoRow[]> {
+    const { data, error } = await this.client
+      .from("cursos")
+      .select("id, nome, empresa_id");
+    
+    if (error) throw new Error(error.message);
+    return data || [];
+  }
+
+  async getDisciplinas(cursoId: string): Promise<{id: string; nome: string}[]> {
+    const { data, error } = await this.client
+      .from("cursos_disciplinas")
+      .select("disciplina:disciplinas(id, nome)")
+      .eq("curso_id", cursoId);
+      
+    if (error) throw new Error(error.message);
+    return data?.map((d: { disciplina: { id: string; nome: string } }) => d.disciplina) || [];
+  }
+
+  async getFrentes(cursoId: string, disciplinaId: string): Promise<{id: string; nome: string; disciplina_id: string}[]> {
+    // Frentes vinculadas à disciplina E ao curso (ou globais se professor?)
+    // Simplificação: buscar frentes da disciplina que pertencem ao curso
+    const { data, error } = await this.client
+      .from("frentes")
+      .select("id, nome, disciplina_id")
+      .eq("curso_id", cursoId)
+      .eq("disciplina_id", disciplinaId);
+      
+    if (error) throw new Error(error.message);
+    return (data || []).map(f => ({
+      ...f,
+      disciplina_id: f.disciplina_id || "" // Fallback for null
+    }));
+  }
+
+  async getModulos(cursoId: string, frenteId: string): Promise<{id: string; nome: string; numero_modulo: number | null; frente_id: string}[]> {
+    const { data, error } = await this.client
+      .from("modulos")
+      .select("id, nome, numero_modulo, frente_id")
+      .eq("frente_id", frenteId)
+      .eq("curso_id", cursoId);
+      
+    if (error) throw new Error(error.message);
+    return (data || []).map(m => ({
+      ...m,
+      frente_id: m.frente_id || "" // Fallback for null
+    }));
+  }
+
+  async submitFeedback(cardId: string, feedback: number): Promise<void> {
+    const { data: { user } } = await this.client.auth.getUser();
+    if (!user) throw new Error("User not authenticated");
+    await this.sendFeedback(user.id, cardId, feedback);
+  }
+
   async listForReview(
     alunoId: string,
     modo: string,
@@ -706,7 +761,7 @@ export class FlashcardsService {
       console.log(`[flashcards] Usuário é professor da empresa ${professorEmpresaId}, buscando cursos da empresa`);
       const { data: todosCursos, error: cursosError } = await this.client
         .from("cursos")
-        .select("id")
+        .select("id, nome")
         .eq("empresa_id", professorEmpresaId);
 
       if (cursosError) {
@@ -2401,3 +2456,23 @@ export class FlashcardsService {
 // Isso impede erros em build quando variáveis de ambiente do Supabase não estão configuradas,
 // mas ainda garante que em tempo de execução o erro seja lançado se o banco não estiver configurado.
 export const createFlashcardsService = () => new FlashcardsService();
+
+// Singleton instance using lazy initialization proxy
+let _flashcardsServiceInstance: FlashcardsService | null = null;
+
+function getFlashcardsServiceInstance(): FlashcardsService {
+  if (!_flashcardsServiceInstance) {
+    _flashcardsServiceInstance = new FlashcardsService();
+  }
+  return _flashcardsServiceInstance;
+}
+
+/**
+ * Singleton instance of FlashcardsService.
+ * Uses lazy initialization to avoid errors during build when Supabase env vars are not set.
+ */
+export const flashcardsService = new Proxy({} as FlashcardsService, {
+  get(_target, prop) {
+    return getFlashcardsServiceInstance()[prop as keyof FlashcardsService];
+  },
+});

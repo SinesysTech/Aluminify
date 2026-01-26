@@ -46,7 +46,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/app/shared/components/feedback/alert-dialog'
+} from '@/app/shared/components/ui/alert-dialog'
 import {
   Form,
   FormControl,
@@ -77,7 +77,7 @@ import { Checkbox } from '@/app/shared/components/forms/checkbox'
 import { Switch } from '@/app/shared/components/forms/switch'
 import { apiClient, ApiClientError } from '@/shared/library/api-client'
 import { format, parse } from 'date-fns'
-import { TableSkeleton } from '@/app/shared/components/dataviz/table-skeleton'
+import { TableSkeleton } from '@/app/shared/components/ui/table-skeleton'
 
 export type Curso = {
   id: string

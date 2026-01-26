@@ -1,17 +1,118 @@
-"use server";
-
 /**
  * Agendamentos Actions Index
  *
- * This file re-exports all functions from specialized modules to maintain
+ * This file re-exports all server action functions from specialized modules to maintain
  * backward compatibility while allowing a more modular and maintainable structure.
+ *
+ * NOTE: Types should be imported directly from "@/app/[tenant]/(modules)/agendamentos/types"
+ * because "use server" files can only export async server action functions.
  */
 
-export * from "../types";
-export * from "./availability-actions";
-export * from "./appointment-actions";
-export * from "./config-actions";
-export * from "./recurrence-actions";
-export * from "./validation-actions";
-export * from "./report-actions";
-export * from "./professor-selection-actions";
+// Availability actions
+import {
+  getDisponibilidade,
+  upsertDisponibilidade,
+  getAvailableSlots,
+  getAvailableSlotsLegacy,
+  getAvailabilityForMonth,
+  deleteDisponibilidade,
+  bulkUpsertDisponibilidade,
+  getProfessoresDisponibilidade,
+} from "./availability-actions";
+
+export {
+  getDisponibilidade,
+  upsertDisponibilidade,
+  getAvailableSlots,
+  getAvailableSlotsLegacy,
+  getAvailabilityForMonth,
+  deleteDisponibilidade,
+  bulkUpsertDisponibilidade,
+  getProfessoresDisponibilidade,
+};
+
+// Appointment actions
+import {
+  createAgendamento,
+  getAgendamentosProfessor,
+  getAgendamentosAluno,
+  getAgendamentoById,
+  confirmarAgendamento,
+  rejeitarAgendamento,
+  cancelAgendamentoWithReason,
+  updateAgendamento,
+  getAgendamentosEmpresa,
+  getAgendamentoStats,
+} from "./appointment-actions";
+
+export {
+  createAgendamento,
+  getAgendamentosProfessor,
+  getAgendamentosAluno,
+  getAgendamentoById,
+  confirmarAgendamento,
+  rejeitarAgendamento,
+  cancelAgendamentoWithReason,
+  updateAgendamento,
+  getAgendamentosEmpresa,
+  getAgendamentoStats,
+};
+
+// Config actions
+import {
+  getConfiguracoesProfessor,
+  updateConfiguracoesProfessor,
+  getIntegracaoProfessor,
+  updateIntegracaoProfessor,
+} from "./config-actions";
+
+export {
+  getConfiguracoesProfessor,
+  updateConfiguracoesProfessor,
+  getIntegracaoProfessor,
+  updateIntegracaoProfessor,
+};
+
+// Recurrence actions
+import {
+  getRecorrencias,
+  createRecorrencia,
+  updateRecorrencia,
+  deleteRecorrencia,
+  getBloqueios,
+  createBloqueio,
+  updateBloqueio,
+  deleteBloqueio,
+} from "./recurrence-actions";
+
+export {
+  getRecorrencias,
+  createRecorrencia,
+  updateRecorrencia,
+  deleteRecorrencia,
+  getBloqueios,
+  createBloqueio,
+  updateBloqueio,
+  deleteBloqueio,
+};
+
+// Validation actions
+import { validateAgendamento, checkConflitos } from "./validation-actions";
+
+export { validateAgendamento, checkConflitos };
+
+// Report actions
+import { gerarRelatorio, getRelatorios, getRelatorioById } from "./report-actions";
+
+export { gerarRelatorio, getRelatorios, getRelatorioById };
+
+// Professor selection actions
+import {
+  getProfessoresDisponiveis,
+  getProfessorById,
+} from "./professor-selection-actions";
+
+export {
+  getProfessoresDisponiveis,
+  getProfessorById,
+};

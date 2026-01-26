@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import {
   cronogramaService,
-  CronogramaValidationError,
-  CronogramaTempoInsuficienteError,
 } from "@/app/[tenant]/(modules)/cronograma/services";
+import { CronogramaConflictError, CronogramaValidationError, CronogramaTempoInsuficienteError } from "@/app/[tenant]/(modules)/cronograma/services/errors";
 import {
   requireUserAuth,
   AuthenticatedRequest,

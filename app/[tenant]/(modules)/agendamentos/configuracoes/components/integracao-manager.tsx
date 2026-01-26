@@ -16,9 +16,8 @@ import {
   getConfiguracoesProfessor,
   updateIntegracaoProfessor,
   updateConfiguracoesProfessor,
-  type ProfessorIntegracao,
-  type ConfiguracoesProfessor,
 } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import type { ProfessorIntegracao, ConfiguracoesProfessor } from "@/app/[tenant]/(modules)/agendamentos/types"
 import { Loader2, Video, Link2, Check, X, ExternalLink, AlertCircle, Settings2 } from "lucide-react"
 import { toast } from "sonner"
 

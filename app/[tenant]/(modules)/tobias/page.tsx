@@ -9,16 +9,16 @@ import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from '@/components/ui/shadcn-io/ai/conversation'
-import { Message, MessageContent, MessageAvatar } from '@/components/ui/shadcn-io/ai/message'
-import { Response } from '@/components/ui/shadcn-io/ai/response'
+} from '@/app/shared/components/ui/ai/conversation'
+import { Message, MessageContent, MessageAvatar } from '@/app/shared/components/ui/ai/message'
+import { Response } from '@/app/shared/components/ui/ai/response'
 import {
   PromptInput,
   PromptInputTextarea,
   PromptInputToolbar,
   PromptInputSubmit,
-} from '@/components/ui/shadcn-io/ai/prompt-input'
-import { Loader } from '@/components/ui/shadcn-io/ai/loader'
+} from '@/app/shared/components/ui/ai/prompt-input'
+import { Loader } from '@/app/shared/components/ui/ai/loader'
 import { ConversationsPanel } from './components/conversations-panel'
 import { Button } from '@/components/ui/button'
 import { MessageSquare, Paperclip, X } from 'lucide-react'

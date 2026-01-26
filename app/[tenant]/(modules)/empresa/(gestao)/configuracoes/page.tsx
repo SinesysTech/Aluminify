@@ -1,25 +1,34 @@
-
 import { createClient } from "@/app/shared/core/server"
 import { redirect } from "next/navigation"
-import { SettingsTabs } from "../components/settings-tabs"
+import { SettingsTabs } from "@/app/[tenant]/(modules)/agendamentos/configuracoes/components/settings-tabs"
+import { mapSupabaseUserToAuthUser } from "@/app/[tenant]/auth/middleware"
+import type { AppUser, AppUserRole } from "@/app/shared/types"
 
 export default async function EmpresaConfiguracoesPage() {
-    const supabase = createClient()
+    const supabase = await createClient()
     const {
-        data: { user },
+      data: { user: supabaseUser },
     } = await supabase.auth.getUser()
 
-    if (!user) {
+    if (!supabaseUser) {
         redirect("/auth/login")
     }
 
-    // Fetch basic user info to pass to SettingsTabs if needed (it takes 'user' prop)
-    // We need to type cast or fetch full user profile if 'user' from auth isn't enough.
-    // SettingsTabs expects 'AppUser'. Let's check if we need to fetch profile.
-    // For now passing auth user casted or ensure type compatibility.
-    // Actually SettingsTabs takes 'AppUser'. 
+    const authUser = await mapSupabaseUserToAuthUser(supabaseUser)
+    
+    if (!authUser) {
+        redirect("/auth/login")
+    }
 
-    // Let's implement a minimal fetch or usage.
+    // Convert AuthUser to AppUser
+    const appUser: AppUser = {
+        id: authUser.id,
+        email: authUser.email,
+        role: authUser.role as AppUserRole,
+        empresaId: authUser.empresaId,
+        roleType: authUser.roleType,
+        permissions: authUser.permissions,
+    }
 
     return (
         <div className="container mx-auto py-6 space-y-6">
@@ -30,7 +39,7 @@ export default async function EmpresaConfiguracoesPage() {
                 </p>
             </div>
 
-            <SettingsTabs user={user as any} />
+            <SettingsTabs user={appUser} />
         </div>
     )
 }

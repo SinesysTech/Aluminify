@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ProfessorDisponivel } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import { ProfessorDisponivel } from "@/app/[tenant]/(modules)/agendamentos/types"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/app/shared/components/forms/input"
 import { Badge } from "@/components/ui/badge"
