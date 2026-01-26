@@ -60,7 +60,10 @@
       "Bash(git status:*)",
       "Bash(npm update:*)",
       "Bash(npx mastra --version)",
-      "Bash(npx mastra --help:*)"
+      "Bash(npx mastra --help:*)",
+      "Bash(node:*)",
+      "Bash(test:*)",
+      "Bash(cmd.exe /c \"cd E:\\\\Development\\\\aluminify && npm install\")"
     ],
     "deny": [],
     "ask": []
