@@ -62,7 +62,8 @@ export async function mapSupabaseUserToAuthUser(
 
       if (papelData) {
         roleType = papelData.tipo as RoleTipo;
-        permissions = papelData.permissoes as RolePermissions;
+        // `permissoes` vem do Supabase como Json. Fazemos cast controlado.
+        permissions = papelData.permissoes as unknown as RolePermissions;
       }
     }
 

@@ -3,29 +3,19 @@ import {
   ExperimentalEmptyAdapter,
   copilotRuntimeNextJSAppRouterEndpoint,
 } from "@copilotkit/runtime";
-import { MastraAgent } from "@ag-ui/mastra";
 import { NextRequest } from "next/server";
-import { mastra } from "@/mastra";
 
 /**
- * Service adapter para CopilotKit
- * ExperimentalEmptyAdapter é usado quando não há necessidade de
- * um modelo LLM direto no runtime (os agentes Mastra têm seus próprios modelos)
+ * CopilotKit Runtime API Route
+ *
+ * Nota:
+ * A integração com agentes Mastra foi removida deste endpoint porque o pacote
+ * não está presente/compatível no projeto no momento.
  */
 const serviceAdapter = new ExperimentalEmptyAdapter();
 
-/**
- * API Route para CopilotKit
- *
- * Integra os agentes Mastra locais com o CopilotKit runtime.
- * Os agentes são carregados usando MastraAgent.getLocalAgents()
- * para funcionamento completo de features como shared state.
- */
 export const POST = async (req: NextRequest) => {
-  const runtime = new CopilotRuntime({
-    // @ts-expect-error - typing issue between packages
-    agents: MastraAgent.getLocalAgents({ mastra }),
-  });
+  const runtime = new CopilotRuntime({});
 
   const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
     runtime,
@@ -35,3 +25,6 @@ export const POST = async (req: NextRequest) => {
 
   return handleRequest(req);
 };
+
+// Aumenta o timeout para streaming de respostas longas
+export const maxDuration = 60;

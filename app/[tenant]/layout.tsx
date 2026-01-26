@@ -8,7 +8,8 @@ interface TenantLayoutProps {
 }
 
 export default async function TenantLayout({ children, params }: TenantLayoutProps) {
-  const { tenant: tenantSlug } = await params;
+  const { tenant } = await params;
+  const tenantSlug = (tenant || '').toLowerCase();
 
   // Validate that tenant exists
   // Use admin client to bypass RLS - checking if tenant exists is not sensitive
@@ -18,7 +19,8 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
   const { data: empresa, error } = await adminClient
     .from('empresas')
     .select('id, nome, slug')
-    .eq('slug', tenantSlug)
+    // also allow subdomain matching (same logic as middleware)
+    .or(`slug.eq.${tenantSlug},subdomain.eq.${tenantSlug}`)
     .eq('ativo', true)
     .maybeSingle();
 
