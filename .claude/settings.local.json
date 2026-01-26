@@ -75,7 +75,10 @@
       "Bash(git reset:*)",
       "Bash(git ls-tree:*)",
       "Bash(npx tsx:*)",
-      "Bash(npx dotenv:*)"
+      "Bash(npx dotenv:*)",
+      "Bash(git apply:*)",
+      "Bash(git merge:*)",
+      "Bash(npx ts-node:*)"
     ],
     "deny": [],
     "ask": []

@@ -8,15 +8,16 @@
  * - SUPABASE_SERVICE_ROLE_KEY
  */
 
+import "dotenv/config"
 import { createClient } from "@supabase/supabase-js"
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+const supabaseServiceKey = process.env.SUPABASE_SECRET_KEY
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error("❌ Variáveis de ambiente não configuradas")
   console.error(
-    "   Certifique-se de ter NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY"
+    "   Certifique-se de ter NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY"
   )
   process.exit(1)
 }
