@@ -77,8 +77,8 @@
     --bottom-nav-safe-area: env(safe-area-inset-bottom, 0px);
 
     /* Deco */
-    --deco-line: var(--border);
-    --deco-alpha: 0.55;
+    --deco-line: 240 5.9% 90%;
+    --deco-alpha: 0.08;
 
     /* Sidebar */
     --sidebar: hsl(240 5% 96%);
@@ -113,8 +113,8 @@
     --input: hsl(240 3.7% 15.9%);
     --ring: hsl(240 4.9% 83.9%);
 
-    --deco-line: var(--border);
-    --deco-alpha: 0.25;
+    --deco-line: 240 3.7% 15.9%;
+    --deco-alpha: 0.15;
 
     /* Sidebar */
     --sidebar: hsl(240 6% 10%);

@@ -18,7 +18,21 @@ import {
 
 export function LandingPage() {
     return (
-        <div className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 transition-colors duration-200 flex flex-col">
+        <div
+            className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 transition-colors duration-200 flex flex-col"
+            style={{
+                // Landing page uses neutral/professional colors independent of tenant theme
+                '--primary': 'hsl(240 5.9% 10%)',
+                '--primary-foreground': 'hsl(0 0% 98%)',
+                '--background': 'hsl(0 0% 100%)',
+                '--foreground': 'hsl(240 10% 3.9%)',
+                '--card': 'hsl(0 0% 100%)',
+                '--card-foreground': 'hsl(240 10% 3.9%)',
+                '--muted': 'hsl(240 4.8% 95.9%)',
+                '--muted-foreground': 'hsl(240 3.8% 46.1%)',
+                '--border': 'hsl(240 5.9% 90%)',
+            } as React.CSSProperties}
+        >
             <Nav />
 
             <main className="flex-1">
