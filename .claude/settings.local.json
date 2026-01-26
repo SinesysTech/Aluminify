@@ -78,7 +78,9 @@
       "Bash(npx dotenv:*)",
       "Bash(git apply:*)",
       "Bash(git merge:*)",
-      "Bash(npx ts-node:*)"
+      "Bash(npx ts-node:*)",
+      "Bash(tee:*)",
+      "Bash(npx supabase:*)"
     ],
     "deny": [],
     "ask": []
