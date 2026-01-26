@@ -180,7 +180,7 @@ export function getNotificacaoMessage(notificacao: NotificacaoAgendamento, userI
     substituicao_solicitada: `Foi solicitada uma substituição para seu agendamento com ${outraParteNome}`
   }
 
-  return messages[notificacao.tipo] || 'Nova notificacao'
+  return messages[notificacao.tipo] || 'Nova notificação'
 }
 
 // Helper to get notification icon

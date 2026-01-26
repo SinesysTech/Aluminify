@@ -43,6 +43,8 @@ Este documento foca na **Área Logada**.
 
 ### Classes Utilitárias (globals.css)
 
+#### Hierarquia de Página
+
 | Nível | Classe | Especificações | Tamanho |
 |-------|--------|----------------|---------|
 | H1 | `.page-title` | `text-2xl font-bold tracking-tight text-foreground` | 24px |
@@ -52,23 +54,31 @@ Este documento foca na **Área Logada**.
 | H3 | `.card-title` | `text-base font-semibold text-foreground` | 16px |
 | Empty | `.empty-state-title` | `text-lg font-semibold text-foreground` | 18px |
 
+#### Hierarquia de Widgets/Dashboard
+
+| Uso | Classe | Especificações | Tamanho |
+|-----|--------|----------------|---------|
+| Título de gráfico | `.widget-title` | `text-base md:text-lg font-semibold text-foreground` | 16-18px |
+| Label de métrica | `.metric-label` | `text-sm font-medium text-muted-foreground` | 14px |
+| Valor de métrica | `.metric-value` | `text-2xl font-bold tracking-tight text-foreground` | 24px |
+
 ### Hierarquia Interna de Cards (Dashboard)
 
 Para títulos dentro de cards de métricas/gráficos no dashboard:
 
-| Elemento | Classes | Exemplo |
-|----------|---------|---------|
-| Título do card | `text-sm font-medium text-muted-foreground` | "Tempo de Estudo" |
-| Valor principal | `text-2xl font-bold tracking-tight` | "4h 32min" |
-| Subtexto | `text-xs text-muted-foreground` | "vs. semana anterior" |
+| Elemento | Classe Utilitária | Equivalente | Exemplo |
+|----------|-------------------|-------------|---------|
+| Label de métrica | `.metric-label` | `text-sm font-medium text-muted-foreground` | "Tempo de Estudo" |
+| Valor de métrica | `.metric-value` | `text-2xl font-bold tracking-tight text-foreground` | "4h 32min" |
+| Subtexto | - | `text-xs text-muted-foreground` | "vs. semana anterior" |
 
 ### Hierarquia de Gráficos/Seções Internas
 
-| Elemento | Classes | Uso |
-|----------|---------|-----|
-| Título de seção interna | `text-base md:text-lg font-semibold text-foreground` | Títulos de gráficos |
-| Legenda/Label | `text-sm text-muted-foreground` | Rótulos de eixos |
-| Valores destacados | `text-xl font-bold` | Números em destaque |
+| Elemento | Classe Utilitária | Equivalente | Uso |
+|----------|-------------------|-------------|-----|
+| Título de widget | `.widget-title` | `text-base md:text-lg font-semibold text-foreground` | Títulos de gráficos |
+| Legenda/Label | - | `text-sm text-muted-foreground` | Rótulos de eixos |
+| Valores destacados | - | `text-xl font-bold` | Números em destaque |
 
 ---
 
@@ -105,68 +115,100 @@ className="p-4 md:px-8 md:py-6 pb-20 md:pb-8"
 
 ## Quando Usar Cada Classe
 
-### `.page-title`
-Use para o titulo principal de cada pagina. Deve haver apenas um por pagina.
+### `.page-title` (H1)
+
+Use para o título principal de cada página. **Deve haver apenas um por página.**
 
 ```tsx
 <h1 className="page-title">Alunos</h1>
 ```
 
 ### `.page-subtitle`
-Use para a descricao que acompanha o titulo principal da pagina.
+
+Use para a descrição que acompanha o título principal da página.
 
 ```tsx
-<p className="page-subtitle">Gerencie matriculas, progresso e status financeiro.</p>
+<p className="page-subtitle">Gerencie matrículas, progresso e status financeiro.</p>
 ```
 
-### `.section-title`
-Use para titulos de secoes dentro de uma pagina.
+### `.section-title` (H2)
+
+Use para títulos de seções dentro de uma página.
 
 ```tsx
-<h2 className="section-title mb-2">Empresas</h2>
+<h2 className="section-title mb-4">Empresas</h2>
 ```
 
 ### `.section-subtitle`
-Use para descricoes de secoes.
+
+Use para descrições de seções.
 
 ```tsx
 <p className="section-subtitle">Gerencie todas as empresas do sistema</p>
 ```
 
-### `.card-title`
-Use para titulos dentro de cards.
+### `.card-title` (H3)
+
+Use para títulos dentro de cards.
 
 ```tsx
-<h3 className="card-title">Configuracoes</h3>
+<h3 className="card-title">Configurações</h3>
 ```
 
 ### `.empty-state-title`
-Use para titulos em estados vazios (quando nao ha dados).
+
+Use para títulos em estados vazios (quando não há dados).
 
 ```tsx
 <h3 className="empty-state-title mb-2">Base de alunos vazia</h3>
 ```
 
+---
+
+## Anti-Patterns (NÃO USAR)
+
+Estes padrões **NÃO devem ser usados** na área logada:
+
+```tsx
+// ❌ ERRADO - Escala de landing page na área logada
+<h1 className="text-3xl font-bold tracking-tight">Transações</h1>
+<h1 className="text-4xl font-bold">Título</h1>
+
+// ❌ ERRADO - Cores hardcoded
+<h1 className="text-2xl font-bold text-zinc-900">Título</h1>
+<p className="text-[#71717A]">Descrição</p>
+
+// ❌ ERRADO - Mistura de padrões
+<h1 className="text-xl md:text-2xl font-bold">TobIAs</h1>
+
+// ✅ CORRETO - Use as classes utilitárias
+<h1 className="page-title">Título</h1>
+<p className="page-subtitle">Descrição</p>
+```
+
+---
+
 ## Componentes Padronizados
 
-Para maior consistencia, utilize os componentes de `components/ui/data-page.tsx`:
+Para maior consistência, utilize os componentes de `@/components/ui/data-page`:
 
-- `DataPageHeader` - Header padrao para paginas de dados
-- `DataPageEmptyState` - Estado vazio padronizado
+### DataPageHeader
 
-### Exemplo com DataPageHeader
+Header padrão para páginas de dados com título, descrição e ações.
 
 ```tsx
 import { DataPageHeader } from '@/components/ui/data-page'
 
 <DataPageHeader
   title="Alunos"
-  description="Gerencie matriculas, progresso e status financeiro."
+  description="Gerencie matrículas, progresso e status financeiro."
   actions={<Button>Novo Aluno</Button>}
 />
 ```
 
-### Exemplo com DataPageEmptyState
+### DataPageEmptyState
+
+Estado vazio padronizado para páginas sem dados.
 
 ```tsx
 import { DataPageEmptyState } from '@/components/ui/data-page'
@@ -180,18 +222,45 @@ import { UserPlus } from 'lucide-react'
 />
 ```
 
+---
+
+## Páginas que Precisam de Padronização
+
+As seguintes páginas usam estilos inline ao invés das classes utilitárias:
+
+| Página | Problema | Correção |
+|--------|----------|----------|
+| `agendamentos/page.tsx` | `text-3xl md:text-4xl font-bold` | Usar `.page-title` |
+| `transacoes/page.tsx` | `text-3xl font-bold tracking-tight` | Usar `.page-title` |
+| `transacoes/[id]/page.tsx` | `text-3xl font-bold tracking-tight` | Usar `.page-title` |
+| `foco/components/focus-header.tsx` | `text-3xl font-bold tracking-tight` | Usar `.page-title` |
+| `tobias/page.tsx` | `text-xl md:text-2xl font-bold` | Usar `.page-title` |
+| `sala-de-estudos/client.tsx` | `text-3xl font-bold tracking-tight` | Usar `.page-title` |
+| `usuario/.../user-edit-form.tsx` | `text-2xl font-semibold` | Usar `.page-title` |
+
+---
+
 ## Regras Gerais
 
-1. **Nunca use cores hardcoded** como `#71717A` ou `#09090B` para texto. Use as classes utilitarias que ja incluem suporte a dark mode.
+1. **Nunca use cores hardcoded** como `#71717A` ou `#09090B` para texto. Use tokens semânticos (`text-foreground`, `text-muted-foreground`).
 
-2. **Evite misturar estilos** - Use as classes utilitarias ou os componentes padronizados, nao ambos.
+2. **Nunca use escala de landing na área logada** - O máximo é `text-2xl` para títulos de página.
 
-3. **Consistencia entre paginas** - Todas as paginas de dados devem seguir o mesmo padrao visual.
+3. **Use as classes utilitárias** - `.page-title`, `.section-title`, `.card-title` garantem consistência.
 
-4. **Dark mode** - Todas as classes utilitarias ja incluem variantes para dark mode usando `dark:`.
+4. **Prefira componentes** - Use `DataPageHeader` e `DataPageEmptyState` quando aplicável.
 
-## Arquivos de Referencia
+5. **Dark mode automático** - As classes utilitárias já usam tokens que suportam dark mode.
 
-- Classes CSS: `app/globals.css`
-- Componentes: `components/ui/data-page.tsx`
-- Exemplo de uso: `app/(modules)/usuario/(gestao)/alunos/components/client-page.tsx`
+6. **Um H1 por página** - Cada página deve ter apenas um `.page-title`.
+
+---
+
+## Arquivos de Referência
+
+| Arquivo | Propósito |
+|---------|-----------|
+| `app/globals.css` | Classes utilitárias de tipografia |
+| `@/components/ui/data-page.tsx` | Componentes padronizados |
+| `design-system/MASTER.md` | Design System completo |
+| `design-system/tokens/typography.ts` | Tokens de tipografia |

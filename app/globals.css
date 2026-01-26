@@ -398,6 +398,21 @@
     @apply text-lg font-semibold text-foreground;
   }
 
+  /* Títulos de widgets/gráficos internos (dentro de cards no dashboard) */
+  .widget-title {
+    @apply text-base md:text-lg font-semibold text-foreground;
+  }
+
+  /* Labels de métricas em cards de stats */
+  .metric-label {
+    @apply text-sm font-medium text-muted-foreground;
+  }
+
+  /* Valores de métricas em cards de stats */
+  .metric-value {
+    @apply text-2xl font-bold tracking-tight text-foreground;
+  }
+
   /* === Responsive Form Utilities === */
 
   /* Grid de formulário responsivo: 1 col mobile, 2 cols tablet+, 3+ cols desktop */

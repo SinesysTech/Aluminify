@@ -230,7 +230,7 @@ export function IntegracaoManager({ professorId }: IntegracaoManagerProps) {
           {!hasGoogleConfig && (
             <Alert>
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Configuracao necessaria</AlertTitle>
+              <AlertTitle>Configuração necessária</AlertTitle>
               <AlertDescription>
                 Para habilitar a integração com Google, configure as variáveis de ambiente:
                 <ul className="mt-2 list-disc list-inside text-sm">
@@ -296,9 +296,9 @@ export function IntegracaoManager({ professorId }: IntegracaoManagerProps) {
           {!hasZoomConfig && (
             <Alert>
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Configuracao necessaria</AlertTitle>
+              <AlertTitle>Configuração necessária</AlertTitle>
               <AlertDescription>
-                Para habilitar a integracao com Zoom, configure as variaveis de ambiente:
+                Para habilitar a integração com Zoom, configure as variáveis de ambiente:
                 <ul className="mt-2 list-disc list-inside text-sm">
                   <li>NEXT_PUBLIC_ZOOM_CLIENT_ID</li>
                   <li>ZOOM_CLIENT_SECRET</li>

@@ -39,7 +39,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap");
 ```
 
-### Type Scale
+### Type Scales
+
+O Design System define **duas escalas tipográficas**:
+
+#### Landing Pages (Escala Grande)
+
+Para páginas públicas, marketing e hero sections.
 
 | Level      | Mobile          | Desktop         | Class                  | Usage             |
 | ---------- | --------------- | --------------- | ---------------------- | ----------------- |
@@ -51,6 +57,24 @@
 | Body       | 1rem (16px)     | 1rem (16px)     | `text-base`            | Default body      |
 | Small      | 0.875rem (14px) | 0.875rem (14px) | `text-sm`              | Labels, nav links |
 | XSmall     | 0.75rem (12px)  | 0.75rem (12px)  | `text-xs`              | Badges, captions  |
+
+#### Área Logada / App (Escala Compacta)
+
+Para dashboards, formulários e gestão. Usa classes utilitárias em `globals.css`.
+
+| Level         | Size   | Class Utilitária    | Usage                  |
+| ------------- | ------ | ------------------- | ---------------------- |
+| Page Title    | 24px   | `.page-title`       | Título principal (H1)  |
+| Page Subtitle | 14px   | `.page-subtitle`    | Descrição da página    |
+| Section Title | 18px   | `.section-title`    | Títulos de seção (H2)  |
+| Section Sub   | 14px   | `.section-subtitle` | Descrição de seção     |
+| Card Title    | 16px   | `.card-title`       | Títulos de cards (H3)  |
+| Empty State   | 18px   | `.empty-state-title`| Estados vazios         |
+| Body          | 16px   | `text-base`         | Texto padrão           |
+| Small         | 14px   | `text-sm`           | Labels, links          |
+| XSmall        | 12px   | `text-xs`           | Badges, captions       |
+
+> **Referência completa:** Ver `docs/ref/typography-guidelines.md`
 
 ### Font Weights
 
