@@ -42,7 +42,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/app/shared/components/feedback/alert'
 import { ChevronDown, Upload, FileText, AlertCircle, CheckCircle2, Trash2, Plus, Info, FileUp, Download } from 'lucide-react'
 import Papa from 'papaparse'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { AddActivityModal } from './shared/add-activity-modal'
 import InlineEditableTitle from '@/components/shared/inline-editable-title'
 import { formatTipoAtividade } from '@/shared/library/utils'
@@ -123,6 +123,8 @@ type AtividadeItem = {
 
 export default function StructureManagerClient() {
   const router = useRouter()
+  const params = useParams()
+  const tenant = params?.tenant as string
   const supabase = createClient()
 
   const [userId, setUserId] = React.useState<string | null>(null)
@@ -218,7 +220,7 @@ export default function StructureManagerClient() {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
-          router.push('/auth/login')
+          router.push(tenant ? `/${tenant}/auth/login` : '/auth/login')
           return
         }
         setUserId(user.id)
@@ -1852,7 +1854,7 @@ export default function StructureManagerClient() {
           {cursos.length === 0 && (
             <div className="rounded-md border-2 border-dashed px-3 py-2.5 text-xs text-muted-foreground text-center">
               Nenhum curso encontrado.{' '}
-              <Button variant="link" className="h-auto p-0 align-baseline text-xs" onClick={() => router.push('/curso')}>
+              <Button variant="link" className="h-auto p-0 align-baseline text-xs" onClick={() => router.push(tenant ? `/${tenant}/curso` : '/curso')}>
                 Crie um curso antes de importar conteudos.
               </Button>
             </div>
@@ -1889,7 +1891,7 @@ export default function StructureManagerClient() {
                       type="button"
                       variant="link"
                       className="h-auto p-0 align-baseline text-[11px]"
-                      onClick={() => router.push('/curso')}
+                      onClick={() => router.push(tenant ? `/${tenant}/curso` : '/curso')}
                     >
                       Abrir gestao de cursos
                     </Button>
