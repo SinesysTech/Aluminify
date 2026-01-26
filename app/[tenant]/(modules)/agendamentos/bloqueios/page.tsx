@@ -1,26 +1,12 @@
-﻿
+
 import { BloqueiosManager } from "./components/bloqueios-manager"
-import { createClient } from "@/app/shared/core/server"
-import { redirect } from "next/navigation"
+import { requireUser } from "@/app/shared/core/auth"
+import { isAdminRoleTipo } from "@/app/shared/core/roles"
 
 export default async function BloqueiosPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const user = await requireUser({ allowedRoles: ["usuario"] })
 
-  if (!user) {
-    redirect("/auth/login")
-  }
-
-  // Get professor's empresa_id and admin status
-  const { data: professor } = await supabase
-    .from("professores")
-    .select("empresa_id, is_admin")
-    .eq("id", user.id)
-    .single()
-
-  if (!professor?.empresa_id) {
+  if (!user.empresaId) {
     return (
       <div className="flex flex-col gap-6 p-6">
         <div className="flex flex-col gap-2">
@@ -33,6 +19,9 @@ export default async function BloqueiosPage() {
     )
   }
 
+  // Check if user is admin based on roleType
+  const isAdmin = user.roleType ? isAdminRoleTipo(user.roleType) : false
+
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex flex-col gap-2">
@@ -44,8 +33,8 @@ export default async function BloqueiosPage() {
 
       <BloqueiosManager
         professorId={user.id}
-        empresaId={professor.empresa_id}
-        isAdmin={professor.is_admin === true}
+        empresaId={user.empresaId}
+        isAdmin={isAdmin}
       />
     </div>
   )

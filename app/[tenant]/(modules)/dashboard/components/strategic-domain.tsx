@@ -98,7 +98,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     }
   }, [])
 
-  // Resetar sele��es dependentes
+  // Resetar seleções dependentes
   useEffect(() => {
     if (scope === 'curso') {
       setSelectedDisciplineId(null)
@@ -173,7 +173,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      // Em n�veis que dependem de sele��o, n�o fetchar sem id
+      // Em níveis que dependem de seleção, não fetchar sem id
       if ((scope === 'disciplina' && !selectedDisciplineId) || (scope === 'frente' && !selectedFrontId)) return
 
       setIsLoading(true)

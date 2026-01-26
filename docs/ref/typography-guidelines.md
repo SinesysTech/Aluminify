@@ -224,19 +224,21 @@ import { UserPlus } from 'lucide-react'
 
 ---
 
-## Páginas que Precisam de Padronização
+## Páginas Padronizadas
 
-As seguintes páginas usam estilos inline ao invés das classes utilitárias:
+As seguintes páginas foram atualizadas para usar classes utilitárias:
 
-| Página | Problema | Correção |
-|--------|----------|----------|
-| `agendamentos/page.tsx` | `text-3xl md:text-4xl font-bold` | Usar `.page-title` |
-| `transacoes/page.tsx` | `text-3xl font-bold tracking-tight` | Usar `.page-title` |
-| `transacoes/[id]/page.tsx` | `text-3xl font-bold tracking-tight` | Usar `.page-title` |
-| `foco/components/focus-header.tsx` | `text-3xl font-bold tracking-tight` | Usar `.page-title` |
-| `tobias/page.tsx` | `text-xl md:text-2xl font-bold` | Usar `.page-title` |
-| `sala-de-estudos/client.tsx` | `text-3xl font-bold tracking-tight` | Usar `.page-title` |
-| `usuario/.../user-edit-form.tsx` | `text-2xl font-semibold` | Usar `.page-title` |
+| Página | Classe Aplicada |
+|--------|-----------------|
+| `agendamentos/page.tsx` | `.page-title`, `.page-subtitle` |
+| `transacoes/page.tsx` | `.page-title`, `.page-subtitle` |
+| `transacoes/[id]/page.tsx` | `.page-title`, `.page-subtitle` |
+| `foco/components/focus-header.tsx` | `.page-title`, `.page-subtitle` |
+| `tobias/page.tsx` | `.page-title`, `.page-subtitle` |
+| `sala-de-estudos/client.tsx` | `.page-title`, `.page-subtitle` |
+| `usuario/.../user-edit-form.tsx` | `.page-title`, `.page-subtitle` |
+| `usuario/.../student-edit-form.tsx` | `.page-title`, `.page-subtitle` |
+| `dashboard/components/*.tsx` | `.widget-title` (6 componentes) |
 
 ---
 

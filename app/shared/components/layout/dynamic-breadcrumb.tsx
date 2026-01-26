@@ -11,13 +11,65 @@ import {
 } from "@/components/ui/breadcrumb"
 
 const routeLabels: Record<string, string> = {
-  "/dashboard": "Dashboard",
-  "/professor": "Professores",
-  "/aluno": "Alunos",
-  "/curso": "Cursos",
-  "/curso/disciplinas": "Disciplinas",
-  "/curso/segmentos": "Segmentos",
-  "/empresa/agendamentos/configuracoes": "Configurações",
+  // Dashboard
+  "dashboard": "Dashboard",
+
+  // Usuários
+  "usuario": "Usuários",
+  "alunos": "Alunos",
+  "professores": "Professores",
+  "equipe": "Equipe",
+  "admins": "Administradores",
+
+  // Cursos
+  "curso": "Cursos",
+  "disciplinas": "Disciplinas",
+  "segmentos": "Segmentos",
+  "conteudo": "Conteúdo",
+  "materiais": "Materiais",
+  "relatorios": "Relatórios",
+
+  // Biblioteca
+  "biblioteca": "Biblioteca",
+  "flashcards": "Flashcards",
+
+  // Financeiro
+  "financeiro": "Financeiro",
+  "transacoes": "Transações",
+  "produtos": "Produtos",
+  "cupons": "Cupons",
+  "integracoes": "Integrações",
+
+  // Agendamentos
+  "agendamentos": "Agendamentos",
+  "disponibilidade": "Disponibilidade",
+  "bloqueios": "Bloqueios",
+  "stats": "Estatísticas",
+  "meus": "Meus Agendamentos",
+  "detalhes": "Detalhes",
+  "configuracoes": "Configurações",
+
+  // Empresa
+  "empresa": "Empresa",
+  "personalizacao": "Personalização",
+  "avancadas": "Avançadas",
+  "usuarios": "Usuários",
+  "papeis": "Papéis",
+
+  // Estudos
+  "estudos": "Estudos",
+  "sala-de-estudos": "Sala de Estudos",
+  "foco": "Modo Foco",
+  "cronograma": "Cronograma",
+  "calendario": "Calendário",
+
+  // Outros
+  "tobias": "TobIAs",
+  "perfil": "Perfil",
+  "nova": "Nova",
+  "novo": "Novo",
+  "editar": "Editar",
+  "completar": "Completar",
 }
 
 export function DynamicBreadcrumb() {
