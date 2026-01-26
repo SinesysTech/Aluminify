@@ -3,7 +3,7 @@
 import * as React from 'react'
 import { PlayCircle, Eye, FileX, Loader2, FileText, Timer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox } from '@/app/shared/components/forms/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/shared/library/utils'

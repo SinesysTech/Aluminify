@@ -54,8 +54,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+} from '@/app/shared/components/forms/form'
+import { Input } from '@/app/shared/components/forms/input'
 import { DatePicker } from '@/components/ui/date-picker'
 import {
   DropdownMenu,
@@ -70,7 +70,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox } from '@/app/shared/components/forms/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { apiClient, ApiClientError } from '@/shared/library/api-client'

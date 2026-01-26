@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/app/shared/core/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Input } from '@/app/shared/components/forms/input';
+import { Label } from '@/app/shared/components/forms/label';
 
 import { useToast } from '@/hooks/use-toast';
 import { formatBRPhone, formatCNPJ, isValidCNPJ } from '@/shared/library/br';

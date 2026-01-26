@@ -2,10 +2,10 @@
 
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
+import { Label } from '@/app/shared/components/forms/label'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Input } from '@/app/shared/components/forms/input'
+import { RadioGroup, RadioGroupItem } from '@/app/shared/components/forms/radio-group'
 import { Slider } from '@/components/ui/slider'
 import { Separator } from '@/components/ui/separator'
 import { Timer, Hourglass, Zap, Play } from 'lucide-react'

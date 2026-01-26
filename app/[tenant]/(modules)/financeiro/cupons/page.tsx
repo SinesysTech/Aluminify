@@ -15,14 +15,14 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/app/shared/components/forms/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/app/shared/components/forms/select";
 import {
   Table,
   TableBody,
@@ -48,9 +48,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
+import { Label } from "@/app/shared/components/forms/label";
+import { Textarea } from "@/app/shared/components/forms/textarea";
+import { Switch } from "@/app/shared/components/forms/switch";
 import { useToast } from "@/hooks/use-toast";
 
 interface Coupon {

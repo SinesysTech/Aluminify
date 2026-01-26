@@ -16,8 +16,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Empty, EmptyHeader, EmptyMedia, EmptyTitle, EmptyDescription } from "@/components/ui/empty"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
+import { Textarea } from "@/app/shared/components/forms/textarea"
+import { Label } from "@/app/shared/components/forms/label"
 import { toast } from "sonner"
 import { format, isFuture, isPast } from "date-fns"
 import { ptBR } from "date-fns/locale"

@@ -3,267 +3,166 @@
 import Link from "next/link";
 import { Nav } from "../../components/nav";
 import { Footer } from "../../components/footer";
+import { Check, HelpCircle } from "lucide-react";
 
 export function PricingPage() {
     return (
-        <div className="bg-background text-foreground font-sans antialiased selection:bg-zinc-200 dark:selection:bg-zinc-800 transition-colors duration-200">
-            <Nav activeLink="precos" transparent />
+        <div className="bg-background text-foreground font-sans antialiased transition-colors duration-200">
+            <Nav activeLink="precos" />
 
-            <main className="pt-24">
-                <section className="py-20 text-center px-4">
-                    <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-6 text-primary dark:text-white">
-                        Investimento Justo e Escalável
+            <main>
+                <section className="pt-24 pb-20 text-center px-4">
+                    <h1 className="text-4xl md:text-5xl font-display font-bold tracking-tight mb-6 text-foreground">
+                        Investimento Previsível.
                     </h1>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                        Um modelo cumulativo desenhado para o crescimento. Você paga uma base
-                        fixa pela sua faixa atual e um valor pequeno apenas pelos alunos
-                        excedentes.
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
+                        Escolha a infraestrutura que se adapta ao estágio do seu negócio.
+                        Do MVP ao Enterprise, sem surpresas na fatura.
                     </p>
+                    
+                    {/* Toggle Monthly/Yearly (Visual only for now) */}
+                    <div className="inline-flex items-center bg-muted p-1 rounded-lg">
+                        <button className="px-4 py-1.5 text-sm font-medium rounded-md bg-background shadow-sm text-foreground">Mensal</button>
+                        <button className="px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">Anual (-20%)</button>
+                    </div>
                 </section>
 
-                <section className="pb-12 px-4">
-                    <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-6">
-                        <div className="bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
+                <section className="pb-24 px-4">
+                    <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
+                        {/* Community */}
+                        <div className="bg-card border border-border rounded-2xl p-8 flex flex-col hover:border-zinc-400 transition-colors">
                             <div className="mb-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="material-icons-outlined text-zinc-400">psychology_alt</span>
-                                    <h3 className="text-lg font-bold text-primary dark:text-white">Inicial</h3>
-                                </div>
-                                <p className="text-sm text-muted-foreground">Para validação mínima.</p>
+                                <h3 className="text-xl font-bold font-display">Community</h3>
+                                <p className="text-sm text-muted-foreground mt-1">Para desenvolvedores.</p>
                             </div>
                             <div className="mb-6">
-                                <span className="text-3xl font-bold text-primary dark:text-white">R$ 500</span>
-                                <span className="text-xs text-muted-foreground block mt-1">Valor fixo mensal</span>
+                                <span className="text-4xl font-bold">R$ 0</span>
                             </div>
-                            <div className="text-sm text-muted-foreground mb-6 grow border-t border-border pt-4">
-                                <p className="mb-2 font-medium text-primary dark:text-white">Até 300 alunos</p>
-                                <p className="mb-2">
-                                    Incluso na taxa. Ideal para quem está começando a digitalizar o preparatório.
-                                </p>
+                            <div className="text-sm space-y-4 mb-8 grow">
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-green-500 shrink-0" />
+                                    <span>Código Open Source (Self-hosted)</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-green-500 shrink-0" />
+                                    <span>Sem limite de alunos</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-green-500 shrink-0" />
+                                    <span>Atualizações via Git</span>
+                                </div>
+                                <div className="flex gap-3 text-muted-foreground">
+                                    <span className="w-5 h-5 shrink-0 flex items-center justify-center text-xs">✕</span>
+                                    <span>Suporte Dedicado</span>
+                                </div>
                             </div>
-                            <Link href="/signup" className="w-full py-2 border border-border rounded-lg text-center text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-primary dark:text-white">
-                                Escolher Inicial
+                            <Link href="/opensource" className="w-full py-3 border border-border rounded-lg text-center font-medium hover:bg-muted transition-colors">
+                                Ver Repositório
                             </Link>
                         </div>
 
-                        <div className="bg-primary text-white border border-primary rounded-xl p-6 shadow-lg transform md:-translate-y-4 flex flex-col relative overflow-hidden">
-                            <div className="absolute top-0 right-0 bg-blue-600 text-[10px] font-bold px-2 py-1 rounded-bl-lg uppercase">
-                                Acelerado
+                        {/* Pro Cloud */}
+                        <div className="bg-zinc-900 dark:bg-zinc-50 text-white dark:text-black rounded-2xl p-8 flex flex-col shadow-2xl relative overflow-hidden transform md:-translate-y-4">
+                            <div className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">
+                                Mais Popular
                             </div>
                             <div className="mb-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="material-icons-outlined text-white">rocket_launch</span>
-                                    <h3 className="text-lg font-bold">Crescimento</h3>
-                                </div>
-                                <p className="text-sm text-zinc-400">Para expansão acelerada.</p>
-                            </div>
-                            <div className="mb-2">
-                                <span className="text-3xl font-bold">R$ 500</span>
-                                <span className="text-sm text-zinc-400"> base</span>
-                            </div>
-                            <div className="text-xs font-mono text-blue-200 mb-6 bg-white/10 p-2 rounded">
-                                + R$ 1,50 por aluno extra (&gt;300)
-                            </div>
-                            <div className="text-sm text-zinc-300 mb-6 grow border-t border-zinc-700 pt-4">
-                                <p className="mb-2 text-white font-medium">301 a 500 alunos</p>
-                                <p className="text-xs">
-                                    Ex: 400 alunos = R$ 500 + (100 x 1,50) = <strong>R$ 650/mês</strong>.
-                                </p>
-                            </div>
-                            <Link href="/signup" className="w-full py-2 bg-white text-primary rounded-lg text-center text-sm font-bold hover:bg-zinc-100 transition-colors">
-                                Escolher Crescimento
-                            </Link>
-                        </div>
-
-                        <div className="bg-card border border-border rounded-xl p-6 shadow-sm flex flex-col hover:border-zinc-300 dark:hover:border-zinc-600 transition-colors">
-                            <div className="mb-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="material-icons-outlined text-zinc-600 dark:text-zinc-400">trending_up</span>
-                                    <h3 className="text-lg font-bold text-primary dark:text-white">Escala</h3>
-                                </div>
-                                <p className="text-sm text-muted-foreground">Melhor custo-benefício.</p>
-                            </div>
-                            <div className="mb-2">
-                                <span className="text-3xl font-bold text-primary dark:text-white">R$ 800</span>
-                                <span className="text-sm text-muted-foreground"> base</span>
-                            </div>
-                            <div className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mb-6 bg-zinc-50 dark:bg-zinc-800 p-2 rounded">
-                                + R$ 1,00 por aluno extra (&gt;500)
-                            </div>
-                            <div className="text-sm text-muted-foreground mb-6 grow border-t border-border pt-4">
-                                <p className="mb-2 font-medium text-primary dark:text-white">501 a 1.000 alunos</p>
-                                <p className="text-xs">
-                                    Ex: 800 alunos = R$ 800 + (300 x 1,00) = <strong>R$ 1.100/mês</strong>.
-                                </p>
-                            </div>
-                            <Link href="/signup" className="w-full py-2 border border-border rounded-lg text-center text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-primary dark:text-white">
-                                Escolher Escala
-                            </Link>
-                        </div>
-
-                        <div className="bg-zinc-50 dark:bg-zinc-900 border border-border rounded-xl p-6 shadow-sm flex flex-col">
-                            <div className="mb-4">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="material-icons-outlined text-zinc-500 dark:text-zinc-400">domain</span>
-                                    <h3 className="text-lg font-bold text-primary dark:text-white">Enterprise</h3>
-                                </div>
-                                <p className="text-sm text-muted-foreground">Estrutura robusta.</p>
+                                <h3 className="text-xl font-bold font-display">Pro Cloud</h3>
+                                <p className="text-sm text-zinc-400 dark:text-zinc-600 mt-1">Para escolas em crescimento.</p>
                             </div>
                             <div className="mb-6">
-                                <span className="text-2xl font-bold text-primary dark:text-white">Sob Consulta</span>
-                                <span className="text-xs text-muted-foreground block mt-1">A partir de R$ 1.599</span>
+                                <span className="text-4xl font-bold">R$ 499</span>
+                                <span className="text-sm text-zinc-400 dark:text-zinc-600">/mês</span>
                             </div>
-                            <div className="text-sm text-muted-foreground mb-6 grow border-t border-border pt-4">
-                                <p className="mb-2 font-medium text-primary dark:text-white">Acima de 1.000 alunos</p>
-                                <p>Condições especiais e infraestrutura dedicada.</p>
+                            <div className="text-sm space-y-4 mb-8 grow text-zinc-300 dark:text-zinc-700">
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-blue-400 shrink-0" />
+                                    <span className="font-bold text-white dark:text-black">Até 500 alunos ativos</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-blue-400 shrink-0" />
+                                    <span>Infraestrutura Gerenciada</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-blue-400 shrink-0" />
+                                    <span>CDN Global de Vídeo</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-blue-400 shrink-0" />
+                                    <span>Backup Diário</span>
+                                </div>
+                                <div className="p-3 bg-white/10 dark:bg-black/10 rounded-lg text-xs mt-4">
+                                    + R$ 1,00 por aluno extra ativo no mês.
+                                </div>
                             </div>
-                            <a href="mailto:comercial@aluminify.com" className="w-full py-2 border border-border rounded-lg text-center text-sm font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-primary dark:text-white">
-                                Falar com Consultor
-                            </a>
+                            <Link href="/signup" className="w-full py-3 bg-white dark:bg-black text-black dark:text-white rounded-lg text-center font-bold hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+                                Começar Trial de 14 dias
+                            </Link>
+                        </div>
+
+                        {/* Enterprise */}
+                        <div className="bg-card border border-border rounded-2xl p-8 flex flex-col hover:border-zinc-400 transition-colors">
+                            <div className="mb-4">
+                                <h3 className="text-xl font-bold font-display">Enterprise</h3>
+                                <p className="text-sm text-muted-foreground mt-1">Para grandes operações.</p>
+                            </div>
+                            <div className="mb-6">
+                                <span className="text-4xl font-bold">Custom</span>
+                            </div>
+                            <div className="text-sm space-y-4 mb-8 grow">
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-green-500 shrink-0" />
+                                    <span>Alunos Ilimitados</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-green-500 shrink-0" />
+                                    <span>SLA de 99.9%</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-green-500 shrink-0" />
+                                    <span>Single Sign-On (SSO)</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <Check className="w-5 h-5 text-green-500 shrink-0" />
+                                    <span>Gerente de Contas Dedicado</span>
+                                </div>
+                            </div>
+                            <Link href="mailto:enterprise@aluminify.com" className="w-full py-3 border border-border rounded-lg text-center font-medium hover:bg-muted transition-colors">
+                                Falar com Vendas
+                            </Link>
                         </div>
                     </div>
                 </section>
 
-                <section className="py-20 bg-card border-y border-border">
-                    <div className="max-w-5xl mx-auto px-6">
-                        <div className="flex flex-col md:flex-row gap-12">
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-primary dark:text-white">
-                                        <span className="material-icons-outlined">build</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-primary dark:text-white">Setup e Implantação</h3>
-                                        <p className="text-xs text-muted-foreground">Fase inicial de calibração técnica</p>
-                                    </div>
-                                </div>
-
-                                <div className="bg-zinc-50 dark:bg-zinc-900 rounded-xl p-6 border border-border">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <span className="text-sm font-medium text-muted-foreground">Investimento Único</span>
-                                        <span className="text-2xl font-bold text-primary dark:text-white">R$ 1.600,00</span>
-                                    </div>
-
-                                    <ul className="space-y-3 text-sm text-muted-foreground mb-6">
-                                        <li className="flex gap-2">
-                                            <span className="material-icons-outlined text-green-600 text-sm">check_circle</span>
-                                            Configuração dos Agentes de IA e Base de Conhecimento
-                                        </li>
-                                        <li className="flex gap-2">
-                                            <span className="material-icons-outlined text-green-600 text-sm">check_circle</span>
-                                            Integração com Plataforma de Vendas
-                                        </li>
-                                        <li className="flex gap-2">
-                                            <span className="material-icons-outlined text-green-600 text-sm">check_circle</span>
-                                            Prazo estimado: 10 dias
-                                        </li>
-                                    </ul>
-
-                                    <div className="border-t border-border pt-4">
-                                        <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-3">Condições Especiais</span>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="bg-card p-3 rounded border border-border text-center">
-                                                <span className="block text-xs text-muted-foreground">Contrato 12 meses</span>
-                                                <span className="block font-bold text-green-600">25% OFF</span>
-                                                <span className="text-[10px] text-muted-foreground">Setup: R$ 1.200</span>
-                                            </div>
-                                            <div className="dark:bg-card p-3 rounded border border-blue-200 dark:border-blue-900 bg-blue-50 text-center">
-                                                <span className="block text-xs text-blue-800 dark:text-blue-300">Contrato 24 meses</span>
-                                                <span className="block font-bold text-blue-600 dark:text-blue-400">SETUP GRÁTIS</span>
-                                                <span className="text-[10px] text-blue-800 dark:text-blue-300">100% OFF</span>
-                                            </div>
-                                        </div>
-                                        <div className="mt-4 text-xs text-muted-foreground text-center">
-                                            Pagamento facilitado: 5% OFF à vista ou 3x sem juros.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-primary dark:text-white">
-                                        <span className="material-icons-outlined">extension</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-bold text-primary dark:text-white">Melhorias Opcionais</h3>
-                                        <p className="text-xs text-muted-foreground">Potencialize sua infraestrutura</p>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="border border-border rounded-lg p-5 hover:border-primary dark:hover:border-white transition-colors">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h4 className="font-bold text-sm text-primary dark:text-white">Agente WhatsApp 24/7</h4>
-                                            <span className="bg-green-100 text-green-800 text-[10px] px-2 py-0.5 rounded font-mono">Popular</span>
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-                                            Automação integrada ao Chatwoot. Responde dúvidas frequentes e faz triagem de alunos a qualquer hora do dia.
-                                        </p>
-                                        <div className="flex items-baseline gap-2 text-sm">
-                                            <span className="font-mono font-bold text-primary dark:text-white">R$ 2.000,00</span>
-                                            <span className="text-xs text-muted-foreground">(Setup Único) + Variável mensal</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="border border-border rounded-lg p-5 hover:border-primary dark:hover:border-white transition-colors">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h4 className="font-bold text-sm text-primary dark:text-white">Conteúdo Especializado (RAG)</h4>
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-                                            Transcrição e organização das suas aulas para treinar a IA com sua metodologia exata. Reduz alucinações drasticamente.
-                                        </p>
-                                        <div className="flex items-baseline gap-2 text-sm">
-                                            <span className="font-mono font-bold text-primary dark:text-white">R$ 10,00</span>
-                                            <span className="text-xs text-muted-foreground">por hora de conteúdo processado</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="py-20 bg-zinc-50 dark:bg-zinc-900 border-b border-border">
-                    <div className="max-w-3xl mx-auto px-6 text-center">
-                        <div className="inline-flex items-center gap-2 text-primary dark:text-white font-bold mb-4">
-                            <span className="material-icons-outlined">visibility</span>
-                            <h3>Diferencial Ético: Transparência Total</h3>
-                        </div>
-                        <p className="text-muted-foreground leading-relaxed mb-8">
-                            Ao contrário de plataformas que lucram com um percentual sobre o seu consumo de IA, nós optamos pela independência.
-                            <strong>O custo de consumo dos agentes (tokens) é pago diretamente por você aos provedores</strong> (OpenAI/Anthropic).
-                            Nós não temos lucro sobre o seu uso. Você paga apenas pelo que consome, com total controle.
-                        </p>
-                        <div className="p-4 bg-card border border-border rounded-lg shadow-sm inline-block text-left max-w-lg">
-                            <p className="text-sm italic text-muted-foreground">
-                                &quot;A Sinesys opta por dar controle de gastos e qualidade ao cliente... sem conflito de interesses.&quot;
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="py-20 px-4">
-                    <div className="max-w-3xl mx-auto">
-                        <h2 className="text-2xl font-bold text-center mb-10 text-primary dark:text-white">Dúvidas Comuns</h2>
-                        <div className="space-y-3">
-                            <details className="group bg-card border border-border rounded-lg p-4 cursor-pointer">
-                                <summary className="flex justify-between items-center font-medium list-none text-sm text-primary dark:text-white">
-                                    <span>Como funciona o contrato mínimo?</span>
-                                    <span className="material-icons-outlined text-muted-foreground transition group-open:rotate-180">expand_more</span>
+                <section className="py-24 bg-card border-t border-border">
+                    <div className="max-w-3xl mx-auto px-4">
+                        <h2 className="text-2xl font-bold text-center mb-12">Perguntas Frequentes</h2>
+                        <div className="space-y-4">
+                            <details className="group border border-border rounded-lg p-4 cursor-pointer bg-background">
+                                <summary className="flex justify-between items-center font-medium list-none text-foreground">
+                                    <span>O que conta como "aluno ativo"?</span>
+                                    <HelpCircle className="w-4 h-4 text-muted-foreground" />
                                 </summary>
-                                <div className="text-muted-foreground text-sm mt-3 leading-relaxed">
-                                    O contrato mínimo é de 6 meses. Isso garante que tenhamos tempo hábil para implementar a cultura da plataforma e você ver resultados reais na retenção dos alunos.
+                                <div className="text-muted-foreground text-sm mt-3 pt-3 border-t border-border leading-relaxed">
+                                    Consideramos ativo qualquer aluno que tenha feito login na plataforma pelo menos uma vez no período de cobrança (mês). Alunos cadastrados que não acessam não geram custo variável.
                                 </div>
                             </details>
-
-                            <details className="group bg-card border border-border rounded-lg p-4 cursor-pointer">
-                                <summary className="flex justify-between items-center font-medium list-none text-sm text-primary dark:text-white">
-                                    <span>O que está incluso na Integração de Plataforma Gratuita?</span>
-                                    <span className="material-icons-outlined text-muted-foreground transition group-open:rotate-180">expand_more</span>
+                            <details className="group border border-border rounded-lg p-4 cursor-pointer bg-background">
+                                <summary className="flex justify-between items-center font-medium list-none text-foreground">
+                                    <span>Posso migrar do Self-Hosted para o Cloud?</span>
+                                    <HelpCircle className="w-4 h-4 text-muted-foreground" />
                                 </summary>
-                                <div className="text-muted-foreground text-sm mt-3 leading-relaxed">
-                                    Conectamos seu sistema de vendas (Hotmart, Eduzz, Kiwify, etc.) para que o cadastro do aluno no Aluminify seja automático assim que a compra for aprovada.
+                                <div className="text-muted-foreground text-sm mt-3 pt-3 border-t border-border leading-relaxed">
+                                    Sim! Oferecemos ferramentas de migração de banco de dados para trazer seus dados da versão open-source para nossa nuvem gerenciada sem perda de histórico.
+                                </div>
+                            </details>
+                            <details className="group border border-border rounded-lg p-4 cursor-pointer bg-background">
+                                <summary className="flex justify-between items-center font-medium list-none text-foreground">
+                                    <span>Existe custo de setup?</span>
+                                    <HelpCircle className="w-4 h-4 text-muted-foreground" />
+                                </summary>
+                                <div className="text-muted-foreground text-sm mt-3 pt-3 border-t border-border leading-relaxed">
+                                    Não para os planos Cloud padrão. Você cria a conta e começa a usar imediatamente. Para o plano Enterprise, pode haver custos dependendo das customizações solicitadas.
                                 </div>
                             </details>
                         </div>

@@ -9,8 +9,8 @@ import {
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
+} from '@/app/shared/components/forms/select'
+import { Label } from '@/app/shared/components/forms/label'
 import { Loader2 } from 'lucide-react'
 
 // IDs estáveis para evitar erro de hidratação

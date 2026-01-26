@@ -6,9 +6,9 @@ import { ptBR } from 'date-fns/locale/pt-BR'
 import { CalendarIcon } from 'lucide-react'
 import { cn } from '@/shared/library/utils'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
+import { Calendar } from '@/app/shared/components/forms/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/app/shared/components/forms/input'
 
 interface DatePickerProps {
   value?: Date | null

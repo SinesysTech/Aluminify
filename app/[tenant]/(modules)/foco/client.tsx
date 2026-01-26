@@ -19,7 +19,7 @@ import { TimerConfig } from './components/timer-config'
 import { CleanView } from './components/clean-view'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+import { Label } from '@/app/shared/components/forms/label'
 import { Slider } from '@/components/ui/slider'
 
 function formatMs(ms: number) {

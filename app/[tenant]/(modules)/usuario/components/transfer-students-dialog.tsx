@@ -17,9 +17,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+} from '@/app/shared/components/forms/select'
+import { Label } from '@/app/shared/components/forms/label'
+import { RadioGroup, RadioGroupItem } from '@/app/shared/components/forms/radio-group'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { apiClient, ApiClientError } from '@/shared/library/api-client'

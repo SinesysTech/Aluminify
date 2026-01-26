@@ -8,12 +8,12 @@ import * as z from 'zod'
 import { createClient } from '@/app/shared/core/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Input } from '@/app/shared/components/forms/input'
+import { Label } from '@/app/shared/components/forms/label'
 import { Slider } from '@/components/ui/slider'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/app/shared/components/forms/select'
+import { Checkbox } from '@/app/shared/components/forms/checkbox'
 import {
   Accordion,
   AccordionContent,
@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/accordion'
 import * as AccordionPrimitive from '@radix-ui/react-accordion'
 import { ChevronDownIcon } from 'lucide-react'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { RadioGroup, RadioGroupItem } from '@/app/shared/components/forms/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import {

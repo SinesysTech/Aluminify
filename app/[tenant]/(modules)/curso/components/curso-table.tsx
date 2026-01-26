@@ -55,9 +55,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+} from '@/app/shared/components/forms/form'
+import { Input } from '@/app/shared/components/forms/input'
+import { Textarea } from '@/app/shared/components/forms/textarea'
 import { DatePicker } from '@/components/ui/date-picker'
 import {
   Select,
@@ -65,7 +65,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/app/shared/components/forms/select'
 import {
   Tooltip,
   TooltipContent,
@@ -73,8 +73,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Switch } from '@/components/ui/switch'
+import { Checkbox } from '@/app/shared/components/forms/checkbox'
+import { Switch } from '@/app/shared/components/forms/switch'
 import { apiClient, ApiClientError } from '@/shared/library/api-client'
 import { format, parse } from 'date-fns'
 import { TableSkeleton } from '@/components/ui/table-skeleton'

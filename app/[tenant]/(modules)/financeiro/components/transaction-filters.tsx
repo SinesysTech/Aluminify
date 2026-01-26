@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/app/shared/components/forms/input";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,7 +10,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/app/shared/components/forms/select";
 import { Search, X } from "lucide-react";
 import type { TransactionStatus, Provider } from "@/app/shared/types/entities/financial";
 

@@ -19,7 +19,7 @@ import { ptBR } from "date-fns/locale/pt-BR";
 
 import { cn } from "@/app/shared/library/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/app/shared/components/forms/calendar";
 import {
   Popover,
   PopoverContent,
@@ -31,7 +31,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/app/shared/components/forms/select";
 
 const months = [
   "Janeiro",

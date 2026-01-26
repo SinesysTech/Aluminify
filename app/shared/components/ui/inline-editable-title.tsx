@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/app/shared/components/forms/input';
 import { Button } from '@/components/ui/button';
 import { Pencil, Check, X } from 'lucide-react';
 

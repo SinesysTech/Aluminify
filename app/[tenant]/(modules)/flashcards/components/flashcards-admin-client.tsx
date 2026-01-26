@@ -4,15 +4,15 @@
 import * as React from 'react'
 import { createClient } from '@/app/shared/core/client'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Input } from '@/app/shared/components/forms/input'
+import { Label } from '@/app/shared/components/forms/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/app/shared/components/forms/select'
 import {
   Table,
   TableBody,
@@ -39,9 +39,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Textarea } from '@/components/ui/textarea'
+import { Textarea } from '@/app/shared/components/forms/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Checkbox } from '@/app/shared/components/forms/checkbox'
 import { Pencil, Trash2, Plus, Loader2, Search, X } from 'lucide-react'
 import { FlashcardUploadCard } from '@/components/shared/flashcard-upload-card'
 import {

@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { Button } from '@/components/ui/button';
 import {
@@ -7,8 +7,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+} from '@/app/shared/components/forms/select';
+import { Textarea } from '@/app/shared/components/forms/textarea';
 import { cn } from '@/shared/library/utils';
 import type { ChatStatus } from 'ai';
 import { Loader2Icon, SquareIcon, XIcon, ArrowUp } from 'lucide-react';

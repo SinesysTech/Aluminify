@@ -1,6 +1,6 @@
 'use client'
 
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar } from "@/app/shared/components/forms/calendar"
 import { useRouter, useSearchParams } from "next/navigation"
 import * as React from "react"
 import { FormPanel } from "./form-panel"

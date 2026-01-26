@@ -17,7 +17,7 @@ import type { DateRange } from "react-day-picker";
 
 import { cn } from "@/app/shared/library/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/app/shared/components/forms/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -27,7 +27,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@/components/ui/select";
+} from "@/app/shared/components/forms/select";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const dateFilterPresets = [

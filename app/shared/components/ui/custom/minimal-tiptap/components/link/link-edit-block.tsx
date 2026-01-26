@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Input } from '@/components/ui/input'
+import { Label } from '@/app/shared/components/forms/label'
+import { Switch } from '@/app/shared/components/forms/switch'
+import { Input } from '@/app/shared/components/forms/input'
 import { cn } from '@/shared/library/utils'
 
 export interface LinkEditorProps extends React.HTMLAttributes<HTMLDivElement> {

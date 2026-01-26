@@ -54,8 +54,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+} from '@/app/shared/components/forms/form'
+import { Input } from '@/app/shared/components/forms/input'
 import {
   Tooltip,
   TooltipContent,

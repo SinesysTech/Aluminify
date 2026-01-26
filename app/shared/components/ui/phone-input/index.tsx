@@ -8,7 +8,7 @@ import {
 	CommandItem,
 	CommandList,
 } from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/app/shared/components/forms/input";
 import {
 	Popover,
 	PopoverContent,

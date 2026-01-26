@@ -12,9 +12,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/app/shared/components/forms/input';
+import { Label } from '@/app/shared/components/forms/label';
+import { Checkbox } from '@/app/shared/components/forms/checkbox';
 
 interface Professor {
   id: string;

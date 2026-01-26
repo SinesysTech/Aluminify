@@ -13,9 +13,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/app/shared/components/forms/input"
+import { Label } from "@/app/shared/components/forms/label"
+import { Textarea } from "@/app/shared/components/forms/textarea"
 import { toast } from "sonner"
 import { Check, X, Loader2 } from "lucide-react"
 

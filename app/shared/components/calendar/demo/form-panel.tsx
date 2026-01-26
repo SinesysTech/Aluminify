@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Input } from "@/app/shared/components/forms/input";
+import { Label } from "@/app/shared/components/forms/label";
 
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea } from "@/app/shared/components/forms/textarea";
 
 import { UserPlus, X } from "lucide-react";
 import Link from "next/link";

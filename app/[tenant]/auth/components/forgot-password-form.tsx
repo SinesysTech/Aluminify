@@ -12,8 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Input } from '@/app/shared/components/forms/input'
+import { Label } from '@/app/shared/components/forms/label'
 import Link from 'next/link'
 import { useState } from 'react'
 

@@ -8,15 +8,15 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/app/shared/components/forms/label';
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
+} from '@/app/shared/components/forms/select';
+import { Input } from '@/app/shared/components/forms/input';
 import { Loader2 } from 'lucide-react';
 import { TipoAtividade } from '../../types';
 

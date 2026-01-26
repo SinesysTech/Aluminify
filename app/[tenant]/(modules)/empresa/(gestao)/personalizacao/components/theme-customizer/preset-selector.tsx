@@ -8,8 +8,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue
-} from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+} from "@/app/shared/components/forms/select";
+import { Label } from "@/app/shared/components/forms/label";
 import { Separator } from "@/components/ui/separator";
 
 export function PresetSelector() {

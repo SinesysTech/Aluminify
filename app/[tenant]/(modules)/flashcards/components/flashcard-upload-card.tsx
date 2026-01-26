@@ -11,15 +11,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Input } from '@/app/shared/components/forms/input'
+import { Label } from '@/app/shared/components/forms/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/app/shared/components/forms/select'
 import { FileText, Upload, Loader2, AlertCircle, CheckCircle2, Download } from 'lucide-react'
 import Papa from 'papaparse'
 import { downloadFile } from '@/shared/library/download-file'

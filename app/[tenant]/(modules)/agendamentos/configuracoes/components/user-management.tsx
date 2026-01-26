@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Plus, Search, GraduationCap, Users, Shield, Briefcase, BookOpen, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Input } from '@/app/shared/components/forms/input'
+import { Label } from '@/app/shared/components/forms/label'
 import { useToast } from '@/hooks/use-toast'
 import {
   Dialog,
@@ -20,7 +20,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/app/shared/components/forms/select'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/app/shared/core/client'
 import Link from 'next/link'

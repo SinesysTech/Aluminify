@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { cn } from "@/app/shared/library/utils";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/app/shared/components/forms/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 

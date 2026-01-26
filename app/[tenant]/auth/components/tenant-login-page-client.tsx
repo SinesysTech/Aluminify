@@ -13,9 +13,9 @@ import { LoginDecorativeCard } from './login-decorative-card';
 import { MagicLinkButton } from './magic-link-button';
 import { OAuthButtons } from './oauth-buttons';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/app/shared/components/forms/checkbox';
+import { Input } from '@/app/shared/components/forms/input';
+import { Label } from '@/app/shared/components/forms/label';
 import { createClient } from '@/app/shared/core/client';
 import { toast } from 'sonner';
 

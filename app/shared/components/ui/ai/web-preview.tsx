@@ -6,7 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/app/shared/components/forms/input';
 import {
   Tooltip,
   TooltipContent,

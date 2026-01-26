@@ -53,9 +53,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+} from '@/app/shared/components/forms/form'
+import { Input } from '@/app/shared/components/forms/input'
+import { Textarea } from '@/app/shared/components/forms/textarea'
 import {
   Tooltip,
   TooltipContent,

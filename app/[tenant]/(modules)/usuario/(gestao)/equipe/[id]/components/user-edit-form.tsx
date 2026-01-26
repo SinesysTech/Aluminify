@@ -5,17 +5,17 @@ import { ArrowLeft, Eye, EyeOff, Loader2, Save, X } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Switch } from '@/components/ui/switch'
+import { Input } from '@/app/shared/components/forms/input'
+import { Label } from '@/app/shared/components/forms/label'
+import { Textarea } from '@/app/shared/components/forms/textarea'
+import { Switch } from '@/app/shared/components/forms/switch'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/app/shared/components/forms/select'
 import { toast } from '@/hooks/use-toast'
 
 interface Papel {
