@@ -203,7 +203,7 @@ export function StudentTable({ students, meta }: StudentTableProps) {
                                                             variant="ghost"
                                                             size="sm"
                                                             className="h-8 w-8 p-0"
-                                                            onClick={() => router.push(`/usuario/alunos/${student.id}`)}
+                                                            onClick={() => router.push(tenant ? `/${tenant}/usuario/alunos/${student.id}` : `/usuario/alunos/${student.id}`)}
                                                         >
                                                             <UserCog className="h-4 w-4" />
                                                         </Button>

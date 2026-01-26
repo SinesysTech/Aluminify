@@ -411,7 +411,7 @@ export function StudentDetails({ student, onUpdate }: StudentDetailsProps) {
                     key={course.id}
                     variant="outline"
                     className="cursor-pointer hover:bg-zinc-100"
-                    onClick={() => router.push(`/curso/admin/${course.id}`)}
+                    onClick={() => router.push(tenant ? `/${tenant}/curso/admin/${course.id}` : `/curso/admin/${course.id}`)}
                   >
                     {course.name}
                   </Badge>
