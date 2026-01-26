@@ -81,13 +81,13 @@ export function Nav({ transparent = false, activeLink }: NavProps) {
                     <div className="flex items-center gap-4">
                         <Link
                             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors hidden sm:block"
-                            href="/login"
+                            href="/auth/login"
                         >
                             Login
                         </Link>
                         <Link
                             className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                            href="/signup"
+                            href="/auth/sign-up"
                         >
                             Criar Conta
                         </Link>

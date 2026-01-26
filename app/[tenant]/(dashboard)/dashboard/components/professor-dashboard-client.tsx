@@ -2,17 +2,17 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { RefreshCw, AlertCircle } from 'lucide-react'
-import type { ProfessorDashboardData } from '@/app/[tenant]/features/professor/types'
+import type { ProfessorDashboardData } from '@/app/[tenant]/(dashboard)/dashboard/types'
 import {
   fetchProfessorDashboardData,
   type ProfessorDashboardServiceError,
-} from '@/professor/services/professorDashboardService'
+} from '@/app/[tenant]/(dashboard)/dashboard/services/professorDashboardService'
 import { ProfessorHeader } from './professor-header'
 import { ProfessorMetrics } from './professor-metrics'
-import { StudentsUnderCareList } from './students-under-care-list'
-import { UpcomingAppointments } from './upcoming-appointments'
+import { StudentsUnderCareList } from '@/app/[tenant]/features/pessoas/components/students-under-care-list'
+import { UpcomingAppointments } from '@/app/[tenant]/(dashboard)/agendamentos/components/upcoming-appointments'
 import { ProfessorDisciplinaPerformanceList } from './professor-disciplina-performance'
-import { DashboardSkeleton } from '@/app/[tenant]/(dashboard)/dashboard/components/dashboard-skeleton'
+import { DashboardSkeleton } from './dashboard-skeleton'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 

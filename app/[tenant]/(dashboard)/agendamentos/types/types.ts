@@ -250,3 +250,22 @@ export function isValidUserObject(obj: unknown): obj is {
     "email" in obj
   );
 }
+
+// =============================================
+// Dashboard View Types
+// =============================================
+
+/**
+ * Tipo para exibição de próximos agendamentos no dashboard
+ */
+export interface UpcomingAppointment {
+  id: string;
+  alunoId: string;
+  alunoNome: string;
+  alunoAvatar: string | null;
+  dataHora: string; // Data ISO
+  duracao: number; // Minutos
+  status: "pendente" | "confirmado" | "cancelado" | "realizado";
+  titulo: string | null;
+  notas: string | null;
+}

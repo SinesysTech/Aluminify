@@ -16,7 +16,7 @@ import {
     FrenteComModulos,
     ModuloComAtividades,
 } from './types'
-import { StatusAtividade, DificuldadePercebida } from '@/app/shared/core/services/progresso-atividade'
+import { StatusAtividade, DificuldadePercebida } from '@/app/shared/types/enums'
 import { salaEstudosService } from './services/sala-estudos.service'
 
 type SalaEstudosClientProps = {

@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import type { ProfessorDisciplinaPerformance } from '@/app/[tenant]/features/professor/types'
+import type { ProfessorDisciplinaPerformance } from '@/app/[tenant]/(dashboard)/dashboard/types'
 import { cn } from '@/app/shared/core/utils'
 import { BookOpen } from 'lucide-react'
 

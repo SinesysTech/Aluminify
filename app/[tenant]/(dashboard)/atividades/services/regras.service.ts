@@ -8,7 +8,7 @@ import {
   RegraAtividadeNotFoundError,
   RegraAtividadeValidationError,
 } from "./regras.errors";
-import { TipoAtividade } from "../atividade";
+import { TipoAtividade } from "@/app/shared/types/enums";
 
 const VALID_TIPOS: TipoAtividade[] = [
   "Nivel_1",

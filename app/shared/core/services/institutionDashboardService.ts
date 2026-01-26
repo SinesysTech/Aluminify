@@ -1,5 +1,5 @@
 import type { InstitutionDashboardData } from "@/app/[tenant]/(dashboard)/dashboard/types";
-import { apiClient, ApiClientError } from "@/app/shared/core/api-client";
+import { apiClient, ApiClientError } from "@/app/shared/library/api-client";
 
 export interface InstitutionDashboardServiceError extends Error {
   status?: number;

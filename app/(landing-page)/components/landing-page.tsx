@@ -250,22 +250,22 @@ export function LandingPage() {
                                 </Link>
                             </div>
 
-                            <div className="bg-primary text-white rounded-2xl p-8 shadow-2xl flex flex-col h-full relative overflow-hidden">
-                                <div className="absolute top-0 right-0 bg-white/10 px-3 py-1 rounded-bl-lg text-xs font-bold uppercase tracking-wider">Popular</div>
+                            <div className="bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 rounded-2xl p-8 shadow-2xl flex flex-col h-full relative overflow-hidden">
+                                <div className="absolute top-0 right-0 bg-white/10 dark:bg-black/10 px-3 py-1 rounded-bl-lg text-xs font-bold uppercase tracking-wider">Popular</div>
                                 <div className="mb-6 relative z-10">
                                     <h3 className="text-2xl font-bold mb-2">Aluminify Cloud</h3>
-                                    <div className="text-sm text-zinc-400 font-mono">MANAGED</div>
+                                    <div className="text-sm text-zinc-400 dark:text-zinc-600 font-mono">MANAGED</div>
                                 </div>
-                                <div className="text-4xl font-bold mb-6 relative z-10">Escala<span className="text-lg font-normal text-zinc-400"> com você</span></div>
-                                <p className="text-zinc-300 mb-8 grow relative z-10">
+                                <div className="text-4xl font-bold mb-6 relative z-10">Escala<span className="text-lg font-normal text-zinc-400 dark:text-zinc-600"> com você</span></div>
+                                <p className="text-zinc-300 dark:text-zinc-700 mb-8 grow relative z-10">
                                     Nós gerenciamos a infraestrutura, atualizações e segurança. Você foca apenas no conteúdo e nos alunos.
                                 </p>
-                                <ul className="space-y-3 mb-8 text-sm text-zinc-200 relative z-10">
+                                <ul className="space-y-3 mb-8 text-sm text-zinc-200 dark:text-zinc-700 relative z-10">
                                     <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-400 text-base">check</span> Setup instantâneo</li>
                                     <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-400 text-base">check</span> CDN Global otimizado</li>
                                     <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-400 text-base">check</span> Suporte dedicado</li>
                                 </ul>
-                                <Link className="w-full py-3 bg-white text-primary rounded-lg text-center font-bold hover:bg-zinc-100 transition-colors relative z-10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-primary" href="/signup">
+                                <Link className="w-full py-3 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 rounded-lg text-center font-bold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors relative z-10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-zinc-900" href="/signup">
                                     Começar Trial
                                 </Link>
                                 <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-zinc-800 rounded-full blur-3xl opacity-50 pointer-events-none"></div>

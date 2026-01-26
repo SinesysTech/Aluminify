@@ -6,13 +6,13 @@ import type { InstitutionDashboardData } from '@/app/[tenant]/(dashboard)/dashbo
 import {
   fetchInstitutionDashboardData,
   type InstitutionDashboardServiceError,
-} from '@/dashboard/services/institutionDashboardService'
+} from '@/app/shared/core/services/institutionDashboardService'
 import { InstitutionHeader } from './institution-header'
 import { InstitutionMetrics } from './institution-metrics'
 import { StudentRankingList } from './student-ranking-list'
 import { ProfessorRankingList } from './professor-ranking-list'
 import { DisciplinaPerformanceList } from './disciplina-performance'
-import { ConsistencyHeatmap, type HeatmapPeriod } from '@/app/[tenant]/(dashboard)/aluno/dashboard/components/consistency-heatmap'
+import { ConsistencyHeatmap, type HeatmapPeriod } from '@/app/[tenant]/(dashboard)/dashboard/components/consistency-heatmap'
 import { DashboardSkeleton } from '@/app/[tenant]/(dashboard)/dashboard/components/dashboard-skeleton'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'

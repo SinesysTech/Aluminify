@@ -16,13 +16,13 @@ export function ThemeScaleSelector() {
   type ScaleKey = keyof typeof scaleValues;
 
   const selectedScaleKey: ScaleKey =
-    (Object.entries(scaleValues).find(([, val]) => val === theme.scale)?.[0] as ScaleKey | undefined) || 'none';
+    (Object.entries(scaleValues).find(([, val]) => String(val) === theme.scale)?.[0] as ScaleKey | undefined) || 'none';
 
   const handleChange = (value: string | undefined) => {
     if (!value) return;
     const nextScale = scaleValues[value as ScaleKey];
     if (typeof nextScale === 'number') {
-      setTheme({ ...theme, scale: nextScale });
+      setTheme({ ...theme, scale: String(nextScale) });
     }
   };
 

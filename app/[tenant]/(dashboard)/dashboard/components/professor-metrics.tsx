@@ -1,8 +1,8 @@
 ﻿'use client'
 
 import { Users, Calendar, CheckCircle2, Clock } from 'lucide-react'
-import { MetricCard } from '@/app/[tenant]/(dashboard)/dashboard/components/metric-card'
-import type { ProfessorSummary } from '@/app/[tenant]/features/professor/types'
+import { MetricCard } from './metric-card'
+import type { ProfessorSummary } from '@/app/[tenant]/(dashboard)/dashboard/types'
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 

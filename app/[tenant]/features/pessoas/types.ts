@@ -6,6 +6,19 @@
 // Re-export common user types
 export * from "@/app/shared/types/entities/user";
 
-// Specific role types if needed (that aren't in shared yet)
-// Currently, shared/types/entities/user.ts seems to have Student/Teacher.
-// We will verify if we need to move anything else here.
+// =============================================
+// Dashboard View Types
+// =============================================
+
+/**
+ * Aluno sob cuidado do professor (visão de dashboard)
+ */
+export interface StudentUnderCare {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  cursoNome: string;
+  progresso: number; // Percentual (0-100)
+  ultimaAtividade: string | null; // Data ISO
+  aproveitamento: number; // Percentual (0-100)
+}

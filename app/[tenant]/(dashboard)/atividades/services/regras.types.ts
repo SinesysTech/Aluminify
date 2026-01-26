@@ -1,4 +1,4 @@
-import { TipoAtividade } from '../atividade';
+import { TipoAtividade } from "@/app/shared/types/enums";
 
 export interface RegraAtividade {
   id: string;

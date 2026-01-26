@@ -22,8 +22,8 @@ export function PresetSelector() {
       setTheme({
         ...theme,
         preset: value,
-        radius: customPreset.radius,
-        scale: customPreset.scale,
+        radius: String(customPreset.radius),
+        scale: String(customPreset.scale),
         mode: customPreset.mode,
       });
     } else {

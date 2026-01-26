@@ -117,3 +117,4 @@ export interface DashboardData {
   subjectDistribution: SubjectDistributionItem[];
 }
 export * from './institution';
+export * from './professor';

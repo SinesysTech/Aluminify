@@ -18,13 +18,13 @@ export function ThemeRadiusSelector() {
   type RadiusKey = keyof typeof radiusValues;
 
   const selectedRadiusKey: RadiusKey =
-    (Object.entries(radiusValues).find(([, val]) => val === theme.radius)?.[0] as RadiusKey | undefined) || 'md';
+    (Object.entries(radiusValues).find(([, val]) => String(val) === theme.radius)?.[0] as RadiusKey | undefined) || 'md';
 
   const handleChange = (value: string | undefined) => {
     if (!value) return;
     const nextRadius = radiusValues[value as RadiusKey];
     if (typeof nextRadius === 'number') {
-      setTheme({ ...theme, radius: nextRadius });
+      setTheme({ ...theme, radius: String(nextRadius) });
     }
   };
 

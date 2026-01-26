@@ -150,8 +150,11 @@
 }
 
 /* --- V4 CONFIGURATION --- */
-@theme {
-  /* Mapeando as variáveis CSS para utilitários do Tailwind */
+@theme inline {
+  /*
+   * Semantic colors using CSS custom properties
+   * The 'inline' keyword tells Tailwind to preserve CSS variables at runtime
+   */
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));

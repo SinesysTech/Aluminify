@@ -150,7 +150,6 @@ export interface FontScheme {
     medium: number;
     semibold: number;
     bold: number;
-    fathers: number;
   };
 
   // Google Fonts integration

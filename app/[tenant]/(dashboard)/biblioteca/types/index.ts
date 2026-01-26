@@ -1,8 +1,4 @@
-import { TipoAtividade } from "@/app/[tenant]/(dashboard)/atividades/services";
-import {
-  StatusAtividade,
-  DificuldadePercebida,
-} from "@/app/shared/core/services/progresso-atividade";
+import { TipoAtividade, StatusAtividade, DificuldadePercebida } from "@/app/shared/types/enums";
 
 export interface AtividadeComProgresso {
   id: string;
