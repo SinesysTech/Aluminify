@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState, useContext } from 'react';
 import { useTenantBranding, TenantBrandingContext, type TenantBrandingContextType } from '@/components/providers/tenant-branding-provider';
 import { getCSSPropertiesManager } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/css-properties-manager';
-import type { CompleteBrandingConfig, ColorPalette, FontScheme, LogoType } from '@/empresa/personalizacao/services/empresa/personalizacao.types';
+import type { CompleteBrandingConfig, ColorPalette, FontScheme, LogoType } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
 
 export interface TenantBrandingHookReturn {
   // State

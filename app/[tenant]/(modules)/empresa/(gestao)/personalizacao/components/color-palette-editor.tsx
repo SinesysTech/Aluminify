@@ -17,7 +17,7 @@ import type {
   ColorPaletteEditorProps,
   CreateColorPaletteRequest,
   AccessibilityReport
-} from '@/empresa/personalizacao/services/empresa/personalizacao.types';
+} from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
 
 interface ColorInputProps {
   label: string;

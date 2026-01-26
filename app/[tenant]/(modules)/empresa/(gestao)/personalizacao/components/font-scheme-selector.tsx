@@ -23,7 +23,7 @@ import {
 import type {
   FontSchemeSelectorProps,
   CreateFontSchemeRequest
-} from '@/empresa/personalizacao/services/empresa/personalizacao.types';
+} from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
 
 interface FontInputProps {
   label: string;

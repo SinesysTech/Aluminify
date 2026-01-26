@@ -1,14 +1,14 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { BrandCustomizationRepositoryImpl } from './empresa/personalizacao.repository';
-import { getBrandingCacheManager } from '@/empresa/personalizacao/services/branding-cache-manager';
-import { getBrandingPerformanceMonitor } from '@/empresa/personalizacao/services/branding-performance-monitor';
+import { getBrandingCacheManager } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/branding-cache-manager';
+import { getBrandingPerformanceMonitor } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/branding-performance-monitor';
 import type {
   CompleteBrandingConfig,
   CSSCustomProperties,
   TenantBrandingInsert,
   ColorPalette,
   FontScheme,
-} from '@/empresa/personalizacao/services/empresa/personalizacao.types';
+} from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
 import type {
   LoadTenantBrandingOptions,
   ApplyTenantBrandingOptions,

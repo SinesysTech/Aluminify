@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { FontSchemeManagerImpl } from "@/empresa/personalizacao/services";
+import { FontSchemeManagerImpl } from "@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services";
 import {
   requireBrandCustomizationAccess,
   BrandCustomizationRequest,
 } from "@/app/shared/core/middleware/empresa/personalizacao-access";
 import { getPublicSupabaseConfig } from "@/app/shared/core/supabase-public-env";
-import type { CreateFontSchemeRequest } from "@/empresa/personalizacao/services/empresa/personalizacao.types";
+import type { CreateFontSchemeRequest } from "@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types";
 
 interface RouteContext {
   params: Promise<{ empresaId: string }>;

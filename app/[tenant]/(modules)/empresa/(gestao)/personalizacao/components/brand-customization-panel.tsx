@@ -36,7 +36,7 @@ import type {
   CreateColorPaletteRequest,
   CreateFontSchemeRequest,
   SaveTenantBrandingRequest
-} from '@/empresa/personalizacao/services/empresa/personalizacao.types';
+} from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
 
 export function BrandCustomizationPanel({
   empresaId,

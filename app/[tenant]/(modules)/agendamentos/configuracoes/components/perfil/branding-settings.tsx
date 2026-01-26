@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { createClient } from '@/app/shared/core/client';
 import { CardSkeleton } from '@/components/ui/card-skeleton';
-import { BrandCustomizationPanel } from '@/empresa/personalizacao/components';
-import type { CompleteBrandingConfig, SaveTenantBrandingRequest } from '@/empresa/personalizacao/services/empresa/personalizacao.types';
+import { BrandCustomizationPanel } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/components';
+import type { CompleteBrandingConfig, SaveTenantBrandingRequest } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
 
 interface BrandingSettingsProps {
     empresaId: string;

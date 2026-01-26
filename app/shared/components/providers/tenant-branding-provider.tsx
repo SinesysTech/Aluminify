@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useCallback, useRef } from 'react';
 import { useThemeConfig } from '@/components/active-theme';
 import { getBrandingSyncManager } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/branding-sync-manager';
-import type { CompleteBrandingConfig, LogoType } from '@/empresa/personalizacao/services/empresa/personalizacao.types';
+import type { CompleteBrandingConfig, LogoType } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
 import { createClient } from '@/app/shared/core/client';
 
 interface User {

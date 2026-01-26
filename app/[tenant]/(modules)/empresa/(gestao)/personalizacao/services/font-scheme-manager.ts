@@ -5,8 +5,8 @@ import type {
   FontSchemeUpdate,
   FontSchemeInsert,
   CSSCustomProperties,
-} from '@/empresa/personalizacao/services/empresa/personalizacao.types';
-import { FontLoadingError } from '@/empresa/personalizacao/services/empresa/personalizacao.types';
+} from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
+import { FontLoadingError } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
 
 /**
  * Font Scheme Manager Interface

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { LogoManagerImpl } from "@/empresa/personalizacao/services";
+import { LogoManagerImpl } from "@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services";
 import {
   requireBrandCustomizationAccess,
   BrandCustomizationRequest,
 } from "@/app/shared/core/middleware/empresa/personalizacao-access";
 import { getPublicSupabaseConfig } from "@/app/shared/core/supabase-public-env";
-import type { LogoType } from "@/empresa/personalizacao/services/empresa/personalizacao.types";
+import type { LogoType } from "@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types";
 
 interface RouteContext {
   params: Promise<{ empresaId: string }>;

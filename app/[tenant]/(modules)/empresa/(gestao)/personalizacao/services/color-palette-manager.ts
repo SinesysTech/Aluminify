@@ -6,8 +6,8 @@ import type {
   ColorPaletteInsert,
   AccessibilityReport,
   CSSCustomProperties,
-} from '@/empresa/personalizacao/services/empresa/personalizacao.types';
-import { ColorValidationError } from '@/empresa/personalizacao/services/empresa/personalizacao.types';
+} from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
+import { ColorValidationError } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
 
 /**
  * Color Palette Manager Interface
