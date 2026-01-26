@@ -526,14 +526,6 @@ export class StudentService extends UserBaseService {
   }
 }
 
-/**
- * Factory function para criar StudentService com cliente Supabase específico.
- * Use esta função quando precisar que as RLS policies sejam aplicadas
- * (ex: em páginas de dashboard, APIs com contexto de usuário).
- *
- * @param client - Cliente Supabase com contexto do usuário autenticado
- * @returns Instância de StudentService que respeita RLS
- */
 export function createStudentService(client: SupabaseClient): StudentService {
   const repository = new StudentRepositoryImpl(client);
   return new StudentService(repository);

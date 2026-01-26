@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
 import {
-  studentService,
+  createStudentService,
   StudentConflictError,
   StudentValidationError,
+  Student,
 } from "@/app/[tenant]/features/pessoas/services";
+import { createClient } from "@/app/shared/core/server";
 import {
   requireAuth,
   AuthenticatedRequest,
 } from "@/app/[tenant]/auth/middleware";
 import type { PaginationParams } from "@/app/shared/types/dtos/api-responses";
 
-const serializeStudent = (
-  student: Awaited<ReturnType<typeof studentService.getById>>,
-) => ({
+const serializeStudent = (student: Student) => ({
   id: student.id,
   fullName: student.fullName ?? null,
   email: student.email,
@@ -114,7 +114,8 @@ async function getHandler(request: AuthenticatedRequest) {
       role: request.user?.role,
     });
 
-    let service = studentService;
+    const supabaseAdmin = await createClient();
+    let service = createStudentService(supabaseAdmin);
 
     // Se tivermos um token de usuário, usamos o client com RLS
     // Se for API Key ou outro método, mantemos o service padrão (admin)
@@ -182,7 +183,8 @@ async function postHandler(request: AuthenticatedRequest) {
     const authHeader = request.headers.get("authorization");
     const token = authHeader?.replace("Bearer ", "");
 
-    let service = studentService;
+    const supabaseAdmin = await createClient();
+    let service = createStudentService(supabaseAdmin);
 
     if (token && request.user) {
       const { getDatabaseClientAsUser } =

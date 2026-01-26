@@ -65,13 +65,12 @@ export class StudentOrganizationsService {
    */
   async getStudentOrganizations(): Promise<StudentOrganizationsResponse> {
     // Call the RPC function to get empresa IDs for the current student
-    const { data: empresaIds, error: rpcError } = await this.client.rpc(
-      "get_aluno_empresas"
-    );
+    const { data: empresaIds, error: rpcError } =
+      await this.client.rpc("get_aluno_empresas");
 
     if (rpcError) {
       throw new Error(
-        `Failed to get student organizations: ${rpcError.message}`
+        `Failed to get student organizations: ${rpcError.message}`,
       );
     }
 
@@ -84,7 +83,7 @@ export class StudentOrganizationsService {
 
     // Extract empresa_id values from the RPC result
     const orgIds = empresaIds.map(
-      (row: { empresa_id: string }) => row.empresa_id
+      (row: { empresa_id: string }) => row.empresa_id,
     );
 
     // Fetch organization details
@@ -96,7 +95,7 @@ export class StudentOrganizationsService {
 
     if (empresasError) {
       throw new Error(
-        `Failed to fetch organization details: ${empresasError.message}`
+        `Failed to fetch organization details: ${empresasError.message}`,
       );
     }
 
@@ -110,7 +109,7 @@ export class StudentOrganizationsService {
         slug: empresa.slug,
         logoUrl: empresa.logo_url,
         courseCount: courseCounts.get(empresa.id) ?? 0,
-      })
+      }),
     );
 
     return {
@@ -130,7 +129,7 @@ export class StudentOrganizationsService {
 
     if (enrollmentsError) {
       throw new Error(
-        `Failed to fetch student enrollments: ${enrollmentsError.message}`
+        `Failed to fetch student enrollments: ${enrollmentsError.message}`,
       );
     }
 
@@ -144,7 +143,7 @@ export class StudentOrganizationsService {
     const { data: courses, error: coursesError } = await this.client
       .from("cursos")
       .select(
-        "id, nome, modalidade, tipo, ano_vigencia, data_inicio, data_termino, empresa_id"
+        "id, nome, modalidade, tipo, ano_vigencia, data_inicio, data_termino, empresa_id",
       )
       .in("id", courseIds);
 
@@ -170,7 +169,7 @@ export class StudentOrganizationsService {
 
     if (empresasError) {
       throw new Error(
-        `Failed to fetch organization details: ${empresasError.message}`
+        `Failed to fetch organization details: ${empresasError.message}`,
       );
     }
 
@@ -211,7 +210,7 @@ export class StudentOrganizationsService {
 
     // Convert to array and sort by org name
     const organizations = Array.from(orgMap.values()).sort((a, b) =>
-      a.nome.localeCompare(b.nome)
+      a.nome.localeCompare(b.nome),
     );
 
     return { organizations };
@@ -220,7 +219,9 @@ export class StudentOrganizationsService {
   /**
    * Get course counts per organization for the current student.
    */
-  private async getCourseCounts(orgIds: string[]): Promise<Map<string, number>> {
+  private async getCourseCounts(
+    orgIds: string[],
+  ): Promise<Map<string, number>> {
     const counts = new Map<string, number>();
 
     if (orgIds.length === 0) {
@@ -268,7 +269,7 @@ export class StudentOrganizationsService {
  * The client should have the user context for RLS to work correctly.
  */
 export function createStudentOrganizationsService(
-  client: SupabaseClient
+  client: SupabaseClient,
 ): StudentOrganizationsService {
   return new StudentOrganizationsService(client);
 }

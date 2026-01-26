@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/app/shared/core/server";
 import {
-  studentService,
+  createStudentService,
   StudentConflictError,
   StudentNotFoundError,
   StudentValidationError,
@@ -10,9 +11,7 @@ import {
   AuthenticatedRequest,
 } from "@/app/[tenant]/auth/middleware";
 
-const serializeStudent = (
-  student: Awaited<ReturnType<typeof studentService.getById>>,
-) => ({
+const serializeStudent = (student: any) => ({
   id: student.id,
   empresaId: student.empresaId,
   fullName: student.fullName,
@@ -68,7 +67,9 @@ async function getHandler(
   params: { id: string },
 ) {
   try {
-    const student = await studentService.getById(params.id);
+    const supabase = await createClient();
+    const service = createStudentService(supabase);
+    const student = await service.getById(params.id);
     return NextResponse.json({ data: serializeStudent(student) });
   } catch (error) {
     return handleError(error);
@@ -82,7 +83,9 @@ async function putHandler(
 ) {
   try {
     const body = await request.json();
-    const student = await studentService.update(params.id, {
+    const supabase = await createClient();
+    const service = createStudentService(supabase);
+    const student = await service.update(params.id, {
       fullName: body?.fullName,
       email: body?.email,
       cpf: body?.cpf,
@@ -109,7 +112,9 @@ async function deleteHandler(
   params: { id: string },
 ) {
   try {
-    await studentService.delete(params.id);
+    const supabase = await createClient();
+    const service = createStudentService(supabase);
+    await service.delete(params.id);
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleError(error);

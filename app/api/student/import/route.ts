@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import {
-  studentImportService,
+  createStudentImportService,
   StudentValidationError,
   StudentImportInputRow,
 } from "@/app/[tenant]/features/pessoas/services";
+import { createClient } from "@/app/shared/core/server";
 import {
   requireAuth,
   AuthenticatedRequest,
@@ -75,7 +76,9 @@ async function postHandler(request: AuthenticatedRequest) {
     }
 
     const rows = normalizeRowPayload(body.rows);
-    const result = await studentImportService.import(rows, {
+    const supabase = await createClient();
+    const importService = createStudentImportService(supabase);
+    const result = await importService.import(rows, {
       empresaId: request.user.empresaId,
     });
 

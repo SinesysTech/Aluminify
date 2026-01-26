@@ -52,6 +52,8 @@ export type DbProfessorIntegracao = {
   updated_at: string;
 };
 
+export type ProfessorIntegracao = DbProfessorIntegracao;
+
 export type DbAgendamentoRelatorio = {
   id: string;
   empresa_id: string;

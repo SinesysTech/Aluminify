@@ -1,6 +1,6 @@
 ﻿import type { Metadata } from 'next'
 import { UpdatePasswordForm } from '@/app/[tenant]/auth/components/update-password-form'
-import { TenantLogo } from '@/components/tenant-logo';
+import { TenantLogo } from '@/components/ui/tenant-logo';
 
 export const metadata: Metadata = {
   title: 'Atualizar Senha'

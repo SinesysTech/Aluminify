@@ -1,7 +1,7 @@
 ﻿import { createClient } from "@/app/shared/core/server"
 import { redirect } from "next/navigation"
 import { getAgendamentosProfessor, getAgendamentoStats } from "@/app/[tenant]/(dashboard)/agendamentos/lib/actions"
-import { AgendamentosDashboard } from "./components/agendamentos-dashboard"
+import { AgendamentosDashboard } from "@/app/[tenant]/(dashboard)/agendamentos/components/agendamentos-dashboard"
 import { Suspense } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 

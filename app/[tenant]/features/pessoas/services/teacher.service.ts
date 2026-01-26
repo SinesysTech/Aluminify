@@ -298,14 +298,3 @@ export class TeacherService extends UserBaseService {
     return teacher;
   }
 }
-
-let _teacherService: TeacherService | null = null;
-
-export function getTeacherService(): TeacherService {
-  if (!_teacherService) {
-    const databaseClient = getDatabaseClient();
-    const repository = new TeacherRepositoryImpl(databaseClient);
-    _teacherService = new TeacherService(repository);
-  }
-  return _teacherService;
-}

@@ -25,15 +25,15 @@ export function Nav({ transparent = false, activeLink }: NavProps) {
     const navClasses = transparent
         ? `fixed top-0 w-full z-50 transition-all duration-300 ${
               scrolled
-                  ? "bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-border-light/80 dark:border-border-dark/80"
+                  ? "bg-background/80 backdrop-blur-md border-b border-border/80"
                   : "bg-transparent border-b border-transparent"
           }`
-        : "sticky top-0 z-50 w-full border-b border-border-light/80 dark:border-border-dark/80 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md";
+        : "sticky top-0 z-50 w-full border-b border-border/80 bg-background/80 backdrop-blur-md";
 
     const getLinkClasses = (link: NavProps["activeLink"]) => {
-        const baseClasses = "hover:text-primary dark:hover:text-white transition-colors";
+        const baseClasses = "hover:text-primary transition-colors";
         if (activeLink === link) {
-            return "text-primary dark:text-white font-semibold transition-colors";
+            return "text-primary font-semibold transition-colors";
         }
         return baseClasses;
     };
@@ -44,14 +44,14 @@ export function Nav({ transparent = false, activeLink }: NavProps) {
                 <div className="flex justify-between h-16 items-center">
                     <div className="flex items-center gap-8">
                         <Link className="flex items-center gap-2 group" href="/">
-                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold font-display text-xl group-hover:scale-105 transition-transform">
+                            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold font-display text-xl group-hover:scale-105 transition-transform">
                                 A
                             </div>
-                            <span className="font-display font-bold text-lg tracking-tight">
+                            <span className="font-display font-bold text-lg tracking-tight text-foreground">
                                 Aluminify
                             </span>
                         </Link>
-                        <div className="hidden md:flex gap-6 text-sm font-medium text-text-muted-light dark:text-text-muted-dark">
+                        <div className="hidden md:flex gap-6 text-sm font-medium text-muted-foreground">
                             <Link
                                 className={getLinkClasses("produto")}
                                 href="/features"
@@ -80,13 +80,13 @@ export function Nav({ transparent = false, activeLink }: NavProps) {
                     </div>
                     <div className="flex items-center gap-4">
                         <Link
-                            className="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-white transition-colors hidden sm:block"
+                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors hidden sm:block"
                             href="/login"
                         >
                             Login
                         </Link>
                         <Link
-                            className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm shadow-zinc-300 dark:shadow-none focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                            className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                             href="/signup"
                         >
                             Criar Conta

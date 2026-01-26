@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import {
-  studentImportService,
+  createStudentImportService,
   StudentValidationError,
 } from "@/app/[tenant]/features/pessoas/services";
+import { createClient } from "@/app/shared/core/server";
 import {
   requireAuth,
   AuthenticatedRequest,
@@ -365,8 +366,10 @@ async function postHandler(request: AuthenticatedRequest) {
       courses: row.courses,
     }));
 
+    const supabase = await createClient();
+    const importService = createStudentImportService(supabase);
     // Executar importação
-    const result = await studentImportService.import(importData, {
+    const result = await importService.import(importData, {
       empresaId: request.user.empresaId,
     });
 

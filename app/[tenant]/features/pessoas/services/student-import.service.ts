@@ -1,9 +1,6 @@
-import { getDatabaseClient } from '@/app/shared/core/database/database';
-import { StudentService } from './student.service';
-import {
-  StudentConflictError,
-  StudentValidationError,
-} from './errors';
+import { getDatabaseClient } from "@/app/shared/core/database/database";
+import { StudentService, createStudentService } from "./student.service";
+import { StudentConflictError, StudentValidationError } from "./errors";
 
 type CourseRow = {
   id: string;
@@ -21,7 +18,7 @@ export interface StudentImportInputRow {
   temporaryPassword: string;
 }
 
-export type StudentImportRowStatus = 'created' | 'skipped' | 'failed';
+export type StudentImportRowStatus = "created" | "skipped" | "failed";
 
 export interface StudentImportRowResult {
   rowNumber: number;
@@ -39,12 +36,12 @@ export interface StudentImportSummary {
 }
 
 const REQUIRED_FIELDS: Array<keyof StudentImportInputRow> = [
-  'fullName',
-  'email',
-  'cpf',
-  'phone',
-  'enrollmentNumber',
-  'temporaryPassword',
+  "fullName",
+  "email",
+  "cpf",
+  "phone",
+  "enrollmentNumber",
+  "temporaryPassword",
 ];
 
 export class StudentImportService {
@@ -58,12 +55,16 @@ export class StudentImportService {
     options?: { empresaId?: string | null },
   ): Promise<StudentImportSummary> {
     if (!rows || rows.length === 0) {
-      throw new StudentValidationError('Nenhum aluno encontrado para importação.');
+      throw new StudentValidationError(
+        "Nenhum aluno encontrado para importação.",
+      );
     }
 
     const empresaId = options?.empresaId ?? undefined;
 
-    const courseLookup = await this.buildCourseLookup(options?.empresaId ?? null);
+    const courseLookup = await this.buildCourseLookup(
+      options?.empresaId ?? null,
+    );
 
     const summary: StudentImportSummary = {
       total: rows.length,
@@ -91,19 +92,19 @@ export class StudentImportService {
         summary.rows.push({
           rowNumber: row.rowNumber,
           email: row.email,
-          status: 'failed',
-          message: errors.join(' | '),
+          status: "failed",
+          message: errors.join(" | "),
         });
       }
     }
 
     // Fase 2: Processar registros válidos em lotes
-    const validRows = validatedRows.filter(v => v.errors.length === 0);
+    const validRows = validatedRows.filter((v) => v.errors.length === 0);
     const BATCH_SIZE = 10; // Processar 10 alunos por vez para evitar sobrecarga
 
     for (let i = 0; i < validRows.length; i += BATCH_SIZE) {
       const batch = validRows.slice(i, i + BATCH_SIZE);
-      
+
       // Processar lote em paralelo
       const batchResults = await Promise.allSettled(
         batch.map(async ({ row, courseIds }) => {
@@ -123,37 +124,39 @@ export class StudentImportService {
             return {
               rowNumber: row.rowNumber,
               email: row.email,
-              status: 'created' as const,
+              status: "created" as const,
             };
           } catch (error) {
             if (error instanceof StudentConflictError) {
               return {
                 rowNumber: row.rowNumber,
                 email: row.email,
-                status: 'skipped' as const,
+                status: "skipped" as const,
                 message: error.message,
               };
             }
 
             const message =
-              error instanceof Error ? error.message : 'Erro inesperado ao importar aluno.';
+              error instanceof Error
+                ? error.message
+                : "Erro inesperado ao importar aluno.";
             return {
               rowNumber: row.rowNumber,
               email: row.email,
-              status: 'failed' as const,
+              status: "failed" as const,
               message,
             };
           }
-        })
+        }),
       );
 
       // Processar resultados do lote
       batchResults.forEach((result) => {
-        if (result.status === 'fulfilled') {
+        if (result.status === "fulfilled") {
           const rowResult = result.value;
-          if (rowResult.status === 'created') {
+          if (rowResult.status === "created") {
             summary.created += 1;
-          } else if (rowResult.status === 'skipped') {
+          } else if (rowResult.status === "skipped") {
             summary.skipped += 1;
           } else {
             summary.failed += 1;
@@ -163,9 +166,10 @@ export class StudentImportService {
           summary.failed += 1;
           summary.rows.push({
             rowNumber: 0,
-            email: '',
-            status: 'failed',
-            message: result.reason?.message || 'Erro inesperado ao processar lote',
+            email: "",
+            status: "failed",
+            message:
+              result.reason?.message || "Erro inesperado ao processar lote",
           });
         }
       });
@@ -177,15 +181,17 @@ export class StudentImportService {
   private async buildCourseLookup(
     empresaId?: string | null,
   ): Promise<Map<string, CourseRow>> {
-    let query = this.client.from('cursos').select('id, nome');
+    let query = this.client.from("cursos").select("id, nome");
     if (empresaId) {
-      query = query.eq('empresa_id', empresaId);
+      query = query.eq("empresa_id", empresaId);
     }
 
     const { data, error } = await query;
 
     if (error) {
-      throw new Error(`Erro ao carregar cursos para importação: ${error.message}`);
+      throw new Error(
+        `Erro ao carregar cursos para importação: ${error.message}`,
+      );
     }
 
     const map = new Map<string, CourseRow>();
@@ -200,7 +206,7 @@ export class StudentImportService {
   }
 
   private normalizeCourseName(name?: string | null): string {
-    return (name ?? '').trim().toLowerCase();
+    return (name ?? "").trim().toLowerCase();
   }
 
   private validateRow(row: StudentImportInputRow): string[] {
@@ -208,7 +214,7 @@ export class StudentImportService {
 
     REQUIRED_FIELDS.forEach((field) => {
       const value = row[field];
-      if (typeof value === 'string') {
+      if (typeof value === "string") {
         if (!value.trim()) {
           errors.push(`Campo obrigatório "${field}" ausente.`);
         }
@@ -218,11 +224,11 @@ export class StudentImportService {
     });
 
     if (!row.courses || row.courses.length === 0) {
-      errors.push('Informe pelo menos um curso para cada aluno.');
+      errors.push("Informe pelo menos um curso para cada aluno.");
     }
 
     if (row.temporaryPassword && row.temporaryPassword.length < 8) {
-      errors.push('A senha temporária deve ter pelo menos 8 caracteres.');
+      errors.push("A senha temporária deve ter pelo menos 8 caracteres.");
     }
 
     return errors;
@@ -254,15 +260,20 @@ export class StudentImportService {
     }
 
     if (unknownCourses.length > 0) {
-      errors.push(`Cursos não encontrados: ${unknownCourses.join(', ')}`);
+      errors.push(`Cursos não encontrados: ${unknownCourses.join(", ")}`);
     }
 
     if (courseIds.length === 0) {
-      errors.push('Nenhum curso válido encontrado para este aluno.');
+      errors.push("Nenhum curso válido encontrado para este aluno.");
     }
 
     return courseIds;
   }
 }
 
-
+export function createStudentImportService(
+  client: SupabaseClient,
+): StudentImportService {
+  const studentService = createStudentService(client);
+  return new StudentImportService(studentService);
+}

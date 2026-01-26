@@ -31,16 +31,30 @@
         "./*"
       ],
       "@/components/*": [
-        "app/shared/components/*"
+        "app/shared/components/*",
+        "app/shared/components/ui/*"
+      ],
+      "@/components/shared/*": [
+        "app/shared/components/ui/*"
       ],
       "@/hooks/*": [
         "app/shared/hooks/*"
       ],
       "@/lib/*": [
-        "app/shared/library/*"
+        "app/shared/library/*",
+        "app/shared/core/*"
       ],
       "@/shared/*": [
         "app/shared/*"
+      ],
+      "@/app/shared/*": [
+        "app/shared/*"
+      ],
+      "@/app/shared/core/utils": [
+        "app/shared/library/utils"
+      ],
+      "@/lib/database.types": [
+        "app/shared/core/database.types"
       ],
       "@/brand-customization/*": [
         "./app/[tenant]/(dashboard)/brand-customization/*"
