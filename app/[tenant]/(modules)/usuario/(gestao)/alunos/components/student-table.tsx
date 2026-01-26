@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Eye, Trash2, UserCog } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Student } from '@/app/shared/types/entities/user'
 import { createClient } from '@/app/shared/core/client'
 import {
@@ -27,6 +27,8 @@ export function StudentTable({ students, meta }: StudentTableProps) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [studentToDelete, setStudentToDelete] = useState<Student | null>(null)
     const router = useRouter()
+    const params = useParams()
+    const tenant = params?.tenant as string
     const pathname = usePathname()
     const searchParams = useSearchParams()
 
@@ -94,7 +96,7 @@ export function StudentTable({ students, meta }: StudentTableProps) {
                 })
                 // Aguardar um pouco para garantir que o cookie foi definido
                 await new Promise(resolve => setTimeout(resolve, 100))
-                router.push('/dashboard')
+                router.push(tenant ? `/${tenant}/dashboard` : '/dashboard')
                 router.refresh()
             } else {
                 toast({

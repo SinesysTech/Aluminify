@@ -55,7 +55,8 @@
       "Bash(npm init -y)",
       "Bash(/c/Program Files/nodejs/npm.cmd install)",
       "Bash(npm.cmd install:*)",
-      "Bash(npm.cmd view:*)"
+      "Bash(npm.cmd view:*)",
+      "Bash(npm.cmd list:*)"
     ],
     "deny": [],
     "ask": []

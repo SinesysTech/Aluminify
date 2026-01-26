@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/app/shared/core/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/app/shared/components/forms/input';
@@ -21,6 +21,8 @@ interface Empresa {
 
 export default function CompletarCadastroEmpresaPage() {
   const router = useRouter();
+  const params = useParams();
+  const tenant = params?.tenant as string;
   const { toast } = useToast();
   const user = useCurrentUser();
   const [loading, setLoading] = useState(false);
@@ -78,7 +80,7 @@ export default function CompletarCadastroEmpresaPage() {
             description: 'Você não está vinculado a uma empresa. Entre em contato com o suporte.',
             variant: 'destructive',
           });
-          router.push('/dashboard');
+          router.push(tenant ? `/${tenant}/dashboard` : '/dashboard');
           return;
         }
 
@@ -115,7 +117,7 @@ export default function CompletarCadastroEmpresaPage() {
             title: 'Informação',
             description: 'O cadastro da empresa já está completo.',
           });
-          router.push('/empresa/dashboard');
+          router.push(tenant ? `/${tenant}/dashboard` : '/dashboard');
           return;
         }
 
@@ -242,7 +244,7 @@ export default function CompletarCadastroEmpresaPage() {
 
       // Redirecionar para dashboard da empresa
       setTimeout(() => {
-        router.push('/empresa/dashboard');
+        router.push(tenant ? `/${tenant}/dashboard` : '/dashboard');
         router.refresh();
       }, 1000);
     } catch (error) {

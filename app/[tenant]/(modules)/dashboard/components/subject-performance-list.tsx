@@ -183,7 +183,7 @@ export function SubjectPerformanceList({
     }
   }, [groupBy, scopeParams.scope, scopeParams.scopeId, period])
 
-  // Fun��o para ordenar os dados
+  // Função para ordenar os dados
   const renderItems: PerformanceItem[] = items ?? subjects.map((s) => ({
     id: String(s.id),
     name: s.name,
@@ -205,7 +205,7 @@ export function SubjectPerformanceList({
     }
   })
 
-  // Fun��o para determinar a cor da barra baseada no score
+  // Função para determinar a cor da barra baseada no score
   const getBarColor = (score: number) => {
     if (score >= 80) {
       return 'bg-green-500'
