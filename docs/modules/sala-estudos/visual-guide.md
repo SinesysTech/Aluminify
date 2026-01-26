@@ -12,7 +12,7 @@ A **Sala de Estudos** é como um **checklist inteligente** que mostra todas as a
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Aluno acessa: /aluno/sala-de-estudos                  │
+│  Aluno acessa: /sala-de-estudos                  │
 └─────────────────────────────────────────────────────────┘
                         ↓
 ┌─────────────────────────────────────────────────────────┐

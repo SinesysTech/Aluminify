@@ -20,7 +20,7 @@
 - [x] `GET /api/atividade/aluno/[alunoId]` - Listar atividades do aluno
 
 ### Frontend - Types
-- [x] Types do frontend (`app/(dashboard)/aluno/sala-de-estudos/types.ts`)
+- [x] Types do frontend (`app/(modules)/sala-de-estudos/types.ts`)
 
 ## ⏳ PENDENTE
 

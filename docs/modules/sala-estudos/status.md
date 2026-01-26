@@ -9,7 +9,7 @@
    - APIs funcionando
 
 2. **Frontend Professor:**
-   - Página `/admin/materiais` completa
+   - Página `/biblioteca/materiais` completa
    - Upload de PDFs funcionando
    - Geração de estrutura automática
 

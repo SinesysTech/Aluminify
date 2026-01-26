@@ -65,7 +65,7 @@ Aluno
 
 #### 1.1. Autenticação e Detecção de Role
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 ```typescript
 // Busca usuário autenticado
@@ -164,7 +164,7 @@ Ao invés de uma query SQL gigante com múltiplos JOINs, usamos uma abordagem de
 
 #### 3.2. Passo a Passo da Query
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 **Passo 1: Obter Cursos**
 ```typescript
@@ -732,7 +732,7 @@ SET search_path = public
 ### Exemplo: Aluno Visualiza Atividades
 
 ```
-1. Aluno acessa /aluno/sala-de-estudos
+1. Aluno acessa /sala-de-estudos
    ↓
 2. Sistema detecta: role = 'aluno'
    ↓

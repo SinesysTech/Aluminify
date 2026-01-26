@@ -85,7 +85,7 @@ Módulo;Pergunta;Resposta
 
 ---
 
-### 4. Filtros de Admin (`app/(dashboard)/admin/flashcards/flashcards-admin-client.tsx`)
+### 4. Filtros de Admin (`app/(modules)/admin/flashcards/flashcards-admin-client.tsx`)
 
 **Status:** ✅ Funcionando corretamente
 
@@ -189,7 +189,7 @@ Na página `/admin/flashcards`, use os filtros:
 
 ### Revisão (Aluno)
 
-Na página `/aluno/flashcards`:
+Na página `/flashcards`:
 - Aluno seleciona modo de revisão
 - Sistema busca apenas flashcards dos cursos do aluno
 - Filtra por hierarquia completa

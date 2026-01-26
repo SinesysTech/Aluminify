@@ -53,9 +53,9 @@ O sistema de agendamento atual possui falhas criticas que impedem seu uso em pro
 
 ### Affected Code
 - `app/actions/agendamentos.ts` - Server actions
-- `app/(dashboard)/agendamentos/` - Rotas de agendamento
-- `app/(dashboard)/meus-agendamentos/` - Lista do aluno
-- `app/(dashboard)/professor/` - Area do professor
+- `app/(modules)/agendamentos/` - Rotas de agendamento
+- `app/(modules)/meus-agendamentos/` - Lista do aluno
+- `app/(modules)/professor/` - Area do professor
 - `components/agendamento/` - Componentes de agendamento
 - `components/professor/` - Componentes do professor
 - `lib/agendamento-validations.ts` - Validacoes

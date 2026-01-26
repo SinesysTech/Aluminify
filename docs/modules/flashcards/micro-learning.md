@@ -70,7 +70,7 @@
 
 ### 6. ✅ Frontend Atualizado
 
-**Arquivo:** `app/(dashboard)/aluno/flashcards/flashcards-client.tsx`
+**Arquivo:** `app/(modules)/flashcards/flashcards-client.tsx`
 
 **Mudanças:**
 - ✅ **Rastreamento de Sessão:**

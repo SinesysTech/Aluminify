@@ -26,10 +26,10 @@ O cliente deve ter liberdade de escolher entre usar integração com Hotmart ou 
 - **ADDED** Webhook handler para Hotmart - receber notificações de vendas
 
 ### Frontend
-- **ADDED** Página `/admin/financeiro` - dashboard financeiro
-- **ADDED** Página `/admin/financeiro/transacoes` - listagem de transações
-- **ADDED** Página `/admin/financeiro/produtos` - gestão de produtos
-- **ADDED** Página `/admin/financeiro/cupons` - gestão de cupons
+- **ADDED** Página `/financeiro` - dashboard financeiro
+- **ADDED** Página `/financeiro/transacoes` - listagem de transações
+- **ADDED** Página `/financeiro/produtos` - gestão de produtos
+- **ADDED** Página `/financeiro/cupons` - gestão de cupons
 - **ADDED** Componentes de relatórios - gráficos e métricas
 
 ## Impact
@@ -38,7 +38,7 @@ O cliente deve ter liberdade de escolher entre usar integração com Hotmart ou 
 - **Affected code**:
   - `backend/services/` - novo service financial
   - `app/api/` - novas rotas de API
-  - `app/(dashboard)/admin/` - novas páginas
+  - `app/(modules)/admin/` - novas páginas
   - `supabase/migrations/` - novas tabelas
 - **Breaking changes**: Nenhum
 

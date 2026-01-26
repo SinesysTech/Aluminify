@@ -34,7 +34,7 @@ O bucket está configurado e pronto para uso. Agora você pode testar:
 
 1. **Acesse a aplicação:**
    ```
-   http://localhost:3000/admin/materiais
+   http://localhost:3000/biblioteca/materiais
    ```
 
 2. **Faça login como professor**

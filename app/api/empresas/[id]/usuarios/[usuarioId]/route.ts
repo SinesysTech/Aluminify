@@ -3,7 +3,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/app/shared/core/database.types";
 import { createClient } from "@/app/shared/core/server";
 import { UsuarioRepositoryImpl } from "@/app/[tenant]/(modules)/usuario/services";
-import { PapelRepositoryImpl } from "@/app/[tenant]/(modules)/admin/services";
+import { PapelRepositoryImpl } from "@/app/[tenant]/(modules)/usuario/services/papel.repository";
 import { getAuthUser } from "@/app/[tenant]/auth/middleware";
 import {
   getEmpresaContext,

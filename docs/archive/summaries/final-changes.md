@@ -9,7 +9,7 @@
 **Solução**: Alinhado para usar `alunos_cursos` (mesma fonte do cronograma).
 
 **Arquivos Modificados**:
-- `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+- `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 - `backend/services/atividade/atividade.repository-helper.ts`
 
 ---

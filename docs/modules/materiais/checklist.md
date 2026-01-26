@@ -14,7 +14,7 @@
 
 ### Frontend
 - [x] Componentes UI criados
-- [x] Página `/admin/materiais` criada
+- [x] Página `/biblioteca/materiais` criada
 - [x] Upload direto no frontend implementado
 - [x] Filtros de Disciplina > Frente funcionando
 - [x] Accordions por módulo implementados
@@ -51,7 +51,7 @@ Após criar o bucket, execute a migration SQL das políticas:
 
 1. **Acessar a página:**
    - Faça login como professor
-   - Acesse `/admin/materiais`
+   - Acesse `/biblioteca/materiais`
 
 2. **Gerar estrutura:**
    - Selecione uma disciplina
@@ -93,9 +93,9 @@ Após criar o bucket, execute a migration SQL das políticas:
 - `components/module-accordion.tsx`
 
 ### Páginas
-- `app/(dashboard)/admin/materiais/page.tsx`
-- `app/(dashboard)/admin/materiais/materiais-client.tsx`
-- `app/(dashboard)/admin/materiais/types.ts`
+- `app/(modules)/biblioteca/materiais/page.tsx`
+- `app/(modules)/biblioteca/materiais/materiais-client.tsx`
+- `app/(modules)/biblioteca/materiais/types.ts`
 
 ### Documentação
 - `docs/PLANO_MODULO_MATERIAIS.md`

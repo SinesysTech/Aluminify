@@ -2,7 +2,7 @@
 
 ### Requirement: Importação de Alunos via Excel na Página de Administração
 
-O sistema DEVE fornecer uma interface de importação de alunos em massa na página de administração de alunos (`/admin/alunos`) com as seguintes funcionalidades:
+O sistema DEVE fornecer uma interface de importação de alunos em massa na página de administração de alunos (`/usuario/(gestao)/alunos`) com as seguintes funcionalidades:
 
 1. **Dialog de Importação**
    - Um dialog/sheet DEVE ser exibido ao clicar nos botões "Importar CSV" ou "Importar Planilha"

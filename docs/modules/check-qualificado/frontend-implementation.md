@@ -97,7 +97,7 @@ interface AtividadeChecklistRowProps {
 
 ### 4. **Página Atualizada: `sala-estudos-client.tsx`**
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 **Mudanças Principais**:
 

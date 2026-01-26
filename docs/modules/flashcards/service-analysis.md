@@ -19,7 +19,7 @@
    - ✅ Tabela `progresso_flashcards` (SRS tracking)
 
 ### Frontend - Aluno
-1. **Página de Revisão** (`app/(dashboard)/aluno/flashcards/`)
+1. **Página de Revisão** (`app/(modules)/flashcards/`)
    - ✅ Seleção de modo (Mais Cobrados, Revisão Geral, Mais Errados)
    - ✅ Visualização de flashcards (pergunta/resposta)
    - ✅ Sistema de feedback (Errei, Difícil, Bom, Fácil)
@@ -27,7 +27,7 @@
    - ✅ Interface completa funcional
 
 ### Frontend - Admin (Parcial)
-1. **Importação dentro de Materiais** (`app/(dashboard)/admin/materiais/`)
+1. **Importação dentro de Materiais** (`app/(modules)/biblioteca/materiais/`)
    - ✅ Upload de CSV para importação
    - ✅ Parsing e validação de CSV
    - ✅ Integração com API de importação

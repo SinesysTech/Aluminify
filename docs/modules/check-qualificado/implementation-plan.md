@@ -214,7 +214,7 @@ interface AtividadeChecklistRowProps {
 
 #### 1.3. Atualizar: Tipos Frontend
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/types.ts`
+**Arquivo**: `app/(modules)/sala-de-estudos/types.ts`
 
 **Adicionar campos de desempenho ao tipo**:
 ```typescript
@@ -233,7 +233,7 @@ export interface AtividadeComProgresso extends AtividadeBase {
 
 #### 2.1. Atualizar Query de Atividades
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 **Na query de progresso**, buscar campos adicionais:
 ```typescript

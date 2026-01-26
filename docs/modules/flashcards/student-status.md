@@ -12,11 +12,11 @@ O serviço de flashcards para alunos está **100% implementado e configurado**, 
 
 ### 1. Página de Acesso do Aluno
 
-**Arquivo:** `app/(dashboard)/aluno/flashcards/page.tsx`
+**Arquivo:** `app/(modules)/flashcards/page.tsx`
 - ✅ Server component com autenticação (`requireUser()`)
 - ✅ Renderiza o componente client
 
-**Arquivo:** `app/(dashboard)/aluno/flashcards/flashcards-client.tsx`
+**Arquivo:** `app/(modules)/flashcards/flashcards-client.tsx`
 - ✅ Interface completa de revisão
 - ✅ 3 modos de estudo:
   - 🔥 **Mais Cobrados** - Foco em módulos de importância Alta
@@ -33,7 +33,7 @@ O serviço de flashcards para alunos está **100% implementado e configurado**, 
 **Arquivo:** `components/app-sidebar.tsx`
 - ✅ Link "Flashcards" adicionado no menu do aluno
 - ✅ Ícone: `BrainCircuit`
-- ✅ URL: `/aluno/flashcards`
+- ✅ URL: `/flashcards`
 - ✅ Visível para todos os roles (aluno, professor, superadmin)
 
 ### 3. Backend - Serviço
@@ -74,7 +74,7 @@ O serviço de flashcards para alunos está **100% implementado e configurado**, 
 
 ### 1. Acesso
 ```
-Aluno acessa /aluno/flashcards
+Aluno acessa /flashcards
     ↓
 Sistema verifica autenticação
     ↓

@@ -89,7 +89,7 @@ const cursoIds = matriculas.map((m: { curso_id: string }) => m.curso_id)
 1. **Migration**: `supabase/migrations/..._create_function_get_matriculas_aluno.sql`
    - Criada função RPC `get_matriculas_aluno`
 
-2. **Frontend**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+2. **Frontend**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
    - Substituídas queries diretas por chamadas RPC
    - Adicionada verificação de sessão
    - Corrigida tipagem TypeScript

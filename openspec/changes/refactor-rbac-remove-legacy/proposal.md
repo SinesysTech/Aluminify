@@ -32,7 +32,7 @@ O sistema de papéis (RBAC) atual contém código legado de compatibilidade com 
 
 ### Nova UI de Gerenciamento de Papéis
 
-- Página de listagem de papéis (`/admin/empresa/papeis`)
+- Página de listagem de papéis (`/empresa/(gestao)/detalhes/papeis`)
 - Formulário de criação/edição de papel customizado
 - Componente de matriz de permissões (grid visual para editar permissões)
 - Integração com APIs existentes (`/api/empresas/[id]/papeis`)
@@ -47,7 +47,7 @@ O sistema de papéis (RBAC) atual contém código legado de compatibilidade com 
   - `lib/auth.ts`
   - `backend/auth/middleware.ts`
   - `app/api/user/profile/route.ts`
-  - `app/(dashboard)/admin/empresa/papeis/` (novo)
+  - `app/(modules)/empresa/(gestao)/detalhes/papeis/` (novo)
   - `components/admin/papel-form.tsx` (novo)
   - `components/admin/permissions-matrix.tsx` (novo)
 

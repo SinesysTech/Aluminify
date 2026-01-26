@@ -41,7 +41,7 @@ Após criar o bucket e aplicar as políticas:
 
 1. **Acesse a página:**
    ```
-   http://localhost:3000/admin/materiais
+   http://localhost:3000/biblioteca/materiais
    ```
    (ou sua URL de produção)
 
@@ -65,7 +65,7 @@ Após criar o bucket e aplicar as políticas:
 - [ ] Bucket marcado como **público**
 - [ ] Políticas RLS aplicadas (migration SQL executada)
 - [ ] Testado login como professor
-- [ ] Testado acesso à página `/admin/materiais`
+- [ ] Testado acesso à página `/biblioteca/materiais`
 - [ ] Testado gerar estrutura
 - [ ] Testado upload de PDF
 - [ ] Testado visualização de PDF

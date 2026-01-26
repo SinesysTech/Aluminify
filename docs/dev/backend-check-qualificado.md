@@ -30,7 +30,7 @@ export function atividadeRequerDesempenho(tipo: TipoAtividade): boolean {
 }
 ```
 
-**Tipos Frontend também atualizados** (`app/(dashboard)/aluno/sala-de-estudos/types.ts`):
+**Tipos Frontend também atualizados** (`app/(modules)/sala-de-estudos/types.ts`):
 - Adicionados campos de desempenho ao `AtividadeComProgresso`
 
 ---
@@ -73,7 +73,7 @@ resultado.push({
 });
 ```
 
-#### `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+#### `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 **Query no frontend também atualizada**:
 ```typescript

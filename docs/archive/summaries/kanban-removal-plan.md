@@ -14,7 +14,7 @@ A funcionalidade de Kanban foi implementada para visualizar o cronograma de estu
 ### 1.2 Componentes e Arquivos Identificados
 
 #### Frontend
-1. **Página principal**: `app/(dashboard)/aluno/cronograma/kanban/page.tsx`
+1. **Página principal**: `app/(modules)/cronograma/kanban/page.tsx`
    - Carrega cronograma do aluno
    - Renderiza componente ScheduleKanban
    - Gerencia estado de conclusão de itens
@@ -44,9 +44,9 @@ A funcionalidade de Kanban foi implementada para visualizar o cronograma de estu
 ### 1.3 Impacto e Dependências
 
 #### ✅ Funcionalidades que NÃO serão afetadas:
-- **Cronograma principal** (`/aluno/cronograma`) - página independente
-- **Calendário** (`/aluno/cronograma/calendario`) - página independente
-- **Criação de cronograma** (`/aluno/cronograma/novo`) - página independente
+- **Cronograma principal** (`/cronograma`) - página independente
+- **Calendário** (`/cronograma/calendario`) - página independente
+- **Criação de cronograma** (`/cronograma/novo`) - página independente
 - **Backend de cronograma** (`backend/services/cronograma/`) - não depende do kanban
 - **APIs de cronograma** - não dependem do kanban
 - **Tabelas do banco** - não precisam ser alteradas
@@ -64,10 +64,10 @@ A funcionalidade de Kanban foi implementada para visualizar o cronograma de estu
 ### Fase 1: Remoção de Arquivos e Componentes
 
 #### 1.1 Remover página do kanban
-**Arquivo**: `app/(dashboard)/aluno/cronograma/kanban/page.tsx`
+**Arquivo**: `app/(modules)/cronograma/kanban/page.tsx`
 - **Ação**: Deletar arquivo e diretório completo
-- **Impacto**: Usuários que acessarem `/aluno/cronograma/kanban` receberão 404
-- **Alternativa**: Redirecionar para `/aluno/cronograma` (opcional)
+- **Impacto**: Usuários que acessarem `/cronograma/kanban` receberão 404
+- **Alternativa**: Redirecionar para `/cronograma` (opcional)
 
 #### 1.2 Remover componente ScheduleKanban
 **Arquivo**: `components/schedule-kanban.tsx`
@@ -88,7 +88,7 @@ A funcionalidade de Kanban foi implementada para visualizar o cronograma de estu
 ```typescript
 {
   title: "Quadro Kanban",
-  url: "/aluno/cronograma/kanban",
+  url: "/cronograma/kanban",
   icon: LayoutGrid,
   roles: ALL_ROLES,
 },
@@ -118,8 +118,8 @@ A funcionalidade de Kanban foi implementada para visualizar o cronograma de estu
 **Arquivo**: `docs/VERIFICACAO_COMPLETA_SISTEMA.md`
 - **Linha**: 54
 - **Ação**: Remover ou marcar como removido:
-  - Remover: `- ✅ `/aluno/cronograma/kanban` - Visualização Kanban`
-  - Ou adicionar: `- ❌ `/aluno/cronograma/kanban` - Visualização Kanban (REMOVIDO)`
+  - Remover: `- ✅ `/cronograma/kanban` - Visualização Kanban`
+  - Ou adicionar: `- ❌ `/cronograma/kanban` - Visualização Kanban (REMOVIDO)`
 
 #### 4.2 Atualizar plano mobile (opcional)
 **Arquivo**: `docs/MOBILE_UX_PLAN.md`
@@ -135,8 +135,8 @@ A funcionalidade de Kanban foi implementada para visualizar o cronograma de estu
 - [ ] Comunicar remoção aos stakeholders (se necessário)
 
 ### Remoção de Arquivos
-- [ ] Deletar `app/(dashboard)/aluno/cronograma/kanban/page.tsx`
-- [ ] Deletar diretório `app/(dashboard)/aluno/cronograma/kanban/`
+- [ ] Deletar `app/(modules)/cronograma/kanban/page.tsx`
+- [ ] Deletar diretório `app/(modules)/cronograma/kanban/`
 - [ ] Deletar `components/schedule-kanban.tsx`
 - [ ] Deletar `components/ui/shadcn-io/kanban/index.tsx`
 - [ ] Deletar diretório `components/ui/shadcn-io/kanban/`
@@ -159,7 +159,7 @@ A funcionalidade de Kanban foi implementada para visualizar o cronograma de estu
 - [ ] Verificar que o app compila sem erros (`npm run build`)
 - [ ] Verificar que não há erros de lint (`npm run lint`)
 - [ ] Testar navegação no menu (verificar que item foi removido)
-- [ ] Testar acesso direto à URL `/aluno/cronograma/kanban` (deve retornar 404 ou redirecionar)
+- [ ] Testar acesso direto à URL `/cronograma/kanban` (deve retornar 404 ou redirecionar)
 - [ ] Testar outras páginas do cronograma (devem funcionar normalmente)
 - [ ] Verificar que não há imports quebrados
 
@@ -200,12 +200,12 @@ grep -r "@dnd-kit" --exclude-dir=node_modules --exclude-dir=.git
 ### 5.1 Redirecionamento (Opcional)
 Se quiser redirecionar usuários que acessarem a URL antiga:
 
-**Criar**: `app/(dashboard)/aluno/cronograma/kanban/page.tsx`
+**Criar**: `app/(modules)/cronograma/kanban/page.tsx`
 ```typescript
 import { redirect } from 'next/navigation'
 
 export default function KanbanPage() {
-  redirect('/aluno/cronograma')
+  redirect('/cronograma')
 }
 ```
 

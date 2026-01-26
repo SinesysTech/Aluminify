@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import type { AppUserRole } from "@/app/shared/types";
 import type { RoleTipo, RolePermissions } from "@/app/shared/types/entities/papel";
-import { isAdminRole } from "@/app/[tenant]/(modules)/admin/services";
+import { isAdminRole } from "@/app/[tenant]/(modules)/usuario/services/permission.service";
 import type {
   UserRoleIdentification,
   UserRoleDetail,

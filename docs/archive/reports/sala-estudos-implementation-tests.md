@@ -11,7 +11,7 @@
   - ✅ `/api/progresso-atividade/[id]`
   - ✅ `/api/progresso-atividade/atividade/[atividadeId]`
   - ✅ `/api/atividade/aluno/[alunoId]`
-  - ✅ `/aluno/sala-de-estudos` (página já existe)
+  - ✅ `/sala-de-estudos` (página já existe)
 
 ### 2. Verificação de Linter
 - **Status**: ✅ **SEM ERROS**
@@ -20,7 +20,7 @@
   - ✅ `backend/services/atividade/`
   - ✅ `app/api/progresso-atividade/`
   - ✅ `app/api/atividade/aluno/`
-  - ✅ `app/(dashboard)/aluno/sala-de-estudos/`
+  - ✅ `app/(modules)/sala-de-estudos/`
 
 ### 3. Verificação de Estrutura de Arquivos
 
@@ -40,7 +40,7 @@
 - ✅ `app/api/atividade/aluno/[alunoId]/route.ts` - Criado
 
 #### Frontend - Types
-- ✅ `app/(dashboard)/aluno/sala-de-estudos/types.ts` - Criado
+- ✅ `app/(modules)/sala-de-estudos/types.ts` - Criado
 
 ### 4. Verificação de Banco de Dados
 - **Status**: ✅ **OK**
@@ -75,7 +75,7 @@ app/api/progresso-atividade/
 app/api/atividade/aluno/
 └── [alunoId]/route.ts
 
-app/(dashboard)/aluno/sala-de-estudos/
+app/(modules)/sala-de-estudos/
 └── types.ts
 ```
 

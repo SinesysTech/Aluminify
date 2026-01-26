@@ -52,7 +52,7 @@ Todas as 4 políticas de segurança foram aplicadas e estão funcionando:
 
 ### Próximo passo: Testar!
 
-1. Acesse: `http://localhost:3000/admin/materiais`
+1. Acesse: `http://localhost:3000/biblioteca/materiais`
 2. Faça login como professor
 3. Selecione disciplina e frente
 4. Clique em "Gerar Estrutura"

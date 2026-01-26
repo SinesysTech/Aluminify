@@ -303,13 +303,13 @@ ON public.progresso_flashcards(data_proxima_revisao);
 npm run dev
 ```
 
-2. Acesse `http://localhost:3000/aluno/flashcards`
+2. Acesse `http://localhost:3000/flashcards`
 3. Verifique se consegue ver os flashcards
 4. Teste dar feedback em um flashcard
 
 ### 6.2. Teste de Importação
 
-1. Acesse `/admin/materiais` (como professor)
+1. Acesse `/biblioteca/materiais` (como professor)
 2. Faça upload de um CSV de flashcards
 3. Verifique se os flashcards foram importados corretamente
 
@@ -342,9 +342,9 @@ app/api/flashcards/
   ├── revisao/route.ts          # Listagem para revisão
   └── feedback/route.ts         # Registro de feedback
 
-app/(dashboard)/
+app/(modules)/
   ├── admin/flashcards/         # Interface admin
-  └── aluno/flashcards/         # Interface aluno
+  └── flashcards/         # Interface aluno
 ```
 
 ---

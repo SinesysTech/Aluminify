@@ -41,7 +41,7 @@ O sistema DEVE utilizar permissões granulares por recurso ao invés de checagen
 O sistema DEVE fornecer uma interface administrativa para gerenciar papéis customizados.
 
 #### Scenario: List papéis
-- **WHEN** um admin acessa `/admin/empresa/papeis`
+- **WHEN** um admin acessa `/empresa/(gestao)/detalhes/papeis`
 - **THEN** DEVE ver a lista de papéis disponíveis (sistema + customizados)
 - **AND** papéis do sistema DEVEM ser marcados como "Sistema"
 - **AND** papéis customizados DEVEM ter opções de editar/excluir

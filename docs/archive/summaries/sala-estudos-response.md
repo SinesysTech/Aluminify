@@ -11,13 +11,13 @@
   - `GET /api/atividade/[id]` - Buscar atividade específica
 
 ### 2. Frontend Professor Completo:
-- ✅ Página `/admin/materiais` - Upload e gestão de materiais
+- ✅ Página `/biblioteca/materiais` - Upload e gestão de materiais
 - ✅ Componentes: Filters, Upload Row, Accordion
 - ✅ Funcionalidades: Gerar estrutura, upload de PDFs
 
 ## ❌ O que FALTA:
 
-### Frontend Aluno - Sala de Estudos (`/aluno/sala-de-estudos`):
+### Frontend Aluno - Sala de Estudos (`/sala-de-estudos`):
 - ❌ Listar atividades dos cursos/disciplinas do aluno (baseado nas matrículas)
 - ❌ Visualizar PDFs das atividades
 - ❌ Marcar progresso (checklist - atualizar tabela `progresso_atividades`)

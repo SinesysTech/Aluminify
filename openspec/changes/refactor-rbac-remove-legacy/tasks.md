@@ -63,10 +63,10 @@
 
 ## 9. Páginas de Gerenciamento de Papéis
 
-- [x] 9.1 Criar `app/(dashboard)/admin/empresa/papeis/page.tsx` - listagem
+- [x] 9.1 Criar `app/(modules)/empresa/(gestao)/detalhes/papeis/page.tsx` - listagem
 - [x] 9.2 Implementar tabela de papéis com badges (sistema/customizado)
-- [x] 9.3 Criar `app/(dashboard)/admin/empresa/papeis/novo/page.tsx` - criar
-- [x] 9.4 Criar `app/(dashboard)/admin/empresa/papeis/[papelId]/page.tsx` - editar
+- [x] 9.3 Criar `app/(modules)/empresa/(gestao)/detalhes/papeis/novo/page.tsx` - criar
+- [x] 9.4 Criar `app/(modules)/empresa/(gestao)/detalhes/papeis/[papelId]/page.tsx` - editar
 - [x] 9.5 Implementar dialog de confirmação para exclusão
 - [ ] 9.6 Adicionar link no menu lateral de admin
 

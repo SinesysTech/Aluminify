@@ -4,8 +4,8 @@
 
 ### 1.1 Fix Professor Identity Issue ✅ COMPLETE
 - [x] 1.1.1 Create `ProfessorSelector` component at `components/agendamento/professor-selector.tsx`
-- [x] 1.1.2 Create new route `app/(dashboard)/agendamentos/[professorId]/page.tsx`
-- [x] 1.1.3 Update `app/(dashboard)/agendamentos/page.tsx` to show professor list instead of scheduler
+- [x] 1.1.2 Create new route `app/(modules)/agendamentos/[professorId]/page.tsx`
+- [x] 1.1.3 Update `app/(modules)/agendamentos/page.tsx` to show professor list instead of scheduler
 - [x] 1.1.4 Add server action `getProfessoresDisponiveis(empresaId)` to fetch available professors
 - [x] 1.1.5 Update navigation links across the app
 

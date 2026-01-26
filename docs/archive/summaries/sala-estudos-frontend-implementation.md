@@ -58,14 +58,14 @@
 ## 📄 Páginas Criadas
 
 ### 1. ✅ Server Component
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/page.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/page.tsx`
 
 **Funcionalidades**:
 - ✅ Verificação de autenticação com `requireUser`
 - ✅ Renderização do Client Component
 
 ### 2. ✅ Client Component
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 **Funcionalidades**:
 - ✅ Busca de aluno autenticado
@@ -196,11 +196,11 @@ Curso
 - ✅ `components/progresso-stats-card.tsx` (NOVO)
 
 ### Páginas
-- ✅ `app/(dashboard)/aluno/sala-de-estudos/page.tsx` (ATUALIZADO)
-- ✅ `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx` (NOVO)
+- ✅ `app/(modules)/sala-de-estudos/page.tsx` (ATUALIZADO)
+- ✅ `app/(modules)/sala-de-estudos/sala-estudos-client.tsx` (NOVO)
 
 ### Types
-- ✅ `app/(dashboard)/aluno/sala-de-estudos/types.ts` (ATUALIZADO)
+- ✅ `app/(modules)/sala-de-estudos/types.ts` (ATUALIZADO)
 
 ---
 

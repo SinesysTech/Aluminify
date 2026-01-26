@@ -51,7 +51,7 @@ Falta a interface para administradores gerenciarem turmas e a configuracao para 
 - Inferir pela existencia de turmas: Rejeitado - confuso para UX
 
 ### Decision 2: Turmas dentro da pagina do curso
-**O que**: Gerenciar turmas na pagina de detalhes do curso (`/admin/cursos/[id]`), nao em pagina separada.
+**O que**: Gerenciar turmas na pagina de detalhes do curso (`/curso/(gestao)/admin/[id]`), nao em pagina separada.
 
 **Por que**:
 - Turmas sao subordinadas ao curso

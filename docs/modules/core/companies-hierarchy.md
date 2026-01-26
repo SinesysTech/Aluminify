@@ -13,7 +13,7 @@ O sistema possui **dois fluxos principais** para criação de empresas:
 **Quem pode criar**: Apenas usuários com role `superadmin`
 
 **Fluxo**:
-1. Super Admin acessa a interface de criação de empresas (ex: `/superadmin/empresas/nova`)
+1. Super Admin acessa a interface de criação de empresas (ex: `/superempresa/(gestao)/detalhess/nova`)
 2. Preenche dados da empresa:
    - `nome` (obrigatório)
    - `cnpj` (opcional, mas deve ser único)

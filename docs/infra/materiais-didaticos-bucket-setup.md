@@ -67,7 +67,7 @@ O upload é feito **diretamente do frontend** para o Supabase Storage, sem passa
 
 Para verificar se está tudo funcionando:
 
-1. Acesse a página `/admin/materiais`
+1. Acesse a página `/biblioteca/materiais`
 2. Selecione uma disciplina e frente
 3. Clique em "Gerar Estrutura"
 4. Tente fazer upload de um PDF em uma atividade

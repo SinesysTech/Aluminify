@@ -2,7 +2,7 @@
 
 ## 🎯 Objetivo
 
-Implementar a página **"Sala de Estudos"** (`/aluno/sala-de-estudos`) onde alunos podem:
+Implementar a página **"Sala de Estudos"** (`/sala-de-estudos`) onde alunos podem:
 - ✅ Ver atividades dos cursos em que estão matriculados
 - ✅ Visualizar PDFs das atividades
 - ✅ Marcar progresso (checklist): Pendente → Iniciado → Concluído
@@ -16,7 +16,7 @@ Implementar a página **"Sala de Estudos"** (`/aluno/sala-de-estudos`) onde alun
 - Tabela `atividades` (91 atividades criadas, 5 com arquivo)
 - Tabela `progresso_atividades` (para checklist)
 - Backend de atividades funcionando
-- Frontend do professor completo (`/admin/materiais`)
+- Frontend do professor completo (`/biblioteca/materiais`)
 
 ### ❌ O que FALTA:
 - Backend de progresso (service layer + APIs)
@@ -43,7 +43,7 @@ app/api/progresso-atividade/
 
 ### Frontend (Novo)
 ```
-app/(dashboard)/aluno/sala-de-estudos/
+app/(modules)/sala-de-estudos/
   ├── page.tsx (Server Component)
   ├── sala-estudos-client.tsx (Client Component)
   └── types.ts
@@ -243,7 +243,7 @@ Atualizar UI e estatísticas
 ## 🎯 Resultado Esperado
 
 Após implementação, o aluno poderá:
-1. Acessar `/aluno/sala-de-estudos`
+1. Acessar `/sala-de-estudos`
 2. Ver todas atividades dos cursos matriculados
 3. Organizadas por: Curso → Disciplina → Frente → Módulo
 4. Marcar atividades como iniciadas/concluídas

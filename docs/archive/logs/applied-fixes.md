@@ -102,7 +102,7 @@ const FRENTE_SELECT_ID = 'frente-select-materials'
 
 ### Teste 1: Duplicação de Atividades
 
-1. Acessar `/admin/materiais`
+1. Acessar `/biblioteca/materiais`
 2. Selecionar disciplina e frente
 3. Clicar em "Gerar Estrutura"
 4. Verificar que atividades foram criadas
@@ -111,7 +111,7 @@ const FRENTE_SELECT_ID = 'frente-select-materials'
 
 ### Teste 2: Erro de Hidratação
 
-1. Acessar `/admin/materiais`
+1. Acessar `/biblioteca/materiais`
 2. Abrir console do navegador
 3. ✅ Verificar que não há erro de hidratação
 4. Interagir com os Selects

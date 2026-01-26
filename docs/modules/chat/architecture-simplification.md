@@ -35,7 +35,7 @@ npm uninstall @ai-sdk/react ai
 
 ## ✅ O que ficou (SIMPLES)
 
-### Frontend ([tobias/page.tsx](../app/(dashboard)/tobias/page.tsx))
+### Frontend ([tobias/page.tsx](../app/(modules)/tobias/page.tsx))
 
 ```typescript
 // Enviar mensagem
@@ -93,7 +93,7 @@ Cliente → POST /api/chat → N8N Webhook → Resposta → Cliente
 ## 📁 Arquivos Modificados
 
 ### Criados
-- ✨ `app/(dashboard)/tobias/page.tsx` - Nova versão simples
+- ✨ `app/(modules)/tobias/page.tsx` - Nova versão simples
 - ✨ `docs/SIMPLIFICACAO_CHAT.md` - Este documento
 
 ### Modificados
@@ -103,7 +103,7 @@ Cliente → POST /api/chat → N8N Webhook → Resposta → Cliente
 
 ### Removidos
 - ❌ `app/api/chat/callback/` - Diretório inteiro
-- ❌ `app/(dashboard)/tobias/page-old-aisdk.tsx` - Backup (pode deletar)
+- ❌ `app/(modules)/tobias/page-old-aisdk.tsx` - Backup (pode deletar)
 
 ### Opcionalmente Removíveis
 - ⚠️ `backend/services/cache/` - Não é mais necessário (mas mantido para referência)

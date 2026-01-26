@@ -14,7 +14,7 @@ Este documento registra todos os testes realizados para validar a implementaçã
 
 **Arquivos Verificados**:
 - ✅ `backend/services/atividade/atividade.types.ts`
-- ✅ `app/(dashboard)/aluno/sala-de-estudos/types.ts`
+- ✅ `app/(modules)/sala-de-estudos/types.ts`
 - ✅ `backend/services/progresso-atividade/progresso-atividade.types.ts`
 
 **Checklist**:
@@ -46,7 +46,7 @@ Este documento registra todos os testes realizados para validar a implementaçã
 
 ### 2.2. Query Frontend
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 **Verificação**:
 - [ ] Query busca campos de desempenho

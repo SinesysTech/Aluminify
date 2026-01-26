@@ -21,6 +21,6 @@ A página de alunos possui botões de "Importar CSV" e "Importar Planilha" que n
 
 - Affected specs: `student-management` (nova capability ou modificação se existir)
 - Affected code:
-  - `app/(dashboard)/admin/alunos/components/client-page.tsx` - integrar dialog de importação
-  - `app/(dashboard)/admin/alunos/components/student-import-dialog.tsx` - novo componente
+  - `app/(modules)/usuario/(gestao)/alunos/components/client-page.tsx` - integrar dialog de importação
+  - `app/(modules)/usuario/(gestao)/alunos/components/student-import-dialog.tsx` - novo componente
   - Reutilizar API existente: `app/api/student/bulk-import/route.ts`

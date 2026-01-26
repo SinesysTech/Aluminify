@@ -35,10 +35,10 @@ Após análise completa do código, identifiquei **8 áreas principais** que pod
 **TTL Sugerido:** 1 hora (invalidação manual quando houver mudanças)
 
 **Arquivos afetados:**
-- `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+- `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 - `components/schedule-wizard.tsx`
-- `app/(dashboard)/conteudos/conteudos-client.tsx`
-- `app/(dashboard)/aluno/modo-foco/modo-foco-client.tsx`
+- `app/(modules)/conteudos/conteudos-client.tsx`
+- `app/(modules)/aluno/modo-foco/modo-foco-client.tsx`
 - `backend/services/cronograma/cronograma.service.ts`
 
 ---
@@ -61,7 +61,7 @@ Após análise completa do código, identifiquei **8 áreas principais** que pod
 **TTL Sugerido:** 30 minutos
 
 **Arquivos afetados:**
-- `app/(dashboard)/aluno/biblioteca/page.tsx`
+- `app/(modules)/aluno/biblioteca/page.tsx`
 - `backend/services/course-material/course-material.service.ts`
 - `app/api/course-material/route.ts`
 
@@ -88,7 +88,7 @@ Após análise completa do código, identifiquei **8 áreas principais** que pod
 **Arquivos afetados:**
 - `app/api/flashcards/route.ts`
 - `backend/services/flashcards/flashcards.service.ts`
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx`
+- `app/(modules)/flashcards/flashcards-client.tsx`
 
 ---
 
@@ -184,7 +184,7 @@ Após análise completa do código, identifiquei **8 áreas principais** que pod
 **TTL Sugerido:** 30 minutos
 
 **Arquivos afetados:**
-- `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+- `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 - `backend/services/atividade/atividade.repository-helper.ts`
 
 ---

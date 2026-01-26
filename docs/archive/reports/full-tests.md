@@ -21,7 +21,7 @@
 ```
 
 **Rotas Verificadas**:
-- ✅ `/aluno/sala-de-estudos` (rota compilada)
+- ✅ `/sala-de-estudos` (rota compilada)
 - ✅ `/api/atividade/aluno/[alunoId]` (rota compilada)
 - ✅ `/api/progresso-atividade/atividade/[atividadeId]` (rota compilada)
 
@@ -64,7 +64,7 @@
 
 ### 2.2. Tipos Frontend
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/types.ts`
+**Arquivo**: `app/(modules)/sala-de-estudos/types.ts`
 
 **Verificações**:
 - ✅ Interface `AtividadeComProgresso` contém campos de desempenho:
@@ -157,7 +157,7 @@ resultado.push({
 
 ### 4.2. Query de Progresso no Frontend
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 **Verificação**:
 ```typescript
@@ -302,7 +302,7 @@ atividadesComProgresso.push({
 
 ### 7.4. sala-estudos-client.tsx
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 **Verificações**:
 

@@ -7,7 +7,7 @@ A plataforma já possui:
 - Service de importação em `backend/services/student/student-import.service.ts`
 - Componente de importação em `components/aluno/aluno-table.tsx` (usado em outra área)
 
-A página de administração de alunos (`/admin/alunos`) possui botões de importação que não estão conectados à funcionalidade existente.
+A página de administração de alunos (`/usuario/(gestao)/alunos`) possui botões de importação que não estão conectados à funcionalidade existente.
 
 ## Goals / Non-Goals
 

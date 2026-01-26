@@ -158,7 +158,7 @@ const isValid = verifyHotmartSignature(
 ## Frontend Structure
 
 ```
-app/(dashboard)/admin/financeiro/
+app/(modules)/financeiro/
 ├── page.tsx                    # Dashboard financeiro
 ├── transacoes/
 │   ├── page.tsx               # Lista de transações

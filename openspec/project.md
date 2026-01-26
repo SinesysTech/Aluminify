@@ -28,7 +28,7 @@
 ### Architecture Patterns
 - **App Router:** Rotas em `app/` com layouts aninhados
 - **Server Components:** Preferidos quando possível
-- **Route Groups:** `(dashboard)`, `(landing)`, `[tenant]`
+- **Route Groups:** `(modules)`, `(landing)`, `[tenant]`
 - **Componentes:** `components/ui/` para primitivos, `components/{feature}/` para features
 - **Hooks customizados:** `hooks/` para lógica reutilizável
 - **Ações do servidor:** `app/actions/` para mutations

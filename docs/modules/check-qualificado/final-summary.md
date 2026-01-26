@@ -82,8 +82,8 @@ Clica checkbox → Abre modal → Preenche dados → Salva → Exibe badges
 ### Atualizados
 - ✅ `components/atividade-checklist-row.tsx`
 - ✅ `components/modulo-activities-accordion.tsx`
-- ✅ `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
-- ✅ `app/(dashboard)/aluno/sala-de-estudos/types.ts`
+- ✅ `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
+- ✅ `app/(modules)/sala-de-estudos/types.ts`
 - ✅ `backend/services/atividade/atividade.types.ts`
 - ✅ `backend/services/atividade/atividade.repository-helper.ts`
 - ✅ `backend/services/progresso-atividade/progresso-atividade.service.ts`

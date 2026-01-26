@@ -47,11 +47,11 @@ Nenhum erro de tipo encontrado. Todos os arquivos TypeScript estão corretos.
 ### Rotas Compiladas
 
 **Páginas Principais**:
-- ✅ `/admin/materiais` - Gestão de Materiais
-- ✅ `/aluno/sala-de-estudos` - Sala de Estudos
-- ✅ `/aluno/cronograma` - Cronograma do Aluno
-- ✅ `/aluno/cronograma/calendario` - Visualização de Calendário
-- ❌ `/aluno/cronograma/kanban` - Visualização Kanban (REMOVIDO)
+- ✅ `/biblioteca/materiais` - Gestão de Materiais
+- ✅ `/sala-de-estudos` - Sala de Estudos
+- ✅ `/cronograma` - Cronograma do Aluno
+- ✅ `/cronograma/calendario` - Visualização de Calendário
+- ❌ `/cronograma/kanban` - Visualização Kanban (REMOVIDO)
 
 **API Routes**:
 - ✅ `/api/atividade` - Listar atividades

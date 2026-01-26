@@ -78,9 +78,9 @@ Todo o código foi desenvolvido, testado e está pronto para uso. Apenas a confi
 ### 5. Página Frontend ✅
 
 **Arquivos criados:**
-- `app/(dashboard)/admin/materiais/page.tsx` - Server Component (verificação de permissão)
-- `app/(dashboard)/admin/materiais/materiais-client.tsx` - Client Component (lógica)
-- `app/(dashboard)/admin/materiais/types.ts` - Tipos para frontend
+- `app/(modules)/biblioteca/materiais/page.tsx` - Server Component (verificação de permissão)
+- `app/(modules)/biblioteca/materiais/materiais-client.tsx` - Client Component (lógica)
+- `app/(modules)/biblioteca/materiais/types.ts` - Tipos para frontend
 
 **Funcionalidades:**
 - ✅ Layout Master-Detail
@@ -161,7 +161,7 @@ components/
   ├── activity-upload-row.tsx ✅
   └── module-accordion.tsx ✅
 
-app/(dashboard)/admin/materiais/
+app/(modules)/biblioteca/materiais/
   ├── page.tsx ✅
   ├── materiais-client.tsx ✅
   └── types.ts ✅
@@ -186,7 +186,7 @@ docs/
    - Executar migration SQL das políticas
 
 3. **Testar:**
-   - Acessar `/admin/materiais`
+   - Acessar `/biblioteca/materiais`
    - Gerar estrutura
    - Fazer upload de PDF
 

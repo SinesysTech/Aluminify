@@ -47,9 +47,9 @@ Criado um serviço de cache (`backend/services/cache/response-store.ts`) que:
 #### Arquivos Atualizados
 - 🔧 [`app/api/chat/callback/route.ts`](../app/api/chat/callback/route.ts) - Usa responseStore ao invés de Map
 - 🔧 [`app/api/chat/route.ts`](../app/api/chat/route.ts) - Polling async com responseStore
-- 🔧 [`app/(dashboard)/tobias/page.tsx`](../app/(dashboard)/tobias/page.tsx) - Correções no useChat v5.x
+- 🔧 [`app/(modules)/tobias/page.tsx`](../app/(modules)/tobias/page.tsx) - Correções no useChat v5.x
 - 🔧 **27/11/2025** [`app/api/chat/route.ts`](../app/api/chat/route.ts) e [`backend/services/chat/*`](../backend/services/chat) agora aceitam uploads de imagens/PDF, encaminham os binários ao webhook e limpam os arquivos temporários após o envio.
-- 🔧 **27/11/2025** [`app/(dashboard)/tobias/page.tsx`](../app/(dashboard)/tobias/page.tsx) ganhou UI para anexar arquivos, pré-visualizar e remover anexos antes do envio.
+- 🔧 **27/11/2025** [`app/(modules)/tobias/page.tsx`](../app/(modules)/tobias/page.tsx) ganhou UI para anexar arquivos, pré-visualizar e remover anexos antes do envio.
 ## 📎 Suporte a Anexos (27/11/2025)
 
 - Implementado serviço de armazenamento temporário em [`backend/services/chat/attachments.service.ts`](../backend/services/chat/attachments.service.ts) com validação de tipo/tamanho, limite de 5MB por arquivo e 15MB por mensagem.

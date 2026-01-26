@@ -7801,45 +7801,45 @@
 
 ### `text-muted-foreground` (ocorrências: 316)
 
-- `app/(dashboard)/admin/empresa/admins/page.tsx:208`  <div className="text-sm text-muted-foreground">
-- `app/(dashboard)/admin/empresa/alunos/page.tsx:68`  <div className="text-sm text-muted-foreground">{aluno.email}</div>
-- `app/(dashboard)/admin/empresa/alunos/page.tsx:71`  <div className="text-sm text-muted-foreground">
-- `app/(dashboard)/admin/empresa/page.tsx:267`  <div className="text-sm text-muted-foreground capitalize">
-- `app/(dashboard)/admin/empresa/professores/page.tsx:176`  <div className="text-sm text-muted-foreground">{prof.email}</div>
-- `app/(dashboard)/admin/flashcards/flashcards-admin-client.tsx:811`  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-- `app/(dashboard)/admin/flashcards/flashcards-admin-client.tsx:867`  <div className="text-sm text-muted-foreground">
-- `app/(dashboard)/admin/flashcards/flashcards-admin-client.tsx:958`  <div className="text-sm text-muted-foreground">
-- `app/(dashboard)/admin/materiais/materiais-client.tsx:554`  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-- `app/(dashboard)/agendamentos/page.tsx:17`  <h2 className="font-medium text-xl text-muted-foreground text-center px-10">
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:736`  <p className="text-sm text-muted-foreground">
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:761`  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:816`  <div className="text-xs uppercase tracking-wide text-muted-foreground">Pergunta</div>
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:820`  <div className="border-t pt-4 text-xs uppercase tracking-wide text-muted-foreground">Resposta</div>
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:825`  <div className="text-sm text-muted-foreground">Clique para ver a resposta</div>
-- `app/(dashboard)/aluno/modo-foco/modo-foco-client.tsx:761`  <p className="text-xs text-muted-foreground">{pomodoroConfig.totalCycles ?? 1} ciclos</p>
-- `app/(dashboard)/aluno/modo-foco/modo-foco-client.tsx:808`  <p className="text-sm text-muted-foreground">
-- `app/(dashboard)/aluno/modo-foco/modo-foco-client.tsx:821`  <p className="text-xs text-muted-foreground">Ajuste e gere novamente se mudar valores.</p>
-- `app/(dashboard)/aluno/modo-foco/modo-foco-client.tsx:848`  <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
-- `app/(dashboard)/aluno/modo-foco/modo-foco-client.tsx:873`  <div className="text-sm text-muted-foreground">
-- `app/(dashboard)/aluno/modo-foco/modo-foco-client.tsx:998`  <p className="text-sm text-muted-foreground">Como foi o foco?</p>
-- `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx:931`  <School className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-- `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx:948`  <h3 className="text-xl font-medium text-muted-foreground">{disciplina.nome}</h3>
-- `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx:951`  <h4 className="text-lg font-medium text-muted-foreground">{frente.nome}</h4>
-- `app/(dashboard)/conteudos/conteudos-client.tsx:1552`  <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
-- `app/(dashboard)/conteudos/conteudos-client.tsx:1575`  <div className="text-xs text-muted-foreground">
-- `app/(dashboard)/conteudos/conteudos-client.tsx:1653`  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-- `app/(dashboard)/conteudos/conteudos-client.tsx:1659`  <p className="text-xs text-muted-foreground">
-- `app/(dashboard)/conteudos/conteudos-client.tsx:1698`  <div className="text-center py-8 text-muted-foreground">
-- `app/(dashboard)/conteudos/conteudos-client.tsx:1723`  <div className="text-center py-8 text-muted-foreground">
+- `app/(modules)/empresa/(gestao)/detalhes/admins/page.tsx:208`  <div className="text-sm text-muted-foreground">
+- `app/(modules)/empresa/(gestao)/detalhes/alunos/page.tsx:68`  <div className="text-sm text-muted-foreground">{aluno.email}</div>
+- `app/(modules)/empresa/(gestao)/detalhes/alunos/page.tsx:71`  <div className="text-sm text-muted-foreground">
+- `app/(modules)/empresa/(gestao)/detalhes/page.tsx:267`  <div className="text-sm text-muted-foreground capitalize">
+- `app/(modules)/empresa/(gestao)/detalhes/professores/page.tsx:176`  <div className="text-sm text-muted-foreground">{prof.email}</div>
+- `app/(modules)/admin/flashcards/flashcards-admin-client.tsx:811`  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+- `app/(modules)/admin/flashcards/flashcards-admin-client.tsx:867`  <div className="text-sm text-muted-foreground">
+- `app/(modules)/admin/flashcards/flashcards-admin-client.tsx:958`  <div className="text-sm text-muted-foreground">
+- `app/(modules)/biblioteca/materiais/materiais-client.tsx:554`  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+- `app/(modules)/agendamentos/page.tsx:17`  <h2 className="font-medium text-xl text-muted-foreground text-center px-10">
+- `app/(modules)/flashcards/flashcards-client.tsx:736`  <p className="text-sm text-muted-foreground">
+- `app/(modules)/flashcards/flashcards-client.tsx:761`  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+- `app/(modules)/flashcards/flashcards-client.tsx:816`  <div className="text-xs uppercase tracking-wide text-muted-foreground">Pergunta</div>
+- `app/(modules)/flashcards/flashcards-client.tsx:820`  <div className="border-t pt-4 text-xs uppercase tracking-wide text-muted-foreground">Resposta</div>
+- `app/(modules)/flashcards/flashcards-client.tsx:825`  <div className="text-sm text-muted-foreground">Clique para ver a resposta</div>
+- `app/(modules)/aluno/modo-foco/modo-foco-client.tsx:761`  <p className="text-xs text-muted-foreground">{pomodoroConfig.totalCycles ?? 1} ciclos</p>
+- `app/(modules)/aluno/modo-foco/modo-foco-client.tsx:808`  <p className="text-sm text-muted-foreground">
+- `app/(modules)/aluno/modo-foco/modo-foco-client.tsx:821`  <p className="text-xs text-muted-foreground">Ajuste e gere novamente se mudar valores.</p>
+- `app/(modules)/aluno/modo-foco/modo-foco-client.tsx:848`  <div className="flex flex-wrap gap-3 text-[11px] text-muted-foreground">
+- `app/(modules)/aluno/modo-foco/modo-foco-client.tsx:873`  <div className="text-sm text-muted-foreground">
+- `app/(modules)/aluno/modo-foco/modo-foco-client.tsx:998`  <p className="text-sm text-muted-foreground">Como foi o foco?</p>
+- `app/(modules)/sala-de-estudos/sala-estudos-client.tsx:931`  <School className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+- `app/(modules)/sala-de-estudos/sala-estudos-client.tsx:948`  <h3 className="text-xl font-medium text-muted-foreground">{disciplina.nome}</h3>
+- `app/(modules)/sala-de-estudos/sala-estudos-client.tsx:951`  <h4 className="text-lg font-medium text-muted-foreground">{frente.nome}</h4>
+- `app/(modules)/conteudos/conteudos-client.tsx:1552`  <div className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+- `app/(modules)/conteudos/conteudos-client.tsx:1575`  <div className="text-xs text-muted-foreground">
+- `app/(modules)/conteudos/conteudos-client.tsx:1653`  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+- `app/(modules)/conteudos/conteudos-client.tsx:1659`  <p className="text-xs text-muted-foreground">
+- `app/(modules)/conteudos/conteudos-client.tsx:1698`  <div className="text-center py-8 text-muted-foreground">
+- `app/(modules)/conteudos/conteudos-client.tsx:1723`  <div className="text-center py-8 text-muted-foreground">
 - ... +286 ocorrências
 
 ### `text-primary` (ocorrências: 54)
 
-- `app/(dashboard)/admin/empresa/admins/page.tsx:212`  <span className="text-xs text-primary">Owner</span>
-- `app/(dashboard)/admin/empresa/professores/page.tsx:178`  <span className="text-xs text-primary">Admin</span>
-- `app/(dashboard)/aluno/cronograma/calendario/page.tsx:66`  <CalendarCheck className="h-8 w-8 text-primary" />
-- `app/(dashboard)/aluno/cronograma/page.tsx:73`  <CalendarCheck className="h-8 w-8 text-primary" />
-- `app/(dashboard)/conteudos/conteudos-client.tsx:1946`  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+- `app/(modules)/empresa/(gestao)/detalhes/admins/page.tsx:212`  <span className="text-xs text-primary">Owner</span>
+- `app/(modules)/empresa/(gestao)/detalhes/professores/page.tsx:178`  <span className="text-xs text-primary">Admin</span>
+- `app/(modules)/cronograma/calendario/page.tsx:66`  <CalendarCheck className="h-8 w-8 text-primary" />
+- `app/(modules)/cronograma/page.tsx:73`  <CalendarCheck className="h-8 w-8 text-primary" />
+- `app/(modules)/conteudos/conteudos-client.tsx:1946`  <span className="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
 - `app/(landing)/code.html:82`  <a class="text-sm font-medium text-text-muted-light dark:text-text-muted-dark hover:text-primary dark:hover:text-white transition-colors hidden sm:block" href="#">Login</a>
 - `app/(landing)/code.html:300`  <a class="w-full py-3 bg-white text-primary rounded-lg text-center font-bold hover:bg-gray-100 transition-colors relative z-10" href="#">
 - `app/(landing)/code.html:328`  <td class="py-6 px-6 font-bold text-lg text-primary dark:text-white flex items-center gap-2">Growth <span class="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded font-bold uppercase">Recomendado</span></td>
@@ -7869,20 +7869,20 @@
 
 ### `text-destructive` (ocorrências: 45)
 
-- `app/(dashboard)/admin/flashcards/flashcards-admin-client.tsx:945`  <Trash2 className="h-4 w-4 text-destructive" />
-- `app/(dashboard)/admin/materiais/materiais-client.tsx:505`  <div className="flex items-center gap-2 text-destructive">
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:724`  <div className="flex items-center gap-2 text-destructive">
-- `app/(dashboard)/aluno/modo-foco/modo-foco-client.tsx:708`  <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-- `app/(dashboard)/aluno/modo-foco/modo-foco-client.tsx:984`  <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-- `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx:858`  <AlertCircle className="h-5 w-5 text-destructive" />
-- `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx:883`  <AlertCircle className="h-5 w-5 text-destructive" />
-- `app/(dashboard)/conteudos/conteudos-client.tsx:1507`  <AlertCircle className="h-5 w-5 text-destructive" />
-- `app/(dashboard)/conteudos/conteudos-client.tsx:1538`  <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive flex items-center gap-2">
-- `app/(dashboard)/conteudos/conteudos-client.tsx:2054`  <p className="text-sm font-medium text-destructive mt-3">
-- `app/(dashboard)/professor/agendamentos/stats/page.tsx:175`  <XCircle className="h-4 w-4 text-destructive" />
-- `app/(dashboard)/professor/flashcards/flashcards-admin-client.tsx:936`  <Trash2 className="h-4 w-4 text-destructive" />
-- `app/(dashboard)/professor/materiais/materiais-client.tsx:503`  <div className="flex items-center gap-2 text-destructive">
-- `app/(dashboard)/tobias/page.tsx:624`  <div className="bg-destructive/10 text-destructive rounded-lg p-4">
+- `app/(modules)/admin/flashcards/flashcards-admin-client.tsx:945`  <Trash2 className="h-4 w-4 text-destructive" />
+- `app/(modules)/biblioteca/materiais/materiais-client.tsx:505`  <div className="flex items-center gap-2 text-destructive">
+- `app/(modules)/flashcards/flashcards-client.tsx:724`  <div className="flex items-center gap-2 text-destructive">
+- `app/(modules)/aluno/modo-foco/modo-foco-client.tsx:708`  <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+- `app/(modules)/aluno/modo-foco/modo-foco-client.tsx:984`  <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+- `app/(modules)/sala-de-estudos/sala-estudos-client.tsx:858`  <AlertCircle className="h-5 w-5 text-destructive" />
+- `app/(modules)/sala-de-estudos/sala-estudos-client.tsx:883`  <AlertCircle className="h-5 w-5 text-destructive" />
+- `app/(modules)/conteudos/conteudos-client.tsx:1507`  <AlertCircle className="h-5 w-5 text-destructive" />
+- `app/(modules)/conteudos/conteudos-client.tsx:1538`  <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive flex items-center gap-2">
+- `app/(modules)/conteudos/conteudos-client.tsx:2054`  <p className="text-sm font-medium text-destructive mt-3">
+- `app/(modules)/professor/agendamentos/stats/page.tsx:175`  <XCircle className="h-4 w-4 text-destructive" />
+- `app/(modules)/professor/flashcards/flashcards-admin-client.tsx:936`  <Trash2 className="h-4 w-4 text-destructive" />
+- `app/(modules)/professor/materiais/materiais-client.tsx:503`  <div className="flex items-center gap-2 text-destructive">
+- `app/(modules)/tobias/page.tsx:624`  <div className="bg-destructive/10 text-destructive rounded-lg p-4">
 - `components/admin/professor-table.tsx:611`  <div className="mb-4 rounded-md bg-destructive/15 p-3 text-sm text-destructive">
 - `components/agendamento/meus-agendamentos-list.tsx:209`  className="text-destructive hover:text-destructive"
 - `components/aluno/aluno-table.tsx:1093`  <div className="space-y-1 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
@@ -7903,8 +7903,8 @@
 
 ### `text-foreground` (ocorrências: 33)
 
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:831`  <h3 className="text-sm font-semibold text-foreground">Indique aqui o seu desempenho:</h3>
-- `app/(dashboard)/tobias/page.tsx:646`  className="text-muted-foreground hover:text-foreground h-5 w-5 flex items-center justify-center"
+- `app/(modules)/flashcards/flashcards-client.tsx:831`  <h3 className="text-sm font-semibold text-foreground">Indique aqui o seu desempenho:</h3>
+- `app/(modules)/tobias/page.tsx:646`  className="text-muted-foreground hover:text-foreground h-5 w-5 flex items-center justify-center"
 - `app/page.tsx:60`  className="text-sm text-muted-foreground hover:text-foreground"
 - `app/page.tsx:66`  className="text-sm text-muted-foreground hover:text-foreground"
 - `app/page.tsx:72`  className="text-sm text-muted-foreground hover:text-foreground"
@@ -7937,17 +7937,17 @@
 
 ### `bg-muted` (ocorrências: 26)
 
-- `app/(dashboard)/admin/flashcards/flashcards-admin-client.tsx:850`  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-- `app/(dashboard)/admin/flashcards/flashcards-admin-client.tsx:1222`  <div className="mt-2 rounded-md bg-muted p-2">
-- `app/(dashboard)/professor/agendamentos/stats/page.tsx:255`  <div className="flex-1 bg-muted rounded-full h-2">
-- `app/(dashboard)/professor/agendamentos/stats/page.tsx:283`  <div className="text-center p-4 rounded-lg bg-muted">
-- `app/(dashboard)/professor/agendamentos/stats/page.tsx:287`  <div className="text-center p-4 rounded-lg bg-muted">
-- `app/(dashboard)/professor/agendamentos/stats/page.tsx:291`  <div className="text-center p-4 rounded-lg bg-muted">
-- `app/(dashboard)/professor/agendamentos/stats/page.tsx:295`  <div className="text-center p-4 rounded-lg bg-muted">
-- `app/(dashboard)/professor/agendamentos/stats/page.tsx:299`  <div className="text-center p-4 rounded-lg bg-muted">
-- `app/(dashboard)/professor/flashcards/flashcards-admin-client.tsx:841`  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-- `app/(dashboard)/professor/flashcards/flashcards-admin-client.tsx:1213`  <div className="mt-2 rounded-md bg-muted p-2">
-- `app/(dashboard)/tobias/page.tsx:640`  className="flex items-center gap-2 rounded bg-muted px-2 py-1.5"
+- `app/(modules)/admin/flashcards/flashcards-admin-client.tsx:850`  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+- `app/(modules)/admin/flashcards/flashcards-admin-client.tsx:1222`  <div className="mt-2 rounded-md bg-muted p-2">
+- `app/(modules)/professor/agendamentos/stats/page.tsx:255`  <div className="flex-1 bg-muted rounded-full h-2">
+- `app/(modules)/professor/agendamentos/stats/page.tsx:283`  <div className="text-center p-4 rounded-lg bg-muted">
+- `app/(modules)/professor/agendamentos/stats/page.tsx:287`  <div className="text-center p-4 rounded-lg bg-muted">
+- `app/(modules)/professor/agendamentos/stats/page.tsx:291`  <div className="text-center p-4 rounded-lg bg-muted">
+- `app/(modules)/professor/agendamentos/stats/page.tsx:295`  <div className="text-center p-4 rounded-lg bg-muted">
+- `app/(modules)/professor/agendamentos/stats/page.tsx:299`  <div className="text-center p-4 rounded-lg bg-muted">
+- `app/(modules)/professor/flashcards/flashcards-admin-client.tsx:841`  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+- `app/(modules)/professor/flashcards/flashcards-admin-client.tsx:1213`  <div className="mt-2 rounded-md bg-muted p-2">
+- `app/(modules)/tobias/page.tsx:640`  className="flex items-center gap-2 rounded bg-muted px-2 py-1.5"
 - `app/page.tsx:147`  <div className="flex h-6 w-64 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
 - `app/page.tsx:362`  <div className="h-4 w-24 rounded bg-muted" />
 - `app/page.tsx:363`  <div className="mt-1 h-3 w-16 rounded bg-muted" />
@@ -8027,7 +8027,7 @@
 
 ### `bg-accent` (ocorrências: 13)
 
-- `app/(dashboard)/conteudos/conteudos-client.tsx:1795`  <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md border p-3 hover:bg-accent">
+- `app/(modules)/conteudos/conteudos-client.tsx:1795`  <CollapsibleTrigger className="flex w-full items-center justify-between rounded-md border p-3 hover:bg-accent">
 - `components/layout/bottom-navigation.tsx:47`  'transition-colors hover:bg-accent active:bg-accent/80',
 - `components/notifications/notification-item.tsx:65`  className="flex items-start gap-3 p-3 hover:bg-accent transition-colors"
 - `components/shared/calendar-date-picker.tsx:417`  <SelectTrigger className="hidden sm:flex w-[122px] focus:ring-0 focus:ring-offset-0 font-medium hover:bg-accent hover:text-accent-foreground">
@@ -8089,7 +8089,7 @@
 
 ### `text-primary-foreground` (ocorrências: 10)
 
-- `app/(dashboard)/aluno/modo-foco/modo-foco-client.tsx:830`  ? 'bg-primary/80 text-primary-foreground'
+- `app/(modules)/aluno/modo-foco/modo-foco-client.tsx:830`  ? 'bg-primary/80 text-primary-foreground'
 - `app/page.tsx:523`  <Card className="relative overflow-hidden bg-primary text-primary-foreground shadow-2xl">
 - `app/page.tsx:529`  <CardTitle className="text-2xl text-primary-foreground">
 - `app/page.tsx:793`  <section className="bg-primary px-4 py-24 text-primary-foreground sm:px-6 lg:px-8">
@@ -8176,7 +8176,7 @@
 
 ### `text-status-warning-foreground` (ocorrências: 4)
 
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:842`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-warning text-status-warning-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
+- `app/(modules)/flashcards/flashcards-client.tsx:842`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-warning text-status-warning-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
 - `components/layout/impersonation-banner.tsx:68`  className="flex flex-col items-center gap-1 border-status-warning-border bg-status-warning text-status-warning-foreground"
 - `components/layout/impersonation-banner.tsx:71`  <AlertTitle className="w-full text-center text-status-warning-foreground">
 - `components/layout/impersonation-banner.tsx:74`  <AlertDescription className="flex w-full flex-col items-center gap-2 text-center text-status-warning-foreground">
@@ -8227,12 +8227,12 @@
 
 ### `border-primary` (ocorrências: 2)
 
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:528`  className={`cursor-pointer transition hover:border-primary ${modo === m.id ? 'border-primary shadow-md' : ''}`}
+- `app/(modules)/flashcards/flashcards-client.tsx:528`  className={`cursor-pointer transition hover:border-primary ${modo === m.id ? 'border-primary shadow-md' : ''}`}
 - `components/ui/radio-group.tsx:31`  "aspect-square h-4 w-4 rounded-full border border-primary text-primary shadow focus:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
 
 ### `bg-status-warning` (ocorrências: 2)
 
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:842`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-warning text-status-warning-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
+- `app/(modules)/flashcards/flashcards-client.tsx:842`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-warning text-status-warning-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
 - `components/layout/impersonation-banner.tsx:68`  className="flex flex-col items-center gap-1 border-status-warning-border bg-status-warning text-status-warning-foreground"
 
 ### `text-status-success-text` (ocorrências: 2)
@@ -8257,27 +8257,27 @@
 
 ### `bg-status-error` (ocorrências: 1)
 
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:835`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-error text-status-error-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
+- `app/(modules)/flashcards/flashcards-client.tsx:835`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-error text-status-error-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
 
 ### `text-status-error-foreground` (ocorrências: 1)
 
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:835`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-error text-status-error-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
+- `app/(modules)/flashcards/flashcards-client.tsx:835`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-error text-status-error-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
 
 ### `bg-status-info` (ocorrências: 1)
 
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:849`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-info text-status-info-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
+- `app/(modules)/flashcards/flashcards-client.tsx:849`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-info text-status-info-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
 
 ### `text-status-info-foreground` (ocorrências: 1)
 
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:849`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-info text-status-info-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
+- `app/(modules)/flashcards/flashcards-client.tsx:849`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-info text-status-info-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
 
 ### `bg-status-success` (ocorrências: 1)
 
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:856`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-success text-status-success-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
+- `app/(modules)/flashcards/flashcards-client.tsx:856`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-success text-status-success-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
 
 ### `text-status-success-foreground` (ocorrências: 1)
 
-- `app/(dashboard)/aluno/flashcards/flashcards-client.tsx:856`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-success text-status-success-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
+- `app/(modules)/flashcards/flashcards-client.tsx:856`  className="flex flex-col items-center gap-1 h-auto py-2 bg-status-success text-status-success-foreground shadow-lg hover:shadow-xl transition hover:brightness-110"
 
 ### `text-status-warning-text` (ocorrências: 1)
 

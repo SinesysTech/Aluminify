@@ -3,7 +3,7 @@
 ## ✅ ATUALIZAÇÕES APROVADAS
 
 - **Bucket Storage**: `materiais_didaticos`
-- **Rota**: `/admin/materiais`
+- **Rota**: `/biblioteca/materiais`
 - **Acesso**: Apenas professores
 - **Upload**: Direto no frontend (sem rota intermediária)
 
@@ -38,7 +38,7 @@
 - `Atividade`: Interface principal
 - `UpdateAtividadeInput`: Para atualização de `arquivo_url`
 
-### 2.2 Frontend (`app/(dashboard)/admin/materiais/types.ts`)
+### 2.2 Frontend (`app/(modules)/biblioteca/materiais/types.ts`)
 - `AtividadeComModulo`: Atividade com dados do módulo
 - `ModuloComAtividades`: Módulo com array de atividades
 
@@ -103,7 +103,7 @@
 
 ### 5.1 Estrutura
 ```
-app/(dashboard)/admin/materiais/
+app/(modules)/biblioteca/materiais/
   page.tsx (Server Component - verificação professor)
   materiais-client.tsx (Client Component - lógica)
 ```

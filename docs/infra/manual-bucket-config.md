@@ -110,7 +110,7 @@ Após configurar, teste se está funcionando:
 
 ### 1. Teste de Upload (via Interface)
 
-1. Acesse sua aplicação: `http://localhost:3000/admin/materiais`
+1. Acesse sua aplicação: `http://localhost:3000/biblioteca/materiais`
 2. Faça login como **professor**
 3. Selecione uma disciplina
 4. Selecione uma frente

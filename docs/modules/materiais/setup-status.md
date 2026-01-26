@@ -40,7 +40,7 @@ As políticas RLS já estão aplicadas e funcionarão automaticamente assim que 
 
 Após criar o bucket:
 
-1. Acesse: `http://localhost:3000/admin/materiais`
+1. Acesse: `http://localhost:3000/biblioteca/materiais`
 2. Faça login como professor
 3. Selecione disciplina e frente
 4. Clique em "Gerar Estrutura"

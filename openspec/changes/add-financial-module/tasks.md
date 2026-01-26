@@ -114,7 +114,7 @@
 
 ## 6. Frontend - Dashboard Financeiro
 
-- [x] 6.1 Criar `app/(dashboard)/admin/financeiro/page.tsx`
+- [x] 6.1 Criar `app/(modules)/financeiro/page.tsx`
   - Cards com métricas: total vendas, ticket médio, conversão
   - Gráfico de vendas por período
   - Lista de transações recentes
@@ -127,13 +127,13 @@
 
 ## 7. Frontend - Transações
 
-- [x] 7.1 Criar `app/(dashboard)/admin/financeiro/transacoes/page.tsx`
+- [x] 7.1 Criar `app/(modules)/financeiro/transacoes/page.tsx`
   - Tabela de transações com paginação
   - Filtros: status, período, provedor, produto
   - Busca por email/nome
   - Export para CSV
 
-- [x] 7.2 Criar `app/(dashboard)/admin/financeiro/transacoes/[id]/page.tsx`
+- [x] 7.2 Criar `app/(modules)/financeiro/transacoes/[id]/page.tsx`
   - Detalhes completos da transação
   - Dados do comprador
   - Timeline de eventos
@@ -147,21 +147,21 @@
 
 ## 8. Frontend - Produtos
 
-- [x] 8.1 Criar `app/(dashboard)/admin/financeiro/produtos/page.tsx`
+- [x] 8.1 Criar `app/(modules)/financeiro/produtos/page.tsx`
   - Lista de produtos com filtros
   - Busca por nome/ID
   - Ações de editar/excluir
 
-- [x] 8.2 Criar `app/(dashboard)/admin/financeiro/produtos/novo/page.tsx`
+- [x] 8.2 Criar `app/(modules)/financeiro/produtos/novo/page.tsx`
   - Formulário de criação de produto
 
 - [x] 8.3 Criar páginas de detalhe e edição
-  - `app/(dashboard)/admin/financeiro/produtos/[id]/page.tsx`
-  - `app/(dashboard)/admin/financeiro/produtos/[id]/editar/page.tsx`
+  - `app/(modules)/financeiro/produtos/[id]/page.tsx`
+  - `app/(modules)/financeiro/produtos/[id]/editar/page.tsx`
 
 ## 9. Frontend - Cupons
 
-- [x] 9.1 Criar `app/(dashboard)/admin/financeiro/cupons/page.tsx`
+- [x] 9.1 Criar `app/(modules)/financeiro/cupons/page.tsx`
   - Lista de cupons
   - Criar/editar cupom via dialog
   - Status dinâmico (ativo, expirado, esgotado)
@@ -199,7 +199,7 @@
 - Tasks 3.1 (Transaction Repository) ✅
 - Tasks 4.1-4.2 (Services) ✅
 - Tasks 5.1-5.4, 5.8 (API Transações + Webhook) ✅
-- Tasks 6.1-6.2 (Dashboard) ✅
+- Tasks 6.1-6.2 (modules) ✅
 - Tasks 7.1-7.3 (Transações) ✅
 - Task 10.1 (Script importação) ✅
 

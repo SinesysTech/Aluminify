@@ -26,7 +26,7 @@ Turmas sao **opcionais** por design - algumas empresas matriculam alunos diretam
 - Quando habilitado, mostrar secao de gerenciamento de turmas na pagina de detalhes do curso
 
 ### Frontend - Turmas
-- Criar pagina de listagem de turmas do curso (`/admin/cursos/[id]/turmas`)
+- Criar pagina de listagem de turmas do curso (`/curso/(gestao)/admin/[id]/turmas`)
 - Criar dialog para criar/editar turma
 - Permitir vincular alunos a turmas
 
@@ -44,9 +44,9 @@ Turmas sao **opcionais** por design - algumas empresas matriculam alunos diretam
 - Affected specs: Nenhum spec existente (nova capability)
 - Affected code:
   - `components/curso/curso-table.tsx` - Adicionar campo usa_turmas no form
-  - `app/(dashboard)/admin/cursos/[id]/page.tsx` - Adicionar secao de turmas
-  - `app/(dashboard)/admin/alunos/components/student-filters.tsx` - Conectar ao backend
-  - `app/(dashboard)/admin/alunos/components/student-sheet.tsx` - Ajustar labels
+  - `app/(modules)/curso/(gestao)/admin/[id]/page.tsx` - Adicionar secao de turmas
+  - `app/(modules)/usuario/(gestao)/alunos/components/student-filters.tsx` - Conectar ao backend
+  - `app/(modules)/usuario/(gestao)/alunos/components/student-sheet.tsx` - Ajustar labels
   - `app/api/turma/route.ts` - Novo endpoint CRUD
   - `backend/services/turma/` - Novo service
 - **BREAKING**: Nenhuma mudanca breaking - todas alteracoes sao aditivas

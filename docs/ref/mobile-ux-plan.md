@@ -45,7 +45,7 @@
 
 ## 📋 Estruturação por Página/Componente
 
-### 1. Layout Principal (`app/(dashboard)/layout.tsx`)
+### 1. Layout Principal (`app/(modules)/layout.tsx`)
 
 **Mudanças:**
 - ✅ Header já responsivo (usa `md:` breakpoints)
@@ -74,7 +74,7 @@
 
 ---
 
-### 3. TobIAs - Chat (`app/(dashboard)/tobias/page.tsx`)
+### 3. TobIAs - Chat (`app/(modules)/tobias/page.tsx`)
 
 **Problemas Identificados:**
 - Painel de conversas ocupa muito espaço em mobile
@@ -157,12 +157,12 @@
 
 **Alternativas disponíveis:**
 - **Lista**: Visualização em lista (`components/schedule-list.tsx`)
-- **Calendário**: Visualização em calendário (`/aluno/cronograma/calendario`)
+- **Calendário**: Visualização em calendário (`/cronograma/calendario`)
 - **Dashboard**: Dashboard do cronograma (`components/schedule-dashboard.tsx`)
 
 ---
 
-### 7. Calendário (`app/(dashboard)/aluno/cronograma/calendario/page.tsx`)
+### 7. Calendário (`app/(modules)/cronograma/calendario/page.tsx`)
 
 **Problemas Identificados:**
 - Calendário pode ser muito pequeno
@@ -207,7 +207,7 @@
 
 ---
 
-### 9. Conteúdos Programáticos (`app/(dashboard)/conteudos/conteudos-client.tsx`)
+### 9. Conteúdos Programáticos (`app/(modules)/conteudos/conteudos-client.tsx`)
 
 **Problemas Identificados:**
 - Formulário de upload muito longo
@@ -222,7 +222,7 @@
 
 ---
 
-### 10. Perfil (`app/(dashboard)/perfil/page.tsx`)
+### 10. Perfil (`app/(modules)/perfil/page.tsx`)
 
 **Problemas Identificados:**
 - Formulário longo

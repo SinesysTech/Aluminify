@@ -64,7 +64,7 @@
 
 ### Frontend Types (100% Completo)
 ```
-✅ app/(dashboard)/aluno/sala-de-estudos/
+✅ app/(modules)/sala-de-estudos/
    └── types.ts
 ```
 

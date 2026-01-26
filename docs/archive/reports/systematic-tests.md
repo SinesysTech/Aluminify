@@ -24,7 +24,7 @@ Este documento apresenta os resultados de testes sistemáticos realizados em tod
 ```
 
 **Rotas Compiladas**:
-- ✅ `/aluno/sala-de-estudos` - Página principal da Sala de Estudos
+- ✅ `/sala-de-estudos` - Página principal da Sala de Estudos
 - ✅ `/api/atividade/aluno/[alunoId]` - API de atividades do aluno
 - ✅ `/api/progresso-atividade/atividade/[atividadeId]` - API de progresso
 
@@ -61,7 +61,7 @@ anotacoesPessoais: string | null;
 #### Frontend: `AtividadeComProgresso`
 
 ```typescript
-// app/(dashboard)/aluno/sala-de-estudos/types.ts
+// app/(modules)/sala-de-estudos/types.ts
 questoesTotais?: number | null;
 questoesAcertos?: number | null;
 dificuldadePercebida?: DificuldadePercebida | null;
@@ -157,7 +157,7 @@ resultado.push({
 
 ### 3.2. Query de Progresso - Frontend
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 **Query Verificada**:
 ```typescript
@@ -584,7 +584,7 @@ export * from './atividade.types';  // ✅ Exporta atividadeRequerDesempenho
 
 ### 14.1. handleStatusChange (Check Simples)
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 
 **Fluxo Verificado**:
 1. ✅ Obtém sessão

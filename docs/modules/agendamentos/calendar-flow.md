@@ -8,7 +8,7 @@ O serviço de calendário permite visualizar e gerenciar as aulas do cronograma 
 
 ## 1. ENTRADA - Página do Calendário
 
-**Arquivo:** `app/(dashboard)/aluno/cronograma/calendario/page.tsx`
+**Arquivo:** `app/(modules)/cronograma/calendario/page.tsx`
 
 ### Fluxo Inicial:
 1. **Verificação de Autenticação**
@@ -347,7 +347,7 @@ const distribuicao = await cronogramaService.atualizarDistribuicaoDias(
 ## FLUXO RESUMIDO
 
 ```
-1. Usuário acessa /aluno/cronograma/calendario
+1. Usuário acessa /cronograma/calendario
    ↓
 2. Página busca cronograma do aluno
    ↓

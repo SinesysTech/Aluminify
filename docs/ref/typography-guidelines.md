@@ -108,4 +108,4 @@ import { UserPlus } from 'lucide-react'
 
 - Classes CSS: `app/globals.css`
 - Componentes: `components/ui/data-page.tsx`
-- Exemplo de uso: `app/(dashboard)/admin/alunos/components/client-page.tsx`
+- Exemplo de uso: `app/(modules)/usuario/(gestao)/alunos/components/client-page.tsx`

@@ -61,10 +61,10 @@ O código contém mapeamentos de compatibilidade que convertem o modelo legado p
 
 ### 4. UI de Papéis - Estrutura de Páginas
 
-**Decisão**: Criar páginas em `/admin/empresa/papeis/`:
+**Decisão**: Criar páginas em `/empresa/(gestao)/detalhes/papeis/`:
 
 ```
-app/(dashboard)/admin/empresa/papeis/
+app/(modules)/empresa/(gestao)/detalhes/papeis/
 ├── page.tsx              # Lista de papéis
 ├── novo/
 │   └── page.tsx          # Criar papel customizado

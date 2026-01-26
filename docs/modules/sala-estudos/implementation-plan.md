@@ -3,7 +3,7 @@
 ## 📋 1. Contexto e Requisitos
 
 ### 1.1 Objetivo
-Criar a página "Sala de Estudos" (`/aluno/sala-de-estudos`) onde alunos podem:
+Criar a página "Sala de Estudos" (`/sala-de-estudos`) onde alunos podem:
 - Visualizar atividades dos cursos/disciplinas em que estão matriculados
 - Ver PDFs das atividades disponíveis
 - Marcar progresso (checklist) das atividades
@@ -84,7 +84,7 @@ Criar a página "Sala de Estudos" (`/aluno/sala-de-estudos`) onde alunos podem:
 ### 2.2 Frontend
 
 #### 2.2.1 Tipos
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/types.ts`
+**Arquivo**: `app/(modules)/sala-de-estudos/types.ts`
 - `AtividadeComProgresso`: Atividade + ProgressoAtividade
 - `ModuloComAtividades`: Módulo + AtividadesComProgresso[]
 - `FrenteComModulos`: Frente + ModulosComAtividades[]
@@ -126,10 +126,10 @@ Criar a página "Sala de Estudos" (`/aluno/sala-de-estudos`) onde alunos podem:
 
 #### 2.2.3 Páginas
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/page.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/page.tsx`
 - Server Component - Verificação de autenticação
 
-**Arquivo**: `app/(dashboard)/aluno/sala-de-estudos/sala-estudos-client.tsx`
+**Arquivo**: `app/(modules)/sala-de-estudos/sala-estudos-client.tsx`
 - Client Component principal
 - Carrega atividades do aluno
 - Orquestra componentes
@@ -286,7 +286,7 @@ app/api/atividade/
 
 ### Frontend
 ```
-app/(dashboard)/aluno/sala-de-estudos/
+app/(modules)/sala-de-estudos/
   ├── page.tsx
   ├── sala-estudos-client.tsx
   └── types.ts
