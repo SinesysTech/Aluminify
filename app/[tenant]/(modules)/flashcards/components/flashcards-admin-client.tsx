@@ -43,7 +43,7 @@ import { Textarea } from '@/app/shared/components/forms/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/app/shared/components/forms/checkbox'
 import { Pencil, Trash2, Plus, Loader2, Search, X } from 'lucide-react'
-import { FlashcardUploadCard } from '@/components/shared/flashcard-upload-card'
+import { FlashcardUploadCard } from './flashcard-upload-card'
 import {
   Empty,
   EmptyDescription,

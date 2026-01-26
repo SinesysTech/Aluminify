@@ -1,4 +1,4 @@
-import { LogPausa, MetodoEstudo } from '@/types/sessao-estudo';
+import { LogPausa, MetodoEstudo } from '@/app/shared/types/entities/activity';
 
 type TimerMode = MetodoEstudo;
 
