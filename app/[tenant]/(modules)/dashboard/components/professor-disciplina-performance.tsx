@@ -43,7 +43,7 @@ export function ProfessorDisciplinaPerformanceList({
               Sem dados de performance
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              A performance dos seus alunos aparecer· aqui
+              A performance dos seus alunos aparecer√° aqui
             </p>
           </div>
         ) : (

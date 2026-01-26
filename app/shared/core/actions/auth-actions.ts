@@ -38,28 +38,29 @@ export async function identifyUserRoleAction(
     const adminClient = getDatabaseClient();
     const roleIdentifier = createUserRoleIdentifier(adminClient);
 
-    const { primaryRole } = await roleIdentifier.identifyUserRoles(user.id, {
-      includeDetails: false,
+    const { primaryRole, roleDetails } = await roleIdentifier.identifyUserRoles(user.id, {
+      includeDetails: true,
     });
+
+    // Get empresaSlug from roleDetails (first available)
+    const empresaSlug = roleDetails?.find(r => r.empresaSlug)?.empresaSlug;
 
     let redirectUrl = "/protected"; // Fallback
 
     switch (primaryRole) {
       case "superadmin":
-        redirectUrl = "/admin"; // Or superadmin specific dashboard
+        redirectUrl = "/superadmin/dashboard";
         break;
       case "usuario":
-        redirectUrl = "/dashboard";
-        break;
+      case "professor":
       case "aluno":
-        // Tenta obter o slug da empresa do metadata ou params
-        // O ideal é redirecionar para uma rota que sabe resolver o tenant,
-        // mas como a rota é /[tenant]/dashboard, precisamos do slug.
-
-        // TODO: Buscar slug da empresa se não estiver no metadata
-        // Por hora, vamos redirecionar para /aluno que faz o redirect correto
-        // se o usuário tiver empresaSlug (veja app/(dashboard)/aluno/page.tsx)
-        redirectUrl = "/aluno";
+        // Redirect to tenant-specific dashboard
+        if (empresaSlug) {
+          redirectUrl = `/${empresaSlug}/dashboard`;
+        } else {
+          // Fallback to root which will handle redirect
+          redirectUrl = "/";
+        }
         break;
       default:
         console.warn(
