@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/app/shared/core/server';
-import { createStudentTransferService } from '@/app/[tenant]/(dashboard)/aluno/services';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/app/shared/core/server";
+import { createStudentTransferService } from "@/app/[tenant]/features/pessoas/services";
 
 interface RouteContext {
   params: Promise<{ turmaId: string }>;
@@ -15,15 +15,15 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { turmaId } = await context.params;
 
     if (!turmaId) {
       return NextResponse.json(
-        { error: 'turmaId e obrigatorio' },
-        { status: 400 }
+        { error: "turmaId e obrigatorio" },
+        { status: 400 },
       );
     }
 
@@ -32,10 +32,10 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: students });
   } catch (error) {
-    console.error('Error fetching students by turma:', error);
+    console.error("Error fetching students by turma:", error);
     return NextResponse.json(
-      { error: 'Erro ao buscar alunos da turma' },
-      { status: 500 }
+      { error: "Erro ao buscar alunos da turma" },
+      { status: 500 },
     );
   }
 }

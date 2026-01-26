@@ -4,7 +4,7 @@ import {
   type AuthenticatedRequest,
 } from "@/app/[tenant]/auth/middleware";
 import { createClient } from "@/app/shared/core/server";
-import { createStudentOrganizationsService } from "@/app/[tenant]/(dashboard)/aluno/services";
+import { createStudentOrganizationsService } from "@/app/[tenant]/features/pessoas/services";
 
 function handleError(error: unknown) {
   console.error("Student Organizations API Error:", error);
@@ -25,7 +25,7 @@ function handleError(error: unknown) {
             : String(error)
           : undefined,
     },
-    { status: 500 }
+    { status: 500 },
   );
 }
 
@@ -41,7 +41,7 @@ async function getHandler(request: AuthenticatedRequest) {
     if (!request.user || request.user.role !== "aluno") {
       return NextResponse.json(
         { error: "Forbidden: This endpoint is only for students" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 

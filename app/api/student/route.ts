@@ -3,12 +3,15 @@ import {
   studentService,
   StudentConflictError,
   StudentValidationError,
-} from "@/app/[tenant]/(dashboard)/aluno/services";
-import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
+} from "@/app/[tenant]/features/pessoas/services";
+import {
+  requireAuth,
+  AuthenticatedRequest,
+} from "@/app/[tenant]/auth/middleware";
 import type { PaginationParams } from "@/app/shared/types/dtos/api-responses";
 
 const serializeStudent = (
-  student: Awaited<ReturnType<typeof studentService.getById>>
+  student: Awaited<ReturnType<typeof studentService.getById>>,
 ) => ({
   id: student.id,
   fullName: student.fullName ?? null,
@@ -62,7 +65,7 @@ function handleError(error: unknown) {
             : String(error)
           : undefined,
     },
-    { status: 500 }
+    { status: 500 },
   );
 }
 
@@ -120,9 +123,9 @@ async function getHandler(request: AuthenticatedRequest) {
       const { getDatabaseClientAsUser } =
         await import("@/app/shared/core/database/database");
       const { StudentRepositoryImpl } =
-        await import("@/app/[tenant]/(dashboard)/aluno/services/student.repository");
+        await import("@/app/[tenant]/features/pessoas/services/student.repository");
       const { StudentService } =
-        await import("@/app/[tenant]/(dashboard)/aluno/services/student.service");
+        await import("@/app/[tenant]/features/pessoas/services/student.service");
 
       const client = getDatabaseClientAsUser(token);
       const repository = new StudentRepositoryImpl(client);
@@ -159,7 +162,7 @@ async function postHandler(request: AuthenticatedRequest) {
         {
           error: "Campo obrigatório: email é necessário",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -171,7 +174,7 @@ async function postHandler(request: AuthenticatedRequest) {
         {
           error: "empresaId é obrigatório para criar um aluno",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -185,9 +188,9 @@ async function postHandler(request: AuthenticatedRequest) {
       const { getDatabaseClientAsUser } =
         await import("@/app/shared/core/database/database");
       const { StudentRepositoryImpl } =
-        await import("@/app/[tenant]/(dashboard)/aluno/services/student.repository");
+        await import("@/app/[tenant]/features/pessoas/services/student.repository");
       const { StudentService } =
-        await import("@/app/[tenant]/(dashboard)/aluno/services/student.service");
+        await import("@/app/[tenant]/features/pessoas/services/student.service");
 
       const client = getDatabaseClientAsUser(token);
       const repository = new StudentRepositoryImpl(client);
@@ -213,7 +216,7 @@ async function postHandler(request: AuthenticatedRequest) {
     console.log("[Student POST] Student created:", student.id);
     return NextResponse.json(
       { data: serializeStudent(student) },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("[Student POST] Error creating student:", error);

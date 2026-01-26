@@ -18,7 +18,7 @@ import { usePathname } from "next/navigation"
 import { NavMain } from "@/components/layout/nav-main"
 import { NavUser } from "@/components/layout/nav-user"
 import { useCurrentUser } from "@/components/providers/user-provider"
-import { TenantLogo } from "@/components/shared/tenant-logo"
+import { TenantLogo } from "@/components/tenant-logo"
 import {
   Sidebar,
   SidebarContent,

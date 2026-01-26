@@ -2,8 +2,11 @@ import { NextResponse } from "next/server";
 import {
   studentImportService,
   StudentValidationError,
-} from "@/app/[tenant]/(dashboard)/aluno/services";
-import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
+} from "@/app/[tenant]/features/pessoas/services";
+import {
+  requireAuth,
+  AuthenticatedRequest,
+} from "@/app/[tenant]/auth/middleware";
 import Papa from "papaparse";
 import ExcelJS from "exceljs";
 import type { Database } from "@/app/shared/core/database.types";
@@ -199,7 +202,8 @@ async function postHandler(request: AuthenticatedRequest) {
     }
 
     // Buscar cursos para validação
-    const { getDatabaseClient } = await import("@/app/shared/core/database/database");
+    const { getDatabaseClient } =
+      await import("@/app/shared/core/database/database");
     const client = getDatabaseClient();
     let coursesQuery = client.from("cursos").select("id, nome");
     if (request.user.empresaId) {

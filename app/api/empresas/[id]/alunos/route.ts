@@ -1,8 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/app/shared/core/server';
-import { StudentRepositoryImpl } from '@/app/[tenant]/(dashboard)/aluno/services';
-import { getAuthUser } from '@/app/[tenant]/auth/middleware';
-import { getEmpresaContext, validateEmpresaAccess } from '@/app/shared/core/middleware/empresa-context';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/app/shared/core/server";
+import { StudentRepositoryImpl } from "@/app/[tenant]/features/pessoas/services";
+import { getAuthUser } from "@/app/[tenant]/auth/middleware";
+import {
+  getEmpresaContext,
+  validateEmpresaAccess,
+} from "@/app/shared/core/middleware/empresa-context";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -10,17 +13,14 @@ interface RouteContext {
 
 async function getHandler(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
     const user = await getAuthUser(request);
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'Não autenticado' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
     const supabase = await createClient();
@@ -28,8 +28,8 @@ async function getHandler(
     const context = await getEmpresaContext(supabase, user.id, request, user);
     if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
       return NextResponse.json(
-        { error: 'Acesso negado. Apenas admin da empresa pode ver alunos.' },
-        { status: 403 }
+        { error: "Acesso negado. Apenas admin da empresa pode ver alunos." },
+        { status: 403 },
       );
     }
 
@@ -38,18 +38,15 @@ async function getHandler(
 
     return NextResponse.json(alunos);
   } catch (error) {
-    console.error('Error listing alunos:', error);
+    console.error("Error listing alunos:", error);
     return NextResponse.json(
-      { error: 'Erro ao listar alunos' },
-      { status: 500 }
+      { error: "Erro ao listar alunos" },
+      { status: 500 },
     );
   }
 }
 
 // GET /api/empresas/[id]/alunos - Listar alunos matriculados em cursos da empresa
-export async function GET(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function GET(request: NextRequest, context: RouteContext) {
   return getHandler(request, context);
 }

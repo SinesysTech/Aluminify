@@ -3,8 +3,11 @@ import {
   studentImportService,
   StudentValidationError,
   StudentImportInputRow,
-} from "@/app/[tenant]/(dashboard)/aluno/services";
-import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
+} from "@/app/[tenant]/features/pessoas/services";
+import {
+  requireAuth,
+  AuthenticatedRequest,
+} from "@/app/[tenant]/auth/middleware";
 
 function handleError(error: unknown) {
   if (error instanceof StudentValidationError) {

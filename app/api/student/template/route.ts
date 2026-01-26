@@ -3,7 +3,7 @@ import {
   requireAuth,
   type AuthenticatedRequest,
 } from "@/app/[tenant]/auth/middleware";
-import { StudentTemplateService } from "@/app/[tenant]/(dashboard)/aluno/services/student-template.service";
+import { StudentTemplateService } from "@/app/[tenant]/features/pessoas/services/student-template.service";
 import { isAdminRoleTipo } from "@/app/shared/core/roles";
 
 async function getHandler(request: AuthenticatedRequest) {
@@ -15,7 +15,9 @@ async function getHandler(request: AuthenticatedRequest) {
 
     // Permitir superadmin e admins de empresa (usuários com roleType admin)
     const isAdmin =
-      user.role === "usuario" && !!user.roleType && isAdminRoleTipo(user.roleType);
+      user.role === "usuario" &&
+      !!user.roleType &&
+      isAdminRoleTipo(user.roleType);
     if (!user.isSuperAdmin && !isAdmin) {
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
@@ -30,9 +32,9 @@ async function getHandler(request: AuthenticatedRequest) {
       buffer.byteOffset + buffer.byteLength,
     ) as ArrayBuffer;
 
-    const filename = `modelo-importacao-alunos-${new Date()
-      .toISOString()
-      .split("T")[0]}.xlsx`;
+    const filename = `modelo-importacao-alunos-${
+      new Date().toISOString().split("T")[0]
+    }.xlsx`;
 
     return new NextResponse(body, {
       status: 200,

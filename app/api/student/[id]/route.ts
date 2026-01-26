@@ -1,20 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 import {
   studentService,
   StudentConflictError,
   StudentNotFoundError,
   StudentValidationError,
-} from '@/app/[tenant]/(dashboard)/aluno/services';
-import { requireAuth, AuthenticatedRequest } from '@/app/[tenant]/auth/middleware';
+} from "@/app/[tenant]/features/pessoas/services";
+import {
+  requireAuth,
+  AuthenticatedRequest,
+} from "@/app/[tenant]/auth/middleware";
 
-const serializeStudent = (student: Awaited<ReturnType<typeof studentService.getById>>) => ({
+const serializeStudent = (
+  student: Awaited<ReturnType<typeof studentService.getById>>,
+) => ({
   id: student.id,
   empresaId: student.empresaId,
   fullName: student.fullName,
   email: student.email,
   cpf: student.cpf,
   phone: student.phone,
-  birthDate: student.birthDate?.toISOString().split('T')[0] ?? null,
+  birthDate: student.birthDate?.toISOString().split("T")[0] ?? null,
   address: student.address,
   zipCode: student.zipCode,
   cidade: student.cidade,
@@ -50,7 +55,7 @@ function handleError(error: unknown) {
   }
 
   console.error(error);
-  return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  return NextResponse.json({ error: "Internal server error" }, { status: 500 });
 }
 
 interface RouteContext {
@@ -58,7 +63,10 @@ interface RouteContext {
 }
 
 // GET - RLS filtra automaticamente (alunos veem apenas seu próprio perfil)
-async function getHandler(_request: AuthenticatedRequest, params: { id: string }) {
+async function getHandler(
+  _request: AuthenticatedRequest,
+  params: { id: string },
+) {
   try {
     const student = await studentService.getById(params.id);
     return NextResponse.json({ data: serializeStudent(student) });
@@ -68,7 +76,10 @@ async function getHandler(_request: AuthenticatedRequest, params: { id: string }
 }
 
 // PUT - RLS verifica se é o próprio aluno ou superadmin
-async function putHandler(request: AuthenticatedRequest, params: { id: string }) {
+async function putHandler(
+  request: AuthenticatedRequest,
+  params: { id: string },
+) {
   try {
     const body = await request.json();
     const student = await studentService.update(params.id, {
@@ -93,7 +104,10 @@ async function putHandler(request: AuthenticatedRequest, params: { id: string })
 }
 
 // DELETE - RLS verifica se é o próprio aluno ou superadmin
-async function deleteHandler(_request: AuthenticatedRequest, params: { id: string }) {
+async function deleteHandler(
+  _request: AuthenticatedRequest,
+  params: { id: string },
+) {
   try {
     await studentService.delete(params.id);
     return NextResponse.json({ success: true });
@@ -116,4 +130,3 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
   const params = await context.params;
   return requireAuth((req) => deleteHandler(req, params))(request);
 }
-

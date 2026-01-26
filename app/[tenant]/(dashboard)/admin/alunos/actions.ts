@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/shared/core/server";
-import { createStudentService } from "@/app/[tenant]/(dashboard)/aluno/services";
+import { createStudentService } from "@/app/[tenant]/features/pessoas/services/student.service";
 import { getAuthenticatedUser } from "@/app/shared/core/auth";
 import { CreateStudentInput } from "@/app/shared/types/entities/user";
 import { revalidatePath } from "next/cache";
@@ -16,7 +16,8 @@ export async function deleteStudentAction(studentId: string) {
     }
 
     // Check permission to delete students
-    const canDeleteStudents = user.role === "superadmin" || canDelete(user.permissions, "alunos");
+    const canDeleteStudents =
+      user.role === "superadmin" || canDelete(user.permissions, "alunos");
     if (!canDeleteStudents) {
       return {
         success: false,
@@ -49,7 +50,10 @@ export async function createStudentAction(data: CreateStudentInput) {
     }
 
     if (!user.empresaId) {
-      return { success: false, error: "Usuário não está associado a uma empresa" };
+      return {
+        success: false,
+        error: "Usuário não está associado a uma empresa",
+      };
     }
 
     // Usar cliente com contexto do usuário para respeitar RLS
