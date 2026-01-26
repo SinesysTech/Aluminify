@@ -9,7 +9,7 @@ import {
   LayoutDashboard,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useParams } from "next/navigation"
 
 import { NavMain } from "@/components/layout/nav-main"
 import { NavUser } from "@/components/layout/nav-user"
@@ -74,11 +74,23 @@ const alunoNavItems: NavItem[] = [
 export function AlunoSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const user = useCurrentUser()
+  const params = useParams()
+  const tenantSlug = params?.tenant as string
 
-  const navMainWithActive = alunoNavItems.map((item) => ({
+  // Dynamic nav items based on tenant
+  const navItems = alunoNavItems.map(item => ({
+    ...item,
+    url: tenantSlug ? `/${tenantSlug}${item.url}` : item.url,
+  }))
+
+  const navMainWithActive = navItems.map((item) => ({
     ...item,
     isActive: pathname === item.url || pathname?.startsWith(item.url + "/"),
   }))
+
+  const homeLink = tenantSlug
+    ? `/${tenantSlug}${getDefaultRouteForRole(user.role)}`
+    : getDefaultRouteForRole(user.role)
 
   // Get organization name and first letter for fallback
   const organizationName = user.empresaNome || 'Área do Aluno'
@@ -90,7 +102,7 @@ export function AlunoSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href={getDefaultRouteForRole(user.role)}>
+              <a href={homeLink}>
                 <div className="flex items-center gap-3">
                   <TenantLogo
                     logoType="sidebar"

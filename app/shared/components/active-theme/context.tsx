@@ -6,7 +6,7 @@ import { getCSSPropertiesManager } from '@/app/[tenant]/(modules)/empresa/(gesta
 import type { ExtendedThemeConfig, ThemePreset } from './types';
 
 export const DEFAULT_THEME: ExtendedThemeConfig = {
-  preset: 'underground',
+  preset: 'default',
   radius: 'md',
   scale: 'md',
   contentLayout: 'full',
@@ -14,6 +14,7 @@ export const DEFAULT_THEME: ExtendedThemeConfig = {
 };
 
 export const THEMES: ThemePreset[] = [
+  { name: 'Default', value: 'default', colors: ['#1f1f1f', '#525252', '#e5e5e5'] },
   { name: 'Underground', value: 'underground', colors: ['#10B981', '#EC4899', '#374151'] },
   { name: 'Rose Garden', value: 'rose-garden', colors: ['#F43F5E', '#FB7185', '#FDF2F8'] },
   { name: 'Lake View', value: 'lake-view', colors: ['#06B6D4', '#22D3EE', '#ECFEFF'] },
