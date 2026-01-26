@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { createClient } from '@/app/shared/core/server';
+import { getDatabaseClient } from '@/app/shared/core/database/database';
 import { TenantContextProvider } from './tenant-context';
 
 interface TenantLayoutProps {
@@ -11,9 +11,11 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
   const { tenant: tenantSlug } = await params;
 
   // Validate that tenant exists
-  const supabase = await createClient();
+  // Use admin client to bypass RLS - checking if tenant exists is not sensitive
+  // and RLS on empresas table doesn't include alunos (only usuarios)
+  const adminClient = getDatabaseClient();
 
-  const { data: empresa, error } = await supabase
+  const { data: empresa, error } = await adminClient
     .from('empresas')
     .select('id, nome, slug')
     .eq('slug', tenantSlug)
