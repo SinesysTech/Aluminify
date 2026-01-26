@@ -13,6 +13,9 @@ const openrouter = createOpenRouter({
  * - Responder dúvidas sobre cursos e materiais
  * - Auxiliar com agendamentos e cronogramas
  * - Fornecer informações sobre progresso de estudos
+ *
+ * Modelo: Google Gemini 2.0 Flash via OpenRouter
+ * Requer: OPENROUTER_API_KEY no .env
  */
 export const studentAgent = new Agent({
   name: "studentAgent",

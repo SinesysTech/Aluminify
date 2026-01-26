@@ -7,6 +7,9 @@
     "dev:webpack": "next dev --webpack",
     "build": "next build --turbopack",
     "start": "next start",
+    "mastra:dev": "mastra dev --dir mastra",
+    "mastra:build": "mastra build --dir mastra",
+    "mastra:start": "mastra start",
     "lint": "eslint --cache",
     "lint:fix": "eslint --cache --fix",
     "lint:ci": "eslint --cache --max-warnings 0",
@@ -145,6 +148,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "mastra": "^0.18.9",
     "@tailwindcss/postcss": "^4",
     "@types/jest": "^30.0.0",
     "@types/jsdom": "^27.0.0",
@@ -168,6 +172,9 @@
     "typescript": "^5"
   },
   "overrides": {
+    "@openrouter/ai-sdk-provider": {
+      "zod": "^3.25.0"
+    },
     "rimraf": "^6.0.0",
     "tar": "^7.5.6",
     "node-domexception": "^2.0.2",

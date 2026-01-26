@@ -12,7 +12,10 @@ const LOG_LEVEL = (process.env.LOG_LEVEL as LogLevel) || "info";
  * - studentAgent: Assistente para área do aluno
  * - institutionAgent: Assistente para área administrativa
  *
- * Integração CopilotKit via MastraAgent.getLocalAgents({ mastra })
+ * Modos de uso:
+ * 1. CopilotKit (Next.js embedded): MastraAgent.getLocalAgents({ mastra })
+ * 2. Mastra Studio (dev): npm run mastra:dev -> http://localhost:4111
+ * 3. Mastra Server (prod): npm run mastra:build && npm run mastra:start
  */
 export const mastra = new Mastra({
   agents: {
@@ -22,4 +25,11 @@ export const mastra = new Mastra({
   logger: new ConsoleLogger({
     level: LOG_LEVEL,
   }),
+  server: {
+    cors: {
+      origin: ["http://localhost:3000", "http://localhost:4111"],
+      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      allowHeaders: ["Content-Type", "Authorization"],
+    },
+  },
 });

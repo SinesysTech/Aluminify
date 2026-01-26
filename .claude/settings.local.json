@@ -58,7 +58,9 @@
       "Bash(npm.cmd view:*)",
       "Bash(npm.cmd list:*)",
       "Bash(git status:*)",
-      "Bash(npm update:*)"
+      "Bash(npm update:*)",
+      "Bash(npx mastra --version)",
+      "Bash(npx mastra --help:*)"
     ],
     "deny": [],
     "ask": []

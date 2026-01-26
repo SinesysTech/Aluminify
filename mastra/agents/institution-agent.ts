@@ -13,6 +13,9 @@ const openrouter = createOpenRouter({
  * - Fornecer insights sobre métricas e relatórios
  * - Ajudar com configurações administrativas
  * - Orientar sobre funcionalidades de gestão
+ *
+ * Modelo: Google Gemini 2.0 Flash via OpenRouter
+ * Requer: OPENROUTER_API_KEY no .env
  */
 export const institutionAgent = new Agent({
   name: "institutionAgent",
