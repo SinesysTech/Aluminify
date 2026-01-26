@@ -170,7 +170,7 @@ export function UserDetails({ user, empresaId, papeis, onUpdate }: UserDetailsPr
         title: 'Usuário excluído',
         description: 'O usuário foi excluído com sucesso.',
       })
-      router.push('/empresa/configuracoes?tab=usuarios')
+      router.push('/empresa/agendamentos/configuracoes?tab=usuarios')
     } catch (error) {
       console.error('Error deleting user:', error)
       toast({

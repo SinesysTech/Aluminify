@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     console.error("Google OAuth error:", error);
     return NextResponse.redirect(
       new URL(
-        `/professor/configuracoes/integracoes?error=${encodeURIComponent(error)}`,
+        `/professor/empresa/integracoes?error=${encodeURIComponent(error)}`,
         request.url,
       ),
     );
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   if (!code || !state) {
     return NextResponse.redirect(
       new URL(
-        "/professor/configuracoes/integracoes?error=missing_params",
+        "/professor/empresa/integracoes?error=missing_params",
         request.url,
       ),
     );
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.redirect(
       new URL(
-        "/professor/configuracoes/integracoes?success=google",
+        "/professor/empresa/integracoes?success=google",
         request.url,
       ),
     );
@@ -106,7 +106,7 @@ export async function GET(request: NextRequest) {
     console.error("Google OAuth callback error:", error);
     return NextResponse.redirect(
       new URL(
-        `/professor/configuracoes/integracoes?error=${encodeURIComponent(String(error))}`,
+        `/professor/empresa/integracoes?error=${encodeURIComponent(String(error))}`,
         request.url,
       ),
     );

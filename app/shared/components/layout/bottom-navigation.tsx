@@ -37,7 +37,7 @@ const professorNavItems: NavItem[] = [
   { name: 'Início', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Alunos', href: '/aluno', icon: Users },
   { name: 'Agenda', href: '/agendamentos/disponibilidade', icon: Calendar },
-  { name: 'Materiais', href: '/professor/materiais', icon: School },
+  { name: 'Materiais', href: '/professor/biblioteca/materiais', icon: School },
   { name: 'Perfil', href: '/perfil', icon: User },
 ]
 
@@ -46,7 +46,7 @@ const adminNavItems: NavItem[] = [
   { name: 'Alunos', href: '/aluno', icon: Users },
   { name: 'Turmas', href: '/turma', icon: School },
   { name: 'Agenda', href: '/agendamentos', icon: CalendarCheck },
-  { name: 'Config', href: '/admin/configuracoes', icon: Settings },
+  { name: 'Config', href: '/admin/agendamentos/configuracoes', icon: Settings },
 ]
 
 export function BottomNavigation() {

@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { ColorPaletteManagerImpl } from "@/brand-customization/services";
+import { ColorPaletteManagerImpl } from "@/empresa/personalizacao/services";
 import {
   requireBrandCustomizationAccess,
   BrandCustomizationRequest,
-} from "@/app/shared/core/middleware/brand-customization-access";
+} from "@/app/shared/core/middleware/empresa/personalizacao-access";
 import { getPublicSupabaseConfig } from "@/app/shared/core/supabase-public-env";
-import type { CreateColorPaletteRequest } from "@/brand-customization/services/brand-customization.types";
+import type { CreateColorPaletteRequest } from "@/empresa/personalizacao/services/empresa/personalizacao.types";
 
 interface RouteContext {
   params: Promise<{ empresaId: string }>;

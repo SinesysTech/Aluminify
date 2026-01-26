@@ -1,4 +1,4 @@
-Ôªø'use client'
+'use client'
 
 import { useCallback, useEffect, useState } from 'react'
 import { Search, Settings, GraduationCap, Users, Shield } from 'lucide-react'
@@ -151,15 +151,15 @@ export default function EmpresaUsuariosPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="page-title">Usu√°rios da Empresa</h1>
+          <h1 className="page-title">Usu·rios da Empresa</h1>
           <p className="page-subtitle">
-            Visualize todos os usu√°rios da sua empresa
+            Visualize todos os usu·rios da sua empresa
           </p>
         </div>
         <Button asChild>
-          <Link href="/empresa/configuracoes?tab=usuarios">
+          <Link href="/empresa/agendamentos/configuracoes?tab=usuarios">
             <Settings className="h-4 w-4 mr-2" />
-            Gerenciar Usu√°rios
+            Gerenciar Usu·rios
           </Link>
         </Button>
       </div>
@@ -195,9 +195,9 @@ export default function EmpresaUsuariosPage() {
       {/* Filters */}
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Usu√°rios</CardTitle>
+          <CardTitle>Lista de Usu·rios</CardTitle>
           <CardDescription>
-            {filteredUsers.length} usu√°rio(s) encontrado(s)
+            {filteredUsers.length} usu·rio(s) encontrado(s)
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -228,8 +228,8 @@ export default function EmpresaUsuariosPage() {
           {filteredUsers.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               {search || filterType !== 'todos'
-                ? 'Nenhum usu√°rio encontrado com os filtros aplicados'
-                : 'Nenhum usu√°rio cadastrado'}
+                ? 'Nenhum usu·rio encontrado com os filtros aplicados'
+                : 'Nenhum usu·rio cadastrado'}
             </div>
           ) : (
             <div className="space-y-2">

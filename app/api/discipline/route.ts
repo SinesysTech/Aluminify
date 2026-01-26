@@ -3,7 +3,7 @@ import {
   disciplineService,
   DisciplineConflictError,
   DisciplineValidationError,
-} from "@/app/[tenant]/(dashboard)/disciplina/services";
+} from "@/app/[tenant]/(dashboard)/curso/curso/disciplinass/services";
 import { requireAuth, AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
 import { getDatabaseClientAsUser } from "@/app/shared/core/database/database";
 

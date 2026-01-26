@@ -931,7 +931,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
 
     // Se estiver marcando todas as aulas, também marcar os tempos de estudos
     if (novoEstado && cronogramaId) {
-      // Agrupar itens por data/disciplina/frente para marcar tempos de estudos
+      // Agrupar itens por data/curso/disciplinas/frente para marcar tempos de estudos
       const gruposPorDataDisciplinaFrente = new Map<string, typeof itensDoDia>()
 
       itensDoDia.forEach((item) => {
@@ -1102,7 +1102,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
 
     // Se estiver marcando todas as aulas da frente, também marcar os tempos de estudos
     if (novoEstado && cronogramaId) {
-      // Agrupar itens por data/disciplina/frente para marcar tempos de estudos
+      // Agrupar itens por data/curso/disciplinas/frente para marcar tempos de estudos
       const gruposPorDataDisciplinaFrente = new Map<string, typeof itensDaFrente>()
 
       itensDaFrente.forEach((item) => {

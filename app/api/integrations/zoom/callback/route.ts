@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     console.error("Zoom OAuth error:", error);
     return NextResponse.redirect(
       new URL(
-        `/professor/configuracoes/integracoes?error=${encodeURIComponent(error)}`,
+        `/professor/empresa/integracoes?error=${encodeURIComponent(error)}`,
         request.url,
       ),
     );
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   if (!code || !state) {
     return NextResponse.redirect(
       new URL(
-        "/professor/configuracoes/integracoes?error=missing_params",
+        "/professor/empresa/integracoes?error=missing_params",
         request.url,
       ),
     );
@@ -101,13 +101,13 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.redirect(
-      new URL("/professor/configuracoes/integracoes?success=zoom", request.url),
+      new URL("/professor/empresa/integracoes?success=zoom", request.url),
     );
   } catch (error) {
     console.error("Zoom OAuth callback error:", error);
     return NextResponse.redirect(
       new URL(
-        `/professor/configuracoes/integracoes?error=${encodeURIComponent(String(error))}`,
+        `/professor/empresa/integracoes?error=${encodeURIComponent(String(error))}`,
         request.url,
       ),
     );

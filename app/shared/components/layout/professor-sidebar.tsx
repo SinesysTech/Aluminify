@@ -53,17 +53,17 @@ const professorNavItems: NavItem[] = [
   },
   {
     title: "Disciplinas",
-    url: "/disciplina",
+    url: "/curso/disciplinas",
     icon: FileText,
   },
   {
     title: "Segmentos",
-    url: "/segmento",
+    url: "/curso/segmentos",
     icon: Layers,
   },
   {
     title: "Materiais",
-    url: "/materiais",
+    url: "/biblioteca/materiais",
     icon: FolderOpen,
   },
   {
@@ -73,7 +73,7 @@ const professorNavItems: NavItem[] = [
   },
   {
     title: "Conteúdo Programático",
-    url: "/conteudos",
+    url: "/curso/conteudos",
     icon: Calendar,
   },
   {

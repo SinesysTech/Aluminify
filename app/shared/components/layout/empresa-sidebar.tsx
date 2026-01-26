@@ -80,22 +80,22 @@ const empresaNavItems: NavItem[] = [
   },
   {
     title: "Disciplinas",
-    url: "/disciplina",
+    url: "/curso/disciplinas",
     icon: FileText,
   },
   {
     title: "Segmentos",
-    url: "/segmento",
+    url: "/curso/segmentos",
     icon: Layers,
   },
   {
     title: "Conteúdo Programático",
-    url: "/conteudos",
+    url: "/curso/conteudos",
     icon: Calendar,
   },
   {
     title: "Materiais",
-    url: "/professor/materiais",
+    url: "/professor/biblioteca/materiais",
     icon: FolderOpen,
   },
   {

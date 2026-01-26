@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { FontSchemeManagerImpl } from "@/brand-customization/services";
+import { FontSchemeManagerImpl } from "@/empresa/personalizacao/services";
 import {
   requireBrandCustomizationAccess,
   BrandCustomizationRequest,
-} from "@/app/shared/core/middleware/brand-customization-access";
+} from "@/app/shared/core/middleware/empresa/personalizacao-access";
 import { getPublicSupabaseConfig } from "@/app/shared/core/supabase-public-env";
 
 interface RouteContext {

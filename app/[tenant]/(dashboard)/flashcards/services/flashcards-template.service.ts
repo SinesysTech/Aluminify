@@ -168,7 +168,7 @@ export class FlashcardsTemplateService {
       '1. Preencha os dados na aba "Importação de Flashcards".',
       "2. A linha 2 contém exemplos — pode ser removida ou substituída.",
       "3. Campos marcados com * são obrigatórios.",
-      '4. No app, selecione Curso/Disciplina/Frente antes de importar.',
+      '4. No app, selecione Curso/curso/disciplinas/Frente antes de importar.',
       "5. A coluna Módulo deve ser o NÚMERO do módulo (conforme cadastrado na frente).",
       "",
       "⚠️ IMPORTANTE:",

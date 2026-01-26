@@ -4,7 +4,7 @@ import {
   DisciplineConflictError,
   DisciplineNotFoundError,
   DisciplineValidationError,
-} from '@/app/[tenant]/(dashboard)/disciplina/services';
+} from '@/app/[tenant]/(dashboard)/curso/curso/disciplinass/services';
 import { requireAuth, AuthenticatedRequest } from '@/app/[tenant]/auth/middleware';
 
 const serializeDiscipline = (discipline: Awaited<ReturnType<typeof disciplineService.getById>>) => ({

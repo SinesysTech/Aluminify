@@ -2,5 +2,5 @@
 export * from './empresa-context';
 
 // Export new brand customization middleware
-export * from './brand-customization-access';
+export * from './empresa/personalizacao-access';
 export * from './file-security';

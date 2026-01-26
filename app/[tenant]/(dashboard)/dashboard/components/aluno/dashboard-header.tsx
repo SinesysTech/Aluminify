@@ -115,7 +115,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
                 <li>Mostra quantas pessoas estão estudando no mesmo contexto</li>
               </ul>
               <p className="text-xs text-slate-200">
-                Dica: o botão tenta reutilizar o último contexto (curso/disciplina/módulo/atividade) quando disponível.
+                Dica: o botão tenta reutilizar o último contexto (curso/curso/disciplinas/módulo/atividade) quando disponível.
               </p>
             </div>
           </TooltipContent>
