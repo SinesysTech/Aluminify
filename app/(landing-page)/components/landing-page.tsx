@@ -3,146 +3,127 @@
 import Link from "next/link";
 import { Nav } from "./nav";
 import { Footer } from "./footer";
+import { 
+    ArrowRight, 
+    Github, 
+    Check, 
+    Layout, 
+    Zap, 
+    Shield, 
+    Play,
+    BookOpen,
+    Users,
+    BarChart3
+} from "lucide-react";
 
 export function LandingPage() {
     return (
-        <div className="bg-background text-foreground font-sans antialiased selection:bg-zinc-200 dark:selection:bg-zinc-800 transition-colors duration-200">
-            <div className="fixed inset-0 pointer-events-none z-0">
-                <div className="absolute inset-0 bg-grid-pattern dark:bg-grid-pattern-dark opacity-[0.4] grid-bg"></div>
-            </div>
-
+        <div className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 transition-colors duration-200 flex flex-col">
             <Nav />
 
-            <main className="relative z-10">
+            <main className="flex-1">
                 {/* Hero Section */}
-                <section className="pt-24 pb-20 lg:pt-32 lg:pb-24 overflow-hidden">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 mb-8">
+                <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
+                    {/* Background Grid - using a manual SVG pattern for reliability over CSS classes */}
+                    <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
+                        <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-muted border border-border mb-8 animate-fade-in-up">
                             <span className="flex h-2 w-2 rounded-full bg-green-500"></span>
-                            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-300">
-                                v2.0 Beta já disponível
+                            <span className="text-xs font-medium text-muted-foreground">
+                                v2.2 Beta Disponível
                             </span>
                         </div>
 
-                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight mb-6 text-transparent bg-clip-text bg-linear-to-b from-zinc-900 to-zinc-600 dark:from-white dark:to-zinc-400">
-                            A infraestrutura invisível <br className="hidden md:block" /> da educação.
+                        <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight mb-8 text-foreground max-w-5xl mx-auto leading-[1.1]">
+                            A infraestrutura invisível <br className="hidden md:block" /> da sua escola.
                         </h1>
 
-                        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed text-balance">
-                            A primeira área do aluno <strong>Open Source</strong> e White Label. Crie experiências de aprendizado de alta performance com a robustez técnica de uma fintech.
+                        <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed text-balance">
+                            A primeira área do aluno <strong>Open Source</strong> e White Label projetada para escala.
+                            Do vídeo ao financeiro, sem amarras.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20">
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-24">
                             <Link
-                                className="w-full sm:w-auto px-8 py-3.5 bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 font-medium rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all flex items-center justify-center gap-2 shadow-lg shadow-zinc-200 dark:shadow-none focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100 focus:ring-offset-2"
+                                className="w-full sm:w-auto px-8 py-4 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
                                 href="/signup"
                             >
                                 Começar Agora
-                                <span className="material-icons-outlined text-sm">arrow_forward</span>
+                                <ArrowRight className="w-4 h-4" />
                             </Link>
                             <a
-                                className="w-full sm:w-auto px-8 py-3.5 bg-card border border-border text-foreground font-medium rounded-lg hover:bg-accent transition-all flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                                className="w-full sm:w-auto px-8 py-4 bg-background border border-border text-foreground font-medium rounded-lg hover:bg-muted transition-all flex items-center justify-center gap-2 group"
                                 href="https://github.com/aluminify"
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                <svg
-                                    className="w-5 h-5 text-zinc-500 group-hover:text-black dark:text-zinc-400 dark:group-hover:text-white transition-colors"
-                                    fill="currentColor"
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                >
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                                        clipRule="evenodd"
-                                    />
-                                </svg>
+                                <Github className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                                 Star on GitHub
                             </a>
                         </div>
 
-                        {/* Browser Mockup */}
-                        <div className="relative max-w-5xl mx-auto">
-                            <div className="absolute -inset-1 bg-linear-to-r from-zinc-200 via-zinc-100 to-zinc-200 dark:from-zinc-800 dark:via-zinc-700 dark:to-zinc-800 rounded-xl blur opacity-40"></div>
+                        {/* App Screenshot Mockup */}
+                        <div className="relative max-w-6xl mx-auto rounded-xl border border-border bg-card/50 shadow-2xl backdrop-blur-sm overflow-hidden aspect-video group">
+                            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent z-10 pointer-events-none"></div>
+                            
+                            {/* Browser Header */}
+                            <div className="border-b border-border bg-muted/50 p-3 flex items-center gap-4">
+                                <div className="flex gap-2">
+                                    <div className="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
+                                    <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
+                                    <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
+                                </div>
+                                <div className="h-6 w-full max-w-md bg-background rounded-md border border-border flex items-center px-3 mx-auto">
+                                    <span className="text-[10px] text-muted-foreground font-mono">aluno.suaescola.com.br/dashboard</span>
+                                </div>
+                            </div>
 
-                            <div className="relative bg-card border border-border rounded-xl shadow-2xl overflow-hidden aspect-16/10 md:aspect-video flex flex-col">
-                                <div className="border-b border-border bg-zinc-50 dark:bg-zinc-900/50 p-3 flex items-center gap-4">
-                                    <div className="flex gap-2">
-                                        <div className="w-3 h-3 rounded-full bg-red-400"></div>
-                                        <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
-                                        <div className="w-3 h-3 rounded-full bg-green-400"></div>
+                            {/* Dashboard UI Simulation */}
+                            <div className="flex h-full text-left">
+                                {/* Sidebar */}
+                                <div className="w-64 border-r border-border bg-card p-4 hidden md:flex flex-col gap-4">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-8 h-8 bg-primary rounded-lg"></div>
+                                        <div className="h-4 w-24 bg-muted rounded"></div>
                                     </div>
-                                    <div className="h-7 w-full max-w-lg bg-white dark:bg-zinc-950 rounded border border-zinc-200 dark:border-zinc-800 flex items-center px-3 text-[11px] text-zinc-400 font-mono shadow-sm mx-auto">
-                                        <span className="material-icons-outlined text-[12px] mr-2">lock</span>
-                                        https://aluno.seupreparatorio.com.br
+                                    <div className="space-y-1">
+                                        {[1, 2, 3, 4].map((i) => (
+                                            <div key={i} className={`h-10 rounded-lg flex items-center px-3 gap-3 ${i === 1 ? 'bg-primary/10 text-primary' : 'text-muted-foreground'}`}>
+                                                <div className="w-4 h-4 rounded-sm bg-current opacity-20"></div>
+                                                <div className="h-2 w-20 bg-current opacity-20 rounded"></div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
 
-                                <div className="flex-1 flex overflow-hidden bg-zinc-50 dark:bg-[#09090b]">
-                                    <div className="w-14 md:w-56 border-r border-border bg-card hidden sm:flex flex-col p-4 justify-between">
+                                {/* Content */}
+                                <div className="flex-1 p-8 bg-background/50">
+                                    <div className="flex justify-between items-center mb-8">
                                         <div>
-                                            <div className="flex items-center gap-3 mb-8">
-                                                <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-white text-sm font-bold font-display">A</div>
-                                                <div className="h-3 w-24 bg-zinc-200 dark:bg-zinc-800 rounded hidden md:block"></div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <div className="h-9 bg-zinc-100 dark:bg-zinc-800/50 rounded flex items-center px-2 gap-3 border border-zinc-200 dark:border-zinc-700">
-                                                    <span className="material-icons-outlined text-sm text-primary">dashboard</span>
-                                                    <div className="h-2 w-20 bg-zinc-300 dark:bg-zinc-600 rounded hidden md:block"></div>
-                                                </div>
-                                                <div className="h-9 flex items-center px-2 gap-3 text-zinc-400">
-                                                    <span className="material-icons-outlined text-sm">library_books</span>
-                                                    <div className="h-2 w-16 bg-zinc-100 dark:bg-zinc-800 rounded hidden md:block"></div>
-                                                </div>
-                                                <div className="h-9 flex items-center px-2 gap-3 text-zinc-400">
-                                                    <span className="material-icons-outlined text-sm">style</span>
-                                                    <div className="h-2 w-14 bg-zinc-100 dark:bg-zinc-800 rounded hidden md:block"></div>
-                                                </div>
-                                            </div>
+                                            <div className="h-8 w-48 bg-foreground/10 rounded mb-2"></div>
+                                            <div className="h-4 w-64 bg-muted rounded"></div>
                                         </div>
-                                        <div className="flex items-center gap-3 pt-4 border-t border-border">
-                                            <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700"></div>
-                                            <div className="hidden md:block space-y-1">
-                                                <div className="h-2 w-20 bg-zinc-200 dark:bg-zinc-700 rounded"></div>
-                                                <div className="h-1.5 w-12 bg-zinc-100 dark:bg-zinc-800 rounded"></div>
-                                            </div>
+                                        <div className="flex gap-3">
+                                            <div className="w-10 h-10 rounded-full bg-muted border border-border"></div>
                                         </div>
                                     </div>
 
-                                    <div className="flex-1 p-6 md:p-8 overflow-hidden flex flex-col gap-6">
-                                        <div className="flex justify-between items-end">
-                                            <div>
-                                                <div className="h-6 w-48 bg-zinc-200 dark:bg-zinc-800 rounded mb-2"></div>
-                                                <div className="h-3 w-64 bg-zinc-100 dark:bg-zinc-900 rounded"></div>
+                                    <div className="grid grid-cols-3 gap-6 mb-8">
+                                        {[1, 2, 3].map((i) => (
+                                            <div key={i} className="h-32 rounded-xl border border-border bg-card p-4 flex flex-col justify-between">
+                                                <div className="w-8 h-8 rounded-lg bg-primary/10 mb-2"></div>
+                                                <div className="h-4 w-24 bg-muted rounded"></div>
+                                                <div className="h-8 w-16 bg-foreground/10 rounded"></div>
                                             </div>
-                                        </div>
+                                        ))}
+                                    </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
-                                            <div className="col-span-2 bg-card rounded-xl shadow-sm border border-border p-0 overflow-hidden flex flex-col">
-                                                <div className="h-32 bg-zinc-100 dark:bg-zinc-800 relative flex items-center justify-center">
-                                                    <span className="material-icons-outlined text-4xl text-zinc-300 dark:text-zinc-600">play_circle</span>
-                                                    <div className="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-1 rounded font-mono">12:40</div>
-                                                </div>
-                                                <div className="p-4 flex-1 flex flex-col justify-center">
-                                                    <div className="flex items-center gap-2 mb-2">
-                                                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                                                        <div className="h-2 w-16 bg-blue-100 dark:bg-blue-900/30 rounded"></div>
-                                                    </div>
-                                                    <div className="h-4 w-3/4 bg-zinc-800 dark:bg-zinc-200 rounded mb-2"></div>
-                                                    <div className="h-2 w-full bg-zinc-100 dark:bg-zinc-800 rounded mb-4">
-                                                        <div className="h-full w-1/3 bg-blue-500 rounded"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="bg-card rounded-xl shadow-sm border border-border p-6 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                                                <div className="absolute top-0 right-0 w-16 h-16 bg-red-50 dark:bg-red-900/10 rounded-bl-full -mr-8 -mt-8"></div>
-                                                <span className="material-icons-outlined text-3xl text-red-500 mb-2">style</span>
-                                                <div className="h-3 w-16 bg-zinc-800 dark:bg-white rounded mb-1"></div>
-                                                <div className="h-2 w-10 bg-zinc-300 dark:bg-zinc-700 rounded"></div>
-                                            </div>
-                                        </div>
+                                    <div className="h-64 rounded-xl border border-border bg-card relative overflow-hidden flex items-center justify-center group-hover:scale-[1.01] transition-transform duration-700">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+                                        <Play className="w-16 h-16 text-primary opacity-50" />
                                     </div>
                                 </div>
                             </div>
@@ -150,182 +131,147 @@ export function LandingPage() {
                     </div>
                 </section>
 
-                {/* Features Section */}
-                <section className="py-20 lg:py-24 border-t border-border bg-card" id="recursos">
+                {/* Features Grid */}
+                <section className="py-24 border-t border-border bg-card/50">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="grid md:grid-cols-3 gap-12">
-                            <div className="group">
-                                <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <span className="material-icons-outlined text-zinc-700 dark:text-zinc-300">
-                                        verified_user
-                                    </span>
+                            <div className="space-y-4">
+                                <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                                    <Layout className="w-6 h-6 text-blue-500" />
                                 </div>
-                                <h3 className="text-xl font-display font-semibold mb-3">
-                                    Soberania de Dados
-                                </h3>
+                                <h3 className="text-xl font-bold">Design System Nativo</h3>
                                 <p className="text-muted-foreground leading-relaxed">
-                                    Seus dados, suas regras. Hospede onde quiser e mantenha controle total sobre as informações dos seus alunos, sem lock-in.
+                                    Componentes React otimizados e acessíveis. Personalize cores, 
+                                    fontes e bordas através de variáveis CSS simples.
                                 </p>
                             </div>
-                            <div className="group">
-                                <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <span className="material-icons-outlined text-zinc-700 dark:text-zinc-300">
-                                        branding_watermark
-                                    </span>
+                            <div className="space-y-4">
+                                <div className="w-12 h-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                                    <Zap className="w-6 h-6 text-purple-500" />
                                 </div>
-                                <h3 className="text-xl font-display font-semibold mb-3">
-                                    White Label Nativo
-                                </h3>
+                                <h3 className="text-xl font-bold">Edge Performance</h3>
                                 <p className="text-muted-foreground leading-relaxed">
-                                    Personalização profunda via CSS variables e React Components. Sua marca brilha, nós ficamos invisíveis no backend.
+                                    Renderizado no Edge com Next.js 15. Carregamento instantâneo
+                                    e otimização automática de imagens e vídeos.
                                 </p>
                             </div>
-                            <div className="group">
-                                <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                                    <span className="material-icons-outlined text-zinc-700 dark:text-zinc-300">
-                                        psychology
-                                    </span>
+                            <div className="space-y-4">
+                                <div className="w-12 h-12 rounded-lg bg-green-500/10 flex items-center justify-center">
+                                    <Shield className="w-6 h-6 text-green-500" />
                                 </div>
-                                <h3 className="text-xl font-display font-semibold mb-3">
-                                    Inteligência Contextual (RAG)
-                                </h3>
+                                <h3 className="text-xl font-bold">Soberania de Dados</h3>
                                 <p className="text-muted-foreground leading-relaxed">
-                                    Infraestrutura pronta para IA. Vetorização automática de conteúdo para tutores inteligentes que conhecem o seu material.
+                                    Hospede onde quiser (AWS, Vercel, VPS). Banco de dados Postgres
+                                    com schema aberto e documentado.
                                 </p>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* Manifesto Section */}
-                <section className="py-20 lg:py-24 bg-muted border-y border-border" id="manifesto">
-                    <div className="max-w-4xl mx-auto px-6 text-center">
-                        <span className="text-xs font-bold tracking-[0.2em] text-zinc-400 uppercase mb-6 block">Nossa Filosofia</span>
-
-                        <h2 className="text-3xl md:text-4xl font-display font-bold text-primary dark:text-white mb-8 leading-tight">
-                            Ensinar é, antes de tudo, <br className="hidden md:block" /> um ato de autonomia.
-                        </h2>
-
-                        <div className="prose prose-zinc dark:prose-invert mx-auto text-muted-foreground leading-relaxed text-lg max-w-2xl">
-                            <p>
-                                Quando você fecha a porta da sala de aula, aquele espaço é seu. A didática é sua. A conexão é sua. Mas, no digital, tentaram convencer você a abrir mão disso.
-                            </p>
-                            <p>
-                                Disseram que, para ensinar online, você precisava alugar um terreno em plataformas que não são suas. Nós discordamos. O Aluminify nasceu para devolver a soberania à sua instituição.
-                            </p>
-                        </div>
-
-                        <div className="mt-10">
-                            <Link href="/manifesto" className="inline-flex items-center gap-2 text-primary dark:text-white font-medium border-b border-primary dark:border-white pb-0.5 hover:opacity-70 transition-opacity group">
-                                Ler manifesto completo
-                                <span className="material-icons-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                            </Link>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Pricing Cards Section */}
-                <section className="py-20 lg:py-24 border-t border-border bg-card">
+                {/* Bento Grid Teaser */}
+                <section className="py-24 bg-background border-t border-border">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-16">
-                            <h2 className="text-3xl font-display font-bold mb-4">Dois modelos, a mesma potência</h2>
+                            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+                                Tudo o que sua escola precisa.
+                            </h2>
+                            <p className="text-muted-foreground max-w-2xl mx-auto">
+                                Modular e extensível. Comece com o básico e ative funcionalidades
+                                avançadas conforme cresce.
+                            </p>
                         </div>
-                        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-                            <div className="bg-muted rounded-2xl p-8 border border-border flex flex-col h-full">
-                                <div className="mb-6">
-                                    <h3 className="text-2xl font-bold mb-2">Community</h3>
-                                    <div className="text-sm text-muted-foreground font-mono">SELF-HOSTED</div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
+                            <div className="md:col-span-2 bg-card rounded-2xl border border-border p-8 flex flex-col justify-between overflow-hidden relative group">
+                                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <div className="relative z-10">
+                                    <h3 className="text-2xl font-bold mb-2">Sala de Estudos</h3>
+                                    <p className="text-muted-foreground max-w-md">
+                                        Player de vídeo imersivo com anotações, chat e materiais de apoio integrados em uma única interface.
+                                    </p>
                                 </div>
-                                <div className="text-4xl font-bold mb-6">R$ 0<span className="text-lg font-normal text-muted-foreground">/mês</span></div>
-                                <p className="text-muted-foreground mb-8 grow">
-                                    Perfeito para desenvolvedores e edtechs em estágio inicial com capacidade técnica. Código aberto, licença permissiva.
-                                </p>
-                                <ul className="space-y-3 mb-8 text-sm">
-                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-500 text-base">check</span> Código fonte completo</li>
-                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-500 text-base">check</span> Deploy na sua infra</li>
-                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-500 text-base">check</span> Suporte da comunidade</li>
-                                </ul>
-                                <Link className="w-full py-3 border border-zinc-300 dark:border-zinc-600 rounded-lg text-center font-medium hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" href="/opensource">
-                                    Ver no GitHub
-                                </Link>
+                                <div className="relative z-10 mt-8 rounded-lg border border-border bg-background shadow-lg h-64 w-full overflow-hidden">
+                                    <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
+                                        <Play className="w-12 h-12 text-primary opacity-80" />
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="bg-zinc-900 dark:bg-zinc-100 text-zinc-50 dark:text-zinc-900 rounded-2xl p-8 shadow-2xl flex flex-col h-full relative overflow-hidden">
-                                <div className="absolute top-0 right-0 bg-white/10 dark:bg-black/10 px-3 py-1 rounded-bl-lg text-xs font-bold uppercase tracking-wider">Popular</div>
-                                <div className="mb-6 relative z-10">
-                                    <h3 className="text-2xl font-bold mb-2">Aluminify Cloud</h3>
-                                    <div className="text-sm text-zinc-400 dark:text-zinc-600 font-mono">MANAGED</div>
+                            <div className="bg-card rounded-2xl border border-border p-8 flex flex-col justify-between group hover:border-primary/50 transition-colors">
+                                <div>
+                                    <BookOpen className="w-10 h-10 text-primary mb-4" />
+                                    <h3 className="text-xl font-bold mb-2">Conteúdo</h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        Estrutura flexível de cursos, módulos e aulas.
+                                    </p>
                                 </div>
-                                <div className="text-4xl font-bold mb-6 relative z-10">Escala<span className="text-lg font-normal text-zinc-400 dark:text-zinc-600"> com você</span></div>
-                                <p className="text-zinc-300 dark:text-zinc-700 mb-8 grow relative z-10">
-                                    Nós gerenciamos a infraestrutura, atualizações e segurança. Você foca apenas no conteúdo e nos alunos.
-                                </p>
-                                <ul className="space-y-3 mb-8 text-sm text-zinc-200 dark:text-zinc-700 relative z-10">
-                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-400 text-base">check</span> Setup instantâneo</li>
-                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-400 text-base">check</span> CDN Global otimizado</li>
-                                    <li className="flex items-center gap-2"><span className="material-icons-outlined text-green-400 text-base">check</span> Suporte dedicado</li>
-                                </ul>
-                                <Link className="w-full py-3 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50 rounded-lg text-center font-bold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors relative z-10 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-zinc-900" href="/signup">
-                                    Começar Trial
-                                </Link>
-                                <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-zinc-800 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+                                <div className="space-y-2 mt-4">
+                                    <div className="h-2 w-full bg-muted rounded overflow-hidden">
+                                        <div className="h-full w-3/4 bg-primary rounded"></div>
+                                    </div>
+                                    <div className="flex justify-between text-xs text-muted-foreground">
+                                        <span>Progresso</span>
+                                        <span>75%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-card rounded-2xl border border-border p-8 flex flex-col justify-between group hover:border-primary/50 transition-colors">
+                                <div>
+                                    <Users className="w-10 h-10 text-primary mb-4" />
+                                    <h3 className="text-xl font-bold mb-2">Comunidade</h3>
+                                    <p className="text-sm text-muted-foreground">
+                                        Fóruns, comentários e grupos de estudo.
+                                    </p>
+                                </div>
+                                <div className="flex -space-x-2 mt-4">
+                                    {[1,2,3,4].map(i => (
+                                        <div key={i} className="w-8 h-8 rounded-full border-2 border-card bg-muted"></div>
+                                    ))}
+                                    <div className="w-8 h-8 rounded-full border-2 border-card bg-muted flex items-center justify-center text-[10px] font-bold">+40</div>
+                                </div>
+                            </div>
+
+                            <div className="md:col-span-2 bg-card rounded-2xl border border-border p-8 flex flex-col justify-between overflow-hidden relative group">
+                                <div className="relative z-10">
+                                    <h3 className="text-2xl font-bold mb-2">Analytics & Financeiro</h3>
+                                    <p className="text-muted-foreground max-w-md">
+                                        Visão 360º do seu negócio. Acompanhe engajamento, retenção e receita em tempo real.
+                                    </p>
+                                </div>
+                                <div className="relative z-10 mt-8 flex gap-4 items-end h-32">
+                                    {[40, 60, 45, 80, 55, 70, 90].map((h, i) => (
+                                        <div key={i} className="flex-1 bg-primary/20 rounded-t-lg group-hover:bg-primary/40 transition-colors" style={{ height: `${h}%` }}></div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                {/* Pricing Table Section */}
-                <section className="py-20 lg:py-24 bg-background">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-12">
-                            <h3 className="text-2xl font-bold text-primary dark:text-white mb-4">Investimento Cloud</h3>
-                            <p className="text-muted-foreground max-w-2xl mx-auto">
-                                Modelo justo e cumulativo. Você paga um valor base pela faixa e um adicional pequeno apenas por aluno excedente.
-                            </p>
-                        </div>
-                        <div className="overflow-x-auto border border-border rounded-xl shadow-sm">
-                            <table className="w-full text-left border-collapse bg-card">
-                                <thead>
-                                    <tr className="border-b border-border bg-muted">
-                                        <th className="py-4 px-6 text-sm font-bold text-muted-foreground uppercase tracking-wider">Plano</th>
-                                        <th className="py-4 px-6 text-sm font-bold text-muted-foreground uppercase tracking-wider">Capacidade</th>
-                                        <th className="py-4 px-6 text-sm font-bold text-muted-foreground uppercase tracking-wider">Investimento Mensal</th>
-                                        <th className="py-4 px-6 text-sm font-bold text-muted-foreground uppercase tracking-wider">Modelo</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border">
-                                    <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-                                        <td className="py-6 px-6 font-bold text-lg">Start</td>
-                                        <td className="py-6 px-6 text-muted-foreground">Até 300 alunos</td>
-                                        <td className="py-6 px-6 font-mono font-medium">R$ 500,00<span className="text-xs text-zinc-500 font-sans">/fixo</span></td>
-                                        <td className="py-6 px-6 text-sm text-muted-foreground">Valor único para validação inicial.</td>
-                                    </tr>
-                                    <tr className="bg-blue-50/30 dark:bg-blue-900/10 relative z-10">
-                                        <td className="py-6 px-6 font-bold text-lg text-primary dark:text-white flex items-center gap-2">
-                                            Growth
-                                            <span className="bg-blue-100 text-blue-800 text-[10px] px-2 py-0.5 rounded font-bold uppercase border border-blue-200">Recomendado</span>
-                                        </td>
-                                        <td className="py-6 px-6 text-muted-foreground font-medium">301 a 500 alunos</td>
-                                        <td className="py-6 px-6 font-mono text-blue-700 dark:text-blue-300 font-bold">R$ 500,00<span className="text-xs text-zinc-500 font-normal dark:text-zinc-400"> + R$ 1,50/extra</span></td>
-                                        <td className="py-6 px-6 text-sm text-muted-foreground">Base + valor por aluno excedente.</td>
-                                    </tr>
-                                    <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-                                        <td className="py-6 px-6 font-bold text-lg">Scale</td>
-                                        <td className="py-6 px-6 text-muted-foreground">501 a 1.000 alunos</td>
-                                        <td className="py-6 px-6 font-mono font-medium">R$ 800,00<span className="text-xs text-zinc-500 font-sans"> + R$ 1,00/extra</span></td>
-                                        <td className="py-6 px-6 text-sm text-muted-foreground">Custo marginal reduzido para escala.</td>
-                                    </tr>
-                                    <tr className="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-                                        <td className="py-6 px-6 font-bold text-lg">Enterprise</td>
-                                        <td className="py-6 px-6 text-muted-foreground">1.001+ alunos</td>
-                                        <td className="py-6 px-6 font-mono font-medium">Sob Consulta</td>
-                                        <td className="py-6 px-6 text-sm text-muted-foreground">Condições especiais e infra dedicada.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div className="mt-6 text-center">
-                            <Link href="/pricing" className="text-sm font-medium text-primary hover:underline dark:text-white">Ver detalhes completos e opcionais →</Link>
+                {/* CTA */}
+                <section className="py-24 border-t border-border bg-muted/30">
+                    <div className="max-w-4xl mx-auto text-center px-4">
+                        <h2 className="text-3xl md:text-4xl font-display font-bold mb-6">
+                            Pronto para evoluir?
+                        </h2>
+                        <p className="text-lg text-muted-foreground mb-10">
+                            Junte-se a centenas de escolas que já estão construindo o futuro da educação com Aluminify.
+                        </p>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <Link
+                                href="/signup"
+                                className="w-full sm:w-auto px-8 py-4 bg-foreground text-background font-bold rounded-lg hover:opacity-90 transition-all"
+                            >
+                                Criar Conta Grátis
+                            </Link>
+                            <Link
+                                href="/contact"
+                                className="w-full sm:w-auto px-8 py-4 bg-background border border-border font-bold rounded-lg hover:bg-muted transition-all"
+                            >
+                                Falar com Vendas
+                            </Link>
                         </div>
                     </div>
                 </section>
