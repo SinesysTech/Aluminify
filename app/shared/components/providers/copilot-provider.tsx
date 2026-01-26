@@ -16,18 +16,15 @@ interface CopilotProviderProps {
 const COPILOTKIT_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_COPILOTKIT_PUBLIC_KEY || "ck_pub_b5b202514d1736f9e6f6675a87238818";
 
-const MASTRA_SERVER_URL =
-  process.env.NEXT_PUBLIC_MASTRA_SERVER_URL || "http://localhost:4111";
-
-const RUNTIME_URLS = {
-  student: `${MASTRA_SERVER_URL}/copilot/student`,
-  institution: `${MASTRA_SERVER_URL}/copilot/institution`,
+const AGENT_IDS = {
+  student: "studentAgent",
+  institution: "institutionAgent",
 };
 
 /**
  * Provider do CopilotKit para integração com Mastra AI
  *
- * Usa CopilotKit Cloud (publicApiKey) + Mastra Server (runtimeUrl)
+ * Usa CopilotKit Cloud + rota API local que conecta ao Mastra
  */
 export function CopilotProvider({
   children,
@@ -36,7 +33,8 @@ export function CopilotProvider({
   return (
     <CopilotKit
       publicApiKey={COPILOTKIT_PUBLIC_KEY}
-      runtimeUrl={RUNTIME_URLS[context]}
+      runtimeUrl="/api/copilotkit"
+      agent={AGENT_IDS[context]}
       showDevConsole={process.env.NODE_ENV === "development"}
     >
       {children}
