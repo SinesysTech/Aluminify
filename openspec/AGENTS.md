@@ -12,6 +12,29 @@ Instructions for AI coding assistants using OpenSpec for spec-driven development
 - Validate: `openspec validate [change-id] --strict` and fix issues
 - Request approval: Do not start implementation until proposal is approved
 
+## Critical Architecture Rules
+
+Strictly adhere to the following directory structure constraints:
+
+1.  **Modules Root:** All feature modules reside in `app/[tenant]/(modules)/`.
+    *   ❌ DO NOT use `app/[tenant]/(dashboard)`.
+    *   ❌ DO NOT create top-level `admin`, `aluno`, or `professor` folders.
+
+2.  **Module Internals:**
+    *   **`(aluno)`**: Route group for student-facing pages.
+    *   **`(gestao)`**: Route group for management pages (Admin, Professor, Staff).
+    *   **`components/`**: UI components specific to the module.
+    *   **`services/`**: Business logic and data access.
+    *   **`types/`**: TypeScript definitions.
+
+3.  **No Generic Admin:**
+    *   ❌ NEVER create `app/admin` or `app/[tenant]/(modules)/admin`.
+    *   ✅ Place management logic inside the relevant module (e.g., `curso/(gestao)/admin`).
+
+4.  **Aggregate-Oriented:**
+    *   Modules should represent Business Aggregates (e.g., `curso` contains `disciplina`, `segmento`, `conteudos`).
+    *   Avoid creating tiny modules for sub-entities.
+
 ## Three-Stage Workflow
 
 ### Stage 1: Creating Changes
