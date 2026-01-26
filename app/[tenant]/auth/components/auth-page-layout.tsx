@@ -26,6 +26,12 @@ export function AuthPageLayout({
         'flex min-h-screen w-full',
         formSide === 'right' ? 'flex-row-reverse' : 'flex-row'
       )}
+      style={{
+        // Auth pages use neutral/professional colors independent of tenant theme
+        '--primary': 'hsl(240 5.9% 10%)',
+        '--primary-foreground': 'hsl(0 0% 98%)',
+        '--muted-foreground': 'hsl(240 3.8% 46.1%)',
+      } as React.CSSProperties}
     >
       {/* Form Area */}
       <Card

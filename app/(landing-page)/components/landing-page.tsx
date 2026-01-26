@@ -38,8 +38,15 @@ export function LandingPage() {
             <main className="flex-1">
                 {/* Hero Section */}
                 <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-                    {/* Background Grid - using a manual SVG pattern for reliability over CSS classes */}
-                    <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
+                    {/* Background Grid */}
+                    <div
+                        className="absolute inset-0 -z-10 h-full w-full"
+                        style={{
+                            backgroundColor: 'hsl(0 0% 100%)',
+                            backgroundImage: 'linear-gradient(to right, rgba(128,128,128,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(128,128,128,0.08) 1px, transparent 1px)',
+                            backgroundSize: '4rem 4rem',
+                        }}
+                    >
                         <div className="absolute left-0 right-0 top-0 -z-10 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]"></div>
                     </div>
 

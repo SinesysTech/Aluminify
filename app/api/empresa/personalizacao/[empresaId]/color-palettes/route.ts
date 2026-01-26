@@ -4,7 +4,7 @@ import { ColorPaletteManagerImpl } from "@/app/[tenant]/(modules)/empresa/(gesta
 import {
   requireBrandCustomizationAccess,
   BrandCustomizationRequest,
-} from "@/app/shared/core/middleware/empresa/personalizacao-access";
+} from "@/app/shared/core/middleware/brand-customization-access";
 import { getPublicSupabaseConfig } from "@/app/shared/core/supabase-public-env";
 import type { CreateColorPaletteRequest } from "@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types";
 

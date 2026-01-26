@@ -4,7 +4,7 @@ import { BrandCustomizationManager } from "@/app/[tenant]/(modules)/empresa/(ges
 import {
   requireBrandCustomizationAccess,
   BrandCustomizationRequest,
-} from "@/app/shared/core/middleware/empresa/personalizacao-access";
+} from "@/app/shared/core/middleware/brand-customization-access";
 import { getPublicSupabaseConfig } from "@/app/shared/core/supabase-public-env";
 import type { SaveTenantBrandingRequest } from "@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types";
 
