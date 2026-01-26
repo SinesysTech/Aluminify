@@ -62,7 +62,7 @@ export function SubjectDistribution({
     }
   }, [])
 
-  // Resetar sele��es dependentes quando subir no n�vel
+  // Resetar seleções dependentes quando subir no nível
   useEffect(() => {
     if (groupBy === 'curso') {
       setSelectedDisciplineId(null)
