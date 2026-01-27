@@ -188,12 +188,29 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
   if (role === "aluno") {
     const { data: alunoData } = await supabase
       .from("alunos")
-      .select("must_change_password")
+      .select("must_change_password, empresa_id")
       .eq("id", user.id)
       .maybeSingle();
 
     if (alunoData?.must_change_password !== undefined) {
       mustChangePassword = alunoData.must_change_password;
+    }
+
+    // Carregar empresaSlug para alunos (necessário para redirecionamento após primeiro acesso)
+    const alunoEmpresaId = alunoData?.empresa_id || user.user_metadata?.empresa_id;
+    if (alunoEmpresaId && !empresaSlug) {
+      const adminClient = getDatabaseClient();
+      const { data: empresaRow } = await adminClient
+        .from("empresas")
+        .select("id, nome, slug")
+        .eq("id", alunoEmpresaId)
+        .maybeSingle();
+
+      if (empresaRow) {
+        empresaId = empresaRow.id;
+        empresaNome = empresaRow.nome ?? undefined;
+        empresaSlug = empresaRow.slug ?? undefined;
+      }
     }
 
     if (process.env.NODE_ENV === "development") {
@@ -207,6 +224,7 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
             ),
             alunoRowMustChangePassword: alunoData?.must_change_password,
             mustChangePasswordFinal: mustChangePassword,
+            empresaSlug,
           }),
       );
     }

@@ -24,7 +24,7 @@ export default async function PrimeiroAcessoPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <FirstAccessForm userId={user.id} role={user.role} />
+          <FirstAccessForm userId={user.id} role={user.role} empresaSlug={user.empresaSlug} />
         </CardContent>
       </Card>
     </div>
