@@ -8,9 +8,8 @@
 import { Mastra } from "@mastra/core";
 import {
   createStudyAssistantAgent,
-  CreateStudyAssistantOptions,
+  type CreateStudyAssistantOptions,
 } from "./agents/study-assistant";
-import { createMastraTools, ToolContext } from "./tools";
 
 // Export types
 export type { ToolContext } from "./tools";
