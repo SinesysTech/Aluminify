@@ -4,16 +4,17 @@ import React from 'react'
 import { useEffect, useState, useRef, useCallback } from 'react'
 import type { ChangeEvent } from 'react'
 import { createClient } from '@/app/shared/core/client'
+import { useCurrentUser } from '@/components/providers/user-provider'
 import { ConversationsPanel } from './components/conversations-panel'
 import { CopilotChatSection } from './components/copilot-chat-section'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/app/shared/components/forms/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { MessageSquare, Paperclip, X, ArrowUp, Loader2, ChevronDown, Sparkles } from 'lucide-react'
+import { MessageSquare, Paperclip, X, ArrowUp, Loader2, ChevronDown, AlertCircle } from 'lucide-react'
 import { cn } from '@/shared/library/utils'
-import type { Conversation as ConversationType } from '@/app/[tenant]/(modules)/tobias/services/conversation/conversation.types'
+import type { Conversation as ConversationType } from './services/conversation/conversation.types'
+import type { AIAgentChatConfig } from '@/app/shared/services/ai-agents'
 
 interface ChatMessage {
   id: string
@@ -22,7 +23,14 @@ interface ChatMessage {
   timestamp: number
 }
 
-export default function TobIAsPage() {
+export default function AgentePage() {
+  const user = useCurrentUser()
+
+  // Agent config state
+  const [agentConfig, setAgentConfig] = useState<AIAgentChatConfig | null>(null)
+  const [agentError, setAgentError] = useState<string | null>(null)
+
+  // Chat state
   const [userId, setUserId] = useState<string | null>(null)
   const [accessToken, setAccessToken] = useState<string | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -35,7 +43,6 @@ export default function TobIAsPage() {
   const [attachments, setAttachments] = useState<File[]>([])
   const [isNewConversation, setIsNewConversation] = useState(false)
   const [showScrollButton, setShowScrollButton] = useState(false)
-  const [chatMode, setChatMode] = useState<'classic' | 'copilot'>('classic')
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
@@ -46,6 +53,34 @@ export default function TobIAsPage() {
     maxFileSizeMb: 5,
     maxTotalSizeMb: 15,
   }
+
+  // Fetch agent configuration
+  useEffect(() => {
+    const fetchAgentConfig = async () => {
+      if (!user?.empresaId) return
+
+      try {
+        const response = await fetch(`/api/ai-agents/${user.empresaId}`)
+        if (!response.ok) {
+          if (response.status === 404) {
+            setAgentError('Nenhum assistente configurado para esta empresa.')
+            return
+          }
+          throw new Error('Erro ao carregar configuração do agente')
+        }
+
+        const data = await response.json()
+        if (data.success && data.agent) {
+          setAgentConfig(data.agent)
+        }
+      } catch (err) {
+        console.error('Error fetching agent config:', err)
+        setAgentError('Erro ao carregar assistente. Tente novamente.')
+      }
+    }
+
+    fetchAgentConfig()
+  }, [user?.empresaId])
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -61,9 +96,7 @@ export default function TobIAsPage() {
   const loadConversation = useCallback(async (conversation: ConversationType, isNew = false) => {
     if (!accessToken) return
 
-    // Limpar mensagens primeiro para evitar mostrar mensagens da conversa anterior
     setMessages([])
-
     setCurrentConversation(conversation)
     setSelectedConversationId(conversation.id)
     setIsNewConversation(isNew)
@@ -73,10 +106,8 @@ export default function TobIAsPage() {
       : conversation.messages || []
 
     if (history.length > 0 && !isNew) {
-      console.log('[TobIAs] Loaded', history.length, 'messages from conversation')
       setMessages(history)
     } else {
-      // Garantir que mensagens estejam vazias para nova conversa
       setMessages([])
     }
   }, [accessToken])
@@ -85,8 +116,6 @@ export default function TobIAsPage() {
   useEffect(() => {
     const supabase = createClient()
 
-    // Configurar listener para atualizar o token quando a sessão mudar
-    // Criar a subscription de forma síncrona para garantir que o cleanup funcione
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.access_token) {
         setAccessToken(session.access_token)
@@ -97,7 +126,6 @@ export default function TobIAsPage() {
 
     const initializeChat = async () => {
       try {
-        // Obter userId e accessToken do usuário autenticado
         const { data: { session } } = await supabase.auth.getSession()
 
         let currentUserId: string | null = null
@@ -112,7 +140,6 @@ export default function TobIAsPage() {
           setAccessToken(currentAccessToken)
         }
 
-        // Carregar histórico da conversa ativa
         if (currentUserId && currentAccessToken) {
           try {
             const response = await fetch('/api/tobias/conversations?active=true', {
@@ -130,7 +157,7 @@ export default function TobIAsPage() {
               }
             }
           } catch (error) {
-            console.error('[TobIAs] Error loading conversation history:', error)
+            console.error('[Agent] Error loading conversation history:', error)
           }
         }
       } catch (error) {
@@ -142,7 +169,6 @@ export default function TobIAsPage() {
 
     initializeChat()
 
-    // Retornar função de cleanup para desinscrever o listener quando o componente desmontar
     return () => {
       subscription.unsubscribe()
     }
@@ -150,7 +176,6 @@ export default function TobIAsPage() {
 
   // Handler para selecionar conversa
   const handleSelectConversation = async (conversation: ConversationType | null) => {
-    // Limpar mensagens imediatamente ao trocar de conversa
     setMessages([])
     setIsNewConversation(false)
 
@@ -162,7 +187,6 @@ export default function TobIAsPage() {
     }
 
     try {
-      // Buscar conversa completa por ID
       const response = await fetch(`/api/tobias/conversations/${conversation.id}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -172,33 +196,28 @@ export default function TobIAsPage() {
       if (response.ok) {
         const data = await response.json()
         if (data.data) {
-          // Verificar se é uma conversa nova (sem histórico e criada recentemente)
           const conversationData = data.data
           const hasHistory = conversationData.history && Array.isArray(conversationData.history) && conversationData.history.length > 0
           const createdAt = conversationData.created_at ? new Date(conversationData.created_at).getTime() : 0
           const now = Date.now()
-          const isRecentlyCreated = (now - createdAt) < 10000 // Criada nos últimos 10 segundos
+          const isRecentlyCreated = (now - createdAt) < 10000
           const isNew = !hasHistory && isRecentlyCreated
 
           await loadConversation(conversationData, isNew)
         } else {
-          // Se não houver dados, garantir que mensagens estejam vazias
           setMessages([])
         }
       }
     } catch (error) {
-      console.error('[TobIAs] Error loading conversation:', error)
-      // Em caso de erro, garantir que mensagens estejam vazias
+      console.error('[Agent] Error loading conversation:', error)
       setMessages([])
     }
   }
 
-  // Handler para quando conversas são atualizadas
   const handleConversationUpdated = async () => {
     if (!accessToken || !selectedConversationId) return
 
     try {
-      // Recarregar conversa atual
       const response = await fetch(`/api/tobias/conversations/${selectedConversationId}`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -212,7 +231,7 @@ export default function TobIAsPage() {
         }
       }
     } catch (error) {
-      console.error('[TobIAs] Error reloading conversation:', error)
+      console.error('[Agent] Error reloading conversation:', error)
     }
   }
 
@@ -265,18 +284,13 @@ export default function TobIAsPage() {
     setAttachments((prev) => prev.filter((_, idx) => idx !== index))
   }
 
-  // Função para processar mensagens com anexos e renderizar de forma limpa
   const renderUserMessage = (content: string) => {
-    // Primeiro, normalizar formato antigo para o novo formato
-    // Formato antigo: [Anexo enviado: nome (url)] ou [Anexos enviados: nome1, nome2]
     const normalizedContent = content.replace(
       /\[Anexo[s]? enviado[s]?: ([^\]]+)\]/g,
       (match, attachmentInfo) => {
-        // Extrair apenas os nomes dos arquivos (remover URLs entre parênteses)
         const names = attachmentInfo
           .split(',')
           .map((item: string) => {
-            // Se contém parênteses, extrair apenas o nome antes do parêntese
             const nameMatch = item.trim().match(/^([^(]+)/)
             return nameMatch ? nameMatch[1].trim() : item.trim()
           })
@@ -285,14 +299,12 @@ export default function TobIAsPage() {
       }
     )
 
-    // Padrão: [ANEXO:nome1,nome2,...]
     const attachmentPattern = /\[ANEXO:([^\]]+)\]/g
     const parts: Array<{ type: 'text' | 'attachment'; content: string }> = []
     let lastIndex = 0
     let match
 
     while ((match = attachmentPattern.exec(normalizedContent)) !== null) {
-      // Adicionar texto antes do anexo
       if (match.index > lastIndex) {
         const textBefore = normalizedContent.substring(lastIndex, match.index).trim()
         if (textBefore) {
@@ -300,7 +312,6 @@ export default function TobIAsPage() {
         }
       }
 
-      // Adicionar anexos
       const attachmentNames = match[1].split(',').map(name => name.trim()).filter(Boolean)
       attachmentNames.forEach(name => {
         parts.push({ type: 'attachment', content: name })
@@ -309,7 +320,6 @@ export default function TobIAsPage() {
       lastIndex = match.index + match[0].length
     }
 
-    // Adicionar texto restante
     if (lastIndex < normalizedContent.length) {
       const textAfter = normalizedContent.substring(lastIndex).trim()
       if (textAfter) {
@@ -317,7 +327,6 @@ export default function TobIAsPage() {
       }
     }
 
-    // Se não encontrou padrão de anexo, retorna o conteúdo original
     if (parts.length === 0) {
       return <div className="whitespace-pre-wrap">{content}</div>
     }
@@ -352,7 +361,6 @@ export default function TobIAsPage() {
       return
     }
 
-    // Se não há conversa selecionada, criar ou obter uma ativa
     if (!currentConversation) {
       try {
         const response = await fetch('/api/tobias/conversations?active=true', {
@@ -368,9 +376,8 @@ export default function TobIAsPage() {
           if (activeConversation) {
             await loadConversation(activeConversation)
           } else {
-            // Criar nova conversa se não houver nenhuma ativa
             if (!accessToken) {
-              console.error('[TobIAs] Cannot create conversation: accessToken is null')
+              console.error('[Agent] Cannot create conversation: accessToken is null')
               return
             }
 
@@ -394,7 +401,7 @@ export default function TobIAsPage() {
           }
         }
       } catch (error) {
-        console.error('[TobIAs] Error getting/creating conversation:', error)
+        console.error('[Agent] Error getting/creating conversation:', error)
         return
       }
     }
@@ -410,31 +417,26 @@ export default function TobIAsPage() {
       timestamp: Date.now(),
     }
 
-    // Adicionar mensagem do usuário imediatamente
     setMessages(prev => [...prev, userMessage])
     setIsLoading(true)
     setError(null)
 
-    // Scroll to bottom after adding user message
     setTimeout(scrollToBottom, 100)
 
     try {
       const supabase = createClient()
 
-      // Usar getUser() que tenta renovar o token automaticamente se necessário
       const { data: { user: authUser }, error: userError } = await supabase.auth.getUser()
 
       if (userError || !authUser) {
         setError('Sessão expirada. Faça login novamente.')
         setIsLoading(false)
-        // Se não conseguir autenticar, redirecionar para login após um breve delay
         setTimeout(() => {
           window.location.href = '/auth'
         }, 2000)
         return
       }
 
-      // Obter a sessão atualizada após getUser()
       const { data: { session } } = await supabase.auth.getSession()
       const authToken = session?.access_token
 
@@ -450,7 +452,6 @@ export default function TobIAsPage() {
       const formData = new FormData()
       formData.append('message', text)
       formData.append('userId', userId)
-      // Enviar newConversation=true se for uma nova conversa (primeira mensagem)
       if (isNewConversation) {
         formData.append('newConversation', 'true')
       }
@@ -465,7 +466,6 @@ export default function TobIAsPage() {
       })
 
       if (!response.ok) {
-        // Se for erro 401 (Unauthorized), redirecionar para login
         if (response.status === 401) {
           setError('Sessão expirada. Redirecionando para login...')
           setTimeout(() => {
@@ -485,7 +485,6 @@ export default function TobIAsPage() {
 
       const data = await response.json()
 
-      // Adicionar resposta do assistente
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
@@ -499,13 +498,10 @@ export default function TobIAsPage() {
         setMessages(prev => [...prev, assistantMessage])
       }
       setAttachments([])
-      // Após enviar a primeira mensagem, marcar que não é mais uma nova conversa
       setIsNewConversation(false)
 
-      // Scroll to bottom after receiving response
       setTimeout(scrollToBottom, 100)
 
-      // Recarregar conversa para ter os dados atualizados
       if (currentConversation) {
         await handleConversationUpdated()
       }
@@ -528,7 +524,6 @@ export default function TobIAsPage() {
 
     await sendMessage(message)
 
-    // Limpar o input
     if (inputRef.current) {
       inputRef.current.value = ''
     }
@@ -544,6 +539,7 @@ export default function TobIAsPage() {
     }
   }
 
+  // Show loading state
   if (isInitializing) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -552,200 +548,219 @@ export default function TobIAsPage() {
     )
   }
 
-  return (
-    <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-8rem)] flex-col overflow-hidden">
-      <div className="mb-2 md:mb-4 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => setConversationsPanelOpen(!conversationsPanelOpen)}
-            className="h-10 w-10 md:h-9 md:w-9"
-          >
-            <MessageSquare className="h-4 w-4" />
-            <span className="sr-only">Toggle conversas</span>
-          </Button>
+  // Show error if no agent configured
+  if (agentError) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <AlertCircle className="h-12 w-12 text-muted-foreground" />
+          <p className="text-muted-foreground">{agentError}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show loading while fetching agent config
+  if (!agentConfig) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  // Use CopilotKit integration
+  if (agentConfig.integrationType === 'copilotkit') {
+    return (
+      <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-8rem)] flex-col overflow-hidden">
+        <div className="mb-2 md:mb-4 flex items-center gap-2 shrink-0">
           <div>
-            <h1 className="page-title">TobIAs</h1>
+            <h1 className="page-title">{agentConfig.name}</h1>
             <p className="page-subtitle">
               Tire suas dúvidas e receba ajuda personalizada
             </p>
           </div>
         </div>
 
-        {/* Chat mode toggle */}
-        <Tabs value={chatMode} onValueChange={(v) => setChatMode(v as 'classic' | 'copilot')} className="hidden md:block">
-          <TabsList className="h-9">
-            <TabsTrigger value="classic" className="text-xs gap-1.5">
-              <MessageSquare className="h-3.5 w-3.5" />
-              Clássico
-            </TabsTrigger>
-            <TabsTrigger value="copilot" className="text-xs gap-1.5">
-              <Sparkles className="h-3.5 w-3.5" />
-              CopilotKit
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
-
-      {/* CopilotKit Chat Mode */}
-      {chatMode === 'copilot' ? (
         <div className="flex flex-1 min-h-0 overflow-hidden rounded-lg border">
           <CopilotChatSection className="h-full w-full" />
         </div>
-      ) : (
-        <div className="flex flex-1 min-h-0 overflow-hidden rounded-lg border">
-          {/* Painel de conversas */}
-          <ConversationsPanel
-            selectedConversationId={selectedConversationId}
-            onSelectConversation={(conv) => {
-              handleSelectConversation(conv)
-            }}
-            onConversationUpdated={handleConversationUpdated}
-            accessToken={accessToken}
-            open={conversationsPanelOpen}
-            onOpenChange={setConversationsPanelOpen}
-          />
+      </div>
+    )
+  }
 
-          {/* Área do chat - full width em mobile quando painel fechado */}
-          <div className="relative flex flex-1 flex-col min-h-0">
-            {/* Messages area */}
-            <ScrollArea
-              className="flex-1 p-4"
-              ref={scrollAreaRef}
-              onScrollCapture={handleScroll}
-            >
-              <div className="flex flex-col gap-4">
-                {messages.length === 0 && (
-                  <div className="group flex w-full items-end gap-2 py-4 justify-start">
-                    <Avatar className="ring-1 ring-border size-10 mr-2">
-                      <AvatarImage alt="TobIAs" src="/tobiasavatar.png" />
-                      <AvatarFallback>TO</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-foreground text-sm bg-secondary max-w-[80%]">
-                      <div className="whitespace-pre-wrap">
-                        {`Olá! Eu sou @ TobIAs, responsável pela monitoria do curso CDF.\n\nComo posso ajudá-lo hoje?`}
-                      </div>
+  // Use n8n/legacy integration (default)
+  return (
+    <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-8rem)] flex-col overflow-hidden">
+      <div className="mb-2 md:mb-4 flex items-center gap-2 shrink-0">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setConversationsPanelOpen(!conversationsPanelOpen)}
+          className="h-10 w-10 md:h-9 md:w-9"
+        >
+          <MessageSquare className="h-4 w-4" />
+          <span className="sr-only">Toggle conversas</span>
+        </Button>
+        <div>
+          <h1 className="page-title">{agentConfig.name}</h1>
+          <p className="page-subtitle">
+            Tire suas dúvidas e receba ajuda personalizada
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-1 min-h-0 overflow-hidden rounded-lg border">
+        {/* Painel de conversas */}
+        <ConversationsPanel
+          selectedConversationId={selectedConversationId}
+          onSelectConversation={(conv) => {
+            handleSelectConversation(conv)
+          }}
+          onConversationUpdated={handleConversationUpdated}
+          accessToken={accessToken}
+          open={conversationsPanelOpen}
+          onOpenChange={setConversationsPanelOpen}
+        />
+
+        {/* Área do chat */}
+        <div className="relative flex flex-1 flex-col min-h-0">
+          <ScrollArea
+            className="flex-1 p-4"
+            ref={scrollAreaRef}
+            onScrollCapture={handleScroll}
+          >
+            <div className="flex flex-col gap-4">
+              {messages.length === 0 && (
+                <div className="group flex w-full items-end gap-2 py-4 justify-start">
+                  <Avatar className="ring-1 ring-border size-10 mr-2">
+                    <AvatarImage alt={agentConfig.name} src={agentConfig.avatarUrl || undefined} />
+                    <AvatarFallback>{agentConfig.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-foreground text-sm bg-secondary max-w-[80%]">
+                    <div className="whitespace-pre-wrap">
+                      {agentConfig.greetingMessage || `Olá! Eu sou o ${agentConfig.name}. Como posso ajudá-lo hoje?`}
                     </div>
                   </div>
-                )}
+                </div>
+              )}
 
-                {messages.map((message) => (
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={cn(
+                    'group flex w-full items-end gap-2 py-2',
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  )}
+                >
+                  {message.role === 'assistant' && (
+                    <Avatar className="ring-1 ring-border size-10 mr-2">
+                      <AvatarImage alt={agentConfig.name} src={agentConfig.avatarUrl || undefined} />
+                      <AvatarFallback>{agentConfig.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  )}
                   <div
-                    key={message.id}
                     className={cn(
-                      'group flex w-full items-end gap-2 py-2',
-                      message.role === 'user' ? 'justify-end' : 'justify-start'
+                      'flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-sm max-w-[80%]',
+                      message.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-foreground'
                     )}
                   >
-                    {message.role === 'assistant' && (
-                      <Avatar className="ring-1 ring-border size-10 mr-2">
-                        <AvatarImage alt="TobIAs" src="/tobiasavatar.png" />
-                        <AvatarFallback>TO</AvatarFallback>
-                      </Avatar>
-                    )}
-                    <div
-                      className={cn(
-                        'flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-sm max-w-[80%]',
-                        message.role === 'user'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-foreground'
-                      )}
-                    >
-                      {message.role === 'user' ? (
-                        renderUserMessage(message.content)
-                      ) : (
-                        <div className="whitespace-pre-wrap">{message.content}</div>
-                      )}
-                    </div>
-                    {message.role === 'user' && (
-                      <Avatar className="ring-1 ring-border size-8 ml-2">
-                        <AvatarImage alt="Você" src="" />
-                        <AvatarFallback>VO</AvatarFallback>
-                      </Avatar>
+                    {message.role === 'user' ? (
+                      renderUserMessage(message.content)
+                    ) : (
+                      <div className="whitespace-pre-wrap">{message.content}</div>
                     )}
                   </div>
-                ))}
-
-                {isLoading && (
-                  <div className="group flex w-full items-end gap-2 py-2 justify-start">
-                    <Avatar className="ring-1 ring-border size-10 mr-2">
-                      <AvatarImage alt="TobIAs" src="/tobiasavatar.png" />
-                      <AvatarFallback>TO</AvatarFallback>
+                  {message.role === 'user' && (
+                    <Avatar className="ring-1 ring-border size-8 ml-2">
+                      <AvatarImage alt="Você" src="" />
+                      <AvatarFallback>VO</AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-foreground text-sm bg-secondary">
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    </div>
+                  )}
+                </div>
+              ))}
+
+              {isLoading && (
+                <div className="group flex w-full items-end gap-2 py-2 justify-start">
+                  <Avatar className="ring-1 ring-border size-10 mr-2">
+                    <AvatarImage alt={agentConfig.name} src={agentConfig.avatarUrl || undefined} />
+                    <AvatarFallback>{agentConfig.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-foreground text-sm bg-secondary">
+                    <Loader2 className="h-5 w-5 animate-spin" />
                   </div>
-                )}
+                </div>
+              )}
 
-                {error && (
-                  <div className="bg-destructive/10 text-destructive rounded-lg p-4">
-                    <p className="font-medium">Erro ao enviar mensagem</p>
-                    <p className="text-sm">{error}</p>
-                  </div>
-                )}
+              {error && (
+                <div className="bg-destructive/10 text-destructive rounded-lg p-4">
+                  <p className="font-medium">Erro ao enviar mensagem</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
 
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
 
-            {/* Scroll to bottom button */}
-            {showScrollButton && (
-              <Button
-                variant="outline"
-                size="icon"
-                className="absolute bottom-24 right-4 rounded-full shadow-md"
-                onClick={scrollToBottom}
-              >
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            )}
+          {showScrollButton && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="absolute bottom-24 right-4 rounded-full shadow-md"
+              onClick={scrollToBottom}
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          )}
 
-            <div className="bg-background p-2 md:p-4 sticky bottom-0">
-              <div className="space-y-2">
-                {attachments.length > 0 && (
-                  <div className="flex flex-wrap gap-2 rounded-md border border-dashed border-muted-foreground/40 p-2 text-xs">
-                    {attachments.map((file, index) => (
-                      <div
-                        key={`${file.name}-${index}`}
-                        className="flex items-center gap-2 rounded bg-muted px-2 py-1.5"
+          <div className="bg-background p-2 md:p-4 sticky bottom-0">
+            <div className="space-y-2">
+              {attachments.length > 0 && (
+                <div className="flex flex-wrap gap-2 rounded-md border border-dashed border-muted-foreground/40 p-2 text-xs">
+                  {attachments.map((file, index) => (
+                    <div
+                      key={`${file.name}-${index}`}
+                      className="flex items-center gap-2 rounded bg-muted px-2 py-1.5"
+                    >
+                      <span className="truncate max-w-[120px] md:max-w-[150px] text-xs">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeAttachment(index)}
+                        className="text-muted-foreground hover:text-foreground h-5 w-5 flex items-center justify-center"
+                        aria-label="Remover anexo"
                       >
-                        <span className="truncate max-w-[120px] md:max-w-[150px] text-xs">{file.name}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeAttachment(index)}
-                          className="text-muted-foreground hover:text-foreground h-5 w-5 flex items-center justify-center"
-                          aria-label="Remover anexo"
-                        >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
-                <form
-                  onSubmit={handleSubmit}
-                  className="w-full divide-y overflow-hidden rounded-xl border bg-background shadow-sm"
-                >
-                  <Textarea
-                    ref={inputRef}
-                    name="message"
-                    placeholder="Digite sua mensagem..."
-                    disabled={isLoading || !userId}
-                    onKeyDown={handleKeyDown}
-                    className="w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0 field-sizing-content max-h-[6lh] bg-transparent dark:bg-transparent focus-visible:ring-0 min-h-11 text-sm md:text-base"
+              <form
+                onSubmit={handleSubmit}
+                className="w-full divide-y overflow-hidden rounded-xl border bg-background shadow-sm"
+              >
+                <Textarea
+                  ref={inputRef}
+                  name="message"
+                  placeholder={agentConfig.placeholderText || 'Digite sua mensagem...'}
+                  disabled={isLoading || !userId}
+                  onKeyDown={handleKeyDown}
+                  className="w-full resize-none rounded-none border-none p-3 shadow-none outline-none ring-0 field-sizing-content max-h-[6lh] bg-transparent dark:bg-transparent focus-visible:ring-0 min-h-11 text-sm md:text-base"
+                />
+                <div className="flex items-center justify-between p-1">
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif,application/pdf"
+                    multiple
+                    hidden
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
                   />
-                  <div className="flex items-center justify-between p-1">
-                    <input
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp,image/gif,application/pdf"
-                      multiple
-                      hidden
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                    />
+                  {agentConfig.supportsAttachments && (
                     <Button
                       type="button"
                       variant="ghost"
@@ -757,25 +772,26 @@ export default function TobIAsPage() {
                       <Paperclip className="h-4 w-4" />
                       <span className="sr-only">Adicionar anexos</span>
                     </Button>
-                    <Button
-                      type="submit"
-                      disabled={isLoading || !userId}
-                      className="h-8 w-8 gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 p-0"
-                      size="icon"
-                    >
-                      {isLoading ? (
-                        <Loader2 className="size-3.5 animate-spin" />
-                      ) : (
-                        <ArrowUp className="size-3.5" />
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </div>
+                  )}
+                  {!agentConfig.supportsAttachments && <div />}
+                  <Button
+                    type="submit"
+                    disabled={isLoading || !userId}
+                    className="h-8 w-8 gap-1.5 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 p-0"
+                    size="icon"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <ArrowUp className="size-3.5" />
+                    )}
+                  </Button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }

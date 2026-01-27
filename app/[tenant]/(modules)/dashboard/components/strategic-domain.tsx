@@ -557,7 +557,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                 </AccordionTrigger>
                 <AccordionContent className="px-0">
                   <p className="text-xs text-muted-foreground mb-2">
-                    **F** = Flashcards (memória/recall) � **Q** = Questões (acertos ÷ questões respondidas)
+                    **F** = Flashcards (memória/recall) | **Q** = Questões (acertos ÷ questões respondidas)
                   </p>
                   <div className="space-y-2">
                     {modulesRanking.slice(0, 8).map((m) => (
@@ -578,7 +578,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                     className="underline decoration-dotted underline-offset-2"
                                     aria-label="O que significa F?"
                                   >
-                                    F: {m.flashcardsScore ?? '�'}%
+                                    F: {m.flashcardsScore ?? '—'}%
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" align="start" className="max-w-xs">
@@ -586,7 +586,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
-                            {' � '}
+                            {' | '}
                             <TooltipProvider delayDuration={200}>
                               <Tooltip>
                                 <TooltipTrigger asChild>
@@ -595,7 +595,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                     className="underline decoration-dotted underline-offset-2"
                                     aria-label="O que significa Q?"
                                   >
-                                    Q: {m.questionsScore ?? '�'}%
+                                    Q: {m.questionsScore ?? '—'}%
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" align="start" className="max-w-xs">
@@ -608,7 +608,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                             )}
                           </div>
                         </div>
-                        {/* "Risco" � usado apenas para ordenar; n�o renderizamos ao usu�rio. */}
+                        {/* "Risco" é usado apenas para ordenar; não renderizamos ao usuário. */}
                       </div>
                     ))}
                   </div>
