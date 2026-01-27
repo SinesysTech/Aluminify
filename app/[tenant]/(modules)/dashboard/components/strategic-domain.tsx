@@ -27,11 +27,11 @@ function ScoreValue({ score }: { score: number | null }) {
               className="text-xs text-muted-foreground underline decoration-dotted underline-offset-2"
               aria-label="O que significa sem evid�ncia?"
             >
-              Sem evid�ncia
+              Sem evidência
             </button>
           </TooltipTrigger>
           <TooltipContent side="top" align="center" className="max-w-xs">
-            Ainda n�o h� dados suficientes para calcular este indicador (por exemplo: poucas quest�es/flashcards feitos neste t�pico).
+            Ainda não há dados suficientes para calcular este indicador (por exemplo: poucas questões/flashcards feitos neste tópico).
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -58,7 +58,7 @@ function ProgressBar({
 }
 
 export function StrategicDomain({ data }: StrategicDomainProps) {
-  // Dom�nio Estrat�gico n�o tem escopo por m�dulo (evita redund�ncia com "Performance por M�dulo")
+  // Domínio Estratégico não tem escopo por módulo (evita redundância com "Performance por Módulo")
   const [scope, setScope] = useState<Extract<DashboardScopeLevel, 'curso' | 'disciplina' | 'frente'>>('curso')
   const [courses, setCourses] = useState<Array<{ id: string; nome: string }>>([])
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null)
@@ -114,7 +114,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     }
   }, [scope])
 
-  // Garantir disciplina selecionada quando necess�rio
+  // Garantir disciplina selecionada quando necessário
   useEffect(() => {
     let cancelled = false
     async function ensureDiscipline() {
@@ -141,7 +141,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     }
   }, [scope, selectedDisciplineId, selectedCourseId])
 
-  // Garantir frente selecionada quando necess�rio (frente/modulo)
+  // Garantir frente selecionada quando necessário (frente/modulo)
   useEffect(() => {
     let cancelled = false
     async function ensureFront() {
@@ -200,7 +200,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
         <div className="flex flex-col justify-center gap-4 md:gap-6">
           <div className="flex items-center gap-2">
             <h2 className="widget-title">
-              Dom�nio Estrat�gico
+              Domínio Estratégico
             </h2>
             <TooltipProvider delayDuration={200}>
               <Tooltip>
@@ -310,13 +310,13 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
             <AccordionItem value="base" className="border border-border rounded-lg shadow-sm mb-3 last:mb-0 bg-background border-b-0 px-3">
               <AccordionTrigger className="py-3">
                 <div className="flex items-center gap-2">
-                  <span>M�dulos de Base</span>
+                  <span>Módulos de Base</span>
                   <TooltipProvider delayDuration={200}>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span
                           className="text-muted-foreground hover:text-foreground transition-colors rounded inline-flex"
-                          aria-label="O que s�o m�dulos de base?"
+                          aria-label="O que são módulos de base?"
                           onPointerDown={(e) => e.stopPropagation()}
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -343,7 +343,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="top" align="center" className="max-w-xs">
-                            Percentual de desempenho em flashcards neste grupo (indica o qu�o bem voc� est� lembrando do conte�do nas revis�es).
+                            Percentual de desempenho em flashcards neste grupo (indica o quão bem você está lembrando do conteúdo nas revisões).
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -353,7 +353,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                 </div>
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Quest�es</span>
+                    <span className="text-muted-foreground">Questões</span>
                     <span className="text-green-600 dark:text-green-500">
                       <TooltipProvider delayDuration={200}>
                         <Tooltip>
@@ -363,7 +363,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                             </span>
                           </TooltipTrigger>
                           <TooltipContent side="top" align="center" className="max-w-xs">
-                            Percentual de acerto em quest�es neste grupo (acertos � quest�es respondidas).
+                            Percentual de acerto em quest�es neste grupo (acertos � questões respondidas).
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -420,7 +420,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                 </div>
                 <div className="space-y-2 mt-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Quest�es</span>
+                    <span className="text-muted-foreground">Questões</span>
                     <span className="text-yellow-600 dark:text-yellow-500">
                       <TooltipProvider delayDuration={200}>
                         <Tooltip>
@@ -518,7 +518,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="left" align="center" className="max-w-xs">
-                                  **Q** � sua taxa de acerto em quest�es deste t�pico (acertos � quest�es respondidas).
+                                  **Q** � sua taxa de acerto em quest�es deste t�pico (acertos � questões respondidas).
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
@@ -549,7 +549,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                           </span>
                         </TooltipTrigger>
                         <TooltipContent side="top" align="start" className="max-w-xs">
-                          Este ranking destaca os m�dulos mais importantes (Base/Alta) e mostra seus indicadores de Flashcards (F) e Quest�es (Q), para voc� identificar onde focar primeiro.
+                          Este ranking destaca os m�dulos mais importantes (Base/Alta) e mostra seus indicadores de Flashcards (F) e Questões (Q), para voc� identificar onde focar primeiro.
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -557,7 +557,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                 </AccordionTrigger>
                 <AccordionContent className="px-0">
                   <p className="text-xs text-muted-foreground mb-2">
-                    **F** = Flashcards (mem�ria/recall) � **Q** = Quest�es (acertos � quest�es respondidas)
+                    **F** = Flashcards (mem�ria/recall) � **Q** = Questões (acertos � questões respondidas)
                   </p>
                   <div className="space-y-2">
                     {modulesRanking.slice(0, 8).map((m) => (
@@ -599,12 +599,12 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
                                   </button>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" align="start" className="max-w-xs">
-                                  **Q** � sua taxa de acerto em quest�es neste m�dulo (acertos � quest�es respondidas).
+                                  **Q** � sua taxa de acerto em quest�es neste m�dulo (acertos � questões respondidas).
                                 </TooltipContent>
                               </Tooltip>
                             </TooltipProvider>
                             {m.risk == null && (
-                              <span className="ml-2 italic">Sem evid�ncia</span>
+                              <span className="ml-2 italic">Sem evidência</span>
                             )}
                           </div>
                         </div>
