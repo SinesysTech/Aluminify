@@ -26,8 +26,10 @@ const routeLabels: Record<string, string> = {
   "disciplinas": "Disciplinas",
   "segmentos": "Segmentos",
   "conteudo": "Conteúdo",
+  "conteudos": "Conteúdos",
   "materiais": "Materiais",
   "relatorios": "Relatórios",
+  "admin": "Administração",
 
   // Biblioteca
   "biblioteca": "Biblioteca",
@@ -55,6 +57,7 @@ const routeLabels: Record<string, string> = {
   "avancadas": "Avançadas",
   "usuarios": "Usuários",
   "papeis": "Papéis",
+  "modulos": "Módulos",
 
   // Estudos
   "estudos": "Estudos",
@@ -62,6 +65,30 @@ const routeLabels: Record<string, string> = {
   "foco": "Modo Foco",
   "cronograma": "Cronograma",
   "calendario": "Calendário",
+
+  // Autenticação
+  "auth": "Autenticação",
+  "login": "Login",
+  "sign-up": "Cadastro",
+  "forgot-password": "Esqueci a Senha",
+  "update-password": "Atualizar Senha",
+  "primeiro-acesso": "Primeiro Acesso",
+
+  // Super Admin
+  "superadmin": "Super Admin",
+  "empresas": "Empresas",
+  "planos": "Planos",
+  "logs": "Logs",
+
+  // Landing Page
+  "features": "Funcionalidades",
+  "docs": "Documentação",
+  "changelog": "Histórico",
+  "roadmap": "Roadmap",
+  "status": "Status",
+  "opensource": "Open Source",
+  "manifesto": "Manifesto",
+  "pricing": "Preços",
 
   // Outros
   "tobias": "TobIAs",

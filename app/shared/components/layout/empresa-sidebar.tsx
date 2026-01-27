@@ -50,11 +50,6 @@ const empresaNavItems: NavItem[] = [
     icon: GraduationCap,
   },
   {
-    title: "Usuarios",
-    url: "/usuario/equipe",
-    icon: Users,
-  },
-  {
     title: "Cursos",
     url: "/curso/admin",
     icon: BookOpen,
@@ -63,7 +58,6 @@ const empresaNavItems: NavItem[] = [
       { title: "Disciplinas", url: "/curso/disciplinas" },
       { title: "Segmentos", url: "/curso/segmentos" },
       { title: "Conteúdo Programático", url: "/curso/conteudos" },
-      { title: "Materiais", url: "/curso/conteudos/materiais" },
       { title: "Relatórios", url: "/curso/relatorios" },
     ],
   },
@@ -108,6 +102,7 @@ const empresaNavItems: NavItem[] = [
     icon: Building2,
     items: [
       { title: "Detalhes", url: "/empresa/detalhes" },
+      { title: "Usuários", url: "/usuario/equipe" },
       { title: "Papéis e Permissões", url: "/empresa/detalhes/papeis" },
       { title: "Personalização", url: "/empresa/personalizacao" },
       { title: "Módulos do Aluno", url: "/empresa/modulos" },

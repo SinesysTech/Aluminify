@@ -5,11 +5,13 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import type { ChangeEvent } from 'react'
 import { createClient } from '@/app/shared/core/client'
 import { ConversationsPanel } from './components/conversations-panel'
+import { CopilotChatSection } from './components/copilot-chat-section'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/app/shared/components/forms/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { MessageSquare, Paperclip, X, ArrowUp, Loader2, ChevronDown } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { MessageSquare, Paperclip, X, ArrowUp, Loader2, ChevronDown, Sparkles } from 'lucide-react'
 import { cn } from '@/shared/library/utils'
 import type { Conversation as ConversationType } from '@/app/[tenant]/(modules)/tobias/services/conversation/conversation.types'
 
@@ -33,6 +35,7 @@ export default function TobIAsPage() {
   const [attachments, setAttachments] = useState<File[]>([])
   const [isNewConversation, setIsNewConversation] = useState(false)
   const [showScrollButton, setShowScrollButton] = useState(false)
+  const [chatMode, setChatMode] = useState<'classic' | 'copilot'>('classic')
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
@@ -551,24 +554,46 @@ export default function TobIAsPage() {
 
   return (
     <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-8rem)] flex-col overflow-hidden">
-      <div className="mb-2 md:mb-4 flex items-center gap-2 shrink-0">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setConversationsPanelOpen(!conversationsPanelOpen)}
-          className="h-10 w-10 md:h-9 md:w-9"
-        >
-          <MessageSquare className="h-4 w-4" />
-          <span className="sr-only">Toggle conversas</span>
-        </Button>
-        <div>
-          <h1 className="page-title">TobIAs</h1>
-          <p className="page-subtitle">
-            Tire suas dúvidas e receba ajuda personalizada
-          </p>
+      <div className="mb-2 md:mb-4 flex items-center justify-between shrink-0">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setConversationsPanelOpen(!conversationsPanelOpen)}
+            className="h-10 w-10 md:h-9 md:w-9"
+          >
+            <MessageSquare className="h-4 w-4" />
+            <span className="sr-only">Toggle conversas</span>
+          </Button>
+          <div>
+            <h1 className="page-title">TobIAs</h1>
+            <p className="page-subtitle">
+              Tire suas dúvidas e receba ajuda personalizada
+            </p>
+          </div>
         </div>
+
+        {/* Chat mode toggle */}
+        <Tabs value={chatMode} onValueChange={(v) => setChatMode(v as 'classic' | 'copilot')} className="hidden md:block">
+          <TabsList className="h-9">
+            <TabsTrigger value="classic" className="text-xs gap-1.5">
+              <MessageSquare className="h-3.5 w-3.5" />
+              Clássico
+            </TabsTrigger>
+            <TabsTrigger value="copilot" className="text-xs gap-1.5">
+              <Sparkles className="h-3.5 w-3.5" />
+              CopilotKit
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
+      {/* CopilotKit Chat Mode */}
+      {chatMode === 'copilot' ? (
+        <div className="flex flex-1 min-h-0 overflow-hidden rounded-lg border">
+          <CopilotChatSection className="h-full w-full" />
+        </div>
+      ) : (
       <div className="flex flex-1 min-h-0 overflow-hidden rounded-lg border">
         {/* Painel de conversas */}
         <ConversationsPanel
@@ -750,6 +775,7 @@ export default function TobIAsPage() {
           </div>
         </div>
       </div>
+      )}
     </div>
   )
 }
