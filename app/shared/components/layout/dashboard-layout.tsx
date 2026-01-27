@@ -2,6 +2,7 @@ import React from 'react'
 
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { UserProvider } from '@/components/providers/user-provider'
+import { CopilotKitProvider } from '@/components/providers/copilotkit-provider'
 import { TenantBrandingProvider } from '@/components/providers/tenant-branding-provider'
 import { StudentOrganizationsProvider } from '@/components/providers/student-organizations-provider'
 import { ModuleVisibilityProvider } from '@/components/providers/module-visibility-provider'
@@ -39,8 +40,9 @@ export async function DashboardLayout({
 
     return (
         <UserProvider user={user}>
-            <TenantBrandingProvider user={user}>
-                <StudentOrganizationsProvider user={user}>
+            <CopilotKitProvider user={user}>
+                <TenantBrandingProvider user={user}>
+                    <StudentOrganizationsProvider user={user}>
                     <ModuleVisibilityProvider
                         empresaId={user.empresaId || null}
                         userRole={user.role}
@@ -66,8 +68,9 @@ export async function DashboardLayout({
                         </SidebarInset>
                     </SidebarProvider>
                     </ModuleVisibilityProvider>
-                </StudentOrganizationsProvider>
-            </TenantBrandingProvider>
+                    </StudentOrganizationsProvider>
+                </TenantBrandingProvider>
+            </CopilotKitProvider>
         </UserProvider>
     )
 }
