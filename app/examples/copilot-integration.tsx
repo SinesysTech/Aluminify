@@ -80,40 +80,59 @@ export function InstitutionCopilotEmbedded() {
 /**
  * Advanced: Headless UI with useCopilotChat hook
  *
- * For complete UI customization, use the headless approach:
+ * For complete UI customization, use the headless approach.
+ * Note: useCopilotChat provides visibleMessages and appendMessage.
+ * For full headless features (messages, sendMessage, suggestions), use
+ * useCopilotChatHeadless_c which requires a free publicApiKey from cloud.copilotkit.ai
  */
 import { useCopilotChat } from "@copilotkit/react-core";
+import { TextMessage, MessageRole } from "@copilotkit/runtime-client-gql";
+
+function CustomChatContent() {
+  const { visibleMessages, appendMessage, isLoading } = useCopilotChat();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const input = e.currentTarget.elements.namedItem(
+      "message"
+    ) as HTMLInputElement;
+    if (!input.value.trim()) return;
+
+    await appendMessage(
+      new TextMessage({
+        role: MessageRole.User,
+        content: input.value,
+      })
+    );
+    input.value = "";
+  };
+
+  return (
+    <div className="custom-chat-interface">
+      <div className="messages">
+        {visibleMessages.map((msg, i) => (
+          <div key={i} className={`message ${msg.role}`}>
+            {typeof msg.content === "string" ? msg.content : ""}
+          </div>
+        ))}
+      </div>
+      <form onSubmit={handleSubmit}>
+        <input name="message" disabled={isLoading} />
+        <button type="submit" disabled={isLoading}>
+          Send
+        </button>
+      </form>
+    </div>
+  );
+}
 
 export function CustomChatInterface() {
-  const { messages, sendMessage, isLoading } = useCopilotChat();
-
   return (
     <CopilotKit
       runtimeUrl="http://localhost:4111/chat/student"
       agent="studentAgent"
     >
-      <div className="custom-chat-interface">
-        <div className="messages">
-          {messages.map((msg, i) => (
-            <div key={i} className={`message ${msg.role}`}>
-              {msg.content}
-            </div>
-          ))}
-        </div>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const input = e.currentTarget.message as HTMLInputElement;
-            sendMessage(input.value);
-            input.value = "";
-          }}
-        >
-          <input name="message" disabled={isLoading} />
-          <button type="submit" disabled={isLoading}>
-            Send
-          </button>
-        </form>
-      </div>
+      <CustomChatContent />
     </CopilotKit>
   );
 }
