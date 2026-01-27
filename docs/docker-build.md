@@ -19,13 +19,38 @@ Guia para build e deploy da imagem Docker do Aluminify (Next.js + Mastra Studio)
 
 As seguintes variáveis são necessárias no momento do **build** (ARGs):
 
+### Supabase (Obrigatório)
 | Variável | Descrição | Obrigatório |
 |----------|-----------|-------------|
-| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase | Sim |
+| `SUPABASE_URL` | URL do projeto Supabase (server-side) | Sim |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase (client-side) | Sim |
+| `SUPABASE_SECRET_KEY` | Service role key do Supabase | Sim |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` | Chave pública do Supabase | Sim |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | ID do Google Analytics | Não |
+
+### Redis (Obrigatório)
+| Variável | Descrição | Obrigatório |
+|----------|-----------|-------------|
 | `UPSTASH_REDIS_REST_URL` | URL do Redis Upstash | Sim |
 | `UPSTASH_REDIS_REST_TOKEN` | Token do Redis Upstash | Sim |
+
+### Superadmin (Obrigatório)
+| Variável | Descrição | Obrigatório |
+|----------|-----------|-------------|
+| `SUPERADMIN_USERNAME` | Username do superadmin | Sim |
+| `SUPERADMIN_PASSWORD` | Password do superadmin | Sim |
+
+### Mastra AI (Obrigatório)
+| Variável | Descrição | Obrigatório |
+|----------|-----------|-------------|
+| `AI_MODEL_PROVIDER` | Provedor de AI: "google" ou "openai" | Sim |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | API key do Google AI (se provider=google) | Condicional |
+| `OPENAI_API_KEY` | API key da OpenAI (se provider=openai) | Condicional |
+| `LOG_LEVEL` | Nível de log: debug, info, warn, error | Não |
+
+### Analytics (Opcional)
+| Variável | Descrição | Obrigatório |
+|----------|-----------|-------------|
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | ID do Google Analytics | Não |
 
 > As variáveis `NEXT_PUBLIC_*` são embutidas no build do Next.js e não podem ser alteradas em runtime.
 
@@ -44,11 +69,19 @@ docker-compose -f docker-compose.prod.yml build && docker push sinesystec/alumin
 # Carregar variáveis, buildar e fazer push
 export $(grep -v '^#' .env.local | xargs) && \
 docker build --platform linux/amd64 \
+  --build-arg SUPABASE_URL=$SUPABASE_URL \
   --build-arg NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
+  --build-arg SUPABASE_SECRET_KEY=$SUPABASE_SECRET_KEY \
   --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY \
-  --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID \
   --build-arg UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL \
   --build-arg UPSTASH_REDIS_REST_TOKEN=$UPSTASH_REDIS_REST_TOKEN \
+  --build-arg SUPERADMIN_USERNAME=$SUPERADMIN_USERNAME \
+  --build-arg SUPERADMIN_PASSWORD=$SUPERADMIN_PASSWORD \
+  --build-arg AI_MODEL_PROVIDER=$AI_MODEL_PROVIDER \
+  --build-arg GOOGLE_GENERATIVE_AI_API_KEY=$GOOGLE_GENERATIVE_AI_API_KEY \
+  --build-arg OPENAI_API_KEY=$OPENAI_API_KEY \
+  --build-arg LOG_LEVEL=$LOG_LEVEL \
+  --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID \
   -t sinesystec/aluminify:latest . && \
 docker push sinesystec/aluminify:latest
 ```
@@ -58,11 +91,19 @@ docker push sinesystec/aluminify:latest
 ```bash
 export $(grep -v '^#' .env.local | xargs) && \
 docker build --platform linux/amd64 --no-cache \
+  --build-arg SUPABASE_URL=$SUPABASE_URL \
   --build-arg NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
+  --build-arg SUPABASE_SECRET_KEY=$SUPABASE_SECRET_KEY \
   --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY \
-  --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID \
   --build-arg UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL \
   --build-arg UPSTASH_REDIS_REST_TOKEN=$UPSTASH_REDIS_REST_TOKEN \
+  --build-arg SUPERADMIN_USERNAME=$SUPERADMIN_USERNAME \
+  --build-arg SUPERADMIN_PASSWORD=$SUPERADMIN_PASSWORD \
+  --build-arg AI_MODEL_PROVIDER=$AI_MODEL_PROVIDER \
+  --build-arg GOOGLE_GENERATIVE_AI_API_KEY=$GOOGLE_GENERATIVE_AI_API_KEY \
+  --build-arg OPENAI_API_KEY=$OPENAI_API_KEY \
+  --build-arg LOG_LEVEL=$LOG_LEVEL \
+  --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID \
   -t sinesystec/aluminify:latest . && \
 docker push sinesystec/aluminify:latest
 ```
