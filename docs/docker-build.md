@@ -15,24 +15,68 @@ Guia para build e deploy da imagem Docker do Aluminify (Next.js + Mastra Studio)
 └─────────────────────────────────────────┘
 ```
 
+## Variáveis de Ambiente
+
+As seguintes variáveis são necessárias no momento do **build** (ARGs):
+
+| Variável | Descrição |
+|----------|-----------|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL do projeto Supabase |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` | Chave pública do Supabase |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | ID do Google Analytics |
+| `UPSTASH_REDIS_REST_URL` | URL do Redis Upstash |
+| `UPSTASH_REDIS_REST_TOKEN` | Token do Redis Upstash |
+
+> As variáveis `NEXT_PUBLIC_*` são embutidas no build do Next.js e não podem ser alteradas em runtime.
+
 ## Build da Imagem
 
-### Build para Linux AMD64
+### Método Recomendado: docker-compose (já consome .env.local)
 
 ```bash
-docker build --platform linux/amd64 -t aluminify:latest .
+docker-compose -f docker-compose.prod.yml build
 ```
 
-### Build com tag para registry
+### Build Manual para Linux AMD64
+
+Carregue as variáveis do `.env.local` e execute o build:
 
 ```bash
-docker build --platform linux/amd64 -t seu-registry.com/aluminify:latest .
+# Carregar variáveis e buildar
+export $(grep -v '^#' .env.local | xargs) && \
+docker build --platform linux/amd64 \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
+  --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY \
+  --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID \
+  --build-arg UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL \
+  --build-arg UPSTASH_REDIS_REST_TOKEN=$UPSTASH_REDIS_REST_TOKEN \
+  -t aluminify:latest .
 ```
 
-### Build com versão específica
+### Build com tag para Docker Hub
 
 ```bash
-docker build --platform linux/amd64 -t aluminify:1.0.0 .
+export $(grep -v '^#' .env.local | xargs) && \
+docker build --platform linux/amd64 \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
+  --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY \
+  --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID \
+  --build-arg UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL \
+  --build-arg UPSTASH_REDIS_REST_TOKEN=$UPSTASH_REDIS_REST_TOKEN \
+  -t sinesystec/aluminify:latest .
+```
+
+### Build sem cache
+
+```bash
+export $(grep -v '^#' .env.local | xargs) && \
+docker build --platform linux/amd64 --no-cache \
+  --build-arg NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL \
+  --build-arg NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY \
+  --build-arg NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID \
+  --build-arg UPSTASH_REDIS_REST_URL=$UPSTASH_REDIS_REST_URL \
+  --build-arg UPSTASH_REDIS_REST_TOKEN=$UPSTASH_REDIS_REST_TOKEN \
+  -t aluminify:latest .
 ```
 
 ## Executar Container
@@ -62,14 +106,14 @@ docker run -d \
 docker-compose up -d
 ```
 
-## Push para Registry
+## Push para Docker Hub
 
 ```bash
-# Login no registry
-docker login seu-registry.com
+# Login no Docker Hub
+docker login
 
 # Push da imagem
-docker push seu-registry.com/aluminify:latest
+docker push sinesystec/aluminify:latest
 ```
 
 ## URLs dos Serviços
@@ -93,11 +137,11 @@ docker stop aluminify
 # Remover container
 docker rm aluminify
 
-# Rebuild sem cache
-docker build --platform linux/amd64 --no-cache -t aluminify:latest .
-
 # Verificar saúde do container
 docker inspect --format='{{.State.Health.Status}}' aluminify
+
+# Acessar shell do container
+docker exec -it aluminify sh
 ```
 
 ## Estrutura de Build
