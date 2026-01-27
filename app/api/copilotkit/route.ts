@@ -1,37 +1,41 @@
+import {
+  CopilotRuntime,
+  copilotRuntimeNextJSAppRouterEndpoint,
+} from "@copilotkit/runtime";
+import { getLocalAgents } from "@ag-ui/mastra";
+import { NextRequest } from "next/server";
+import { mastra } from "@/mastra";
+
 /**
- * CopilotKit Runtime API Route - Proxy to Mastra Server
+ * CopilotKit Runtime API Route - Integrado com Mastra
  *
- * This route proxies requests to the standalone Mastra server.
- * The Mastra server handles the actual agent execution and returns responses.
+ * Este endpoint conecta CopilotKit aos agentes Mastra diretamente no Next.js.
  *
- * Prerequisites:
- * 1. Start Mastra server: npm run mastra:dev (or mastra:start for production)
- * 2. Mastra server must be running on http://localhost:4111
- * 3. Agent routes are registered at:
- *    - /chat/student (studentAgent)
- *    - /chat/institution (institutionAgent)
- *
- * Usage in frontend:
- * <CopilotKit runtimeUrl="http://localhost:4111/chat/student" agent="studentAgent">
- *   ...
+ * Uso no frontend:
+ * <CopilotKit runtimeUrl="/api/copilotkit" agent="studentAgent">
+ *   <CopilotChat />
  * </CopilotKit>
+ *
+ * Agentes disponíveis:
+ * - studentAgent: Assistente para área do aluno
+ * - institutionAgent: Assistente para área administrativa
  */
 
-export const POST = async () => {
-  return new Response(
-    JSON.stringify({
-      error: "This endpoint is deprecated. Use the Mastra server directly.",
-      instructions: [
-        "1. Start Mastra server: npm run mastra:dev",
-        "2. Update CopilotKit runtimeUrl to: http://localhost:4111/chat/student",
-        "3. Or use: http://localhost:4111/chat/institution for institution agent",
-      ],
-    }),
-    {
-      status: 410,
-      headers: { "Content-Type": "application/json" },
-    }
-  );
+export const POST = async (req: NextRequest) => {
+  // Get all Mastra agents as AG-UI compatible agents
+  const agents = getLocalAgents({ mastra });
+
+  const runtime = new CopilotRuntime({
+    agents,
+  });
+
+  const { handleRequest } = copilotRuntimeNextJSAppRouterEndpoint({
+    runtime,
+    endpoint: "/api/copilotkit",
+  });
+
+  return handleRequest(req);
 };
 
+// Aumenta o timeout para streaming de respostas longas
 export const maxDuration = 60;
