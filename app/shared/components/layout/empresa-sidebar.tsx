@@ -8,6 +8,7 @@ import {
   FolderOpen,
   DollarSign,
   Building2,
+  GraduationCap,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { usePathname, useParams } from "next/navigation"
@@ -44,15 +45,14 @@ const empresaNavItems: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    title: "Usuários",
-    url: "/empresa/detalhes/alunos",
+    title: "Alunos",
+    url: "/usuario/alunos",
+    icon: GraduationCap,
+  },
+  {
+    title: "Usuarios",
+    url: "/usuario/equipe",
     icon: Users,
-    items: [
-      { title: "Alunos", url: "/empresa/detalhes/alunos" },
-      { title: "Professores", url: "/empresa/detalhes/professores" },
-      { title: "Equipe", url: "/empresa/detalhes/usuarios" },
-      { title: "Administradores", url: "/empresa/detalhes/admins" },
-    ],
   },
   {
     title: "Cursos",
