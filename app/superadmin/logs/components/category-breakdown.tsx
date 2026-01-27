@@ -90,7 +90,7 @@ export function CategoryBreakdown({ stats, isLoading }: CategoryBreakdownProps) 
                 borderColor: "hsl(var(--border))",
                 borderRadius: "8px",
               }}
-              formatter={(value: number) => [`${value} logs`, ""]}
+              formatter={(value: any) => [`${value} logs`, ""]}
             />
             <Legend
               verticalAlign="bottom"

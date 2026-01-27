@@ -42,7 +42,7 @@ const createEmpresaSchema = z.object({
   emailContato: z.string().email("Email inválido").optional().or(z.literal("")),
   telefone: z.string().optional(),
   plano: z.enum(["basico", "profissional", "enterprise"]),
-  criarAdmin: z.boolean().default(false),
+  criarAdmin: z.boolean(),
   primeiroAdminNome: z.string().optional(),
   primeiroAdminEmail: z.string().email("Email inválido").optional().or(z.literal("")),
   primeiroAdminPassword: z.string().min(6, "Senha deve ter pelo menos 6 caracteres").optional().or(z.literal("")),

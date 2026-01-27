@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getDatabaseClient } from '@/app/shared/core/database/database';
-import { getAuthUser } from '@/app/[tenant]/auth/middleware';
+import { NextRequest, NextResponse } from "next/server";
+import { getDatabaseClient } from "@/app/shared/core/database/database";
+import { getAuthUser } from "@/app/[tenant]/auth/middleware";
 
 export interface SuperAdminStats {
   totalEmpresas: number;
@@ -29,8 +29,11 @@ export async function GET(request: NextRequest) {
 
     if (!user || !user.isSuperAdmin) {
       return NextResponse.json(
-        { error: 'Acesso negado. Apenas superadmin pode acessar estas métricas.' },
-        { status: 403 }
+        {
+          error:
+            "Acesso negado. Apenas superadmin pode acessar estas métricas.",
+        },
+        { status: 403 },
       );
     }
 
@@ -47,67 +50,68 @@ export async function GET(request: NextRequest) {
       recentEmpresasResult,
     ] = await Promise.all([
       // Total de empresas
-      adminClient
-        .from('empresas')
-        .select('id', { count: 'exact', head: true }),
+      adminClient.from("empresas").select("id", { count: "exact", head: true }),
 
       // Empresas ativas
       adminClient
-        .from('empresas')
-        .select('id', { count: 'exact', head: true })
-        .eq('ativo', true),
+        .from("empresas")
+        .select("id", { count: "exact", head: true })
+        .eq("ativo", true),
 
       // Total de usuários (staff/professores) ativos
       adminClient
-        .from('usuarios')
-        .select('id', { count: 'exact', head: true })
-        .eq('ativo', true)
-        .is('deleted_at', null),
+        .from("usuarios")
+        .select("id", { count: "exact", head: true })
+        .eq("ativo", true)
+        .is("deleted_at", null),
 
       // Total de alunos
       adminClient
-        .from('alunos')
-        .select('id', { count: 'exact', head: true })
-        .is('deleted_at', null),
+        .from("alunos")
+        .select("id", { count: "exact", head: true })
+        .is("deleted_at", null),
 
       // Total de cursos
-      adminClient
-        .from('cursos')
-        .select('id', { count: 'exact', head: true }),
+      adminClient.from("cursos").select("id", { count: "exact", head: true }),
 
       // Usuários ativos nos últimos 30 dias (usando RPC ou query direta)
-      adminClient.rpc('count_active_users_30d').maybeSingle(),
+      adminClient.rpc("count_active_users_30d" as any).maybeSingle(),
 
       // Últimas 5 empresas criadas com contagem de usuários
       adminClient
-        .from('empresas')
-        .select(`
+        .from("empresas")
+        .select(
+          `
           id,
           nome,
           slug,
           plano,
           ativo,
           created_at
-        `)
-        .order('created_at', { ascending: false })
+        `,
+        )
+        .order("created_at", { ascending: false })
         .limit(5),
     ]);
 
     // Handle potential errors
     if (empresasResult.error) {
-      console.error('Error fetching empresas count:', empresasResult.error);
+      console.error("Error fetching empresas count:", empresasResult.error);
     }
     if (empresasAtivasResult.error) {
-      console.error('Error fetching empresas ativas count:', empresasAtivasResult.error);
+      console.error(
+        "Error fetching empresas ativas count:",
+        empresasAtivasResult.error,
+      );
     }
     if (usuariosResult.error) {
-      console.error('Error fetching usuarios count:', usuariosResult.error);
+      console.error("Error fetching usuarios count:", usuariosResult.error);
     }
     if (alunosResult.error) {
-      console.error('Error fetching alunos count:', alunosResult.error);
+      console.error("Error fetching alunos count:", alunosResult.error);
     }
     if (cursosResult.error) {
-      console.error('Error fetching cursos count:', cursosResult.error);
+      console.error("Error fetching cursos count:", cursosResult.error);
     }
 
     // Get user counts per empresa for recent empresas
@@ -115,17 +119,17 @@ export async function GET(request: NextRequest) {
     if (recentEmpresasResult.data) {
       for (const empresa of recentEmpresasResult.data) {
         const { count: usuariosCount } = await adminClient
-          .from('usuarios')
-          .select('id', { count: 'exact', head: true })
-          .eq('empresa_id', empresa.id)
-          .eq('ativo', true)
-          .is('deleted_at', null);
+          .from("usuarios")
+          .select("id", { count: "exact", head: true })
+          .eq("empresa_id", empresa.id)
+          .eq("ativo", true)
+          .is("deleted_at", null);
 
         const { count: alunosCount } = await adminClient
-          .from('alunos')
-          .select('id', { count: 'exact', head: true })
-          .eq('empresa_id', empresa.id)
-          .is('deleted_at', null);
+          .from("alunos")
+          .select("id", { count: "exact", head: true })
+          .eq("empresa_id", empresa.id)
+          .is("deleted_at", null);
 
         recentEmpresas.push({
           id: empresa.id,
@@ -148,21 +152,21 @@ export async function GET(request: NextRequest) {
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       const { count: activeUsuarios } = await adminClient
-        .from('usuarios')
-        .select('id', { count: 'exact', head: true })
-        .eq('ativo', true)
-        .is('deleted_at', null)
-        .gte('updated_at', thirtyDaysAgo.toISOString());
+        .from("usuarios")
+        .select("id", { count: "exact", head: true })
+        .eq("ativo", true)
+        .is("deleted_at", null)
+        .gte("updated_at", thirtyDaysAgo.toISOString());
 
       const { count: activeAlunos } = await adminClient
-        .from('alunos')
-        .select('id', { count: 'exact', head: true })
-        .is('deleted_at', null)
-        .gte('updated_at', thirtyDaysAgo.toISOString());
+        .from("alunos")
+        .select("id", { count: "exact", head: true })
+        .is("deleted_at", null)
+        .gte("updated_at", thirtyDaysAgo.toISOString());
 
       usuariosAtivos30d = (activeUsuarios ?? 0) + (activeAlunos ?? 0);
     } else {
-      usuariosAtivos30d = usuariosAtivos30dResult.data?.count ?? 0;
+      usuariosAtivos30d = (usuariosAtivos30dResult.data as any) ?? 0;
     }
 
     const stats: SuperAdminStats = {
@@ -177,10 +181,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(stats);
   } catch (error) {
-    console.error('Error fetching superadmin stats:', error);
+    console.error("Error fetching superadmin stats:", error);
     return NextResponse.json(
-      { error: 'Erro ao buscar métricas' },
-      { status: 500 }
+      { error: "Erro ao buscar métricas" },
+      { status: 500 },
     );
   }
 }

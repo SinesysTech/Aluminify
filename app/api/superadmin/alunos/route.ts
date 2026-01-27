@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server"
-import { getDatabaseClient } from "@/app/shared/core/database/database"
-import { getAuthUser } from "@/app/[tenant]/auth/middleware"
+import { NextRequest, NextResponse } from "next/server";
+import { getDatabaseClient } from "@/app/shared/core/database/database";
+import { getAuthUser } from "@/app/[tenant]/auth/middleware";
 
 /**
  * GET /api/superadmin/alunos
@@ -12,25 +12,26 @@ import { getAuthUser } from "@/app/[tenant]/auth/middleware"
  */
 export async function GET(request: NextRequest) {
   try {
-    const user = await getAuthUser(request)
+    const user = await getAuthUser(request);
 
     if (!user || user.role !== "superadmin") {
       return NextResponse.json(
         { error: "Acesso negado. Apenas superadmin pode acessar esta rota." },
-        { status: 403 }
-      )
+        { status: 403 },
+      );
     }
 
-    const { searchParams } = new URL(request.url)
-    const search = searchParams.get("search") || ""
-    const empresaId = searchParams.get("empresaId")
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search") || "";
+    const empresaId = searchParams.get("empresaId");
 
-    const adminClient = getDatabaseClient()
+    const adminClient = getDatabaseClient();
 
     // Build query
     let query = adminClient
       .from("alunos")
-      .select(`
+      .select(
+        `
         id,
         email,
         nome_completo,
@@ -44,52 +45,60 @@ export async function GET(request: NextRequest) {
           nome,
           slug
         )
-      `)
+      `,
+      )
       .is("deleted_at", null)
-      .order("created_at", { ascending: false })
+      .order("created_at", { ascending: false });
 
     // Apply filters
     if (search) {
       query = query.or(
-        `nome_completo.ilike.%${search}%,email.ilike.%${search}%,cpf.ilike.%${search}%`
-      )
+        `nome_completo.ilike.%${search}%,email.ilike.%${search}%,cpf.ilike.%${search}%`,
+      );
     }
 
     if (empresaId && empresaId !== "all") {
-      query = query.eq("empresa_id", empresaId)
+      query = query.eq("empresa_id", empresaId);
     }
 
-    const { data: alunos, error } = await query
+    const { data: alunos, error } = await query;
 
     if (error) {
-      console.error("Error fetching alunos:", error)
+      console.error("Error fetching alunos:", error);
       return NextResponse.json(
         { error: "Erro ao buscar alunos" },
-        { status: 500 }
-      )
+        { status: 500 },
+      );
     }
 
     // Get course counts for each student
-    const alunoIds = (alunos || []).map((a) => a.id)
+    const alunoIds = (alunos || []).map((a) => a.id);
 
-    let courseCounts: Record<string, number> = {}
+    let courseCounts: Record<string, number> = {};
     if (alunoIds.length > 0) {
       const { data: enrollments } = await adminClient
-        .from("curso_alunos")
+        .from("alunos_cursos")
         .select("aluno_id")
-        .in("aluno_id", alunoIds)
+        .in("aluno_id", alunoIds);
 
       if (enrollments) {
-        courseCounts = enrollments.reduce((acc, e) => {
-          acc[e.aluno_id] = (acc[e.aluno_id] || 0) + 1
-          return acc
-        }, {} as Record<string, number>)
+        courseCounts = enrollments.reduce(
+          (acc, e) => {
+            acc[e.aluno_id] = (acc[e.aluno_id] || 0) + 1;
+            return acc;
+          },
+          {} as Record<string, number>,
+        );
       }
     }
 
     // Transform data
     const transformed = (alunos || []).map((aluno) => {
-      const empresa = aluno.empresas as { id: string; nome: string; slug: string } | null
+      const empresa = aluno.empresas as {
+        id: string;
+        nome: string;
+        slug: string;
+      } | null;
       return {
         id: aluno.id,
         email: aluno.email,
@@ -102,15 +111,15 @@ export async function GET(request: NextRequest) {
         totalCursos: courseCounts[aluno.id] || 0,
         createdAt: aluno.created_at,
         updatedAt: aluno.updated_at,
-      }
-    })
+      };
+    });
 
-    return NextResponse.json({ data: transformed })
+    return NextResponse.json({ data: transformed });
   } catch (error) {
-    console.error("Error in superadmin alunos endpoint:", error)
+    console.error("Error in superadmin alunos endpoint:", error);
     return NextResponse.json(
       { error: "Erro interno do servidor" },
-      { status: 500 }
-    )
+      { status: 500 },
+    );
   }
 }
