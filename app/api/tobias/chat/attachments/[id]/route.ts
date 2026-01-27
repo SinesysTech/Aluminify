@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cleanupChatAttachments, loadAttachmentMetadata } from '@/app/[tenant]/(modules)/tobias/services/chat/attachments.service';
+import { cleanupChatAttachments, loadAttachmentMetadata } from '@/app/[tenant]/(modules)/agente/services/chat/attachments.service';
 import fs from 'fs/promises';
 
 export const runtime = 'nodejs';
@@ -51,7 +51,7 @@ export async function GET(
   const response = new NextResponse(buffer, { headers });
 
   // Remover arquivo após o download ser iniciado
-  cleanupChatAttachments([attachment]).catch((error) => {
+  cleanupChatAttachments([attachment]).catch((error: unknown) => {
     console.warn('[Chat Attachments] Falha ao limpar arquivo após download', error);
   });
 

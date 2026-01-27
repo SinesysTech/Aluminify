@@ -146,7 +146,7 @@ export class AIAgentsService {
   /**
    * Set an agent as the default for its empresa
    */
-  async setDefault(agentId: string, userId?: string): Promise<AIAgent> {
+  async setDefault(agentId: string, _userId?: string): Promise<AIAgent> {
     const agent = await this.repository.findById(agentId);
     if (!agent) {
       throw new Error('Agente não encontrado');

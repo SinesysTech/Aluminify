@@ -43,7 +43,7 @@ export function createStudyAssistantAgent(options: CreateStudyAssistantOptions) 
     context,
     systemPrompt = DEFAULT_SYSTEM_PROMPT,
     model = "gpt-4o-mini",
-    temperature = 0.7,
+    temperature: _temperature = 0.7,
     agentName = "Assistente de Estudos",
   } = options;
 
@@ -52,6 +52,7 @@ export function createStudyAssistantAgent(options: CreateStudyAssistantOptions) 
 
   // Create the agent
   const agent = new Agent({
+    id: "studyAssistant",
     name: agentName,
     instructions: systemPrompt,
     model: openai(model),

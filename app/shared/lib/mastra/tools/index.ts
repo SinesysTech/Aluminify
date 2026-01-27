@@ -80,7 +80,7 @@ export function createMastraTools(context: ToolContext) {
       total: z.number(),
       searchTerm: z.string().nullable(),
     }),
-    execute: async ({ context: input }) => {
+    execute: async (input) => {
       const client = getDatabaseClient();
       const { searchTerm, limit = 10 } = input;
 
@@ -151,7 +151,7 @@ export function createMastraTools(context: ToolContext) {
       }),
       message: z.string(),
     }),
-    execute: async ({ context: input }) => {
+    execute: async (input) => {
       // Determine which student to query
       let targetStudentId = input.studentId;
 
@@ -267,7 +267,7 @@ export function createMastraTools(context: ToolContext) {
       total: z.number(),
       searchTerm: z.string(),
     }),
-    execute: async ({ context: input }) => {
+    execute: async (input) => {
       // Permission check: only usuarios and superadmin can search students
       if (userRole === "aluno") {
         throw new Error("Apenas administradores podem buscar alunos.");

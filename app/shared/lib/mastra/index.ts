@@ -10,7 +10,6 @@ import {
   createStudyAssistantAgent,
   CreateStudyAssistantOptions,
 } from "./agents/study-assistant";
-import { createMastraTools, ToolContext } from "./tools";
 
 // Export types
 export type { ToolContext } from "./tools";
