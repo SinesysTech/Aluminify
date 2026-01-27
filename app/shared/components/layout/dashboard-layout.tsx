@@ -4,8 +4,6 @@ import { AppSidebar } from '@/components/layout/app-sidebar'
 import { UserProvider } from '@/components/providers/user-provider'
 import { TenantBrandingProvider } from '@/components/providers/tenant-branding-provider'
 import { StudentOrganizationsProvider } from '@/components/providers/student-organizations-provider'
-import { CopilotProvider } from '@/components/providers/copilot-provider'
-import { CopilotChatButton } from '@/components/copilot'
 import { BottomNavigation } from '@/components/layout/bottom-navigation'
 import { ImpersonationBanner } from '@/components/layout/impersonation-banner'
 import {
@@ -42,7 +40,6 @@ export async function DashboardLayout({
         <UserProvider user={user}>
             <TenantBrandingProvider user={user}>
                 <StudentOrganizationsProvider user={user}>
-                    <CopilotProvider>
                     <StudentBrandingCoordinator />
                     <SidebarProvider
                         // 3. Aplicação das variáveis de fonte e classes base no Provider
@@ -63,8 +60,6 @@ export async function DashboardLayout({
                             <BottomNavigation />
                         </SidebarInset>
                     </SidebarProvider>
-                    <CopilotChatButton context={user.role === 'aluno' ? 'student' : 'institution'} />
-                    </CopilotProvider>
                 </StudentOrganizationsProvider>
             </TenantBrandingProvider>
         </UserProvider>
