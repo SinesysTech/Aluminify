@@ -8,6 +8,42 @@ export class UserBaseService {
     return getServiceRoleClient();
   }
 
+  private async findAuthUserIdByEmail(
+    email: string,
+  ): Promise<string | null> {
+    const adminClient = this.getAdminClient();
+    const normalized = email.trim().toLowerCase();
+
+    // Paginar de forma segura: em instalações com muitos usuários, o usuário pode não estar na 1ª página.
+    // A API retorna `nextPage` e `lastPage` (ver Pagination em @supabase/auth-js).
+    let page: number | null = 1;
+    const perPage = 1000;
+
+    while (page) {
+      const { data, error } = await adminClient.auth.admin.listUsers({
+        page,
+        perPage,
+      });
+
+      if (error) {
+        throw new Error(`Failed to list auth users: ${error.message}`);
+      }
+
+      const existingUser = data?.users?.find(
+        (u) => (u.email ?? "").toLowerCase() === normalized,
+      );
+      if (existingUser?.id) {
+        return existingUser.id;
+      }
+
+      page = data?.nextPage ?? null;
+      // Proteção extra: se vier uma página vazia, pare para evitar loop.
+      if (!data?.users?.length) break;
+    }
+
+    return null;
+  }
+
   /**
    * Creates an Auth user in Supabase using the Admin API.
    * Handles "email already registered" conflicts gracefully if needed.
@@ -54,25 +90,10 @@ export class UserBaseService {
         m.includes("already exists") ||
         authError.status === 422
       ) {
-        // User exists, fetch ID
-        // Note: In some setups, we might want to throw a conflict error here.
-        // But the legacy services (Student/Teacher) often tried to find the existing user.
-        // Let's defer strict conflict handling to the caller, or provide a way to fetch existing.
-
-        // We will try to fetch the existing user to return their ID.
-        const { data: usersList } = await adminClient.auth.admin.listUsers();
-        // Pagination warning: listUsers defaults to 50. Ideally we search by email if available.
-        // Supabase Admin API doesn't allow direct getByEmail easily without list.
-        // Optimization: In a real large system we would rely on the caller validation.
-
-        // For now, let's try to simulate what TeacherService was doing:
-        const existingUser = usersList?.users?.find(
-          (u) => u.email === params.email,
-        );
-        if (existingUser) {
-          // Update metadata just in case? TeacherService was doing it.
-          // Let's return the ID and let the caller decide if they want to update.
-          return { userId: existingUser.id, isNew: false };
+        // Usuário já existe no Auth — buscar o ID por email com paginação.
+        const existingUserId = await this.findAuthUserIdByEmail(params.email);
+        if (existingUserId) {
+          return { userId: existingUserId, isNew: false };
         }
 
         throw new Error(
