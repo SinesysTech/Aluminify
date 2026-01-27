@@ -59,9 +59,6 @@ N8N_WEBHOOK_URL=https://seu-webhook.n8n.cloud
 # Next.js
 NODE_ENV=production
 PORT=3000
-# Next.js
-NODE_ENV=production
-PORT=3000
 HOSTNAME=0.0.0.0
 ```
 
@@ -308,8 +305,8 @@ Ajuste conforme necessário para seu ambiente.
 # Ver logs detalhados
 docker logs aluminify-app
 
-# Verificar# Expose ports: Next.js (3000)
-EXPOSE 3000 # Windows
+# Verificar se a porta está em uso
+netstat -ano | findstr :3000  # Windows
 lsof -i :3000                 # Linux/Mac
 ```
 

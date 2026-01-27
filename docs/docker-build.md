@@ -128,7 +128,6 @@ docker run -d \
   --name aluminify \
   --platform linux/amd64 \
   -p 3000:3000 \
-  -p 4111:4111 \
   --env-file .env.local \
   --restart always \
   sinesystec/aluminify:latest
@@ -142,12 +141,10 @@ docker-compose up -d
 
 ## URLs dos Serviços
 
-| Serviço       | Porta | URL                              |
-| ------------- | ----- | -------------------------------- |
-| Next.js       | 3000  | http://localhost:3000            |
-| Mastra Studio | 4111  | http://localhost:4111            |
-| Swagger API   | 4111  | http://localhost:4111/swagger-ui |
-| Health Check  | 3000  | http://localhost:3000/api/health |
+| Serviço      | Porta | URL                              |
+| ------------ | ----- | -------------------------------- |
+| Next.js      | 3000  | http://localhost:3000            |
+| Health Check | 3000  | http://localhost:3000/api/health |
 
 ## Comandos Úteis
 
@@ -175,13 +172,12 @@ docker images | grep aluminify
 
 O Dockerfile usa multi-stage build:
 
-1. **Stage builder**: Instala dependências, builda Next.js e Mastra
+1. **Stage builder**: Instala dependências, builda Next.js
 2. **Stage runner**: Imagem final otimizada para produção
 
 Arquivos copiados para a imagem final:
 
 - `.next/` - Build do Next.js
-- `.mastra/output/` - Build do Mastra com Studio
 - `node_modules/` - Dependências de produção
 - `public/` - Assets estáticos
 - `start.sh` - Script de inicialização
