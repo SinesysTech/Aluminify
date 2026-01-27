@@ -28,9 +28,9 @@ export const mastra = new Mastra({
   }),
   server: {
     cors: {
-      origin: ["http://localhost:3000", "http://localhost:4111"],
-      allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      allowHeaders: ["Content-Type", "Authorization"],
+      origin: "*",
+      allowMethods: ["*"],
+      allowHeaders: ["*"],
     },
     apiRoutes: [
       registerCopilotKit({

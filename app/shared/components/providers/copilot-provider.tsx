@@ -18,8 +18,8 @@ interface CopilotProviderProps {
  * As rotas são registradas em mastra/index.ts com registerCopilotKit()
  */
 const AGENT_ROUTES = {
-  student: "/chat/student",
-  institution: "/chat/institution",
+  student: "/api/chat/student",
+  institution: "/api/chat/institution",
 } as const;
 
 const AGENT_IDS = {
@@ -41,8 +41,8 @@ const MASTRA_BASE_URL =
  * rodando em paralelo. Use `npm run dev:all` para iniciar ambos.
  *
  * Rotas disponíveis:
- * - http://localhost:4111/chat/student (studentAgent)
- * - http://localhost:4111/chat/institution (institutionAgent)
+ * - http://localhost:4111/api/chat/student (studentAgent)
+ * - http://localhost:4111/api/chat/institution (institutionAgent)
  */
 export function CopilotProvider({
   children,

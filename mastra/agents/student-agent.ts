@@ -24,7 +24,8 @@ const models = {
  * - Fornecer informações sobre progresso de estudos
  */
 export const studentAgent = new Agent({
-  name: "studentAgent",
+  id: "studentAgent",
+  name: "Student Agent",
   model: models[MODEL_PROVIDER as keyof typeof models] || models.google,
   instructions: `Você é o Assistente do Aluno da plataforma Aluminify, uma plataforma educacional moderna.
 

@@ -15,7 +15,7 @@ import "@copilotkit/react-ui/styles.css";
 export function StudentCopilotStandalone() {
   return (
     <CopilotKit
-      runtimeUrl="http://localhost:4111/chat/student"
+      runtimeUrl="http://localhost:4111/api/chat/student"
       agent="studentAgent"
     >
       <CopilotChat
@@ -31,7 +31,7 @@ export function StudentCopilotStandalone() {
 export function InstitutionCopilotStandalone() {
   return (
     <CopilotKit
-      runtimeUrl="http://localhost:4111/chat/institution"
+      runtimeUrl="http://localhost:4111/api/chat/institution"
       agent="institutionAgent"
     >
       <CopilotChat
@@ -135,7 +135,7 @@ function CustomChatContent() {
 export function CustomChatInterface() {
   return (
     <CopilotKit
-      runtimeUrl="http://localhost:4111/chat/student"
+      runtimeUrl="http://localhost:4111/api/chat/student"
       agent="studentAgent"
     >
       <CustomChatContent />

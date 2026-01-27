@@ -24,7 +24,8 @@ const models = {
  * - Orientar sobre funcionalidades de gestão
  */
 export const institutionAgent = new Agent({
-  name: "institutionAgent",
+  id: "institutionAgent",
+  name: "Institution Agent",
   model: models[MODEL_PROVIDER as keyof typeof models] || models.google,
   instructions: `Você é o Assistente Administrativo da plataforma Aluminify, especializado em ajudar gestores e administradores de instituições educacionais.
 
