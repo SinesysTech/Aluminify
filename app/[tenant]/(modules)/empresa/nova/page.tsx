@@ -71,7 +71,7 @@ export default function ProfessorNovaEmpresaPage() {
     }
 
     checkEmpresa();
-  }, [user, router, toast]);
+  }, [user, router, toast, tenant]);
 
   async function handleCreateEmpresa() {
     console.log('[Criar Empresa] Iniciando criação...', { formData });

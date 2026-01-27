@@ -62,7 +62,7 @@ export function ActivityChart({ stats, isLoading }: ActivityChartProps) {
                   borderRadius: "8px",
                 }}
                 labelStyle={{ color: "hsl(var(--foreground))" }}
-                formatter={(value: any) => [`${value} eventos`, "Eventos"]}
+                formatter={(value: number | undefined) => [`${value || 0} eventos`, "Eventos"]}
               />
               <Bar
                 dataKey="count"

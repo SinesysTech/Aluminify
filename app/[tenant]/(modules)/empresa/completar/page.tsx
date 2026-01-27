@@ -143,7 +143,7 @@ export default function CompletarCadastroEmpresaPage() {
     }
 
     loadEmpresa();
-  }, [user, router, toast]);
+  }, [user, router, toast, tenant]);
 
   async function handleComplete() {
     if (!empresa) return;

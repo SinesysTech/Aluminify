@@ -87,7 +87,7 @@ export default function ProductDetailPage() {
     };
 
     fetchProduct();
-  }, [productId, router, toast]);
+  }, [productId, router, toast, tenant]);
 
   const handleDelete = async () => {
     setDeleting(true);

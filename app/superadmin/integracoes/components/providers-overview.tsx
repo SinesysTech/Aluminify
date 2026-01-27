@@ -9,7 +9,7 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react"
-import { Progress } from "@/app/shared/components/feedback/progress"
+
 import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 import type { IntegrationStats } from "../types"
 
@@ -52,6 +52,7 @@ export function ProvidersOverview({ stats, isLoading }: ProvidersOverviewProps) 
           const Icon = providerIcons[provider.providerId] || Calendar
           const connectedPercent = (provider.connected / totalEmpresas) * 100
           const errorPercent = (provider.error / totalEmpresas) * 100
+          const disconnected = totalEmpresas - provider.connected - provider.error
 
           return (
             <div
@@ -63,7 +64,7 @@ export function ProvidersOverview({ stats, isLoading }: ProvidersOverviewProps) 
                   <div className="p-2 rounded-lg bg-background border">
                     <Icon className="h-4 w-4 text-muted-foreground" />
                   </div>
-                  <span className="font-medium">{provider.providerName}</span>
+                  <span className="font-medium">{provider.name}</span>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <div className="flex items-center gap-1.5">
@@ -72,7 +73,7 @@ export function ProvidersOverview({ stats, isLoading }: ProvidersOverviewProps) 
                   </div>
                   <div className="flex items-center gap-1.5">
                     <XCircle className="h-3.5 w-3.5 text-muted-foreground" />
-                    <span>{provider.disconnected}</span>
+                    <span>{disconnected}</span>
                   </div>
                   {provider.error > 0 && (
                     <div className="flex items-center gap-1.5">
@@ -104,7 +105,7 @@ export function ProvidersOverview({ stats, isLoading }: ProvidersOverviewProps) 
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
                   <span>{connectedPercent.toFixed(0)}% conectado</span>
-                  <span>{provider.disconnected} desconectado</span>
+                  <span>{disconnected} desconectado</span>
                 </div>
               </div>
             </div>

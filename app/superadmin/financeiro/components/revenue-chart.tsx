@@ -2,7 +2,7 @@
 
 import {
   Bar,
-  BarChart,
+
   XAxis,
   YAxis,
   CartesianGrid,

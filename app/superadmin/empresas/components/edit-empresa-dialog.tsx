@@ -31,7 +31,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { toast } from "@/hooks/use-toast"
 import { createClient } from "@/app/shared/core/client"
-import type { EmpresaWithMetrics, EmpresaPlano } from "../types"
+import type { EmpresaWithMetrics } from "../types"
 
 const editEmpresaSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório"),

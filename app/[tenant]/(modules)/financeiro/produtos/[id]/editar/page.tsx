@@ -96,7 +96,7 @@ export default function EditProductPage() {
     };
 
     fetchProduct();
-  }, [productId, router, toast]);
+  }, [productId, router, toast, tenant]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

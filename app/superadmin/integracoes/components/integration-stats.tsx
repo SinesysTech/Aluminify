@@ -25,7 +25,7 @@ export function IntegrationStatsCards({
     {
       title: "Integrações Ativas",
       value:
-        stats?.integrationsByProvider.reduce((acc, p) => acc + p.connected, 0) ||
+        stats?.integrationsByProvider?.reduce((acc: number, p) => acc + p.connected, 0) ||
         0,
       subtitle: "Conexões estabelecidas",
       icon: Link2,
@@ -43,7 +43,7 @@ export function IntegrationStatsCards({
     {
       title: "Integrações com Erro",
       value:
-        stats?.integrationsByProvider.reduce((acc, p) => acc + p.error, 0) || 0,
+        stats?.integrationsByProvider?.reduce((acc: number, p) => acc + p.error, 0) || 0,
       subtitle: "Requerem atenção",
       icon: AlertTriangle,
       color: "text-orange-600",

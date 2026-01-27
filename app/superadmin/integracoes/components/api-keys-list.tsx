@@ -27,6 +27,7 @@ interface ApiKeysListProps {
 export function ApiKeysList({ apiKeys, isLoading }: ApiKeysListProps) {
   const [search, setSearch] = useState("")
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [now] = useState(() => new Date())
 
   const filteredKeys = apiKeys.filter((key) => {
     if (!search) return true
@@ -97,11 +98,12 @@ export function ApiKeysList({ apiKeys, isLoading }: ApiKeysListProps) {
           </TableHeader>
           <TableBody>
             {filteredKeys.map((key) => {
-              const isExpired = key.expiresAt && new Date(key.expiresAt) < new Date()
+
+              const isExpired = key.expiresAt && new Date(key.expiresAt) < now
               const expiresIn7Days =
                 key.expiresAt &&
                 new Date(key.expiresAt) <
-                new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
 
               return (
                 <TableRow key={key.id}>
@@ -160,10 +162,10 @@ export function ApiKeysList({ apiKeys, isLoading }: ApiKeysListProps) {
                         )}
                         <span
                           className={`text-sm ${isExpired
-                              ? "text-destructive"
-                              : expiresIn7Days
-                                ? "text-orange-600"
-                                : "text-muted-foreground"
+                            ? "text-destructive"
+                            : expiresIn7Days
+                              ? "text-orange-600"
+                              : "text-muted-foreground"
                             }`}
                         >
                           {formatDistanceToNow(new Date(key.expiresAt), {

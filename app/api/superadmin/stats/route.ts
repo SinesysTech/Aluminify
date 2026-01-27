@@ -75,6 +75,7 @@ export async function GET(request: NextRequest) {
       adminClient.from("cursos").select("id", { count: "exact", head: true }),
 
       // Usuários ativos nos últimos 30 dias (usando RPC ou query direta)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       adminClient.rpc("count_active_users_30d" as any).maybeSingle(),
 
       // Últimas 5 empresas criadas com contagem de usuários
@@ -166,7 +167,7 @@ export async function GET(request: NextRequest) {
 
       usuariosAtivos30d = (activeUsuarios ?? 0) + (activeAlunos ?? 0);
     } else {
-      usuariosAtivos30d = (usuariosAtivos30dResult.data as any) ?? 0;
+      usuariosAtivos30d = (usuariosAtivos30dResult.data as number) ?? 0;
     }
 
     const stats: SuperAdminStats = {

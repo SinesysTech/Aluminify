@@ -256,7 +256,7 @@ export default function StructureManagerClient() {
     }
 
     checkProfessor()
-  }, [supabase, router])
+  }, [supabase, router, tenant])
 
   // Carregar disciplinas (todas - usado para outros propósitos)
   React.useEffect(() => {

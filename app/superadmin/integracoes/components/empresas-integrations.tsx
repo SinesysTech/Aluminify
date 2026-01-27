@@ -22,7 +22,7 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 import { formatDistanceToNow } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import type { EmpresaIntegration, IntegrationStatus } from "../types"
+import type { EmpresaIntegration, IntegrationStatus, IntegrationRecord } from "../types"
 
 interface EmpresasIntegrationsProps {
   data: EmpresaIntegration[]
@@ -87,7 +87,7 @@ export function EmpresasIntegrations({
     // Provider and status filter
     if (filterProvider !== "all" || filterStatus !== "all") {
       const integration = empresa.integrations.find(
-        (i) => filterProvider === "all" || i.providerId === filterProvider
+        (i: IntegrationRecord) => filterProvider === "all" || i.providerId === filterProvider
       )
 
       if (!integration) return false
@@ -197,7 +197,7 @@ export function EmpresasIntegrations({
                   </TableCell>
                   {providers.map((provider) => {
                     const integration = empresa.integrations.find(
-                      (i) => i.providerId === provider.id
+                      (i: IntegrationRecord) => i.providerId === provider.id
                     )
                     const status = integration?.status || "disconnected"
                     const config = statusConfig[status]
