@@ -796,6 +796,157 @@ export type Database = {
           },
         ]
       }
+      color_palettes: {
+        Row: {
+          accent_color: string
+          accent_foreground: string
+          background_color: string
+          card_color: string
+          card_foreground: string
+          created_at: string
+          created_by: string | null
+          destructive_color: string
+          destructive_foreground: string
+          empresa_id: string
+          foreground_color: string
+          id: string
+          is_custom: boolean
+          muted_color: string
+          muted_foreground: string
+          name: string
+          primary_color: string
+          primary_foreground: string
+          secondary_color: string
+          secondary_foreground: string
+          sidebar_background: string
+          sidebar_foreground: string
+          sidebar_primary: string
+          sidebar_primary_foreground: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          accent_color: string
+          accent_foreground: string
+          background_color: string
+          card_color: string
+          card_foreground: string
+          created_at?: string
+          created_by?: string | null
+          destructive_color: string
+          destructive_foreground: string
+          empresa_id: string
+          foreground_color: string
+          id?: string
+          is_custom?: boolean
+          muted_color: string
+          muted_foreground: string
+          name: string
+          primary_color: string
+          primary_foreground: string
+          secondary_color: string
+          secondary_foreground: string
+          sidebar_background: string
+          sidebar_foreground: string
+          sidebar_primary: string
+          sidebar_primary_foreground: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          accent_color?: string
+          accent_foreground?: string
+          background_color?: string
+          card_color?: string
+          card_foreground?: string
+          created_at?: string
+          created_by?: string | null
+          destructive_color?: string
+          destructive_foreground?: string
+          empresa_id?: string
+          foreground_color?: string
+          id?: string
+          is_custom?: boolean
+          muted_color?: string
+          muted_foreground?: string
+          name?: string
+          primary_color?: string
+          primary_foreground?: string
+          secondary_color?: string
+          secondary_foreground?: string
+          sidebar_background?: string
+          sidebar_foreground?: string
+          sidebar_primary?: string
+          sidebar_primary_foreground?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "color_palettes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          current_uses: number
+          description: string | null
+          discount_type: Database["public"]["Enums"]["discount_type"]
+          discount_value: number
+          empresa_id: string
+          id: string
+          max_uses: number | null
+          updated_at: string
+          valid_from: string
+          valid_until: string | null
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          current_uses?: number
+          description?: string | null
+          discount_type?: Database["public"]["Enums"]["discount_type"]
+          discount_value: number
+          empresa_id: string
+          id?: string
+          max_uses?: number | null
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          current_uses?: number
+          description?: string | null
+          discount_type?: Database["public"]["Enums"]["discount_type"]
+          discount_value?: number
+          empresa_id?: string
+          id?: string
+          max_uses?: number | null
+          updated_at?: string
+          valid_from?: string
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coupons_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cronograma_itens: {
         Row: {
           aula_id: string
@@ -957,7 +1108,6 @@ export type Database = {
           periodos_ferias: Json | null
           prioridade_minima: number
           updated_at: string | null
-          velocidade_reproducao: number
         }
         Insert: {
           aluno_id: string
@@ -978,7 +1128,6 @@ export type Database = {
           periodos_ferias?: Json | null
           prioridade_minima?: number
           updated_at?: string | null
-          velocidade_reproducao?: number
         }
         Update: {
           aluno_id?: string
@@ -999,7 +1148,6 @@ export type Database = {
           periodos_ferias?: Json | null
           prioridade_minima?: number
           updated_at?: string | null
-          velocidade_reproducao?: number
         }
         Relationships: [
           {
@@ -1143,58 +1291,75 @@ export type Database = {
           },
         ]
       }
-      coupons: {
+      custom_theme_presets: {
         Row: {
-          id: string
-          empresa_id: string
-          code: string
-          description: string | null
-          discount_type: Database["public"]["Enums"]["discount_type"]
-          discount_value: number
-          max_uses: number | null
-          current_uses: number
-          valid_from: string
-          valid_until: string | null
-          active: boolean
+          color_palette_id: string | null
           created_at: string
+          created_by: string | null
+          empresa_id: string
+          font_scheme_id: string | null
+          id: string
+          is_default: boolean | null
+          mode: string | null
+          name: string
+          preview_colors: Json | null
+          radius: number | null
+          scale: number | null
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
-          id?: string
-          empresa_id: string
-          code: string
-          description?: string | null
-          discount_type?: Database["public"]["Enums"]["discount_type"]
-          discount_value: number
-          max_uses?: number | null
-          current_uses?: number
-          valid_from?: string
-          valid_until?: string | null
-          active?: boolean
+          color_palette_id?: string | null
           created_at?: string
+          created_by?: string | null
+          empresa_id: string
+          font_scheme_id?: string | null
+          id?: string
+          is_default?: boolean | null
+          mode?: string | null
+          name: string
+          preview_colors?: Json | null
+          radius?: number | null
+          scale?: number | null
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
-          id?: string
-          empresa_id?: string
-          code?: string
-          description?: string | null
-          discount_type?: Database["public"]["Enums"]["discount_type"]
-          discount_value?: number
-          max_uses?: number | null
-          current_uses?: number
-          valid_from?: string
-          valid_until?: string | null
-          active?: boolean
+          color_palette_id?: string | null
           created_at?: string
+          created_by?: string | null
+          empresa_id?: string
+          font_scheme_id?: string | null
+          id?: string
+          is_default?: boolean | null
+          mode?: string | null
+          name?: string
+          preview_colors?: Json | null
+          radius?: number | null
+          scale?: number | null
           updated_at?: string
+          updated_by?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "coupons_empresa_id_fkey"
+            foreignKeyName: "custom_theme_presets_color_palette_id_fkey"
+            columns: ["color_palette_id"]
+            isOneToOne: false
+            referencedRelation: "color_palettes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_theme_presets_empresa_id_fkey"
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_theme_presets_font_scheme_id_fkey"
+            columns: ["font_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "font_schemes"
             referencedColumns: ["id"]
           },
         ]
@@ -1272,12 +1437,14 @@ export type Database = {
           cnpj: string | null
           configuracoes: Json | null
           created_at: string
+          dominio_customizado: string | null
           email_contato: string | null
           id: string
           logo_url: string | null
           nome: string
           plano: Database["public"]["Enums"]["enum_plano_empresa"]
           slug: string
+          subdomain: string | null
           telefone: string | null
           updated_at: string
         }
@@ -1286,12 +1453,14 @@ export type Database = {
           cnpj?: string | null
           configuracoes?: Json | null
           created_at?: string
+          dominio_customizado?: string | null
           email_contato?: string | null
           id?: string
           logo_url?: string | null
           nome: string
           plano?: Database["public"]["Enums"]["enum_plano_empresa"]
           slug: string
+          subdomain?: string | null
           telefone?: string | null
           updated_at?: string
         }
@@ -1300,12 +1469,14 @@ export type Database = {
           cnpj?: string | null
           configuracoes?: Json | null
           created_at?: string
+          dominio_customizado?: string | null
           email_contato?: string | null
           id?: string
           logo_url?: string | null
           nome?: string
           plano?: Database["public"]["Enums"]["enum_plano_empresa"]
           slug?: string
+          subdomain?: string | null
           telefone?: string | null
           updated_at?: string
         }
@@ -1355,6 +1526,62 @@ export type Database = {
             columns: ["modulo_id"]
             isOneToOne: false
             referencedRelation: "modulos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      font_schemes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          empresa_id: string
+          font_mono: Json
+          font_sans: Json
+          font_sizes: Json
+          font_weights: Json
+          google_fonts: Json | null
+          id: string
+          is_custom: boolean
+          name: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          empresa_id: string
+          font_mono?: Json
+          font_sans?: Json
+          font_sizes?: Json
+          font_weights?: Json
+          google_fonts?: Json | null
+          id?: string
+          is_custom?: boolean
+          name: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          empresa_id?: string
+          font_mono?: Json
+          font_sans?: Json
+          font_sizes?: Json
+          font_weights?: Json
+          google_fonts?: Json | null
+          id?: string
+          is_custom?: boolean
+          name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "font_schemes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
             referencedColumns: ["id"]
           },
         ]
@@ -1529,6 +1756,39 @@ export type Database = {
           },
         ]
       }
+      module_definitions: {
+        Row: {
+          created_at: string
+          default_url: string
+          description: string | null
+          display_order: number
+          icon_name: string
+          id: string
+          is_core: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          default_url: string
+          description?: string | null
+          display_order?: number
+          icon_name: string
+          id: string
+          is_core?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          default_url?: string
+          description?: string | null
+          display_order?: number
+          icon_name?: string
+          id?: string
+          is_core?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
       modulos: {
         Row: {
           created_at: string | null
@@ -1636,43 +1896,43 @@ export type Database = {
       }
       payment_providers: {
         Row: {
-          id: string
-          empresa_id: string
-          provider: string
-          name: string
-          credentials: Json
-          webhook_secret: string | null
-          webhook_url: string | null
-          provider_account_id: string | null
           active: boolean
           created_at: string
+          credentials: Json | null
+          empresa_id: string
+          id: string
+          name: string
+          provider: string
+          provider_account_id: string | null
           updated_at: string
+          webhook_secret: string | null
+          webhook_url: string | null
         }
         Insert: {
-          id?: string
-          empresa_id: string
-          provider: string
-          name: string
-          credentials?: Json
-          webhook_secret?: string | null
-          webhook_url?: string | null
-          provider_account_id?: string | null
           active?: boolean
           created_at?: string
+          credentials?: Json | null
+          empresa_id: string
+          id?: string
+          name: string
+          provider: string
+          provider_account_id?: string | null
           updated_at?: string
+          webhook_secret?: string | null
+          webhook_url?: string | null
         }
         Update: {
-          id?: string
-          empresa_id?: string
-          provider?: string
-          name?: string
-          credentials?: Json
-          webhook_secret?: string | null
-          webhook_url?: string | null
-          provider_account_id?: string | null
           active?: boolean
           created_at?: string
+          credentials?: Json | null
+          empresa_id?: string
+          id?: string
+          name?: string
+          provider?: string
+          provider_account_id?: string | null
           updated_at?: string
+          webhook_secret?: string | null
+          webhook_url?: string | null
         }
         Relationships: [
           {
@@ -1686,66 +1946,66 @@ export type Database = {
       }
       products: {
         Row: {
-          id: string
-          empresa_id: string
-          curso_id: string | null
-          name: string
-          description: string | null
-          price_cents: number
-          currency: string
-          provider: string
-          provider_product_id: string | null
-          provider_offer_id: string | null
           active: boolean
-          metadata: Json
           created_at: string
+          currency: string
+          curso_id: string | null
+          description: string | null
+          empresa_id: string
+          id: string
+          metadata: Json | null
+          name: string
+          price_cents: number
+          provider: string
+          provider_offer_id: string | null
+          provider_product_id: string | null
           updated_at: string
         }
         Insert: {
-          id?: string
-          empresa_id: string
-          curso_id?: string | null
-          name: string
-          description?: string | null
-          price_cents: number
-          currency?: string
-          provider?: string
-          provider_product_id?: string | null
-          provider_offer_id?: string | null
           active?: boolean
-          metadata?: Json
           created_at?: string
+          currency?: string
+          curso_id?: string | null
+          description?: string | null
+          empresa_id: string
+          id?: string
+          metadata?: Json | null
+          name: string
+          price_cents: number
+          provider?: string
+          provider_offer_id?: string | null
+          provider_product_id?: string | null
           updated_at?: string
         }
         Update: {
-          id?: string
-          empresa_id?: string
-          curso_id?: string | null
-          name?: string
-          description?: string | null
-          price_cents?: number
-          currency?: string
-          provider?: string
-          provider_product_id?: string | null
-          provider_offer_id?: string | null
           active?: boolean
-          metadata?: Json
           created_at?: string
+          currency?: string
+          curso_id?: string | null
+          description?: string | null
+          empresa_id?: string
+          id?: string
+          metadata?: Json | null
+          name?: string
+          price_cents?: number
+          provider?: string
+          provider_offer_id?: string | null
+          provider_product_id?: string | null
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "products_empresa_id_fkey"
-            columns: ["empresa_id"]
-            isOneToOne: false
-            referencedRelation: "empresas"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "products_curso_id_fkey"
             columns: ["curso_id"]
             isOneToOne: false
             referencedRelation: "cursos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "products_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
             referencedColumns: ["id"]
           },
         ]
@@ -2229,87 +2489,337 @@ export type Database = {
           },
         ]
       }
-      transactions: {
+      submodule_definitions: {
         Row: {
-          id: string
-          empresa_id: string
-          aluno_id: string | null
-          product_id: string | null
-          coupon_id: string | null
-          provider: string
-          provider_transaction_id: string | null
-          status: Database["public"]["Enums"]["transaction_status"]
-          amount_cents: number
-          currency: string
-          payment_method: Database["public"]["Enums"]["payment_method"] | null
-          installments: number | null
-          buyer_email: string
-          buyer_name: string | null
-          buyer_document: string | null
-          provider_data: Json
-          sale_date: string
-          confirmation_date: string | null
-          refund_date: string | null
-          refund_amount_cents: number | null
           created_at: string
+          default_url: string
+          display_order: number
+          id: string
+          module_id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          default_url: string
+          display_order?: number
+          id: string
+          module_id: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          default_url?: string
+          display_order?: number
+          id?: string
+          module_id?: string
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submodule_definitions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "module_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_branding: {
+        Row: {
+          color_palette_id: string | null
+          created_at: string
+          created_by: string | null
+          custom_css: string | null
+          empresa_id: string
+          font_scheme_id: string | null
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          color_palette_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          custom_css?: string | null
+          empresa_id: string
+          font_scheme_id?: string | null
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          color_palette_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          custom_css?: string | null
+          empresa_id?: string
+          font_scheme_id?: string | null
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_branding_color_palette_id_fkey"
+            columns: ["color_palette_id"]
+            isOneToOne: false
+            referencedRelation: "color_palettes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_branding_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: true
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_branding_font_scheme_id_fkey"
+            columns: ["font_scheme_id"]
+            isOneToOne: false
+            referencedRelation: "font_schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_logos: {
+        Row: {
+          created_at: string
+          file_name: string | null
+          file_size: number | null
+          id: string
+          logo_type: Database["public"]["Enums"]["enum_logo_type"]
+          logo_url: string
+          mime_type: string | null
+          tenant_branding_id: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          empresa_id: string
-          aluno_id?: string | null
-          product_id?: string | null
-          coupon_id?: string | null
-          provider?: string
-          provider_transaction_id?: string | null
-          status?: Database["public"]["Enums"]["transaction_status"]
-          amount_cents: number
-          currency?: string
-          payment_method?: Database["public"]["Enums"]["payment_method"] | null
-          installments?: number | null
-          buyer_email: string
-          buyer_name?: string | null
-          buyer_document?: string | null
-          provider_data?: Json
-          sale_date?: string
-          confirmation_date?: string | null
-          refund_date?: string | null
-          refund_amount_cents?: number | null
           created_at?: string
+          file_name?: string | null
+          file_size?: number | null
+          id?: string
+          logo_type: Database["public"]["Enums"]["enum_logo_type"]
+          logo_url: string
+          mime_type?: string | null
+          tenant_branding_id: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          empresa_id?: string
-          aluno_id?: string | null
-          product_id?: string | null
-          coupon_id?: string | null
-          provider?: string
-          provider_transaction_id?: string | null
-          status?: Database["public"]["Enums"]["transaction_status"]
-          amount_cents?: number
-          currency?: string
-          payment_method?: Database["public"]["Enums"]["payment_method"] | null
-          installments?: number | null
-          buyer_email?: string
-          buyer_name?: string | null
-          buyer_document?: string | null
-          provider_data?: Json
-          sale_date?: string
-          confirmation_date?: string | null
-          refund_date?: string | null
-          refund_amount_cents?: number | null
           created_at?: string
+          file_name?: string | null
+          file_size?: number | null
+          id?: string
+          logo_type?: Database["public"]["Enums"]["enum_logo_type"]
+          logo_url?: string
+          mime_type?: string | null
+          tenant_branding_id?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "transactions_empresa_id_fkey"
+            foreignKeyName: "tenant_logos_tenant_branding_id_fkey"
+            columns: ["tenant_branding_id"]
+            isOneToOne: false
+            referencedRelation: "tenant_branding"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_module_visibility: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          custom_name: string | null
+          custom_url: string | null
+          display_order: number | null
+          empresa_id: string
+          id: string
+          is_visible: boolean
+          module_id: string
+          options: Json | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          custom_name?: string | null
+          custom_url?: string | null
+          display_order?: number | null
+          empresa_id: string
+          id?: string
+          is_visible?: boolean
+          module_id: string
+          options?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          custom_name?: string | null
+          custom_url?: string | null
+          display_order?: number | null
+          empresa_id?: string
+          id?: string
+          is_visible?: boolean
+          module_id?: string
+          options?: Json | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_module_visibility_empresa_id_fkey"
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tenant_module_visibility_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "module_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenant_submodule_visibility: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          custom_name: string | null
+          custom_url: string | null
+          display_order: number | null
+          empresa_id: string
+          id: string
+          is_visible: boolean
+          module_id: string
+          submodule_id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          custom_name?: string | null
+          custom_url?: string | null
+          display_order?: number | null
+          empresa_id: string
+          id?: string
+          is_visible?: boolean
+          module_id: string
+          submodule_id: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          custom_name?: string | null
+          custom_url?: string | null
+          display_order?: number | null
+          empresa_id?: string
+          id?: string
+          is_visible?: boolean
+          module_id?: string
+          submodule_id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenant_submodule_visibility_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenant_submodule_visibility_module_id_submodule_id_fkey"
+            columns: ["module_id", "submodule_id"]
+            isOneToOne: false
+            referencedRelation: "submodule_definitions"
+            referencedColumns: ["module_id", "id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          aluno_id: string | null
+          amount_cents: number
+          buyer_document: string | null
+          buyer_email: string
+          buyer_name: string | null
+          confirmation_date: string | null
+          coupon_id: string | null
+          created_at: string
+          currency: string
+          empresa_id: string
+          id: string
+          installments: number | null
+          payment_method: Database["public"]["Enums"]["payment_method"] | null
+          product_id: string | null
+          provider: string
+          provider_data: Json | null
+          provider_transaction_id: string | null
+          refund_amount_cents: number | null
+          refund_date: string | null
+          sale_date: string
+          status: Database["public"]["Enums"]["transaction_status"]
+          updated_at: string
+        }
+        Insert: {
+          aluno_id?: string | null
+          amount_cents: number
+          buyer_document?: string | null
+          buyer_email: string
+          buyer_name?: string | null
+          confirmation_date?: string | null
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          empresa_id: string
+          id?: string
+          installments?: number | null
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
+          product_id?: string | null
+          provider?: string
+          provider_data?: Json | null
+          provider_transaction_id?: string | null
+          refund_amount_cents?: number | null
+          refund_date?: string | null
+          sale_date?: string
+          status?: Database["public"]["Enums"]["transaction_status"]
+          updated_at?: string
+        }
+        Update: {
+          aluno_id?: string | null
+          amount_cents?: number
+          buyer_document?: string | null
+          buyer_email?: string
+          buyer_name?: string | null
+          confirmation_date?: string | null
+          coupon_id?: string | null
+          created_at?: string
+          currency?: string
+          empresa_id?: string
+          id?: string
+          installments?: number | null
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
+          product_id?: string | null
+          provider?: string
+          provider_data?: Json | null
+          provider_transaction_id?: string | null
+          refund_amount_cents?: number | null
+          refund_date?: string | null
+          sale_date?: string
+          status?: Database["public"]["Enums"]["transaction_status"]
+          updated_at?: string
+        }
+        Relationships: [
           {
             foreignKeyName: "transactions_aluno_id_fkey"
             columns: ["aluno_id"]
@@ -2318,17 +2828,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transactions_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "transactions_coupon_id_fkey"
             columns: ["coupon_id"]
             isOneToOne: false
             referencedRelation: "coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -2576,6 +3093,7 @@ export type Database = {
           empresa_id: string
         }[]
       }
+      get_auth_user_empresa_id: { Args: never; Returns: string }
       get_matriculas_aluno: {
         Args: { p_aluno_id: string }
         Returns: {
@@ -2597,6 +3115,7 @@ export type Database = {
         }[]
       }
       is_aluno: { Args: never; Returns: boolean }
+      is_current_user_superadmin: { Args: never; Returns: boolean }
       is_empresa_admin:
         | { Args: never; Returns: boolean }
         | {
@@ -2624,6 +3143,7 @@ export type Database = {
       }
     }
     Enums: {
+      discount_type: "percentage" | "fixed"
       enum_dificuldade_percebida:
         | "Muito Facil"
         | "Facil"
@@ -2631,6 +3151,7 @@ export type Database = {
         | "Dificil"
         | "Muito Dificil"
       enum_importancia_modulo: "Alta" | "Media" | "Baixa" | "Base"
+      enum_logo_type: "login" | "sidebar" | "favicon"
       enum_modalidade: "EAD" | "LIVE"
       enum_plano_empresa: "basico" | "profissional" | "enterprise"
       enum_status_aluno_turma: "ativo" | "concluido" | "cancelado" | "trancado"
@@ -2662,7 +3183,6 @@ export type Database = {
         | "Gabarito"
         | "Outros"
       enum_tipo_servico_agendamento: "plantao" | "mentoria"
-      discount_type: "percentage" | "fixed"
       payment_method:
         | "credit_card"
         | "debit_card"
@@ -2804,6 +3324,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      discount_type: ["percentage", "fixed"],
       enum_dificuldade_percebida: [
         "Muito Facil",
         "Facil",
@@ -2812,6 +3333,7 @@ export const Constants = {
         "Muito Dificil",
       ],
       enum_importancia_modulo: ["Alta", "Media", "Baixa", "Base"],
+      enum_logo_type: ["login", "sidebar", "favicon"],
       enum_modalidade: ["EAD", "LIVE"],
       enum_plano_empresa: ["basico", "profissional", "enterprise"],
       enum_status_aluno_turma: ["ativo", "concluido", "cancelado", "trancado"],
@@ -2846,6 +3368,22 @@ export const Constants = {
         "Outros",
       ],
       enum_tipo_servico_agendamento: ["plantao", "mentoria"],
+      payment_method: [
+        "credit_card",
+        "debit_card",
+        "pix",
+        "boleto",
+        "bank_transfer",
+        "other",
+      ],
+      transaction_status: [
+        "pending",
+        "approved",
+        "cancelled",
+        "refunded",
+        "disputed",
+        "chargeback",
+      ],
     },
   },
 } as const
