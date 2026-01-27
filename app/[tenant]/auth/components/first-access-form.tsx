@@ -18,9 +18,10 @@ import { toast } from 'sonner'
 interface FirstAccessFormProps {
   userId: string
   role: AppUserRole
+  empresaSlug?: string
 }
 
-export function FirstAccessForm({ userId, role }: FirstAccessFormProps) {
+export function FirstAccessForm({ userId, role, empresaSlug }: FirstAccessFormProps) {
   const supabase = createClient()
   const router = useRouter()
   const [password, setPassword] = useState('')
