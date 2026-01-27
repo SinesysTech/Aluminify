@@ -97,7 +97,7 @@ export function OpenSourcePage() {
                                 </div>
                                 <h3 className="text-2xl font-bold mb-2">Aluminify Cloud</h3>
                                 <p className="text-muted-foreground mb-6 flex-1">
-                                    Para criadores e escolas. Infraestrutura gerenciada, atualizações automáticas, CDN global e suporte prioritário.
+                                    Para criadores e cursos. Infraestrutura gerenciada, atualizações automáticas, CDN global e suporte prioritário.
                                 </p>
                                 <div className="space-y-2 mb-6">
                                     <div className="flex items-center gap-2 text-sm">

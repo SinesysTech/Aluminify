@@ -116,7 +116,7 @@ export function DocsPage() {
                             <div className="p-4 rounded-xl border border-border hover:border-primary/50 transition-all group bg-card">
                                 <RocketIcon className="w-6 h-6 text-primary mb-2" />
                                 <h3 className="font-bold text-foreground group-hover:text-primary transition-colors">Quickstart</h3>
-                                <p className="text-sm text-muted-foreground mt-1">Coloque sua escola no ar em poucos minutos com Docker.</p>
+                                <p className="text-sm text-muted-foreground mt-1">Coloque seu curso no ar em poucos minutos com Docker.</p>
                             </div>
                             <div className="p-4 rounded-xl border border-border hover:border-primary/50 transition-all group bg-card">
                                 <Layout className="w-6 h-6 text-primary mb-2" />

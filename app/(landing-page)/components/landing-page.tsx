@@ -57,7 +57,7 @@ export function LandingPage() {
                         </div>
 
                         <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight mb-8 text-foreground max-w-5xl mx-auto leading-[1.1]">
-                            A infraestrutura invisível <br className="hidden md:block" /> da sua escola.
+                            A infraestrutura invisível <br className="hidden md:block" /> da educação.
                         </h1>
 
                         <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed text-balance">
@@ -96,7 +96,7 @@ export function LandingPage() {
                                     <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
                                 </div>
                                 <div className="h-6 w-full max-w-md bg-background rounded-md border border-border flex items-center px-3 mx-auto">
-                                    <span className="text-[10px] text-muted-foreground font-mono">aluno.suaescola.com.br/dashboard</span>
+                                    <span className="text-[10px] text-muted-foreground font-mono">aluno.seucurso.com.br/dashboard</span>
                                 </div>
                             </div>
 
@@ -193,7 +193,7 @@ export function LandingPage() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center mb-16">
                             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-                                Tudo o que sua escola precisa.
+                                Tudo o que seu curso precisa.
                             </h2>
                             <p className="text-muted-foreground max-w-2xl mx-auto">
                                 Modular e extensível. Comece com o básico e ative funcionalidades
@@ -276,7 +276,7 @@ export function LandingPage() {
                             Pronto para evoluir?
                         </h2>
                         <p className="text-lg text-muted-foreground mb-10">
-                            Junte-se a centenas de escolas que já estão construindo o futuro da educação com Aluminify.
+                            Junte-se a centenas de cursos que já estão construindo o futuro da educação com Aluminify.
                         </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                             <Link

@@ -56,8 +56,8 @@ export function ManifestoPage() {
                         Nutrir Mentes.
                     </h1>
                     <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-                        Por que decidimos construir a infraestrutura invisível que a sua
-                        escola merece.
+                        Por que decidimos construir a infraestrutura invisível que o seu
+                        curso merece.
                     </p>
                 </header>
 
@@ -166,7 +166,7 @@ export function ManifestoPage() {
                         <h2 className="text-2xl font-bold mb-6 text-primary dark:text-white">Nós somos o solo fértil.</h2>
                         <div className="prose prose-zinc dark:prose-invert prose-lg text-muted-foreground leading-relaxed">
                             <p>
-                                Se o aluno precisa ser nutrido, a escola precisa de solo fértil.
+                                Se o aluno precisa ser nutrido, o curso precisa de solo fértil.
                                 É aqui que entra o <strong>Aluminify</strong>.
                             </p>
                             <p>
@@ -174,7 +174,7 @@ export function ManifestoPage() {
                                 Somos <strong>infraestrutura</strong>.
                             </p>
                             <p>
-                                Pense na sua sala de aula física. Você não quer que o
+                                Pense na sua sala de aula. Você não quer que o
                                 ar-condicionado faça barulho, ou que a cadeira quebre. Você quer
                                 que a estrutura seja tão boa que se torne invisível, permitindo
                                 que o foco total esteja na aula.

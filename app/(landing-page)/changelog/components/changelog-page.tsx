@@ -72,7 +72,7 @@ export function ChangelogPage() {
                             <ul className="list-disc pl-4 mt-2 space-y-1">
                                 <li>Código fonte liberado no GitHub.</li>
                                 <li>Documentação de self-hosting via Docker Compose.</li>
-                                <li>Lançamento do plano Cloud para escolas que preferem gestão assistida.</li>
+                                <li>Lançamento do plano Cloud para quem prefere gestão assistida.</li>
                             </ul>
                         </div>
                     </div>

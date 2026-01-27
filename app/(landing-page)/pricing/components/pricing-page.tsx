@@ -68,7 +68,7 @@ export function PricingPage() {
                             </div>
                             <div className="mb-4">
                                 <h3 className="text-xl font-bold font-display">Pro Cloud</h3>
-                                <p className="text-sm text-zinc-400 dark:text-zinc-600 mt-1">Para escolas em crescimento.</p>
+                                <p className="text-sm text-zinc-400 dark:text-zinc-600 mt-1">Para cursos em crescimento.</p>
                             </div>
                             <div className="mb-6">
                                 <span className="text-4xl font-bold">R$ 499</span>
