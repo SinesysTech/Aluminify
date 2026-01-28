@@ -76,9 +76,6 @@ export function TenantBrandingProvider({ children, user, overrideEmpresaId }: Te
   // Keep track of current empresa ID to detect changes
   const currentEmpresaId = useRef<string | null | undefined>(undefined);
 
-  // Keep track of polling interval for real-time updates
-  const pollingInterval = useRef<NodeJS.Timeout | null>(null);
-
   // Sync manager for cross-tab communication
   const syncManager = getBrandingSyncManager();
 
@@ -208,40 +205,33 @@ export function TenantBrandingProvider({ children, user, overrideEmpresaId }: Te
     }
   }, [loadBrandingData, applyBrandingToTheme, resetBrandingToDefaults]);
 
-  // Setup real-time updates polling
-  const setupRealTimeUpdates = useCallback((empresaId: string) => {
-    // Clear existing interval
-    if (pollingInterval.current) {
-      clearInterval(pollingInterval.current);
-    }
-
-    // Setup new polling interval (every 30 seconds)
-    pollingInterval.current = setInterval(async () => {
-      try {
-        const branding = await loadBrandingData(empresaId);
-
-        // Only update if branding has changed
-        if (JSON.stringify(branding) !== JSON.stringify(currentBranding)) {
-          if (branding) {
-            setCurrentBranding(branding);
-            applyBrandingToTheme(branding);
-          } else {
-            setCurrentBranding(null);
-            resetBrandingToDefaults();
-          }
-        }
-      } catch (err) {
-        // Silently handle polling errors to avoid spamming the user
-        console.warn('Failed to poll for branding updates:', err);
+  // Setup smart updates (polling only when necessary + visibility revalidation)
+  const setupRealTimeUpdates = useCallback(() => {
+    // Re-validate when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Debounce slightly to avoid rapid updates if user sleeping tabs quickly
+        setTimeout(() => {
+          refreshBranding().catch(err => console.warn('Background refresh failed', err));
+        }, 500);
       }
-    }, 30000); // 30 seconds
-  }, [loadBrandingData, currentBranding, applyBrandingToTheme, resetBrandingToDefaults]);
+    };
 
-  // Cleanup polling on unmount
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Cleanup function returning clearing logic
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [refreshBranding]);
+
+  // Cleanup polling/listeners on unmount
+  const cleanupUpdatesRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     return () => {
-      if (pollingInterval.current) {
-        clearInterval(pollingInterval.current);
+      if (cleanupUpdatesRef.current) {
+        cleanupUpdatesRef.current();
       }
     };
   }, []);
@@ -257,10 +247,10 @@ export function TenantBrandingProvider({ children, user, overrideEmpresaId }: Te
       // Update sync manager
       syncManager.setCurrentEmpresa(empresaId || null);
 
-      // Clear existing polling
-      if (pollingInterval.current) {
-        clearInterval(pollingInterval.current);
-        pollingInterval.current = null;
+      // Cleanup previous updates listener
+      if (cleanupUpdatesRef.current) {
+        cleanupUpdatesRef.current();
+        cleanupUpdatesRef.current = null;
       }
 
       if (empresaId) {
@@ -268,7 +258,7 @@ export function TenantBrandingProvider({ children, user, overrideEmpresaId }: Te
         refreshBranding();
 
         // Setup real-time updates
-        setupRealTimeUpdates(empresaId);
+        cleanupUpdatesRef.current = setupRealTimeUpdates();
       } else {
         // User logged out - reset to defaults
         setCurrentBranding(null);

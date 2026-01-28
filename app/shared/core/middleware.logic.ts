@@ -9,7 +9,9 @@ const DEV_DOMAINS = ["localhost", "127.0.0.1"];
 
 // --- LOGGING CONFIGURATION ---
 type LogLevel = "debug" | "info" | "warn" | "error" | "none";
-const LOG_LEVEL: LogLevel = (process.env.LOG_LEVEL as LogLevel) || (process.env.NODE_ENV === "development" ? "info" : "warn");
+const LOG_LEVEL: LogLevel =
+  (process.env.LOG_LEVEL as LogLevel) ||
+  (process.env.NODE_ENV === "development" ? "info" : "warn");
 
 const LOG_LEVELS: Record<LogLevel, number> = {
   debug: 0,
@@ -164,6 +166,7 @@ function extractTenantFromPath(pathname: string): string | null {
 export interface TenantContext {
   empresaId?: string;
   empresaSlug?: string;
+  empresaNome?: string;
   resolutionType?: "subdomain" | "custom-domain" | "slug";
 }
 
@@ -336,17 +339,18 @@ export async function updateSession(request: NextRequest) {
     if (!safeToSkipDb) {
       // Perform DB Lookups
       if (isCustomDomain(host)) {
-        const { data: empresa } = await supabase
+        const { data: empresaData } = await supabase
           .from("empresas")
-          .select("id, slug")
+          .select("id, slug, nome")
           .eq("dominio_customizado", host.split(":")[0].toLowerCase())
           .eq("ativo", true)
           .maybeSingle();
 
-        if (empresa) {
+        if (empresaData) {
           tenantContext = {
-            empresaId: empresa.id,
-            empresaSlug: empresa.slug,
+            empresaId: empresaData.id,
+            empresaSlug: empresaData.slug,
+            empresaNome: empresaData.nome,
             resolutionType: "custom-domain",
           };
         }
@@ -355,17 +359,18 @@ export async function updateSession(request: NextRequest) {
       if (!tenantContext.empresaId) {
         const subdomain = extractSubdomain(host);
         if (subdomain) {
-          const { data: empresa } = await supabase
+          const { data: empresaData } = await supabase
             .from("empresas")
-            .select("id, slug")
+            .select("id, slug, nome")
             .or(`subdomain.eq.${subdomain},slug.eq.${subdomain}`)
             .eq("ativo", true)
             .maybeSingle();
 
-          if (empresa) {
+          if (empresaData) {
             tenantContext = {
-              empresaId: empresa.id,
-              empresaSlug: empresa.slug,
+              empresaId: empresaData.id,
+              empresaSlug: empresaData.slug,
+              empresaNome: empresaData.nome,
               resolutionType: "subdomain",
             };
           }
@@ -375,17 +380,18 @@ export async function updateSession(request: NextRequest) {
       if (!tenantContext.empresaId) {
         const tenantSlug = extractTenantFromPath(pathname);
         if (tenantSlug) {
-          const { data: empresa } = await supabase
+          const { data: empresaData } = await supabase
             .from("empresas")
-            .select("id, slug")
+            .select("id, slug, nome")
             .eq("slug", tenantSlug)
             .eq("ativo", true)
             .maybeSingle();
 
-          if (empresa) {
+          if (empresaData) {
             tenantContext = {
-              empresaId: empresa.id,
-              empresaSlug: empresa.slug,
+              empresaId: empresaData.id,
+              empresaSlug: empresaData.slug,
+              empresaNome: empresaData.nome,
               resolutionType: "slug",
             };
           }
@@ -394,7 +400,9 @@ export async function updateSession(request: NextRequest) {
 
       if (tenantContext.empresaId) {
         setCachedTenant(cacheKey, tenantContext);
-        logDebug(`tenant resolved: ${tenantContext.empresaSlug} (${tenantContext.resolutionType})`);
+        logDebug(
+          `tenant resolved: ${tenantContext.empresaSlug} (${tenantContext.resolutionType})`,
+        );
       }
     }
   }
@@ -407,6 +415,12 @@ export async function updateSession(request: NextRequest) {
     if (tenantContext.empresaId) {
       target.headers.set("x-tenant-id", tenantContext.empresaId);
       target.headers.set("x-tenant-slug", tenantContext.empresaSlug!);
+      if (tenantContext.empresaNome) {
+        target.headers.set(
+          "x-tenant-name",
+          encodeURIComponent(tenantContext.empresaNome),
+        );
+      }
       if (tenantContext.resolutionType) {
         target.headers.set("x-tenant-resolution", tenantContext.resolutionType);
       }
@@ -451,6 +465,12 @@ export async function updateSession(request: NextRequest) {
       const response = NextResponse.rewrite(url);
       response.headers.set("x-tenant-id", tenantContext.empresaId);
       response.headers.set("x-tenant-slug", tenantContext.empresaSlug!);
+      if (tenantContext.empresaNome) {
+        response.headers.set(
+          "x-tenant-name",
+          encodeURIComponent(tenantContext.empresaNome),
+        );
+      }
 
       supabaseResponse.cookies.getAll().forEach((cookie) => {
         response.cookies.set(cookie.name, cookie.value);
@@ -494,6 +514,12 @@ export async function updateSession(request: NextRequest) {
   if (tenantContext.empresaId) {
     supabaseResponse.headers.set("x-tenant-id", tenantContext.empresaId);
     supabaseResponse.headers.set("x-tenant-slug", tenantContext.empresaSlug!);
+    if (tenantContext.empresaNome) {
+      supabaseResponse.headers.set(
+        "x-tenant-name",
+        encodeURIComponent(tenantContext.empresaNome),
+      );
+    }
     if (tenantContext.resolutionType) {
       supabaseResponse.headers.set(
         "x-tenant-resolution",
@@ -502,5 +528,40 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  return supabaseResponse;
+  // --- 6. FINALIZE RESPONSE ---
+  // We must create a new response that includes the request headers we want to pass to Server Components.
+  // The original 'supabaseResponse' has the cookies set by createServerClient, so we must copy them.
+
+  const requestHeaders = new Headers(request.headers);
+  if (tenantContext.empresaId) {
+    requestHeaders.set("x-tenant-id", tenantContext.empresaId);
+    requestHeaders.set("x-tenant-slug", tenantContext.empresaSlug!);
+    if (tenantContext.empresaNome) {
+      requestHeaders.set(
+        "x-tenant-name",
+        encodeURIComponent(tenantContext.empresaNome),
+      );
+    }
+    if (tenantContext.resolutionType) {
+      requestHeaders.set("x-tenant-resolution", tenantContext.resolutionType);
+    }
+  }
+
+  const finalResponse = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+
+  // Copy cookies from supabaseResponse (which has auth updates) to finalResponse
+  supabaseResponse.cookies.getAll().forEach((cookie) => {
+    finalResponse.cookies.set(cookie.name, cookie.value, cookie);
+  });
+
+  // Copy output headers (like x-tenant-id for client) from supabaseResponse
+  supabaseResponse.headers.forEach((value, key) => {
+    finalResponse.headers.set(key, value);
+  });
+
+  return finalResponse;
 }

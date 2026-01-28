@@ -91,7 +91,7 @@ export function CopilotKitProvider({ user, children, agentMode = 'copilotkit' }:
         empresaId: user.empresaId ?? null,
         userRole: user.role,
         userName: user.fullName ?? user.email,
-        agentMode, // Pass agent mode to frontend for UI customization
+        agentMode,
       }}
     >
       {children}
