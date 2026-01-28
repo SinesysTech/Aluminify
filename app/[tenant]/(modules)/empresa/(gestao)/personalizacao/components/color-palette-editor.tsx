@@ -268,7 +268,7 @@ function ColorPreview({ colors, className = "" }: ColorPreviewProps) {
 export function ColorPaletteEditor({
   currentPalette,
   onSave: _onSave,
-  onPreview: _onPreview,
+  onPreview,
   onValidate
 }: ColorPaletteEditorProps) {
   // State management
@@ -411,20 +411,28 @@ export function ColorPaletteEditor({
 
   // Handle palette data updates
   const updatePaletteData = useCallback((field: keyof CreateColorPaletteRequest, value: string) => {
-    setPaletteData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  }, []);
+    setPaletteData(prev => {
+      const next = {
+        ...prev,
+        [field]: value
+      };
+      onPreview(next);
+      return next;
+    });
+  }, [onPreview]);
 
   // Handle preset selection
   const applyPreset = useCallback((preset: PresetPalette) => {
-    setPaletteData(prev => ({
-      ...prev,
-      ...preset.colors,
-      name: prev.name || preset.name
-    }));
-  }, []);
+    setPaletteData(prev => {
+      const next: CreateColorPaletteRequest = {
+        ...prev,
+        ...preset.colors,
+        name: prev.name || preset.name
+      } as CreateColorPaletteRequest;
+      onPreview(next);
+      return next;
+    });
+  }, [onPreview]);
 
   // Handle accessibility validation
   const handleValidateAccessibility = useCallback(async () => {

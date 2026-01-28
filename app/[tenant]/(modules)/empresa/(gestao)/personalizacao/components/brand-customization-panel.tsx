@@ -63,6 +63,7 @@ export function BrandCustomizationPanel({
   const [previewMode, setPreviewMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [draftColorPalette, setDraftColorPalette] = useState<CreateColorPaletteRequest | null>(null);
 
   // Get branding context for refresh and cross-tab sync
   const brandingContext = useTenantBrandingOptional();
@@ -185,11 +186,19 @@ export function BrandCustomizationPanel({
     }
   }, [empresaId, brandingContext]);
 
-  const handleColorPaletteSave = async (paletteRequest: CreateColorPaletteRequest): Promise<void> => {
+  const saveColorPalette = async (paletteRequest: CreateColorPaletteRequest): Promise<string> => {
     try {
       const authHeaders = await getAuthHeaders();
-      const response = await fetch(`/api/empresa/personalizacao/${empresaId}/color-palettes`, {
-        method: 'POST',
+      const existingPaletteId =
+        brandingState.colorPaletteId ?? brandingState.colorPalette?.id ?? null;
+
+      const isUpdate = !!existingPaletteId;
+      const endpoint = isUpdate
+        ? `/api/empresa/personalizacao/${empresaId}/color-palettes/${existingPaletteId}`
+        : `/api/empresa/personalizacao/${empresaId}/color-palettes`;
+
+      const response = await fetch(endpoint, {
+        method: isUpdate ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...authHeaders,
@@ -209,15 +218,27 @@ export function BrandCustomizationPanel({
         colorPalette: data.data,
         colorPaletteId: data.data.id
       }));
-      setHasUnsavedChanges(true);
+
+      return data.data.id as string;
     } catch (error) {
       console.error('Failed to save color palette:', error);
       throw error; // Let child component handle the error
     }
   };
 
-  // Keep these handlers for compatibility with child components
-  const handleColorPalettePreview = () => setPreviewMode(!previewMode);
+  const handleColorPaletteSave = async (paletteRequest: CreateColorPaletteRequest): Promise<void> => {
+    await saveColorPalette(paletteRequest);
+    setDraftColorPalette(null);
+    setHasUnsavedChanges(true);
+  };
+
+  // Used by ColorPaletteEditor to notify "draft" changes
+  const handleColorPalettePreview = (palette: CreateColorPaletteRequest) => {
+    setDraftColorPalette(palette);
+    setHasUnsavedChanges(true);
+    // Keep legacy preview mode toggle (currently unused by UI, but harmless)
+    setPreviewMode(true);
+  };
   const handleColorPaletteValidate = () => Promise.resolve({ isCompliant: true, contrastRatios: { primaryOnBackground: 4.5, secondaryOnBackground: 4.5, accentOnBackground: 4.5 } });
 
   const handleFontSchemeSave = async (schemeRequest: CreateFontSchemeRequest): Promise<void> => {
@@ -262,14 +283,30 @@ export function BrandCustomizationPanel({
   const handleSave = async () => {
     setIsSaving(true);
     try {
+      let colorPaletteId =
+        brandingState.colorPaletteId ?? brandingState.colorPalette?.id ?? null;
+
+      // If user changed colors but palette isn't persisted yet (or needs update),
+      // persist it first so we have a paletteId to apply.
+      if (draftColorPalette) {
+        colorPaletteId = await saveColorPalette(draftColorPalette);
+        setDraftColorPalette(null);
+      }
+
       const saveRequest: SaveTenantBrandingRequest = {
-        colorPaletteId: brandingState.colorPaletteId ?? brandingState.colorPalette?.id,
+        colorPaletteId,
         fontSchemeId: brandingState.fontSchemeId ?? brandingState.fontScheme?.id,
         customCss: brandingState.customCss,
       };
 
       await onSave(saveRequest);
       setHasUnsavedChanges(false);
+
+      // Refresh branding context so changes propagate immediately (sidebar, etc.)
+      if (brandingContext) {
+        await brandingContext.refreshBranding();
+        brandingContext.triggerCrossTabUpdate();
+      }
     } catch (error) {
       console.error('Failed to save branding:', error);
       // Parent handles toast usually
