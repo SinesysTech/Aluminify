@@ -2,8 +2,6 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import type {
   ColorPalette,
   CreateColorPaletteRequest,
-  ColorPaletteUpdate,
-  ColorPaletteInsert,
   AccessibilityReport,
   CSSCustomProperties,
 } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
@@ -74,29 +72,30 @@ export class ColorPaletteManagerImpl implements ColorPaletteManager {
         }
       }
 
-      // Create palette insert data
-      const paletteData: ColorPaletteInsert = {
+      // Monta payload com colunas do banco (snake_case).
+      // Importante: Supabase NÃO entende os campos camelCase do nosso domínio.
+      const paletteData = {
         name: palette.name,
-        empresaId,
-        primaryColor: palette.primaryColor,
-        primaryForeground: palette.primaryForeground,
-        secondaryColor: palette.secondaryColor,
-        secondaryForeground: palette.secondaryForeground,
-        accentColor: palette.accentColor,
-        accentForeground: palette.accentForeground,
-        mutedColor: palette.mutedColor,
-        mutedForeground: palette.mutedForeground,
-        backgroundColor: palette.backgroundColor,
-        foregroundColor: palette.foregroundColor,
-        cardColor: palette.cardColor,
-        cardForeground: palette.cardForeground,
-        destructiveColor: palette.destructiveColor,
-        destructiveForeground: palette.destructiveForeground,
-        sidebarBackground: palette.sidebarBackground,
-        sidebarForeground: palette.sidebarForeground,
-        sidebarPrimary: palette.sidebarPrimary,
-        sidebarPrimaryForeground: palette.sidebarPrimaryForeground,
-        isCustom: true,
+        empresa_id: empresaId,
+        primary_color: palette.primaryColor,
+        primary_foreground: palette.primaryForeground,
+        secondary_color: palette.secondaryColor,
+        secondary_foreground: palette.secondaryForeground,
+        accent_color: palette.accentColor,
+        accent_foreground: palette.accentForeground,
+        muted_color: palette.mutedColor,
+        muted_foreground: palette.mutedForeground,
+        background_color: palette.backgroundColor,
+        foreground_color: palette.foregroundColor,
+        card_color: palette.cardColor,
+        card_foreground: palette.cardForeground,
+        destructive_color: palette.destructiveColor,
+        destructive_foreground: palette.destructiveForeground,
+        sidebar_background: palette.sidebarBackground,
+        sidebar_foreground: palette.sidebarForeground,
+        sidebar_primary: palette.sidebarPrimary,
+        sidebar_primary_foreground: palette.sidebarPrimaryForeground,
+        is_custom: true,
       };
 
       const { data, error } = await this.client
@@ -142,11 +141,30 @@ export class ColorPaletteManagerImpl implements ColorPaletteManager {
         }
       }
 
-      // Create update data
-      const updateData: ColorPaletteUpdate = {
-        ...palette,
-        updatedAt: new Date(),
+      // Monta update com colunas do banco (snake_case) e só inclui campos enviados.
+      const updateData: Record<string, unknown> = {
+        updated_at: new Date().toISOString(),
       };
+
+      if (palette.name !== undefined) updateData.name = palette.name;
+      if (palette.primaryColor !== undefined) updateData.primary_color = palette.primaryColor;
+      if (palette.primaryForeground !== undefined) updateData.primary_foreground = palette.primaryForeground;
+      if (palette.secondaryColor !== undefined) updateData.secondary_color = palette.secondaryColor;
+      if (palette.secondaryForeground !== undefined) updateData.secondary_foreground = palette.secondaryForeground;
+      if (palette.accentColor !== undefined) updateData.accent_color = palette.accentColor;
+      if (palette.accentForeground !== undefined) updateData.accent_foreground = palette.accentForeground;
+      if (palette.mutedColor !== undefined) updateData.muted_color = palette.mutedColor;
+      if (palette.mutedForeground !== undefined) updateData.muted_foreground = palette.mutedForeground;
+      if (palette.backgroundColor !== undefined) updateData.background_color = palette.backgroundColor;
+      if (palette.foregroundColor !== undefined) updateData.foreground_color = palette.foregroundColor;
+      if (palette.cardColor !== undefined) updateData.card_color = palette.cardColor;
+      if (palette.cardForeground !== undefined) updateData.card_foreground = palette.cardForeground;
+      if (palette.destructiveColor !== undefined) updateData.destructive_color = palette.destructiveColor;
+      if (palette.destructiveForeground !== undefined) updateData.destructive_foreground = palette.destructiveForeground;
+      if (palette.sidebarBackground !== undefined) updateData.sidebar_background = palette.sidebarBackground;
+      if (palette.sidebarForeground !== undefined) updateData.sidebar_foreground = palette.sidebarForeground;
+      if (palette.sidebarPrimary !== undefined) updateData.sidebar_primary = palette.sidebarPrimary;
+      if (palette.sidebarPrimaryForeground !== undefined) updateData.sidebar_primary_foreground = palette.sidebarPrimaryForeground;
 
       const { error } = await this.client
         .from('color_palettes')

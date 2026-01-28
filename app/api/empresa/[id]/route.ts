@@ -115,10 +115,19 @@ async function patchHandler(
   } catch (error) {
     console.error('Error updating empresa:', error);
     const errorMessage = error instanceof Error ? error.message : 'Erro ao atualizar empresa';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    // Unique constraint: empresas_slug_key (slug duplicado)
+    if (
+      typeof errorMessage === 'string' &&
+      (errorMessage.includes('empresas_slug_key') ||
+        errorMessage.includes('duplicate key value violates unique constraint'))
+    ) {
+      return NextResponse.json(
+        { error: 'Já existe outra empresa usando esse identificador (slug). Tente um nome diferente ou contate o suporte.' },
+        { status: 409 }
+      );
+    }
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 

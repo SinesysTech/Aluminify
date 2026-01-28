@@ -100,8 +100,11 @@ export class EmpresaRepositoryImpl implements EmpresaRepository {
 
     if (input.nome !== undefined) {
       updateData.nome = input.nome;
-      // Atualizar slug se nome mudou
-      updateData.slug = slugify(input.nome);
+      // IMPORTANTE:
+      // Não atualizar `slug` automaticamente em updates.
+      // O slug é usado para resolução de tenant/URLs e mudar aqui pode:
+      // - quebrar rotas
+      // - colidir com outra empresa invisível por RLS (gerando erro de unique constraint)
     }
 
     if (input.cnpj !== undefined) {

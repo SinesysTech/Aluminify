@@ -86,14 +86,9 @@ export class EmpresaService {
       input.cnpj = undefined;
     }
 
-    // Se nome mudou, verificar se novo slug já existe
-    if (input.nome) {
-      const slug = this.generateSlug(input.nome);
-      const existingBySlug = await this.repository.findBySlug(slug);
-      if (existingBySlug && existingBySlug.id !== id) {
-        throw new Error(`Empresa com slug "${slug}" já existe`);
-      }
-    }
+    // IMPORTANTE:
+    // Não validamos colisão de slug aqui porque o slug não é mais atualizado automaticamente
+    // em updates (ver `EmpresaRepositoryImpl.update`). O slug serve para URLs/tenant resolution.
 
     return this.repository.update(id, {
       ...input,

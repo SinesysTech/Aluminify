@@ -189,6 +189,11 @@ export function BrandCustomizationPanel({
   const saveColorPalette = async (paletteRequest: CreateColorPaletteRequest): Promise<string> => {
     try {
       const authHeaders = await getAuthHeaders();
+      const normalizedPaletteRequest: CreateColorPaletteRequest = {
+        ...paletteRequest,
+        // A API exige nome; se o usuário não preencher, usamos um default seguro
+        name: paletteRequest.name?.trim() || 'Paleta personalizada',
+      };
       const existingPaletteId =
         brandingState.colorPaletteId ?? brandingState.colorPalette?.id ?? null;
 
@@ -203,7 +208,7 @@ export function BrandCustomizationPanel({
           'Content-Type': 'application/json',
           ...authHeaders,
         },
-        body: JSON.stringify(paletteRequest),
+        body: JSON.stringify(normalizedPaletteRequest),
       });
 
       const data = await response.json();
