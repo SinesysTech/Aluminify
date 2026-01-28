@@ -7,13 +7,37 @@ const PRIMARY_DOMAIN =
   process.env.NEXT_PUBLIC_PRIMARY_DOMAIN || "alumnify.com.br";
 const DEV_DOMAINS = ["localhost", "127.0.0.1"];
 
-// --- LOGGING & CACHE CONFIGURATION ---
-const LOG_DEBUG =
-  process.env.LOG_LEVEL === "debug" || process.env.NODE_ENV === "development";
+// --- LOGGING CONFIGURATION ---
+type LogLevel = "debug" | "info" | "warn" | "error" | "none";
+const LOG_LEVEL: LogLevel = (process.env.LOG_LEVEL as LogLevel) || (process.env.NODE_ENV === "development" ? "info" : "warn");
+
+const LOG_LEVELS: Record<LogLevel, number> = {
+  debug: 0,
+  info: 1,
+  warn: 2,
+  error: 3,
+  none: 4,
+};
+
+function shouldLog(level: LogLevel): boolean {
+  return LOG_LEVELS[level] >= LOG_LEVELS[LOG_LEVEL];
+}
 
 function logDebug(message: string, ...args: unknown[]) {
-  if (LOG_DEBUG) {
-    console.log(`[DEBUG] Middleware - ${message}`, ...args);
+  if (shouldLog("debug")) {
+    console.log(`[MW:debug] ${message}`, ...args);
+  }
+}
+
+function logInfo(message: string) {
+  if (shouldLog("info")) {
+    console.log(`[MW] ${message}`);
+  }
+}
+
+function logWarn(message: string) {
+  if (shouldLog("warn")) {
+    console.warn(`[MW] ${message}`);
   }
 }
 
@@ -185,17 +209,8 @@ export async function updateSession(request: NextRequest) {
     !isNextDataRequest &&
     !isApiRoute;
 
-  // Debug Logging (Controlled)
-  logDebug("processando requisição:", pathname, "host:", host);
-  if (LOG_DEBUG) {
-    logDebug(
-      "Cookies:",
-      request.cookies
-        .getAll()
-        .map((c) => c.name)
-        .join(", "),
-    );
-  }
+  // Debug Logging (Controlled) - cookies removidos por segurança
+  logDebug(`${request.method} ${pathname} host:${host}`);
 
   // --- 1. EARLY EXIT FOR PUBLIC / STATIC ASSETS ---
   // Avoid any processing for internal Next.js paths
@@ -306,7 +321,6 @@ export async function updateSession(request: NextRequest) {
 
   if (cachedTenant) {
     tenantContext = cachedTenant;
-    logDebug("tenant resolved from cache:", tenantContext);
   } else {
     // Only query DB if we are NOT on a likely public route, OR if we really need to know (e.g. login rewrite).
     // The prompt explicitly asks to "avoid consultas... em rotas públicas".
@@ -380,10 +394,8 @@ export async function updateSession(request: NextRequest) {
 
       if (tenantContext.empresaId) {
         setCachedTenant(cacheKey, tenantContext);
-        logDebug("tenant resolved from DB and cached:", tenantContext);
+        logDebug(`tenant resolved: ${tenantContext.empresaSlug} (${tenantContext.resolutionType})`);
       }
-    } else {
-      logDebug("Skipping tenant DB lookup for public route:", pathname);
     }
   }
 
@@ -417,24 +429,14 @@ export async function updateSession(request: NextRequest) {
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
 
-  logDebug("isPublicPath:", isPublicPath, "pathname:", pathname);
-
   // --- 4. AUTHENTICATION (PROTECTED ROUTES ONLY) ---
   let user = null;
   let error = null;
 
   if (!isPublicPath) {
-    // Only call getUser on protected routes
     const result = await supabase.auth.getUser();
     user = result.data.user;
     error = result.error;
-
-    logDebug("getUser result:", {
-      hasUser: !!user,
-      hasError: !!error,
-    });
-  } else {
-    logDebug("Rota pública, pulando supabase.auth.getUser()");
   }
 
   // --- 5. REDIRECTS & REWRITES ---
@@ -444,7 +446,7 @@ export async function updateSession(request: NextRequest) {
     if (pathname === "/auth" || pathname === "/auth/login") {
       const url = request.nextUrl.clone();
       url.pathname = `/${tenantContext.empresaSlug}/auth/login`;
-      logDebug("rewriting to tenant login:", url.pathname);
+      logInfo(`rewrite /auth → ${url.pathname}`);
 
       const response = NextResponse.rewrite(url);
       response.headers.set("x-tenant-id", tenantContext.empresaId);
@@ -469,6 +471,7 @@ export async function updateSession(request: NextRequest) {
       isServerAction ||
       isNextDataRequest
     ) {
+      logWarn(`${request.method} ${pathname} → 401 unauthorized`);
       const response = NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 },
@@ -477,18 +480,15 @@ export async function updateSession(request: NextRequest) {
       return copyCookiesAndHeaders(response);
     }
 
-    logDebug("redirecionando para /auth (não autenticado em rota protegida)");
     const url = request.nextUrl.clone();
     if (tenantContext.empresaSlug) {
       url.pathname = `/${tenantContext.empresaSlug}/auth/login`;
     } else {
       url.pathname = "/auth";
     }
+    logInfo(`${request.method} ${pathname} → 302 redirect (no auth)`);
     return copyCookiesAndHeaders(NextResponse.redirect(url));
   }
-
-  // Authenticated or Public
-  logDebug("continuando request");
 
   // Add headers
   if (tenantContext.empresaId) {
