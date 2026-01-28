@@ -1,9 +1,8 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import { BrandingService } from "@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/branding.service";
+import { BrandingService } from "../../../app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/branding.service";
 
 // Mock Dependencies
 jest.mock(
-  "@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/simple-cache",
+  "../../../app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/simple-cache",
   () => {
     return {
       SimpleCache: jest.fn().mockImplementation(() => ({
@@ -17,7 +16,7 @@ jest.mock(
 );
 
 jest.mock(
-  "@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/branding-sync",
+  "../../../app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/branding-sync",
   () => {
     return {
       BrandingSync: jest.fn().mockImplementation(() => ({
@@ -135,10 +134,19 @@ describe("BrandingService", () => {
       const empresaId = "emp-1";
       const branding = { colorPaletteId: "cp-1" };
 
-      mockBuilders.tenant_branding.maybeSingle.mockResolvedValue({
-        data: null,
-        error: null,
-      });
+      mockBuilders.tenant_branding.maybeSingle
+        .mockResolvedValueOnce({ data: null, error: null }) // Initial check (not found)
+        .mockResolvedValueOnce({
+          data: {
+            id: "new",
+            empresa_id: empresaId,
+            ...branding,
+            created_at: new Date(),
+            updated_at: new Date(),
+          },
+          error: null,
+        }); // Inside getCompleteBrandingConfig (found)
+
       mockBuilders.tenant_branding.single.mockResolvedValue({
         data: {
           id: "new",

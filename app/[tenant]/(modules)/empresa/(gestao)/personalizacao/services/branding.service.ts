@@ -1,6 +1,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { BrandingTransformers } from "./branding.transformers";
 import { BrandingValidators } from "./branding.validators";
+import { SimpleCache } from "./simple-cache";
+import { BrandingSync } from "./branding-sync";
 import type {
   AccessibilityReport,
   ApplyTenantBrandingOptions,
@@ -8,7 +10,6 @@ import type {
   ColorPalette,
   CompleteBrandingConfig,
   CreateColorPaletteRequest,
-  CreateFontSchemeRequest,
   CSSApplicationResult,
   CSSCustomProperties,
   CustomThemePreset,
@@ -31,10 +32,8 @@ import {
 } from "./brand-customization.types";
 
 export class BrandingService {
-  private cache = new Map<
-    string,
-    { data: CompleteBrandingConfig; expires: number }
-  >();
+  private cache = new SimpleCache<CompleteBrandingConfig>();
+  private sync = new BrandingSync();
   private readonly defaultBranding: DefaultBrandingConfig;
   private readonly STORAGE_BUCKET = "tenant-logos";
 
@@ -56,7 +55,7 @@ export class BrandingService {
       const { empresaId } = options;
 
       // Check cache first
-      const cached = this.getFromCache(empresaId);
+      const cached = this.cache.get(empresaId);
       if (cached) {
         return { success: true, data: cached };
       }
@@ -88,7 +87,7 @@ export class BrandingService {
       if (!brandingConfig) {
         const defaultConfig = this.createDefaultBrandingConfig(empresaId);
         // Cache default configuration with shorter TTL (2 mins)
-        this.setCache(empresaId, defaultConfig, 2 * 60 * 1000);
+        this.cache.set(empresaId, defaultConfig, 2 * 60 * 1000);
         return {
           success: true,
           data: defaultConfig,
@@ -97,7 +96,7 @@ export class BrandingService {
       }
 
       // Cache the loaded configuration
-      this.setCache(empresaId, brandingConfig);
+      this.cache.set(empresaId, brandingConfig);
       return { success: true, data: brandingConfig };
     } catch (error) {
       return {
@@ -179,7 +178,7 @@ export class BrandingService {
 
       // Apply custom CSS
       if (branding.tenantBranding.customCss) {
-        this.applyCustomCSS(branding.tenantBranding.customCss, targetElement);
+        this.applyCustomCSS(branding.tenantBranding.customCss);
       }
 
       return {
@@ -206,7 +205,7 @@ export class BrandingService {
   ): Promise<BrandingOperationResult> {
     try {
       const { empresaId, branding, userId } = options;
-      this.invalidateCache(empresaId);
+      this.cache.invalidate(empresaId);
 
       const existingBranding = await this.findTenantBranding(empresaId);
 
@@ -230,7 +229,9 @@ export class BrandingService {
 
       const completeConfig = await this.getCompleteBrandingConfig(empresaId);
       if (completeConfig) {
-        this.setCache(empresaId, completeConfig);
+        this.cache.set(empresaId, completeConfig);
+        // Notify other tabs
+        this.sync.publishUpdate(empresaId, completeConfig);
       }
 
       return { success: true, data: completeConfig || undefined };
@@ -250,7 +251,7 @@ export class BrandingService {
   ): Promise<BrandingOperationResult> {
     try {
       const { empresaId, userId, preserveLogos = false } = options;
-      this.invalidateCache(empresaId);
+      this.cache.invalidate(empresaId);
 
       const existingBranding = await this.findTenantBranding(empresaId);
 
@@ -268,7 +269,10 @@ export class BrandingService {
       }
 
       const defaultConfig = this.createDefaultBrandingConfig(empresaId);
-      this.setCache(empresaId, defaultConfig, 2 * 60 * 1000); // 2 mins
+      this.cache.set(empresaId, defaultConfig, 2 * 60 * 1000); // 2 mins
+
+      // Notify other tabs
+      this.sync.publishInvalidation(empresaId);
 
       return { success: true, data: defaultConfig };
     } catch (error) {
@@ -355,6 +359,9 @@ export class BrandingService {
         );
       }
 
+      this.cache.invalidate(empresaId);
+      this.sync.publishInvalidation(empresaId);
+
       return { success: true, logoUrl };
     } catch (error) {
       if (
@@ -390,6 +397,9 @@ export class BrandingService {
       }
 
       await this.client.from("tenant_logos").delete().eq("id", existingLogo.id);
+
+      this.cache.invalidate(empresaId);
+      this.sync.publishInvalidation(empresaId);
     } catch (error) {
       throw new LogoUploadError(
         `Failed to remove logo: ${error instanceof Error ? error.message : "Unknown"}`,
@@ -480,24 +490,6 @@ export class BrandingService {
   // Internal Helpers & Repository-like Methods
   // ==========================================================================
 
-  private getFromCache(key: string): CompleteBrandingConfig | null {
-    const entry = this.cache.get(key);
-    if (!entry || Date.now() > entry.expires) {
-      if (entry) this.cache.delete(key);
-      return null;
-    }
-    return entry.data;
-  }
-
-  private setCache(key: string, data: CompleteBrandingConfig, ttl = 300000) {
-    // 5 mins default
-    this.cache.set(key, { data, expires: Date.now() + ttl });
-  }
-
-  private invalidateCache(key: string) {
-    this.cache.delete(key);
-  }
-
   private async getCompleteBrandingConfig(
     empresaId: string,
   ): Promise<CompleteBrandingConfig | null> {
@@ -571,7 +563,9 @@ export class BrandingService {
     id: string,
     data: TenantBrandingUpdate,
   ): Promise<TenantBranding> {
-    const updateData: any = { updated_at: new Date().toISOString() };
+    const updateData: TenantBrandingUpdate & { updated_at: string } = {
+      updated_at: new Date().toISOString(),
+    };
     if (data.colorPaletteId !== undefined)
       updateData.color_palette_id = data.colorPaletteId;
     if (data.fontSchemeId !== undefined)
@@ -811,7 +805,7 @@ export class BrandingService {
     });
   }
 
-  private applyCustomCSS(css: string, parent: HTMLElement) {
+  private applyCustomCSS(css: string) {
     let style = document.getElementById(
       "tenant-custom-css",
     ) as HTMLStyleElement;
