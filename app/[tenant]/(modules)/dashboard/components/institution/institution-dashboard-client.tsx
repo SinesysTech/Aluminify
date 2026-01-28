@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { RefreshCw, AlertCircle } from 'lucide-react'
 import type { InstitutionDashboardData } from '@/app/[tenant]/(modules)/dashboard/types'
 import {
@@ -30,6 +31,10 @@ const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000
 type DashboardPeriod = 'semanal' | 'mensal' | 'anual'
 
 export default function InstitutionDashboardClient() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
   const [data, setData] = useState<InstitutionDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -51,7 +56,12 @@ export default function InstitutionDashboardClient() {
         const dashboardData = await fetchInstitutionDashboardData(periodToUse)
         setData(dashboardData)
       } catch (err) {
-        console.error('Erro ao carregar dados do dashboard:', err)
+        const typed = err as InstitutionDashboardServiceError
+        const isExpectedAuthError = !!typed?.isAuthError || !!typed?.isForbidden
+        ;(isExpectedAuthError ? console.warn : console.error)(
+          'Erro ao carregar dados do dashboard:',
+          err
+        )
 
         let errorMessage = 'Erro ao carregar dados do dashboard'
         if (err instanceof Error) {
@@ -71,13 +81,19 @@ export default function InstitutionDashboardClient() {
 
         if ((err as InstitutionDashboardServiceError).isAuthError) {
           setData(null)
+          const qs = searchParams?.toString()
+          const returnUrl = `${pathname}${qs ? `?${qs}` : ''}`
+          const firstSegment = pathname.split('/').filter(Boolean)[0]
+          const loginBase =
+            firstSegment && firstSegment !== 'auth' ? `/${firstSegment}/auth/login` : '/auth/login'
+          router.replace(`${loginBase}?next=${encodeURIComponent(returnUrl)}`)
         }
       } finally {
         setIsLoading(false)
         setIsRefreshing(false)
       }
     },
-    [period]
+    [period, pathname, router, searchParams]
   )
 
   // Carregamento inicial

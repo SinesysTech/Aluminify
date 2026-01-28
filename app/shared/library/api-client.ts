@@ -60,6 +60,9 @@ async function apiRequest<T>(
   const response = await fetch(endpoint, {
     ...options,
     headers,
+    // Garantir que cookies de sessão (mesma origem) sejam enviados,
+    // permitindo o fallback de auth por cookie no server.
+    credentials: options.credentials ?? 'include',
   })
 
   if (!response.ok) {
