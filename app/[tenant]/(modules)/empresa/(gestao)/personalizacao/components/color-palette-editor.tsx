@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/app/shared/components/forms/input';
@@ -297,6 +297,10 @@ export function ColorPaletteEditor({
   const [isValidating, setIsValidating] = useState(false);
   const [accessibilityReport, setAccessibilityReport] = useState<AccessibilityReport | null>(null);
 
+  // Evita disparar preview (setState no pai) durante render.
+  // Só notifica o pai após o usuário editar algo, e sempre via effect (pós-commit).
+  const userEditedRef = useRef(false);
+
 
 
   // Preset palettes for quick selection
@@ -381,6 +385,8 @@ export function ColorPaletteEditor({
   // Initialize palette data when currentPalette changes
   useEffect(() => {
     if (currentPalette) {
+      // Sync vindo de props não deve marcar alterações pendentes no pai
+      userEditedRef.current = false;
       setPaletteData({
         name: currentPalette.name,
         primaryColor: currentPalette.primaryColor,
@@ -405,34 +411,34 @@ export function ColorPaletteEditor({
     }
   }, [currentPalette]);
 
+  // Notifica o painel pai APÓS o commit do React (evita "setState in render")
+  useEffect(() => {
+    if (!userEditedRef.current) return;
+    onPreview(paletteData);
+  }, [paletteData, onPreview]);
+
 
 
 
 
   // Handle palette data updates
   const updatePaletteData = useCallback((field: keyof CreateColorPaletteRequest, value: string) => {
-    setPaletteData(prev => {
-      const next = {
-        ...prev,
-        [field]: value
-      };
-      onPreview(next);
-      return next;
-    });
-  }, [onPreview]);
+    userEditedRef.current = true;
+    setPaletteData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  }, []);
 
   // Handle preset selection
   const applyPreset = useCallback((preset: PresetPalette) => {
-    setPaletteData(prev => {
-      const next: CreateColorPaletteRequest = {
-        ...prev,
-        ...preset.colors,
-        name: prev.name || preset.name
-      } as CreateColorPaletteRequest;
-      onPreview(next);
-      return next;
-    });
-  }, [onPreview]);
+    userEditedRef.current = true;
+    setPaletteData(prev => ({
+      ...prev,
+      ...preset.colors,
+      name: prev.name || preset.name
+    }) as CreateColorPaletteRequest);
+  }, []);
 
   // Handle accessibility validation
   const handleValidateAccessibility = useCallback(async () => {
