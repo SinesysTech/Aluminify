@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback, ReactNode, useMemo } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/app/shared/core/client";
 import { BrandingService } from "../services/branding.service";
 import type { CompleteBrandingConfig } from "../services/brand-customization.types";
 
@@ -41,7 +41,7 @@ export function BrandingDataProvider({ children, empresaId, initialData = null }
     const [isLoading, setIsLoading] = useState(!initialData);
     const [error, setError] = useState<string | null>(null);
 
-    const supabase = createClientComponentClient();
+    const supabase = useMemo(() => createClient(), []);
     const service = useMemo(() => new BrandingService(supabase), [supabase]);
 
     const loadBranding = useCallback(async (idToLoad?: string | null) => {

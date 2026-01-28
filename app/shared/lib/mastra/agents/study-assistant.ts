@@ -6,7 +6,6 @@
  */
 
 import { Agent } from "@mastra/core/agent";
-import { openai } from "@ai-sdk/openai";
 import { createMastraTools, ToolContext } from "../tools";
 
 /**
@@ -57,7 +56,11 @@ export function createStudyAssistantAgent(options: CreateStudyAssistantOptions) 
     id: agentId,
     name: agentName,
     instructions: systemPrompt,
-    model: openai(model),
+    // Prefer Mastra's model config shape (avoids AI SDK v3 type mismatch)
+    model: {
+      id: `openai/${model}`,
+      apiKey: process.env.OPENAI_API_KEY,
+    },
     tools,
   });
 
