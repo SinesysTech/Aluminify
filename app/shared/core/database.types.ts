@@ -324,6 +324,86 @@ export type Database = {
           },
         ]
       }
+      ai_agents: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          empresa_id: string
+          greeting_message: string | null
+          id: string
+          integration_config: Json | null
+          integration_type: string
+          is_active: boolean | null
+          is_default: boolean | null
+          model: string | null
+          name: string
+          placeholder_text: string | null
+          slug: string
+          supports_attachments: boolean | null
+          supports_voice: boolean | null
+          system_prompt: string | null
+          temperature: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          empresa_id: string
+          greeting_message?: string | null
+          id?: string
+          integration_config?: Json | null
+          integration_type?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          model?: string | null
+          name: string
+          placeholder_text?: string | null
+          slug: string
+          supports_attachments?: boolean | null
+          supports_voice?: boolean | null
+          system_prompt?: string | null
+          temperature?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          empresa_id?: string
+          greeting_message?: string | null
+          id?: string
+          integration_config?: Json | null
+          integration_type?: string
+          is_active?: boolean | null
+          is_default?: boolean | null
+          model?: string | null
+          name?: string
+          placeholder_text?: string | null
+          slug?: string
+          supports_attachments?: boolean | null
+          supports_voice?: boolean | null
+          system_prompt?: string | null
+          temperature?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_agents_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alunos: {
         Row: {
           bairro: string | null
@@ -1108,6 +1188,7 @@ export type Database = {
           periodos_ferias: Json | null
           prioridade_minima: number
           updated_at: string | null
+          velocidade_reproducao: number | null
         }
         Insert: {
           aluno_id: string
@@ -1128,6 +1209,7 @@ export type Database = {
           periodos_ferias?: Json | null
           prioridade_minima?: number
           updated_at?: string | null
+          velocidade_reproducao?: number | null
         }
         Update: {
           aluno_id?: string
@@ -1148,6 +1230,7 @@ export type Database = {
           periodos_ferias?: Json | null
           prioridade_minima?: number
           updated_at?: string | null
+          velocidade_reproducao?: number | null
         }
         Relationships: [
           {
@@ -1760,6 +1843,7 @@ export type Database = {
         Row: {
           created_at: string
           default_url: string
+          default_visible: boolean
           description: string | null
           display_order: number
           icon_name: string
@@ -1770,6 +1854,7 @@ export type Database = {
         Insert: {
           created_at?: string
           default_url: string
+          default_visible?: boolean
           description?: string | null
           display_order?: number
           icon_name: string
@@ -1780,6 +1865,7 @@ export type Database = {
         Update: {
           created_at?: string
           default_url?: string
+          default_visible?: boolean
           description?: string | null
           display_order?: number
           icon_name?: string
@@ -3094,6 +3180,7 @@ export type Database = {
         }[]
       }
       get_auth_user_empresa_id: { Args: never; Returns: string }
+      get_auth_user_id_by_email: { Args: { email: string }; Returns: string }
       get_matriculas_aluno: {
         Args: { p_aluno_id: string }
         Returns: {

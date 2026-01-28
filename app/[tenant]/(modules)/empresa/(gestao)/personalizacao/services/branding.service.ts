@@ -563,7 +563,7 @@ export class BrandingService {
     id: string,
     data: TenantBrandingUpdate,
   ): Promise<TenantBranding> {
-    const updateData: TenantBrandingUpdate & { updated_at: string } = {
+    const updateData: any = {
       updated_at: new Date().toISOString(),
     };
     if (data.colorPaletteId !== undefined)
