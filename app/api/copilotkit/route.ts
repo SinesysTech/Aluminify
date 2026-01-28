@@ -140,9 +140,13 @@ export const POST = async (req: NextRequest) => {
       }
     );
 
+    // Get Mastra agents and register with CopilotKit
+    // Type assertion needed because CopilotKit expects NonEmptyRecord but @ag-ui/mastra returns Record
+    const mastraAgents = MastraAgent.getLocalAgents({ mastra });
+
+    // @ts-expect-error - CopilotKit agents type compatibility with @ag-ui/mastra
     copilotRuntime = new CopilotRuntime({
-      // Use MastraAgent.getLocalAgents to register Mastra agents with CopilotKit
-      agents: MastraAgent.getLocalAgents({ mastra }),
+      agents: mastraAgents,
     });
 
     // Use empty adapter since Mastra agent handles LLM calls
