@@ -56,7 +56,7 @@ export function FrenteCardGrid({
   if (frentes.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Nenhuma frente disponivel nesta disciplina.
+        Nenhuma frente disponível nesta disciplina.
       </div>
     )
   }

@@ -123,7 +123,7 @@ export function SimplifiedActivityRow({
     anotacoesPessoais?: string | null
   }) => {
     if (!onStatusChangeWithDesempenho) {
-      throw new Error('Funcao de conclusao com desempenho nao fornecida')
+      throw new Error('Função de conclusão com desempenho não fornecida')
     }
 
     setIsUpdating(true)
@@ -204,7 +204,7 @@ export function SimplifiedActivityRow({
               className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
             >
               <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Acoes</span>
+              <span className="sr-only">Ações</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
@@ -231,7 +231,7 @@ export function SimplifiedActivityRow({
                 disabled={isUpdating}
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Marcar como Concluido
+                Marcar como Concluído
               </DropdownMenuItem>
             )}
 
@@ -245,7 +245,7 @@ export function SimplifiedActivityRow({
             ) : (
               <DropdownMenuItem disabled>
                 <FileX className="h-4 w-4 mr-2" />
-                PDF nao disponivel
+                PDF não disponível
               </DropdownMenuItem>
             )}
           </DropdownMenuContent>

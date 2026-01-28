@@ -31,7 +31,7 @@ export function SimplifiedActivityList({
   if (modulos.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Nenhuma atividade disponivel.
+        Nenhuma atividade disponível.
       </div>
     )
   }
@@ -49,7 +49,7 @@ export function SimplifiedActivityList({
             <CardHeader className="py-3 px-4 bg-muted/30">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium">
-                  {modulo.numeroModulo ? `Modulo ${modulo.numeroModulo}: ` : ''}
+                  {modulo.numeroModulo ? `Módulo ${modulo.numeroModulo}: ` : ''}
                   {modulo.nome}
                 </CardTitle>
                 <span className="text-xs text-muted-foreground tabular-nums">

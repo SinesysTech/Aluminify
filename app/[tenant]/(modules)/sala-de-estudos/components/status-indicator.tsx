@@ -45,7 +45,7 @@ export function StatusIndicator({
           bgClass: 'bg-emerald-500/10',
           iconClass: 'text-emerald-500',
           hoverClass: 'hover:bg-emerald-500/20',
-          label: 'Concluido',
+          label: 'Concluído',
           tooltip: 'Clique para desmarcar',
         }
       case 'Iniciado':
@@ -55,7 +55,7 @@ export function StatusIndicator({
           iconClass: 'text-blue-500',
           hoverClass: 'hover:bg-blue-500/20',
           label: 'Em andamento',
-          tooltip: 'Clique para marcar como concluido',
+          tooltip: 'Clique para marcar como concluído',
         }
       case 'Pendente':
       default:
@@ -65,7 +65,7 @@ export function StatusIndicator({
           iconClass: 'text-muted-foreground',
           hoverClass: 'hover:bg-primary/10 hover:text-primary',
           label: 'Pendente',
-          tooltip: 'Clique para marcar como concluido',
+          tooltip: 'Clique para marcar como concluído',
         }
     }
   }

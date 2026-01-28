@@ -44,7 +44,7 @@ export function FrenteCard({
         }
       }}
       aria-expanded={isExpanded}
-      aria-label={`Frente ${frente.nome}, ${completed} de ${total} atividades concluidas`}
+      aria-label={`Frente ${frente.nome}, ${completed} de ${total} atividades concluídas`}
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-3">
