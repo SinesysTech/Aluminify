@@ -7,6 +7,45 @@ const PRIMARY_DOMAIN =
   process.env.NEXT_PUBLIC_PRIMARY_DOMAIN || "alumnify.com.br";
 const DEV_DOMAINS = ["localhost", "127.0.0.1"];
 
+// --- LOGGING & CACHE CONFIGURATION ---
+const LOG_DEBUG =
+  process.env.LOG_LEVEL === "debug" || process.env.NODE_ENV === "development";
+
+function logDebug(message: string, ...args: unknown[]) {
+  if (LOG_DEBUG) {
+    console.log(`[DEBUG] Middleware - ${message}`, ...args);
+  }
+}
+
+interface CachedTenant {
+  ctx: TenantContext;
+  expiresAt: number;
+}
+
+// Simple in-memory cache for tenant resolution
+// Map<key, {ctx, expiresAt}>
+const TENANT_CACHE = new Map<string, CachedTenant>();
+const CACHE_TTL = 1000 * 60; // 1 minute
+const MAX_CACHE_SIZE = 1000;
+
+function getCachedTenant(key: string): TenantContext | null {
+  const cached = TENANT_CACHE.get(key);
+  if (cached) {
+    if (Date.now() < cached.expiresAt) {
+      return cached.ctx;
+    }
+    TENANT_CACHE.delete(key);
+  }
+  return null;
+}
+
+function setCachedTenant(key: string, ctx: TenantContext) {
+  if (TENANT_CACHE.size >= MAX_CACHE_SIZE) {
+    TENANT_CACHE.clear(); // Simple eviction strategy
+  }
+  TENANT_CACHE.set(key, { ctx, expiresAt: Date.now() + CACHE_TTL });
+}
+
 /**
  * Extract subdomain from host
  */
@@ -134,7 +173,8 @@ export async function updateSession(request: NextRequest) {
     pathname === "/manifest.json";
   const isApiRoute = pathname === "/api" || pathname.startsWith("/api/");
   // Next.js App Router signals
-  const isServerAction = request.method === "POST" && !!request.headers.get("next-action");
+  const isServerAction =
+    request.method === "POST" && !!request.headers.get("next-action");
   const isRscRequest =
     request.headers.get("rsc") === "1" || accept.includes("text/x-component");
   const isNextDataRequest = request.headers.get("x-nextjs-data") === "1";
@@ -145,63 +185,96 @@ export async function updateSession(request: NextRequest) {
     !isNextDataRequest &&
     !isApiRoute;
 
-  console.log(
-    "[DEBUG] Middleware - processando requisição:",
-    pathname,
-    "host:",
-    host,
+  // Debug Logging (Controlled)
+  logDebug("processando requisição:", pathname, "host:", host);
+  if (LOG_DEBUG) {
+    logDebug(
+      "Cookies:",
+      request.cookies
+        .getAll()
+        .map((c) => c.name)
+        .join(", "),
+    );
+  }
+
+  // --- 1. EARLY EXIT FOR PUBLIC / STATIC ASSETS ---
+  // Avoid any processing for internal Next.js paths
+  if (isNextInternalPath) {
+    return NextResponse.next();
+  }
+
+  // List of public paths that don't need authentication
+  // We define this early to allow skipping heavy logic
+  const basePublicPaths = [
+    "/login",
+    "/auth",
+    "/auth/login",
+    "/auth/sign-up",
+    "/api/auth/signup-with-empresa",
+    "/api/admin/fix-permissions",
+    "/api/tobias/chat/attachments",
+    "/api/health",
+    "/",
+    "/signup",
+    "/features.html",
+    "/pricing.html",
+    "/docs.html",
+    "/open-source.html",
+    "/roadmap.html",
+    "/changelog.html",
+    "/status.html",
+  ];
+
+  // Check if it matches a known public base path
+  const isBasePublicPath = basePublicPaths.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
-  console.log(
-    "[DEBUG] Middleware - Cookies:",
-    request.cookies
-      .getAll()
-      .map((c) => c.name)
-      .join(", "),
-  );
+
+  // Check if it matches a tenant public path pattern (e.g. /slug/auth/...)
+  // We do this via regex/pattern extraction to avoid needing DB resolution first.
+  let isTenantPublicPattern = false;
+  const pathSlug = extractTenantFromPath(pathname);
+  if (pathSlug) {
+    const tenantPublicPrefixes = [`/${pathSlug}/auth`];
+    isTenantPublicPattern = tenantPublicPrefixes.some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`),
+    );
+  }
+
+  const isLikelyPublic = isBasePublicPath || isTenantPublicPattern;
 
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  // With Fluid compute, don't put this client in a global environment
-  // variable. Always create a new one on each request.
   const { url, anonKey } = getPublicSupabaseConfig();
 
-  // Se o browser tiver cookies de múltiplos projetos Supabase, isso pode causar
-  // inconsistência (server lendo um projeto e o client outro). Limpamos cookies
-  // "sb-*-auth-token*" que não correspondem ao projeto atual.
+  // Cookie cleaning logic (Cross-project safety)
   const projectRef = getSupabaseProjectRefFromUrl(url);
   if (projectRef) {
     const expectedPrefix = `sb-${projectRef}-auth-token`;
     const allCookies = request.cookies.getAll();
-    const supabaseAuthCookies = allCookies.filter(
-      (c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"),
-    );
-    const foreignCookies = supabaseAuthCookies.filter(
-      (c) => !c.name.startsWith(expectedPrefix),
+    const foreignCookies = allCookies.filter(
+      (c) =>
+        c.name.startsWith("sb-") &&
+        c.name.includes("-auth-token") &&
+        !c.name.startsWith(expectedPrefix),
     );
 
     if (foreignCookies.length > 0) {
-      console.warn(
-        "[DEBUG] Middleware - removendo cookies Supabase de outro projeto",
-        {
-          expectedPrefix,
-          foreign: foreignCookies.map((c) => c.name),
-        },
-      );
+      logDebug("removendo cookies Supabase de outro projeto", {
+        expectedPrefix,
+        foreign: foreignCookies.map((c) => c.name),
+      });
 
-      // Remover do request (para esta requisição) e do response (persistir no browser)
       for (const c of foreignCookies) {
-        try {
-          request.cookies.delete(c.name);
-        } catch {
-          // ignore
-        }
+        request.cookies.delete(c.name);
         supabaseResponse.cookies.set(c.name, "", { path: "/", maxAge: 0 });
       }
     }
   }
 
+  // Create lightweight client
   const supabase = createServerClient(url, anonKey, {
     cookies: {
       getAll() {
@@ -221,92 +294,104 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // Resolve tenant context
+  // --- 2. TENANT RESOLUTION (WITH CACHE) ---
   let tenantContext: TenantContext = {};
 
-  // Try to resolve tenant from:
-  // 1. Custom domain (e.g., escola.com.br)
-  // 2. Subdomain (e.g., escola.alumnify.com.br)
-  // 3. URL path (e.g., /escola/auth/login)
+  // Cache key combines host and the first path segment (potential slug)
+  // This handles both subdomain/custom domain calls and path-based slug calls
+  const potentialSlug = pathname.split("/")[1] || "";
+  const cacheKey = `tenant:${host}:${potentialSlug}`;
 
-  if (isCustomDomain(host)) {
-    // Lookup empresa by custom domain
-    const { data: empresa } = await supabase
-      .from("empresas")
-      .select("id, slug")
-      .eq("dominio_customizado", host.split(":")[0].toLowerCase())
-      .eq("ativo", true)
-      .maybeSingle();
+  const cachedTenant = getCachedTenant(cacheKey);
 
-    if (empresa) {
-      tenantContext = {
-        empresaId: empresa.id,
-        empresaSlug: empresa.slug,
-        resolutionType: "custom-domain",
-      };
-      console.log(
-        "[DEBUG] Middleware - tenant resolved from custom domain:",
-        tenantContext,
-      );
-    }
-  }
+  if (cachedTenant) {
+    tenantContext = cachedTenant;
+    logDebug("tenant resolved from cache:", tenantContext);
+  } else {
+    // Only query DB if we are NOT on a likely public route, OR if we really need to know (e.g. login rewrite).
+    // The prompt explicitly asks to "avoid consultas... em rotas públicas".
+    // However, if we are at /auth/login (public), we might need to rewrite it.
+    // Compromise: We skip DB if isLikelyPublic is true AND it's not a root-level auth/login that needs rewriting.
 
-  if (!tenantContext.empresaId) {
-    const subdomain = extractSubdomain(host);
-    if (subdomain) {
-      // Lookup empresa by subdomain or slug
-      const { data: empresa } = await supabase
-        .from("empresas")
-        .select("id, slug")
-        .or(`subdomain.eq.${subdomain},slug.eq.${subdomain}`)
-        .eq("ativo", true)
-        .maybeSingle();
+    // We force lookup if it's a generic /auth path pending rewrite, otherwise we respect the public optimization.
+    const needsRewriteConfirmation =
+      (pathname === "/auth" || pathname === "/auth/login") &&
+      !pathname.startsWith("/api");
+    const safeToSkipDb = isLikelyPublic && !needsRewriteConfirmation;
 
-      if (empresa) {
-        tenantContext = {
-          empresaId: empresa.id,
-          empresaSlug: empresa.slug,
-          resolutionType: "subdomain",
-        };
-        console.log(
-          "[DEBUG] Middleware - tenant resolved from subdomain:",
-          tenantContext,
-        );
+    if (!safeToSkipDb) {
+      // Perform DB Lookups
+      if (isCustomDomain(host)) {
+        const { data: empresa } = await supabase
+          .from("empresas")
+          .select("id, slug")
+          .eq("dominio_customizado", host.split(":")[0].toLowerCase())
+          .eq("ativo", true)
+          .maybeSingle();
+
+        if (empresa) {
+          tenantContext = {
+            empresaId: empresa.id,
+            empresaSlug: empresa.slug,
+            resolutionType: "custom-domain",
+          };
+        }
       }
-    }
-  }
 
-  if (!tenantContext.empresaId) {
-    const tenantSlug = extractTenantFromPath(pathname);
-    if (tenantSlug) {
-      // Lookup empresa by slug
-      const { data: empresa } = await supabase
-        .from("empresas")
-        .select("id, slug")
-        .eq("slug", tenantSlug)
-        .eq("ativo", true)
-        .maybeSingle();
+      if (!tenantContext.empresaId) {
+        const subdomain = extractSubdomain(host);
+        if (subdomain) {
+          const { data: empresa } = await supabase
+            .from("empresas")
+            .select("id, slug")
+            .or(`subdomain.eq.${subdomain},slug.eq.${subdomain}`)
+            .eq("ativo", true)
+            .maybeSingle();
 
-      if (empresa) {
-        tenantContext = {
-          empresaId: empresa.id,
-          empresaSlug: empresa.slug,
-          resolutionType: "slug",
-        };
-        console.log(
-          "[DEBUG] Middleware - tenant resolved from path:",
-          tenantContext,
-        );
+          if (empresa) {
+            tenantContext = {
+              empresaId: empresa.id,
+              empresaSlug: empresa.slug,
+              resolutionType: "subdomain",
+            };
+          }
+        }
       }
+
+      if (!tenantContext.empresaId) {
+        const tenantSlug = extractTenantFromPath(pathname);
+        if (tenantSlug) {
+          const { data: empresa } = await supabase
+            .from("empresas")
+            .select("id, slug")
+            .eq("slug", tenantSlug)
+            .eq("ativo", true)
+            .maybeSingle();
+
+          if (empresa) {
+            tenantContext = {
+              empresaId: empresa.id,
+              empresaSlug: empresa.slug,
+              resolutionType: "slug",
+            };
+          }
+        }
+      }
+
+      if (tenantContext.empresaId) {
+        setCachedTenant(cacheKey, tenantContext);
+        logDebug("tenant resolved from DB and cached:", tenantContext);
+      }
+    } else {
+      logDebug("Skipping tenant DB lookup for public route:", pathname);
     }
   }
 
+  // Helper to sync cookies/headers
   const copyCookiesAndHeaders = (target: NextResponse) => {
-    // Copy cookies to keep browser/server in sync (Supabase SSR)
     supabaseResponse.cookies.getAll().forEach((cookie) => {
       target.cookies.set(cookie.name, cookie.value);
     });
-    // Add tenant headers to response
     if (tenantContext.empresaId) {
       target.headers.set("x-tenant-id", tenantContext.empresaId);
       target.headers.set("x-tenant-slug", tenantContext.empresaSlug!);
@@ -317,32 +402,11 @@ export async function updateSession(request: NextRequest) {
     return target;
   };
 
-  // Rotas públicas que não precisam de autenticação
-  // Nota: as rotas /auth/login, /auth/login e /auth/sign-up
-  // existem para compatibilidade futura com o sistema de multi-tenant baseado em domínio.
-  // Atualmente, elas redirecionam para /auth/login.
-  const publicPaths = [
-    "/login",
-    "/auth",
-    "/auth/login",
-    "/auth/login",
-    "/auth/sign-up",
-    "/api/auth/signup-with-empresa", // Endpoint de cadastro público
-    "/api/admin/fix-permissions", // Endpoint temporário para correção
-    "/api/tobias/chat/attachments", // Anexos usam token na URL, não precisam de autenticação de sessão
-    "/api/health", // Health check para Docker/Kubernetes
-    "/", // Landing page
-    "/signup",
-    "/features.html",
-    "/pricing.html",
-    "/docs.html",
-    "/open-source.html",
-    "/roadmap.html",
-    "/changelog.html",
-    "/status.html",
-  ];
+  // --- 3. PUBLIC PATH CHECK ---
+  // Re-verify public path status with resolved tenant context (if any)
+  // This allows logic like `/${tenant}/auth` to be correctly whitelistd even if strict per-tenant check matches.
 
-  // Also allow tenant-specific auth routes
+  const publicPaths = [...basePublicPaths];
   if (tenantContext.empresaSlug) {
     publicPaths.push(`/${tenantContext.empresaSlug}/auth`);
     publicPaths.push(`/${tenantContext.empresaSlug}/auth/login`);
@@ -352,46 +416,40 @@ export async function updateSession(request: NextRequest) {
   const isPublicPath = publicPaths.some(
     (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
-  console.log(
-    "[DEBUG] Middleware - isPublicPath:",
-    isPublicPath,
-    "pathname:",
-    pathname,
-  );
 
-  // Tentar obter o usuário autenticado
-  // getUser() renova automaticamente a sessão se necessário usando o refresh token
-  // Se o refresh token estiver inválido ou não encontrado, retornará um erro
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  logDebug("isPublicPath:", isPublicPath, "pathname:", pathname);
 
-  console.log("[DEBUG] Middleware - getUser result:", {
-    hasUser: !!user,
-    userId: user?.id,
-    userEmail: user?.email,
-    hasError: !!error,
-    errorMessage: error?.message,
-  });
+  // --- 4. AUTHENTICATION (PROTECTED ROUTES ONLY) ---
+  let user = null;
+  let error = null;
 
-  // Handle tenant-specific login redirects when tenant is identified via domain/subdomain
+  if (!isPublicPath) {
+    // Only call getUser on protected routes
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+    error = result.error;
+
+    logDebug("getUser result:", {
+      hasUser: !!user,
+      hasError: !!error,
+    });
+  } else {
+    logDebug("Rota pública, pulando supabase.auth.getUser()");
+  }
+
+  // --- 5. REDIRECTS & REWRITES ---
+
+  // Handle tenant-specific login redirects
   if (tenantContext.empresaId && tenantContext.resolutionType !== "slug") {
-    // If accessing /auth or /auth/login, rewrite to tenant-specific login
     if (pathname === "/auth" || pathname === "/auth/login") {
       const url = request.nextUrl.clone();
       url.pathname = `/${tenantContext.empresaSlug}/auth/login`;
-      console.log(
-        "[DEBUG] Middleware - rewriting to tenant login:",
-        url.pathname,
-      );
+      logDebug("rewriting to tenant login:", url.pathname);
 
-      // Clone response and add tenant headers
       const response = NextResponse.rewrite(url);
       response.headers.set("x-tenant-id", tenantContext.empresaId);
       response.headers.set("x-tenant-slug", tenantContext.empresaSlug!);
 
-      // Copy cookies
       supabaseResponse.cookies.getAll().forEach((cookie) => {
         response.cookies.set(cookie.name, cookie.value);
       });
@@ -400,51 +458,39 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // Se houver erro de autenticação (incluindo refresh token inválido/não encontrado)
-  // ou se não houver usuário autenticado
-  if (error || !user) {
-    // Never redirect Next.js internal assets/requests
-    if (isNextInternalPath) {
-      return supabaseResponse;
-    }
+  // Handle Unauthenticated
+  if ((!user || error) && !isPublicPath) {
+    if (isNextInternalPath) return supabaseResponse;
 
-    // Se não for rota pública, redirecionar para login
-    // O cliente Supabase irá limpar os cookies inválidos automaticamente
-    if (!isPublicPath) {
-      // For API/RSC/Server Actions, avoid HTML redirects (breaks clients and can cause
-      // "An unexpected response was received from the server" in Next.js).
-      if (!isHtmlNavigation || isApiRoute || isRscRequest || isServerAction || isNextDataRequest) {
-        const response = NextResponse.json(
-          { error: "Unauthorized" },
-          { status: 401 },
-        );
-        response.headers.set("cache-control", "no-store");
-        return copyCookiesAndHeaders(response);
-      }
-
-      console.log(
-        "[DEBUG] Middleware - redirecionando para /auth (não autenticado em rota protegida)",
+    if (
+      !isHtmlNavigation ||
+      isApiRoute ||
+      isRscRequest ||
+      isServerAction ||
+      isNextDataRequest
+    ) {
+      const response = NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 },
       );
-      const url = request.nextUrl.clone();
-
-      // If tenant context exists, redirect to tenant login
-      if (tenantContext.empresaSlug) {
-        url.pathname = `/${tenantContext.empresaSlug}/auth/login`;
-      } else {
-        url.pathname = "/auth";
-      }
-
-      return copyCookiesAndHeaders(NextResponse.redirect(url));
+      response.headers.set("cache-control", "no-store");
+      return copyCookiesAndHeaders(response);
     }
-    // Se for rota pública, continuar normalmente (usuário não autenticado é esperado)
-    console.log(
-      "[DEBUG] Middleware - rota pública, continuando sem autenticação",
-    );
-  } else {
-    console.log("[DEBUG] Middleware - usuário autenticado, continuando");
+
+    logDebug("redirecionando para /auth (não autenticado em rota protegida)");
+    const url = request.nextUrl.clone();
+    if (tenantContext.empresaSlug) {
+      url.pathname = `/${tenantContext.empresaSlug}/auth/login`;
+    } else {
+      url.pathname = "/auth";
+    }
+    return copyCookiesAndHeaders(NextResponse.redirect(url));
   }
 
-  // Add tenant context headers to response
+  // Authenticated or Public
+  logDebug("continuando request");
+
+  // Add headers
   if (tenantContext.empresaId) {
     supabaseResponse.headers.set("x-tenant-id", tenantContext.empresaId);
     supabaseResponse.headers.set("x-tenant-slug", tenantContext.empresaSlug!);
@@ -455,19 +501,6 @@ export async function updateSession(request: NextRequest) {
       );
     }
   }
-
-  // IMPORTANT: You *must* return the supabaseResponse object as it is.
-  // If you're creating a new response object with NextResponse.next() make sure to:
-  // 1. Pass the request in it, like so:
-  //    const myNewResponse = NextResponse.next({ request })
-  // 2. Copy over the cookies, like so:
-  //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-  // 3. Change the myNewResponse object to fit your needs, but avoid changing
-  //    the cookies!
-  // 4. Finally:
-  //    return myNewResponse
-  // If this is not done, you may be causing the browser and server to go out
-  // of sync and terminate the user's session prematurely!
 
   return supabaseResponse;
 }
