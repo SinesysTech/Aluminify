@@ -9,7 +9,6 @@ import {
   PlayCircle,
   Target,
   Flame,
-  Sparkles,
 } from 'lucide-react'
 import { Progress } from '@/app/shared/components/feedback/progress'
 import { cn } from '@/lib/utils'
@@ -46,20 +45,21 @@ export function ProgressoStatsCard({
     }
   }, [atividades])
 
-  const streakIntensity = React.useMemo(() => {
-    if (streakDays === 0) return 'text-muted-foreground'
-    if (streakDays < 3) return 'text-orange-400'
-    if (streakDays < 7) return 'text-orange-500'
-    if (streakDays < 14) return 'text-amber-500'
-    return 'text-amber-400'
+  const streakMessage = React.useMemo(() => {
+    if (streakDays === 0) return 'Comece sua jornada hoje!'
+    if (streakDays < 3) return 'Continue assim!'
+    if (streakDays < 7) return 'Você está no caminho certo!'
+    if (streakDays < 14) return 'Impressionante consistência!'
+    if (streakDays < 30) return 'Você é imparável!'
+    return 'Lendário!'
   }, [streakDays])
 
   const motivationalMessage = React.useMemo(() => {
-    if (stats.percentual === 100) return 'Incrivel! Voce completou tudo!'
-    if (stats.percentual >= 75) return 'Quase la! Continue assim!'
-    if (stats.percentual >= 50) return 'Mais da metade! Voce consegue!'
-    if (stats.percentual >= 25) return 'Bom comeco! Mantenha o ritmo!'
-    if (stats.concluidas > 0) return 'Otimo inicio! Cada passo conta!'
+    if (stats.percentual === 100) return 'Incrível! Você completou tudo!'
+    if (stats.percentual >= 75) return 'Quase lá! Continue assim!'
+    if (stats.percentual >= 50) return 'Mais da metade! Você consegue!'
+    if (stats.percentual >= 25) return 'Bom começo! Mantenha o ritmo!'
+    if (stats.concluidas > 0) return 'Ótimo início! Cada passo conta!'
     return 'Comece sua jornada de estudos!'
   }, [stats.percentual, stats.concluidas])
 
@@ -75,29 +75,41 @@ export function ProgressoStatsCard({
       <CardContent className="p-4 md:p-6">
         {/* Top Row: Streak + Daily Goal + Motivational Message */}
         <div className="flex flex-col md:flex-row md:items-center gap-4 mb-6">
-          {/* Streak Badge */}
+          {/* Streak Badge - Estilo Fogo */}
           <div
             className={cn(
-              'flex items-center gap-2 px-3 py-2 rounded-xl shrink-0',
-              'bg-linear-to-r from-orange-500/10 via-amber-500/10 to-yellow-500/10',
-              'border border-orange-500/20'
+              'flex items-center gap-3 px-3 py-2 rounded-xl shrink-0',
+              'bg-linear-to-r from-red-500/15 via-orange-500/15 to-amber-500/15',
+              'border border-orange-500/30'
             )}
           >
-            <div className="relative">
+            <div
+              className={cn(
+                'w-8 h-8 rounded-full flex items-center justify-center',
+                'bg-linear-to-br from-red-500/20 via-orange-500/20 to-amber-500/20'
+              )}
+            >
               <Flame
-                className={cn('h-5 w-5', streakIntensity)}
+                className={cn(
+                  'h-4 w-4',
+                  streakDays > 0
+                    ? 'text-orange-500 animate-pulse'
+                    : 'text-orange-400/60'
+                )}
                 fill="currentColor"
               />
-              {streakDays >= 7 && (
-                <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-amber-400" />
-              )}
             </div>
             <div className="flex flex-col">
-              <span className={cn('text-sm font-bold leading-tight', streakIntensity)}>
-                {streakDays} {streakDays === 1 ? 'dia' : 'dias'}
+              <span
+                className={cn(
+                  'text-sm font-bold leading-tight',
+                  streakDays > 0 ? 'text-orange-600' : 'text-orange-500/70'
+                )}
+              >
+                {streakDays} {streakDays === 1 ? 'dia seguido' : 'dias seguidos'}
               </span>
               <span className="text-[10px] text-muted-foreground leading-tight">
-                sequencia
+                {streakMessage}
               </span>
             </div>
           </div>
@@ -134,7 +146,7 @@ export function ProgressoStatsCard({
                 {effectiveDailyGoal.completed}/{effectiveDailyGoal.target} hoje
               </span>
               <span className="text-[10px] text-muted-foreground leading-tight">
-                {dailyGoalComplete ? 'Meta atingida!' : 'meta diaria'}
+                {dailyGoalComplete ? 'Meta atingida!' : 'meta diária'}
               </span>
             </div>
             {/* Mini progress bar */}
@@ -186,7 +198,7 @@ export function ProgressoStatsCard({
             </div>
             <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
               <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-              Concluidas
+              Concluídas
             </div>
           </div>
         </div>

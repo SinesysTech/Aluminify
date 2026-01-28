@@ -56,9 +56,9 @@ export function NextActivityCard({ activity, onViewAll, className }: NextActivit
           <div className="mx-auto w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3">
             <BookOpen className="h-6 w-6 text-emerald-600" />
           </div>
-          <h3 className="font-semibold text-lg">Parabens!</h3>
+          <h3 className="font-semibold text-lg">Parabéns!</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Voce concluiu todas as atividades disponiveis.
+            Você concluiu todas as atividades disponíveis.
           </p>
         </CardContent>
       </Card>
@@ -91,7 +91,7 @@ export function NextActivityCard({ activity, onViewAll, className }: NextActivit
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                  Proxima atividade
+                  Próxima atividade
                 </span>
                 <Badge variant="outline" className={cn('text-[10px]', activityColorClass)}>
                   {activity.tipo}
@@ -123,7 +123,7 @@ export function NextActivityCard({ activity, onViewAll, className }: NextActivit
             >
               <Link href={focoHref}>
                 <Timer className="h-5 w-5" />
-                <span>Comecar Agora</span>
+                <span>Começar Agora</span>
               </Link>
             </Button>
 

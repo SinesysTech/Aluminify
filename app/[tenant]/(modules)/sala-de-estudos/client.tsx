@@ -192,19 +192,16 @@ export default function SalaEstudosClientPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header with greeting, streak, and org switcher */}
-      <StudyRoomHeader
-        userName={currentUser.name || 'Estudante'}
-        streakDays={streakDays}
-      />
+      {/* Header with greeting and org switcher */}
+      <StudyRoomHeader userName={currentUser.name || 'Estudante'} />
 
       {/* Impersonation Warning */}
       {isReadOnlyImpersonation && (
         <div className="rounded-md bg-amber-500/10 p-4 text-amber-500 flex items-center gap-2">
           <AlertCircle className="h-5 w-5" />
           <p>
-            Modo de visualizacao (Impersonacao): Voce esta vendo os dados do aluno como somente
-            leitura. Alteracoes de status nao serao salvas.
+            Modo de visualização (Impersonação): Você está vendo os dados do aluno como somente
+            leitura. Alterações de status não serão salvas.
           </p>
         </div>
       )}
@@ -245,7 +242,7 @@ export default function SalaEstudosClientPage() {
               </div>
               <h3 className="mt-4 text-lg font-semibold">Nenhuma atividade encontrada</h3>
               <p className="mb-4 mt-2 text-sm text-muted-foreground max-w-sm">
-                Voce ainda nao possui atividades disponiveis. Entre em contato com a coordenacao.
+                Você ainda não possui atividades disponíveis. Entre em contato com a coordenação.
               </p>
             </div>
           ) : (
