@@ -240,7 +240,7 @@ export function SessionSummaryModal({
                             <Checkbox
                                 id="check-concluded"
                                 checked={concluiuAtividade}
-                                onCheckedChange={(checked) => onConcluiuAtividadeChange(checked === true)}
+                                onCheckedChange={(checked: boolean | 'indeterminate') => onConcluiuAtividadeChange(checked === true)}
                                 className="mt-0.5"
                             />
                             <div className="space-y-1">

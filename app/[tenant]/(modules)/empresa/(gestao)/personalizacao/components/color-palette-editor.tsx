@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/app/shared/components/forms/input';
 import { Label } from '@/app/shared/components/forms/label';
-import { Alert, AlertDescription } from '@/app/shared/components/feedback/alert';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -269,7 +268,7 @@ function ColorPreview({ colors, className = "" }: ColorPreviewProps) {
 export function ColorPaletteEditor({
   currentPalette,
   onSave: _onSave,
-  onPreview: _onPreview,
+  onPreview,
   onValidate
 }: ColorPaletteEditorProps) {
   // State management
@@ -412,20 +411,28 @@ export function ColorPaletteEditor({
 
   // Handle palette data updates
   const updatePaletteData = useCallback((field: keyof CreateColorPaletteRequest, value: string) => {
-    setPaletteData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  }, []);
+    setPaletteData(prev => {
+      const next = {
+        ...prev,
+        [field]: value
+      };
+      onPreview(next);
+      return next;
+    });
+  }, [onPreview]);
 
   // Handle preset selection
   const applyPreset = useCallback((preset: PresetPalette) => {
-    setPaletteData(prev => ({
-      ...prev,
-      ...preset.colors,
-      name: prev.name || preset.name
-    }));
-  }, []);
+    setPaletteData(prev => {
+      const next: CreateColorPaletteRequest = {
+        ...prev,
+        ...preset.colors,
+        name: prev.name || preset.name
+      } as CreateColorPaletteRequest;
+      onPreview(next);
+      return next;
+    });
+  }, [onPreview]);
 
   // Handle accessibility validation
   const handleValidateAccessibility = useCallback(async () => {
