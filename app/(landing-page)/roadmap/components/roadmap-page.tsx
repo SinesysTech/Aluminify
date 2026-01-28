@@ -88,25 +88,25 @@ export function RoadmapPage() {
                     <div>
                         <div className="flex items-center gap-2 mb-6">
                             <MapPin className="w-5 h-5 text-muted-foreground" />
-                            <h3 className="font-bold text-sm uppercase tracking-wider text-muted-foreground">Planejado (Q3/Q4 2026)</h3>
+                            <h3 className="font-bold text-sm uppercase tracking-wider text-muted-foreground">Vem aí</h3>
                         </div>
                         <div className="space-y-4">
                             <div className="bg-muted/30 p-5 rounded-xl border border-border border-dashed">
-                                <h4 className="font-bold mb-2 text-muted-foreground">Modo Offline</h4>
+                                <h4 className="font-bold mb-2 text-muted-foreground">Estudo sem internet</h4>
                                 <p className="text-sm text-muted-foreground">
-                                    Download seguro de conteúdo para estudo sem conexão à internet.
+                                    Seus alunos poderão baixar as aulas e estudar mesmo sem conexão.
                                 </p>
                             </div>
                             <div className="bg-muted/30 p-5 rounded-xl border border-border border-dashed">
-                                <h4 className="font-bold mb-2 text-muted-foreground">Comunidade & Social</h4>
+                                <h4 className="font-bold mb-2 text-muted-foreground">Fórum de dúvidas</h4>
                                 <p className="text-sm text-muted-foreground">
-                                    Fóruns de dúvida contextualizados e interação entre alunos.
+                                    Espaço para alunos tirarem dúvidas entre si e com monitores.
                                 </p>
                             </div>
                             <div className="bg-muted/30 p-5 rounded-xl border border-border border-dashed">
-                                <h4 className="font-bold mb-2 text-muted-foreground">IA Multimodal (Tobias V2)</h4>
+                                <h4 className="font-bold mb-2 text-muted-foreground">Tutor com IA avançada</h4>
                                 <p className="text-sm text-muted-foreground">
-                                    Tutor capaz de analisar imagens e áudio para dúvidas complexas.
+                                    O assistente vai entender fotos e áudios para ajudar em dúvidas mais complexas.
                                 </p>
                             </div>
                         </div>
