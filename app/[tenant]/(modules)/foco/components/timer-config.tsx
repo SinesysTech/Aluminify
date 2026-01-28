@@ -390,25 +390,25 @@ export function TimerConfig({
                 {/* Start Button */}
                 <Button
                     size="lg"
-                    className="w-full h-14 text-lg gap-3 shadow-lg hover:shadow-xl transition-shadow"
+                    className="w-full h-12 text-base gap-2.5 shadow-lg hover:shadow-xl transition-shadow"
                     onClick={onStart}
                     disabled={iniciando || !disciplinaId}
                 >
                     {iniciando ? (
                         <>
-                            <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                             Iniciando...
                         </>
                     ) : (
                         <>
-                            <Play className="h-5 w-5 fill-current" />
+                            <Play className="h-4 w-4 fill-current" />
                             Iniciar Sessão de Foco
                         </>
                     )}
                 </Button>
 
                 {!disciplinaId && (
-                    <p className="text-center text-sm text-muted-foreground">
+                    <p className="text-center text-xs text-muted-foreground">
                         Selecione uma disciplina acima para começar
                     </p>
                 )}
