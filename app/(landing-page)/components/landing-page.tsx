@@ -116,33 +116,46 @@ export function LandingPage() {
                                 <div className="w-56 border-r border-border bg-white p-4 hidden md:flex flex-col">
                                     {/* Logo */}
                                     <div className="flex items-center gap-2.5 mb-6 px-2">
-                                        <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                            <span className="text-white text-xs font-bold">A</span>
+                                        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center">
+                                            <span className="text-white text-xs font-bold">E+</span>
                                         </div>
-                                        <span className="font-semibold text-sm text-gray-800">Academia Pro</span>
+                                        <span className="font-semibold text-sm text-gray-800">ENEM Plus</span>
                                     </div>
 
                                     {/* Nav Items */}
                                     <nav className="space-y-1 flex-1">
                                         {[
-                                            { icon: Layout, label: 'Dashboard', active: false },
-                                            { icon: Play, label: 'Sala de Estudos', active: true },
-                                            { icon: BookOpen, label: 'Meus Cursos', active: false },
-                                            { icon: Award, label: 'Certificados', active: false },
+                                            { icon: Layout, label: 'Início', active: false },
+                                            { icon: Play, label: 'Aulas ao Vivo', active: true, badge: '2' },
+                                            { icon: BookOpen, label: 'Matérias', active: false },
+                                            { icon: FileText, label: 'Simulados', active: false },
+                                            { icon: Award, label: 'Desempenho', active: false },
                                         ].map((item, i) => (
-                                            <div key={i} className={`h-9 rounded-lg flex items-center px-3 gap-2.5 text-xs font-medium transition-colors ${item.active ? 'bg-violet-50 text-violet-600 border border-violet-100' : 'text-gray-500 hover:bg-gray-50'}`}>
+                                            <div key={i} className={`h-9 rounded-lg flex items-center px-3 gap-2.5 text-xs font-medium transition-colors ${item.active ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'text-gray-500 hover:bg-gray-50'}`}>
                                                 <item.icon className="w-4 h-4" />
                                                 <span>{item.label}</span>
+                                                {'badge' in item && item.badge && (
+                                                    <span className="ml-auto w-4 h-4 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center">{item.badge}</span>
+                                                )}
                                             </div>
                                         ))}
                                     </nav>
 
+                                    {/* Streak Card */}
+                                    <div className="p-3 rounded-lg bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 mb-3">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Sparkles className="w-4 h-4 text-amber-500" />
+                                            <span className="text-xs font-semibold text-amber-700">7 dias de sequência!</span>
+                                        </div>
+                                        <p className="text-[10px] text-amber-600/70">Continue estudando para manter</p>
+                                    </div>
+
                                     {/* User */}
-                                    <div className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50 mt-4">
-                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500" />
+                                    <div className="flex items-center gap-2.5 p-2 rounded-lg bg-gray-50">
+                                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-rose-500" />
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-xs font-medium text-gray-800 truncate">João Silva</p>
-                                            <p className="text-[10px] text-gray-400">Aluno Premium</p>
+                                            <p className="text-xs font-medium text-gray-800 truncate">Ana Clara</p>
+                                            <p className="text-[10px] text-gray-400">3º Ano • Meta: Medicina</p>
                                         </div>
                                     </div>
                                 </div>
@@ -152,20 +165,23 @@ export function LandingPage() {
                                     {/* Header */}
                                     <div className="bg-white border-b border-border px-6 py-4 flex justify-between items-center">
                                         <div>
-                                            <h2 className="text-base font-semibold text-gray-800">Marketing Digital Avançado</h2>
-                                            <p className="text-xs text-gray-500">Módulo 3 • Aula 7 de 12</p>
+                                            <div className="flex items-center gap-2 mb-0.5">
+                                                <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-semibold rounded">REDAÇÃO</span>
+                                                <h2 className="text-base font-semibold text-gray-800">Estrutura da Dissertação</h2>
+                                            </div>
+                                            <p className="text-xs text-gray-500">Preparatório ENEM 2025 • Aula 4 de 8</p>
                                         </div>
                                         <div className="flex items-center gap-3">
                                             <div className="flex items-center gap-1.5 text-xs text-gray-500">
                                                 <Clock className="w-3.5 h-3.5" />
-                                                <span>45min restantes</span>
+                                                <span>32min restantes</span>
                                             </div>
                                             <div className="h-6 w-px bg-gray-200" />
                                             <div className="flex -space-x-2">
-                                                {['from-violet-400 to-purple-500', 'from-blue-400 to-cyan-500', 'from-emerald-400 to-teal-500'].map((color, i) => (
+                                                {['from-pink-400 to-rose-500', 'from-blue-400 to-cyan-500', 'from-amber-400 to-orange-500'].map((color, i) => (
                                                     <div key={i} className={`w-6 h-6 rounded-full bg-gradient-to-br ${color} border-2 border-white`} />
                                                 ))}
-                                                <div className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[9px] font-medium text-gray-500">+5</div>
+                                                <div className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-[9px] font-medium text-gray-500">+127</div>
                                             </div>
                                         </div>
                                     </div>
@@ -176,42 +192,70 @@ export function LandingPage() {
                                             {/* Video Player */}
                                             <div className="flex-1 rounded-xl bg-zinc-900 relative overflow-hidden shadow-xl">
                                                 {/* Video Gradient */}
-                                                <div className="absolute inset-0 bg-gradient-to-br from-violet-600/30 via-transparent to-blue-600/20" />
+                                                <div className="absolute inset-0 bg-gradient-to-br from-amber-600/20 via-transparent to-rose-600/20" />
 
-                                                {/* Play Button */}
-                                                <div className="absolute inset-0 flex items-center justify-center">
-                                                    <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform duration-500 shadow-lg">
-                                                        <Play className="w-6 h-6 text-white fill-white ml-1" />
+                                                {/* Whiteboard simulation */}
+                                                <div className="absolute inset-4 top-12 bottom-20 bg-white/5 rounded-lg border border-white/10 p-4">
+                                                    <div className="text-[10px] text-amber-300 font-mono mb-2">Estrutura da Redação ENEM:</div>
+                                                    <div className="space-y-1.5 text-[9px] text-white/70">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-4 h-4 rounded bg-amber-500/30 flex items-center justify-center text-amber-300 text-[8px]">1</span>
+                                                            <span>Introdução → Contextualização + Tese</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-4 h-4 rounded bg-amber-500/30 flex items-center justify-center text-amber-300 text-[8px]">2</span>
+                                                            <span>Desenvolvimento 1 → Argumento + Repertório</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-4 h-4 rounded bg-amber-500/30 flex items-center justify-center text-amber-300 text-[8px]">3</span>
+                                                            <span>Desenvolvimento 2 → Argumento + Repertório</span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="w-4 h-4 rounded bg-emerald-500/30 flex items-center justify-center text-emerald-300 text-[8px]">4</span>
+                                                            <span>Conclusão → Proposta de Intervenção</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Professor avatar */}
+                                                <div className="absolute bottom-20 right-4 w-20 h-20 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 border-2 border-white/20 shadow-lg overflow-hidden">
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <div className="w-10 h-10 rounded-full bg-white/20" />
                                                     </div>
                                                 </div>
 
                                                 {/* Video Info Overlay */}
                                                 <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-                                                    <div className="px-2.5 py-1 bg-black/40 backdrop-blur-sm rounded-md">
-                                                        <span className="text-[10px] text-white font-medium">Ao Vivo</span>
+                                                    <div className="px-2.5 py-1 bg-red-500/90 backdrop-blur-sm rounded-md flex items-center gap-1.5">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                                                        <span className="text-[10px] text-white font-medium">AO VIVO</span>
                                                     </div>
                                                     <div className="px-2.5 py-1 bg-black/40 backdrop-blur-sm rounded-md flex items-center gap-1.5">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                                                        <span className="text-[10px] text-white">HD 1080p</span>
+                                                        <Users className="w-3 h-3 text-white/70" />
+                                                        <span className="text-[10px] text-white">1.284 assistindo</span>
                                                     </div>
                                                 </div>
 
                                                 {/* Progress Bar */}
                                                 <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
                                                     <div className="flex items-center gap-3 mb-2">
-                                                        <span className="text-[10px] text-white/80 font-mono">18:42</span>
+                                                        <span className="text-[10px] text-white/80 font-mono">23:18</span>
                                                         <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                                                            <div className="h-full w-[42%] bg-gradient-to-r from-violet-500 to-purple-500 rounded-full relative">
+                                                            <div className="h-full w-[58%] bg-gradient-to-r from-amber-500 to-orange-500 rounded-full relative">
                                                                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg" />
                                                             </div>
                                                         </div>
-                                                        <span className="text-[10px] text-white/80 font-mono">45:00</span>
+                                                        <span className="text-[10px] text-white/80 font-mono">40:00</span>
                                                     </div>
                                                     <div className="flex justify-between items-center">
-                                                        <p className="text-xs text-white/90 font-medium">Estratégias de Tráfego Pago</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-rose-500 to-pink-600" />
+                                                            <p className="text-xs text-white/90 font-medium">Prof. Marina Costa</p>
+                                                        </div>
                                                         <div className="flex gap-2">
-                                                            <div className="w-7 h-7 rounded-md bg-white/10 flex items-center justify-center">
+                                                            <div className="w-7 h-7 rounded-md bg-white/10 flex items-center justify-center relative">
                                                                 <MessageCircle className="w-3.5 h-3.5 text-white/70" />
+                                                                <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full text-[7px] text-white flex items-center justify-center">5</span>
                                                             </div>
                                                             <div className="w-7 h-7 rounded-md bg-white/10 flex items-center justify-center">
                                                                 <FileText className="w-3.5 h-3.5 text-white/70" />
@@ -227,12 +271,30 @@ export function LandingPage() {
                                                 <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
                                                     <div className="flex items-center justify-between mb-3">
                                                         <span className="text-xs font-medium text-gray-700">Seu Progresso</span>
-                                                        <span className="text-xs font-bold text-emerald-500">67%</span>
+                                                        <span className="text-xs font-bold text-emerald-500">52%</span>
                                                     </div>
                                                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                                                        <div className="h-full w-[67%] bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full" />
+                                                        <div className="h-full w-[52%] bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full" />
                                                     </div>
-                                                    <p className="text-[10px] text-gray-400 mt-2">8 de 12 aulas concluídas</p>
+                                                    <p className="text-[10px] text-gray-400 mt-2">4 de 8 aulas concluídas</p>
+                                                </div>
+
+                                                {/* Subject Pills */}
+                                                <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+                                                    <span className="text-xs font-medium text-gray-700 mb-3 block">Suas Matérias</span>
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {[
+                                                            { name: 'Redação', color: 'bg-amber-100 text-amber-700', active: true },
+                                                            { name: 'Matemática', color: 'bg-blue-100 text-blue-700', active: false },
+                                                            { name: 'Física', color: 'bg-purple-100 text-purple-700', active: false },
+                                                            { name: 'Química', color: 'bg-emerald-100 text-emerald-700', active: false },
+                                                            { name: 'Biologia', color: 'bg-rose-100 text-rose-700', active: false },
+                                                        ].map((subject, i) => (
+                                                            <span key={i} className={`px-2 py-1 rounded-md text-[10px] font-medium ${subject.color} ${subject.active ? 'ring-2 ring-offset-1 ring-amber-400' : 'opacity-70'}`}>
+                                                                {subject.name}
+                                                            </span>
+                                                        ))}
+                                                    </div>
                                                 </div>
 
                                                 {/* Next Lessons */}
@@ -240,13 +302,13 @@ export function LandingPage() {
                                                     <span className="text-xs font-medium text-gray-700 mb-3 block">Próximas Aulas</span>
                                                     <div className="space-y-2">
                                                         {[
-                                                            { title: 'Facebook Ads', duration: '32min', done: false },
-                                                            { title: 'Google Ads', duration: '45min', done: false },
-                                                            { title: 'Analytics', duration: '28min', done: false },
+                                                            { title: 'Repertório Sociocultural', duration: '35min', subject: 'RED' },
+                                                            { title: 'Proposta de Intervenção', duration: '42min', subject: 'RED' },
+                                                            { title: 'Funções do 2º Grau', duration: '38min', subject: 'MAT' },
                                                         ].map((lesson, i) => (
                                                             <div key={i} className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                                                                <div className="w-6 h-6 rounded-md bg-violet-50 flex items-center justify-center text-[10px] font-bold text-violet-500">
-                                                                    {i + 8}
+                                                                <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold ${lesson.subject === 'RED' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'}`}>
+                                                                    {lesson.subject}
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
                                                                     <p className="text-[11px] font-medium text-gray-700 truncate">{lesson.title}</p>
