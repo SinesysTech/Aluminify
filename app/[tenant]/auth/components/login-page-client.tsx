@@ -189,7 +189,7 @@ export function LoginPageClient() {
         <p>
           Não tem uma conta?{' '}
           <Link href={tenant ? `/${tenant}/auth/sign-up` : "/auth/sign-up"} className="font-medium text-primary hover:underline">
-            Criar infraestrutura
+            Criar conta grátis
           </Link>
         </p>
       }
