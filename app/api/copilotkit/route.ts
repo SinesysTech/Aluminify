@@ -120,7 +120,11 @@ export const POST = async (req: NextRequest) => {
   // Determine mode based on integration type
   const useMastra = config.integrationType === "mastra";
 
+<<<<<<< HEAD
   let copilotRuntime: CopilotRuntime;
+=======
+  let copilotRuntime: CopilotRuntime<any>;
+>>>>>>> 9edb6af6955b08e5b6c79c110519fdff03896eea
   let serviceAdapter: OpenAIAdapter | InstanceType<typeof ExperimentalEmptyAdapter>;
 
   if (useMastra) {
@@ -142,7 +146,6 @@ export const POST = async (req: NextRequest) => {
 
     copilotRuntime = new CopilotRuntime({
       // Use MastraAgent.getLocalAgents to register Mastra agents with CopilotKit
-      // @ts-expect-error - AG-UI integration type compatibility
       agents: MastraAgent.getLocalAgents({ mastra }),
     });
 

@@ -117,7 +117,7 @@ export async function GET(
   console.log('[Chat Attachments] Resposta criada com headers:', Object.fromEntries(response.headers.entries()));
 
   // Remover arquivo após o download ser iniciado
-  cleanupChatAttachments([attachment]).catch((error) => {
+  cleanupChatAttachments([attachment]).catch((error: unknown) => {
     console.warn('[Chat Attachments] Falha ao limpar arquivo após download', error);
   });
 
