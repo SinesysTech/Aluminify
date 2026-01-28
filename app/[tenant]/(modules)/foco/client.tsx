@@ -17,10 +17,7 @@ import { FocusHeader } from './components/focus-header'
 import { ContextSelector } from './components/context-selector'
 import { TimerConfig } from './components/timer-config'
 import { CleanView } from './components/clean-view'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/app/shared/components/overlay/dialog'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/app/shared/components/forms/label'
-import { Slider } from '@/components/ui/slider'
+import { SessionSummaryModal } from './components/session-summary-modal'
 
 function formatMs(ms: number) {
     const totalSeconds = Math.max(0, Math.floor(ms / 1000))
@@ -28,6 +25,13 @@ function formatMs(ms: number) {
     const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')
     const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, '0')
     return `${hours}:${minutes}:${seconds}`
+}
+
+interface LastContextInfo {
+    cursoId?: string
+    disciplinaId?: string
+    cursoNome?: string
+    disciplinaNome?: string
 }
 
 export default function FocoClient() {
@@ -55,6 +59,7 @@ export default function FocoClient() {
     const [frenteId, setFrenteId] = useState('')
     const [moduloId, setModuloId] = useState<string>('')
     const [atividadeId, setAtividadeId] = useState('')
+    const [lastContext, setLastContext] = useState<LastContextInfo | null>(null)
 
     // Data State
     const [cursos, setCursos] = useState<Option[]>([])
@@ -81,6 +86,10 @@ export default function FocoClient() {
     const [presence, setPresence] = useState<PresenceCounter>({ count: 1, channel: 'geral' })
     const [erro, setErro] = useState<string | null>(null)
 
+    // Stats State (for header display - would come from API in production)
+    const [streak, setStreak] = useState(0)
+    const [todayMinutes, setTodayMinutes] = useState(0)
+
     // -- Effects: Data Loading --
 
     // Restore context from localStorage (when URL doesn't specify it)
@@ -97,11 +106,14 @@ export default function FocoClient() {
                 atividadeId: string
             }>
 
-            if (parsed.cursoId) setCursoId(parsed.cursoId)
-            if (parsed.disciplinaId) setDisciplinaId(parsed.disciplinaId)
-            if (parsed.frenteId) setFrenteId(parsed.frenteId)
-            if (parsed.moduloId) setModuloId(parsed.moduloId)
-            if (parsed.atividadeId) setAtividadeId(parsed.atividadeId)
+            // Don't auto-set, just store for quick-start
+            if (parsed.disciplinaId) {
+                // We'll populate lastContext after disciplinas load
+                setLastContext({
+                    cursoId: parsed.cursoId,
+                    disciplinaId: parsed.disciplinaId
+                })
+            }
         } catch {
             /* ignore */
         }
@@ -146,10 +158,29 @@ export default function FocoClient() {
     useEffect(() => {
         setLoadingDisciplinas(true)
         focoService.getDisciplinas()
-            .then(setDisciplinas)
+            .then((data) => {
+                setDisciplinas(data)
+                // Update lastContext with names after loading
+                if (lastContext?.disciplinaId) {
+                    const disc = data.find(d => d.id === lastContext.disciplinaId)
+                    if (disc) {
+                        setLastContext(prev => prev ? { ...prev, disciplinaNome: disc.nome } : null)
+                    }
+                }
+            })
             .catch(console.error)
             .finally(() => setLoadingDisciplinas(false))
-    }, [])
+    }, [lastContext?.disciplinaId])
+
+    // Update lastContext with curso name
+    useEffect(() => {
+        if (lastContext?.cursoId && cursos.length > 0) {
+            const curso = cursos.find(c => c.id === lastContext.cursoId)
+            if (curso) {
+                setLastContext(prev => prev ? { ...prev, cursoNome: curso.nome } : null)
+            }
+        }
+    }, [cursos, lastContext?.cursoId])
 
     // Load Frentes
     useEffect(() => {
@@ -300,6 +331,12 @@ export default function FocoClient() {
         return () => { if (timer) clearInterval(timer) }
     }, [state.running, state.paused, sessaoId])
 
+    // Quick start handler
+    const handleQuickStart = useCallback(() => {
+        if (lastContext?.cursoId) setCursoId(lastContext.cursoId)
+        if (lastContext?.disciplinaId) setDisciplinaId(lastContext.disciplinaId)
+    }, [lastContext])
+
     const handleStart = async () => {
         if (iniciando) return
         setErro(null)
@@ -366,6 +403,29 @@ export default function FocoClient() {
         }
     }
 
+    // Calculate session stats for the modal
+    const sessionStats = useMemo(() => {
+        const snapshot = latestState()
+        const logPausas = snapshot.logPausas || []
+
+        const pauseCount = logPausas.filter(p => p.tipo === 'manual').length
+        const distractionCount = logPausas.filter(p => p.tipo === 'distracao').length
+        const totalPauseMs = logPausas.reduce((acc, p) => {
+            if (p.fim) {
+                return acc + (new Date(p.fim).getTime() - new Date(p.inicio).getTime())
+            }
+            return acc
+        }, 0)
+
+        return { pauseCount, distractionCount, totalPauseMs }
+    }, [latestState])
+
+    // Get selected atividade name
+    const selectedAtividadeNome = useMemo(() =>
+        atividades.find(a => a.id === atividadeId)?.nome,
+        [atividades, atividadeId]
+    )
+
     const elapsedLabel = formatMs(state.elapsedMs)
     const remainingLabel = state.remainingMs !== null ? formatMs(state.remainingMs) : (state.running ? '...' : '-')
 
@@ -386,14 +446,23 @@ export default function FocoClient() {
                         leaveCleanView()
                         setShowFinalizeModal(true)
                     }}
+                    pomodoroPhase={state.phase?.phase}
+                    pomodoroCycle={state.phase?.cycle}
+                    totalCycles={pomodoroConfig.totalCycles}
                 />
             )}
 
-            <div className="space-y-6 container py-6 mx-auto max-w-5xl" aria-hidden={isCleanView}>
-                <FocusHeader presenceCount={presence.count} />
+            <div className="space-y-6 container py-6 mx-auto max-w-3xl" aria-hidden={isCleanView}>
+                <FocusHeader
+                    presenceCount={presence.count}
+                    streak={streak}
+                    todayMinutes={todayMinutes}
+                    dailyGoal={120}
+                />
 
                 {erro && (
-                    <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-md text-sm">
+                    <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+                        <span className="font-medium">Erro:</span>
                         {erro}
                     </div>
                 )}
@@ -421,6 +490,8 @@ export default function FocoClient() {
                     loadingFrentes={loadingFrentes}
                     loadingModulos={loadingModulos}
                     loadingAtividades={loadingAtividades}
+                    lastContext={lastContext}
+                    onQuickStart={handleQuickStart}
                 />
 
                 <TimerConfig
@@ -442,61 +513,23 @@ export default function FocoClient() {
                 />
             </div>
 
-            {/* Modal de Finalização */}
-            <Dialog open={showFinalizeModal} onOpenChange={setShowFinalizeModal}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Sessão Finalizada!</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-6 py-4">
-                        <div className="space-y-2">
-                            <Label>Como foi seu nível de foco?</Label>
-                            <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
-                                <span>Distraído</span>
-                                <span>Zen</span>
-                            </div>
-                            <Slider
-                                value={[nivelFoco]}
-                                onValueChange={(v) => setNivelFoco(v[0])}
-                                min={1}
-                                max={5}
-                                step={1}
-                                className="py-2"
-                            />
-                            <div className="text-center text-sm font-semibold text-primary">
-                                {nivelFoco === 1 && 'Socorro'}
-                                {nivelFoco === 2 && 'Precisa melhorar'}
-                                {nivelFoco === 3 && 'Na média'}
-                                {nivelFoco === 4 && 'Bom foco'}
-                                {nivelFoco === 5 && 'Eu sou a própria concentração'}
-                            </div>
-                        </div>
-
-                        {atividadeId && (
-                            <div className="flex items-center gap-2 border p-3 rounded-md bg-muted/20">
-                                <input
-                                    type="checkbox"
-                                    checked={concluiuAtividade}
-                                    onChange={(e) => setConcluiuAtividade(e.target.checked)}
-                                    id="check-concluded"
-                                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                                />
-                                <label htmlFor="check-concluded" className="text-sm font-medium cursor-pointer">
-                                    Concluir atividade selecionada
-                                </label>
-                            </div>
-                        )}
-                    </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowFinalizeModal(false)}>
-                            Cancelar
-                        </Button>
-                        <Button onClick={handleFinalize} disabled={finalizando}>
-                            {finalizando ? 'Salvando...' : 'Salvar e Sair'}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            {/* Session Summary Modal */}
+            <SessionSummaryModal
+                open={showFinalizeModal}
+                onOpenChange={setShowFinalizeModal}
+                elapsedMs={state.elapsedMs}
+                pauseCount={sessionStats.pauseCount}
+                distractionCount={sessionStats.distractionCount}
+                totalPauseMs={sessionStats.totalPauseMs}
+                nivelFoco={nivelFoco}
+                onNivelFocoChange={setNivelFoco}
+                concluiuAtividade={concluiuAtividade}
+                onConcluiuAtividadeChange={setConcluiuAtividade}
+                hasAtividade={!!atividadeId}
+                atividadeNome={selectedAtividadeNome}
+                onFinalize={handleFinalize}
+                finalizando={finalizando}
+            />
         </>
     )
 }

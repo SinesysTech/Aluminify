@@ -5,14 +5,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/app/shared/components/forms/checkbox'
 import { Label } from '@/app/shared/components/forms/label'
 import { Badge } from '@/components/ui/badge'
-import { Info } from 'lucide-react'
+import {
+    Flame,
+    BookOpen,
+    Brain,
+    HeartPulse,
+    Target,
+    Sparkles,
+    Info,
+    type LucideIcon,
+} from 'lucide-react'
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from '@/app/shared/components/overlay/tooltip'
-import { MODOS } from '../types'
+import { MODOS, type ModoConfig } from '../types'
+import { cn } from '@/lib/utils'
+
+const iconMap: Record<ModoConfig['icon'], LucideIcon> = {
+    flame: Flame,
+    'book-open': BookOpen,
+    brain: Brain,
+    'heart-pulse': HeartPulse,
+    target: Target,
+}
 
 interface ModeSelectorProps {
     modo?: string | null
@@ -22,6 +40,106 @@ interface ModeSelectorProps {
     isLoading?: boolean
 }
 
+function ModeCard({
+    mode,
+    isSelected,
+    onSelect,
+    isHighlighted = false,
+}: {
+    mode: ModoConfig
+    isSelected: boolean
+    onSelect: () => void
+    isHighlighted?: boolean
+}) {
+    const Icon = iconMap[mode.icon]
+
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Card
+                    role="button"
+                    tabIndex={0}
+                    onClick={onSelect}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            onSelect()
+                        }
+                    }}
+                    className={cn(
+                        'group relative cursor-pointer overflow-hidden transition-all duration-200',
+                        'border-2 bg-card/50 backdrop-blur-sm',
+                        mode.accent,
+                        isSelected
+                            ? 'ring-2 ring-primary/20 shadow-lg scale-[1.02]'
+                            : 'hover:shadow-md hover:scale-[1.01]',
+                        isHighlighted && 'md:col-span-2'
+                    )}
+                >
+                    {/* Gradient Background */}
+                    <div
+                        className={cn(
+                            'absolute inset-0 bg-linear-to-br opacity-60 transition-opacity group-hover:opacity-100',
+                            mode.gradient
+                        )}
+                    />
+
+                    <CardHeader className="relative pb-2">
+                        <div className={cn(
+                            'flex items-center gap-3',
+                            isHighlighted ? 'justify-center' : 'justify-start'
+                        )}>
+                            {/* Icon Container */}
+                            <div
+                                className={cn(
+                                    'flex h-10 w-10 items-center justify-center rounded-xl transition-transform group-hover:scale-110',
+                                    mode.iconBg
+                                )}
+                            >
+                                <Icon className="h-5 w-5" strokeWidth={2} />
+                            </div>
+
+                            <div className={cn(isHighlighted && 'text-center')}>
+                                <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                    {mode.title}
+                                    <Info className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                                </CardTitle>
+                            </div>
+                        </div>
+                    </CardHeader>
+
+                    <CardContent className="relative pt-0">
+                        <CardDescription className={cn(
+                            'text-sm leading-relaxed',
+                            isHighlighted && 'text-center'
+                        )}>
+                            {mode.desc}
+                        </CardDescription>
+                    </CardContent>
+
+                    {/* Selection Indicator */}
+                    {isSelected && (
+                        <div className="absolute right-3 top-3">
+                            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                                <svg className="h-3 w-3 text-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </div>
+                    )}
+                </Card>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" align="center" className="max-w-xs p-3">
+                <div className="space-y-2 text-sm">
+                    {mode.tooltip.map((t, i) => (
+                        <p key={i}>{t}</p>
+                    ))}
+                </div>
+            </TooltipContent>
+        </Tooltip>
+    )
+}
+
 export function ModeSelector({
     modo,
     scope,
@@ -29,165 +147,113 @@ export function ModeSelector({
     onScopeChange,
     isLoading = false,
 }: ModeSelectorProps) {
-    const handleKeyDown = (e: React.KeyboardEvent, modeId: string) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            onSelectMode(modeId)
-        }
-    }
-
+    // Separate UTI mode (highlighted) from others
     const utiMode = MODOS.find((m) => m.id === 'mais_errados')
     const otherModes = MODOS.filter((m) => m.id !== 'mais_errados')
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                    Flashcards
-                    <Badge variant="secondary">SRS</Badge>
-                </h1>
-                <p className="text-muted-foreground mt-2">
-                    Selecione o modo e revise com espaçamento inteligente.
-                </p>
+        <div className="space-y-8">
+            {/* Hero Header */}
+            <div className="relative">
+                <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-3xl font-bold tracking-tight">
+                                Flashcards
+                            </h1>
+                            <Badge variant="secondary" className="gap-1 font-medium">
+                                <Sparkles className="h-3 w-3" />
+                                SRS
+                            </Badge>
+                        </div>
+                        <p className="text-muted-foreground max-w-lg">
+                            Estude de forma inteligente com repetição espaçada.
+                            Escolha um modo e comece sua sessão de revisão.
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            {/* Escopo da revisão */}
-            <Card className="border-primary/70 bg-muted/25 shadow-lg">
-                <CardContent className="px-4 md:px-6 py-0">
-                    <div className="grid gap-3 md:grid-cols-2 md:items-start">
-                        {/* Coluna esquerda: título + descrição */}
-                        <div className="space-y-1 py-4">
-                            <CardTitle className="text-base">Fonte dos flashcards</CardTitle>
-                            <CardDescription>
-                                Escolha se a revisão considera todos os módulos do seu curso ou apenas os módulos concluídos.
-                            </CardDescription>
+            {/* Scope Selection Card */}
+            <Card className="border-muted bg-muted/30">
+                <CardContent className="p-4 md:p-6">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                        <div className="space-y-1">
+                            <Label className="text-sm font-medium">Fonte dos flashcards</Label>
+                            <p className="text-xs text-muted-foreground">
+                                Escolha se a revisão considera todos os módulos ou apenas os concluídos.
+                            </p>
                         </div>
 
-                        {/* Coluna direita: seletor */}
-                        <div className="space-y-2 md:justify-self-end md:w-full md:max-w-md py-4">
-                            <Label>Gerar flashcards a partir de</Label>
-                            <div className="flex flex-col gap-2 rounded-md border bg-background/50 p-2">
-                                <div className="flex flex-wrap items-center gap-6">
-                                    <label className="flex items-center gap-2 text-sm cursor-pointer">
-                                        <Checkbox
-                                            checked={scope === 'all'}
-                                            onCheckedChange={(checked) => {
-                                                if (checked) onScopeChange('all')
-                                            }}
-                                            disabled={isLoading || modo === 'personalizado'}
-                                            aria-label="Todos os módulos do meu curso"
-                                        />
-                                        <span>Todos os módulos do meu curso</span>
-                                    </label>
+                        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
+                            <label className="flex items-center gap-2 text-sm cursor-pointer group">
+                                <Checkbox
+                                    checked={scope === 'all'}
+                                    onCheckedChange={(checked) => {
+                                        if (checked) onScopeChange('all')
+                                    }}
+                                    disabled={isLoading || modo === 'personalizado'}
+                                    aria-label="Todos os módulos do meu curso"
+                                />
+                                <span className="transition-colors group-hover:text-foreground">
+                                    Todos os módulos
+                                </span>
+                            </label>
 
-                                    <label className="flex items-center gap-2 text-sm cursor-pointer">
-                                        <Checkbox
-                                            checked={scope === 'completed'}
-                                            onCheckedChange={(checked) => {
-                                                if (checked) onScopeChange('completed')
-                                            }}
-                                            disabled={isLoading || modo === 'personalizado'}
-                                            aria-label="Apenas módulos concluídos"
-                                        />
-                                        <span>Apenas módulos concluídos</span>
-                                    </label>
-                                </div>
-                                {modo === 'personalizado' && (
-                                    <p className="text-xs text-muted-foreground">
-                                        No modo <strong>Personalizado</strong>, o escopo não se aplica (você escolhe um módulo específico).
-                                    </p>
-                                )}
-                            </div>
+                            <label className="flex items-center gap-2 text-sm cursor-pointer group">
+                                <Checkbox
+                                    checked={scope === 'completed'}
+                                    onCheckedChange={(checked) => {
+                                        if (checked) onScopeChange('completed')
+                                    }}
+                                    disabled={isLoading || modo === 'personalizado'}
+                                    aria-label="Apenas módulos concluídos"
+                                />
+                                <span className="transition-colors group-hover:text-foreground">
+                                    Apenas concluídos
+                                </span>
+                            </label>
                         </div>
                     </div>
+
+                    {modo === 'personalizado' && (
+                        <p className="mt-3 text-xs text-muted-foreground border-t pt-3">
+                            No modo <strong>Personalizado</strong>, você escolhe um módulo específico.
+                        </p>
+                    )}
                 </CardContent>
             </Card>
 
-            {/* Grid de Modos */}
-            <TooltipProvider delayDuration={200}>
-                <div className="grid gap-4 md:grid-cols-2">
-                    {utiMode && (() => {
-                        const isSelected = modo === utiMode.id
+            {/* Mode Selection Grid */}
+            <div className="space-y-4">
+                <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                    Escolha seu modo de estudo
+                </h2>
 
-                        return (
-                            <Tooltip key={utiMode.id}>
-                                <TooltipTrigger asChild>
-                                    <Card
-                                        role="button"
-                                        tabIndex={0}
-                                        className={[
-                                            'cursor-pointer transition',
-                                            'border-primary/70 bg-muted/25 shadow-lg',
-                                            'hover:border-primary',
-                                            'md:col-span-2',
-                                            isSelected ? 'border-primary ring-1 ring-primary/30' : '',
-                                        ].join(' ')}
-                                        onClick={() => onSelectMode(utiMode.id)}
-                                        onKeyDown={(e) => handleKeyDown(e, utiMode.id)}
-                                    >
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center justify-center gap-2 text-center text-lg">
-                                                <span>{utiMode.title}</span>
-                                                <span className="text-muted-foreground">
-                                                    <Info className="h-4 w-4" aria-hidden="true" />
-                                                </span>
-                                            </CardTitle>
-                                            <CardDescription className="text-center">{utiMode.desc}</CardDescription>
-                                        </CardHeader>
-                                    </Card>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom" align="start" className="max-w-xs p-3">
-                                    <div className="space-y-2 text-sm">
-                                        {utiMode.tooltip.map((t, i) => (
-                                            <p key={i}>{t}</p>
-                                        ))}
-                                    </div>
-                                </TooltipContent>
-                            </Tooltip>
-                        )
-                    })()}
+                <TooltipProvider delayDuration={300}>
+                    <div className="grid gap-4 md:grid-cols-2">
+                        {/* UTI Mode - Highlighted */}
+                        {utiMode && (
+                            <ModeCard
+                                mode={utiMode}
+                                isSelected={modo === utiMode.id}
+                                onSelect={() => onSelectMode(utiMode.id)}
+                                isHighlighted
+                            />
+                        )}
 
-                    {otherModes.map((m) => {
-                        const isSelected = modo === m.id
-
-                        return (
-                            <Tooltip key={m.id}>
-                                <TooltipTrigger asChild>
-                                    <Card
-                                        role="button"
-                                        tabIndex={0}
-                                        className={[
-                                            'cursor-pointer transition',
-                                            'border-primary/70 bg-muted/25 shadow-lg',
-                                            'hover:border-primary',
-                                            isSelected ? 'border-primary ring-1 ring-primary/30' : '',
-                                        ].join(' ')}
-                                        onClick={() => onSelectMode(m.id)}
-                                        onKeyDown={(e) => handleKeyDown(e, m.id)}
-                                    >
-                                        <CardHeader>
-                                            <CardTitle className="flex items-center justify-center gap-2 text-center text-lg">
-                                                <span>{m.title}</span>
-                                                <span className="text-muted-foreground">
-                                                    <Info className="h-4 w-4" aria-hidden="true" />
-                                                </span>
-                                            </CardTitle>
-                                            <CardDescription className="text-center">{m.desc}</CardDescription>
-                                        </CardHeader>
-                                    </Card>
-                                </TooltipTrigger>
-                                <TooltipContent side="bottom" align="start" className="max-w-xs p-3">
-                                    <div className="space-y-2 text-sm">
-                                        {m.tooltip.map((t, i) => (
-                                            <p key={i}>{t}</p>
-                                        ))}
-                                    </div>
-                                </TooltipContent>
-                            </Tooltip>
-                        )
-                    })}
-                </div>
-            </TooltipProvider>
+                        {/* Other Modes */}
+                        {otherModes.map((m) => (
+                            <ModeCard
+                                key={m.id}
+                                mode={m}
+                                isSelected={modo === m.id}
+                                onSelect={() => onSelectMode(m.id)}
+                            />
+                        ))}
+                    </div>
+                </TooltipProvider>
+            </div>
         </div>
     )
 }

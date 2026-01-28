@@ -46,8 +46,13 @@ export function ImpersonationBanner() {
       const data = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
 
       if (response.ok) {
-        const defaultRedirect = tenant ? `/${tenant}/dashboard` : '/dashboard'
-        router.push(data.redirectTo || defaultRedirect)
+        // Sempre incluir o tenant no redirect, exceto para rotas absolutas como /superadmin
+        let redirectPath = data.redirectTo || '/dashboard'
+        if (tenant && !redirectPath.startsWith('/superadmin')) {
+          // Remove leading slash and prepend tenant
+          redirectPath = `/${tenant}${redirectPath}`
+        }
+        router.push(redirectPath)
         router.refresh()
       } else {
         console.error('Erro ao parar impersonação:', {
