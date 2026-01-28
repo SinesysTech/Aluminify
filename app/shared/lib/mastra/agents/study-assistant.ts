@@ -33,6 +33,7 @@ export interface CreateStudyAssistantOptions {
   model?: string;
   temperature?: number;
   agentName?: string;
+  agentId?: string;
 }
 
 /**
@@ -45,6 +46,7 @@ export function createStudyAssistantAgent(options: CreateStudyAssistantOptions) 
     model = "gpt-4o-mini",
     temperature: _temperature = 0.7,
     agentName = "Assistente de Estudos",
+    agentId = "study-assistant", // Default stable ID
   } = options;
 
   // Create tools with user context
@@ -52,11 +54,7 @@ export function createStudyAssistantAgent(options: CreateStudyAssistantOptions) 
 
   // Create the agent
   const agent = new Agent({
-<<<<<<< HEAD
-    id: "studyAssistant",
-=======
-    id: "study-assistant",
->>>>>>> bc262e8af7ab1e101494f99aebdda5c5af3d08d1
+    id: agentId,
     name: agentName,
     instructions: systemPrompt,
     model: openai(model),
