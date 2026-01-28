@@ -227,7 +227,7 @@ export function createMastraTools(context: ToolContext) {
       return {
         student: {
           id: studentData.id,
-          name: studentData.nome_completo,
+          name: studentData.nome_completo ?? "",
           email: studentData.email,
         },
         statistics: {
@@ -306,7 +306,7 @@ export function createMastraTools(context: ToolContext) {
         students:
           data?.map((student) => ({
             id: student.id,
-            name: student.nome_completo,
+            name: student.nome_completo ?? "",
             email: student.email,
             createdAt: student.created_at,
           })) ?? [],

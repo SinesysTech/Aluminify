@@ -121,7 +121,7 @@ export const POST = async (req: NextRequest) => {
   const useMastra = config.integrationType === "mastra";
 
   let copilotRuntime: CopilotRuntime;
-  let serviceAdapter: OpenAIAdapter | ExperimentalEmptyAdapter;
+  let serviceAdapter: OpenAIAdapter | InstanceType<typeof ExperimentalEmptyAdapter>;
 
   if (useMastra) {
     // Mastra Agent Mode: Use MastraAgent.getLocalAgents() via AG-UI protocol
@@ -169,6 +169,7 @@ export const POST = async (req: NextRequest) => {
       model: config.model || "gpt-4o-mini",
     });
 
+    // @ts-expect-error - CopilotKit actions type compatibility
     copilotRuntime = new CopilotRuntime({
       actions:
         actions as unknown as NonNullable<
