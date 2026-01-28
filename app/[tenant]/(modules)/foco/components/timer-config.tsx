@@ -136,21 +136,21 @@ export function TimerConfig({
 
     return (
         <Card>
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-3 pt-4">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                        <Settings2 className="h-5 w-5 text-primary" />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                        <Settings2 className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                        <CardTitle className="text-lg">Como você quer estudar?</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-0.5">
+                        <CardTitle className="text-base">Como você quer estudar?</CardTitle>
+                        <p className="text-xs text-muted-foreground mt-0.5">
                             Escolha o método e configure o tempo
                         </p>
                     </div>
                 </div>
             </CardHeader>
 
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 pb-4">
                 {/* Method Selection - Horizontal Cards */}
                 <div className="grid grid-cols-3 gap-3">
                     {METHODS.map((method) => {

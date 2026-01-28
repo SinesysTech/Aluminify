@@ -94,15 +94,15 @@ export function ContextSelector({
 
     return (
         <Card>
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-3 pt-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                            <BookOpen className="h-5 w-5 text-primary" />
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+                            <BookOpen className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg">O que você vai estudar?</CardTitle>
-                            <p className="text-sm text-muted-foreground mt-0.5">
+                            <CardTitle className="text-base">O que você vai estudar?</CardTitle>
+                            <p className="text-xs text-muted-foreground mt-0.5">
                                 Selecione a disciplina para começar
                             </p>
                         </div>
@@ -110,7 +110,7 @@ export function ContextSelector({
 
                     {/* Selection summary badge */}
                     {disciplinaId && (
-                        <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-1.5 rounded-full">
+                        <div className="hidden md:flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full">
                             {selectedCurso && <span>{selectedCurso}</span>}
                             {selectedCurso && selectedDisciplina && <span>/</span>}
                             {selectedDisciplina && <span className="font-medium text-foreground">{selectedDisciplina}</span>}
@@ -119,7 +119,7 @@ export function ContextSelector({
                 </div>
             </CardHeader>
 
-            <CardContent className="space-y-5">
+            <CardContent className="space-y-4 pb-4">
                 {/* Quick Start Option */}
                 {hasValidLastContext && !disciplinaId && (
                     <div className="p-4 rounded-lg border-2 border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 transition-colors">
