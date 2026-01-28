@@ -202,11 +202,11 @@ export function TimerConfig({
                 </div>
 
                 {/* Configuration Panel */}
-                <div className="min-h-[160px]">
+                <div className="min-h-[120px]">
                     {/* Cronômetro - No config needed */}
                     {metodo === 'cronometro' && (
-                        <div className="flex flex-col items-center justify-center h-40 text-center p-6 rounded-lg bg-muted/30 border border-dashed">
-                            <Timer className="h-8 w-8 text-muted-foreground mb-3" />
+                        <div className="flex flex-col items-center justify-center h-[120px] text-center p-4 rounded-lg bg-muted/30 border border-dashed">
+                            <Timer className="h-6 w-6 text-muted-foreground mb-2" />
                             <p className="text-sm text-muted-foreground">
                                 O cronômetro livre não precisa de configuração.
                                 <br />
