@@ -51,6 +51,22 @@ async function safeDeleteWhere(table: string, col: string, value: string): Promi
   return Array.isArray(data) ? data.length : 0;
 }
 
+async function bestEffortDeleteWhere(table: string, col: string, value: string): Promise<number> {
+  try {
+    return await safeDeleteWhere(table, col, value);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    // Em alguns ambientes/times, a tabela/coluna pode não existir; não queremos bloquear o purge por isso.
+    const ignorable =
+      msg.toLowerCase().includes("does not exist") ||
+      msg.toLowerCase().includes("column") ||
+      msg.toLowerCase().includes("schema cache") ||
+      msg.toLowerCase().includes("could not find");
+    if (ignorable) return 0;
+    throw err;
+  }
+}
+
 async function deleteEmpresaBySlug(slug: string) {
   const { data: empresa, error: empresaError } = await supabase
     .from("empresas")
@@ -88,7 +104,69 @@ async function deleteEmpresaBySlug(slug: string) {
     console.log(`  Limpeza extra: disciplinas=${deletedDisciplinas}, segmentos=${deletedSegmentos}`);
   }
 
-  // Deleta a empresa (FKs com ON DELETE CASCADE limpam o resto)
+  // Remoção explícita (defensiva) de dependências por empresa_id.
+  // Em alguns bancos, alguns FKs podem não estar com ON DELETE CASCADE (como vimos em alunos).
+  const deletedByEmpresaId = {
+    // Acesso/relacionamentos
+    empresa_admins: await bestEffortDeleteWhere("empresa_admins", "empresa_id", e.id),
+    matriculas: await bestEffortDeleteWhere("matriculas", "empresa_id", e.id),
+
+    // Navegação/visibilidade
+    tenant_submodule_visibility: await bestEffortDeleteWhere(
+      "tenant_submodule_visibility",
+      "empresa_id",
+      e.id,
+    ),
+    tenant_module_visibility: await bestEffortDeleteWhere(
+      "tenant_module_visibility",
+      "empresa_id",
+      e.id,
+    ),
+
+    // Branding
+    custom_theme_presets: await bestEffortDeleteWhere("custom_theme_presets", "empresa_id", e.id),
+    font_schemes: await bestEffortDeleteWhere("font_schemes", "empresa_id", e.id),
+    color_palettes: await bestEffortDeleteWhere("color_palettes", "empresa_id", e.id),
+    tenant_branding: await bestEffortDeleteWhere("tenant_branding", "empresa_id", e.id),
+
+    // IA
+    ai_agents: await bestEffortDeleteWhere("ai_agents", "empresa_id", e.id),
+
+    // Agendamentos/relatórios
+    relatorios_agendamento: await bestEffortDeleteWhere("relatorios_agendamento", "empresa_id", e.id),
+    agendamento_bloqueios: await bestEffortDeleteWhere("agendamento_bloqueios", "empresa_id", e.id),
+    agendamento_recorrencia: await bestEffortDeleteWhere(
+      "agendamento_recorrencia",
+      "empresa_id",
+      e.id,
+    ),
+
+    // Conteúdo/estudos
+    cronogramas: await bestEffortDeleteWhere("cronogramas", "empresa_id", e.id),
+    atividades: await bestEffortDeleteWhere("atividades", "empresa_id", e.id),
+    flashcards: await bestEffortDeleteWhere("flashcards", "empresa_id", e.id),
+    aulas: await bestEffortDeleteWhere("aulas", "empresa_id", e.id),
+    modulos: await bestEffortDeleteWhere("modulos", "empresa_id", e.id),
+    frentes: await bestEffortDeleteWhere("frentes", "empresa_id", e.id),
+    materiais_curso: await bestEffortDeleteWhere("materiais_curso", "empresa_id", e.id),
+
+    // Núcleo
+    cursos: await bestEffortDeleteWhere("cursos", "empresa_id", e.id),
+    professores: await bestEffortDeleteWhere("professores", "empresa_id", e.id),
+    alunos: await bestEffortDeleteWhere("alunos", "empresa_id", e.id),
+  };
+
+  const deletedSum = Object.values(deletedByEmpresaId).reduce((a, b) => a + b, 0);
+  if (deletedSum) {
+    console.log(
+      `  Remoções explícitas (empresa_id): ${Object.entries(deletedByEmpresaId)
+        .filter(([, n]) => n > 0)
+        .map(([k, n]) => `${k}=${n}`)
+        .join(", ")}`,
+    );
+  }
+
+  // Deleta a empresa
   const { error: delEmpresaError } = await supabase.from("empresas").delete().eq("id", e.id);
   if (delEmpresaError) {
     throw new Error(`Falha ao deletar empresa (${slug}): ${delEmpresaError.message}`);

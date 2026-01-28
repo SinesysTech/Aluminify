@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/app/shared/core/server";
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "@/app/shared/core/database.types";
+import { getPublicSupabaseConfig } from "@/app/shared/core/supabase-public-env";
 import { createTurmaService } from "@/app/[tenant]/(modules)/curso/services/turma";
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Criar client Supabase com token do header Authorization (compatível com chamadas via fetch no client)
+    const authHeader = request.headers.get("authorization");
+    const { url, anonKey } = getPublicSupabaseConfig();
+    const supabase = createClient<Database>(url, anonKey, {
+      global: {
+        headers: authHeader ? { Authorization: authHeader } : {},
+      },
+      auth: {
+        persistSession: false,
+      },
+    });
     const {
       data: { user },
       error: authError,
@@ -45,7 +57,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    // Criar client Supabase com token do header Authorization (compatível com chamadas via fetch no client)
+    const authHeader = request.headers.get("authorization");
+    const { url, anonKey } = getPublicSupabaseConfig();
+    const supabase = createClient<Database>(url, anonKey, {
+      global: {
+        headers: authHeader ? { Authorization: authHeader } : {},
+      },
+      auth: {
+        persistSession: false,
+      },
+    });
     const {
       data: { user },
       error: authError,
