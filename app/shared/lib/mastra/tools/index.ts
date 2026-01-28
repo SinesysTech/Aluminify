@@ -227,11 +227,7 @@ export function createMastraTools(context: ToolContext) {
       return {
         student: {
           id: studentData.id,
-<<<<<<< HEAD
-          name: studentData.nome_completo ?? "",
-=======
           name: studentData.nome_completo ?? "Aluno",
->>>>>>> 9edb6af6955b08e5b6c79c110519fdff03896eea
           email: studentData.email,
         },
         statistics: {
@@ -310,11 +306,7 @@ export function createMastraTools(context: ToolContext) {
         students:
           data?.map((student) => ({
             id: student.id,
-<<<<<<< HEAD
-            name: student.nome_completo ?? "",
-=======
             name: student.nome_completo ?? "Aluno",
->>>>>>> 9edb6af6955b08e5b6c79c110519fdff03896eea
             email: student.email,
             createdAt: student.created_at,
           })) ?? [],

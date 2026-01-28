@@ -120,11 +120,7 @@ export const POST = async (req: NextRequest) => {
   // Determine mode based on integration type
   const useMastra = config.integrationType === "mastra";
 
-<<<<<<< HEAD
-  let copilotRuntime: CopilotRuntime;
-=======
   let copilotRuntime: CopilotRuntime<any>;
->>>>>>> 9edb6af6955b08e5b6c79c110519fdff03896eea
   let serviceAdapter: OpenAIAdapter | InstanceType<typeof ExperimentalEmptyAdapter>;
 
   if (useMastra) {
