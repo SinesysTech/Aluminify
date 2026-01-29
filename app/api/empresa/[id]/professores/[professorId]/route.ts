@@ -45,35 +45,40 @@ export async function PATCH(
     }
 
     // Verificar se o professor pertence à empresa
-    const { data: professor, error: fetchError } = await supabase
-      .from('professores')
-      .select('id, empresa_id')
-      .eq('id', professorId)
+    const { data: vinculo, error: fetchError } = await supabase
+      .from('usuarios_empresas')
+      .select('id, empresa_id, usuario_id')
+      .eq('usuario_id', professorId)
+      .eq('papel_base', 'professor')
+      .eq('empresa_id', id)
+      .eq('ativo', true)
+      .is('deleted_at', null)
       .single();
 
-    // Type assertion: Query result properly typed from Database schema
-    type ProfessorEmpresa = Pick<Database['public']['Tables']['professores']['Row'], 'id' | 'empresa_id'>;
-    const typedProfessor = professor as ProfessorEmpresa | null;
+    // Type assertion: Query result properly typed
+    type VinculoEmpresa = { id: string; empresa_id: string; usuario_id: string };
+    const typedVinculo = vinculo as VinculoEmpresa | null;
 
-    if (fetchError || !typedProfessor) {
+    if (fetchError || !typedVinculo) {
       return NextResponse.json(
         { error: 'Professor não encontrado' },
         { status: 404 }
       );
     }
 
-    if (typedProfessor.empresa_id !== id) {
+    if (typedVinculo.empresa_id !== id) {
       return NextResponse.json(
         { error: 'Professor não pertence a esta empresa' },
         { status: 403 }
       );
     }
 
-    // Atualizar o campo is_admin na tabela professores
+    // Atualizar o campo is_admin na tabela usuarios_empresas
     const { error: updateError } = await supabase
-      .from('professores')
+      .from('usuarios_empresas')
       .update({ is_admin: isAdmin })
-      .eq('id', professorId);
+      .eq('usuario_id', professorId)
+      .eq('empresa_id', id);
 
     if (updateError) {
       throw updateError;

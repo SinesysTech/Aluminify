@@ -204,7 +204,7 @@ export class DashboardAnalyticsService {
       const { data: alunosCursos } = await client
         .from("alunos_cursos")
         .select("curso_id, cursos!inner(empresa_id)")
-        .eq("aluno_id", alunoId);
+        .eq("usuario_id", alunoId);
 
       if (empresaId) {
         // Filter to only courses from the specified empresa
@@ -759,7 +759,7 @@ export class DashboardAnalyticsService {
       let q = client
         .from("progresso_atividades")
         .select("atividade_id, questoes_totais, questoes_acertos")
-        .eq("aluno_id", alunoId)
+        .eq("usuario_id", alunoId)
         .eq("status", "Concluido")
         .not("questoes_totais", "is", null)
         .gt("questoes_totais", 0)
@@ -1166,7 +1166,7 @@ export class DashboardAnalyticsService {
         const attempt = await client
           .from("progresso_flashcards")
           .select("flashcard_id, ultimo_feedback, ultima_revisao")
-          .eq("aluno_id", alunoId)
+          .eq("usuario_id", alunoId)
           .in("flashcard_id", idsChunk)
           .not("ultimo_feedback", "is", null)
           .gte("ultima_revisao", inicioPeriodo.toISOString());
@@ -1183,7 +1183,7 @@ export class DashboardAnalyticsService {
             const fallback = await client
               .from("progresso_flashcards")
               .select("flashcard_id, ultimo_feedback")
-              .eq("aluno_id", alunoId)
+              .eq("usuario_id", alunoId)
               .in("flashcard_id", idsChunk)
               .not("ultimo_feedback", "is", null);
             progChunk = fallback.data as unknown;
@@ -1267,7 +1267,7 @@ export class DashboardAnalyticsService {
         let q = client
           .from("progresso_atividades")
           .select("atividade_id, questoes_totais, questoes_acertos")
-          .eq("aluno_id", alunoId)
+          .eq("usuario_id", alunoId)
           .eq("status", "Concluido")
           .not("questoes_totais", "is", null)
           .gt("questoes_totais", 0)
@@ -1641,7 +1641,7 @@ export class DashboardAnalyticsService {
     const { data: sessoes } = await client
       .from("sessoes_estudo")
       .select("inicio")
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .eq("status", "concluido")
       .order("inicio", { ascending: false })
       .limit(365);
@@ -1747,7 +1747,7 @@ export class DashboardAnalyticsService {
     const { data: cronograma } = await client
       .from("cronogramas")
       .select("id")
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -1844,7 +1844,7 @@ export class DashboardAnalyticsService {
     let query = client
       .from("progresso_atividades")
       .select("questoes_totais")
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .eq("status", "Concluido")
       .gte("data_conclusao", inicioPeriodo.toISOString());
     if (empresaId) query = query.eq("empresa_id", empresaId);
@@ -1877,7 +1877,7 @@ export class DashboardAnalyticsService {
     let query = client
       .from("progresso_atividades")
       .select("questoes_totais, questoes_acertos")
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .eq("status", "Concluido")
       .gte("data_conclusao", inicioPeriodo.toISOString())
       .not("questoes_totais", "is", null)
@@ -1915,7 +1915,7 @@ export class DashboardAnalyticsService {
     const { data: progressosFlashcards, error: queryError } = await client
       .from("progresso_flashcards")
       .select("flashcard_id")
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .gte("updated_at", inicioPeriodo.toISOString());
 
     if (queryError) {
@@ -2101,7 +2101,7 @@ export class DashboardAnalyticsService {
         atividade_id
       `,
       )
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .eq("status", "Concluido")
       .gte("data_conclusao", inicioPeriodo.toISOString())
       .not("questoes_totais", "is", null)
@@ -2240,7 +2240,7 @@ export class DashboardAnalyticsService {
       .select(
         "inicio, tempo_total_bruto_segundos, tempo_total_liquido_segundos",
       )
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .eq("status", "concluido")
       .gte("inicio", inicioPeriodo.toISOString());
 
@@ -2385,7 +2385,7 @@ export class DashboardAnalyticsService {
       const { data: alunosCursos } = await client
         .from("alunos_cursos")
         .select("curso_id")
-        .eq("aluno_id", alunoId);
+        .eq("usuario_id", alunoId);
       cursoIds = (alunosCursos ?? []).map(
         (ac: { curso_id: string }) => ac.curso_id,
       );
@@ -2559,7 +2559,7 @@ export class DashboardAnalyticsService {
         const { data: progChunk, error: progErr } = await client
           .from("progresso_flashcards")
           .select("flashcard_id, ultimo_feedback")
-          .eq("aluno_id", alunoId)
+          .eq("usuario_id", alunoId)
           .in("flashcard_id", idsChunk)
           .not("ultimo_feedback", "is", null);
 
@@ -2614,7 +2614,7 @@ export class DashboardAnalyticsService {
     const { data: progressosAtividades, error: progAtvError } = await client
       .from("progresso_atividades")
       .select("atividade_id, questoes_totais, questoes_acertos")
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .eq("status", "Concluido")
       .not("questoes_totais", "is", null)
       .gt("questoes_totais", 0);
@@ -2829,7 +2829,7 @@ export class DashboardAnalyticsService {
     const { data: cronograma } = await client
       .from("cronogramas")
       .select("id")
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle<{ id: string }>();
@@ -2859,7 +2859,7 @@ export class DashboardAnalyticsService {
       let q = client
         .from("sessoes_estudo")
         .select(selectCols)
-        .eq("aluno_id", alunoId)
+        .eq("usuario_id", alunoId)
         .eq("status", "concluido")
         .not("atividade_relacionada_id", "is", null)
         .gte("inicio", opts.start.toISOString());
@@ -3046,7 +3046,7 @@ export class DashboardAnalyticsService {
       client
         .from("sessoes_estudo")
         .select(selectCols)
-        .eq("aluno_id", alunoId)
+        .eq("usuario_id", alunoId)
         .eq("status", "concluido")
         .not("atividade_relacionada_id", "is", null)
         .gte("inicio", opts.start.toISOString())

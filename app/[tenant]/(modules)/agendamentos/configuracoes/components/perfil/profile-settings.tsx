@@ -114,13 +114,13 @@ export function ProfileSettings({ user, section }: ProfileSettingsProps) {
 
       // Atualizar must_change_password apenas se o usuário for aluno
       if (user.role === 'aluno') {
-        const { error: alunoError } = await supabase
-          .from('alunos')
+        const { error: usuarioError } = await supabase
+          .from('usuarios')
           .update({ must_change_password: false, senha_temporaria: null })
           .eq('id', user.id)
 
-        if (alunoError) {
-          console.warn('Erro ao atualizar flag must_change_password na tabela alunos:', alunoError)
+        if (usuarioError) {
+          console.warn('Erro ao atualizar flag must_change_password na tabela usuarios:', usuarioError)
         }
       }
 

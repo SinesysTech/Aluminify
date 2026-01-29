@@ -226,9 +226,12 @@ export default function StructureManagerClient() {
         setUserId(user.id)
 
         const { data, error } = await supabase
-          .from('professores')
+          .from('usuarios_empresas')
           .select('id')
-          .eq('id', user.id)
+          .eq('usuario_id', user.id)
+          .eq('papel_base', 'professor')
+          .eq('ativo', true)
+          .is('deleted_at', null)
           .maybeSingle()
 
         if (error) {

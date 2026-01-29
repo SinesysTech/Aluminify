@@ -68,11 +68,12 @@ async function deleteHandler(
       throw deleteError;
     }
 
-    // Atualizar is_admin na tabela professores
+    // Atualizar is_admin na tabela usuarios_empresas
     await supabase
-      .from('professores')
+      .from('usuarios_empresas')
       .update({ is_admin: false })
-      .eq('id', userId);
+      .eq('usuario_id', userId)
+      .eq('empresa_id', id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

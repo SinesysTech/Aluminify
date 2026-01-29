@@ -406,8 +406,8 @@ export class FinancialServiceImpl implements FinancialService {
     // Check if already enrolled
     const { data: existing } = await this.client
       .from("alunos_cursos")
-      .select("aluno_id")
-      .eq("aluno_id", studentId)
+      .select("usuario_id")
+      .eq("usuario_id", studentId)
       .eq("curso_id", cursoId)
       .single();
 
@@ -418,7 +418,7 @@ export class FinancialServiceImpl implements FinancialService {
 
     // Enroll student
     const { error } = await this.client.from("alunos_cursos").insert({
-      aluno_id: studentId,
+      usuario_id: studentId,
       curso_id: cursoId,
     });
 

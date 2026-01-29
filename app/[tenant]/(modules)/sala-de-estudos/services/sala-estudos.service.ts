@@ -122,7 +122,7 @@ export class SalaEstudosService {
       const { data, error } = await this.supabase
         .from("alunos_cursos")
         .select("cursos!inner(id, nome, empresa_id)")
-        .eq("aluno_id", alunoId);
+        .eq("usuario_id", alunoId);
 
       if (error) throw error;
       let cursos = (data || []).map(
@@ -200,7 +200,7 @@ export class SalaEstudosService {
     const { data: pData } = await this.supabase
       .from("progresso_atividades")
       .select("*")
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .in("atividade_id", atividadeIds);
     const progressoMap = new Map((pData || []).map((p) => [p.atividade_id, p]));
 

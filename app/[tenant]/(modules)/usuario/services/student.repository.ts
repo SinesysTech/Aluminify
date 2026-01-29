@@ -173,26 +173,26 @@ export class StudentRepositoryImpl implements StudentRepository {
       // Filter by turma - get students in specific turma
       const { data: turmaLinks, error: turmaError } = await this.client
         .from("alunos_turmas")
-        .select("aluno_id")
+        .select("usuario_id")
         .eq("turma_id", params.turmaId);
 
       if (turmaError) {
         throw new Error(`Failed to filter by turma: ${turmaError.message}`);
       }
 
-      studentIdsToFilter = (turmaLinks ?? []).map((link) => link.aluno_id);
+      studentIdsToFilter = (turmaLinks ?? []).map((link) => link.usuario_id);
     } else if (params?.courseId) {
       // Filter by course - get students enrolled in specific course
       const { data: courseLinks, error: courseError } = await this.client
         .from(COURSE_LINK_TABLE)
-        .select("aluno_id")
+        .select("usuario_id")
         .eq("curso_id", params.courseId);
 
       if (courseError) {
         throw new Error(`Failed to filter by course: ${courseError.message}`);
       }
 
-      studentIdsToFilter = (courseLinks ?? []).map((link) => link.aluno_id);
+      studentIdsToFilter = (courseLinks ?? []).map((link) => link.usuario_id);
     } else {
       // Sem turma/course: não aplicar filtro por IDs. O RLS em alunos já restringe
       // (admins veem apenas alunos matriculados em cursos da empresa).
@@ -827,8 +827,8 @@ export class StudentRepositoryImpl implements StudentRepository {
 
     const { data: links, error: linksError } = await this.client
       .from(COURSE_LINK_TABLE)
-      .select("aluno_id, curso_id")
-      .in("aluno_id", studentIds);
+      .select("usuario_id, curso_id")
+      .in("usuario_id", studentIds);
 
     if (linksError) {
       throw new Error(`Failed to fetch student courses: ${linksError.message}`);
@@ -863,10 +863,10 @@ export class StudentRepositoryImpl implements StudentRepository {
         return;
       }
 
-      if (!map.has(link.aluno_id)) {
-        map.set(link.aluno_id, []);
+      if (!map.has(link.usuario_id)) {
+        map.set(link.usuario_id, []);
       }
-      map.get(link.aluno_id)!.push(course);
+      map.get(link.usuario_id)!.push(course);
     });
 
     return map;
@@ -894,7 +894,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     // Buscar alunos matriculados nesses cursos
     const { data: alunosCursos, error: alunosCursosError } = await this.client
       .from(COURSE_LINK_TABLE)
-      .select("aluno_id")
+      .select("usuario_id")
       .in("curso_id", cursoIds);
 
     if (alunosCursosError) {
@@ -905,7 +905,7 @@ export class StudentRepositoryImpl implements StudentRepository {
 
     const alunoIds = Array.from(
       new Set(
-        (alunosCursos ?? []).map((ac: { aluno_id: string }) => ac.aluno_id),
+        (alunosCursos ?? []).map((ac: { usuario_id: string }) => ac.usuario_id),
       ),
     );
 
@@ -934,7 +934,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     const { error: deleteError } = await this.client
       .from(COURSE_LINK_TABLE)
       .delete()
-      .eq("aluno_id", studentId);
+      .eq("usuario_id", studentId);
 
     if (deleteError) {
       throw new Error(
@@ -947,7 +947,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     }
 
     const rows = courseIds.map((courseId) => ({
-      aluno_id: studentId,
+      usuario_id: studentId,
       curso_id: courseId,
     }));
 
@@ -968,13 +968,13 @@ export class StudentRepositoryImpl implements StudentRepository {
     }
 
     const rows = uniqueCourseIds.map((courseId) => ({
-      aluno_id: studentId,
+      usuario_id: studentId,
       curso_id: courseId,
     }));
 
     const { error } = await this.client
       .from(COURSE_LINK_TABLE)
-      .upsert(rows, { onConflict: "aluno_id,curso_id", ignoreDuplicates: true });
+      .upsert(rows, { onConflict: "usuario_id,curso_id", ignoreDuplicates: true });
 
     if (error) {
       throw new Error(`Failed to link student to courses: ${error.message}`);

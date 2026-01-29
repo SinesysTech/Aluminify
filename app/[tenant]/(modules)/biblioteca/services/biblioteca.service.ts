@@ -172,7 +172,7 @@ export async function fetchBibliotecaData(
       const { data: alunosCursos, error: alunosCursosError } = await supabase
         .from("alunos_cursos")
         .select("curso_id, cursos!inner(id, empresa_id)")
-        .eq("aluno_id", alunoId)
+        .eq("usuario_id", alunoId)
         .returns<
           Array<{
             curso_id: string;
@@ -314,7 +314,7 @@ export async function fetchBibliotecaData(
           .select(
             "atividade_id, status, data_inicio, data_conclusao, questoes_totais, questoes_acertos, dificuldade_percebida, anotacoes_pessoais",
           )
-          .eq("aluno_id", alunoId)
+          .eq("usuario_id", alunoId)
           .in("atividade_id", batch);
 
         if (progressosError)

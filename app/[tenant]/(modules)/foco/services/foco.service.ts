@@ -28,7 +28,7 @@ export class FocoService {
       const { data, error: acError } = await this.supabase
         .from("alunos_cursos")
         .select("curso_id, cursos(id, nome)")
-        .eq("aluno_id", user.id)
+        .eq("usuario_id", user.id)
         .returns<
           Array<{
             curso_id: string;

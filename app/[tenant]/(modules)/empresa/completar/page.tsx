@@ -57,19 +57,19 @@ export default function CompletarCadastroEmpresaPage() {
           // Tentar do metadata primeiro
           empresaIdToUse = authUser?.user_metadata?.empresa_id;
 
-          // Se ainda não tiver, buscar da tabela professores
+          // Se ainda não tiver, buscar da tabela usuarios
           if (!empresaIdToUse && authUser?.id) {
-            // Aguardar um pouco para garantir que o registro do professor foi criado
+            // Aguardar um pouco para garantir que o registro do usuário foi criado
             await new Promise(resolve => setTimeout(resolve, 500));
 
-            const { data: professor } = await supabase
-              .from('professores')
+            const { data: usuario } = await supabase
+              .from('usuarios')
               .select('empresa_id')
               .eq('id', authUser.id)
               .maybeSingle();
 
-            if (professor?.empresa_id) {
-              empresaIdToUse = professor.empresa_id;
+            if (usuario?.empresa_id) {
+              empresaIdToUse = usuario.empresa_id;
             }
           }
         }

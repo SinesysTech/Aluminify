@@ -602,7 +602,7 @@ async function getHandler(
       const { data: recentes, error: recentesErr } = await admin
         .from('cronogramas')
         .select('id, created_at')
-        .eq('aluno_id', request.user.id)
+        .eq('usuario_id', request.user.id)
         .order('created_at', { ascending: false })
         .limit(5)
 

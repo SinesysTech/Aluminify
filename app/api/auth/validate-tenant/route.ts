@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
     // Aluno vinculado via matriculas -> empresa (nova estrutura)
     const { data: matriculaRow, error: matriculaError } = await adminClient
       .from("matriculas")
-      .select("aluno_id")
-      .eq("aluno_id", user.id)
+      .select("usuario_id")
+      .eq("usuario_id", user.id)
       .eq("empresa_id", empresaId)
       .eq("ativo", true)
       .limit(1);
@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
     // Aluno vinculado via cursos -> empresa (legacy)
     const { data: alunoCursoRow, error: alunoError } = await adminClient
       .from("alunos_cursos")
-      .select("aluno_id, cursos!inner(empresa_id)")
-      .eq("aluno_id", user.id)
+      .select("usuario_id, cursos!inner(empresa_id)")
+      .eq("usuario_id", user.id)
       .eq("cursos.empresa_id", empresaId)
       .limit(1);
 

@@ -194,7 +194,7 @@ export function createMastraTools(context: ToolContext) {
       const { data: progressData, error: progressError } = await client
         .from("progresso_atividades")
         .select("id, status, data_inicio, data_conclusao, atividade_id")
-        .eq("aluno_id", targetStudentId);
+        .eq("usuario_id", targetStudentId);
 
       if (progressError) {
         console.error(

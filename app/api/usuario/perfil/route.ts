@@ -65,17 +65,17 @@ export async function GET() {
         }
       }
     } else if (role === 'aluno') {
-      const { data: aluno } = await supabase
-        .from('alunos')
+      const { data: usuario } = await supabase
+        .from('usuarios')
         .select('nome_completo')
         .eq('id', user.id)
         .maybeSingle();
 
       // Type assertion: Query result properly typed from Database schema
-      type AlunoProfile = Pick<Database['public']['Tables']['alunos']['Row'], 'nome_completo'>;
-      const typedAluno = aluno as AlunoProfile | null;
+      type UsuarioProfile = { nome_completo: string | null };
+      const typedUsuario = usuario as UsuarioProfile | null;
 
-      fullName = typedAluno?.nome_completo ?? (user.user_metadata?.full_name as string | undefined) ?? null;
+      fullName = typedUsuario?.nome_completo ?? (user.user_metadata?.full_name as string | undefined) ?? null;
     }
 
     return NextResponse.json({

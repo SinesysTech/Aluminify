@@ -306,11 +306,15 @@ export function ScheduleWizard() {
       }
       setUserId(user.id)
 
-      // Verificar se o usuário é professor
+      // Verificar se o usuário é professor via usuarios_empresas
       const { data: professorData, error: professorError } = await supabase
-        .from('professores')
+        .from('usuarios_empresas')
         .select('id')
-        .eq('id', user.id)
+        .eq('usuario_id', user.id)
+        .eq('papel_base', 'professor')
+        .eq('ativo', true)
+        .is('deleted_at', null)
+        .limit(1)
         .maybeSingle()
 
       if (professorError) {
@@ -366,7 +370,7 @@ export function ScheduleWizard() {
         const { data: alunosCursos, error: alunosCursosError } = (await supabase
           .from('alunos_cursos')
           .select('curso_id, cursos(*)')
-          .eq('aluno_id', user.id)) as { data: Array<{ curso_id: string; cursos: CursoData }> | null; error: unknown }
+          .eq('usuario_id', user.id)) as { data: Array<{ curso_id: string; cursos: CursoData }> | null; error: unknown }
 
         if (alunosCursosError) {
           console.error('Erro ao carregar cursos do aluno:', alunosCursosError)
@@ -635,7 +639,7 @@ export function ScheduleWizard() {
           const { data: concluidasData, error: concluidasError } = (await supabase
             .from('aulas_concluidas')
             .select('aula_id')
-            .eq('aluno_id', userId)
+            .eq('usuario_id', userId)
             .eq('curso_id', cursoSelecionado)) as { data: Array<{ aula_id: string }> | null; error: { message?: string; details?: string; code?: string } | null }
 
           if (concluidasError) {

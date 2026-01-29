@@ -68,7 +68,7 @@ async function getHandler(
     const { data, error } = await client
       .from("alunos_cursos")
       .select("curso_id, cursos(id, nome)")
-      .eq("aluno_id", alunoId)
+      .eq("usuario_id", alunoId)
       .order("created_at", { ascending: false });
 
     if (error) {

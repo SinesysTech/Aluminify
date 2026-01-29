@@ -146,7 +146,7 @@ export default function StudentDashboardClientPage() {
             const { data: cronograma } = await supabaseInstance
                 .from('cronogramas')
                 .select('id')
-                .eq('aluno_id', user.id)
+                .eq('usuario_id', user.id)
                 .order('created_at', { ascending: false })
                 .limit(1)
                 .maybeSingle<{ id: string }>()

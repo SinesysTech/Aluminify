@@ -58,7 +58,7 @@ export async function listByAlunoMatriculasHelper(
   const { data: alunosCursos, error: alunosCursosError } = await client
     .from("alunos_cursos")
     .select("curso_id, cursos!inner(id, empresa_id)")
-    .eq("aluno_id", alunoId);
+    .eq("usuario_id", alunoId);
 
   if (alunosCursosError) {
     throw new Error(
@@ -204,7 +204,7 @@ export async function listByAlunoMatriculasHelper(
     .select(
       "atividade_id, status, data_inicio, data_conclusao, questoes_totais, questoes_acertos, dificuldade_percebida, anotacoes_pessoais",
     )
-    .eq("aluno_id", alunoId)
+    .eq("usuario_id", alunoId)
     .in("atividade_id", atividadeIds);
   if (empresaId) {
     progressosQuery = progressosQuery.eq("empresa_id", empresaId);

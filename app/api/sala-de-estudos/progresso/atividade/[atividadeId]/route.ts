@@ -124,7 +124,7 @@ async function patchHandler(
       const { data: vinculo, error: vinculoErr } = await db
         .from("alunos_cursos")
         .select("curso_id, cursos!inner(empresa_id)")
-        .eq("aluno_id", alunoId)
+        .eq("usuario_id", alunoId)
         .eq("cursos.empresa_id", empresaId)
         .limit(1);
 

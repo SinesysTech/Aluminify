@@ -53,7 +53,7 @@ async function postHandler(request: AuthenticatedRequest) {
     const { data: alunoCurso } = await client
       .from("alunos_cursos")
       .select("curso_id, cursos(empresa_id)")
-      .eq("aluno_id", studentId)
+      .eq("usuario_id", studentId)
       .limit(1)
       .maybeSingle();
 

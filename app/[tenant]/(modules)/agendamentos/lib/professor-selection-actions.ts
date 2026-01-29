@@ -34,7 +34,7 @@ export async function getProfessoresDisponiveis(
       const { data: cursosData } = await supabase
         .from("alunos_cursos")
         .select("cursos(empresa_id)")
-        .eq("aluno_id", user.id)
+        .eq("usuario_id", user.id)
         .limit(1)
         .single();
 

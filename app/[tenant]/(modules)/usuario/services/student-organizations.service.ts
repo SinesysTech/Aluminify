@@ -140,7 +140,7 @@ export class StudentOrganizationsService {
     const { data: matriculas, error: matriculasError } = await this.client
       .from("matriculas")
       .select("empresa_id")
-      .eq("aluno_id", normalizedStudentId)
+      .eq("usuario_id", normalizedStudentId)
       .eq("ativo", true);
 
     if (matriculasError) {
@@ -160,7 +160,7 @@ export class StudentOrganizationsService {
     const { data: links, error: linksError } = await this.client
       .from("alunos_cursos")
       .select("curso_id")
-      .eq("aluno_id", normalizedStudentId);
+      .eq("usuario_id", normalizedStudentId);
 
     if (linksError) {
       console.warn(
@@ -243,7 +243,7 @@ export class StudentOrganizationsService {
       await this.client
         .from("matriculas")
         .select("empresa_id, curso_id")
-        .eq("aluno_id", normalizedStudentId)
+        .eq("usuario_id", normalizedStudentId)
         .eq("ativo", true);
 
     if (!matriculasCursosError) {
@@ -298,7 +298,7 @@ export class StudentOrganizationsService {
     const { data: matriculas, error: matriculasError } = await this.client
       .from("matriculas")
       .select("curso_id")
-      .eq("aluno_id", normalizedStudentId)
+      .eq("usuario_id", normalizedStudentId)
       .eq("ativo", true);
 
     if (!matriculasError) {
@@ -311,7 +311,7 @@ export class StudentOrganizationsService {
     const { data: links, error: linksError } = await this.client
       .from("alunos_cursos")
       .select("curso_id")
-      .eq("aluno_id", normalizedStudentId);
+      .eq("usuario_id", normalizedStudentId);
 
     if (!linksError) {
       (links ?? []).forEach((l) => {

@@ -37,18 +37,21 @@ function isMissingImagePathColumns(error: unknown): boolean {
 
 async function ensureProfessorOrAdmin(request: AuthenticatedRequest) {
   const client = getDatabaseClient();
-  const { data: professor, error } = await client
-    .from('professores')
+  const { data: vinculo, error } = await client
+    .from('usuarios_empresas')
     .select('id, empresa_id')
-    .eq('id', request.user!.id)
+    .eq('usuario_id', request.user!.id)
+    .eq('papel_base', 'professor')
+    .eq('ativo', true)
+    .is('deleted_at', null)
     .maybeSingle();
 
-  if (error || !professor) {
+  if (error || !vinculo) {
     throw new Error('Apenas professores podem realizar esta ação.');
   }
 
   return {
-    empresaId: (professor as { empresa_id?: string | null }).empresa_id ?? null,
+    empresaId: (vinculo as { empresa_id?: string | null }).empresa_id ?? null,
   };
 }
 

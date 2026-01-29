@@ -46,13 +46,13 @@ export default function ProfessorNovaEmpresaPage() {
         const { data: { user: authUser } } = await supabase.auth.getUser();
 
         if (authUser) {
-          const { data: professor } = await supabase
-            .from('professores')
+          const { data: usuario } = await supabase
+            .from('usuarios')
             .select('empresa_id')
             .eq('id', authUser.id)
             .maybeSingle();
 
-          if (professor?.empresa_id) {
+          if (usuario?.empresa_id) {
             toast({
               title: 'Você já tem uma empresa',
               description: 'Redirecionando para a página da sua empresa...',
