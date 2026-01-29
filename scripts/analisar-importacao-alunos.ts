@@ -1,6 +1,5 @@
 import ExcelJS from 'exceljs';
 import * as fs from 'fs';
-import * as path from 'path';
 
 // Formato esperado pelo sistema
 const COLUNAS_ESPERADAS = {

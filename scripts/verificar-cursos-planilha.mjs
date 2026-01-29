@@ -1,5 +1,4 @@
 import ExcelJS from 'exceljs';
-import * as fs from 'fs';
 
 function normalizeColumnName(value) {
   return (value ?? '')

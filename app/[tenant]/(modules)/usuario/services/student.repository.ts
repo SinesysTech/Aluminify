@@ -49,19 +49,34 @@ function formatSupabaseError(error: unknown): string {
         ? e.message
         : typeof e.error === "string" && e.error.trim()
           ? e.error
-          : "";
-    const details = e.details ? ` Detalhes: ${String(e.details)}` : "";
+          : typeof e.details === "string" && e.details.trim()
+            ? e.details
+            : "";
+    const details = e.details && typeof e.details === "string" && e.details !== message
+      ? ` Detalhes: ${e.details}`
+      : "";
     const hint = e.hint ? ` Hint: ${String(e.hint)}` : "";
 
-    if (code || message || details || hint) {
-      return `${[code, message].filter(Boolean).join(" ")}${details}${hint}`.trim();
+    // Se ainda não temos mensagem, tentar serializar o objeto inteiro
+    if (!code && !message && !details && !hint) {
+      try {
+        const serialized = JSON.stringify(error, null, 2);
+        return serialized.length > 500 
+          ? `Erro do Supabase (objeto grande): ${serialized.substring(0, 500)}...`
+          : `Erro do Supabase: ${serialized}`;
+      } catch {
+        // Se não conseguir serializar, tentar extrair propriedades conhecidas
+        const keys = Object.keys(e);
+        const values = keys
+          .slice(0, 5)
+          .map(k => `${k}: ${String(e[k])}`)
+          .join(", ");
+        return `Erro do Supabase (${keys.length} propriedades): ${values}${keys.length > 5 ? "..." : ""}`;
+      }
     }
 
-    try {
-      return JSON.stringify(error);
-    } catch {
-      return "Erro desconhecido (objeto não serializável)";
-    }
+    const result = `${[code, message].filter(Boolean).join(" ")}${details}${hint}`.trim();
+    return result || "Erro do Supabase (sem mensagem legível)";
   }
   return String(error);
 }
@@ -252,6 +267,15 @@ export class StudentRepositoryImpl implements StudentRepository {
       .is("deleted_at", null);
 
     if (studentIdsToFilter !== null) {
+      // PostgreSQL tem limites práticos para cláusulas IN com muitos valores
+      // Se a lista for muito grande (>10000), pode causar problemas de performance
+      // Por enquanto, vamos usar a lista completa, mas adicionar log se for muito grande
+      if (studentIdsToFilter.length > 10000) {
+        console.warn(
+          `Large studentIdsToFilter list (${studentIdsToFilter.length} items). ` +
+          `This may cause performance issues.`
+        );
+      }
       queryBuilder = queryBuilder.in("id", studentIdsToFilter);
     }
 
@@ -263,14 +287,61 @@ export class StudentRepositoryImpl implements StudentRepository {
     }
 
     // Get total count
-    const { count, error: countError } = await queryBuilder;
-
-    if (countError) {
-      throw new Error(`Failed to count students: ${formatSupabaseError(countError)}`);
+    let total = 0;
+    let countError: unknown = null;
+    
+    try {
+      const countResult = await queryBuilder;
+      total = countResult.count ?? 0;
+      countError = countResult.error;
+    } catch (err) {
+      countError = err;
     }
 
-    const total = count ?? 0;
-    const totalPages = Math.ceil(total / perPage);
+    if (countError) {
+      // Verificar se é um erro "vazio" (objeto sem propriedades úteis ou mensagem vazia)
+      const isEmptyError = 
+        (typeof countError === "object" && countError !== null) &&
+        (
+          Object.keys(countError).length === 0 ||
+          (Object.keys(countError).length === 1 && 
+           typeof (countError as Record<string, unknown>).message === "string" &&
+           (countError as Record<string, unknown>).message === "")
+        );
+
+      // Log detalhes do erro para debug
+      console.error("Count error details:", {
+        error: countError,
+        errorType: typeof countError,
+        errorKeys: typeof countError === "object" && countError !== null 
+          ? Object.keys(countError) 
+          : [],
+        isEmptyError,
+        studentIdsToFilterLength: studentIdsToFilter?.length ?? null,
+        hasQuery: !!params?.query,
+      });
+      
+      // Se o erro for vazio ou não tiver mensagem clara, usar fallback
+      const errorMessage = formatSupabaseError(countError);
+      const shouldUseFallback = 
+        isEmptyError ||
+        !errorMessage || 
+        errorMessage.trim() === "" ||
+        errorMessage.includes("vazio") || 
+        errorMessage.includes("sem mensagem") ||
+        errorMessage.includes('"message": ""');
+
+      if (shouldUseFallback) {
+        console.warn(
+          "Count query failed with empty/unclear error, will use fallback count from data. " +
+          `Error: ${JSON.stringify(countError)}`
+        );
+        // Continuar para buscar dados e contar depois como fallback
+        total = -1; // Marcador para indicar que precisamos contar depois
+      } else {
+        throw new Error(`Failed to count students: ${errorMessage}`);
+      }
+    }
 
     // Get paginated data
     let dataQuery = this.client
@@ -296,6 +367,70 @@ export class StudentRepositoryImpl implements StudentRepository {
     if (error) {
       throw new Error(`Failed to list students: ${formatSupabaseError(error)}`);
     }
+
+    // Se a contagem falhou, usar fallback: tentar diferentes estratégias
+    if (total === -1) {
+      let fallbackSuccess = false;
+      
+      // Estratégia 1: Tentar count sem head (retorna dados + count)
+      try {
+        let fallbackCountQuery = this.client
+          .from(TABLE)
+          .select("id", { count: "exact", head: false })
+          .is("deleted_at", null)
+          .limit(1); // Apenas precisamos do count, não dos dados
+
+        if (studentIdsToFilter !== null) {
+          fallbackCountQuery = fallbackCountQuery.in("id", studentIdsToFilter);
+        }
+
+        if (params?.query) {
+          const q = params.query;
+          fallbackCountQuery = fallbackCountQuery.or(
+            `nome_completo.ilike.%${q}%,email.ilike.%${q}%,numero_matricula.ilike.%${q}%`,
+          );
+        }
+
+        const { count: fallbackCount, error: fallbackError } = await fallbackCountQuery;
+        
+        if (!fallbackError && fallbackCount !== null && fallbackCount !== undefined) {
+          total = fallbackCount;
+          fallbackSuccess = true;
+          console.info(`Fallback count (strategy 1) successful: ${total} students`);
+        }
+      } catch (fallbackErr) {
+        console.warn(`Fallback count strategy 1 failed: ${formatSupabaseError(fallbackErr)}`);
+      }
+
+      // Estratégia 2: Se studentIdsToFilter existe, usar seu tamanho como aproximação
+      if (!fallbackSuccess && studentIdsToFilter !== null && studentIdsToFilter.length > 0) {
+        total = studentIdsToFilter.length;
+        fallbackSuccess = true;
+        console.warn(
+          `Using studentIdsToFilter length as count approximation: ${total}. ` +
+          `This assumes all filtered students are visible.`
+        );
+      }
+
+      // Estratégia 3: Último recurso - usar tamanho dos dados + indicar que é aproximação
+      if (!fallbackSuccess) {
+        const dataLength = (data ?? []).length;
+        // Se temos dados e não estamos na última página, estimar total
+        if (dataLength > 0 && dataLength === perPage) {
+          // Provavelmente há mais páginas, então estimamos baseado na página atual
+          total = page * perPage + 1; // Mínimo estimado
+        } else {
+          // Última página ou menos dados que perPage
+          total = (page - 1) * perPage + dataLength;
+        }
+        console.warn(
+          `Using estimated count based on returned data: ${total} (page ${page}, ` +
+          `${dataLength} items returned). This is an approximation and may not be accurate.`
+        );
+      }
+    }
+
+    const totalPages = Math.ceil(total / perPage);
 
     const students = await this.attachCourses(data ?? []);
 
@@ -504,27 +639,61 @@ export class StudentRepositoryImpl implements StudentRepository {
     if (error) {
       // Verificar se é erro de constraint única (incluindo primary key)
       const errorMessage = error.message?.toLowerCase() || "";
+      const errorCode = error.code || "";
+      
+      // PostgreSQL error codes: 23505 = unique_violation, 23503 = foreign_key_violation
+      const isPrimaryKeyError = 
+        errorCode === "23505" && 
+        (errorMessage.includes("alunos_pkey") || 
+         errorMessage.includes("primary key") ||
+         errorMessage.includes("chave primária"));
+      
       if (
+        isPrimaryKeyError ||
         errorMessage.includes("duplicate key") ||
         errorMessage.includes("unique constraint") ||
-        errorMessage.includes("alunos_pkey")
+        errorMessage.includes("alunos_pkey") ||
+        errorMessage.includes("chave primária")
       ) {
         // Se for erro de primary key, pode ser race condition - tentar buscar o aluno existente
-        const existingStudent = await this.client
-          .from(TABLE)
-          .select("*")
-          .eq("id", payload.id)
-          .maybeSingle();
-
-        if (existingStudent.data) {
+        // Primeiro tenta sem soft delete
+        let existingStudent = await this.findById(payload.id);
+        
+        // Se não encontrou, tenta incluindo soft deleted
+        if (!existingStudent) {
+          const { data: softDeletedData } = await this.client
+            .from(TABLE)
+            .select("*")
+            .eq("id", payload.id)
+            .maybeSingle();
+          
+          if (softDeletedData) {
+            // Restaurar soft deleted
+            const { data: restoredData } = await this.client
+              .from(TABLE)
+              .update({ deleted_at: null })
+              .eq("id", payload.id)
+              .select("*")
+              .single();
+            
+            if (restoredData) {
+              const [restored] = await this.attachCourses([restoredData]);
+              existingStudent = restored ?? null;
+            }
+          }
+        }
+        
+        if (existingStudent) {
           // Aluno existe, apenas vincular cursos
           if (payload.courseIds && payload.courseIds.length > 0) {
             await this.setCourses(payload.id, payload.courseIds);
           }
-          const [student] = await this.attachCourses([existingStudent.data]);
-          return student;
+          const updated = await this.findById(payload.id);
+          return updated ?? existingStudent;
         }
-        throw new Error(`Failed to create student: ${error.message}`);
+        
+        // Se não encontrou, lançar erro com mensagem clara
+        throw new Error(`Failed to create student: valor duplicado viola restrição única "chave primária de alunos"`);
       }
       if (
         errorMessage.includes("alunos_numero_matricula_key") ||

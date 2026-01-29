@@ -134,7 +134,7 @@ async function analisarArquivo(caminhoArquivo) {
     const fullName = rowData[colunasMapeadas.fullName || ''] || '';
     const enrollmentNumber = rowData[colunasMapeadas.enrollmentNumber || ''] || '';
     const cpfRaw = rowData[colunasMapeadas.cpf || ''] || '';
-    const phoneRaw = rowData[colunasMapeadas.phone || ''] || '';
+    const _phoneRaw = rowData[colunasMapeadas.phone || ''] || '';
     const coursesRaw = rowData[colunasMapeadas.courses || ''] || '';
     const tempPasswordRaw = rowData[colunasMapeadas.temporaryPassword || ''] || '';
 

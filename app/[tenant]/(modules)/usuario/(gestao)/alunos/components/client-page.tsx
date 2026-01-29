@@ -26,7 +26,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/app/shared/components/dataviz/table'
 import { downloadFile } from '@/shared/library/download-file'
-import { Progress } from '@/app/shared/components/feedback/progress'
 import { Spinner } from '@/app/shared/components/feedback/spinner'
 
 type ImportIssueStatus = 'skipped' | 'linked' | 'failed' | 'rejected'
@@ -251,7 +250,6 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
                     `Importação concluída, mas nenhum aluno foi processado (já cadastrados: ${skipped ?? 0}, com erro: ${failed ?? 0}).`
                 )
             } else if (created !== null || linked !== null) {
-                const totalProcessado = (created ?? 0) + (linked ?? 0)
                 toast.success(
                     `Importação concluída: ${created ?? 0} criados, ${linked ?? 0} vinculados, ${skipped ?? 0} já cadastrados, ${failed ?? 0} com erro.`
                 )

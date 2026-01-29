@@ -152,7 +152,6 @@ export class StudentService extends UserBaseService {
 
     // Se o ID não foi fornecido, precisamos criar o usuário no auth.users primeiro
     let studentId = payload.id;
-    let isNewAuthUser = false;
     if (!studentId) {
       try {
         const authResult = await this.createAuthUser({
@@ -165,7 +164,6 @@ export class StudentService extends UserBaseService {
         });
 
         studentId = authResult.userId;
-        isNewAuthUser = authResult.isNew;
       } catch (error: unknown) {
         const err = error as Error;
         if (err.message?.includes("Conflict")) {
@@ -216,20 +214,34 @@ export class StudentService extends UserBaseService {
       });
     } catch (error: unknown) {
       const err = error as Error;
+      const errorMessage = err.message?.toLowerCase() || "";
+      
       // Verificar se é erro de constraint única (duplicate key)
-      // Incluindo erro de primary key (alunos_pkey)
+      // Incluindo erro de primary key (alunos_pkey ou "chave primária")
+      const isPrimaryKeyError = 
+        errorMessage.includes("alunos_pkey") ||
+        errorMessage.includes("chave primária") ||
+        errorMessage.includes("primary key");
+      
       if (
-        err.message?.includes("duplicate key") ||
-        err.message?.includes("unique constraint") ||
-        err.message?.includes("alunos_pkey") ||
-        err.message?.includes("alunos_numero_matricula_key") ||
-        err.message?.includes("alunos_empresa_matricula_unique") ||
-        err.message?.includes("alunos_email_key") ||
-        err.message?.includes("alunos_cpf_key")
+        isPrimaryKeyError ||
+        errorMessage.includes("duplicate key") ||
+        errorMessage.includes("unique constraint") ||
+        errorMessage.includes("alunos_numero_matricula_key") ||
+        errorMessage.includes("alunos_empresa_matricula_unique") ||
+        errorMessage.includes("alunos_email_key") ||
+        errorMessage.includes("alunos_cpf_key")
       ) {
         // Se for erro de primary key, tentar buscar o aluno existente e vincular cursos
-        if (err.message?.includes("alunos_pkey")) {
-          const existingStudent = await this.repository.findById(studentId);
+        if (isPrimaryKeyError) {
+          // Tentar buscar por ID primeiro
+          let existingStudent = await this.repository.findById(studentId);
+          
+          // Se não encontrou, tentar buscar por email
+          if (!existingStudent) {
+            existingStudent = await this.repository.findByEmail(email);
+          }
+          
           if (existingStudent) {
             // Aluno existe, apenas vincular cursos
             const courseIdsToLink =
@@ -248,10 +260,11 @@ export class StudentService extends UserBaseService {
             return updated ?? existingStudent;
           }
         }
+        
         // Para outros erros de constraint, verificar se é por email (aluno já existe)
         if (
-          err.message?.includes("alunos_email_key") ||
-          err.message?.includes("alunos_pkey")
+          errorMessage.includes("alunos_email_key") ||
+          errorMessage.includes("duplicate key")
         ) {
           const existingByEmail = await this.repository.findByEmail(email);
           if (existingByEmail) {
@@ -272,6 +285,7 @@ export class StudentService extends UserBaseService {
             return updated ?? existingByEmail;
           }
         }
+        
         throw new StudentConflictError(
           err.message || "Aluno já existe no sistema",
         );
@@ -432,6 +446,18 @@ export class StudentService extends UserBaseService {
 
   async getById(id: string): Promise<Student> {
     return this.ensureExists(id);
+  }
+
+  async findById(id: string): Promise<Student | null> {
+    return this.repository.findById(id);
+  }
+
+  async findByEmail(email: string): Promise<Student | null> {
+    return this.repository.findByEmail(email);
+  }
+
+  async addCourses(studentId: string, courseIds: string[]): Promise<void> {
+    return this.repository.addCourses(studentId, courseIds);
   }
 
   private validateFullName(fullName?: string): string {

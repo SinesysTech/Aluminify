@@ -141,7 +141,7 @@ export class StudentImportService {
           // Se não conseguir verificar, continuar normalmente
         }
 
-        const result = await this.studentService.create({
+        await this.studentService.create({
           empresaId: empresaId || undefined,
           fullName: row.fullName,
           email: row.email,
@@ -183,13 +183,13 @@ export class StudentImportService {
             if (found && courseIds.length > 0) {
               // Tentar vincular cursos ao aluno existente
               try {
-                await this.studentService.repository.addCourses(
+                await this.studentService.addCourses(
                   found.id,
                   courseIds,
                 );
 
                 // Verificar se os cursos foram vinculados
-                const updated = await this.studentService.repository.findById(
+                const updated = await this.studentService.findById(
                   found.id,
                 );
                 if (updated) {
@@ -228,44 +228,72 @@ export class StudentImportService {
 
         // Se for erro de primary key (alunos_pkey), tentar buscar e vincular
         const err = error as Error;
+        const errorMessage = err.message?.toLowerCase() || "";
+        const isPrimaryKeyError = 
+          errorMessage.includes("alunos_pkey") ||
+          errorMessage.includes("chave primária") ||
+          errorMessage.includes("primary key");
+        
         if (
-          err.message?.includes("alunos_pkey") ||
-          err.message?.includes("duplicate key") ||
-          err.message?.includes("unique constraint")
+          isPrimaryKeyError ||
+          errorMessage.includes("duplicate key") ||
+          errorMessage.includes("unique constraint")
         ) {
           try {
-            const studentAfter = await this.studentService.list({
-              query: row.email,
-              perPage: 1,
-            });
-            const found = studentAfter.data.find(
-              (s) => s.email.toLowerCase() === row.email.toLowerCase(),
+            // Tentar buscar o aluno por email
+            const existingByEmail = await this.studentService.findByEmail(
+              row.email.toLowerCase(),
             );
 
-            if (found && courseIds.length > 0) {
+            if (existingByEmail && courseIds.length > 0) {
               // Tentar vincular cursos ao aluno existente
               try {
-                await this.studentService.repository.addCourses(
-                  found.id,
+                await this.studentService.addCourses(
+                  existingByEmail.id,
                   courseIds,
                 );
 
-                return {
-                  rowNumber: row.rowNumber,
-                  email: row.email,
-                  status: "linked",
-                  message: "Aluno já existente, vinculado aos cursos da empresa",
-                };
+                // Verificar se os cursos foram vinculados
+                const updated = await this.studentService.findById(
+                  existingByEmail.id,
+                );
+                
+                if (updated) {
+                  const hasCourses = courseIds.some((courseId) =>
+                    updated.courses?.some((c) => c.id === courseId),
+                  );
+
+                  if (hasCourses) {
+                    return {
+                      rowNumber: row.rowNumber,
+                      email: row.email,
+                      status: "linked",
+                      message: "Aluno já existente, vinculado aos cursos da empresa",
+                    };
+                  }
+                }
               } catch (linkError) {
-                // Se falhar ao vincular, marcar como failed
+                // Se falhar ao vincular, continuar para marcar como skipped
                 console.warn(
-                  `Failed to link courses to existing student ${found.id}:`,
+                  `Failed to link courses to existing student ${existingByEmail.id}:`,
                   linkError,
                 );
               }
+            } else if (existingByEmail) {
+              // Aluno existe mas não há cursos para vincular
+              return {
+                rowNumber: row.rowNumber,
+                email: row.email,
+                status: "linked",
+                message: "Aluno já existente",
+              };
             }
-          } catch {
-            // Se não conseguir verificar, tratar como failed
+          } catch (searchError) {
+            // Se não conseguir buscar, tratar como skipped
+            console.warn(
+              `Failed to search for existing student with email ${row.email}:`,
+              searchError,
+            );
           }
         }
 
