@@ -1,20 +1,12 @@
 import type { Metadata } from 'next'
-import dynamic from "next/dynamic"
 import { createClient } from "@/app/shared/core/server"
 import { redirect } from "next/navigation"
-import { getAgendamentosAluno } from "@/app/[tenant]/(modules)/agendamentos/lib/actions";
-import { Skeleton } from "@/app/shared/components/feedback/skeleton"
+import { getAgendamentosAluno } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus } from "lucide-react"
-
-const MeusAgendamentosList = dynamic(
-  () => import("../components/meus-agendamentos-list").then(mod => ({ default: mod.MeusAgendamentosList })),
-  {
-    ssr: false,
-    loading: () => <AgendamentosSkeleton />,
-  }
-)
+import { MeusAgendamentosList } from "../components/meus-agendamentos-list"
+import { ProfessorAgendamentosView } from "../components/agendamentos-professor-view"
 
 export const metadata: Metadata = {
   title: 'Meus Agendamentos'
@@ -35,6 +27,20 @@ export default async function MeusAgendamentosPage({ params }: MeusAgendamentosP
     redirect(`/${tenant}/auth`)
   }
 
+  // Check if user is an institution member (has empresa_id)
+  const { data: userData } = await supabase
+    .from("usuarios")
+    .select("empresa_id")
+    .eq("id", user.id)
+    .single()
+
+  const isInstitutionUser = !!userData?.empresa_id
+
+  if (isInstitutionUser) {
+    return <ProfessorAgendamentosView userId={user.id} />
+  }
+
+  // If student (no empresa_id or explicitly student context), show student view
   const agendamentos = await getAgendamentosAluno(user.id)
 
   return (
@@ -55,16 +61,6 @@ export default async function MeusAgendamentosPage({ params }: MeusAgendamentosP
       </div>
 
       <MeusAgendamentosList agendamentos={agendamentos} />
-    </div>
-  )
-}
-
-function AgendamentosSkeleton() {
-  return (
-    <div className="space-y-3">
-      {[1, 2, 3, 4].map((i) => (
-        <Skeleton key={i} className="h-24 rounded-lg" />
-      ))}
     </div>
   )
 }
