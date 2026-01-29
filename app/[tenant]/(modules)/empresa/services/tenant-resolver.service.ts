@@ -10,7 +10,7 @@ import {
 const DEFAULT_CONFIG: TenantResolverConfig = {
   primaryDomain: process.env.NEXT_PUBLIC_PRIMARY_DOMAIN || 'alumnify.com.br',
   devDomains: ['localhost', '127.0.0.1'],
-  cacheTtlMs: 5 * 60 * 1000, // 5 minutes
+  cacheTtlMs: 60 * 1000, // 1 minute (aligned with middleware cache TTL)
 };
 
 // In-memory cache for tenant resolution

@@ -1096,3 +1096,284 @@ O role `superadmin` foi removido inteiramente do sistema. Nunca foi utilizado em
 ### Decisao tecnica
 
 O service role key (Secret) do Supabase ja faz bypass de RLS automaticamente para operacoes server-side, tornando `is_superadmin()` nas policies redundante. A impersonacao permanece como funcao do **admin da empresa** (pode impersonar alunos da propria empresa).
+
+## 2026-01-29: Fix soft-delete RLS para alunos + cache TTL
+
+Correcoes pontuais de seguranca e consistencia na arquitetura multi-tenant.
+
+| Fix | Detalhe |
+|---|---|
+| **Soft-delete RLS** | Policies SELECT e UPDATE na tabela `alunos` agora filtram `deleted_at IS NULL`. Alunos soft-deleted ficam invisiveis via RLS. |
+| **Cache TTL** | TenantResolverService alinhado de 5 min para 1 min (mesmo do middleware). |
+| **Descartado** | `empresa_id` nullable em `disciplinas`/`segmentos` ja e NOT NULL no banco atual. |
+
+---
+
+# Decisao Arquitetural: Modelo Unificado de Usuarios
+
+> Status: APROVADO — pendente implementacao
+
+## Contexto
+
+O sistema atual possui **3 tabelas separadas** para pessoas (`alunos`, `professores`, `usuarios`) mais uma junction separada (`empresa_admins`). Isso causa:
+
+- Duplicacao de colunas (nome, email, cpf, telefone em todas as 3)
+- Funcoes RLS que consultam multiplas tabelas (`get_user_empresa_id()` consulta `professores` + `usuarios`)
+- Impossibilidade de multi-tenant natural (um professor nao pode dar aula em 2 cursinhos)
+- Logica de "normalizacao de role" no auth (professor → usuario, empresa → usuario)
+- Duas tabelas identicas (`professores_disciplinas` e `usuarios_disciplinas`)
+
+## Modelo Novo
+
+### Tabela `usuarios` (dados pessoais — 1 registro por pessoa)
+
+```
+usuarios
+  id                UUID PK (= auth.users.id)
+  nome_completo     TEXT NOT NULL
+  email             TEXT UNIQUE NOT NULL
+  cpf               TEXT
+  telefone          TEXT
+  avatar_url        TEXT
+  data_nascimento   DATE
+  endereco          TEXT
+  cep               TEXT
+  numero_endereco   TEXT
+  complemento       TEXT
+  cidade            TEXT
+  estado            TEXT
+  bairro            TEXT
+  pais              TEXT DEFAULT 'Brasil'
+  instagram         TEXT
+  twitter           TEXT
+  biografia         TEXT
+  especialidade     TEXT
+  chave_pix         TEXT
+  hotmart_id        TEXT
+  origem_cadastro   TEXT DEFAULT 'manual'
+  must_change_password BOOLEAN DEFAULT false
+  created_at        TIMESTAMPTZ DEFAULT now()
+  updated_at        TIMESTAMPTZ DEFAULT now()
+```
+
+Todos os campos de pessoa ficam aqui. Campos que antes eram exclusivos de `alunos` (endereco, social, hotmart) agora sao colunas opcionais na tabela unica. A senha pertence ao `auth.users` e e global.
+
+### Tabela `usuarios_empresas` (vinculo N:N com papel)
+
+```
+usuarios_empresas
+  id                UUID PK DEFAULT gen_random_uuid()
+  usuario_id        UUID FK → usuarios NOT NULL
+  empresa_id        UUID FK → empresas NOT NULL
+  papel_base        ENUM('aluno', 'professor', 'usuario') NOT NULL
+  papel_id          UUID FK → papeis (nullable, so para staff com permissoes customizadas)
+  is_admin          BOOLEAN DEFAULT false
+  is_owner          BOOLEAN DEFAULT false
+  ativo             BOOLEAN DEFAULT true
+  deleted_at        TIMESTAMPTZ
+  created_at        TIMESTAMPTZ DEFAULT now()
+  updated_at        TIMESTAMPTZ DEFAULT now()
+  UNIQUE(usuario_id, empresa_id, papel_base)
+```
+
+**Regras:**
+- Cada registro = "esta pessoa participa deste tenant com este papel"
+- Mesma pessoa pode ser `aluno` no Tenant A e `professor` no Tenant B
+- Mesma pessoa pode ser `aluno` E `professor` no mesmo tenant (monitor que tambem estuda)
+- `is_admin` so para `professor` ou `usuario` (aluno nao pode ser admin)
+- `is_owner` maximo 1 por empresa (enforce via trigger ou app)
+- `papel_id` so necessario para `usuario` com permissoes granulares customizadas
+- Multi-tenant: se tem 2 registros, login mostra workspace switcher
+
+### Tabelas eliminadas
+
+| Tabela atual | Destino |
+|---|---|
+| `alunos` (25 colunas) | Merge em `usuarios` (dados pessoais) + `usuarios_empresas` (vinculo) |
+| `professores` (13 colunas) | Merge em `usuarios` + `usuarios_empresas` |
+| `empresa_admins` (5 colunas) | Absorvido por `usuarios_empresas.is_admin` + `is_owner` |
+| `professores_disciplinas` (11 colunas) | Merge em `usuarios_disciplinas` (ja existente, mesma estrutura) |
+
+### Tabelas que mudam FK
+
+| Tabela | FK atual | FK novo |
+|---|---|---|
+| `alunos_cursos` | `aluno_id → alunos.id` | `usuario_id → usuarios.id` |
+| `alunos_turmas` | `aluno_id → alunos.id` | `usuario_id → usuarios.id` |
+| `aulas_concluidas` | `aluno_id → alunos.id` | `usuario_id → usuarios.id` |
+| `cronogramas` | `aluno_id → alunos.id` | `usuario_id → usuarios.id` |
+| `matriculas` | `aluno_id → alunos.id` | `usuario_id → usuarios.id` |
+| `progresso_atividades` | `aluno_id → alunos.id` | `usuario_id → usuarios.id` |
+| `progresso_flashcards` | `aluno_id → alunos.id` | `usuario_id → usuarios.id` |
+| `sessoes_estudo` | `aluno_id → alunos.id` | `usuario_id → usuarios.id` |
+| `transactions` | `aluno_id → alunos.id` | `usuario_id → usuarios.id` |
+| `professores_disciplinas` | `professor_id → professores.id` | Merge em `usuarios_disciplinas` |
+
+### Funcoes RLS simplificadas
+
+| Funcao | Antes | Depois |
+|---|---|---|
+| `get_user_empresa_id()` | Consulta `professores` + `usuarios` | Consulta `usuarios_empresas` |
+| `is_empresa_admin()` | Consulta `empresa_admins` + `professores.is_admin` | Consulta `usuarios_empresas.is_admin` |
+| `user_belongs_to_empresa()` | Consulta `professores` | Consulta `usuarios_empresas` |
+| `is_professor()` | Consulta `professores` | Consulta `usuarios_empresas.papel_base = 'professor'` |
+| `aluno_matriculado_empresa()` | JOIN `alunos_cursos` + `cursos` | Consulta `usuarios_empresas.papel_base = 'aluno'` |
+
+### TypeScript: tipos simplificados
+
+```typescript
+// Antes: 4 roles com normalizacao
+type AppUserRole = 'aluno' | 'usuario' | 'professor' | 'empresa';
+
+// Depois: 3 papeis base, sem normalizacao
+type PapelBase = 'aluno' | 'professor' | 'usuario';
+```
+
+### Fluxo de login com multi-tenant
+
+```
+1. Usuario faz login (Supabase Auth)
+2. Busca vinculos em usuarios_empresas WHERE usuario_id = auth.uid() AND ativo = true
+3. Se 1 vinculo → entra direto no tenant
+4. Se N vinculos → mostra workspace switcher
+5. Selecao de workspace seta empresa_id no JWT/cookie
+6. Dentro do app, header da sidebar tem switcher de workspace
+```
+
+### Fluxo de adicionar usuario existente a outro tenant
+
+```
+1. Admin do tenant busca por email
+2. Se email existe em usuarios → cria apenas vinculo em usuarios_empresas
+3. Se nao existe → cria em auth.users + usuarios + usuarios_empresas
+4. Admin NAO pode resetar senha (pertence ao auth.users, e global)
+5. Admin pode desativar vinculo (ativo = false no usuarios_empresas)
+```
+
+---
+
+# Plano de Migracao: Modelo Unificado de Usuarios
+
+> Total estimado: ~68 arquivos de codigo + ~109 RLS policies + ~6 funcoes PostgreSQL
+
+## Impacto Mapeado
+
+| Recurso | Quantidade |
+|---|---|
+| Tabelas com FK para `alunos` | 9 |
+| Tabelas com FK para `professores` | 5 |
+| Tabelas com FK para `usuarios` | 1 |
+| Arquivos referenciando `alunos` | 20 |
+| Arquivos referenciando `professores` | 29 |
+| Arquivos referenciando `usuarios` | 15 |
+| Arquivos referenciando `empresa_admins` | 4 |
+| Funcoes RLS consultando tabelas legadas | 6 |
+| Colunas exclusivas de `alunos` | 16 (endereco, social, hotmart) |
+| Colunas exclusivas de `professores` | 1 (is_admin) |
+
+## Fases de Execucao
+
+### FASE 1: Schema — Expandir `usuarios` e criar `usuarios_empresas`
+
+Migration SQL que:
+
+1. **Adiciona colunas faltantes** em `usuarios` (campos que so existem em `alunos`):
+   - `data_nascimento`, `endereco`, `cep`, `numero_endereco`, `complemento`, `cidade`, `estado`, `bairro`, `pais`
+   - `instagram`, `twitter`
+   - `numero_matricula`, `hotmart_id`, `origem_cadastro`
+   - `must_change_password`, `senha_temporaria`
+
+2. **Cria tabela `usuarios_empresas`** com:
+   - `usuario_id`, `empresa_id`, `papel_base` (enum), `papel_id`, `is_admin`, `is_owner`, `ativo`, `deleted_at`, timestamps
+   - UNIQUE(usuario_id, empresa_id, papel_base)
+
+3. **Cria enum** `enum_papel_base` com valores `'aluno'`, `'professor'`, `'usuario'`
+
+### FASE 2: Migracao de Dados
+
+1. **Migra `professores` → `usuarios`**:
+   - INSERT INTO usuarios (id, nome_completo, email, ...) SELECT ... FROM professores WHERE id NOT IN (SELECT id FROM usuarios)
+   - Para professores que JA existem em `usuarios`: merge campos faltantes (biografia, especialidade, etc.)
+
+2. **Migra `alunos` → `usuarios`**:
+   - INSERT INTO usuarios (id, nome_completo, email, ...) SELECT ... FROM alunos WHERE id NOT IN (SELECT id FROM usuarios)
+   - Para alunos que JA existem em `usuarios`: merge campos faltantes (endereco, social, etc.)
+
+3. **Popula `usuarios_empresas`**:
+   - FROM `professores`: INSERT (usuario_id, empresa_id, papel_base='professor', is_admin=professores.is_admin)
+   - FROM `alunos`: INSERT (usuario_id, empresa_id, papel_base='aluno')
+   - FROM `usuarios` (atual): INSERT (usuario_id, empresa_id, papel_base='usuario', papel_id=usuarios.papel_id)
+   - FROM `empresa_admins`: UPDATE usuarios_empresas SET is_admin=true, is_owner=empresa_admins.is_owner WHERE ...
+
+### FASE 3: FKs — Re-apontar referencias
+
+Para cada tabela que referencia `alunos`:
+1. Adicionar coluna `usuario_id` (nullable, FK → usuarios)
+2. Popular `usuario_id` FROM `aluno_id` (mesmos UUIDs, pois alunos.id = auth.users.id = usuarios.id)
+3. Dropar FK antiga de `aluno_id`
+4. Renomear `aluno_id` → `usuario_id` OU dropar coluna velha
+
+Tabelas: `alunos_cursos`, `alunos_turmas`, `aulas_concluidas`, `cronogramas`, `matriculas`, `progresso_atividades`, `progresso_flashcards`, `sessoes_estudo`, `transactions`
+
+Para `professores_disciplinas`:
+1. Migrar dados para `usuarios_disciplinas` (mesma estrutura)
+2. Dropar `professores_disciplinas`
+
+### FASE 4: Funcoes RLS
+
+Reescrever todas as funcoes para consultar `usuarios_empresas`:
+
+- `get_user_empresa_id()` → SELECT empresa_id FROM usuarios_empresas WHERE usuario_id = auth.uid() AND ativo = true LIMIT 1
+- `is_empresa_admin()` → SELECT 1 FROM usuarios_empresas WHERE usuario_id = auth.uid() AND is_admin = true
+- `user_belongs_to_empresa(empresa_id)` → SELECT 1 FROM usuarios_empresas WHERE usuario_id = auth.uid() AND empresa_id = param
+- `is_professor()` → SELECT 1 FROM usuarios_empresas WHERE usuario_id = auth.uid() AND papel_base = 'professor'
+- `aluno_matriculado_empresa(empresa_id)` → SELECT 1 FROM usuarios_empresas WHERE usuario_id = auth.uid() AND papel_base = 'aluno' AND empresa_id = param
+
+### FASE 5: RLS Policies
+
+Reescrever ~109 policies usando as funcoes atualizadas. Como as funcoes mantem a mesma assinatura, a maioria das policies so precisa ser re-testada (nao reescrita).
+
+### FASE 6: TypeScript — Tipos base
+
+- `AppUserRole` → `PapelBase = 'aluno' | 'professor' | 'usuario'`
+- Remover interfaces `Student`, `Teacher` separadas
+- Criar interface `UsuarioEmpresa` para o vinculo
+- Atualizar `AppUser` para incluir `papelBase`, `isAdmin`, `isOwner`
+
+### FASE 7: Auth — Fluxo de login
+
+- Atualizar `getAuthenticatedUser()` para consultar `usuarios_empresas`
+- Implementar workspace switcher (selecao de tenant quando tem multiplos vinculos)
+- Atualizar middleware para resolver empresa_id do vinculo ativo
+- Atualizar `identifyUserRoleAction()` para o novo modelo
+
+### FASE 8: API Routes (~49 arquivos)
+
+Atualizar todas as queries Supabase:
+- `.from('alunos')` → `.from('usuarios')`
+- `.from('professores')` → `.from('usuarios')`
+- `.from('empresa_admins')` → `.from('usuarios_empresas')`
+- `.eq('aluno_id', ...)` → `.eq('usuario_id', ...)`
+- `.eq('professor_id', ...)` → `.eq('usuario_id', ...)`
+
+### FASE 9: Services e UI
+
+- Atualizar services (dashboard-analytics, cronograma, financeiro, etc.)
+- Atualizar componentes UI (nav-user, sidebar, profile, etc.)
+- Implementar UI de workspace switcher
+
+### FASE 10: Cleanup
+
+1. Dropar tabelas legadas: `alunos`, `professores`, `empresa_admins`, `professores_disciplinas`
+2. Dropar funcoes legadas nao mais necessarias
+3. Regenerar `database.types.ts`
+4. Atualizar documentacao
+
+## Verificacao
+
+1. **TypeScript**: `npx tsc --noEmit` sem erros
+2. **Build**: `npm run build` sem erros
+3. **Grep**: Zero referencias a tabelas dropadas no codigo
+4. **DB**: Todas as policies funcionando
+5. **Funcional**: Login, workspace switcher, impersonacao, CRUD de alunos/professores
+6. **Data integrity**: Contagem de registros antes/depois da migracao
