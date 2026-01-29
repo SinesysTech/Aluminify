@@ -34,7 +34,7 @@ export async function GET() {
     let fullName: string | null = null;
     let roleType: RoleTipo | null = null;
 
-    if (role === 'usuario' || role === 'superadmin') {
+    if (role === 'usuario') {
       // Use service role client to bypass RLS for reliable data access
       const adminClient = getDatabaseClient();
 
@@ -63,10 +63,6 @@ export async function GET() {
             roleType = papelRow.tipo as RoleTipo;
           }
         }
-      } else {
-        // Fallback para metadata (apenas para superadmin sem registro em usuarios)
-        empresaId = (user.user_metadata?.empresa_id as string | undefined) ?? null;
-        fullName = (user.user_metadata?.full_name as string | undefined) ?? null;
       }
     } else if (role === 'aluno') {
       const { data: aluno } = await supabase
@@ -90,7 +86,7 @@ export async function GET() {
       fullName,
       empresaId,
       // Derived from roleType for convenience
-      isAdmin: roleType ? isAdminRoleTipo(roleType) : role === 'superadmin',
+      isAdmin: roleType ? isAdminRoleTipo(roleType) : false,
     });
   } catch (e) {
     console.error('Error in /api/usuario/perfil:', e);

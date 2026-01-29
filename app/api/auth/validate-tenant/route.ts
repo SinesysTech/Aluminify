@@ -32,14 +32,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Superadmin pode acessar qualquer tenant
-    const metadata = (user.user_metadata ?? {}) as Record<string, unknown>;
-    const isSuperadmin =
-      metadata.role === "superadmin" || metadata.is_superadmin === true;
-    if (isSuperadmin) {
-      return NextResponse.json({ valid: true, roles: ["superadmin"] });
-    }
-
     const adminClient = getDatabaseClient();
 
     // Usuario (staff) vinculado diretamente à empresa

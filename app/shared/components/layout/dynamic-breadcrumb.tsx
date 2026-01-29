@@ -74,8 +74,7 @@ const routeLabels: Record<string, string> = {
   "update-password": "Atualizar Senha",
   "primeiro-acesso": "Primeiro Acesso",
 
-  // Super Admin
-  "superadmin": "Super Admin",
+  // Empresas
   "empresas": "Empresas",
   "planos": "Planos",
   "logs": "Logs",

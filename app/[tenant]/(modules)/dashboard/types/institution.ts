@@ -1,7 +1,7 @@
 /**
  * Tipos TypeScript para o Dashboard da Instituição
  *
- * Usado quando o usuário tem papel administrativo (admin, professor_admin) ou é superadmin
+ * Usado quando o usuário tem papel administrativo (admin, professor_admin)
  */
 
 import type { HeatmapDay } from "@/app/[tenant]/(modules)/dashboard/types/student";

@@ -86,8 +86,7 @@ async function patchHandler(
     // Verificar permissão: aluno só pode atualizar seu próprio progresso
     if (
       request.user &&
-      request.user.role !== "usuario" &&
-      request.user.role !== "superadmin"
+      request.user.role !== "usuario"
     ) {
       // Já validado acima, alunoId é do usuário autenticado
     }

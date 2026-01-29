@@ -116,7 +116,7 @@ async function apiRequest<T>(
             if (response.status === 401) {
               errorText = 'Não autorizado. Faça login novamente.'
             } else if (response.status === 403) {
-              errorText = 'Acesso negado. Você precisa ser professor ou superadmin para realizar esta ação.'
+              errorText = 'Acesso negado. Você precisa ser professor ou administrador para realizar esta ação.'
             } else if (response.status === 500) {
               errorText = 'Erro interno do servidor. Verifique os logs do servidor para mais detalhes.'
             } else {

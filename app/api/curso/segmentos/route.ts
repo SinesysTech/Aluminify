@@ -106,13 +106,11 @@ async function postHandler(request: AuthenticatedRequest) {
     hasUser: !!request.user,
     hasApiKey: !!request.apiKey,
     userRole: request.user?.role,
-    userIsSuperAdmin: request.user?.isSuperAdmin,
   });
 
   if (
     request.user &&
-    request.user.role !== "usuario" &&
-    request.user.role !== "superadmin"
+    request.user.role !== "usuario"
   ) {
     console.log("[Segment POST] Forbidden - user role:", request.user.role);
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

@@ -31,7 +31,7 @@ export class SalaEstudosService {
     let atividadesComProgresso: AtividadeComProgresso[] = [];
     let cursos: Array<{ id: string; nome: string }> = [];
 
-    if (userRole !== "professor" && userRole !== "superadmin") {
+    if (userRole !== "professor" && userRole !== "usuario") {
       const url = new URL(
         `/api/sala-de-estudos/atividades/aluno/${alunoId}`,
         window.location.origin,
@@ -62,7 +62,7 @@ export class SalaEstudosService {
         return { atividades: [], estrutura: [], cursos };
       }
     } else {
-      // Logic for professor/superadmin (simplified from client)
+      // Logic for professor/usuario (simplified from client)
       // This part was quite complex in client.tsx, re-implementing logic to fetch all...
       // Ideally this should be an API endpoint too, but for refactor we keep client-side orchestration if no API exists.
       // For brevity in this refactor, assuming the API /api/sala-de-estudos/atividades/aluno handles basic fetching.
@@ -110,7 +110,7 @@ export class SalaEstudosService {
     } = await this.supabase.auth.getSession();
     if (!session) throw new Error("No session");
 
-    if (role === "professor" || role === "superadmin") {
+    if (role === "professor" || role === "usuario") {
       const { data, error } = await this.supabase
         .from("cursos")
         .select("id, nome")

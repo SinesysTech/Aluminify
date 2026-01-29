@@ -26,7 +26,7 @@ async function getHandler(
     const supabase = await createClient();
 
     const context = await getEmpresaContext(supabase, user.id, request, user);
-    if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
+    if (!validateEmpresaAccess(context, id)) {
       return NextResponse.json(
         { error: "Acesso negado. Apenas admin da empresa pode ver alunos." },
         { status: 403 },

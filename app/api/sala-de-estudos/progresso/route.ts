@@ -77,8 +77,7 @@ async function getHandler(request: AuthenticatedRequest) {
     // Verificar se o aluno está acessando seu próprio progresso ou se é professor
     if (
       request.user &&
-      request.user.role !== "usuario" &&
-      request.user.role !== "superadmin"
+      request.user.role !== "usuario"
     ) {
       if (request.user.id !== alunoId) {
         return NextResponse.json(

@@ -126,7 +126,6 @@ function isTenantPath(pathname: string): boolean {
     "/_next",
     "/dashboard",
     "/admin",
-    "/superadmin",
     "/aluno",
     "/professor",
     "/static",

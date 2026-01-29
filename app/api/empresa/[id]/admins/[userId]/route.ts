@@ -26,7 +26,7 @@ async function deleteHandler(
 
     const context = await getEmpresaContext(supabase, user.id, request, user);
     
-    // Verificar se é owner ou superadmin
+    // Verificar se é owner
     const { data: isOwner } = await supabase
       .from('empresa_admins')
       .select('is_owner')
@@ -34,9 +34,9 @@ async function deleteHandler(
       .eq('user_id', user.id)
       .maybeSingle();
 
-    if (!context.isSuperAdmin && (!validateEmpresaAccess(context, id) || !isOwner?.is_owner)) {
+    if (!validateEmpresaAccess(context, id) || !isOwner?.is_owner) {
       return NextResponse.json(
-        { error: 'Acesso negado. Apenas owner ou superadmin pode remover admins.' },
+        { error: 'Acesso negado. Apenas owner pode remover admins.' },
         { status: 403 }
       );
     }

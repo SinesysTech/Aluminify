@@ -41,12 +41,6 @@ export class UserRoleIdentifierService {
     }
     const userEmail = userData?.user?.email?.toLowerCase() ?? null;
 
-    // Check for superadmin role first
-    const isSuperadmin = await this.checkSuperadminFromUserData(userData?.user);
-    if (isSuperadmin) {
-      rolesSet.add("superadmin");
-    }
-
     // Check for usuario role (institution staff)
     // First check in 'usuarios' table (new structure)
     const usuarioRoles = await this.checkUsuarioRoles(
@@ -207,15 +201,6 @@ export class UserRoleIdentifierService {
   }
 
   // Private helper methods
-
-  private async checkSuperadminFromUserData(
-    user: { user_metadata?: Record<string, unknown> } | null | undefined,
-  ): Promise<boolean> {
-    const role = user?.user_metadata?.role;
-    const isSuperadmin =
-      role === "superadmin" || user?.user_metadata?.is_superadmin === true;
-    return Boolean(isSuperadmin);
-  }
 
   private async checkUsuarioRoles(
     userId: string,
@@ -610,10 +595,7 @@ export class UserRoleIdentifierService {
   private determinePrimaryRole(
     roles: Array<Exclude<AppUserRole, "empresa">>,
   ): Exclude<AppUserRole, "empresa"> {
-    // Priority: superadmin > usuario > aluno
-    if (roles.includes("superadmin")) {
-      return "superadmin";
-    }
+    // Priority: usuario > aluno
     if (roles.includes("usuario")) {
       return "usuario";
     }

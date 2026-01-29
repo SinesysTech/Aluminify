@@ -837,7 +837,7 @@ export class FlashcardsService {
     // 3. Buscar frentes das disciplinas (que pertencem aos cursos)
     // Regra importante:
     // - Alunos: SOMENTE frentes vinculadas aos cursos em que estão matriculados (curso_id != null e pertence ao aluno)
-    // - Professores/superadmin: podem ver também frentes "globais" (curso_id is null)
+    // - Professores/admins: podem ver também frentes "globais" (curso_id is null)
     const { data: frentesData, error: frentesError } = await this.client
       .from("frentes")
       .select("id")

@@ -9,7 +9,6 @@ import {
 const DEFAULT_ROUTE_BY_ROLE: Record<AppUserRole, string> = {
   aluno: "/dashboard",
   usuario: "/dashboard",
-  superadmin: "/superadmin/dashboard",
   professor: "/dashboard",
   empresa: "/empresa/dashboard",
 };
@@ -102,7 +101,6 @@ export function canImpersonate(
   role: AppUserRole,
   roleType?: RoleTipo,
 ): boolean {
-  if (role === "superadmin") return true;
   if (roleType && isAdminRoleTipo(roleType)) return true;
   return false;
 }

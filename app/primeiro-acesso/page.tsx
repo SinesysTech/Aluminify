@@ -10,7 +10,7 @@ export default async function PrimeiroAcessoPage() {
 
   if (!user.mustChangePassword) {
     const defaultRoute = getDefaultRouteForRole(user.role)
-    const redirectUrl = user.empresaSlug && user.role !== 'superadmin'
+    const redirectUrl = user.empresaSlug
       ? `/${user.empresaSlug}${defaultRoute}`
       : defaultRoute
     redirect(redirectUrl)

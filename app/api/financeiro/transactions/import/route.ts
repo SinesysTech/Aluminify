@@ -52,7 +52,7 @@ async function postHandler(request: AuthenticatedRequest) {
 
     // Check if user is admin
     const isAdmin = user.role === "usuario" && !!user.roleType && isAdminRoleTipo(user.roleType);
-    if (!user.isSuperAdmin && !isAdmin) {
+    if (!isAdmin) {
       return NextResponse.json(
         { error: "Only admins can import transactions" },
         { status: 403 }

@@ -91,8 +91,7 @@ async function getHandler(
     // Verificar permissão: aluno só pode ver suas próprias atividades
     if (
       request.user &&
-      request.user.role !== "usuario" &&
-      request.user.role !== "superadmin"
+      request.user.role !== "usuario"
     ) {
       if (request.user.id !== alunoId) {
         return NextResponse.json(

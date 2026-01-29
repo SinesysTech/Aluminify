@@ -74,7 +74,7 @@ export async function fetchBibliotecaData(
     }
 
     // ALUNO: buscar via backend (mesmo padrão do cronograma)
-    if (userRole !== "professor" && userRole !== "superadmin") {
+    if (userRole !== "professor" && userRole !== "usuario") {
       const url = new URL(
         `/api/sala-de-estudos/atividades/aluno/${alunoId}`,
         window.location.origin,
@@ -155,7 +155,7 @@ export async function fetchBibliotecaData(
     // PROFESSOR Logic (Replicated from sala-estudos-client)
     let cursoIds: string[] = [];
 
-    if (userRole === "professor" || userRole === "superadmin") {
+    if (userRole === "professor" || userRole === "usuario") {
       const { data: cursosData, error: cursosError } = await supabase
         .from("cursos")
         .select("id")

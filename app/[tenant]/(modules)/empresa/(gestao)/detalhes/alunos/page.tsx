@@ -14,8 +14,8 @@ export default async function EmpresaAlunosPage({
 }: {
   searchParams: { page?: string; query?: string; courseId?: string; turmaId?: string };
 }) {
-  // Ensure only empresa admins and superadmins can access
-  await requireUser({ allowedRoles: ['professor', 'usuario', 'superadmin'] })
+  // Ensure only empresa admins can access
+  await requireUser({ allowedRoles: ['professor', 'usuario'] })
 
   const { page: pageStr, query: queryStr, courseId: courseIdStr, turmaId: turmaIdStr } = await searchParams
   const page = Number(pageStr) || 1

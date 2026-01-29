@@ -101,7 +101,7 @@ export class UserBaseService {
     email: string;
     password?: string;
     fullName?: string;
-    role: "aluno" | "professor" | "usuario" | "superadmin" | "empresa";
+    role: "aluno" | "professor" | "usuario" | "empresa";
     empresaId?: string;
     isAdmin?: boolean;
     mustChangePassword?: boolean;

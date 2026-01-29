@@ -98,7 +98,7 @@ export default async function TransacoesPage({
   searchParams: Promise<SearchParams>;
   params: Promise<{ tenant: string }>;
 }) {
-  const user = await requireUser({ allowedRoles: ["superadmin", "usuario"] });
+  const user = await requireUser({ allowedRoles: ["usuario"] });
   const { tenant } = await params;
 
   const searchParamsData = await searchParams;

@@ -42,8 +42,8 @@ async function getHandler(request: AuthenticatedRequest, params: { id: string })
   try {
     const apiKey = await apiKeyService.getById(params.id);
     
-    // Verificar se o usuário é o dono da API key ou superadmin
-    if (apiKey.createdBy !== request.user.id && request.user.role !== 'superadmin') {
+    // Verificar se o usuário é o dono da API key
+    if (apiKey.createdBy !== request.user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -61,8 +61,8 @@ async function putHandler(request: AuthenticatedRequest, params: { id: string })
   try {
     const apiKey = await apiKeyService.getById(params.id);
     
-    // Verificar se o usuário é o dono da API key ou superadmin
-    if (apiKey.createdBy !== request.user.id && request.user.role !== 'superadmin') {
+    // Verificar se o usuário é o dono da API key
+    if (apiKey.createdBy !== request.user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -86,8 +86,8 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
   try {
     const apiKey = await apiKeyService.getById(params.id);
     
-    // Verificar se o usuário é o dono da API key ou superadmin
-    if (apiKey.createdBy !== request.user.id && request.user.role !== 'superadmin') {
+    // Verificar se o usuário é o dono da API key
+    if (apiKey.createdBy !== request.user.id) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

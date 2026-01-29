@@ -28,7 +28,7 @@ export default async function FinanceiroPage({
 }: {
   params: Promise<{ tenant: string }>;
 }) {
-  const user = await requireUser({ allowedRoles: ["superadmin", "usuario"] });
+  const user = await requireUser({ allowedRoles: ["usuario"] });
   const { tenant } = await params;
 
   const supabase = await createClient();

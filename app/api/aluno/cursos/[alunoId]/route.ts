@@ -51,8 +51,7 @@ async function getHandler(
     // Permissão: aluno só pode ver seus próprios cursos
     if (
       request.user &&
-      request.user.role !== "usuario" &&
-      request.user.role !== "superadmin"
+      request.user.role !== "usuario"
     ) {
       if (request.user.id !== alunoId) {
         return NextResponse.json(

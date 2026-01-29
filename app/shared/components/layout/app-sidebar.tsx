@@ -1,6 +1,5 @@
 "use client"
 
-import { SuperAdminSidebar } from "@/app/superadmin/components/superadmin-sidebar"
 import { AlunoSidebar } from "@/components/layout/aluno-sidebar"
 import { ProfessorSidebar } from "@/components/layout/professor-sidebar"
 import { EmpresaSidebar } from "@/components/layout/empresa-sidebar"
@@ -22,8 +21,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         return <EmpresaSidebar {...props} />
       }
       return <ProfessorSidebar {...props} />
-    case 'superadmin':
-      return <SuperAdminSidebar {...props} />
     default:
       return <AlunoSidebar {...props} />
   }

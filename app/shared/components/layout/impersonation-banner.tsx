@@ -46,9 +46,9 @@ export function ImpersonationBanner() {
       const data = await response.json().catch(() => ({ error: 'Erro desconhecido' }))
 
       if (response.ok) {
-        // Sempre incluir o tenant no redirect, exceto para rotas absolutas como /superadmin
+        // Sempre incluir o tenant no redirect
         let redirectPath = data.redirectTo || '/dashboard'
-        if (tenant && !redirectPath.startsWith('/superadmin')) {
+        if (tenant) {
           // Remove leading slash and prepend tenant
           redirectPath = `/${tenant}${redirectPath}`
         }

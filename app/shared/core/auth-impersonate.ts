@@ -72,12 +72,7 @@ export function canImpersonateUser(
   targetUserRole: AppUserRole,
   targetUserEmpresaId: string | undefined,
 ): { allowed: boolean; reason?: string } {
-  // Superadmin pode impersonar qualquer usuário
-  if (realUserRole === "superadmin") {
-    return { allowed: true };
-  }
-
-  // Professores e admins de empresa (usuarios) podem impersonar apenas alunos
+  // Admins de empresa (usuarios) podem impersonar apenas alunos
   if (realUserRole === "usuario") {
     if (targetUserRole !== "aluno") {
       return { allowed: false, reason: "Apenas alunos podem ser impersonados" };

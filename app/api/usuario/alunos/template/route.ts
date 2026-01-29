@@ -13,12 +13,12 @@ async function getHandler(request: AuthenticatedRequest) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    // Permitir superadmin e admins de empresa (usuários com roleType admin)
+    // Permitir admins de empresa (usuários com roleType admin)
     const isAdmin =
       user.role === "usuario" &&
       !!user.roleType &&
       isAdminRoleTipo(user.roleType);
-    if (!user.isSuperAdmin && !isAdmin) {
+    if (!isAdmin) {
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 

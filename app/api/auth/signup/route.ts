@@ -15,7 +15,6 @@ import { authService } from "@/app/[tenant]/auth/services/auth.service";
  *
  * **Comportamento:**
  * - Este endpoint SEMPRE cria usuários com role 'professor'
- * - O primeiro professor criado automaticamente recebe role 'superadmin' via trigger de banco
  * - Alunos são criados exclusivamente por professores através da interface administrativa
  *
  * **Formato da requisição:**
@@ -41,7 +40,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     // Frontend sempre cria professores (não alunos)
-    // O primeiro professor será automaticamente superadmin via trigger
     const result = await authService.signUp({
       email: body?.email,
       password: body?.password,

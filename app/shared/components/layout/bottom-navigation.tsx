@@ -66,8 +66,6 @@ export function BottomNavigation() {
           return adminNavItems
         }
         return professorNavItems
-      case 'superadmin':
-        return adminNavItems
       default:
         return alunoNavItems
     }

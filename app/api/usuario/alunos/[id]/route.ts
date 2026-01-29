@@ -105,7 +105,7 @@ async function getHandler(
   }
 }
 
-// PUT - RLS verifica se é o próprio aluno ou superadmin
+// PUT - RLS verifica se é o próprio aluno ou admin
 async function putHandler(
   request: AuthenticatedRequest,
   params: { id: string },
@@ -135,7 +135,7 @@ async function putHandler(
   }
 }
 
-// DELETE - RLS verifica se é o próprio aluno ou superadmin
+// DELETE - RLS verifica se é o próprio aluno ou admin
 async function deleteHandler(
   _request: AuthenticatedRequest,
   params: { id: string },

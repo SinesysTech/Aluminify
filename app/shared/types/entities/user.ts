@@ -7,11 +7,9 @@ import type { RoleTipo, RolePermissions } from "./papel";
 // Roles principais do app
 // - aluno: estudante
 // - usuario: staff da instituição (professor, admin, staff, monitor)
-// - superadmin: administrador do sistema
 export type AppUserRole =
   | "aluno"
   | "usuario"
-  | "superadmin"
   | "professor"
   | "empresa";
 
@@ -137,7 +135,7 @@ export interface Teacher {
 
 export interface CreateTeacherInput {
   id?: string;
-  empresaId: string | null; // Permite null para Super Admin criar professores sem empresa
+  empresaId: string | null;
   isAdmin?: boolean;
   fullName: string;
   email: string;

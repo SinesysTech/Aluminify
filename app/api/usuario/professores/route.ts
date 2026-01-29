@@ -77,12 +77,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    // Apenas usuarios (staff) e superadmins podem criar professores
-    if (user.role !== "usuario" && user.role !== "superadmin") {
+    // Apenas usuarios (staff) podem criar professores
+    if (user.role !== "usuario") {
       return NextResponse.json(
         {
           error:
-            "Acesso negado. Apenas usuários da instituição ou superadmin podem criar professores.",
+            "Acesso negado. Apenas usuários da instituição podem criar professores.",
         },
         { status: 403 },
       );
@@ -100,8 +100,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Super Admin pode criar sem empresaId, outros professores precisam de empresaId
-    if (!user.isSuperAdmin && !body?.empresaId) {
+    if (!body?.empresaId) {
       return NextResponse.json(
         { error: "empresaId é obrigatório para professores" },
         { status: 400 },

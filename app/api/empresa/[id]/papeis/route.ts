@@ -24,8 +24,8 @@ async function getHandler(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Check if user belongs to this empresa or is superadmin
-  if (!user.isSuperAdmin && user.empresaId !== empresaId) {
+  // Check if user belongs to this empresa
+  if (user.empresaId !== empresaId) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -62,8 +62,7 @@ async function postHandler(
   }
 
   // Only admins can create papeis
-  const isAdmin =
-    user.isSuperAdmin || (user.roleType && isAdminRoleTipo(user.roleType));
+  const isAdmin = user.roleType && isAdminRoleTipo(user.roleType);
   if (!isAdmin) {
     return NextResponse.json(
       { error: "Forbidden: Admin privileges required" },
@@ -71,8 +70,8 @@ async function postHandler(
     );
   }
 
-  // Check if user belongs to this empresa or is superadmin
-  if (!user.isSuperAdmin && user.empresaId !== empresaId) {
+  // Check if user belongs to this empresa
+  if (user.empresaId !== empresaId) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

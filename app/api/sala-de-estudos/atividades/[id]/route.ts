@@ -64,8 +64,7 @@ async function patchHandler(
 ) {
   if (
     request.user &&
-    request.user.role !== "usuario" &&
-    request.user.role !== "superadmin"
+    request.user.role !== "usuario"
   ) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -99,8 +98,7 @@ async function deleteHandler(
 ) {
   if (
     request.user &&
-    request.user.role !== "usuario" &&
-    request.user.role !== "superadmin"
+    request.user.role !== "usuario"
   ) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

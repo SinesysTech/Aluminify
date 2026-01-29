@@ -13,7 +13,7 @@ export default async function PapeisPage({
   const { tenant } = await params
 
   // Only admins can access this page
-  const isAdmin = user.role === 'superadmin' || (user.roleType && isAdminRoleTipo(user.roleType))
+  const isAdmin = user.roleType && isAdminRoleTipo(user.roleType)
   if (!isAdmin) {
     redirect(`/${tenant}/dashboard`)
   }

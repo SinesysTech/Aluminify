@@ -50,7 +50,7 @@ async function getHandler(
 
     // Verificar acesso
     const context = await getEmpresaContext(supabase, user.id, request, user);
-    if (!validateEmpresaAccess(context, empresa.id) && !context.isSuperAdmin) {
+    if (!validateEmpresaAccess(context, empresa.id)) {
       return NextResponse.json(
         { error: 'Acesso negado' },
         { status: 403 }
@@ -103,9 +103,9 @@ async function patchHandler(
 
     // Verificar acesso
     const context = await getEmpresaContext(supabase, user.id, request, user);
-    if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
+    if (!validateEmpresaAccess(context, id)) {
       return NextResponse.json(
-        { error: 'Acesso negado. Apenas admin da empresa ou superadmin pode atualizar.' },
+        { error: 'Acesso negado. Apenas admin da empresa pode atualizar.' },
         { status: 403 }
       );
     }
@@ -139,15 +139,20 @@ async function deleteHandler(
     const { id } = await params;
     const user = await getAuthUser(request);
 
-    if (!user || user.role !== 'superadmin') {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Acesso negado. Apenas superadmin pode deletar empresas.' },
+        { error: 'Acesso negado.' },
         { status: 403 }
       );
     }
 
+    // Criar cliente Supabase com token do header Authorization
+    const authHeader = request.headers.get('authorization');
     const { url, anonKey } = getPublicSupabaseConfig();
     const supabase = createClient<Database>(url, anonKey, {
+      global: {
+        headers: authHeader ? { Authorization: authHeader } : {},
+      },
       auth: {
         persistSession: false,
       },
@@ -184,7 +189,7 @@ export async function PATCH(
   return patchHandler(request, context);
 }
 
-// DELETE /api/empresa/[id] - Deletar empresa (apenas superadmin)
+// DELETE /api/empresa/[id] - Deletar empresa
 export async function DELETE(
   request: NextRequest,
   context: RouteContext

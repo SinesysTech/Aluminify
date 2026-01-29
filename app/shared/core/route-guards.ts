@@ -23,7 +23,7 @@ export async function requireAlunoRoute() {
 
   // Caso contrário, redirecionar
   const defaultRoute = getDefaultRouteForRole(user.role)
-  const redirectUrl = user.empresaSlug && user.role !== 'superadmin'
+  const redirectUrl = user.empresaSlug
     ? `/${user.empresaSlug}${defaultRoute}`
     : defaultRoute
   redirect(redirectUrl)
@@ -33,7 +33,7 @@ export async function requireAlunoRoute() {
  * Guard para rotas de professor
  */
 export async function requireProfessorRoute() {
-  const user = await requireUser({ allowedRoles: ['professor', 'superadmin'] })
+  const user = await requireUser({ allowedRoles: ['professor'] })
   return user
 }
 
@@ -41,15 +41,7 @@ export async function requireProfessorRoute() {
  * Guard para rotas de empresa
  */
 export async function requireEmpresaRoute() {
-  const user = await requireUser({ allowedRoles: ['empresa', 'superadmin'] })
-  return user
-}
-
-/**
- * Guard para rotas de superadmin
- */
-export async function requireSuperAdminRoute() {
-  const user = await requireUser({ allowedRoles: ['superadmin'] })
+  const user = await requireUser({ allowedRoles: ['empresa'] })
   return user
 }
 
@@ -72,7 +64,7 @@ export async function allowImpersonation() {
 
   // Caso contrário, redirecionar
   const defaultRoute = getDefaultRouteForRole(user.role)
-  const redirectUrl = user.empresaSlug && user.role !== 'superadmin'
+  const redirectUrl = user.empresaSlug
     ? `/${user.empresaSlug}${defaultRoute}`
     : defaultRoute
   redirect(redirectUrl)

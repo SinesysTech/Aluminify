@@ -3,8 +3,7 @@ import type { RoleTipo, RolePermissions } from "@/app/shared/types/entities/pape
 // Main app roles (simplified)
 // - aluno: student
 // - usuario: institution staff (professor, admin, staff, monitor)
-// - superadmin: system administrator
-export type UserRole = "aluno" | "usuario" | "superadmin";
+export type UserRole = "aluno" | "usuario";
 
 export interface AuthUser {
   id: string;
@@ -14,7 +13,6 @@ export interface AuthUser {
   roleType?: RoleTipo;
   // Role permissions
   permissions?: RolePermissions;
-  isSuperAdmin?: boolean;
   isAdmin?: boolean;
   empresaId?: string;
 }

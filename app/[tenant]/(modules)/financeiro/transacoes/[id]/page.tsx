@@ -86,7 +86,7 @@ export default async function TransacaoDetalhePage({
 }: {
   params: Promise<{ id: string; tenant: string }>;
 }) {
-  await requireUser({ allowedRoles: ["superadmin", "usuario"] });
+  await requireUser({ allowedRoles: ["usuario"] });
 
   const { id, tenant } = await params;
   const supabase = await createClient();

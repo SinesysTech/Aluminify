@@ -135,10 +135,10 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
     }
   }
 
-  // Load empresa context for usuarios (staff) and superadmin
+  // Load empresa context for usuarios (staff)
   // First check if user exists in usuarios table (institution staff)
   // Note: Using service role client to bypass RLS for auth queries
-  if (role === "usuario" || role === "superadmin") {
+  if (role === "usuario") {
     // Use service role client to bypass RLS for authentication queries
     const adminClient = getDatabaseClient();
 
@@ -318,7 +318,7 @@ export async function requireUser(
 
     if (!normalizedAllowed.has(user.role)) {
       const defaultRoute = getDefaultRouteForRole(user.role);
-      const redirectUrl = user.empresaSlug && user.role !== "superadmin"
+      const redirectUrl = user.empresaSlug
         ? `/${user.empresaSlug}${defaultRoute}`
         : defaultRoute;
       redirect(redirectUrl);

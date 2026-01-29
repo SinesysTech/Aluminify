@@ -68,12 +68,12 @@ function normalizeRowPayload(rows: unknown[]): StudentImportInputRow[] {
 async function postHandler(request: AuthenticatedRequest) {
   if (
     !request.user ||
-    (request.user.role !== "usuario" && !request.user.isSuperAdmin)
+    request.user.role !== "usuario"
   ) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (!request.user.empresaId && !request.user.isSuperAdmin) {
+  if (!request.user.empresaId) {
     return NextResponse.json(
       { error: "Empresa não encontrada para o usuário autenticado." },
       { status: 403 },

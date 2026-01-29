@@ -57,12 +57,11 @@ export default function EmpresaAdminsPage() {
         if (adminsResponse.ok) {
           const adminsData = await adminsResponse.json();
           setAdmins(adminsData);
-          const isSuperAdmin = userData?.role === 'superadmin';
           const isOwner =
             !!userData?.id &&
             Array.isArray(adminsData) &&
             adminsData.some((a: Admin) => a.user_id === userData.id && a.is_owner);
-          setCanManageAdmins(Boolean(isSuperAdmin || isOwner));
+          setCanManageAdmins(Boolean(isOwner));
         } else {
           // Se não conseguimos listar admins, por segurança, não permitir gerenciar
           setCanManageAdmins(false);
@@ -215,7 +214,7 @@ export default function EmpresaAdminsPage() {
           ) : (
             <div className="text-sm text-muted-foreground text-right max-w-xs">
               Apenas <span className="font-medium">owner</span> ou{' '}
-              <span className="font-medium">superadmin</span> pode adicionar admins.
+              <span className="font-medium">admin</span> pode adicionar admins.
             </div>
           )}
         </div>

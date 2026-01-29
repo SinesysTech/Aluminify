@@ -7,7 +7,7 @@ async function getHandler(request: AuthenticatedRequest) {
     const userId = request.user?.id
     if (!userId) return NextResponse.json({ error: 'Usuário não autenticado' }, { status: 401 })
 
-    if (!['aluno', 'professor', 'usuario', 'superadmin'].includes(request.user?.role || '')) {
+    if (!['aluno', 'professor', 'usuario'].includes(request.user?.role || '')) {
       return NextResponse.json(
         { error: 'Acesso negado. Apenas alunos e membros da equipe podem acessar o dashboard.' },
         { status: 403 }

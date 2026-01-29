@@ -12,7 +12,7 @@ import { getDatabaseClient } from "@/app/shared/core/database/database";
 export interface ToolContext {
   userId: string;
   empresaId: string | null;
-  userRole: "aluno" | "usuario" | "superadmin";
+  userRole: "aluno" | "usuario";
 }
 
 /**
@@ -182,9 +182,8 @@ export function createMastraTools(context: ToolContext) {
         throw new Error("Aluno não encontrado.");
       }
 
-      // Verify tenant access for non-superadmin
+      // Verify tenant access
       if (
-        userRole !== "superadmin" &&
         empresaId &&
         studentData.empresa_id !== empresaId
       ) {
@@ -268,7 +267,7 @@ export function createMastraTools(context: ToolContext) {
       searchTerm: z.string(),
     }),
     execute: async (executionContext) => {
-      // Permission check: only usuarios and superadmin can search students
+      // Permission check: only usuarios can search students
       if (userRole === "aluno") {
         throw new Error("Apenas administradores podem buscar alunos.");
       }
@@ -290,8 +289,8 @@ export function createMastraTools(context: ToolContext) {
         .order("nome_completo", { ascending: true })
         .limit(limit);
 
-      // Filter by empresa for multi-tenant isolation (unless superadmin)
-      if (userRole !== "superadmin" && empresaId) {
+      // Filter by empresa for multi-tenant isolation
+      if (empresaId) {
         query = query.eq("empresa_id", empresaId);
       }
 

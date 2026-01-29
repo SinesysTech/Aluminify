@@ -27,7 +27,7 @@ export default async function DashboardPage(props: {
   // Verificar se precisa completar cadastro da empresa (Lógica existente mantida)
   let shouldRedirectToComplete = false
 
-  if (user.empresaId && user.role !== 'superadmin') {
+  if (user.empresaId) {
     try {
       const supabase = await createClient()
       const { data: empresa, error } = await supabase
@@ -51,9 +51,9 @@ export default async function DashboardPage(props: {
     redirect(`/${tenant}/empresa/completar`)
   }
 
-  // Se é admin da empresa (ou superadmin), mostrar dashboard da instituição
+  // Se é admin da empresa, mostrar dashboard da instituição
   // Caso contrário, mostrar dashboard do professor
-  const isAdmin = user.role === 'superadmin' || (user.roleType && isAdminRoleTipo(user.roleType))
+  const isAdmin = user.roleType && isAdminRoleTipo(user.roleType)
   if (isAdmin) {
     return <InstitutionDashboardClient />
   }

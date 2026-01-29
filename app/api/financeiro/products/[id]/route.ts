@@ -73,7 +73,7 @@ async function getHandler(request: AuthenticatedRequest, context?: Record<string
     }
 
     // Verify product belongs to user's empresa
-    if (product.empresaId !== user.empresaId && !user.isSuperAdmin) {
+    if (product.empresaId !== user.empresaId) {
       return NextResponse.json(
         { error: "Product not found" },
         { status: 404 }
@@ -99,7 +99,7 @@ async function patchHandler(request: AuthenticatedRequest, context?: Record<stri
 
     // Check if user is admin
     const isAdmin = user.role === "usuario" && !!user.roleType && isAdminRoleTipo(user.roleType);
-    if (!user.isSuperAdmin && !isAdmin) {
+    if (!isAdmin) {
       return NextResponse.json(
         { error: "Only admins can update products" },
         { status: 403 }
@@ -121,7 +121,7 @@ async function patchHandler(request: AuthenticatedRequest, context?: Record<stri
       );
     }
 
-    if (existing.empresaId !== user.empresaId && !user.isSuperAdmin) {
+    if (existing.empresaId !== user.empresaId) {
       return NextResponse.json(
         { error: "Product not found" },
         { status: 404 }
@@ -162,7 +162,7 @@ async function deleteHandler(request: AuthenticatedRequest, context?: Record<str
 
     // Check if user is admin
     const isAdmin = user.role === "usuario" && !!user.roleType && isAdminRoleTipo(user.roleType);
-    if (!user.isSuperAdmin && !isAdmin) {
+    if (!isAdmin) {
       return NextResponse.json(
         { error: "Only admins can delete products" },
         { status: 403 }
@@ -183,7 +183,7 @@ async function deleteHandler(request: AuthenticatedRequest, context?: Record<str
       );
     }
 
-    if (existing.empresaId !== user.empresaId && !user.isSuperAdmin) {
+    if (existing.empresaId !== user.empresaId) {
       return NextResponse.json(
         { error: "Product not found" },
         { status: 404 }

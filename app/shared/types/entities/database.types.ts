@@ -3184,6 +3184,12 @@ export type Database = {
         }[]
       }
       get_professor_disciplinas: { Args: never; Returns: string[] }
+      get_student_ids_by_empresa_courses: {
+        Args: { empresa_id_param: string }
+        Returns: {
+          aluno_id: string
+        }[]
+      }
       get_user_empresa_id: { Args: never; Returns: string }
       importar_cronograma_aulas: {
         Args: {

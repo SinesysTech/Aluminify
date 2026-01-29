@@ -16,8 +16,7 @@ export async function deleteStudentAction(studentId: string) {
     }
 
     // Check permission to delete students
-    const canDeleteStudents =
-      user.role === "superadmin" || canDelete(user.permissions, "alunos");
+    const canDeleteStudents = canDelete(user.permissions, "alunos");
     if (!canDeleteStudents) {
       return {
         success: false,
@@ -56,8 +55,7 @@ export async function createStudentAction(data: CreateStudentInput) {
     }
 
     // Check permission to create students
-    const canCreateStudents =
-      user.role === "superadmin" || canCreate(user.permissions, "alunos");
+    const canCreateStudents = canCreate(user.permissions, "alunos");
     if (!canCreateStudents) {
       return {
         success: false,

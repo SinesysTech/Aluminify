@@ -78,8 +78,7 @@ async function getHandler(
     // Verificar permissão: aluno só pode ver seu próprio progresso
     if (
       request.user &&
-      request.user.role !== "usuario" &&
-      request.user.role !== "superadmin"
+      request.user.role !== "usuario"
     ) {
       if (request.user.id !== progresso.alunoId) {
         return NextResponse.json(
@@ -114,8 +113,7 @@ async function patchHandler(
     );
     if (
       request.user &&
-      request.user.role !== "usuario" &&
-      request.user.role !== "superadmin"
+      request.user.role !== "usuario"
     ) {
       if (request.user.id !== progresso.alunoId) {
         return NextResponse.json(

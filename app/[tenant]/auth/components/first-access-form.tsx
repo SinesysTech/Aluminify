@@ -205,9 +205,8 @@ export function FirstAccessForm({ userId, role, empresaSlug }: FirstAccessFormPr
 
       // Construir URL de redirect com o tenant se disponível
       const defaultRoute = getDefaultRouteForRole(role)
-      // Para superadmin, a rota já é absoluta (/superadmin/dashboard)
-      // Para outros roles que têm empresaSlug, adicionar o prefixo do tenant
-      const redirectUrl = empresaSlug && role !== 'superadmin'
+      // Se o usuário tem empresaSlug, adicionar o prefixo do tenant
+      const redirectUrl = empresaSlug
         ? `/${empresaSlug}${defaultRoute}`
         : defaultRoute
 

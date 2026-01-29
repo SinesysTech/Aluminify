@@ -22,22 +22,6 @@ export async function mapSupabaseUserToAuthUser(
 ): Promise<AuthUser | null> {
   const client = getDatabaseClient();
 
-  // Check if user is superadmin from metadata
-  const metadataRole = user.user_metadata?.role as UserRole | undefined;
-  const isSuperAdmin =
-    metadataRole === "superadmin" || user.user_metadata?.is_superadmin === true;
-
-  if (isSuperAdmin) {
-    return {
-      id: user.id,
-      email: user.email!,
-      role: "superadmin",
-      isSuperAdmin: true,
-      isAdmin: true,
-      empresaId: user.user_metadata?.empresa_id as string | undefined,
-    };
-  }
-
   // Check if user exists in usuarios table (institution staff)
   // Query 1: Get usuario data
   const { data: usuarioData, error: usuarioError } = await client
@@ -75,7 +59,6 @@ export async function mapSupabaseUserToAuthUser(
       role: "usuario",
       roleType,
       permissions,
-      isSuperAdmin: false,
       isAdmin,
       empresaId: usuarioData.empresa_id,
     };
@@ -94,7 +77,6 @@ export async function mapSupabaseUserToAuthUser(
       id: user.id,
       email: user.email!,
       role: "aluno",
-      isSuperAdmin: false,
       isAdmin: false,
       empresaId: alunoData.empresa_id ?? undefined,
     };
@@ -102,13 +84,13 @@ export async function mapSupabaseUserToAuthUser(
 
   // Fallback: user not found in any table, use metadata role
   const empresaId = user.user_metadata?.empresa_id as string | undefined;
+  const metadataRole = user.user_metadata?.role as UserRole | undefined;
   const role: UserRole = metadataRole || "aluno";
 
   return {
     id: user.id,
     email: user.email!,
     role,
-    isSuperAdmin: false,
     isAdmin: false,
     empresaId,
   };
@@ -198,25 +180,6 @@ export async function getAuth(
   }
 
   return null;
-}
-
-export async function isSuperAdmin(userId: string): Promise<boolean> {
-  const client = getDatabaseClient();
-
-  try {
-    // Verificar metadata do usuário no auth
-    const {
-      data: { user },
-    } = await client.auth.getUser();
-    if (!user || user.id !== userId) {
-      return false;
-    }
-
-    const role = user.user_metadata?.role as string | undefined;
-    return role === "superadmin" || user.user_metadata?.is_superadmin === true;
-  } catch {
-    return false;
-  }
 }
 
 export function requireAuth(
@@ -324,7 +287,7 @@ export function requireRole(role: UserRole) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
 
-      if (user.role !== role && !user.isSuperAdmin) {
+      if (user.role !== role) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
 
@@ -340,38 +303,6 @@ export function requireRole(role: UserRole) {
 
       return handler(authenticatedRequest, unwrappedContext);
     };
-  };
-}
-
-export function requireSuperAdmin(
-  handler: (
-    request: AuthenticatedRequest,
-    context?: Record<string, unknown>,
-  ) => Promise<NextResponse>,
-) {
-  return async (
-    request: NextRequest,
-    context?:
-      | Record<string, unknown>
-      | { params?: Promise<Record<string, string>> },
-  ) => {
-    const user = await getAuthUser(request);
-
-    if (!user || !user.isSuperAdmin) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    const authenticatedRequest = request as AuthenticatedRequest;
-    authenticatedRequest.user = user;
-
-    // Unwrap params if it's a Promise (Next.js 16+)
-    let unwrappedContext = context;
-    if (context && "params" in context && context.params instanceof Promise) {
-      const params = await context.params;
-      unwrappedContext = { ...context, params };
-    }
-
-    return handler(authenticatedRequest, unwrappedContext);
   };
 }
 
@@ -400,24 +331,6 @@ export function requirePermission(
 
       if (!user) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-
-      // SuperAdmins have all permissions
-      if (user.isSuperAdmin) {
-        const authenticatedRequest = request as AuthenticatedRequest;
-        authenticatedRequest.user = user;
-
-        let unwrappedContext = context;
-        if (
-          context &&
-          "params" in context &&
-          context.params instanceof Promise
-        ) {
-          const params = await context.params;
-          unwrappedContext = { ...context, params };
-        }
-
-        return handler(authenticatedRequest, unwrappedContext);
       }
 
       // Check if user has the required permission

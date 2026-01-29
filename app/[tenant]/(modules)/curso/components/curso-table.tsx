@@ -297,7 +297,7 @@ export function CursoTable() {
         if (err.status === 401) {
           errorMessage = 'Não autorizado. Faça login novamente.'
         } else if (err.status === 403) {
-          errorMessage = 'Acesso negado. Você precisa ser professor ou superadmin.'
+          errorMessage = 'Acesso negado. Você precisa ser professor ou administrador.'
         } else if (err.status === 500) {
           errorMessage = `Erro interno do servidor: ${err.data?.error || err.message || 'Erro desconhecido'}`
         } else {

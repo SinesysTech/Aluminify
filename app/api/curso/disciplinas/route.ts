@@ -111,18 +111,16 @@ export const GET = requireAuth(getHandler);
 // POST requer autenticação de professor (JWT ou API Key)
 async function postHandler(request: AuthenticatedRequest) {
   // API Keys têm acesso total (request.apiKey existe)
-  // Se for JWT, verificar se é professor ou superadmin
+  // Se for JWT, verificar se é usuario
   console.log("[Discipline POST] Auth check:", {
     hasUser: !!request.user,
     hasApiKey: !!request.apiKey,
     userRole: request.user?.role,
-    userIsSuperAdmin: request.user?.isSuperAdmin,
   });
 
   if (
     request.user &&
-    request.user.role !== "usuario" &&
-    request.user.role !== "superadmin"
+    request.user.role !== "usuario"
   ) {
     console.log("[Discipline POST] Forbidden - user role:", request.user.role);
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

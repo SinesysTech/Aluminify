@@ -70,7 +70,7 @@ function handleError(error: unknown) {
   );
 }
 
-// GET - RLS filtra automaticamente (alunos veem apenas seu próprio perfil, superadmin vê todos)
+// GET - RLS filtra automaticamente (alunos veem apenas seu próprio perfil)
 async function getHandler(request: AuthenticatedRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -146,21 +146,19 @@ async function getHandler(request: AuthenticatedRequest) {
   }
 }
 
-// POST - Criação de aluno (geralmente via signup, mas pode ser manual por superadmin)
+// POST - Criação de aluno (geralmente via signup, mas pode ser manual por staff)
 async function postHandler(request: AuthenticatedRequest) {
   console.log("[Student POST] Auth check:", {
     hasUser: !!request.user,
     hasApiKey: !!request.apiKey,
     userRole: request.user?.role,
-    userIsSuperAdmin: request.user?.isSuperAdmin,
   });
 
   try {
-    // Somente staff (usuario) / superadmin / api key podem criar/vincular alunos
+    // Somente staff (usuario) / api key podem criar/vincular alunos
     if (
       request.user &&
-      request.user.role !== "usuario" &&
-      request.user.role !== "superadmin"
+      request.user.role !== "usuario"
     ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -236,8 +234,7 @@ async function postHandler(request: AuthenticatedRequest) {
         // Se o CPF pertence a outro e-mail, não criamos um novo aluno.
         // (Evita duplicidade e confusão de identidade)
         const existingEmail = (byCpf as { email?: string | null }).email ?? null;
-        const isSuperAdmin = !!request.user?.isSuperAdmin;
-        if (existingEmail && existingEmail !== email && !isSuperAdmin) {
+        if (existingEmail && existingEmail !== email) {
           return NextResponse.json(
             {
               error:
@@ -255,10 +252,9 @@ async function postHandler(request: AuthenticatedRequest) {
       // Aluno já existe no sistema (possivelmente em outra empresa)
       // Permitir vínculo cross-tenant - apenas vincular aos cursos da empresa atual
       // O empresa_id "primário" do aluno permanece inalterado para compatibilidade
-      const isSuperAdmin = !!request.user?.isSuperAdmin;
 
       // Validar que os cursos informados pertencem à empresa (evita vínculo cross-tenant).
-      if (courseIds.length > 0 && !isSuperAdmin) {
+      if (courseIds.length > 0) {
         const { data: cursos, error: cursosError } = await db
           .from("cursos")
           .select("id")

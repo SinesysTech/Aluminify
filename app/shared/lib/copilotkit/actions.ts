@@ -13,7 +13,7 @@ import { getDatabaseClient } from "@/app/shared/core/database/database";
 export interface ActionContext {
   userId: string;
   empresaId: string | null;
-  userRole: "aluno" | "usuario" | "superadmin";
+  userRole: "aluno" | "usuario";
 }
 
 /**
@@ -155,9 +155,8 @@ export function createCopilotKitActions(context: ActionContext) {
           throw new Error("Aluno não encontrado.");
         }
 
-        // Verify tenant access for non-superadmin
+        // Verify tenant access
         if (
-          userRole !== "superadmin" &&
           empresaId &&
           studentData.empresa_id !== empresaId
         ) {
@@ -236,7 +235,7 @@ export function createCopilotKitActions(context: ActionContext) {
       ],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       handler: async ({ searchTerm, limit = 10 }: any) => {
-        // Permission check: only usuarios and superadmin can search students
+        // Permission check: only usuarios can search students
         if (userRole === "aluno") {
           throw new Error("Apenas administradores podem buscar alunos.");
         }
@@ -256,8 +255,8 @@ export function createCopilotKitActions(context: ActionContext) {
           .order("nome_completo", { ascending: true })
           .limit(limit);
 
-        // Filter by empresa for multi-tenant isolation (unless superadmin)
-        if (userRole !== "superadmin" && empresaId) {
+        // Filter by empresa for multi-tenant isolation
+        if (empresaId) {
           query = query.eq("empresa_id", empresaId);
         }
 

@@ -7,7 +7,6 @@ import { hasPermission, canView, canCreate, canEdit, canDelete } from '@/app/sha
 interface PermissionContextValue {
   permissions: RolePermissions | undefined
   roleType: RoleTipo | undefined
-  isSuperAdmin: boolean
   hasPermission: (resource: keyof RolePermissions, action: 'view' | 'create' | 'edit' | 'delete') => boolean
   canView: (resource: keyof RolePermissions) => boolean
   canCreate: (resource: keyof RolePermissions) => boolean
@@ -22,54 +21,47 @@ const PermissionContext = createContext<PermissionContextValue | null>(null)
 interface PermissionProviderProps {
   permissions?: RolePermissions
   roleType?: RoleTipo
-  isSuperAdmin?: boolean
   children: React.ReactNode
 }
 
 export function PermissionProvider({
   permissions,
   roleType,
-  isSuperAdmin = false,
   children,
 }: PermissionProviderProps) {
   const checkPermission = useCallback(
     (resource: keyof RolePermissions, action: 'view' | 'create' | 'edit' | 'delete'): boolean => {
-      if (isSuperAdmin) return true
       return hasPermission(permissions, resource, action)
     },
-    [permissions, isSuperAdmin]
+    [permissions]
   )
 
   const checkCanView = useCallback(
     (resource: keyof RolePermissions): boolean => {
-      if (isSuperAdmin) return true
       return canView(permissions, resource)
     },
-    [permissions, isSuperAdmin]
+    [permissions]
   )
 
   const checkCanCreate = useCallback(
     (resource: keyof RolePermissions): boolean => {
-      if (isSuperAdmin) return true
       return canCreate(permissions, resource)
     },
-    [permissions, isSuperAdmin]
+    [permissions]
   )
 
   const checkCanEdit = useCallback(
     (resource: keyof RolePermissions): boolean => {
-      if (isSuperAdmin) return true
       return canEdit(permissions, resource)
     },
-    [permissions, isSuperAdmin]
+    [permissions]
   )
 
   const checkCanDelete = useCallback(
     (resource: keyof RolePermissions): boolean => {
-      if (isSuperAdmin) return true
       return canDelete(permissions, resource)
     },
-    [permissions, isSuperAdmin]
+    [permissions]
   )
 
   const isTeachingRole = useMemo(() => {
@@ -78,16 +70,14 @@ export function PermissionProvider({
   }, [roleType])
 
   const isAdminRole = useMemo(() => {
-    if (isSuperAdmin) return true
     if (!roleType) return false
     return ['admin', 'professor_admin'].includes(roleType)
-  }, [roleType, isSuperAdmin])
+  }, [roleType])
 
   const value = useMemo<PermissionContextValue>(
     () => ({
       permissions,
       roleType,
-      isSuperAdmin,
       hasPermission: checkPermission,
       canView: checkCanView,
       canCreate: checkCanCreate,
@@ -99,7 +89,6 @@ export function PermissionProvider({
     [
       permissions,
       roleType,
-      isSuperAdmin,
       checkPermission,
       checkCanView,
       checkCanCreate,
@@ -174,9 +163,9 @@ interface PermissionGateProps {
 }
 
 export function PermissionGate({ resource, action, children, fallback = null }: PermissionGateProps) {
-  const { hasPermission, isSuperAdmin } = usePermissions()
+  const { hasPermission } = usePermissions()
 
-  if (isSuperAdmin || hasPermission(resource, action)) {
+  if (hasPermission(resource, action)) {
     return <>{children}</>
   }
 

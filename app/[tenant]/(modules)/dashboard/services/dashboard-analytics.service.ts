@@ -118,7 +118,7 @@ export class DashboardAnalyticsService {
   /**
    * Retorna cursos disponíveis para seleção no dashboard.
    * - Aluno: cursos matriculados
-   * - Professor/superadmin: todos os cursos
+   * - Professor/usuario: todos os cursos
    */
   async getAvailableCourses(alunoId: string): Promise<
     Array<{
@@ -156,7 +156,7 @@ export class DashboardAnalyticsService {
   }
 
   /**
-   * Resolve o escopo de cursos do usuário (aluno vs professor/superadmin).
+   * Resolve o escopo de cursos do usuário (aluno vs professor/usuario).
    * Reutiliza a mesma lógica do dashboard atual, mas centraliza para endpoints filtráveis.
    * @param empresaId - Optional: filter courses to only those belonging to this organization
    */
@@ -171,7 +171,7 @@ export class DashboardAnalyticsService {
       .eq("id", alunoId)
       .maybeSingle();
 
-    // Fallback via auth metadata (superadmin/professor sem registro em `professores`)
+    // Fallback via auth metadata (usuario/professor sem registro em `professores`)
     let isProfessor = !!professorData;
     if (!isProfessor) {
       try {
@@ -179,7 +179,7 @@ export class DashboardAnalyticsService {
         const role =
           (authUser?.user?.user_metadata?.role as string | undefined) ??
           undefined;
-        if (role === "professor" || role === "superadmin") {
+        if (role === "professor" || role === "usuario") {
           isProfessor = true;
         }
       } catch (e) {
@@ -1452,7 +1452,7 @@ export class DashboardAnalyticsService {
 
     const userEmail = authUser.user.email || "";
     const userRole = (authUser.user.user_metadata?.role as string) || "aluno";
-    const isProfessor = userRole === "professor" || userRole === "superadmin";
+    const isProfessor = userRole === "professor" || userRole === "usuario";
 
     // Buscar nome do professor se for professor
     let professorName: string | null = null;
@@ -2355,8 +2355,8 @@ export class DashboardAnalyticsService {
       .eq("id", alunoId)
       .maybeSingle();
 
-    // Fallback: alguns usuários (ex.: superadmin) podem não ter registro em `professores`,
-    // mas ainda assim devem ter acesso “tipo professor” (todos os cursos).
+    // Fallback: alguns usuários podem não ter registro em `professores`,
+    // mas ainda assim devem ter acesso "tipo professor" (todos os cursos).
     let isProfessor = !!professorData;
     if (!isProfessor) {
       try {
@@ -2364,7 +2364,7 @@ export class DashboardAnalyticsService {
         const role =
           (authUser?.user?.user_metadata?.role as string | undefined) ??
           undefined;
-        if (role === "professor" || role === "superadmin") {
+        if (role === "professor" || role === "usuario") {
           isProfessor = true;
         }
       } catch (e) {

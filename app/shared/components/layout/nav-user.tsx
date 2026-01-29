@@ -84,7 +84,7 @@ export function NavUser() {
         const userRole = session.user.user_metadata?.role
         // IMPORTANTE: Só buscar na tabela professores se realmente for professor
         // Isso evita erros 406 quando alunos tentam acessar
-        if (userRole === 'professor' || userRole === 'superadmin') {
+        if (userRole === 'professor') {
           try {
             const { data: professor, error: profError } = await supabase
               .from('professores')

@@ -201,7 +201,7 @@ export class StudentRepositoryImpl implements StudentRepository {
       studentIdsToFilter = (courseLinks ?? []).map((link) => link.aluno_id);
     } else {
       // Sem turma/course: não aplicar filtro por IDs. O RLS em alunos já restringe
-      // (admins veem apenas alunos matriculados em cursos da empresa; superadmin vê todos).
+      // (admins veem apenas alunos matriculados em cursos da empresa).
       // Evita .in("id", [...]) com milhares de UUIDs, que causa 400 Bad Request por limite de URL.
       studentIdsToFilter = null;
     }

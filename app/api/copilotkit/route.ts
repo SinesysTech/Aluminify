@@ -130,7 +130,7 @@ export const POST = async (req: NextRequest) => {
       {
         userId: user.id,
         empresaId: user.empresaId ?? null,
-        userRole: user.role as "aluno" | "usuario" | "superadmin",
+        userRole: user.role as "aluno" | "usuario",
       },
       {
         agentId: config.slug,
@@ -165,7 +165,7 @@ export const POST = async (req: NextRequest) => {
     const actions = createCopilotKitActions({
       userId: user.id,
       empresaId: user.empresaId ?? null,
-      userRole: user.role as "aluno" | "usuario" | "superadmin",
+      userRole: user.role as "aluno" | "usuario",
     });
 
     // Create adapter with model from config

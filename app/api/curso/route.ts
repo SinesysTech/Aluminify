@@ -132,8 +132,7 @@ export const GET = requireAuth(getHandler);
 async function postHandler(request: AuthenticatedRequest) {
   if (
     request.user &&
-    request.user.role !== "usuario" &&
-    request.user.role !== "superadmin"
+    request.user.role !== "usuario"
   ) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -143,26 +142,10 @@ async function postHandler(request: AuthenticatedRequest) {
 
     // Resolver empresaId:
     // - Usuario: sempre deriva da tabela `usuarios` (fonte de verdade)
-    // - Superadmin: pode passar empresaId no body (ou via query param `empresa_id` se quiser)
     // - API Key: deriva do `createdBy` da API key (que deve ser um usuario)
     let empresaId: string | null = null;
 
-    if (request.user?.role === "superadmin") {
-      empresaId =
-        body?.empresaId ||
-        request.nextUrl?.searchParams?.get("empresa_id") ||
-        null;
-
-      if (!empresaId) {
-        return NextResponse.json(
-          {
-            error:
-              "empresaId is required (informe empresaId ao criar curso como superadmin)",
-          },
-          { status: 400 },
-        );
-      }
-    } else if (request.user?.role === "usuario") {
+    if (request.user?.role === "usuario") {
       // Preferir empresaId do contexto de auth (já populado pelo middleware)
       empresaId = request.user.empresaId ?? null;
 

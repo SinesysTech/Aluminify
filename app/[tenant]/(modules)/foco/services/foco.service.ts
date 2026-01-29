@@ -14,22 +14,12 @@ export class FocoService {
     if (error || !user) return [];
 
     const role = (user.user_metadata?.role as string) || "aluno";
-    const isSuperAdmin =
-      role === "superadmin" || user.user_metadata?.is_superadmin === true;
 
-    if (role === "professor" && !isSuperAdmin) {
+    if (role === "professor" || role === "usuario") {
       const { data, error: cursosError } = await this.supabase
         .from("cursos")
         .select("id, nome")
         .eq("created_by", user.id)
-        .order("nome", { ascending: true });
-
-      if (cursosError) throw cursosError;
-      return (data || []).map((c) => ({ id: c.id, nome: c.nome }));
-    } else if (isSuperAdmin) {
-      const { data, error: cursosError } = await this.supabase
-        .from("cursos")
-        .select("id, nome")
         .order("nome", { ascending: true });
 
       if (cursosError) throw cursosError;

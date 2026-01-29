@@ -19,8 +19,8 @@ export default async function AlunosPage({
     turmaId?: string
   }>
 }) {
-  // Superadmins e admins de empresa podem ver alunos (RLS filtra por empresa)
-  await requireUser({ allowedRoles: ['superadmin', 'usuario'] })
+  // Admins de empresa podem ver alunos (RLS filtra por empresa)
+  await requireUser({ allowedRoles: ['usuario'] })
 
   const { page: pageStr, query: queryStr, courseId: courseIdStr, turmaId: turmaIdStr } =
     await searchParams

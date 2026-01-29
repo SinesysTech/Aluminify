@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       context: {
         userId: user.id,
         empresaId: user.empresaId ?? null,
-        userRole: user.role as "aluno" | "usuario" | "superadmin",
+        userRole: user.role as "aluno" | "usuario",
       },
       systemPrompt: agentConfig.systemPrompt ?? undefined,
       model: agentConfig.model || "gpt-4o-mini",

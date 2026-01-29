@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     data: user,
     debug: process.env.NODE_ENV === 'development' ? {
       userMetadata,
-      note: 'Se user_metadata.role não for "superadmin" ou is_superadmin não for true, você não terá acesso de superadmin. Atualize o metadata no Supabase ou faça logout e login novamente para atualizar o token.'
+      note: 'Informações de debug do usuário autenticado. Faça logout e login novamente se os dados do token estiverem desatualizados.'
     } : undefined
   });
 }

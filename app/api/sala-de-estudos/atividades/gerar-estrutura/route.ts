@@ -23,8 +23,7 @@ function handleError(error: unknown) {
 async function postHandler(request: AuthenticatedRequest) {
   if (
     request.user &&
-    request.user.role !== "usuario" &&
-    request.user.role !== "superadmin"
+    request.user.role !== "usuario"
   ) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

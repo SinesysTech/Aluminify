@@ -277,17 +277,7 @@ export function requireEmpresaAdmin<Ctx>(
       );
     }
 
-    // Superadmins can access any empresa
-    if (user.isSuperAdmin) {
-      const authenticatedRequest = request as BrandCustomizationRequest;
-      authenticatedRequest.user = user;
-      authenticatedRequest.empresaId = empresaId;
-      authenticatedRequest.isEmpresaAdmin = true;
-
-      return handler(authenticatedRequest, unwrappedContext);
-    }
-
-    // Get empresa context for regular users
+    // Get empresa context
     const client = getDatabaseClient();
     const empresaContext = await getEmpresaContext(
       client,
@@ -454,15 +444,6 @@ export async function checkBrandCustomizationAccess(
         isAdmin: false,
         error: "Invalid user authentication",
       };
-    }
-
-    const isSuperAdmin =
-      user.user_metadata?.role === "superadmin" ||
-      user.user_metadata?.is_superadmin === true;
-
-    // Superadmins have access to all empresas
-    if (isSuperAdmin) {
-      return { hasAccess: true, isAdmin: true };
     }
 
     // Check empresa access and admin privileges

@@ -48,9 +48,6 @@ export async function identifyUserRoleAction(
     let redirectUrl = "/protected"; // Fallback
 
     switch (primaryRole) {
-      case "superadmin":
-        redirectUrl = "/superadmin/dashboard";
-        break;
       case "usuario":
       case "professor":
       case "aluno":

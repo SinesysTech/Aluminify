@@ -71,7 +71,7 @@ async function getHandler(request: AuthenticatedRequest, context?: Record<string
     }
 
     // Verify coupon belongs to user's empresa
-    if (coupon.empresaId !== user.empresaId && !user.isSuperAdmin) {
+    if (coupon.empresaId !== user.empresaId) {
       return NextResponse.json(
         { error: "Coupon not found" },
         { status: 404 }
@@ -97,7 +97,7 @@ async function patchHandler(request: AuthenticatedRequest, context?: Record<stri
 
     // Check if user is admin
     const isAdmin = user.role === "usuario" && !!user.roleType && isAdminRoleTipo(user.roleType);
-    if (!user.isSuperAdmin && !isAdmin) {
+    if (!isAdmin) {
       return NextResponse.json(
         { error: "Only admins can update coupons" },
         { status: 403 }
@@ -119,7 +119,7 @@ async function patchHandler(request: AuthenticatedRequest, context?: Record<stri
       );
     }
 
-    if (existing.empresaId !== user.empresaId && !user.isSuperAdmin) {
+    if (existing.empresaId !== user.empresaId) {
       return NextResponse.json(
         { error: "Coupon not found" },
         { status: 404 }
@@ -172,7 +172,7 @@ async function deleteHandler(request: AuthenticatedRequest, context?: Record<str
 
     // Check if user is admin
     const isAdmin = user.role === "usuario" && !!user.roleType && isAdminRoleTipo(user.roleType);
-    if (!user.isSuperAdmin && !isAdmin) {
+    if (!isAdmin) {
       return NextResponse.json(
         { error: "Only admins can delete coupons" },
         { status: 403 }
@@ -193,7 +193,7 @@ async function deleteHandler(request: AuthenticatedRequest, context?: Record<str
       );
     }
 
-    if (existing.empresaId !== user.empresaId && !user.isSuperAdmin) {
+    if (existing.empresaId !== user.empresaId) {
       return NextResponse.json(
         { error: "Coupon not found" },
         { status: 404 }

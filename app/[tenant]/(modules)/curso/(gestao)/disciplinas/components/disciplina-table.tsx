@@ -180,7 +180,7 @@ export function DisciplinaTable() {
         if (err.status === 401) {
           errorMessage = 'Não autorizado. Faça login novamente.'
         } else if (err.status === 403) {
-          errorMessage = 'Acesso negado. Você precisa ser professor ou superadmin para criar disciplinas.'
+          errorMessage = 'Acesso negado. Você precisa ser professor ou administrador para criar disciplinas.'
         } else if (err.status === 500) {
           const details = err.data?.details
           errorMessage = `Erro interno do servidor: ${err.data?.error || err.message || 'Erro desconhecido'}`

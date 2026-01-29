@@ -33,10 +33,7 @@ async function deleteHandler(
   }
 
   // Verificar se o usuário é professor/usuario
-  if (
-    request.user.role !== "usuario" &&
-    request.user.role !== "superadmin"
-  ) {
+  if (request.user.role !== "usuario") {
     return NextResponse.json(
       { error: "Forbidden. Only professors can delete fronts." },
       { status: 403 },
@@ -74,8 +71,8 @@ async function deleteHandler(
       empresaId = usuario?.empresa_id ?? undefined;
     }
 
-    // Se não conseguimos determinar a empresa e não é superadmin, não dá para autorizar com segurança
-    if (!empresaId && request.user.role !== "superadmin") {
+    // Se não conseguimos determinar a empresa, não dá para autorizar com segurança
+    if (!empresaId) {
       return NextResponse.json(
         { error: "Forbidden. Missing company context for this user." },
         { status: 403 },
@@ -110,11 +107,7 @@ async function deleteHandler(
 
     // 2. Validar que a frente pertence à empresa do professor
     // (em multitenancy, frentes possuem empresa_id; logo, dá pra autorizar sem depender do curso)
-    if (
-      request.user.role !== "superadmin" &&
-      empresaId &&
-      typedFrente.empresa_id !== empresaId
-    ) {
+    if (empresaId && typedFrente.empresa_id !== empresaId) {
       return NextResponse.json(
         { error: "Forbidden. You can only delete fronts from your company." },
         { status: 403 },

@@ -43,13 +43,12 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     const supabase = await createClient();
 
     const context = await getEmpresaContext(supabase, user.id, request, user);
-    if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
+    if (!validateEmpresaAccess(context, id)) {
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
     // Users can view their own profile
     const canView =
-      user.isSuperAdmin ||
       user.id === usuarioId ||
       user.permissions?.usuarios?.view;
 
@@ -101,14 +100,14 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     const supabase = await createClient();
 
     const context = await getEmpresaContext(supabase, user.id, request, user);
-    if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
+    if (!validateEmpresaAccess(context, id)) {
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 
     // Users can edit their own profile (limited fields) or admins can edit any
     const isOwnProfile = user.id === usuarioId;
     const canEdit =
-      user.isSuperAdmin || isOwnProfile || user.permissions?.usuarios?.edit;
+      isOwnProfile || user.permissions?.usuarios?.edit;
 
     if (!canEdit) {
       return NextResponse.json(
@@ -150,7 +149,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     // If changing papel, verify permission and papel exists
     if (papelId !== undefined && papelId !== existingUsuario.papelId) {
       // Only admins can change role
-      if (!user.isSuperAdmin && !user.permissions?.usuarios?.edit) {
+      if (!user.permissions?.usuarios?.edit) {
         return NextResponse.json(
           { error: "Sem permissão para alterar papel do usuário" },
           { status: 403 }
@@ -176,7 +175,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     // If changing ativo status, verify permission
     if (ativo !== undefined && ativo !== existingUsuario.ativo) {
-      if (!user.isSuperAdmin && !user.permissions?.usuarios?.edit) {
+      if (!user.permissions?.usuarios?.edit) {
         return NextResponse.json(
           { error: "Sem permissão para alterar status do usuário" },
           { status: 403 }
@@ -186,7 +185,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     // If editing own profile, restrict fields
     const input: UpdateUsuarioInput = {};
-    if (isOwnProfile && !user.isSuperAdmin && !user.permissions?.usuarios?.edit) {
+    if (isOwnProfile && !user.permissions?.usuarios?.edit) {
       // Own profile - limited fields
       if (nomeCompleto !== undefined) input.nomeCompleto = nomeCompleto;
       if (telefone !== undefined) input.telefone = telefone;
@@ -213,7 +212,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     // If password is provided, update auth user password (admin only)
     if (password && password.length >= 6) {
       // Only admins can change other users' passwords
-      if (!user.isSuperAdmin && !user.permissions?.usuarios?.edit) {
+      if (!user.permissions?.usuarios?.edit) {
         return NextResponse.json(
           { error: "Sem permissão para alterar senha do usuário" },
           { status: 403 }
@@ -258,7 +257,7 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
     }
 
     // Check permission to delete usuarios
-    if (!user.isSuperAdmin && !user.permissions?.usuarios?.delete) {
+    if (!user.permissions?.usuarios?.delete) {
       return NextResponse.json(
         { error: "Sem permissão para remover usuários" },
         { status: 403 }
@@ -268,7 +267,7 @@ export async function DELETE(request: NextRequest, { params }: RouteContext) {
     const supabase = await createClient();
 
     const context = await getEmpresaContext(supabase, user.id, request, user);
-    if (!validateEmpresaAccess(context, id) && !context.isSuperAdmin) {
+    if (!validateEmpresaAccess(context, id)) {
       return NextResponse.json({ error: "Acesso negado" }, { status: 403 });
     }
 

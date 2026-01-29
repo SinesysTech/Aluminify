@@ -35,9 +35,7 @@ function isMissingImagePathColumns(error: unknown): boolean {
   );
 }
 
-async function ensureProfessorOrSuperAdmin(request: AuthenticatedRequest) {
-  if (request.user?.isSuperAdmin) return { isSuperAdmin: true, empresaId: request.user.empresaId ?? null };
-
+async function ensureProfessorOrAdmin(request: AuthenticatedRequest) {
   const client = getDatabaseClient();
   const { data: professor, error } = await client
     .from('professores')
@@ -50,14 +48,13 @@ async function ensureProfessorOrSuperAdmin(request: AuthenticatedRequest) {
   }
 
   return {
-    isSuperAdmin: false,
     empresaId: (professor as { empresa_id?: string | null }).empresa_id ?? null,
   };
 }
 
 async function postHandler(request: AuthenticatedRequest, params: { id: string }) {
   try {
-    const { isSuperAdmin, empresaId: userEmpresaId } = await ensureProfessorOrSuperAdmin(request);
+    const { empresaId: userEmpresaId } = await ensureProfessorOrAdmin(request);
 
     const formData = await request.formData();
     const side = parseSide(formData.get('side'));
@@ -112,7 +109,7 @@ async function postHandler(request: AuthenticatedRequest, params: { id: string }
       return NextResponse.json({ error: 'Flashcard sem empresa_id (dados inconsistentes).' }, { status: 400 });
     }
 
-    if (!isSuperAdmin && userEmpresaId && flashcardEmpresaId !== userEmpresaId) {
+    if (userEmpresaId && flashcardEmpresaId !== userEmpresaId) {
       return NextResponse.json({ error: 'Você não tem permissão para alterar este flashcard.' }, { status: 403 });
     }
 
@@ -171,7 +168,7 @@ async function postHandler(request: AuthenticatedRequest, params: { id: string }
 
 async function deleteHandler(request: AuthenticatedRequest, params: { id: string }) {
   try {
-    const { isSuperAdmin, empresaId: userEmpresaId } = await ensureProfessorOrSuperAdmin(request);
+    const { empresaId: userEmpresaId } = await ensureProfessorOrAdmin(request);
 
     const { searchParams } = new URL(request.url);
     const side = parseSide(searchParams.get('side'));
@@ -205,7 +202,7 @@ async function deleteHandler(request: AuthenticatedRequest, params: { id: string
       return NextResponse.json({ error: 'Flashcard sem empresa_id (dados inconsistentes).' }, { status: 400 });
     }
 
-    if (!isSuperAdmin && userEmpresaId && flashcardEmpresaId !== userEmpresaId) {
+    if (userEmpresaId && flashcardEmpresaId !== userEmpresaId) {
       return NextResponse.json({ error: 'Você não tem permissão para alterar este flashcard.' }, { status: 403 });
     }
 

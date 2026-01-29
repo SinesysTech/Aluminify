@@ -55,15 +55,14 @@ async function getHandler(
   }
 }
 
-// PUT - RLS verifica permissões (professor ou superadmin)
+// PUT - RLS verifica permissões (professor)
 async function putHandler(
   request: AuthenticatedRequest,
   params: { id: string },
 ) {
   if (
     request.user &&
-    request.user.role !== "usuario" &&
-    request.user.role !== "superadmin"
+    request.user.role !== "usuario"
   ) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
@@ -81,15 +80,14 @@ async function putHandler(
   }
 }
 
-// DELETE - RLS verifica permissões (professor ou superadmin)
+// DELETE - RLS verifica permissões (professor)
 async function deleteHandler(
   request: AuthenticatedRequest,
   params: { id: string },
 ) {
   if (
     request.user &&
-    request.user.role !== "usuario" &&
-    request.user.role !== "superadmin"
+    request.user.role !== "usuario"
   ) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

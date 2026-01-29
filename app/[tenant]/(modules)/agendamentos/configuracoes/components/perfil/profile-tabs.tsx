@@ -26,7 +26,6 @@ function getRoleLabel(role: string): string {
         aluno: 'Aluno',
         professor: 'Professor',
         admin: 'Administrador',
-        superadmin: 'Super Admin',
     }
     return roleMap[role] || role
 }

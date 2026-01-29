@@ -66,7 +66,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
   }
 }
 
-// PUT requer autenticação (JWT ou API Key) - RLS verifica se é o criador ou superadmin
+// PUT requer autenticação (JWT ou API Key) - RLS verifica se é o criador ou admin
 async function putHandler(request: AuthenticatedRequest, params: { id: string }) {
   try {
     if (!params || !params.id) {
@@ -98,7 +98,7 @@ async function putHandler(request: AuthenticatedRequest, params: { id: string })
   }
 }
 
-// DELETE requer autenticação (JWT ou API Key) - RLS verifica se é o criador ou superadmin
+// DELETE requer autenticação (JWT ou API Key) - RLS verifica se é o criador ou admin
 async function deleteHandler(_request: AuthenticatedRequest, params: { id: string }) {
   try {
     await cursoService.delete(params.id);
