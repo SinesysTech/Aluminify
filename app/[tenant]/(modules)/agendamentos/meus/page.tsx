@@ -1,13 +1,20 @@
 import type { Metadata } from 'next'
+import dynamic from "next/dynamic"
 import { createClient } from "@/app/shared/core/server"
 import { redirect } from "next/navigation"
 import { getAgendamentosAluno } from "@/app/[tenant]/(modules)/agendamentos/lib/actions";
-import { MeusAgendamentosList } from "../components/meus-agendamentos-list"
-import { Suspense } from "react"
 import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus } from "lucide-react"
+
+const MeusAgendamentosList = dynamic(
+  () => import("../components/meus-agendamentos-list").then(mod => ({ default: mod.MeusAgendamentosList })),
+  {
+    ssr: false,
+    loading: () => <AgendamentosSkeleton />,
+  }
+)
 
 export const metadata: Metadata = {
   title: 'Meus Agendamentos'
@@ -47,9 +54,7 @@ export default async function MeusAgendamentosPage({ params }: MeusAgendamentosP
         </Button>
       </div>
 
-      <Suspense fallback={<AgendamentosSkeleton />}>
-        <MeusAgendamentosList agendamentos={agendamentos} />
-      </Suspense>
+      <MeusAgendamentosList agendamentos={agendamentos} />
     </div>
   )
 }
