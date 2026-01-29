@@ -2,10 +2,13 @@ import { NextResponse } from 'next/server';
 import { authService } from '@/app/[tenant]/auth/services/auth.service';
 import { requireAuth, AuthenticatedRequest } from '@/app/[tenant]/auth/middleware';
 import { clearImpersonationContext } from '@/app/shared/core/auth-impersonate';
+import { invalidateAuthSessionCache } from '@/app/shared/core/auth';
 
-async function handler() {
+async function handler(request: AuthenticatedRequest) {
   try {
-    // Garantia: encerrar qualquer cookie de impersonação no logout server-side.
+    if (request.user?.id) {
+      await invalidateAuthSessionCache(request.user.id);
+    }
     await clearImpersonationContext();
     await authService.signOut();
     return NextResponse.json({ success: true });
@@ -15,5 +18,5 @@ async function handler() {
   }
 }
 
-export const POST = requireAuth(handler as (request: AuthenticatedRequest) => Promise<NextResponse>);
+export const POST = requireAuth(handler);
 

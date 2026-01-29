@@ -6,6 +6,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from '@/components/ui/accordion'
+import { cn } from '@/lib/utils'
 import { AtividadeRow } from './atividade-row'
 import { ModuloComAtividades } from '../types'
 import { StatusAtividade, DificuldadePercebida } from '@/app/shared/types/enums'
@@ -35,19 +36,36 @@ export function ContentList({
     ).length
     const totalAtividades = modulo.atividades.length
     const percentual = totalAtividades > 0 ? Math.round((atividadesConcluidas / totalAtividades) * 100) : 0
+    const isComplete = percentual === 100 && totalAtividades > 0
+    const hasProgress = percentual > 0
 
     return (
         <Accordion type="single" collapsible className="w-full">
             <AccordionItem value={modulo.id} className="border rounded-lg mb-2">
                 <AccordionTrigger className="px-4 hover:no-underline">
                     <div className="flex items-center justify-between w-full mr-4">
-                        <div className="flex items-center gap-2">
-                            <span className="font-medium">
-                                Módulo {modulo.numeroModulo || 'N/A'}: {modulo.nome}
-                            </span>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                            {atividadesConcluidas}/{totalAtividades} atividades concluídas ({percentual}%)
+                        <div className="flex items-center gap-3">
+                            {/* Progress badge */}
+                            <div
+                                className={cn(
+                                    'flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold shrink-0 transition-colors',
+                                    isComplete
+                                        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+                                        : hasProgress
+                                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                                            : 'bg-muted text-muted-foreground',
+                                )}
+                            >
+                                {percentual}%
+                            </div>
+                            <div className="text-left">
+                                <span className="font-medium">
+                                    Módulo {modulo.numeroModulo || 'N/A'}: {modulo.nome}
+                                </span>
+                                <div className="text-xs text-muted-foreground">
+                                    {atividadesConcluidas}/{totalAtividades} concluídas
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </AccordionTrigger>

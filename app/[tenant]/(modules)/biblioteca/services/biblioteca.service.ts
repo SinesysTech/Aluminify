@@ -104,26 +104,35 @@ export async function fetchBibliotecaData(
       const atividadesComProgresso = (payload.data || []).slice();
 
       if (atividadesComProgresso.length === 0) {
-        const cursosResp = await fetch(`/api/usuario/alunos/cursos/${alunoId}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
-          },
-        });
+        // Fetch enrolled courses directly via Supabase instead of non-existent API route.
+        // RLS on alunos_cursos allows students to query their own records (usuario_id = auth.uid()).
+        let cursosQuery = supabase
+          .from("alunos_cursos")
+          .select("curso_id, cursos!inner(id, nome)")
+          .eq("usuario_id", alunoId);
 
-        if (cursosResp.ok) {
-          const cursosPayload = (await cursosResp.json()) as {
-            data?: Array<{ id: string; nome: string }>;
-          };
-          return {
-            atividades: [],
-            estrutura: [],
-            cursos: cursosPayload.data || [],
-            disciplinas: [],
-            frentes: [],
-          };
+        if (activeOrgId) {
+          cursosQuery = cursosQuery.eq("cursos.empresa_id", activeOrgId);
         }
+
+        const { data: enrollments } = await cursosQuery;
+
+        const cursosDoAluno = (enrollments || [])
+          .map(
+            (e) =>
+              e.cursos as unknown as { id: string; nome: string } | null,
+          )
+          .filter(
+            (c): c is { id: string; nome: string } => c !== null,
+          );
+
+        return {
+          atividades: [],
+          estrutura: [],
+          cursos: cursosDoAluno,
+          disciplinas: [],
+          frentes: [],
+        };
       }
 
       atividadesComProgresso.sort((a, b) => {

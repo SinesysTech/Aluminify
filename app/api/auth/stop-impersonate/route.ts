@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { requireUserAuth, type AuthenticatedRequest } from '@/app/[tenant]/auth/middleware'
 import { clearImpersonationContext, getImpersonationContext } from '@/app/shared/core/auth-impersonate'
 import { getDefaultRouteForRole } from '@/app/shared/core/roles'
+import { invalidateAuthSessionCache } from '@/app/shared/core/auth'
 
 async function postHandler(request: AuthenticatedRequest) {
   try {
@@ -26,8 +27,9 @@ async function postHandler(request: AuthenticatedRequest) {
       )
     }
 
-    // Limpar contexto
+    // Limpar contexto e cache de sessão
     await clearImpersonationContext()
+    await invalidateAuthSessionCache(request.user.id)
 
     return NextResponse.json({
       success: true,

@@ -8,6 +8,7 @@ import {
   setImpersonationContext,
   canImpersonateUser,
 } from "@/app/shared/core/auth-impersonate";
+import { invalidateAuthSessionCache } from "@/app/shared/core/auth";
 import type { AppUserRole } from "@/app/shared/types";
 import type { Database } from "@/app/shared/core/database.types";
 
@@ -110,6 +111,7 @@ async function postHandler(request: AuthenticatedRequest) {
     };
 
     await setImpersonationContext(context);
+    await invalidateAuthSessionCache(request.user.id);
 
     return NextResponse.json({
       success: true,

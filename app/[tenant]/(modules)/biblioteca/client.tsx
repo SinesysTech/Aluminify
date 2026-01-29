@@ -1,8 +1,15 @@
 'use client'
 
 import * as React from 'react'
-import { AlertCircle, School } from 'lucide-react'
+import { AlertCircle, Library, BookOpen } from 'lucide-react'
 import { Skeleton } from '@/app/shared/components/feedback/skeleton'
+import {
+    Empty,
+    EmptyHeader,
+    EmptyMedia,
+    EmptyTitle,
+    EmptyDescription,
+} from '@/app/shared/components/ui/empty'
 import { useCurrentUser } from '@/components/providers/user-provider'
 import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
 import { AtividadeComProgresso, CursoComDisciplinas, DisciplinaComFrentes, FrenteComModulos } from './types'
@@ -173,25 +180,34 @@ export default function BibliotecaClient({
 
     return (
         <div className="container mx-auto py-6 space-y-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                        <School className="h-8 w-8 text-primary" />
-                        {title}
-                    </h1>
-                    <p className="text-muted-foreground">{description}</p>
+            {/* Page Header - matching dashboard InstitutionHeader pattern */}
+            <header className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
+                    <Library className="w-5 h-5 text-primary" />
                 </div>
-            </div>
+                <div>
+                    <h1 className="page-title">{title}</h1>
+                    <p className="page-subtitle">{description}</p>
+                </div>
+            </header>
 
             {error ? (
                 <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive flex items-center gap-2">
-                    <AlertCircle className="h-5 w-5" />
+                    <AlertCircle className="h-5 w-5 shrink-0" />
                     <p>{error}</p>
                 </div>
             ) : isLoading ? (
                 <div className="space-y-4">
-                    <Skeleton className="h-32 w-full" />
-                    <Skeleton className="h-64 w-full" />
+                    {/* Skeleton matching the final layout */}
+                    <Skeleton className="h-20 w-full rounded-lg" />
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        <Skeleton className="h-24 rounded-lg" />
+                        <Skeleton className="h-24 rounded-lg" />
+                        <Skeleton className="h-24 rounded-lg" />
+                        <Skeleton className="h-24 rounded-lg" />
+                    </div>
+                    <Skeleton className="h-16 w-full rounded-lg" />
+                    <Skeleton className="h-64 w-full rounded-lg" />
                 </div>
             ) : (
                 <>
@@ -229,12 +245,12 @@ export default function BibliotecaClient({
                         {estruturaFiltrada.map(curso => (
                             <div key={curso.id} className="space-y-4">
                                 {curso.disciplinas.map(disciplina => (
-                                    <div key={disciplina.id} className="space-y-2">
+                                    <div key={disciplina.id} className="space-y-3">
                                         <h3 className="text-lg font-semibold flex items-center gap-2 text-primary">
                                             {disciplina.nome}
                                         </h3>
                                         {disciplina.frentes.map(frente => (
-                                            <div key={frente.id} className="pl-4 border-l-2 border-muted space-y-2">
+                                            <div key={frente.id} className="pl-4 border-l-2 border-primary/20 space-y-2">
                                                 <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                                                     {frente.nome}
                                                 </h4>
@@ -254,9 +270,19 @@ export default function BibliotecaClient({
                         ))}
 
                         {estruturaFiltrada.length === 0 && !isLoading && (
-                            <div className="text-center py-12 text-muted-foreground">
-                                Nenhum conteúdo encontrado para os filtros selecionados.
-                            </div>
+                            <Empty className="border">
+                                <EmptyHeader>
+                                    <EmptyMedia variant="icon">
+                                        <BookOpen />
+                                    </EmptyMedia>
+                                    <EmptyTitle>Nenhum conteúdo encontrado</EmptyTitle>
+                                    <EmptyDescription>
+                                        {!cursoSelecionado
+                                            ? 'Selecione um curso para começar a explorar suas atividades e materiais de estudo.'
+                                            : 'Não há atividades disponíveis para os filtros selecionados. Tente ajustar os filtros.'}
+                                    </EmptyDescription>
+                                </EmptyHeader>
+                            </Empty>
                         )}
                     </div>
                 </>

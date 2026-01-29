@@ -24,10 +24,22 @@ import type { AppUser, AppUserRole } from "@/app/shared/types";
 import type { RoleTipo, RolePermissions } from "@/app/shared/types/entities/papel";
 import { getImpersonationContext } from "@/app/shared/core/auth-impersonate";
 import { getDefaultRouteForRole } from "@/app/shared/core/roles";
+import { cacheService } from "@/app/shared/core/services/cache/cache.service";
 
 type LegacyAppUserRole = "professor" | "empresa";
 
+const AUTH_SESSION_CACHE_TTL = 1800; // 30 minutos
+
+/**
+ * Invalida o cache de sessão de um usuário.
+ * Chamar quando: logout, troca de senha, alteração de papel/permissões, impersonação.
+ */
+export async function invalidateAuthSessionCache(userId: string): Promise<void> {
+  await cacheService.del(`auth:session:${userId}`);
+}
+
 async function _getAuthenticatedUser(): Promise<AppUser | null> {
+  // 1. Validação JWT (sempre — segurança)
   const supabase = await createClient();
   const {
     data: { user },
@@ -38,26 +50,41 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
     return null;
   }
 
-  // Verificar se está em modo impersonação
+  // 2. Verificar impersonação (cookie, rápido)
   const impersonationContext = await getImpersonationContext();
   const isImpersonating =
     impersonationContext !== null &&
     impersonationContext.realUserId === user.id;
 
-  // Se estiver impersonando, usar dados do usuário impersonado
   let targetUserId = user.id;
   if (isImpersonating && impersonationContext) {
     targetUserId = impersonationContext.impersonatedUserId;
   }
 
-  // Get role from metadata
+  // 3. Checar cache de sessão (Redis)
+  const cacheKey = isImpersonating && impersonationContext
+    ? `auth:session:${user.id}:imp:${impersonationContext.impersonatedUserId}`
+    : `auth:session:${user.id}`;
+
+  const cached = await cacheService.get<AppUser>(cacheKey);
+  if (cached) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("[AUTH DEBUG] getAuthenticatedUser: session cache hit");
+    }
+    return cached;
+  }
+
+  // 4. Cache miss — buscar dados no banco
+  if (process.env.NODE_ENV === "development") {
+    console.log("[AUTH DEBUG] getAuthenticatedUser: session cache miss, fetching from DB");
+  }
+
   const metadataRole =
     isImpersonating && impersonationContext
       ? impersonationContext.impersonatedUserRole
       : (user.user_metadata?.role as AppUserRole | LegacyAppUserRole) ||
         "aluno";
 
-  // Back-compat: map legacy roles to the unified staff role ("usuario")
   let role: AppUserRole =
     metadataRole === "professor" || metadataRole === "empresa"
       ? "usuario"
@@ -66,27 +93,17 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
   let mustChangePassword = Boolean(user.user_metadata?.must_change_password);
   let roleType: RoleTipo | undefined;
   let permissions: RolePermissions | undefined;
-
-  if (process.env.NODE_ENV === "development") {
-    console.log(
-      "[AUTH DEBUG] getAuthenticatedUser: base " +
-        JSON.stringify({
-          userId: user.id,
-          email: user.email,
-          role,
-          isImpersonating,
-          mustChangePasswordFromMetadata: Boolean(
-            user.user_metadata?.must_change_password,
-          ),
-          metadataRole: user.user_metadata?.role,
-          metadataEmpresaId: user.user_metadata?.empresa_id,
-        }),
-    );
-  }
-
   let empresaId: string | undefined;
   let empresaNome: string | undefined;
   let empresaSlug: string | undefined;
+
+  // Helper para cachear e retornar
+  const cacheAndReturn = async (
+    appUser: AppUser & { _impersonationContext?: typeof impersonationContext },
+  ) => {
+    await cacheService.set(cacheKey, appUser, AUTH_SESSION_CACHE_TTL);
+    return appUser;
+  };
 
   // Se estiver impersonando, buscar dados do aluno impersonado
   if (isImpersonating && impersonationContext) {
@@ -97,7 +114,6 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
       .maybeSingle();
 
     if (alunoData) {
-      // Carregar dados da empresa do aluno impersonado para branding
       let impersonatedEmpresaId: string | undefined;
       let impersonatedEmpresaNome: string | undefined;
       let impersonatedEmpresaSlug: string | undefined;
@@ -117,33 +133,24 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
         }
       }
 
-      return {
+      return cacheAndReturn({
         id: targetUserId,
         email: alunoData.email || "",
         role: "aluno" as AppUserRole,
         fullName: alunoData.nome_completo || undefined,
-        // Impersonação é uma visualização (read-only). Não devemos forçar troca de senha
-        // do usuário impersonado, porque o usuário autenticado no Supabase Auth é o "real"
-        // e isso pode causar loop em /primeiro-acesso para admins/professores.
         mustChangePassword: false,
-        // Incluir dados da empresa para branding funcionar corretamente
         empresaId: impersonatedEmpresaId,
         empresaNome: impersonatedEmpresaNome,
         empresaSlug: impersonatedEmpresaSlug,
-        // Manter informações do usuário real para contexto
         _impersonationContext: impersonationContext,
-      } as AppUser & { _impersonationContext?: typeof impersonationContext };
+      } as AppUser & { _impersonationContext?: typeof impersonationContext });
     }
   }
 
   // Load empresa context for usuarios (staff)
-  // First check if user exists in usuarios table (institution staff)
-  // Note: Using service role client to bypass RLS for auth queries
   if (role === "usuario") {
-    // Use service role client to bypass RLS for authentication queries
     const adminClient = getDatabaseClient();
 
-    // Query 1: Get usuario data
     const { data: usuarioRow, error: usuarioError } = await adminClient
       .from("usuarios")
       .select("empresa_id, nome_completo, papel_id")
@@ -153,11 +160,9 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
       .maybeSingle();
 
     if (!usuarioError && usuarioRow) {
-      // User found in usuarios table - they are institution staff
       role = "usuario";
       empresaId = usuarioRow.empresa_id;
 
-      // Query 2: Get papel data
       if (usuarioRow.papel_id) {
         const { data: papelRow } = await adminClient
           .from("papeis")
@@ -171,7 +176,6 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
         }
       }
 
-      // Query 3: Get empresa data
       if (usuarioRow.empresa_id) {
         const { data: empresaRow } = await adminClient
           .from("empresas")
@@ -185,27 +189,12 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
         }
       }
 
-      // Use nome_completo from usuarios table
       if (usuarioRow.nome_completo) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (user.user_metadata as any) = {
           ...(user.user_metadata || {}),
           full_name: usuarioRow.nome_completo,
         };
-      }
-
-      if (process.env.NODE_ENV === "development") {
-        console.log(
-          "[AUTH DEBUG] getAuthenticatedUser: usuario found " +
-            JSON.stringify({
-              userId: user.id,
-              email: user.email,
-              role,
-              roleType,
-              empresaId,
-              empresaSlug,
-            }),
-        );
       }
     }
   }
@@ -221,7 +210,6 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
       mustChangePassword = alunoData.must_change_password;
     }
 
-    // Carregar empresaSlug para alunos (necessário para redirecionamento após primeiro acesso)
     const alunoEmpresaId = alunoData?.empresa_id || user.user_metadata?.empresa_id;
     if (alunoEmpresaId && !empresaSlug) {
       const adminClient = getDatabaseClient();
@@ -237,40 +225,9 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
         empresaSlug = empresaRow.slug ?? undefined;
       }
     }
-
-    if (process.env.NODE_ENV === "development") {
-      console.log(
-        "[AUTH DEBUG] getAuthenticatedUser: aluno mustChangePassword source " +
-          JSON.stringify({
-            userId: user.id,
-            email: user.email,
-            mustChangePasswordFromMetadata: Boolean(
-              user.user_metadata?.must_change_password,
-            ),
-            alunoRowMustChangePassword: alunoData?.must_change_password,
-            mustChangePasswordFinal: mustChangePassword,
-            empresaSlug,
-          }),
-      );
-    }
-  } else {
-    if (process.env.NODE_ENV === "development") {
-      console.log(
-        "[AUTH DEBUG] getAuthenticatedUser: non-aluno mustChangePassword final " +
-          JSON.stringify({
-            userId: user.id,
-            email: user.email,
-            role,
-            mustChangePasswordFromMetadata: Boolean(
-              user.user_metadata?.must_change_password,
-            ),
-            mustChangePasswordFinal: mustChangePassword,
-          }),
-      );
-    }
   }
 
-  return {
+  return cacheAndReturn({
     id: targetUserId,
     email: user.email || "",
     role,
@@ -285,11 +242,10 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
     empresaId,
     empresaSlug,
     empresaNome,
-    // Adicionar contexto de impersonação se estiver impersonando
     ...(isImpersonating && impersonationContext
       ? { _impersonationContext: impersonationContext }
       : {}),
-  } as AppUser & { _impersonationContext?: typeof impersonationContext };
+  } as AppUser & { _impersonationContext?: typeof impersonationContext });
 }
 
 export const getAuthenticatedUser = cache(_getAuthenticatedUser);
