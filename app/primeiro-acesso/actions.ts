@@ -2,6 +2,7 @@
 
 import { createClient } from "@/app/shared/core/server";
 import { getDatabaseClient } from "@/app/shared/core/database/database";
+import { invalidateAuthSessionCache } from "@/app/shared/core/auth";
 
 export type FinalizeFirstAccessResult = {
   success: boolean;
@@ -83,6 +84,7 @@ export async function finalizeFirstAccessAction(): Promise<FinalizeFirstAccessRe
       }
     }
 
+    await invalidateAuthSessionCache(user.id);
     return { success: true };
   } catch (error) {
     console.error("[finalizeFirstAccessAction] erro inesperado:", error);
