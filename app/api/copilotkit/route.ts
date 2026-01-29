@@ -147,8 +147,8 @@ export const POST = async (req: NextRequest) => {
 
     copilotRuntime = new CopilotRuntime({
       // Use MastraAgent.getLocalAgents to register Mastra agents with CopilotKit
-      // CopilotKit types model `agents` as MaybePromise; wrap to satisfy TS
-      agents: Promise.resolve(mastraAgents),
+      // Type assertion needed: duplicate @ag-ui/client packages cause nominal type mismatch
+      agents: mastraAgents as Parameters<typeof CopilotRuntime>[0] extends { agents?: infer A } ? A : never,
     });
 
     // Use empty adapter since Mastra agent handles LLM calls
