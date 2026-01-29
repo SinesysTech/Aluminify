@@ -4,7 +4,6 @@ import * as React from 'react'
 import { AlertCircle, School } from 'lucide-react'
 import { Skeleton } from '@/app/shared/components/feedback/skeleton'
 import { useCurrentUser } from '@/components/providers/user-provider'
-import { OrganizationSwitcher } from '@/app/[tenant]/(modules)/dashboard/components/organization-switcher'
 import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
 import { AtividadeComProgresso, CursoComDisciplinas, DisciplinaComFrentes, FrenteComModulos } from './types'
 import { StatusAtividade } from '@/app/shared/types/enums'
@@ -181,9 +180,6 @@ export default function BibliotecaClient({
                         {title}
                     </h1>
                     <p className="text-muted-foreground">{description}</p>
-                </div>
-                <div className="w-full md:w-auto">
-                    <OrganizationSwitcher />
                 </div>
             </div>
 

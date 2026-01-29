@@ -70,10 +70,6 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
     const acertos = counts.dificil + counts.facil
     const score = total > 0 ? Math.round((acertos / total) * 100) : 0
 
-    // Progress ring calculations
-    const circumference = 2 * Math.PI * 70
-    const strokeDashoffset = circumference - ((score / 100) * circumference)
-
     // Get color and message based on score
     const getScoreConfig = (score: number) => {
         if (score >= 80) return {
@@ -108,10 +104,10 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
 
     // Stats data
     const stats = [
-        { icon: XCircle, label: 'Errei', count: counts.errei, color: 'text-red-400', bg: 'bg-red-500/20' },
-        { icon: CircleDot, label: 'Parcial', count: counts.parcial, color: 'text-amber-400', bg: 'bg-amber-500/20' },
-        { icon: CircleHelp, label: 'Inseguro', count: counts.dificil, color: 'text-sky-400', bg: 'bg-sky-500/20' },
-        { icon: CircleCheck, label: 'Acertei', count: counts.facil, color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
+        { icon: XCircle, label: 'Errei', count: counts.errei, color: 'text-slate-100', bg: 'bg-red-500/20' },
+        { icon: CircleDot, label: 'Parcial', count: counts.parcial, color: 'text-slate-100', bg: 'bg-amber-500/20' },
+        { icon: CircleHelp, label: 'Inseguro', count: counts.dificil, color: 'text-slate-100', bg: 'bg-sky-500/20' },
+        { icon: CircleCheck, label: 'Acertei', count: counts.facil, color: 'text-slate-100', bg: 'bg-emerald-500/20' },
     ]
 
     return (
@@ -153,34 +149,35 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
             </div>
 
             {/* Main content */}
-            <div className="h-full w-full flex flex-col items-center justify-center px-6 relative z-10">
-                <div className="w-full max-w-lg space-y-8">
+            <div className="h-full w-full flex flex-col items-center justify-center px-6 relative z-10 overflow-y-auto py-8">
+                <div className="w-full max-w-lg space-y-6 my-auto">
                     {/* Trophy and Score Ring */}
                     <div className="flex flex-col items-center">
                         {/* Trophy icon */}
-                        <div className="relative mb-6">
+                        <div className="relative mb-4">
                             <div className={cn(
-                                'flex h-16 w-16 items-center justify-center rounded-full',
-                                'bg-amber-500/20 border border-amber-500/30'
+                                'flex h-12 w-12 items-center justify-center rounded-full',
+                                'bg-violet-600 border border-violet-500/30',
+                                'shadow-lg shadow-violet-500/25'
                             )}>
-                                <Trophy className="h-8 w-8 text-amber-400" />
+                                <Trophy className="h-6 w-6 text-slate-100" />
                             </div>
                             {score >= 80 && (
-                                <Sparkles className="absolute -top-1 -right-1 h-5 w-5 text-amber-400 animate-pulse" />
+                                <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-slate-100 animate-pulse" />
                             )}
                         </div>
 
                         {/* Title */}
-                        <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+                        <h1 className="text-xl md:text-2xl font-bold text-white mb-1">
                             Sessão Concluída!
                         </h1>
-                        <p className="text-slate-400 text-sm mb-8">
+                        <p className="text-slate-400 text-xs md:text-sm mb-6">
                             Você revisou {total} flashcards
                         </p>
 
                         {/* Score Ring */}
                         <div className="relative">
-                            <svg width="180" height="180" className="-rotate-90">
+                            <svg width="140" height="140" className="-rotate-90">
                                 <defs>
                                     <filter id="glow-summary" x="-50%" y="-50%" width="200%" height="200%">
                                         <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -191,70 +188,70 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
                                     </filter>
                                 </defs>
                                 <circle
-                                    cx="90"
-                                    cy="90"
-                                    r="70"
+                                    cx="70"
+                                    cy="70"
+                                    r="55"
                                     fill="none"
                                     stroke="currentColor"
-                                    strokeWidth="8"
+                                    strokeWidth="6"
                                     className="text-white/10"
                                 />
                                 <circle
-                                    cx="90"
-                                    cy="90"
-                                    r="70"
+                                    cx="70"
+                                    cy="70"
+                                    r="55"
                                     fill="none"
                                     stroke="currentColor"
-                                    strokeWidth="8"
+                                    strokeWidth="6"
                                     strokeLinecap="round"
                                     filter="url(#glow-summary)"
                                     className={cn('transition-all duration-1000', scoreConfig.ringColor)}
-                                    strokeDasharray={circumference}
-                                    strokeDashoffset={strokeDashoffset}
+                                    strokeDasharray={2 * Math.PI * 55}
+                                    strokeDashoffset={(2 * Math.PI * 55) - ((score / 100) * 2 * Math.PI * 55)}
                                 />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className={cn('text-5xl font-bold tabular-nums', scoreConfig.color)}>
+                                <span className={cn('text-2xl md:text-3xl font-bold tabular-nums', scoreConfig.color)}>
                                     {score}%
                                 </span>
-                                <span className="text-xs text-slate-400 mt-1">score</span>
+                                <span className="text-[9px] md:text-[10px] text-slate-400 mt-0.5">score</span>
                             </div>
                         </div>
 
                         {/* Celebration message */}
-                        <p className={cn('mt-6 text-center font-medium', scoreConfig.color)}>
+                        <p className={cn('mt-4 text-sm md:text-base text-center font-medium', scoreConfig.color)}>
                             {celebrationMessage}
                         </p>
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-4 gap-2 md:gap-3">
                         {stats.map((stat) => (
                             <div
                                 key={stat.label}
                                 className={cn(
-                                    'flex flex-col items-center gap-2 py-4 px-2 rounded-xl',
+                                    'flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl',
                                     'bg-white/5 border border-white/10'
                                 )}
                             >
-                                <div className={cn('p-2 rounded-lg', stat.bg)}>
-                                    <stat.icon className={cn('h-4 w-4', stat.color)} />
+                                <div className={cn('p-1.5 rounded-lg', stat.bg)}>
+                                    <stat.icon className={cn('h-3.5 w-3.5', stat.color)} />
                                 </div>
-                                <span className="text-2xl font-bold text-white tabular-nums">
+                                <span className="text-xl md:text-2xl font-bold text-white tabular-nums">
                                     {stat.count}
                                 </span>
-                                <span className="text-xs text-slate-400">{stat.label}</span>
+                                <span className="text-[10px] md:text-xs text-slate-400">{stat.label}</span>
                             </div>
                         ))}
                     </div>
 
                     {/* Distribution bar */}
-                    <div className="space-y-2">
-                        <div className="flex justify-between text-xs text-slate-400">
+                    <div className="space-y-1.5">
+                        <div className="flex justify-between text-[10px] md:text-xs text-slate-400">
                             <span>Distribuição</span>
                             <span>{acertos} de {total} acertos</span>
                         </div>
-                        <div className="h-3 rounded-full overflow-hidden bg-white/10 flex">
+                        <div className="h-2 md:h-2.5 rounded-full overflow-hidden bg-white/10 flex">
                             {counts.errei > 0 && (
                                 <div
                                     className="h-full bg-red-500 transition-all duration-500"
@@ -283,30 +280,30 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-2 md:gap-3 pt-2 pb-4">
                         <Button
                             onClick={onFinish}
                             className={cn(
-                                'flex-1 h-12 text-base font-medium',
+                                'flex-1 h-10 md:h-11 text-sm md:text-base font-medium',
                                 'bg-violet-600 hover:bg-violet-500 text-white',
                                 'transition-all duration-300 hover:scale-[1.02]',
                                 'shadow-lg shadow-violet-500/25'
                             )}
                         >
-                            <Home className="mr-2 h-4 w-4" />
+                            <Home className="mr-2 h-3.5 w-3.5 md:h-4 md:w-4" />
                             Concluir
                         </Button>
                         <Button
                             onClick={onStudyMore}
                             variant="outline"
                             className={cn(
-                                'flex-1 h-12 text-base font-medium',
+                                'flex-1 h-10 md:h-11 text-sm md:text-base font-medium',
                                 'bg-white/5 border-white/20 text-white',
                                 'hover:bg-white/10 hover:border-white/30',
                                 'transition-all duration-300 hover:scale-[1.02]'
                             )}
                         >
-                            <RefreshCw className="mr-2 h-4 w-4" />
+                            <RefreshCw className="mr-2 h-3.5 w-3.5 md:h-4 md:w-4" />
                             Estudar +10
                         </Button>
                     </div>

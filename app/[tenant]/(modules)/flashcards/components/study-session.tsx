@@ -68,11 +68,121 @@ export function StudySession({
 
     const normalizeMathDelimiters = React.useCallback((value?: string | null) => {
         if (!value) return ""
-        return value
+        
+        // Debug: log do texto original para entender a estrutura
+        if (process.env.NODE_ENV === 'development') {
+            console.log('[Flashcards] Texto original:', value)
+        }
+        
+        let normalized = value
+        
+        // Primeiro, converter delimiters explícitos LaTeX
+        normalized = normalized
             .replaceAll("\\(", "$")
             .replaceAll("\\)", "$")
             .replaceAll("\\[", "$$")
             .replaceAll("\\]", "$$")
+        
+        // Função auxiliar para verificar se já está entre delimiters
+        const isAlreadyDelimited = (text: string, index: number): boolean => {
+            if (index === 0) return false
+            const before = text.substring(Math.max(0, index - 2), index)
+            return before.endsWith('$') || before.endsWith('$$')
+        }
+        
+        // Detectar fórmulas que começam com variável matemática seguida de =
+        // Exemplo: "F_{ar} = \frac{1}{2} \cdot \rho \cdot v^2 \cdot C_d \cdot A"
+        // Estratégia: encontrar padrão "variável = " e capturar tudo até "onde"
+        
+        const formulaMatches: Array<{ fullMatch: string; startIndex: number; endIndex: number }> = []
+        let i = 0
+        
+        while (i < normalized.length) {
+            // Buscar padrão de início: variável com subscrito/superscrito seguida de =
+            const varPattern = /([A-Za-z](?:_\{[^}]+\})?(?:\^\{[^}]+\})?)\s*=\s*/
+            const remainingText = normalized.substring(i)
+            const varMatch = remainingText.match(varPattern)
+            
+            if (!varMatch) {
+                i++
+                continue
+            }
+            
+            const formulaStart = i + varMatch.index! + varMatch[0].length
+            let j = formulaStart
+            let braceDepth = 0
+            let lastValidPos = formulaStart
+            let foundOnde = false
+            
+            // Avançar até encontrar "onde"
+            while (j < normalized.length) {
+                const char = normalized[j]
+                const nextFew = normalized.substring(j, Math.min(j + 10, normalized.length))
+                
+                // Contar chaves
+                if (char === '{') braceDepth++
+                else if (char === '}') braceDepth--
+                
+                // Se estamos fora de chaves
+                if (braceDepth === 0) {
+                    // Verificar se é caractere válido em fórmula
+                    if (char.match(/[A-Za-z0-9_^+\-*/=()\{\}\s\\.]/)) {
+                        lastValidPos = j + 1
+                    }
+                    
+                    // Verificar se encontrou "onde"
+                    if (nextFew.match(/^\s*,?\s*onde\b/i)) {
+                        foundOnde = true
+                        break
+                    }
+                }
+                
+                j++
+            }
+            
+            // Se encontramos "onde" ou chegamos ao fim, temos uma fórmula
+            if (foundOnde || (j >= normalized.length && lastValidPos > formulaStart)) {
+                const formulaText = normalized.substring(i + varMatch.index!, lastValidPos).trim()
+                
+                // Verificar se contém comandos LaTeX e não está já delimitado
+                if (formulaText.includes('\\') && !isAlreadyDelimited(normalized, i + varMatch.index!)) {
+                    const cleanedFormula = formulaText.replace(/[,\s]+$/, '')
+                    
+                    if (cleanedFormula.length > 3) {
+                        formulaMatches.push({
+                            fullMatch: cleanedFormula,
+                            startIndex: i + varMatch.index!,
+                            endIndex: i + varMatch.index! + cleanedFormula.length
+                        })
+                    }
+                }
+            }
+            
+            // Continuar busca após esta posição
+            i = foundOnde ? j : (i + 1)
+        }
+        
+        // Processar matches de trás para frente para não alterar índices
+        formulaMatches.reverse().forEach(({ fullMatch, startIndex, endIndex }) => {
+            normalized = normalized.substring(0, startIndex) + 
+                       `$${fullMatch}$` + 
+                       normalized.substring(endIndex)
+        })
+        
+        // Limpar delimiters duplicados
+        normalized = normalized.replace(/\$\$\$/g, '$$')
+        normalized = normalized.replace(/\$\$\$\$/g, '$$')
+        
+        // Remover delimiters $ soltos no final ou seguidos de texto não-matemático
+        normalized = normalized.replace(/\$\s*$/g, '')
+        normalized = normalized.replace(/\$\s+([a-záàâãéêíóôõúç])/gi, ' $1')
+        
+        // Debug: log do texto processado
+        if (process.env.NODE_ENV === 'development') {
+            console.log('[Flashcards] Texto processado:', normalized)
+        }
+        
+        return normalized
     }, [])
 
     // Detect reduced motion preference
@@ -303,7 +413,7 @@ export function StudySession({
             </div>
 
             {/* Main content - centered */}
-            <div className="h-full w-full flex flex-col items-center justify-center px-6 relative z-10">
+            <div className="h-full w-full flex flex-col items-center justify-center px-6 relative z-10 py-8 md:py-12 overflow-y-auto">
                 {/* Flashcard */}
                 <div className="w-full max-w-2xl perspective-1000">
                     <div
@@ -311,46 +421,50 @@ export function StudySession({
                             'relative w-full transition-all duration-700 transform-3d',
                             showAnswer && 'transform-[rotateY(180deg)]'
                         )}
-                        style={{ transformStyle: 'preserve-3d' }}
+                        style={{ transformStyle: 'preserve-3d', height: 'auto' }}
                     >
                         {/* FRONT - Question */}
                         <div
                             className={cn(
-                                'w-full rounded-2xl p-8 md:p-12 backface-hidden',
+                                'w-full rounded-2xl backface-hidden',
                                 'bg-white/3 backdrop-blur-xl',
                                 'border border-white/10',
-                                'shadow-2xl shadow-black/20'
+                                'shadow-2xl shadow-black/20',
+                                'flex flex-col',
+                                'min-h-full'
                             )}
                             style={{ backfaceVisibility: 'hidden' }}
                         >
                             {/* Question badge */}
-                            <div className="flex items-center justify-center mb-8">
-                                <span className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                            <div className="flex items-center justify-center pt-8 md:pt-12 px-8 md:px-12 pb-8">
+                                <span className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-violet-500/20 text-slate-100 border border-violet-500/30">
                                     Pergunta
                                 </span>
                             </div>
 
                             {/* Question content */}
-                            <div className="flex flex-col items-center justify-center min-h-[200px] gap-6">
-                                {current.perguntaImagemUrl && (
-                                    <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-white/5">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                            src={current.perguntaImagemUrl}
-                                            alt="Imagem da pergunta"
-                                            className="w-full h-auto object-contain"
-                                        />
+                            <div className="px-8 md:px-12 py-4">
+                                <div className="flex flex-col items-center justify-center gap-6">
+                                    {current.perguntaImagemUrl && (
+                                        <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={current.perguntaImagemUrl}
+                                                alt="Imagem da pergunta"
+                                                className="w-full h-auto object-contain"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="text-xl md:text-2xl lg:text-3xl font-medium text-center text-white leading-relaxed">
+                                        <Markdown>
+                                            {normalizeMathDelimiters(current.pergunta)}
+                                        </Markdown>
                                     </div>
-                                )}
-                                <div className="text-xl md:text-2xl lg:text-3xl font-medium text-center text-white leading-relaxed">
-                                    <Markdown>
-                                        {normalizeMathDelimiters(current.pergunta)}
-                                    </Markdown>
                                 </div>
                             </div>
 
                             {/* Reveal button */}
-                            <div className="mt-10 pt-8 border-t border-white/10">
+                            <div className="pt-10 pb-8 md:pb-12 px-8 md:px-12 border-t border-white/10 space-y-3">
                                 <Button
                                     onClick={onReveal}
                                     className={cn(
@@ -364,7 +478,7 @@ export function StudySession({
                                     Revelar Resposta
                                     <ChevronRight className="ml-2 h-5 w-5" />
                                 </Button>
-                                <p className="mt-3 text-center text-xs text-slate-500">
+                                <p className="text-center text-xs text-slate-500">
                                     ou pressione <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-mono text-[10px]">Espaço</kbd>
                                 </p>
                             </div>
@@ -373,99 +487,105 @@ export function StudySession({
                         {/* BACK - Answer */}
                         <div
                             className={cn(
-                                'absolute inset-0 w-full rounded-2xl p-8 md:p-12 backface-hidden',
+                                'absolute top-0 left-0 right-0 w-full rounded-2xl backface-hidden',
                                 'bg-white/3 backdrop-blur-xl',
                                 'border border-white/10',
                                 'shadow-2xl shadow-black/20',
-                                'transform-[rotateY(180deg)]'
+                                'transform-[rotateY(180deg)]',
+                                'flex flex-col'
                             )}
                             style={{ backfaceVisibility: 'hidden' }}
                         >
                             {/* Answer badge */}
-                            <div className="flex items-center justify-center mb-8">
-                                <span className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            <div className="flex items-center justify-center pt-8 md:pt-12 px-8 md:px-12 pb-8">
+                                <span className="px-4 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-violet-500/20 text-slate-100 border border-violet-500/30">
                                     Resposta
                                 </span>
                             </div>
 
                             {/* Answer content */}
-                            <div className="flex flex-col items-center justify-center min-h-[160px] gap-6">
-                                {current.respostaImagemUrl && (
-                                    <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-white/5">
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img
-                                            src={current.respostaImagemUrl}
-                                            alt="Imagem da resposta"
-                                            className="w-full h-auto object-contain"
-                                        />
+                            <div className="px-8 md:px-12 py-6 md:py-8">
+                                <div className="flex flex-col items-center justify-center gap-6">
+                                    {current.respostaImagemUrl && (
+                                        <div className="relative w-full max-w-sm overflow-hidden rounded-xl border border-white/10 bg-white/5">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={current.respostaImagemUrl}
+                                                alt="Imagem da resposta"
+                                                className="w-full h-auto object-contain"
+                                            />
+                                        </div>
+                                    )}
+                                    <div className="text-lg md:text-xl lg:text-2xl font-medium text-center text-white leading-relaxed">
+                                        <Markdown>
+                                            {normalizeMathDelimiters(current.resposta)}
+                                        </Markdown>
                                     </div>
-                                )}
-                                <div className="text-lg md:text-xl lg:text-2xl font-medium text-center text-white leading-relaxed">
-                                    <Markdown>
-                                        {normalizeMathDelimiters(current.resposta)}
-                                    </Markdown>
                                 </div>
                             </div>
 
-                            {/* Feedback buttons */}
-                            <div className="mt-8 pt-6 border-t border-white/10">
-                                <p className="mb-5 text-center text-sm text-slate-400 font-medium">
-                                    Como foi?
-                                </p>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    <FeedbackButton
-                                        onClick={() => onFeedback(1)}
-                                        icon={<XCircle className="h-5 w-5" />}
-                                        label="Errei"
-                                        shortcut="1"
-                                        colorClass="bg-red-500/20 hover:bg-red-500/30 text-red-300 border-red-500/30"
-                                    />
-                                    <FeedbackButton
-                                        onClick={() => onFeedback(2)}
-                                        icon={<CircleDot className="h-5 w-5" />}
-                                        label="Parcial"
-                                        shortcut="2"
-                                        colorClass="bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border-amber-500/30"
-                                    />
-                                    <FeedbackButton
-                                        onClick={() => onFeedback(3)}
-                                        icon={<CircleHelp className="h-5 w-5" />}
-                                        label="Inseguro"
-                                        shortcut="3"
-                                        colorClass="bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border-sky-500/30"
-                                    />
-                                    <FeedbackButton
-                                        onClick={() => onFeedback(4)}
-                                        icon={<CircleCheck className="h-5 w-5" />}
-                                        label="Acertei"
-                                        shortcut="4"
-                                        colorClass="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border-emerald-500/30"
-                                    />
+                            {/* Feedback section */}
+                            <div className="px-8 md:px-12 pt-10 md:pt-12 pb-10 md:pb-12 border-t border-white/10">
+                                <div className="flex flex-col gap-6 md:gap-8">
+                                    <p className="text-center text-sm md:text-base text-slate-400 font-medium">
+                                        Como foi?
+                                    </p>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 w-full auto-rows-fr">
+                                        <FeedbackButton
+                                            onClick={() => onFeedback(1)}
+                                            icon={<XCircle className="h-5 w-5" />}
+                                            label="Errei"
+                                            shortcut="1"
+                                            colorClass="bg-red-500/20 hover:bg-red-500/30 text-slate-100 border-red-500/30"
+                                        />
+                                        <FeedbackButton
+                                            onClick={() => onFeedback(2)}
+                                            icon={<CircleDot className="h-5 w-5" />}
+                                            label="Parcial"
+                                            shortcut="2"
+                                            colorClass="bg-amber-500/20 hover:bg-amber-500/30 text-slate-100 border-amber-500/30"
+                                        />
+                                        <FeedbackButton
+                                            onClick={() => onFeedback(3)}
+                                            icon={<CircleHelp className="h-5 w-5" />}
+                                            label="Inseguro"
+                                            shortcut="3"
+                                            colorClass="bg-sky-500/20 hover:bg-sky-500/30 text-slate-100 border-sky-500/30"
+                                        />
+                                        <FeedbackButton
+                                            onClick={() => onFeedback(4)}
+                                            icon={<CircleCheck className="h-5 w-5" />}
+                                            label="Acertei"
+                                            shortcut="4"
+                                            colorClass="bg-emerald-500/20 hover:bg-emerald-500/30 text-slate-100 border-emerald-500/30"
+                                        />
+                                    </div>
                                 </div>
+                            </div>
+
+                            {/* Quote section inside card */}
+                            <div className={cn(
+                                'px-8 md:px-12 pt-10 md:pt-12 pb-16 md:pb-20 border-t border-white/10 transition-all duration-700',
+                                showControls ? 'opacity-60' : 'opacity-30'
+                            )}>
+                                <blockquote className="text-center">
+                                    <p className="text-sm md:text-base text-slate-400 italic leading-relaxed">
+                                        &ldquo;{currentQuote.text}&rdquo;
+                                    </p>
+                                    <footer className="mt-2 text-xs text-slate-500">
+                                        — {currentQuote.author}
+                                    </footer>
+                                </blockquote>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                {/* Quote section */}
-                <div className={cn(
-                    'absolute bottom-24 left-0 right-0 px-8 transition-all duration-700',
-                    showControls ? 'opacity-60' : 'opacity-30'
-                )}>
-                    <blockquote className="max-w-xl mx-auto text-center">
-                        <p className="text-sm md:text-base text-slate-400 italic leading-relaxed">
-                            &ldquo;{currentQuote.text}&rdquo;
-                        </p>
-                        <footer className="mt-2 text-xs text-slate-500">
-                            — {currentQuote.author}
-                        </footer>
-                    </blockquote>
                 </div>
             </div>
 
             {/* Bottom hint */}
             <div className={cn(
-                'absolute bottom-6 left-0 right-0 text-center z-20 transition-all duration-500 pointer-events-none',
+                'fixed bottom-6 md:bottom-8 left-0 right-0 z-20 transition-all duration-500 pointer-events-none',
+                'text-center',
                 showControls ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             )}>
                 <p className="text-xs text-slate-500">
@@ -473,7 +593,7 @@ export function StudySession({
                 </p>
             </div>
 
-            {/* CSS for aurora animations */}
+            {/* CSS for aurora animations, scrollbar, and KaTeX */}
             <style jsx>{`
                 @keyframes aurora-slow {
                     0%, 100% { transform: translate(0%, 0%) rotate(0deg); }
@@ -498,6 +618,56 @@ export function StudySession({
                 }
                 .animate-aurora-fast {
                     animation: aurora-fast 15s ease-in-out infinite;
+                }
+                /* KaTeX styles for dark theme */
+                :global(.katex) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex *) {
+                    color: inherit !important;
+                }
+                :global(.katex .mathnormal) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex .mord) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex .mrel) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex .mop) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex .mbin) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex .mopen) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex .mclose) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex .mpunct) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex .mfrac) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex .sqrt) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                :global(.katex .mspace) {
+                    color: rgb(255, 255, 255) !important;
+                }
+                /* Sobrescrever cores de erro do KaTeX */
+                :global(.katex-error) {
+                    color: rgb(255, 255, 255) !important;
+                    background-color: transparent !important;
+                }
+                /* Garantir que delimiters $ não apareçam como texto */
+                :global(.katex-display),
+                :global(.katex-inline) {
+                    color: rgb(255, 255, 255) !important;
                 }
             `}</style>
         </div>
@@ -526,6 +696,7 @@ function FeedbackButton({
                 'border transition-all duration-200',
                 'hover:scale-[1.02] active:scale-[0.98]',
                 'focus:outline-none focus:ring-2 focus:ring-white/20',
+                'w-full h-full',
                 colorClass
             )}
         >

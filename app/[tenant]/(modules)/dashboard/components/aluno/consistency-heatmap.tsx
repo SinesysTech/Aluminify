@@ -14,7 +14,7 @@ import { format, subDays, startOfWeek, addDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { CalendarDays, Info } from 'lucide-react'
 
-export type HeatmapPeriod = 'mensal' | 'trimestral' | 'semestral' | 'anual'
+export type HeatmapPeriod = 'mensal' | 'semestral' | 'anual'
 
 interface ConsistencyHeatmapProps {
   data: HeatmapDay[]
@@ -24,7 +24,6 @@ interface ConsistencyHeatmapProps {
 
 const periodOptions: { value: HeatmapPeriod; label: string }[] = [
   { value: 'mensal', label: 'Mensal' },
-  { value: 'trimestral', label: 'Trimestral' },
   { value: 'semestral', label: 'Semestral' },
   { value: 'anual', label: 'Anual' },
 ]
@@ -39,8 +38,6 @@ export function ConsistencyHeatmap({
     switch (period) {
       case 'mensal':
         return { days: 30, label: 'Últimos 30 dias' }
-      case 'trimestral':
-        return { days: 90, label: 'Últimos 3 meses' }
       case 'semestral':
         return { days: 180, label: 'Últimos 6 meses' }
       case 'anual':
@@ -105,17 +102,18 @@ export function ConsistencyHeatmap({
   const getIntensityColor = (intensity: number) => {
     switch (intensity) {
       case 0:
-        return 'bg-muted hover:bg-muted/80'
+        // No modo claro: fundo mais escuro e borda para visibilidade; modo escuro usa cores mais claras
+        return 'bg-slate-200/60 border border-slate-300/10 hover:bg-slate-200/80 dark:bg-slate-700/40 dark:border-slate-600/10 hover:dark:bg-slate-700/60'
       case 1:
-        return 'bg-emerald-500/20 hover:bg-emerald-500/30'
+        return 'bg-emerald-500/40 hover:bg-emerald-500/50 dark:bg-emerald-400/40 dark:hover:bg-emerald-400/50'
       case 2:
-        return 'bg-emerald-500/40 hover:bg-emerald-500/50'
+        return 'bg-emerald-500/60 hover:bg-emerald-500/70 dark:bg-emerald-400/60 dark:hover:bg-emerald-400/70'
       case 3:
-        return 'bg-emerald-500/60 hover:bg-emerald-500/70'
+        return 'bg-emerald-500/80 hover:bg-emerald-500/90 dark:bg-emerald-400/80 dark:hover:bg-emerald-400/90'
       case 4:
-        return 'bg-emerald-500/80 hover:bg-emerald-500/90'
+        return 'bg-emerald-500 hover:bg-emerald-500/90 dark:bg-emerald-400 dark:hover:bg-emerald-400/90'
       default:
-        return 'bg-muted'
+        return 'bg-slate-200/60 border border-slate-300/10 dark:bg-slate-700/40 dark:border-slate-600/10'
     }
   }
 
@@ -131,8 +129,10 @@ export function ConsistencyHeatmap({
   }
 
   return (
-    <Card className="mb-6 md:mb-8">
-      <CardHeader className="pb-4">
+    <Card className="mb-6 md:mb-8 overflow-hidden transition-all duration-300 border-primary/20 relative">
+      {/* Gradiente de fundo */}
+      <div className="absolute inset-0 bg-linear-to-r from-primary/5 via-primary/3 to-transparent pointer-events-none z-0" />
+      <CardHeader className="pb-4 relative z-20">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Title + Info */}
           <div className="flex items-center gap-2">
@@ -199,20 +199,20 @@ export function ConsistencyHeatmap({
         </div>
       </CardHeader>
 
-      <CardContent>
-        <div className="flex flex-col gap-2">
+      <CardContent className="relative z-20">
+        <div className="flex flex-col gap-2 relative z-20">
           {/* Heatmap Grid */}
-          <div className="overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-            <div className="flex gap-1 min-w-fit">
+          <div className="overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 relative z-20">
+            <div className="flex gap-1 min-w-fit relative z-20">
               {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-1">
+                <div key={weekIndex} className="flex flex-col gap-1 relative z-20">
                   {week.map((day, dayIndex) => (
                     <TooltipProvider key={dayIndex} delayDuration={100}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div
                             className={cn(
-                              'w-3 h-3 rounded-sm transition-colors cursor-default',
+                              'w-3 h-3 rounded-sm transition-colors cursor-default relative z-20',
                               getIntensityColor(day.intensity)
                             )}
                           />
@@ -239,14 +239,14 @@ export function ConsistencyHeatmap({
           </div>
 
           {/* Legenda */}
-          <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground mt-2">
+          <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground mt-2 relative z-20">
             <span>Menos</span>
             <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-sm bg-muted" />
-              <div className="w-3 h-3 rounded-sm bg-emerald-500/20" />
-              <div className="w-3 h-3 rounded-sm bg-emerald-500/40" />
-              <div className="w-3 h-3 rounded-sm bg-emerald-500/60" />
-              <div className="w-3 h-3 rounded-sm bg-emerald-500/80" />
+              <div className="w-3 h-3 rounded-sm bg-slate-200/60 border border-slate-300/10 dark:bg-slate-700/40 dark:border-slate-600/10" />
+              <div className="w-3 h-3 rounded-sm bg-emerald-500/40 dark:bg-emerald-400/40" />
+              <div className="w-3 h-3 rounded-sm bg-emerald-500/60 dark:bg-emerald-400/60" />
+              <div className="w-3 h-3 rounded-sm bg-emerald-500/80 dark:bg-emerald-400/80" />
+              <div className="w-3 h-3 rounded-sm bg-emerald-500 dark:bg-emerald-400" />
             </div>
             <span>Mais</span>
           </div>

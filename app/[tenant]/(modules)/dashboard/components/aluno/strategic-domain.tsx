@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import {
   Radar,
   RadarChart,
@@ -19,6 +20,7 @@ import {
 import { Info, Brain, Target, CheckCircle2 } from 'lucide-react'
 import type { StrategicDomain, StrategicDomainRecommendation, ModuloImportancia } from '../../types'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useTheme } from 'next-themes'
 
 interface StrategicDomainProps {
   data: StrategicDomain
@@ -73,6 +75,9 @@ function RecommendationCard({ rec }: { rec: StrategicDomainRecommendation }) {
 }
 
 export function StrategicDomain({ data }: StrategicDomainProps) {
+  const { theme, resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark' || theme === 'dark'
+
   // Preparar dados para o gráfico de radar
   // Eixos: Flashcards e Questões para Base e Alta Recorrência
   const radarData = [
@@ -98,8 +103,29 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     },
   ]
 
+  // Cores adaptáveis ao tema - usando roxo #A78BFA
+  const chartColors = useMemo(() => {
+    const purpleColor = '#A78BFA' // Cor roxa especificada
+    
+    if (isDark) {
+      // No modo escuro, usar cores mais claras para melhor visibilidade
+      return {
+        grid: 'rgba(255, 255, 255, 0.15)',
+        text: 'rgba(255, 255, 255, 0.7)',
+        primary: purpleColor,
+      }
+    }
+    
+    // Modo claro - usar cores escuras para melhor visibilidade
+    return {
+      grid: 'rgba(0, 0, 0, 0.2)',
+      text: 'rgba(0, 0, 0, 0.8)',
+      primary: purpleColor,
+    }
+  }, [isDark])
+
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
           <CardTitle className="text-base font-semibold">
@@ -125,10 +151,16 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
         <div className="w-full md:w-1/2 h-[250px] md:h-auto relative">
           <ResponsiveContainer width="100%" height="100%">
             <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
-              <PolarGrid stroke="hsl(var(--muted-foreground))" strokeOpacity={0.2} />
+              <PolarGrid 
+                stroke={chartColors.grid}
+                strokeOpacity={isDark ? 0.3 : 0.2}
+              />
               <PolarAngleAxis
                 dataKey="subject"
-                tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                tick={{ 
+                  fill: chartColors.text, 
+                  fontSize: 10
+                }}
               />
               <PolarRadiusAxis
                 angle={30}
@@ -139,9 +171,10 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
               <Radar
                 name="Performance"
                 dataKey="A"
-                stroke="hsl(var(--primary))"
-                fill="hsl(var(--primary))"
-                fillOpacity={0.3}
+                stroke={chartColors.primary}
+                fill={chartColors.primary}
+                strokeWidth={2}
+                fillOpacity={isDark ? 0.5 : 0.4}
               />
             </RadarChart>
           </ResponsiveContainer>

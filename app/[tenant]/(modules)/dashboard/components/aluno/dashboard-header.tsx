@@ -7,7 +7,6 @@ import Link from 'next/link'
 import type { UserInfo } from '../../types'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/app/shared/components/overlay/tooltip'
-import { OrganizationSwitcher } from '@/app/[tenant]/(modules)/dashboard/components/organization-switcher'
 import { cn } from '@/lib/utils'
 
 type FocusContext = {
@@ -101,13 +100,12 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
     <header className="mb-6 md:mb-8">
       {/* Mobile Layout */}
       <div className="flex flex-col gap-4 md:hidden">
-        {/* Greeting + Organization */}
+        {/* Greeting */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <h1 className="text-2xl font-bold tracking-tight truncate">
               {getGreeting()}, {user.name.split(' ')[0]}!
             </h1>
-            <OrganizationSwitcher variant="compact" />
           </div>
         </div>
 
@@ -195,7 +193,6 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
               <h1 className="text-3xl font-bold tracking-tight">
                 {getGreeting()}, {user.name}!
               </h1>
-              <OrganizationSwitcher variant="compact" />
             </div>
           </div>
 

@@ -7,7 +7,6 @@ import Link from 'next/link'
 import type { UserInfo } from '@/app/[tenant]/(modules)/dashboard/types/student'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/app/shared/components/overlay/tooltip'
-import { OrganizationSwitcher } from '@/app/[tenant]/(modules)/dashboard/components/organization-switcher'
 
 type FocusContext = {
   cursoId?: string
@@ -79,14 +78,12 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
 
   return (
     <header className="flex flex-wrap items-center justify-between gap-4 mb-8">
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="page-title">
-            {getGreeting()}, {user.name}!
-          </h1>
-          {/* Organization Switcher for multi-org students */}
-          <OrganizationSwitcher variant="compact" />
-        </div>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="page-title">
+              {getGreeting()}, {user.name}!
+            </h1>
+          </div>
         <div className="flex items-center gap-2">
           <Flame className="text-[#FB923C] fill-[#FB923C]" size={20} />
           <p className="page-subtitle">

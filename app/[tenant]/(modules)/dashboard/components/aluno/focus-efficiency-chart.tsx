@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Bar,
@@ -16,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/app/shared/components/overlay/tooltip'
+import { useTheme } from 'next-themes'
 import type { FocusEfficiencyDay } from '../../types'
 
 interface FocusEfficiencyChartProps {
@@ -23,8 +25,16 @@ interface FocusEfficiencyChartProps {
 }
 
 export function FocusEfficiencyChart({ data }: FocusEfficiencyChartProps) {
+  const { theme, resolvedTheme } = useTheme()
+  const isDark = resolvedTheme === 'dark' || theme === 'dark'
+
+  // Cores adaptáveis ao tema
+  const axisColor = useMemo(() => {
+    return isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.7)'
+  }, [isDark])
+
   return (
-    <Card className="h-full">
+    <Card className="h-full overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <div className="flex items-center gap-2">
           <CardTitle className="text-base font-semibold">
@@ -51,17 +61,19 @@ export function FocusEfficiencyChart({ data }: FocusEfficiencyChartProps) {
             <BarChart data={data}>
               <XAxis
                 dataKey="day"
-                stroke="#888888"
+                stroke={axisColor}
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
+                tick={{ fill: axisColor }}
               />
               <YAxis
-                stroke="#888888"
+                stroke={axisColor}
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(value) => `${value}min`}
+                tick={{ fill: axisColor }}
               />
               <Tooltip
                 content={({ active, payload }) => {

@@ -835,7 +835,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
   return (
     <div className="container mx-auto py-4 md:py-6 space-y-4 md:space-y-6 px-2 md:px-4">
       {/* Header com Resumo */}
-      <Card>
+      <Card className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
@@ -1016,7 +1016,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
       </Card>
 
       {/* Card de Resumo das Configurações */}
-      <Card>
+      <Card className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
         <CardHeader>
           <CardTitle>Resumo da Configuração</CardTitle>
           <Separator className="mt-2" />

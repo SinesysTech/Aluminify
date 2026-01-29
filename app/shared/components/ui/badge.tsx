@@ -22,14 +22,18 @@ const badgeVariants = cva(
         outline: "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
 
         // Importance levels - Solid badges with white text
+        // Base: Azul (intensificado para melhor contraste)
         "importance-base":
-          "border-transparent bg-blue-500 text-white [a&]:hover:bg-blue-600 focus-visible:ring-blue-500/20 dark:focus-visible:ring-blue-500/40",
+          "border-transparent bg-[#3B82F6] text-white [a&]:hover:bg-[#2563EB] focus-visible:ring-[#3B82F6]/20 dark:focus-visible:ring-[#3B82F6]/40",
+        // Alta: Vermelho (intensificado para melhor contraste)
         "importance-high":
-          "border-transparent bg-red-500 text-white [a&]:hover:bg-red-600 focus-visible:ring-red-500/20 dark:focus-visible:ring-red-500/40",
+          "border-transparent bg-[#EF4444] text-white [a&]:hover:bg-[#DC2626] focus-visible:ring-[#EF4444]/20 dark:focus-visible:ring-[#EF4444]/40",
+        // Média: Amarelo (intensificado para melhor contraste)
         "importance-medium":
-          "border-transparent bg-amber-500 text-white [a&]:hover:bg-amber-600 focus-visible:ring-amber-500/20 dark:focus-visible:ring-amber-500/40",
+          "border-transparent bg-[#EAB308] text-white [a&]:hover:bg-[#CA8A04] focus-visible:ring-[#EAB308]/20 dark:focus-visible:ring-[#EAB308]/40",
+        // Baixa: Verde (intensificado para melhor contraste)
         "importance-low":
-          "border-transparent bg-emerald-500 text-white [a&]:hover:bg-emerald-600 focus-visible:ring-emerald-500/20 dark:focus-visible:ring-emerald-500/40"
+          "border-transparent bg-[#10B981] text-white [a&]:hover:bg-[#059669] focus-visible:ring-[#10B981]/20 dark:focus-visible:ring-[#10B981]/40"
       }
     },
     defaultVariants: {

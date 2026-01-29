@@ -479,7 +479,7 @@ export function ScheduleList({
                       return (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {frentes.map((frente, frenteIndex) => (
-                            <Card key={frenteIndex} className="border rounded-lg p-4 bg-card">
+                            <Card key={frenteIndex} className="border rounded-lg p-4 bg-card overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
                               <div className="mb-3 pb-2 border-b">
                                 <h4 className="font-semibold text-sm">{frente.nome}</h4>
                                 {frente.disciplina && (

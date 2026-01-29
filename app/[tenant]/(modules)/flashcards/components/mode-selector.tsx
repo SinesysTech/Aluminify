@@ -166,8 +166,8 @@ export function ModeSelector({
             </div>
 
             {/* Scope Selection Card */}
-            <Card className="border-muted bg-muted/30">
-                <CardContent className="py-3 px-4">
+            <Card className="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 mb-6 overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
+                <CardContent className="px-4 md:px-6">
                     <div className="flex items-center justify-between gap-4">
                         <div className="flex items-baseline gap-1.5">
                             <Label className="text-sm font-medium whitespace-nowrap">Fonte dos flashcards</Label>

@@ -1292,7 +1292,7 @@ export function ScheduleWizard() {
 
   return (
     <div className="container mx-auto py-6 max-w-4xl">
-      <Card>
+      <Card className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
         <CardHeader className="space-y-4">
           <div>
             <CardTitle>Criar Cronograma de Estudos</CardTitle>
@@ -1913,7 +1913,7 @@ export function ScheduleWizard() {
 
                 {/* Exibir tempos recalculados baseados na velocidade */}
                 {form.watch('disciplinas_ids').length > 0 && (
-                  <Card>
+                  <Card className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
                     <CardHeader>
                       <CardTitle className="text-base">Tempos Recalculados</CardTitle>
                       <CardDescription className="text-xs">
@@ -2007,7 +2007,7 @@ export function ScheduleWizard() {
                   )}
                 </div>
 
-                <Card>
+                <Card className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
                   <CardHeader>
                     <CardTitle>Resumo da Configuração</CardTitle>
                     <Separator className="mt-2" />

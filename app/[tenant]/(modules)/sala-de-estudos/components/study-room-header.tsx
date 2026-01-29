@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo } from 'react'
-import { OrganizationSwitcher } from '@/app/[tenant]/(modules)/dashboard/components/organization-switcher'
 
 interface StudyRoomHeaderProps {
   userName: string
@@ -55,7 +54,6 @@ export function StudyRoomHeader({ userName }: StudyRoomHeaderProps) {
               {motivationalPhrase}
             </p>
           </div>
-          <OrganizationSwitcher variant="compact" />
         </div>
       </div>
 
@@ -69,8 +67,6 @@ export function StudyRoomHeader({ userName }: StudyRoomHeaderProps) {
             {motivationalPhrase}
           </p>
         </div>
-
-        <OrganizationSwitcher />
       </div>
     </header>
   )

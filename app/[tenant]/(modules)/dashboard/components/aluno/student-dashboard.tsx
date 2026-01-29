@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Clock, CheckCircle2, Brain, RefreshCw, AlertCircle, Target } from 'lucide-react'
-import type { DashboardData } from '../../types'
+import type { DashboardData, DashboardPeriod } from '../../types'
 import {
     fetchDashboardData,
     type DashboardServiceError,
@@ -23,6 +23,26 @@ import { StrategicDomain } from './strategic-domain'
 import { DashboardSkeleton } from './dashboard-skeleton'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/app/shared/components/feedback/alert'
+
+/**
+ * Converte HeatmapPeriod para DashboardPeriod
+ * A API só aceita 'semanal', 'mensal' ou 'anual'
+ * Mapeia: semestral -> anual
+ */
+function mapHeatmapPeriodToDashboardPeriod(
+    period: HeatmapPeriod
+): DashboardPeriod {
+    switch (period) {
+        case 'mensal':
+            return 'mensal'
+        case 'semestral':
+            return 'anual' // Mapeia semestral para anual (mais próximo)
+        case 'anual':
+            return 'anual'
+        default:
+            return 'anual' // Fallback
+    }
+}
 
 // Intervalo de refresh automático (5 minutos)
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000
@@ -345,10 +365,10 @@ export default function StudentDashboardClientPage() {
             {/* Linha 3: 2 Colunas - Subject Performance List e Subject Distribution */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6 mb-6 md:mb-8 items-stretch">
                 <div className="lg:col-span-3 lg:h-[446px]">
-                    <SubjectPerformanceList subjects={data.subjects} period={heatmapPeriod as Parameters<typeof SubjectPerformanceList>[0]['period']} />
+                    <SubjectPerformanceList subjects={data.subjects} period={mapHeatmapPeriodToDashboardPeriod(heatmapPeriod)} />
                 </div>
                 <div className="lg:col-span-2 lg:h-[446px]">
-                    <SubjectDistribution data={data.subjectDistribution} period={heatmapPeriod as Parameters<typeof SubjectDistribution>[0]['period']} />
+                    <SubjectDistribution data={data.subjectDistribution} period={mapHeatmapPeriodToDashboardPeriod(heatmapPeriod)} />
                 </div>
             </div>
 

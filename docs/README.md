@@ -19,6 +19,13 @@ Bem-vindo ao portal de documentação do Aluminify. Este diretório foi organiza
 - [**Guia de Instalação Local**](./infra/setup.md)
 - [**Padrões de Desenvolvimento TypeScript**](./dev/typescript-supabase-guide.md)
 
+## 📖 Guias de Desenvolvimento
+
+- [**Formatação LaTeX**](./guides/latex-formatting.md) - Como formatar e renderizar fórmulas matemáticas
+- [**Configuração**](./guides/configuration.md)
+- [**CopilotKit Implementation**](./guides/copilotkit-implementation.md)
+- [**TypeScript + Supabase**](./guides/typescript-supabase.md)
+
 ## 📡 APIs e Backend
 
 - [**Referência da API**](./dev/api-reference.md)

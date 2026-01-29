@@ -16,6 +16,26 @@ export interface DashboardServiceError extends Error {
   isAuthError?: boolean;
 }
 
+/**
+ * Converte HeatmapPeriod para DashboardPeriod
+ * A API só aceita 'semanal', 'mensal' ou 'anual'
+ * Mapeia: semestral -> anual
+ */
+function mapHeatmapPeriodToDashboardPeriod(
+  period: HeatmapPeriod
+): DashboardPeriod {
+  switch (period) {
+    case "mensal":
+      return "mensal";
+    case "semestral":
+      return "anual"; // Mapeia semestral para anual (mais próximo)
+    case "anual":
+      return "anual";
+    default:
+      return "anual"; // Fallback
+  }
+}
+
 export interface FetchDashboardDataOptions {
   period?: HeatmapPeriod;
   /** Filter by organization ID (for multi-org students) */
@@ -38,7 +58,8 @@ export async function fetchDashboardData(
       ? { period: periodOrOptions }
       : periodOrOptions;
 
-  const period = options.period ?? "anual";
+  const heatmapPeriod = options.period ?? "anual";
+  const period = mapHeatmapPeriodToDashboardPeriod(heatmapPeriod);
   const empresaId = options.empresaId;
 
   try {
