@@ -45,11 +45,11 @@ export async function finalizeFirstAccessAction(): Promise<FinalizeFirstAccessRe
       return { success: false, error: metaError.message || "Falha ao finalizar primeiro acesso" };
     }
 
-    // Se for aluno, tentar limpar também na tabela alunos (se existir).
+    // Se for aluno, tentar limpar também na tabela usuarios (se existir).
     const role = currentMeta.role;
     if (role === "aluno") {
       const { data: alunoById, error: alunoIdError } = await adminClient
-        .from("alunos")
+        .from("usuarios")
         .select("id")
         .eq("id", user.id)
         .maybeSingle();
@@ -60,7 +60,7 @@ export async function finalizeFirstAccessAction(): Promise<FinalizeFirstAccessRe
 
       if (alunoById?.id) {
         const { error: alunoUpdateError } = await adminClient
-          .from("alunos")
+          .from("usuarios")
           .update({ must_change_password: false, senha_temporaria: null })
           .eq("id", user.id);
 
@@ -70,7 +70,7 @@ export async function finalizeFirstAccessAction(): Promise<FinalizeFirstAccessRe
       } else if (user.email) {
         // Fallback por email (bases legadas podem ter divergência id/email)
         const { error: alunoUpdateByEmailError } = await adminClient
-          .from("alunos")
+          .from("usuarios")
           .update({ must_change_password: false, senha_temporaria: null })
           .eq("email", user.email.toLowerCase());
 

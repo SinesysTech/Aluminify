@@ -108,7 +108,7 @@ async function putHandler(
       const db = getDatabaseClient();
 
       const { data: professor, error: profError } = await db
-        .from("professores")
+        .from("usuarios")
         .select("empresa_id")
         .eq("id", request.apiKey.createdBy)
         .maybeSingle();
@@ -183,7 +183,7 @@ async function deleteHandler(
       const db = getDatabaseClient();
 
       const { data: professor, error: profError } = await db
-        .from("professores")
+        .from("usuarios")
         .select("empresa_id")
         .eq("id", request.apiKey.createdBy)
         .maybeSingle();

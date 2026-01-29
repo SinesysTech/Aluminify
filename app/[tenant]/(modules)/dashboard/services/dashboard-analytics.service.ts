@@ -166,12 +166,12 @@ export class DashboardAnalyticsService {
     empresaId?: string,
   ): Promise<{ isProfessor: boolean; cursoIds: string[] }> {
     const { data: professorData } = await client
-      .from("professores")
+      .from("usuarios")
       .select("id")
       .eq("id", alunoId)
       .maybeSingle();
 
-    // Fallback via auth metadata (usuario/professor sem registro em `professores`)
+    // Fallback via auth metadata (usuario/professor sem registro em `usuarios`)
     let isProfessor = !!professorData;
     if (!isProfessor) {
       try {
@@ -1459,7 +1459,7 @@ export class DashboardAnalyticsService {
     let professorEmpresaId: string | null = null;
     if (isProfessor) {
       const { data: professor } = await client
-        .from("professores")
+        .from("usuarios")
         .select("nome_completo, empresa_id")
         .eq("id", alunoId)
         .maybeSingle();
@@ -1470,7 +1470,7 @@ export class DashboardAnalyticsService {
 
     // Buscar dados do aluno (professores também precisam ter registro aqui para dados de sessões/progresso)
     const { data: aluno, error: alunoError } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id, nome_completo, email")
       .eq("id", alunoId)
       .maybeSingle();
@@ -1484,7 +1484,7 @@ export class DashboardAnalyticsService {
       );
       const adminClient = getServiceRoleClient();
       const { data: alunoAdmin, error: adminError } = await adminClient
-        .from("alunos")
+        .from("usuarios")
         .select("id, nome_completo, email")
         .eq("id", alunoId)
         .maybeSingle();
@@ -1533,7 +1533,7 @@ export class DashboardAnalyticsService {
       let insertClient = client;
       let insertError = null;
 
-      const { error: normalInsertError } = await client.from("alunos").insert({
+      const { error: normalInsertError } = await client.from("usuarios").insert({
         id: alunoId,
         email: userEmail,
         nome_completo: fullName,
@@ -1548,7 +1548,7 @@ export class DashboardAnalyticsService {
         // Tentar com cliente admin (bypass RLS)
         insertClient = getServiceRoleClient();
         const { error: adminInsertError } = await insertClient
-          .from("alunos")
+          .from("usuarios")
           .insert({
             id: alunoId,
             email: userEmail,
@@ -1573,7 +1573,7 @@ export class DashboardAnalyticsService {
 
       // Buscar o registro recém-criado usando o cliente que funcionou
       const { data: novoAluno, error: selectError } = await insertClient
-        .from("alunos")
+        .from("usuarios")
         .select("id, nome_completo, email")
         .eq("id", alunoId)
         .single();
@@ -2350,12 +2350,12 @@ export class DashboardAnalyticsService {
 
     // 1) Resolver cursos do usuário (mesma lógica de getSubjectPerformance)
     const { data: professorData } = await client
-      .from("professores")
+      .from("usuarios")
       .select("id")
       .eq("id", alunoId)
       .maybeSingle();
 
-    // Fallback: alguns usuários podem não ter registro em `professores`,
+    // Fallback: alguns usuários podem não ter registro em `usuarios`,
     // mas ainda assim devem ter acesso "tipo professor" (todos os cursos).
     let isProfessor = !!professorData;
     if (!isProfessor) {

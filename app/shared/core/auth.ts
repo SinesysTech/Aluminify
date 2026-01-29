@@ -90,7 +90,7 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
   // Se estiver impersonando, buscar dados do aluno impersonado
   if (isImpersonating && impersonationContext) {
     const { data: alunoData } = await supabase
-      .from("alunos")
+      .from("usuarios")
       .select("must_change_password, nome_completo, email, empresa_id")
       .eq("id", targetUserId)
       .maybeSingle();
@@ -211,7 +211,7 @@ export async function getAuthenticatedUser(): Promise<AppUser | null> {
 
   if (role === "aluno") {
     const { data: alunoData } = await supabase
-      .from("alunos")
+      .from("usuarios")
       .select("must_change_password, empresa_id")
       .eq("id", user.id)
       .maybeSingle();

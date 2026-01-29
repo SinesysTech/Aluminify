@@ -23,7 +23,7 @@ export async function getProfessoresDisponiveis(
   let targetEmpresaId = empresaId;
   if (!targetEmpresaId) {
     const { data: alunoData } = await supabase
-      .from("alunos")
+      .from("usuarios")
       .select("empresa_id")
       .eq("id", user.id)
       .single();
@@ -53,7 +53,7 @@ export async function getProfessoresDisponiveis(
   }
 
   const { data: professores, error } = await supabase
-    .from("professores")
+    .from("usuarios")
     .select(
       "id, nome_completo, email, foto_url, especialidade, biografia, empresa_id",
     )
@@ -189,7 +189,7 @@ export async function getProfessorById(
   const supabase = await createClient();
 
   const { data: professor, error } = await supabase
-    .from("professores")
+    .from("usuarios")
     .select(
       "id, nome_completo, email, foto_url, especialidade, biografia, empresa_id",
     )

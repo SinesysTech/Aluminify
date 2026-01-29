@@ -32,7 +32,7 @@ async function patchHandler(
 
     // Verificar se o usuário é professor
     const { data: professorData } = await client
-      .from("professores")
+      .from("usuarios")
       .select("id")
       .eq("id", request.user!.id)
       .maybeSingle();

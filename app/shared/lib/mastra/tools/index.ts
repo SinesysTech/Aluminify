@@ -173,7 +173,7 @@ export function createMastraTools(context: ToolContext) {
 
       // Get student info
       const { data: studentData, error: studentError } = await client
-        .from("alunos")
+        .from("usuarios")
         .select("id, nome_completo, email, empresa_id")
         .eq("id", targetStudentId)
         .maybeSingle();
@@ -282,7 +282,7 @@ export function createMastraTools(context: ToolContext) {
       const term = searchTerm.trim();
 
       let query = client
-        .from("alunos")
+        .from("usuarios")
         .select("id, nome_completo, email, created_at")
         .is("deleted_at", null)
         .or(`nome_completo.ilike.%${term}%,email.ilike.%${term}%`)

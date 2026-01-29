@@ -325,7 +325,7 @@ export async function createBloqueio(
       .gt("data_fim", dataInicio);
   } else {
     const { data: professores } = await supabase
-      .from("professores")
+      .from("usuarios")
       .select("id")
       .eq("empresa_id", data.empresa_id);
 

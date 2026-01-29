@@ -114,7 +114,7 @@ async function postHandler(request: AuthenticatedRequest) {
       const db = getDatabaseClient();
 
       const { data: professor, error: profError } = await db
-        .from("professores")
+        .from("usuarios")
         .select("empresa_id")
         .eq("id", request.apiKey.createdBy)
         .maybeSingle();

@@ -22,67 +22,67 @@ export async function mapSupabaseUserToAuthUser(
 ): Promise<AuthUser | null> {
   const client = getDatabaseClient();
 
-  // Check if user exists in usuarios table (institution staff)
-  // Query 1: Get usuario data
-  const { data: usuarioData, error: usuarioError } = await client
-    .from("usuarios")
-    .select("empresa_id, papel_id")
-    .eq("id", user.id)
+  // Query usuarios_empresas for unified role determination
+  const { data: vinculos, error: vinculoError } = await client
+    .from("usuarios_empresas")
+    .select("empresa_id, papel_base, papel_id, is_admin")
+    .eq("usuario_id", user.id)
     .eq("ativo", true)
-    .is("deleted_at", null)
-    .maybeSingle();
+    .is("deleted_at", null);
 
-  if (!usuarioError && usuarioData) {
-    let roleType: RoleTipo | undefined;
-    let permissions: RolePermissions | undefined;
+  if (!vinculoError && vinculos && vinculos.length > 0) {
+    // Prioritize staff roles (professor/usuario) over aluno
+    const staffVinculo = vinculos.find(
+      (v) => v.papel_base === "professor" || v.papel_base === "usuario",
+    );
+    const activeVinculo = staffVinculo || vinculos[0];
 
-    // Query 2: Get papel data separately to avoid !inner join issues
-    if (usuarioData.papel_id) {
-      const { data: papelData } = await client
-        .from("papeis")
-        .select("tipo, permissoes")
-        .eq("id", usuarioData.papel_id)
-        .maybeSingle();
+    if (
+      activeVinculo.papel_base === "professor" ||
+      activeVinculo.papel_base === "usuario"
+    ) {
+      // Staff role path
+      let roleType: RoleTipo | undefined;
+      let permissions: RolePermissions | undefined;
 
-      if (papelData) {
-        roleType = papelData.tipo as RoleTipo;
-        // `permissoes` vem do Supabase como Json. Fazemos cast controlado.
-        permissions = papelData.permissoes as unknown as RolePermissions;
+      if (activeVinculo.papel_id) {
+        const { data: papelData } = await client
+          .from("papeis")
+          .select("tipo, permissoes")
+          .eq("id", activeVinculo.papel_id)
+          .maybeSingle();
+
+        if (papelData) {
+          roleType = papelData.tipo as RoleTipo;
+          permissions = papelData.permissoes as unknown as RolePermissions;
+        }
       }
+
+      const isAdmin =
+        activeVinculo.is_admin || (roleType ? isAdminRoleTipo(roleType) : false);
+
+      return {
+        id: user.id,
+        email: user.email!,
+        role: "usuario",
+        roleType,
+        permissions,
+        isAdmin,
+        empresaId: activeVinculo.empresa_id,
+      };
     }
 
-    const isAdmin = roleType ? isAdminRoleTipo(roleType) : false;
-
-    return {
-      id: user.id,
-      email: user.email!,
-      role: "usuario",
-      roleType,
-      permissions,
-      isAdmin,
-      empresaId: usuarioData.empresa_id,
-    };
-  }
-
-  // Check if user exists in alunos table
-  const { data: alunoData, error: alunoError } = await client
-    .from("alunos")
-    .select("empresa_id")
-    .eq("id", user.id)
-    .is("deleted_at", null)
-    .maybeSingle();
-
-  if (!alunoError && alunoData) {
+    // Aluno role
     return {
       id: user.id,
       email: user.email!,
       role: "aluno",
       isAdmin: false,
-      empresaId: alunoData.empresa_id ?? undefined,
+      empresaId: activeVinculo.empresa_id ?? undefined,
     };
   }
 
-  // Fallback: user not found in any table, use metadata role
+  // Fallback: user not found in usuarios_empresas, use metadata role
   const empresaId = user.user_metadata?.empresa_id as string | undefined;
   const metadataRole = user.user_metadata?.role as UserRole | undefined;
   const role: UserRole = metadataRole || "aluno";

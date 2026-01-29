@@ -52,9 +52,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ valid: true, roles: ["usuario"] });
     }
 
-    // Professor vinculado diretamente à empresa (legacy - mantido para compatibilidade)
+    // Professor vinculado diretamente à empresa (unified usuarios table)
     const { data: professorRow, error: professorError } = await adminClient
-      .from("professores")
+      .from("usuarios")
       .select("id")
       .eq("id", user.id)
       .eq("empresa_id", empresaId)

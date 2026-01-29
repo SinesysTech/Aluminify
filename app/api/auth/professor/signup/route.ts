@@ -68,28 +68,27 @@ export async function POST(request: NextRequest) {
 
     const userId = createdUser.user.id;
 
-    // 2) Criar registro de professor com empresa_id null (apenas admin consegue)
-    const { error: insertProfessorError } = await adminClient
-      .from("professores")
+    // 2) Criar registro de usuario com empresa_id null (apenas admin consegue)
+    const { error: insertUsuarioError } = await adminClient
+      .from("usuarios")
       .insert({
         id: userId,
         email,
         nome_completo: fullName,
         empresa_id: null,
-        is_admin: false,
         cpf: null,
         telefone: null,
         biografia: null,
         foto_url: null,
         especialidade: null,
-      } as unknown as Database["public"]["Tables"]["professores"]["Insert"]);
+      } as unknown as Database["public"]["Tables"]["usuarios"]["Insert"]);
 
-    if (insertProfessorError) {
+    if (insertUsuarioError) {
       // rollback best-effort
       await adminClient.auth.admin.deleteUser(userId);
       return NextResponse.json(
         {
-          error: `Erro ao criar registro de professor: ${insertProfessorError.message}`,
+          error: `Erro ao criar registro de usuario: ${insertUsuarioError.message}`,
         },
         { status: 500 },
       );

@@ -126,7 +126,7 @@ export async function getAgendamentosProfessor(
   // Fetch aluno data separately to handle RLS gracefully
   const alunoIds = [...new Set(agendamentos.map((a) => a.aluno_id))];
   const { data: alunos, error: alunosError } = await supabase
-    .from("alunos")
+    .from("usuarios")
     .select("id, nome_completo, email")
     .in("id", alunoIds);
 
@@ -206,7 +206,7 @@ export async function getAgendamentosAluno(
 
   const professorIds = [...new Set(agendamentos.map((a) => a.professor_id))];
   const { data: professores, error: professoresError } = await supabase
-    .from("professores")
+    .from("usuarios")
     .select("id, nome_completo, email, foto_url")
     .in("id", professorIds);
 
@@ -322,7 +322,7 @@ export async function confirmarAgendamento(id: string, linkReuniao?: string) {
       const config = await getConfiguracoesProfessor(user.id);
 
       const { data: aluno } = await supabase
-        .from("alunos")
+        .from("usuarios")
         .select("nome_completo, email")
         .eq("id", agendamento.aluno_id)
         .single();

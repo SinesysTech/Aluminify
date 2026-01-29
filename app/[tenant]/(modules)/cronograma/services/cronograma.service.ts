@@ -504,7 +504,7 @@ export class CronogramaService {
   ): Promise<void> {
     // Verificar se o aluno já existe
     const { data: alunoExistente, error: selectError } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id")
       .eq("id", userId)
       .maybeSingle();
@@ -535,7 +535,7 @@ export class CronogramaService {
         );
       }
 
-      const { error: insertError } = await client.from("alunos").insert({
+      const { error: insertError } = await client.from("usuarios").insert({
         id: userId,
         email: userEmail,
         empresa_id: empresaId,
@@ -560,7 +560,7 @@ export class CronogramaService {
     if (empresaId) return empresaId;
 
     const { data, error } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("empresa_id")
       .eq("id", userId)
       .maybeSingle();

@@ -315,7 +315,7 @@ export class FinancialServiceImpl implements FinancialService {
       // Update hotmart_id if not set
       if (!existingStudent.hotmart_id) {
         await this.client
-          .from("alunos")
+          .from("usuarios")
           .update({ hotmart_id: hotmartProductId })
           .eq("id", existingStudent.id);
       }
@@ -356,7 +356,7 @@ export class FinancialServiceImpl implements FinancialService {
     const userId = authData.user.id;
 
     // Create student record
-    const { error: studentError } = await this.client.from("alunos").insert({
+    const { error: studentError } = await this.client.from("usuarios").insert({
       id: userId,
       empresa_id: empresaId,
       email: buyer.email,
@@ -596,7 +596,7 @@ export class FinancialServiceImpl implements FinancialService {
     email: string
   ): Promise<{ id: string; hotmart_id: string | null } | null> {
     const { data, error } = await this.client
-      .from("alunos")
+      .from("usuarios")
       .select("id, hotmart_id")
       .eq("empresa_id", empresaId)
       .eq("email", email)

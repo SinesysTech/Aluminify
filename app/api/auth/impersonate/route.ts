@@ -30,14 +30,14 @@ async function postHandler(request: AuthenticatedRequest) {
     // Buscar dados do aluno a ser impersonado
     const client = getDatabaseClient();
     const { data: aluno, error: alunoError } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id, email")
       .eq("id", studentId)
       .maybeSingle();
 
     // Type assertion: Query result properly typed from Database schema
     type AlunoBasic = Pick<
-      Database["public"]["Tables"]["alunos"]["Row"],
+      Database["public"]["Tables"]["usuarios"]["Row"],
       "id" | "email"
     >;
     const typedAluno = aluno as AlunoBasic | null;
@@ -69,14 +69,14 @@ async function postHandler(request: AuthenticatedRequest) {
     let realUserEmpresaId: string | undefined;
     if (request.user.role === "usuario") {
       const { data: professor } = await client
-        .from("professores")
+        .from("usuarios")
         .select("empresa_id")
         .eq("id", request.user.id)
         .maybeSingle();
 
       // Type assertion: Query result properly typed from Database schema
       type ProfessorEmpresa = Pick<
-        Database["public"]["Tables"]["professores"]["Row"],
+        Database["public"]["Tables"]["usuarios"]["Row"],
         "empresa_id"
       >;
       const typedProfessor = professor as ProfessorEmpresa | null;

@@ -19,7 +19,7 @@ export class ProfessorAnalyticsService {
 
     // Buscar nome do professor
     const { data: professor } = await client
-      .from("professores")
+      .from("usuarios")
       .select("nome_completo")
       .eq("id", professorId)
       .single();
@@ -124,7 +124,7 @@ export class ProfessorAnalyticsService {
 
     // Buscar dados dos alunos
     const { data: alunos } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id, nome_completo, empresa_id")
       .in("id", alunoIdsUnicos)
       .eq("empresa_id", empresaId);
@@ -293,7 +293,7 @@ export class ProfessorAnalyticsService {
     // Buscar nomes dos alunos
     const alunoIds = [...new Set(agendamentos.map((a) => a.aluno_id))];
     const { data: alunos } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id, nome_completo")
       .in("id", alunoIds);
 

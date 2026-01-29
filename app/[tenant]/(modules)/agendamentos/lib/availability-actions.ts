@@ -40,7 +40,7 @@ export async function upsertDisponibilidade(data: Disponibilidade) {
 
   // Fetch professor's empresa_id
   const { data: professor } = await supabase
-    .from("professores")
+    .from("usuarios")
     .select("empresa_id")
     .eq("id", user.id)
     .single();
@@ -131,7 +131,7 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
 
   // Get bloqueios for this professor and date
   const { data: professor } = await supabase
-    .from("professores")
+    .from("usuarios")
     .select("empresa_id")
     .eq("id", professorId)
     .single();
@@ -211,7 +211,7 @@ export async function getAvailabilityForMonth(
 
   // Get professor's empresa_id
   const { data: professor } = await supabase
-    .from("professores")
+    .from("usuarios")
     .select("empresa_id")
     .eq("id", professorId)
     .single();
@@ -358,7 +358,7 @@ export async function getProfessoresDisponibilidade(
 
   // Get all professors from the company
   const { data: professores } = await supabase
-    .from("professores")
+    .from("usuarios")
     .select("id, nome_completo, foto_url")
     .eq("empresa_id", empresaId);
 

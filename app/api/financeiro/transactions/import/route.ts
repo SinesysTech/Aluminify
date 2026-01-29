@@ -170,7 +170,7 @@ async function postHandler(request: AuthenticatedRequest) {
 
         // Try to find existing student
         const { data: studentData } = await client
-          .from("alunos")
+          .from("usuarios")
           .select("id")
           .eq("empresa_id", user.empresaId)
           .eq("email", row.buyerEmail)

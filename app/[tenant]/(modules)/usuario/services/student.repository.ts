@@ -35,7 +35,7 @@ export interface StudentRepository {
   addCourses(studentId: string, courseIds: string[]): Promise<void>;
 }
 
-const TABLE = "alunos";
+const TABLE = "usuarios";
 const COURSE_LINK_TABLE = "alunos_cursos";
 const COURSES_TABLE = "cursos";
 
@@ -93,9 +93,9 @@ function escapeIlikePattern(s: string): string {
 }
 
 // Use generated Database types instead of manual definitions
-type StudentRow = Database["public"]["Tables"]["alunos"]["Row"];
-type StudentInsert = Database["public"]["Tables"]["alunos"]["Insert"];
-type StudentUpdate = Database["public"]["Tables"]["alunos"]["Update"];
+type StudentRow = Database["public"]["Tables"]["usuarios"]["Row"];
+type StudentInsert = Database["public"]["Tables"]["usuarios"]["Insert"];
+type StudentUpdate = Database["public"]["Tables"]["usuarios"]["Update"];
 
 /**
  * Map database row to domain object
@@ -122,15 +122,9 @@ function mapRow(
   row: StudentRow,
   courses: StudentCourseSummary[] = [],
 ): Student {
-  // Cast para acessar empresa_id e deleted_at
-  const rowWithExtras = row as StudentRow & {
-    empresa_id?: string | null;
-    deleted_at?: string | null;
-  };
-
   return {
     id: row.id,
-    empresaId: rowWithExtras.empresa_id ?? null,
+    empresaId: row.empresa_id ?? null,
     fullName: row.nome_completo,
     email: row.email,
     cpf: row.cpf,
@@ -154,8 +148,8 @@ function mapRow(
     temporaryPassword: row.senha_temporaria,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
-    deletedAt: rowWithExtras.deleted_at
-      ? new Date(rowWithExtras.deleted_at)
+    deletedAt: row.deleted_at
+      ? new Date(row.deleted_at)
       : null,
   };
 }
@@ -571,7 +565,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     const insertData = {
       id: payload.id,
       empresa_id: payload.empresaId ?? null,
-      nome_completo: payload.fullName ?? null,
+      nome_completo: payload.fullName || payload.email,
       email: payload.email.toLowerCase(),
       cpf: payload.cpf ?? null,
       telefone: payload.phone ?? null,
@@ -591,13 +585,36 @@ export class StudentRepositoryImpl implements StudentRepository {
       origem_cadastro: payload.origemCadastro ?? null,
       must_change_password: payload.mustChangePassword ?? false,
       senha_temporaria: payload.temporaryPassword ?? null,
-    } as StudentInsert & { empresa_id?: string | null };
+    } as StudentInsert;
 
     const { data, error } = await this.client
       .from(TABLE)
       .insert(insertData)
       .select("*")
       .single();
+
+    // Create usuarios_empresas binding for this student
+    if (data && insertData.empresa_id) {
+      await this.client
+        .from("usuarios_empresas")
+        .upsert(
+          {
+            usuario_id: data.id,
+            empresa_id: insertData.empresa_id,
+            papel_base: "aluno",
+            ativo: true,
+          },
+          { onConflict: "usuario_id,empresa_id" },
+        )
+        .then(({ error: vinculoError }) => {
+          if (vinculoError) {
+            console.error(
+              "[StudentRepo] Failed to create usuarios_empresas binding:",
+              vinculoError,
+            );
+          }
+        });
+    }
 
     if (error) {
       // Verificar se é erro de constraint única (incluindo primary key)
@@ -607,15 +624,15 @@ export class StudentRepositoryImpl implements StudentRepository {
       // PostgreSQL error codes: 23505 = unique_violation, 23503 = foreign_key_violation
       const isPrimaryKeyError = 
         errorCode === "23505" && 
-        (errorMessage.includes("alunos_pkey") || 
+        (errorMessage.includes("usuarios_pkey") || errorMessage.includes("alunos_pkey") ||
          errorMessage.includes("primary key") ||
          errorMessage.includes("chave primária"));
-      
+
       if (
         isPrimaryKeyError ||
         errorMessage.includes("duplicate key") ||
         errorMessage.includes("unique constraint") ||
-        errorMessage.includes("alunos_pkey") ||
+        errorMessage.includes("usuarios_pkey") || errorMessage.includes("alunos_pkey") ||
         errorMessage.includes("chave primária")
       ) {
         // Se for erro de primary key, pode ser race condition - tentar buscar o aluno existente
@@ -656,7 +673,7 @@ export class StudentRepositoryImpl implements StudentRepository {
         }
         
         // Se não encontrou, lançar erro com mensagem clara
-        throw new Error(`Failed to create student: valor duplicado viola restrição única "chave primária de alunos"`);
+        throw new Error(`Failed to create student: valor duplicado viola restrição única "chave primária de usuarios"`);
       }
       if (
         errorMessage.includes("alunos_numero_matricula_key") ||

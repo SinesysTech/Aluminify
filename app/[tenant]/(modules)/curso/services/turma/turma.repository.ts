@@ -14,7 +14,7 @@ import type {
 
 const TURMAS_TABLE = "turmas";
 const ALUNOS_TURMAS_TABLE = "alunos_turmas";
-const ALUNOS_TABLE = "alunos";
+const ALUNOS_TABLE = "usuarios";
 const CURSOS_TABLE = "cursos";
 
 export interface TurmaRepository {

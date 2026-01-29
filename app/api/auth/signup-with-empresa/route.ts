@@ -99,51 +99,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2.1 Criar registro em `professores` (fonte de verdade para empresa_id)
+    // 2.1 Criar registro em `usuarios` (fonte de verdade para empresa_id)
     // Não depender apenas de trigger, pois fluxos via admin client podem variar.
-    const { error: insertProfessorError } = await adminClient
-      .from("professores")
-      .upsert({
-        id: newUser.user.id,
-        email: newUser.user.email || email,
-        nome_completo: fullName,
-        empresa_id: empresa.id,
-        is_admin: true,
-        cpf: null,
-        telefone: null,
-        biografia: null,
-        foto_url: null,
-        especialidade: null,
-      });
-
-    if (insertProfessorError) {
-      console.error("Error creating professor record:", insertProfessorError);
-      // rollback best-effort: remover user e empresa para não deixar tenant órfão
-      try {
-        await adminClient.auth.admin.deleteUser(newUser.user.id);
-      } catch (deleteUserError) {
-        console.error(
-          "Error deleting user after professor insert failure:",
-          deleteUserError,
-        );
-      }
-      try {
-        await service.delete(empresa.id);
-      } catch (deleteEmpresaError) {
-        console.error(
-          "Error deleting empresa after professor insert failure:",
-          deleteEmpresaError,
-        );
-      }
-      return NextResponse.json(
-        {
-          error: `Erro ao criar registro de professor: ${insertProfessorError.message}`,
-        },
-        { status: 500 },
-      );
-    }
-
-    // 2.2 Também criar registro em `usuarios` para consistência com UserRoleIdentifierService
     // Buscar papel_id para professor_admin
     const { data: papelAdmin } = await adminClient
       .from("papeis")
@@ -152,37 +109,63 @@ export async function POST(request: NextRequest) {
       .eq("is_system", true)
       .maybeSingle();
 
-    if (papelAdmin?.id) {
-      const { error: insertUsuarioError } = await adminClient
-        .from("usuarios")
-        .upsert({
-          id: newUser.user.id,
-          email: newUser.user.email || email,
-          nome_completo: fullName,
-          empresa_id: empresa.id,
-          papel_id: papelAdmin.id,
-          ativo: true,
-        });
+    const { error: insertUsuarioError } = await adminClient
+      .from("usuarios")
+      .upsert({
+        id: newUser.user.id,
+        email: newUser.user.email || email,
+        nome_completo: fullName,
+        empresa_id: empresa.id,
+        cpf: null,
+        telefone: null,
+        biografia: null,
+        foto_url: null,
+        especialidade: null,
+        ativo: true,
+        ...(papelAdmin?.id ? { papel_id: papelAdmin.id } : {}),
+      });
 
-      if (insertUsuarioError) {
-        console.error("Error creating usuario record:", insertUsuarioError);
-        // Don't fail - professor record is already created and that's sufficient
+    if (insertUsuarioError) {
+      console.error("Error creating usuario record:", insertUsuarioError);
+      // rollback best-effort: remover user e empresa para não deixar tenant órfão
+      try {
+        await adminClient.auth.admin.deleteUser(newUser.user.id);
+      } catch (deleteUserError) {
+        console.error(
+          "Error deleting user after usuario insert failure:",
+          deleteUserError,
+        );
       }
+      try {
+        await service.delete(empresa.id);
+      } catch (deleteEmpresaError) {
+        console.error(
+          "Error deleting empresa after usuario insert failure:",
+          deleteEmpresaError,
+        );
+      }
+      return NextResponse.json(
+        {
+          error: `Erro ao criar registro de usuario: ${insertUsuarioError.message}`,
+        },
+        { status: 500 },
+      );
     }
 
-    // 3. Inserir em empresa_admins como owner
+    // 3. Inserir em usuarios_empresas como owner/admin
     const { error: adminError } = await adminClient
-      .from("empresa_admins")
+      .from("usuarios_empresas")
       .insert({
         empresa_id: empresa.id,
-        user_id: newUser.user.id,
+        usuario_id: newUser.user.id,
         is_owner: true,
-        permissoes: {},
+        is_admin: true,
+        ativo: true,
       });
 
     if (adminError) {
-      console.error("Error creating empresa_admin:", adminError);
-      // Não falhar, pois o professor já foi criado
+      console.error("Error creating usuarios_empresas record:", adminError);
+      // Não falhar, pois o usuario já foi criado
     }
 
     // Retornar dados do usuário e empresa criada

@@ -180,18 +180,21 @@ export async function verifyEmpresaAdminAccess(
       }
     }
 
-    // Fallback: Check legacy professores.is_admin for backward compatibility
-    const { data: professor, error: professorError } = await client
-      .from("professores")
-      .select("id, empresa_id, is_admin")
-      .eq("id", userId)
+    // Check usuarios_empresas for admin status
+    const { data: vinculo, error: vinculoError } = await client
+      .from("usuarios_empresas")
+      .select("is_admin")
+      .eq("usuario_id", userId)
       .eq("empresa_id", empresaId)
+      .eq("ativo", true)
+      .is("deleted_at", null)
+      .eq("is_admin", true)
       .maybeSingle();
 
-    if (professorError) {
+    if (vinculoError) {
       console.error(
-        "[Brand Customization] Error checking professor admin status:",
-        professorError,
+        "[Brand Customization] Error checking admin status:",
+        vinculoError,
       );
       return {
         isAdmin: false,
@@ -199,7 +202,7 @@ export async function verifyEmpresaAdminAccess(
       };
     }
 
-    if (professor && professor.is_admin) {
+    if (vinculo) {
       return { isAdmin: true };
     }
 

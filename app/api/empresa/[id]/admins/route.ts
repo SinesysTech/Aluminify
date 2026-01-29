@@ -30,9 +30,10 @@ async function getHandler(
     }
 
     const { data: admins, error } = await supabase
-      .from("empresa_admins")
-      .select("*, professores:user_id(*)")
-      .eq("empresa_id", id);
+      .from("usuarios_empresas")
+      .select("*, usuarios:usuario_id(*)")
+      .eq("empresa_id", id)
+      .eq("is_admin", true);
 
     if (error) {
       throw error;
@@ -76,10 +77,10 @@ async function postHandler(
 
     // Verificar se é owner
     const { data: isOwner } = await supabase
-      .from("empresa_admins")
+      .from("usuarios_empresas")
       .select("is_owner")
       .eq("empresa_id", id)
-      .eq("user_id", user.id)
+      .eq("usuario_id", user.id)
       .maybeSingle();
 
     if (
@@ -94,9 +95,9 @@ async function postHandler(
       );
     }
 
-    // Verificar se professor pertence à empresa
+    // Verificar se usuario pertence à empresa
     const { data: professor } = await supabase
-      .from("professores")
+      .from("usuarios")
       .select("empresa_id")
       .eq("id", professorId)
       .eq("empresa_id", id)
@@ -109,25 +110,20 @@ async function postHandler(
       );
     }
 
-    // Adicionar como admin
+    // Adicionar como admin em usuarios_empresas
     const { error: insertError } = await supabase
-      .from("empresa_admins")
-      .insert({
+      .from("usuarios_empresas")
+      .upsert({
         empresa_id: id,
-        user_id: professorId,
+        usuario_id: professorId,
         is_owner: false,
-        permissoes: {},
+        is_admin: true,
+        ativo: true,
       });
 
     if (insertError) {
       throw insertError;
     }
-
-    // Atualizar is_admin na tabela professores
-    await supabase
-      .from("professores")
-      .update({ is_admin: true })
-      .eq("id", professorId);
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {

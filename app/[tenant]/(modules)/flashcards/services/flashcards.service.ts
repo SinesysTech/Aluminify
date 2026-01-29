@@ -151,7 +151,7 @@ export class FlashcardsService {
 
   private async ensureProfessor(userId: string) {
     const { data, error } = await this.client
-      .from("professores")
+      .from("usuarios")
       .select("id")
       .eq("id", userId)
       .maybeSingle();
@@ -591,7 +591,7 @@ export class FlashcardsService {
 
       // 2. Verificar se é professor ou aluno
       const { data: professorData } = await this.client
-        .from("professores")
+        .from("usuarios")
         .select("id, empresa_id")
         .eq("id", alunoId)
         .maybeSingle();
@@ -749,7 +749,7 @@ export class FlashcardsService {
     // Modos automáticos: buscar cursos do aluno ou professor
     // Verificar se é professor ou aluno
     const { data: professorData } = await this.client
-      .from("professores")
+      .from("usuarios")
       .select("id, empresa_id")
       .eq("id", alunoId)
       .maybeSingle();
@@ -1447,7 +1447,7 @@ export class FlashcardsService {
 
     // Buscar empresa_id do aluno para garantir isolamento de tenant
     const { data: alunoData, error: alunoError } = await this.client
-      .from("alunos")
+      .from("usuarios")
       .select("empresa_id")
       .eq("id", alunoId)
       .maybeSingle();
@@ -1538,7 +1538,7 @@ export class FlashcardsService {
 
     // Buscar empresa_id do professor para isolamento por tenant
     const { data: professorListAll } = await this.client
-      .from("professores")
+      .from("usuarios")
       .select("empresa_id")
       .eq("id", userId)
       .maybeSingle();
@@ -2021,7 +2021,7 @@ export class FlashcardsService {
 
     // Buscar empresa_id do professor para isolamento por tenant
     const { data: professorGetById } = await this.client
-      .from("professores")
+      .from("usuarios")
       .select("empresa_id")
       .eq("id", userId)
       .maybeSingle();
@@ -2143,7 +2143,7 @@ export class FlashcardsService {
 
     // Buscar empresa_id do professor para isolamento por tenant
     const { data: professorCreate } = await this.client
-      .from("professores")
+      .from("usuarios")
       .select("empresa_id")
       .eq("id", userId)
       .maybeSingle();
@@ -2264,7 +2264,7 @@ export class FlashcardsService {
 
     // Buscar empresa_id do professor para isolamento por tenant
     const { data: professorUpdate } = await this.client
-      .from("professores")
+      .from("usuarios")
       .select("empresa_id")
       .eq("id", userId)
       .maybeSingle();

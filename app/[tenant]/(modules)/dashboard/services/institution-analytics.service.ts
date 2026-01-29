@@ -84,13 +84,13 @@ export class InstitutionAnalyticsService {
   ): Promise<InstitutionSummary> {
     // Buscar total de alunos da empresa
     const { count: totalAlunos } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id", { count: "exact", head: true })
       .eq("empresa_id", empresaId);
 
     // Buscar total de professores da empresa
     const { count: totalProfessores } = await client
-      .from("professores")
+      .from("usuarios")
       .select("id", { count: "exact", head: true })
       .eq("empresa_id", empresaId);
 
@@ -117,7 +117,7 @@ export class InstitutionAnalyticsService {
 
     // Filtrar apenas alunos da empresa
     const { data: alunosEmpresa } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id")
       .eq("empresa_id", empresaId);
 
@@ -146,7 +146,7 @@ export class InstitutionAnalyticsService {
 
     // Buscar alunos da empresa
     const { data: alunos } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id")
       .eq("empresa_id", empresaId);
 
@@ -254,7 +254,7 @@ export class InstitutionAnalyticsService {
 
     // Buscar alunos da empresa
     const { data: alunos } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id")
       .eq("empresa_id", empresaId);
 
@@ -333,7 +333,7 @@ export class InstitutionAnalyticsService {
   ): Promise<StudentRankingItem[]> {
     // Buscar alunos da empresa
     const { data: alunos } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id, nome_completo")
       .eq("empresa_id", empresaId)
       .limit(100);
@@ -495,7 +495,7 @@ export class InstitutionAnalyticsService {
   ): Promise<ProfessorRankingItem[]> {
     // Buscar professores da empresa
     const { data: professores } = await client
-      .from("professores")
+      .from("usuarios")
       .select("id, nome_completo, foto_url")
       .eq("empresa_id", empresaId)
       .limit(100);
@@ -559,7 +559,7 @@ export class InstitutionAnalyticsService {
 
     // Buscar alunos da empresa
     const { data: alunos } = await client
-      .from("alunos")
+      .from("usuarios")
       .select("id")
       .eq("empresa_id", empresaId);
 

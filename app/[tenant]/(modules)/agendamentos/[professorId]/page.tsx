@@ -22,7 +22,7 @@ interface Professor {
 
 async function getProfessorById(supabase: Awaited<ReturnType<typeof createClient>>, professorId: string): Promise<Professor | null> {
   const { data: professor, error } = await supabase
-    .from("professores")
+    .from("usuarios")
     .select("id, nome_completo, foto_url, especialidade")
     .eq("id", professorId)
     .single()

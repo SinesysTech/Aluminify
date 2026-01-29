@@ -1,7 +1,7 @@
 /**
  * Teacher Repository
  *
- * Provides data access methods for the professores table with full type safety.
+ * Provides data access methods for the usuarios table with full type safety.
  *
  * Type Safety Patterns:
  * - Uses generated Database types from lib/database.types.ts
@@ -61,7 +61,7 @@ export interface TeacherRepository {
   setAsAdmin(teacherId: string, isAdmin: boolean): Promise<void>;
 }
 
-const TABLE = "professores";
+const TABLE = "usuarios";
 
 /**
  * Database Type Aliases
@@ -87,7 +87,6 @@ const TABLE = "professores";
  *   nome_completo: 'John',   // Required
  *   email: 'john@test.com',  // Required
  *   cpf: null,               // Optional (nullable)
- *   is_admin: false,         // Optional (has default)
  * };
  *
  * // Update allows partial updates (all fields optional)
@@ -96,15 +95,15 @@ const TABLE = "professores";
  * };
  * ```
  */
-type TeacherRow = Database["public"]["Tables"]["professores"]["Row"];
-type TeacherInsert = Database["public"]["Tables"]["professores"]["Insert"];
-type TeacherUpdate = Database["public"]["Tables"]["professores"]["Update"];
+type TeacherRow = Database["public"]["Tables"]["usuarios"]["Row"];
+type TeacherInsert = Database["public"]["Tables"]["usuarios"]["Insert"];
+type TeacherUpdate = Database["public"]["Tables"]["usuarios"]["Update"];
 
 function mapRow(row: TeacherRow): Teacher {
   return {
     id: row.id,
     empresaId: row.empresa_id ?? "",
-    isAdmin: row.is_admin,
+    isAdmin: false, // Admin status determined from usuarios_empresas
     fullName: row.nome_completo,
     email: row.email,
     cpf: row.cpf,
@@ -212,7 +211,7 @@ export class TeacherRepositoryImpl implements TeacherRepository {
      *
      * The TeacherInsert type enforces:
      * - Required fields: id, empresa_id, nome_completo, email
-     * - Optional fields: cpf, telefone, biografia, foto_url, especialidade, is_admin
+     * - Optional fields: cpf, telefone, biografia, foto_url, especialidade
      * - Nullable fields can be set to null or omitted
      *
      * TypeScript will show compile errors if:
@@ -225,7 +224,6 @@ export class TeacherRepositoryImpl implements TeacherRepository {
       nome_completo: payload.fullName,
       email: payload.email.toLowerCase(),
       empresa_id: payload.empresaId as string,
-      is_admin: payload.isAdmin ?? false,
       cpf: payload.cpf ?? null,
       telefone: payload.phone ?? null,
       chave_pix: payload.pixKey ?? null,
@@ -246,6 +244,30 @@ export class TeacherRepositoryImpl implements TeacherRepository {
       .insert(insertData)
       .select("*")
       .single();
+
+    // Create usuarios_empresas binding for this teacher
+    if (data) {
+      await this.client
+        .from("usuarios_empresas")
+        .upsert(
+          {
+            usuario_id: data.id,
+            empresa_id: insertData.empresa_id,
+            papel_base: "professor",
+            is_admin: payload.isAdmin ?? false,
+            ativo: true,
+          },
+          { onConflict: "usuario_id,empresa_id" },
+        )
+        .then(({ error: vinculoError }) => {
+          if (vinculoError) {
+            console.error(
+              "[TeacherRepo] Failed to create usuarios_empresas binding:",
+              vinculoError,
+            );
+          }
+        });
+    }
 
     if (error) {
       throw new Error(`Failed to create teacher: ${error.message}`);
@@ -347,9 +369,9 @@ export class TeacherRepositoryImpl implements TeacherRepository {
 
   async setAsAdmin(teacherId: string, isAdmin: boolean): Promise<void> {
     const { error } = await this.client
-      .from(TABLE)
+      .from("usuarios_empresas")
       .update({ is_admin: isAdmin })
-      .eq("id", teacherId);
+      .eq("usuario_id", teacherId);
 
     if (error) {
       throw new Error(

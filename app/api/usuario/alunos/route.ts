@@ -199,10 +199,10 @@ async function postHandler(request: AuthenticatedRequest) {
       ? body.courseIds.filter(Boolean)
       : [];
 
-    // Se o aluno já existe, não tentamos recriar em `alunos`.
+    // Se o aluno já existe, não tentamos recriar em `usuarios`.
     // Apenas vinculamos aos cursos solicitados (alunos_cursos) se permitido.
     const { data: existingAluno, error: existingAlunoError } = await db
-      .from("alunos")
+      .from("usuarios")
       .select("id, empresa_id, email")
       .eq("email", email)
       .is("deleted_at", null)
@@ -220,7 +220,7 @@ async function postHandler(request: AuthenticatedRequest) {
 
     if (!resolvedExistingAluno?.id && cpfNormalized && cpfNormalized.length === 11) {
       const { data: byCpf, error: byCpfError } = await db
-        .from("alunos")
+        .from("usuarios")
         .select("id, empresa_id, email")
         .eq("cpf", cpfNormalized)
         .is("deleted_at", null)

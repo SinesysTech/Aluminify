@@ -62,16 +62,16 @@ export async function POST(request: NextRequest) {
 
     const adminClient = getDatabaseClient();
 
-    // Confirmar que o professor existe e ainda não está vinculado a uma empresa
+    // Confirmar que o usuario existe e ainda não está vinculado a uma empresa
     const { data: professor, error: professorError } = await adminClient
-      .from("professores")
+      .from("usuarios")
       .select("id, empresa_id")
       .eq("id", user.id)
       .maybeSingle();
 
     // Type assertion: Query result properly typed from Database schema
     type ProfessorEmpresa = Pick<
-      Database["public"]["Tables"]["professores"]["Row"],
+      Database["public"]["Tables"]["usuarios"]["Row"],
       "id" | "empresa_id"
     >;
     const typedProfessor = professor as ProfessorEmpresa | null;
@@ -101,10 +101,10 @@ export async function POST(request: NextRequest) {
       plano: "basico",
     });
 
-    // 2) Vincular professor à empresa e marcar como admin
+    // 2) Vincular usuario à empresa
     const { error: updateProfessorError } = await adminClient
-      .from("professores")
-      .update({ empresa_id: empresa.id, is_admin: true })
+      .from("usuarios")
+      .update({ empresa_id: empresa.id })
       .eq("id", user.id);
 
     if (updateProfessorError) {
@@ -116,20 +116,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3) Inserir em empresa_admins como owner
+    // 3) Inserir em usuarios_empresas como owner/admin
     const { error: adminInsertError } = await adminClient
-      .from("empresa_admins")
+      .from("usuarios_empresas")
       .insert({
         empresa_id: empresa.id,
-        user_id: user.id,
+        usuario_id: user.id,
         is_owner: true,
-        permissoes: {},
+        is_admin: true,
+        ativo: true,
       });
 
     if (adminInsertError) {
-      console.error("Error inserting empresa_admin:", adminInsertError);
+      console.error("Error inserting usuarios_empresas:", adminInsertError);
       // Não falhar completamente, mas logar o erro
-      // O professor já foi vinculado como admin na tabela professores
+      // O usuario já foi vinculado à empresa na tabela usuarios
     }
 
     // 4) Atualizar registro em usuarios para papel professor_admin
