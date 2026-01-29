@@ -604,7 +604,7 @@ export class StudentRepositoryImpl implements StudentRepository {
             papel_base: "aluno",
             ativo: true,
           },
-          { onConflict: "usuario_id,empresa_id" },
+          { onConflict: "usuario_id,empresa_id,papel_base" },
         )
         .then(({ error: vinculoError }) => {
           if (vinculoError) {
