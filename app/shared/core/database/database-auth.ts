@@ -1,17 +1,28 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { AuthenticatedRequest } from '@/app/[tenant]/auth/middleware';
-import type { Database } from '@/lib/database.types';
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import { AuthenticatedRequest } from "@/app/[tenant]/auth/middleware";
+import type { Database } from "@/lib/database.types";
+import { env } from "@/app/shared/core/env";
 
 let cachedClient: SupabaseClient<Database> | null = null;
 let cachedServiceClient: SupabaseClient<Database> | null = null;
 
 function getDatabaseCredentials() {
-  const DATABASE_URL = process.env.SUPABASE_URL;
-  const DATABASE_KEY = process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY;
+  const DATABASE_URL = env.SUPABASE_URL;
+  /**
+   * Para o client "normal" (user-scoped/RLS), preferimos anon/publishable.
+   * Ainda assim, mantemos fallback para chaves server-side por compatibilidade,
+   * mas o caminho admin deve SEMPRE usar getServiceRoleClient().
+   */
+  const DATABASE_KEY =
+    env.SUPABASE_ANON_KEY ??
+    env.SUPABASE_PUBLISHABLE_KEY ??
+    env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY ??
+    env.SUPABASE_SERVICE_ROLE_KEY ??
+    env.SUPABASE_SECRET_KEY;
 
-  if (!DATABASE_URL || !DATABASE_KEY) {
+  if (!DATABASE_KEY) {
     throw new Error(
-      'Database credentials are not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.',
+      "Database credentials are not configured. Configure anon/publishable key for user-scoped operations.",
     );
   }
 
@@ -19,7 +30,19 @@ function getDatabaseCredentials() {
 }
 
 function getServiceRoleKey() {
-  return process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SECRET_KEY;
+  return env.SUPABASE_SERVICE_ROLE_KEY ?? env.SUPABASE_SECRET_KEY;
+}
+
+function assertLooksLikeSupabaseApiKey(key: string): void {
+  const trimmed = key.trim();
+  // Aceitar formatos novos (sb_...) e formatos antigos (JWT com 3 partes).
+  const looksLikeSbKey = trimmed.startsWith("sb_");
+  const looksLikeJwt = trimmed.split(".").length === 3;
+  if (!looksLikeSbKey && !looksLikeJwt) {
+    throw new Error(
+      "Chave server-side inválida para Supabase. Configure SUPABASE_SERVICE_ROLE_KEY (ou SUPABASE_SECRET_KEY no formato sb_secret_.../JWT).",
+    );
+  }
 }
 
 export function getDatabaseClient(): SupabaseClient<Database> {
@@ -37,8 +60,11 @@ export function getDatabaseClient(): SupabaseClient<Database> {
 export function getServiceRoleClient(): SupabaseClient<Database> {
   const SERVICE_ROLE_KEY = getServiceRoleKey();
   if (!SERVICE_ROLE_KEY) {
-    throw new Error('Service role key is required for API key operations');
+    throw new Error(
+      "Service role key is required. Configure SUPABASE_SERVICE_ROLE_KEY (server-side).",
+    );
   }
+  assertLooksLikeSupabaseApiKey(SERVICE_ROLE_KEY);
 
   if (!cachedServiceClient) {
     const { DATABASE_URL } = getDatabaseCredentials();

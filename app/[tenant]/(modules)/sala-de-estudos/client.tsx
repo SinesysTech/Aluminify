@@ -169,7 +169,7 @@ export default function SalaEstudosClientPage() {
   }, [atividades])
 
   const nextActivity = React.useMemo(() => {
-    return atividades.find((a) => a.progressoStatus !== 'Concluido')
+    return atividades.find((a) => a.progressoStatus !== 'Concluido') ?? null
   }, [atividades])
 
   const dailyGoal = React.useMemo(() => {
@@ -193,7 +193,7 @@ export default function SalaEstudosClientPage() {
   return (
     <div className="space-y-6">
       {/* Header with greeting and org switcher */}
-      <StudyRoomHeader userName={currentUser.name || 'Estudante'} />
+      <StudyRoomHeader userName={currentUser.fullName || 'Estudante'} />
 
       {/* Impersonation Warning */}
       {isReadOnlyImpersonation && (

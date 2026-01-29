@@ -65,11 +65,7 @@ export function CleanView({
     totalCycles = 4
 }: CleanViewProps) {
     const [showControls, setShowControls] = useState(true)
-    const [currentQuote, setCurrentQuote] = useState(() => {
-        const isBreakInit = pomodoroPhase === 'short_break' || pomodoroPhase === 'long_break'
-        const quotes = isBreakInit ? BREAK_QUOTES : MOTIVATIONAL_QUOTES
-        return quotes[Math.floor(Math.random() * quotes.length)]
-    })
+    const [quoteIndex, setQuoteIndex] = useState(0)
     const [reducedMotion, setReducedMotion] = useState(() => {
         if (typeof window === 'undefined') return false
         return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -110,20 +106,14 @@ export function CleanView({
         }
     }, [])
 
-    // Rotate quotes every 45 seconds
+    // Rotate quotes every 45 seconds (update happens in callback)
     useEffect(() => {
-        const isBreak = pomodoroPhase === 'short_break' || pomodoroPhase === 'long_break'
-        const quotes = isBreak ? BREAK_QUOTES : MOTIVATIONAL_QUOTES
-
         const interval = setInterval(() => {
-            setCurrentQuote(quotes[Math.floor(Math.random() * quotes.length)])
+            setQuoteIndex((prev) => prev + 1)
         }, 45000)
 
-        // Also update immediately when phase changes
-        setCurrentQuote(quotes[Math.floor(Math.random() * quotes.length)])
-
         return () => clearInterval(interval)
-    }, [pomodoroPhase])
+    }, [])
 
     // Calculate progress percentage
     const getProgress = useCallback(() => {
@@ -145,6 +135,9 @@ export function CleanView({
 
     const isBreak = pomodoroPhase === 'short_break' || pomodoroPhase === 'long_break'
     const isPaused = state.paused
+
+    const quotes = isBreak ? BREAK_QUOTES : MOTIVATIONAL_QUOTES
+    const currentQuote = quotes[quoteIndex % quotes.length]
 
     const getPhaseColor = () => {
         if (isPaused) return 'text-amber-400'

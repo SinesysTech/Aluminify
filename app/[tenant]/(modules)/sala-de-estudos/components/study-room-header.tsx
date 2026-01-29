@@ -23,22 +23,22 @@ const motivationalPhrases = [
   (name: string) => `Persistência é a chave, ${name}!`,
 ]
 
+function hashString(input: string): number {
+  let hash = 0
+  for (let i = 0; i < input.length; i++) {
+    hash = (hash * 31 + input.charCodeAt(i)) >>> 0
+  }
+  return hash
+}
+
 export function StudyRoomHeader({ userName }: StudyRoomHeaderProps) {
-  const greeting = useMemo(() => {
-    const hour = new Date().getHours()
-    if (hour < 12) return 'Bom dia'
-    if (hour < 18) return 'Boa tarde'
-    return 'Boa noite'
-  }, [])
+  const greeting = 'Olá'
 
   const firstName = userName.split(' ')[0]
 
-  // Seleciona uma frase baseada no dia do ano para variar a cada dia
+  // Seleciona uma frase de forma determinística (pura) por nome
   const motivationalPhrase = useMemo(() => {
-    const dayOfYear = Math.floor(
-      (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
-    )
-    const index = dayOfYear % motivationalPhrases.length
+    const index = hashString(firstName) % motivationalPhrases.length
     return motivationalPhrases[index](firstName)
   }, [firstName])
 

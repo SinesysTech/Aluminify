@@ -103,7 +103,8 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
     }
 
     const scoreConfig = getScoreConfig(score)
-    const celebrationMessage = scoreConfig.messages[Math.floor(Math.random() * scoreConfig.messages.length)]
+    const celebrationMessage =
+        scoreConfig.messages[(score + total) % scoreConfig.messages.length]
 
     // Stats data
     const stats = [

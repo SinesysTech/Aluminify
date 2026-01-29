@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { AtividadeComProgresso } from '../types'
 import { TipoAtividade } from '@/app/shared/types/enums'
+import { formatTipoAtividade } from '@/shared/library/utils'
 
 interface NextActivityCardProps {
   activity: AtividadeComProgresso | null
@@ -16,30 +17,46 @@ interface NextActivityCardProps {
   className?: string
 }
 
-function getActivityIcon(tipo: TipoAtividade) {
+function ActivityIcon({ tipo, className }: { tipo: TipoAtividade; className?: string }) {
   switch (tipo) {
-    case 'Videoaula':
-      return Video
-    case 'Lista de Exercicios':
-    case 'Simulado':
-      return FileText
-    case 'Leitura':
-      return BookOpen
+    case 'Nivel_1':
+    case 'Nivel_2':
+    case 'Nivel_3':
+    case 'Nivel_4':
+      return <Video className={className} />
+    case 'Lista_Mista':
+    case 'Simulado_Diagnostico':
+    case 'Simulado_Cumulativo':
+    case 'Simulado_Global':
+      return <FileText className={className} />
+    case 'Conceituario':
+    case 'Revisao':
+      return <BookOpen className={className} />
+    case 'Flashcards':
+      return <HelpCircle className={className} />
     default:
-      return HelpCircle
+      return <HelpCircle className={className} />
   }
 }
 
 function getActivityColor(tipo: TipoAtividade) {
   switch (tipo) {
-    case 'Videoaula':
+    case 'Nivel_1':
+    case 'Nivel_2':
+    case 'Nivel_3':
+    case 'Nivel_4':
       return 'bg-violet-500/10 text-violet-600 border-violet-500/20'
-    case 'Lista de Exercicios':
+    case 'Lista_Mista':
       return 'bg-blue-500/10 text-blue-600 border-blue-500/20'
-    case 'Simulado':
+    case 'Simulado_Diagnostico':
+    case 'Simulado_Cumulativo':
+    case 'Simulado_Global':
       return 'bg-amber-500/10 text-amber-600 border-amber-500/20'
-    case 'Leitura':
+    case 'Conceituario':
+    case 'Revisao':
       return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
+    case 'Flashcards':
+      return 'bg-muted text-muted-foreground border-muted'
     default:
       return 'bg-muted text-muted-foreground'
   }
@@ -65,7 +82,6 @@ export function NextActivityCard({ activity, onViewAll, className }: NextActivit
     )
   }
 
-  const ActivityIcon = getActivityIcon(activity.tipo)
   const activityColorClass = getActivityColor(activity.tipo)
 
   const focoHref = `/${tenant}/foco?cursoId=${activity.cursoId}&atividadeId=${activity.id}&disciplinaId=${activity.disciplinaId}&frenteId=${activity.frenteId}&moduloId=${activity.moduloId}`
@@ -85,7 +101,7 @@ export function NextActivityCard({ activity, onViewAll, className }: NextActivit
               'shrink-0 w-12 h-12 rounded-xl flex items-center justify-center',
               activityColorClass
             )}>
-              <ActivityIcon className="h-6 w-6" />
+              <ActivityIcon tipo={activity.tipo} className="h-6 w-6" />
             </div>
 
             <div className="flex-1 min-w-0">
@@ -94,7 +110,7 @@ export function NextActivityCard({ activity, onViewAll, className }: NextActivit
                   Próxima atividade
                 </span>
                 <Badge variant="outline" className={cn('text-[10px]', activityColorClass)}>
-                  {activity.tipo}
+                  {formatTipoAtividade(activity.tipo)}
                 </Badge>
               </div>
 

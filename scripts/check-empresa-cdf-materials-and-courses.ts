@@ -67,7 +67,7 @@ async function main() {
       .select("id")
       .eq("empresa_id", empresaId);
     if (cursosIdsError) throw new Error(`Falha ao listar cursos: ${cursosIdsError.message}`);
-    const ids = (cursosIds ?? []).map((r: any) => r.id).filter(Boolean);
+    const ids = (cursosIds ?? []).map((r: { id: string }) => r.id).filter(Boolean);
     if (ids.length) {
       const { count, error: mErr } = await supabase
         .from("materiais_curso")

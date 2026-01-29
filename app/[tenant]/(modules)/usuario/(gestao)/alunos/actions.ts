@@ -1,11 +1,11 @@
 "use server";
 
-import { createClient } from "@/app/shared/core/server";
 import { createStudentService } from "@/app/[tenant]/(modules)/usuario/services/student.service";
 import { getAuthenticatedUser } from "@/app/shared/core/auth";
 import { CreateStudentInput } from "@/app/shared/types/entities/user";
 import { revalidatePath } from "next/cache";
-import { canDelete } from "@/app/shared/core/roles";
+import { canCreate, canDelete } from "@/app/shared/core/roles";
+import { getServiceRoleClient } from "@/app/shared/core/database/database-auth";
 
 export async function deleteStudentAction(studentId: string) {
   try {
@@ -25,12 +25,11 @@ export async function deleteStudentAction(studentId: string) {
       };
     }
 
-    const supabase = await createClient();
+    const supabase = getServiceRoleClient();
     const studentService = createStudentService(supabase);
 
     await studentService.delete(studentId);
 
-    revalidatePath("/usuario/alunos");
     revalidatePath("/usuario/alunos");
 
     return { success: true };
@@ -56,8 +55,24 @@ export async function createStudentAction(data: CreateStudentInput) {
       };
     }
 
-    // Usar cliente com contexto do usuário para respeitar RLS
-    const supabase = await createClient();
+    // Check permission to create students
+    const canCreateStudents =
+      user.role === "superadmin" || canCreate(user.permissions, "alunos");
+    if (!canCreateStudents) {
+      return {
+        success: false,
+        error:
+          "Permissão negada. Apenas administradores podem cadastrar alunos.",
+      };
+    }
+
+    /**
+     * IMPORTANT (multi-tenant):
+     * Para permitir que o MESMO e-mail/CPF seja associado a diferentes empresas/cursos,
+     * precisamos enxergar registros já existentes fora do escopo RLS do usuário atual.
+     * Por isso, a criação/vínculo roda com service role e a autorização fica aqui.
+     */
+    const supabase = getServiceRoleClient();
     const studentService = createStudentService(supabase);
 
     // Passar empresaId do usuário para o aluno

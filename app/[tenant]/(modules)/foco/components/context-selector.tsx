@@ -70,7 +70,7 @@ export function ContextSelector({
     const [showAdvanced, setShowAdvanced] = useState(false)
 
     // Get selected names for display
-    const selectedCurso = useMemo(() =>
+    const _selectedCurso = useMemo(() =>
         cursos.find(c => c.id === cursoId)?.nome || '',
         [cursos, cursoId]
     )

@@ -14,6 +14,8 @@ import {
 import { DashboardHeader } from '@/components/layout/dashboard-header'
 import { requireUser } from '@/app/shared/core/auth'
 import { StudentBrandingCoordinator } from '@/components/layout/student-branding-coordinator'
+import { StudentTenantCoordinator } from '@/components/layout/student-tenant-coordinator'
+import { headers } from 'next/headers'
 
 // 1. Importação das fontes do Design System (Aluminify)
 import { Inter, JetBrains_Mono } from "next/font/google"
@@ -36,17 +38,20 @@ export async function DashboardLayout({
     children: React.ReactNode
 }>) {
     const user = await requireUser()
+    const headersList = await headers()
+    const tenantEmpresaId = headersList.get('x-tenant-id') ?? user.empresaId ?? ''
 
     return (
         <UserProvider user={user}>
             <CopilotKitProvider user={user}>
-                <BrandingProvider empresaId={user.empresaId || ''}>
+                <BrandingProvider empresaId={tenantEmpresaId}>
                     <StudentOrganizationsProvider user={user}>
                         <ModuleVisibilityProvider
-                            empresaId={user.empresaId || null}
+                            empresaId={tenantEmpresaId || null}
                             userRole={user.role}
                         >
                             <StudentBrandingCoordinator />
+                            <StudentTenantCoordinator />
                             <SidebarProvider
                                 // 3. Aplicação das variáveis de fonte e classes base no Provider
                                 className={cn(

@@ -3,7 +3,7 @@ import {
   requireAuth,
   type AuthenticatedRequest,
 } from "@/app/[tenant]/auth/middleware";
-import { createClient } from "@/app/shared/core/server";
+import { getDatabaseClient } from "@/app/shared/core/database/database";
 import { createStudentOrganizationsService } from "@/app/[tenant]/(modules)/usuario/services";
 
 function handleError(error: unknown) {
@@ -45,12 +45,13 @@ async function getHandler(request: AuthenticatedRequest) {
       );
     }
 
-    // Create Supabase client with user context for RLS
-    const supabase = await createClient();
+    // Use service role to allow cross-tenant discovery (student can be enrolled in multiple empresas).
+    // SECURITY: We only ever return data for request.user.id (derived from auth).
+    const supabase = getDatabaseClient();
 
     // Create service and fetch organizations
     const service = createStudentOrganizationsService(supabase);
-    const result = await service.getStudentOrganizations();
+    const result = await service.getStudentOrganizationsForStudent(request.user.id);
 
     return NextResponse.json(result);
   } catch (error) {

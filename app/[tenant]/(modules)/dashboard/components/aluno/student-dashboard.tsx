@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import { Clock, CheckCircle2, Brain, RefreshCw, AlertCircle, Target } from 'lucide-react'
 import type { DashboardData } from '../../types'
 import {
@@ -30,10 +31,20 @@ export default function StudentDashboardClientPage() {
     const [data, setData] = useState<DashboardData | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [isAuthError, setIsAuthError] = useState(false)
     const [, setIsRefreshing] = useState(false)
     const [, setLastRefresh] = useState<Date | null>(null)
     const [heatmapPeriod, setHeatmapPeriod] = useState<HeatmapPeriod>('anual')
     const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null)
+    const router = useRouter()
+    const params = useParams<{ tenant?: string | string[] }>()
+    const tenant =
+        typeof params?.tenant === 'string'
+            ? params.tenant
+            : Array.isArray(params?.tenant)
+                ? params?.tenant[0]
+                : undefined
+    const loginUrl = tenant ? `/${tenant}/auth/login` : '/auth/login'
 
     // Get active organization for filtering (multi-org students)
     const { activeOrganization } = useStudentOrganizations()
@@ -58,7 +69,14 @@ export default function StudentDashboardClientPage() {
                 setData(dashboardData)
                 setLastRefresh(new Date())
             } catch (err) {
-                console.error('Erro ao carregar dados do dashboard:', err)
+                const serviceErr = err as DashboardServiceError
+                // Evitar console.error em erros esperados (401/403 etc),
+                // porque o dev overlay do Next trata como "Console Error".
+                if (serviceErr?.isAuthError || serviceErr?.isNetworkError) {
+                    console.warn('Erro esperado ao carregar dados do dashboard:', err)
+                } else {
+                    console.error('Erro ao carregar dados do dashboard:', err)
+                }
 
                 let errorMessage = 'Erro ao carregar dados do dashboard'
                 if (err instanceof Error) {
@@ -67,10 +85,16 @@ export default function StudentDashboardClientPage() {
                     // Tratamento específico para erros de autenticação
                     if ((err as DashboardServiceError).isAuthError) {
                         errorMessage = 'Sua sessão expirou. Por favor, faça login novamente.'
+                        setIsAuthError(true)
                     } else if ((err as DashboardServiceError).isNetworkError) {
                         errorMessage =
                             'Erro de conexão. Verifique sua internet e tente novamente.'
+                        setIsAuthError(false)
+                    } else {
+                        setIsAuthError(false)
                     }
+                } else {
+                    setIsAuthError(false)
                 }
 
                 setError(errorMessage)
@@ -206,6 +230,16 @@ export default function StudentDashboardClientPage() {
                     <AlertTitle>Erro ao carregar dashboard</AlertTitle>
                     <AlertDescription className="mt-2">
                         <p>{error}</p>
+                        {isAuthError && (
+                            <Button
+                                onClick={() => router.push(loginUrl)}
+                                variant="default"
+                                size="sm"
+                                className="mt-4 mr-2"
+                            >
+                                Ir para login
+                            </Button>
+                        )}
                         <Button
                             onClick={handleManualRefresh}
                             variant="outline"
