@@ -257,7 +257,7 @@ export class TeacherRepositoryImpl implements TeacherRepository {
             is_admin: payload.isAdmin ?? false,
             ativo: true,
           },
-          { onConflict: "usuario_id,empresa_id" },
+          { onConflict: "usuario_id,empresa_id,papel_base" },
         )
         .then(({ error: vinculoError }) => {
           if (vinculoError) {

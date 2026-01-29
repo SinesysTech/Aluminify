@@ -605,6 +605,7 @@ export class StudentRepositoryImpl implements StudentRepository {
             ativo: true,
           },
           { onConflict: "usuario_id,empresa_id,papel_base" },
+<<<<<<< HEAD
         );
 
       if (vinculoError) {
@@ -612,6 +613,17 @@ export class StudentRepositoryImpl implements StudentRepository {
           `Failed to create tenant binding (usuarios_empresas): ${formatSupabaseError(vinculoError)}`,
         );
       }
+=======
+        )
+        .then(({ error: vinculoError }) => {
+          if (vinculoError) {
+            console.error(
+              "[StudentRepo] Failed to create usuarios_empresas binding:",
+              vinculoError,
+            );
+          }
+        });
+>>>>>>> c0608648975a6094b35ae91b099de7443acdad3c
     }
 
     if (error) {

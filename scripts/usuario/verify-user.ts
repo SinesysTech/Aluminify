@@ -21,7 +21,7 @@ async function main() {
     },
   });
 
-  const email = "ti@sinesys.com.br";
+  const email = process.argv[2] ?? "ti@sinesys.com.br";
   console.log(`Checking user: ${email}`);
 
   const { data, error } = await supabase.auth.admin.listUsers();
