@@ -91,11 +91,14 @@ export class StudentService extends UserBaseService {
       const enrollmentNumber = this.validateEnrollmentNumber(
         payload.enrollmentNumber,
       );
-      const existingByEnrollment =
-        await this.repository.findByEnrollmentNumber(enrollmentNumber);
+      // Verificar duplicata apenas dentro da mesma empresa
+      const existingByEnrollment = await this.repository.findByEnrollmentNumber(
+        enrollmentNumber,
+        payload.empresaId ?? undefined,
+      );
       if (existingByEnrollment) {
         throw new StudentConflictError(
-          `Student with enrollment number "${enrollmentNumber}" already exists`,
+          `Student with enrollment number "${enrollmentNumber}" already exists in this empresa`,
         );
       }
     }
@@ -149,6 +152,7 @@ export class StudentService extends UserBaseService {
 
     // Se o ID não foi fornecido, precisamos criar o usuário no auth.users primeiro
     let studentId = payload.id;
+    let isNewAuthUser = false;
     if (!studentId) {
       try {
         const authResult = await this.createAuthUser({
@@ -161,6 +165,7 @@ export class StudentService extends UserBaseService {
         });
 
         studentId = authResult.userId;
+        isNewAuthUser = authResult.isNew;
       } catch (error: unknown) {
         const err = error as Error;
         if (err.message?.includes("Conflict")) {
@@ -170,25 +175,109 @@ export class StudentService extends UserBaseService {
       }
     }
 
-    const student = await this.repository.create({
-      id: studentId,
-      empresaId: payload.empresaId,
-      fullName,
-      email,
-      cpf,
-      phone,
-      birthDate: birthDate?.toISOString().split("T")[0],
-      address: payload.address?.trim() || undefined,
-      zipCode,
-      enrollmentNumber: payload.enrollmentNumber
-        ? this.validateEnrollmentNumber(payload.enrollmentNumber)
-        : undefined,
-      instagram,
-      twitter,
-      courseIds,
-      mustChangePassword: true,
-      temporaryPassword,
-    });
+    // Verificar novamente se o aluno já existe por ID (pode existir se o auth user já existia)
+    // Isso previne erros de primary key quando o usuário já existe no auth mas o aluno também já existe
+    const existingById = await this.repository.findById(studentId);
+    if (existingById) {
+      // Aluno já existe, apenas vincular aos cursos se necessário
+      const courseIds =
+        payload.courseIds && payload.courseIds.length > 0
+          ? this.validateCourseIds(payload.courseIds)
+          : [];
+
+      if (courseIds.length > 0) {
+        await this.repository.addCourses(existingById.id, courseIds);
+      }
+
+      const updated = await this.repository.findById(existingById.id);
+      return updated ?? existingById;
+    }
+
+    let student: Student;
+    try {
+      student = await this.repository.create({
+        id: studentId,
+        empresaId: payload.empresaId,
+        fullName,
+        email,
+        cpf,
+        phone,
+        birthDate: birthDate?.toISOString().split("T")[0],
+        address: payload.address?.trim() || undefined,
+        zipCode,
+        enrollmentNumber: payload.enrollmentNumber
+          ? this.validateEnrollmentNumber(payload.enrollmentNumber)
+          : undefined,
+        instagram,
+        twitter,
+        courseIds,
+        mustChangePassword: true,
+        temporaryPassword,
+      });
+    } catch (error: unknown) {
+      const err = error as Error;
+      // Verificar se é erro de constraint única (duplicate key)
+      // Incluindo erro de primary key (alunos_pkey)
+      if (
+        err.message?.includes("duplicate key") ||
+        err.message?.includes("unique constraint") ||
+        err.message?.includes("alunos_pkey") ||
+        err.message?.includes("alunos_numero_matricula_key") ||
+        err.message?.includes("alunos_empresa_matricula_unique") ||
+        err.message?.includes("alunos_email_key") ||
+        err.message?.includes("alunos_cpf_key")
+      ) {
+        // Se for erro de primary key, tentar buscar o aluno existente e vincular cursos
+        if (err.message?.includes("alunos_pkey")) {
+          const existingStudent = await this.repository.findById(studentId);
+          if (existingStudent) {
+            // Aluno existe, apenas vincular cursos
+            const courseIdsToLink =
+              payload.courseIds && payload.courseIds.length > 0
+                ? this.validateCourseIds(payload.courseIds)
+                : [];
+
+            if (courseIdsToLink.length > 0) {
+              await this.repository.addCourses(
+                existingStudent.id,
+                courseIdsToLink,
+              );
+            }
+
+            const updated = await this.repository.findById(existingStudent.id);
+            return updated ?? existingStudent;
+          }
+        }
+        // Para outros erros de constraint, verificar se é por email (aluno já existe)
+        if (
+          err.message?.includes("alunos_email_key") ||
+          err.message?.includes("alunos_pkey")
+        ) {
+          const existingByEmail = await this.repository.findByEmail(email);
+          if (existingByEmail) {
+            // Aluno existe por email, vincular cursos
+            const courseIdsToLink =
+              payload.courseIds && payload.courseIds.length > 0
+                ? this.validateCourseIds(payload.courseIds)
+                : [];
+
+            if (courseIdsToLink.length > 0) {
+              await this.repository.addCourses(
+                existingByEmail.id,
+                courseIdsToLink,
+              );
+            }
+
+            const updated = await this.repository.findById(existingByEmail.id);
+            return updated ?? existingByEmail;
+          }
+        }
+        throw new StudentConflictError(
+          err.message || "Aluno já existe no sistema",
+        );
+      }
+      throw error;
+    }
 
     // Vincular aluno à turma se turmaId foi fornecido
     if (payload.turmaId) {
@@ -269,11 +358,17 @@ export class StudentService extends UserBaseService {
         const enrollmentNumber = this.validateEnrollmentNumber(
           payload.enrollmentNumber,
         );
-        const existingByEnrollment =
-          await this.repository.findByEnrollmentNumber(enrollmentNumber);
+        // Buscar empresa_id do aluno atual para verificar duplicata na mesma empresa
+        const currentStudent = await this.repository.findById(id);
+        const empresaId = currentStudent?.empresaId ?? undefined;
+        
+        const existingByEnrollment = await this.repository.findByEnrollmentNumber(
+          enrollmentNumber,
+          empresaId,
+        );
         if (existingByEnrollment && existingByEnrollment.id !== id) {
           throw new StudentConflictError(
-            `Student with enrollment number "${enrollmentNumber}" already exists`,
+            `Student with enrollment number "${enrollmentNumber}" already exists in this empresa`,
           );
         }
         updateData.enrollmentNumber = enrollmentNumber;
@@ -383,6 +478,7 @@ export class StudentService extends UserBaseService {
   private validateCpf(cpf?: string): string {
     let cleaned = normalizeCpf(cpf || "");
     // Regra: se vier com 8, 9 ou 10 dígitos, completa com 0 à esquerda até 11.
+    // Aceita qualquer quantidade de dígitos, mas completa apenas se estiver entre 8-10.
     if (cleaned.length >= 8 && cleaned.length <= 10) {
       cleaned = cleaned.padStart(CPF_LENGTH, "0");
     }
@@ -396,7 +492,8 @@ export class StudentService extends UserBaseService {
 
   private validatePhone(phone?: string): string {
     // Regra para importação (e sistema): aceitar qualquer quantidade de dígitos,
-    // com DDD ou sem DDD. Persistimos apenas os números.
+    // com DDD ou sem DDD, com ou sem código 55, 8 ou 9 dígitos.
+    // Persistimos apenas os números, sem validação de tamanho.
     const cleaned = (phone ?? "").replace(/\D/g, "");
     if (!cleaned) {
       throw new StudentValidationError("Phone cannot be empty");

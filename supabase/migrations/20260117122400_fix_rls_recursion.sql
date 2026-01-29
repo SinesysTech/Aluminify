@@ -3,6 +3,7 @@
 -- Date: 2026-01-17
 
 -- 1. Update function to SECURITY DEFINER to break recursion
+-- Atualizada para buscar empresa_id de professores e usuarios
 create or replace function public.get_user_empresa_id()
 returns uuid
 language plpgsql
@@ -12,12 +13,21 @@ as $$
 declare
     empresa_id_result uuid;
 begin
-    -- Busca empresa_id do professor logado
+    -- Primeiro tenta buscar empresa_id do professor logado
     select empresa_id
     into empresa_id_result
     from public.professores
     where id = (select auth.uid())
     limit 1;
+
+    -- Se não encontrou, tenta buscar na tabela usuarios
+    if empresa_id_result is null then
+        select empresa_id
+        into empresa_id_result
+        from public.usuarios
+        where id = (select auth.uid())
+        limit 1;
+    end if;
 
     return empresa_id_result;
 end;

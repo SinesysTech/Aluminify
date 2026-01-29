@@ -19,7 +19,7 @@ export interface StudentImportInputRow {
   temporaryPassword: string;
 }
 
-export type StudentImportRowStatus = "created" | "skipped" | "failed";
+export type StudentImportRowStatus = "created" | "linked" | "skipped" | "failed";
 
 export interface StudentImportRowResult {
   rowNumber: number;
@@ -31,6 +31,7 @@ export interface StudentImportRowResult {
 export interface StudentImportSummary {
   total: number;
   created: number;
+  linked: number;
   skipped: number;
   failed: number;
   rows: StudentImportRowResult[];
@@ -45,7 +46,10 @@ const REQUIRED_FIELDS: Array<keyof StudentImportInputRow> = [
 function normalizeCpf(rawCpf: string): string {
   const digits = (rawCpf ?? "").replace(/\D/g, "");
   // Regra: se vier com 8, 9 ou 10 dígitos, completa com 0 à esquerda até 11.
-  if (digits.length >= 8 && digits.length <= 10) return digits.padStart(11, "0");
+  // Aceita qualquer quantidade de dígitos, mas completa apenas se estiver entre 8-10.
+  if (digits.length >= 8 && digits.length <= 10) {
+    return digits.padStart(11, "0");
+  }
   return digits;
 }
 
@@ -74,6 +78,7 @@ export class StudentImportService {
     const summary: StudentImportSummary = {
       total: rows.length,
       created: 0,
+      linked: 0,
       skipped: 0,
       failed: 0,
       rows: [],
@@ -122,7 +127,21 @@ export class StudentImportService {
       courseIds,
     }: (typeof validatedRows)[number]): Promise<StudentImportRowResult> => {
       try {
-        await this.studentService.create({
+        // Verificar se aluno já existe antes de tentar criar
+        let wasExisting = false;
+        try {
+          const existingCheck = await this.studentService.list({
+            query: row.email,
+            perPage: 1,
+          });
+          wasExisting = existingCheck.data.some(
+            (s) => s.email.toLowerCase() === row.email.toLowerCase(),
+          );
+        } catch {
+          // Se não conseguir verificar, continuar normalmente
+        }
+
+        const result = await this.studentService.create({
           empresaId: empresaId || undefined,
           fullName: row.fullName,
           email: row.email,
@@ -134,6 +153,16 @@ export class StudentImportService {
           mustChangePassword: true,
         });
 
+        // Se o aluno já existia, foi vinculado aos cursos (não criado)
+        if (wasExisting) {
+          return {
+            rowNumber: row.rowNumber,
+            email: row.email,
+            status: "linked",
+            message: "Aluno já existente, vinculado aos cursos da empresa",
+          };
+        }
+
         return {
           rowNumber: row.rowNumber,
           email: row.email,
@@ -141,12 +170,103 @@ export class StudentImportService {
         };
       } catch (error) {
         if (error instanceof StudentConflictError) {
+          // Se for conflito, tentar buscar o aluno e vincular cursos
+          try {
+            const studentAfter = await this.studentService.list({
+              query: row.email,
+              perPage: 1,
+            });
+            const found = studentAfter.data.find(
+              (s) => s.email.toLowerCase() === row.email.toLowerCase(),
+            );
+
+            if (found && courseIds.length > 0) {
+              // Tentar vincular cursos ao aluno existente
+              try {
+                await this.studentService.repository.addCourses(
+                  found.id,
+                  courseIds,
+                );
+
+                // Verificar se os cursos foram vinculados
+                const updated = await this.studentService.repository.findById(
+                  found.id,
+                );
+                if (updated) {
+                  const hasCourses = courseIds.some((courseId) =>
+                    updated.courses?.some((c) => c.id === courseId),
+                  );
+
+                  if (hasCourses) {
+                    return {
+                      rowNumber: row.rowNumber,
+                      email: row.email,
+                      status: "linked",
+                      message: "Aluno já existente, vinculado aos cursos da empresa",
+                    };
+                  }
+                }
+              } catch (linkError) {
+                // Se falhar ao vincular, continuar para marcar como skipped
+                console.warn(
+                  `Failed to link courses to existing student ${found.id}:`,
+                  linkError,
+                );
+              }
+            }
+          } catch {
+            // Se não conseguir verificar, tratar como skipped
+          }
+
           return {
             rowNumber: row.rowNumber,
             email: row.email,
             status: "skipped",
             message: error.message,
           };
+        }
+
+        // Se for erro de primary key (alunos_pkey), tentar buscar e vincular
+        const err = error as Error;
+        if (
+          err.message?.includes("alunos_pkey") ||
+          err.message?.includes("duplicate key") ||
+          err.message?.includes("unique constraint")
+        ) {
+          try {
+            const studentAfter = await this.studentService.list({
+              query: row.email,
+              perPage: 1,
+            });
+            const found = studentAfter.data.find(
+              (s) => s.email.toLowerCase() === row.email.toLowerCase(),
+            );
+
+            if (found && courseIds.length > 0) {
+              // Tentar vincular cursos ao aluno existente
+              try {
+                await this.studentService.repository.addCourses(
+                  found.id,
+                  courseIds,
+                );
+
+                return {
+                  rowNumber: row.rowNumber,
+                  email: row.email,
+                  status: "linked",
+                  message: "Aluno já existente, vinculado aos cursos da empresa",
+                };
+              } catch (linkError) {
+                // Se falhar ao vincular, marcar como failed
+                console.warn(
+                  `Failed to link courses to existing student ${found.id}:`,
+                  linkError,
+                );
+              }
+            }
+          } catch {
+            // Se não conseguir verificar, tratar como failed
+          }
         }
 
         const message =
@@ -180,6 +300,7 @@ export class StudentImportService {
 
     processedResults.forEach((rowResult) => {
       if (rowResult.status === "created") summary.created += 1;
+      else if (rowResult.status === "linked") summary.linked += 1;
       else if (rowResult.status === "skipped") summary.skipped += 1;
       else summary.failed += 1;
       summary.rows.push(rowResult);

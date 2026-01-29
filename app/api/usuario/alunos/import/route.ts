@@ -26,7 +26,10 @@ function handleError(error: unknown) {
 function normalizeCpf(rawCpf: string): string {
   const digits = (rawCpf ?? "").replace(/\D/g, "");
   // Regra: se vier com 8, 9 ou 10 dígitos, completa com 0 à esquerda até 11.
-  if (digits.length >= 8 && digits.length <= 10) return digits.padStart(11, "0");
+  // Aceita qualquer quantidade de dígitos, mas completa apenas se estiver entre 8-10.
+  if (digits.length >= 8 && digits.length <= 10) {
+    return digits.padStart(11, "0");
+  }
   return digits;
 }
 

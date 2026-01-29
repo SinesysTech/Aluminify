@@ -22,7 +22,10 @@ export interface StudentRepository {
   findById(id: string): Promise<Student | null>;
   findByEmail(email: string): Promise<Student | null>;
   findByCpf(cpf: string): Promise<Student | null>;
-  findByEnrollmentNumber(enrollmentNumber: string): Promise<Student | null>;
+  findByEnrollmentNumber(
+    enrollmentNumber: string,
+    empresaId?: string | null,
+  ): Promise<Student | null>;
   create(payload: CreateStudentInput): Promise<Student>;
   update(id: string, payload: UpdateStudentInput): Promise<Student>;
   delete(id: string): Promise<void>;
@@ -170,6 +173,63 @@ export class StudentRepositoryImpl implements StudentRepository {
       }
 
       studentIdsToFilter = (courseLinks ?? []).map((link) => link.aluno_id);
+    } else {
+      // Quando não há filtro específico, buscar alunos matriculados em cursos da empresa
+      // Isso garante que alunos de outras empresas que estão matriculados em cursos desta empresa apareçam
+      try {
+        // Tentar obter empresa_id do usuário via RPC
+        const { data: empresaId, error: empresaError } = await this.client.rpc(
+          "get_user_empresa_id",
+        );
+
+        if (!empresaError && empresaId) {
+          // Usar a função RPC para buscar alunos matriculados em cursos da empresa
+          const { data: alunoIds, error: rpcError } = await this.client.rpc(
+            "get_student_ids_by_empresa_courses",
+            { empresa_id_param: empresaId },
+          );
+
+          if (!rpcError && alunoIds && Array.isArray(alunoIds)) {
+            studentIdsToFilter = alunoIds
+              .map((item: { aluno_id: string }) => item.aluno_id)
+              .filter((id): id is string => Boolean(id));
+          } else {
+            // Fallback: buscar manualmente se a RPC não funcionar
+            const { data: cursos, error: cursosError } = await this.client
+              .from(COURSES_TABLE)
+              .select("id")
+              .eq("empresa_id", empresaId);
+
+            if (!cursosError && cursos && cursos.length > 0) {
+              const cursoIds = cursos.map((c: { id: string }) => c.id);
+
+              // Buscar alunos matriculados nesses cursos
+              const { data: alunosCursos, error: alunosCursosError } =
+                await this.client
+                  .from(COURSE_LINK_TABLE)
+                  .select("aluno_id")
+                  .in("curso_id", cursoIds);
+
+              if (!alunosCursosError && alunosCursos) {
+                studentIdsToFilter = Array.from(
+                  new Set(
+                    (alunosCursos ?? []).map(
+                      (ac: { aluno_id: string }) => ac.aluno_id,
+                    ),
+                  ),
+                );
+              }
+            }
+          }
+        }
+      } catch (error) {
+        // Se falhar ao obter empresa_id ou buscar alunos, continuar sem filtro
+        // O RLS deve filtrar automaticamente
+        console.warn(
+          "Failed to filter students by empresa courses, relying on RLS:",
+          error,
+        );
+      }
     }
 
     // If filtering by course/turma and no students found, return empty result
@@ -312,13 +372,20 @@ export class StudentRepositoryImpl implements StudentRepository {
 
   async findByEnrollmentNumber(
     enrollmentNumber: string,
+    empresaId?: string | null,
   ): Promise<Student | null> {
-    const { data, error } = await this.client
+    let query = this.client
       .from(TABLE)
       .select("*")
       .eq("numero_matricula", enrollmentNumber)
-      .is("deleted_at", null)
-      .maybeSingle();
+      .is("deleted_at", null);
+
+    // Se empresaId foi fornecido, filtrar por empresa também
+    if (empresaId) {
+      query = query.eq("empresa_id", empresaId);
+    }
+
+    const { data, error } = await query.maybeSingle();
 
     if (error) {
       throw new Error(
@@ -340,6 +407,66 @@ export class StudentRepositoryImpl implements StudentRepository {
       throw new Error(
         "Student ID is required. User must be created in auth.users first.",
       );
+    }
+
+    // Verificar se aluno já existe por ID (incluindo soft deleted)
+    // Primeiro verifica sem soft delete
+    let existingById = await this.findById(payload.id);
+    
+    // Se não encontrou, verifica incluindo soft deleted
+    if (!existingById) {
+      const { data: softDeletedData, error: softDeletedError } = await this.client
+        .from(TABLE)
+        .select("*")
+        .eq("id", payload.id)
+        .maybeSingle();
+
+      if (softDeletedError) {
+        throw new Error(
+          `Failed to check existing student: ${softDeletedError.message}`,
+        );
+      }
+
+      // Se encontrou com soft delete, restaurar (remover deleted_at)
+      if (softDeletedData) {
+        const { data: restoredData, error: restoreError } = await this.client
+          .from(TABLE)
+          .update({ deleted_at: null })
+          .eq("id", payload.id)
+          .select("*")
+          .single();
+
+        if (restoreError) {
+          throw new Error(
+            `Failed to restore soft-deleted student: ${restoreError.message}`,
+          );
+        }
+
+        existingById = restoredData
+          ? await this.attachCourses([restoredData]).then((s) => s[0] ?? null)
+          : null;
+      }
+    }
+
+    if (existingById) {
+      // Aluno já existe (ou foi restaurado), atualizar apenas os cursos se necessário
+      if (payload.courseIds && payload.courseIds.length > 0) {
+        await this.setCourses(payload.id, payload.courseIds);
+      }
+      return existingById;
+    }
+
+    // Verificar se número de matrícula já existe em outro aluno da mesma empresa
+    if (payload.enrollmentNumber && payload.empresaId) {
+      const existingByEnrollment = await this.findByEnrollmentNumber(
+        payload.enrollmentNumber,
+        payload.empresaId,
+      );
+      if (existingByEnrollment && existingByEnrollment.id !== payload.id) {
+        throw new Error(
+          `Failed to create student: duplicate key value violates unique constraint "alunos_empresa_matricula_unique"`,
+        );
+      }
     }
 
     // Cast para incluir empresa_id e novos campos Hotmart
@@ -370,11 +497,43 @@ export class StudentRepositoryImpl implements StudentRepository {
 
     const { data, error } = await this.client
       .from(TABLE)
-      .upsert(insertData)
+      .insert(insertData)
       .select("*")
       .single();
 
     if (error) {
+      // Verificar se é erro de constraint única (incluindo primary key)
+      const errorMessage = error.message?.toLowerCase() || "";
+      if (
+        errorMessage.includes("duplicate key") ||
+        errorMessage.includes("unique constraint") ||
+        errorMessage.includes("alunos_pkey")
+      ) {
+        // Se for erro de primary key, pode ser race condition - tentar buscar o aluno existente
+        const existingStudent = await this.client
+          .from(TABLE)
+          .select("*")
+          .eq("id", payload.id)
+          .maybeSingle();
+
+        if (existingStudent.data) {
+          // Aluno existe, apenas vincular cursos
+          if (payload.courseIds && payload.courseIds.length > 0) {
+            await this.setCourses(payload.id, payload.courseIds);
+          }
+          const [student] = await this.attachCourses([existingStudent.data]);
+          return student;
+        }
+        throw new Error(`Failed to create student: ${error.message}`);
+      }
+      if (
+        errorMessage.includes("alunos_numero_matricula_key") ||
+        errorMessage.includes("alunos_empresa_matricula_unique") ||
+        errorMessage.includes("alunos_email_key") ||
+        errorMessage.includes("alunos_cpf_key")
+      ) {
+        throw new Error(`Failed to create student: ${error.message}`);
+      }
       throw new Error(`Failed to create student: ${error.message}`);
     }
 

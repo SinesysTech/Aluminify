@@ -133,7 +133,10 @@ const parseXLSXFile = async (
 const normalizeCpfDigits = (cpfRaw: string) => {
   const digits = (cpfRaw ?? "").replace(/\D/g, "");
   // Regra: se vier com 8, 9 ou 10 dígitos, completa com 0 à esquerda até 11.
-  if (digits.length >= 8 && digits.length <= 10) return digits.padStart(11, "0");
+  // Aceita qualquer quantidade de dígitos, mas completa apenas se estiver entre 8-10.
+  if (digits.length >= 8 && digits.length <= 10) {
+    return digits.padStart(11, "0");
+  }
   return digits;
 };
 
@@ -258,6 +261,8 @@ async function postHandler(request: AuthenticatedRequest) {
       const fullName = getValue(STUDENT_IMPORT_COLUMN_ALIASES.fullName);
       const email = getValue(STUDENT_IMPORT_COLUMN_ALIASES.email).toLowerCase();
       const cpfDigits = normalizeCpfDigits(getValue(STUDENT_IMPORT_COLUMN_ALIASES.cpf));
+      // Telefone: aceita qualquer quantidade de dígitos (com ou sem DDD, com ou sem código 55, 8 ou 9 dígitos)
+      // Apenas remove caracteres não numéricos, sem validação de tamanho
       const phoneDigits = getValue(STUDENT_IMPORT_COLUMN_ALIASES.phone).replace(
         /\D/g,
         "",

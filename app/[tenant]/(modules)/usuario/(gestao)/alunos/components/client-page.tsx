@@ -26,8 +26,10 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/app/shared/components/dataviz/table'
 import { downloadFile } from '@/shared/library/download-file'
+import { Progress } from '@/app/shared/components/feedback/progress'
+import { Spinner } from '@/app/shared/components/feedback/spinner'
 
-type ImportIssueStatus = 'skipped' | 'failed' | 'rejected'
+type ImportIssueStatus = 'skipped' | 'linked' | 'failed' | 'rejected'
 
 type ImportIssueRow = {
     rowNumber: number
@@ -38,6 +40,70 @@ type ImportIssueRow = {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null
+}
+
+function translateStatus(status: ImportIssueStatus): string {
+    switch (status) {
+        case 'skipped':
+            return 'já cadastrado'
+        case 'linked':
+            return 'vinculado'
+        case 'failed':
+            return 'erro'
+        case 'rejected':
+            return 'rejeitado'
+        default:
+            return status
+    }
+}
+
+function translateErrorMessage(message: string): string {
+    if (!message) return message
+    
+    let translated = message
+
+    // Traduzir mensagens comuns de erro
+    translated = translated.replace(/Failed to create student:/gi, 'Falha ao criar aluno:')
+    translated = translated.replace(/Failed to list auth users:/gi, 'Falha ao listar usuários:')
+    translated = translated.replace(/Failed to create auth user:/gi, 'Falha ao criar usuário:')
+    translated = translated.replace(/Database error finding users/gi, 'Erro no banco de dados ao buscar usuários')
+    translated = translated.replace(/Database error creating new user/gi, 'Erro no banco de dados ao criar novo usuário')
+    translated = translated.replace(/Erro inesperado ao importar aluno/gi, 'Erro inesperado ao importar aluno')
+    
+    // Traduzir erros de constraint
+    translated = translated.replace(/duplicate key value violates unique constraint/gi, 'valor duplicado viola restrição única')
+    translated = translated.replace(/alunos_pkey/gi, 'chave primária de alunos')
+    translated = translated.replace(/alunos_numero_matricula_key/gi, 'número de matrícula')
+    translated = translated.replace(/alunos_empresa_matricula_unique/gi, 'matrícula única por empresa')
+    translated = translated.replace(/alunos_email_key/gi, 'e-mail')
+    translated = translated.replace(/alunos_cpf_key/gi, 'CPF')
+    
+    // Traduzir mensagens de conflito
+    translated = translated.replace(/Student with email "([^"]+)"/gi, 'Aluno com e-mail "$1"')
+    translated = translated.replace(/Student with CPF "([^"]+)"/gi, 'Aluno com CPF "$1"')
+    translated = translated.replace(/Student with enrollment number "([^"]+)"/gi, 'Aluno com número de matrícula "$1"')
+    translated = translated.replace(/already exists/gi, 'já existe')
+    translated = translated.replace(/in this empresa/gi, 'nesta empresa')
+    translated = translated.replace(/Aluno já existe no sistema/gi, 'Aluno já existe no sistema')
+    translated = translated.replace(/Conflict:/gi, 'Conflito:')
+    translated = translated.replace(/User with email ([^\s]+) exists in Auth but could not be retrieved/gi, 'Usuário com e-mail $1 existe no sistema de autenticação mas não pôde ser recuperado')
+    translated = translated.replace(/exists in Auth but could not be retrieved/gi, 'existe no sistema de autenticação mas não pôde ser recuperado')
+    
+    // Traduzir mensagens de validação
+    translated = translated.replace(/Campo obrigatório/gi, 'Campo obrigatório')
+    translated = translated.replace(/ausente/gi, 'ausente')
+    translated = translated.replace(/CPF deve ter 11 dígitos/gi, 'CPF deve ter 11 dígitos')
+    translated = translated.replace(/Informe o CPF ou a senha temporária/gi, 'Informe o CPF ou a senha temporária')
+    translated = translated.replace(/Cursos não encontrados:/gi, 'Cursos não encontrados:')
+    translated = translated.replace(/Nenhum curso válido encontrado/gi, 'Nenhum curso válido encontrado')
+    translated = translated.replace(/A senha temporária deve ter pelo menos 8 caracteres/gi, 'A senha temporária deve ter pelo menos 8 caracteres')
+    translated = translated.replace(/Informe pelo menos um curso/gi, 'Informe pelo menos um curso')
+    translated = translated.replace(/Nome completo é obrigatório/gi, 'Nome completo é obrigatório')
+    translated = translated.replace(/Email é obrigatório/gi, 'E-mail é obrigatório')
+    translated = translated.replace(/Número de matrícula é obrigatório/gi, 'Número de matrícula é obrigatório')
+    translated = translated.replace(/Senha temporária deve ter pelo menos 8 caracteres/gi, 'Senha temporária deve ter pelo menos 8 caracteres')
+
+    return translated
 }
 
 interface AlunosClientPageProps {
@@ -141,16 +207,18 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
             const rejectedPreview = Array.isArray(json?.rejectedPreview) ? json.rejectedPreview : []
 
             const created = typeof summary?.created === 'number' ? summary.created : null
+            const linked = typeof summary?.linked === 'number' ? summary.linked : null
             const skipped = typeof summary?.skipped === 'number' ? summary.skipped : null
             const failed = typeof summary?.failed === 'number' ? summary.failed : null
 
             const issues: ImportIssueRow[] = []
 
-            // Linhas processadas pelo import service (created/skipped/failed)
+            // Linhas processadas pelo import service (created/linked/skipped/failed)
             const rows = Array.isArray(summary?.rows) ? (summary.rows as unknown[]) : []
             rows.forEach((r) => {
                 if (!isRecord(r)) return
                 const status = typeof r.status === 'string' ? r.status : undefined
+                // Mostrar apenas skipped e failed como problemas (linked é sucesso)
                 if (status === 'skipped' || status === 'failed') {
                     issues.push({
                         rowNumber: typeof r.rowNumber === 'number' ? r.rowNumber : 0,
@@ -178,13 +246,14 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
                 })
             }
 
-            if (created === 0 && (skipped || failed)) {
+            if (created === 0 && linked === 0 && (skipped || failed)) {
                 toast.warning(
-                    `Importação concluída, mas nenhum aluno foi criado (skipped: ${skipped ?? 0}, failed: ${failed ?? 0}).`
+                    `Importação concluída, mas nenhum aluno foi processado (já cadastrados: ${skipped ?? 0}, com erro: ${failed ?? 0}).`
                 )
-            } else if (created !== null) {
+            } else if (created !== null || linked !== null) {
+                const totalProcessado = (created ?? 0) + (linked ?? 0)
                 toast.success(
-                    `Importação concluída: ${created} criados, ${skipped ?? 0} ignorados, ${failed ?? 0} com erro.`
+                    `Importação concluída: ${created ?? 0} criados, ${linked ?? 0} vinculados, ${skipped ?? 0} já cadastrados, ${failed ?? 0} com erro.`
                 )
             } else {
                 toast.success('Importação concluída com sucesso')
@@ -198,9 +267,14 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
             }
 
             if (issues.length > 0) {
-                const summaryLine = `Resultado da importação: ${created ?? 0} criados, ${skipped ?? 0} ignorados, ${failed ?? 0} com erro, ${rejected ?? 0} rejeitados.`
+                const summaryLine = `Resultado da importação: ${created ?? 0} criados, ${linked ?? 0} vinculados, ${skipped ?? 0} já cadastrados, ${failed ?? 0} com erro, ${rejected ?? 0} rejeitados.`
+                // Traduzir mensagens de erro
+                const translatedIssues = issues.map(issue => ({
+                    ...issue,
+                    message: translateErrorMessage(issue.message),
+                }))
                 setImportSummaryText(summaryLine)
-                setImportIssues(issues.sort((a, b) => (a.rowNumber || 0) - (b.rowNumber || 0)))
+                setImportIssues(translatedIssues.sort((a, b) => (a.rowNumber || 0) - (b.rowNumber || 0)))
                 setImportReportOpen(true)
                 toast.warning(
                     `Atenção: ${issues.length} linha(s) não foram importadas. Vou mostrar a lista com os motivos.`
@@ -223,6 +297,44 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
 
     return (
         <div className="flex flex-col gap-8 h-full pb-10">
+            {/* Loading Overlay durante importação */}
+            {isImporting && (
+                <Dialog open={isImporting} onOpenChange={() => {}}>
+                    <DialogContent className="sm:max-w-md" showCloseIcon={false}>
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                                <Spinner className="w-5 h-5 text-primary" />
+                                Importando alunos...
+                            </DialogTitle>
+                            <DialogDescription>
+                                Por favor, aguarde enquanto processamos sua planilha. Isso pode levar alguns minutos dependendo do tamanho do arquivo.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="relative w-full overflow-hidden rounded-full bg-zinc-200 h-2.5">
+                                <div 
+                                    className="h-full bg-zinc-900 rounded-full"
+                                    style={{
+                                        width: '60%',
+                                        animation: 'loading 1.5s ease-in-out infinite',
+                                    }}
+                                />
+                            </div>
+                            <style dangerouslySetInnerHTML={{__html: `
+                                @keyframes loading {
+                                    0% { transform: translateX(-100%); }
+                                    50% { transform: translateX(200%); }
+                                    100% { transform: translateX(-100%); }
+                                }
+                            `}} />
+                            <p className="text-sm text-muted-foreground text-center">
+                                Processando arquivo e criando registros...
+                            </p>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+            )}
+
             <Dialog open={importReportOpen} onOpenChange={setImportReportOpen}>
                 <DialogContent className="sm:max-w-3xl">
                     <DialogHeader>
@@ -241,7 +353,7 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
                             size="sm"
                             onClick={async () => {
                                 const text = importIssues
-                                    .map((i) => `Linha ${i.rowNumber} | ${i.status} | ${i.email} | ${i.message}`)
+                                    .map((i) => `Linha ${i.rowNumber} | ${translateStatus(i.status)} | ${i.email} | ${i.message}`)
                                     .join('\n')
                                 try {
                                     await navigator.clipboard.writeText(text)
@@ -270,7 +382,7 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
                                     {importIssues.map((i, idx) => (
                                         <TableRow key={`${i.rowNumber}-${i.email}-${idx}`}>
                                             <TableCell className="font-mono">{i.rowNumber || '-'}</TableCell>
-                                            <TableCell className="font-mono">{i.status}</TableCell>
+                                            <TableCell className="font-mono">{translateStatus(i.status)}</TableCell>
                                             <TableCell className="font-mono">{i.email || '-'}</TableCell>
                                             <TableCell className="whitespace-normal wrap-break-word">{i.message || '-'}</TableCell>
                                         </TableRow>

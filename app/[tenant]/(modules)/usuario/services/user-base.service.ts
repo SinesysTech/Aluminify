@@ -39,27 +39,55 @@ export class UserBaseService {
     // Paginar de forma segura: em instalações com muitos usuários, o usuário pode não estar na 1ª página.
     let page: number | null = 1;
     const perPage = 1000;
+    let maxPages = 100; // Limite de segurança para evitar loops infinitos
 
-    while (page) {
-      const { data, error } = await adminClient.auth.admin.listUsers({
-        page,
-        perPage,
-      });
+    while (page && maxPages > 0) {
+      try {
+        const { data, error } = await adminClient.auth.admin.listUsers({
+          page,
+          perPage,
+        });
 
-      if (error) {
-        throw new Error(`Failed to list auth users: ${error.message}`);
+        if (error) {
+          // Se for erro de timeout ou rate limit, tentar novamente com delay
+          if (
+            error.message?.includes("timeout") ||
+            error.message?.includes("rate limit") ||
+            error.status === 429 ||
+            error.status === 408
+          ) {
+            // Aguardar um pouco antes de tentar novamente
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            continue; // Tentar a mesma página novamente
+          }
+          throw new Error(`Failed to list auth users: ${error.message}`);
+        }
+
+        const existingUser = data?.users?.find(
+          (u) => (u.email ?? "").toLowerCase() === normalized,
+        );
+        if (existingUser?.id) {
+          return existingUser.id;
+        }
+
+        page = data?.nextPage ?? null;
+        maxPages--;
+
+        // Proteção extra: se vier uma página vazia, pare para evitar loop.
+        if (!data?.users?.length) break;
+      } catch (err) {
+        // Se for erro de timeout ou conexão, tentar novamente
+        if (
+          err instanceof Error &&
+          (err.message?.includes("timeout") ||
+            err.message?.includes("ECONNRESET") ||
+            err.message?.includes("ETIMEDOUT"))
+        ) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          continue;
+        }
+        throw err;
       }
-
-      const existingUser = data?.users?.find(
-        (u) => (u.email ?? "").toLowerCase() === normalized,
-      );
-      if (existingUser?.id) {
-        return existingUser.id;
-      }
-
-      page = data?.nextPage ?? null;
-      // Proteção extra: se vier uma página vazia, pare para evitar loop.
-      if (!data?.users?.length) break;
     }
 
     return null;
@@ -94,13 +122,40 @@ export class UserBaseService {
       userMetadata.empresa_id = params.empresaId;
     }
 
-    const { data: authUser, error: authError } =
-      await adminClient.auth.admin.createUser({
-        email: params.email,
-        password: password,
-        email_confirm: true,
-        user_metadata: userMetadata,
-      });
+    let authUser;
+    let authError;
+    let retries = 3;
+
+    // Tentar criar usuário com retry em caso de timeout
+    while (retries > 0) {
+      try {
+        const result = await adminClient.auth.admin.createUser({
+          email: params.email,
+          password: password,
+          email_confirm: true,
+          user_metadata: userMetadata,
+        });
+        authUser = result.data;
+        authError = result.error;
+        break; // Sucesso, sair do loop
+      } catch (err) {
+        // Se for erro de timeout ou conexão, tentar novamente
+        if (
+          err instanceof Error &&
+          (err.message?.includes("timeout") ||
+            err.message?.includes("ECONNRESET") ||
+            err.message?.includes("ETIMEDOUT"))
+        ) {
+          retries--;
+          if (retries > 0) {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+            continue;
+          }
+        }
+        // Se não for erro de timeout, propagar o erro
+        throw err;
+      }
+    }
 
     if (authError) {
       // Check for existing user conflict
