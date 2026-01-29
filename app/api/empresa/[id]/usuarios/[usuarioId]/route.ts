@@ -10,6 +10,7 @@ import {
   validateEmpresaAccess,
 } from "@/app/shared/core/middleware/empresa-context";
 import type { UpdateUsuarioInput } from "@/app/shared/types/entities/usuario";
+import { invalidateAuthSessionCache } from "@/app/shared/core/auth";
 
 function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -208,6 +209,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
     }
 
     const usuario = await repository.update(usuarioId, input);
+    await invalidateAuthSessionCache(usuarioId);
 
     // If password is provided, update auth user password (admin only)
     if (password && password.length >= 6) {
