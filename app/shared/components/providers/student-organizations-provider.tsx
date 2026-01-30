@@ -171,16 +171,10 @@ export function StudentOrganizationsProvider({
     } finally {
       setLoading(false);
     }
-  }, [user?.role, user?.id]); // Added explicit user dependencies to fetchOrganizations only if necessary, though it's wrapped in useCallback, it should depend on props it uses if they were in scope. But here it uses arguments mostly.
-  // Actually, fetchOrganizations relies on `createClient` and session inside, which are side effects.
-  // The crucial part is dependencies of keys.
-  // We'll keep the dependency array minimal.
-  // Ideally fetchOrganizations shouldn't change identity often.
+  }, []); // dependencies optimized
 
   // Fetch organizations when user changes (only for students)
   useEffect(() => {
-    let mounted = true;
-
     if (user?.role === "aluno" && user?.id) {
       // Only fetch if not already loading to allow distinct calls
       // But wait, fetchOrganizations sets loading=true.
@@ -191,10 +185,6 @@ export function StudentOrganizationsProvider({
       // Not a student - clear organizations
       setOrganizations([]);
       setActiveOrganizationState(null);
-    }
-
-    return () => {
-      mounted = false;
     }
   }, [user?.id, user?.role, fetchOrganizations]);
 
