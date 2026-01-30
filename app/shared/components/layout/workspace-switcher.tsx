@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useMemo } from "react"
+import Link from "next/link"
 import { useParams, usePathname, useRouter } from "next/navigation"
 import { Check, ChevronsUpDown } from "lucide-react"
 import Image from "next/image"
@@ -99,7 +100,7 @@ export function WorkspaceSwitcher() {
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" asChild>
-            <a href={tenantSlug ? `/${tenantSlug}/dashboard` : "/dashboard"}>
+            <Link href={tenantSlug ? `/${tenantSlug}/dashboard` : "/dashboard"}>
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
                 <TenantLogo
                   logoType="sidebar"
@@ -112,7 +113,7 @@ export function WorkspaceSwitcher() {
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{activeDisplayName}</span>
               </div>
-            </a>
+            </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       </SidebarMenu>
