@@ -228,7 +228,7 @@ export async function updateSession(request: NextRequest) {
     "/auth/login",
     "/auth/sign-up",
     "/api/auth/signup-with-empresa",
-    "/api/tobias/chat/attachments",
+    "/api/tobias/chat/attachments", // TOBIAS-LEGACY: Remover quando TobIAs for deletado
     "/api/health",
     "/",
     "/signup",

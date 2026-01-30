@@ -90,7 +90,7 @@ const routeLabels: Record<string, string> = {
   "pricing": "Preços",
 
   // Outros
-  "tobias": "TobIAs",
+  "tobias": "TobIAs", // TOBIAS-LEGACY: Remover quando TobIAs for deletado
   "perfil": "Perfil",
   "nova": "Nova",
   "novo": "Novo",

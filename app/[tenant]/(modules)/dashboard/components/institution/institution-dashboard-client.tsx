@@ -170,35 +170,35 @@ export default function InstitutionDashboardClient() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 md:space-y-8">
       {/* Header com filtro de período */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <InstitutionHeader
-          userName={data.userName}
-          empresaNome={data.empresaNome}
-          totalAlunos={data.summary.totalAlunos}
-          totalProfessores={data.summary.totalProfessores}
-          totalCursos={data.summary.totalCursos}
-        />
-        <div className="flex items-center gap-2 shrink-0">
-          <Select value={period} onValueChange={(v) => handlePeriodChange(v as DashboardPeriod)}>
-            <SelectTrigger className="w-[120px] h-9 text-sm">
-              <SelectValue placeholder="Período" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="semanal">Semanal</SelectItem>
-              <SelectItem value="mensal">Mensal</SelectItem>
-              <SelectItem value="anual">Anual</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button
-            onClick={handleManualRefresh}
-            variant="outline"
-            size="icon"
-            className="shrink-0 h-9 w-9"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <InstitutionHeader
+        userName={data.userName}
+        empresaNome={data.empresaNome}
+        totalAlunos={data.summary.totalAlunos}
+        totalProfessores={data.summary.totalProfessores}
+        totalCursos={data.summary.totalCursos}
+        controls={
+          <>
+            <Select value={period} onValueChange={(v) => handlePeriodChange(v as DashboardPeriod)}>
+              <SelectTrigger className="w-[120px] h-9 text-sm">
+                <SelectValue placeholder="Período" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="semanal">Semanal</SelectItem>
+                <SelectItem value="mensal">Mensal</SelectItem>
+                <SelectItem value="anual">Anual</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              onClick={handleManualRefresh}
+              variant="outline"
+              size="icon"
+              className="shrink-0 h-9 w-9"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </>
+        }
+      />
 
       {/* Mensagem de erro (se houver dados mas tambem erro) */}
       {error && data && (
@@ -219,6 +219,7 @@ export default function InstitutionDashboardClient() {
         data={data.heatmap}
         period={period as HeatmapPeriod}
         onPeriodChange={(p) => handlePeriodChange(p as DashboardPeriod)}
+        showPeriodButtons={false}
       />
 
       {/* Rankings lado a lado */}

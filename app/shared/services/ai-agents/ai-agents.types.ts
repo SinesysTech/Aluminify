@@ -9,6 +9,7 @@
 // Integration Types
 // ============================================
 
+// TOBIAS-LEGACY: Remover 'n8n' e N8nIntegrationConfig quando TobIAs for deletado
 export type IntegrationType = 'copilotkit' | 'mastra' | 'n8n' | 'custom';
 
 export interface N8nIntegrationConfig {

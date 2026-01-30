@@ -129,24 +129,26 @@ export function ConsistencyHeatmap({
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className="flex gap-1">
-            {(['semanal', 'mensal', 'anual'] as HeatmapPeriod[]).map((p) => (
-              <Button
-                key={p}
-                variant={period === p ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => handlePeriodChange(p)}
-                className="text-xs h-7 px-2.5"
-              >
-                {p === 'semanal' ? 'Semanal' : p === 'mensal' ? 'Mensal' : 'Anual'}
-              </Button>
-            ))}
-          </div>
+          {showPeriodButtons && (
+            <div className="flex gap-1">
+              {(['semanal', 'mensal', 'anual'] as HeatmapPeriod[]).map((p) => (
+                <Button
+                  key={p}
+                  variant={period === p ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => handlePeriodChange(p)}
+                  className="text-xs h-7 px-2.5"
+                >
+                  {p === 'semanal' ? 'Semanal' : p === 'mensal' ? 'Mensal' : 'Anual'}
+                </Button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Month labels for annual view */}
         {period === 'anual' && monthPositions.length > 0 && (
-          <div className="overflow-x-auto mb-1">
+          <div className="overflow-x-auto overflow-y-hidden mb-1">
             <div className="relative min-w-max" style={{ paddingLeft: showDayLabels ? '2rem' : 0 }}>
               <div className="grid grid-cols-53 gap-1">
                 {Array.from({ length: 53 }).map((_, colIdx) => {
@@ -163,7 +165,7 @@ export function ConsistencyHeatmap({
         )}
 
         {/* Heatmap grid */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-hidden">
           <div className="flex min-w-max">
             {/* Day-of-week labels */}
             {showDayLabels && (

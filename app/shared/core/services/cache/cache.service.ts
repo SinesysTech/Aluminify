@@ -1,8 +1,9 @@
 /**
- * Cache Service - Serviço genérico de cache usando Redis (Upstash)
+ * Cache Service - Serviço genérico de cache usando Redis (Upstash) e LocalStorage
  *
- * Este serviço fornece uma interface simples para cache de dados no Redis.
- * Suporta fallback gracioso quando Redis não está configurado.
+ * Este serviço fornece uma interface simples para cache de dados.
+ * No servidor: Usa Redis (se configurado) ou Memória (fallback).
+ * No cliente: Usa LocalStorage (persistência) e Memória (velocidade).
  */
 
 import { Redis } from "@upstash/redis";
@@ -14,6 +15,7 @@ class CacheService {
   private lastErrorLogMs: number = 0;
   private readonly networkFailureCooldownMs: number = 60_000;
   private readonly errorLogCooldownMs: number = 30_000;
+  private readonly storagePrefix = "aluminify:v1:cache:";
 
   // In-memory fallback
   private memoryCache: Map<string, { value: any; expiresAt: number }> =
@@ -24,8 +26,13 @@ class CacheService {
   }
 
   private isExplicitlyDisabled(): boolean {
-    const value = process.env.CACHE_DISABLED;
+    const value =
+      process.env.CACHE_DISABLED || process.env.NEXT_PUBLIC_CACHE_DISABLED;
     return value === "1" || value === "true" || value === "yes";
+  }
+
+  private isBrowser(): boolean {
+    return typeof window !== "undefined";
   }
 
   private shouldAttemptRedis(): boolean {
@@ -39,8 +46,6 @@ class CacheService {
   }
 
   private isNetworkLikeError(error: unknown): boolean {
-    // Upstash client uses fetch under the hood; failures often come as TypeError('fetch failed')
-    // with a nested `cause` containing Node.js network codes like ENOTFOUND.
     if (error instanceof TypeError && /fetch failed/i.test(error.message)) {
       return true;
     }
@@ -62,29 +67,31 @@ class CacheService {
   }
 
   private temporarilyDisableRedis(error: unknown) {
-    // Fail-open: cache becomes a no-op temporarily (or falls back to memory), system keeps working.
     this.disabledUntilMs = Date.now() + this.networkFailureCooldownMs;
 
     const now = Date.now();
     if (now - this.lastErrorLogMs >= this.errorLogCooldownMs) {
       this.lastErrorLogMs = now;
-      console.warn(
-        `[Cache Service] ⚠️ Redis indisponível (usando fallback em memória por ${Math.round(
-          this.networkFailureCooldownMs / 1000,
-        )}s):`,
-        error,
-      );
+      if (!this.isBrowser()) {
+        console.warn(
+          `[Cache Service] ⚠️ Redis indisponível (usando fallback local por ${Math.round(
+            this.networkFailureCooldownMs / 1000,
+          )}s):`,
+          error,
+        );
+      }
     }
   }
 
   private initialize() {
     if (this.isExplicitlyDisabled()) {
       this.enabled = false;
-      if (process.env.NODE_ENV === "development") {
-        console.debug(
-          "[Cache Service] ⚠️ CACHE_DISABLED ativo - cache desabilitado",
-        );
-      }
+      return;
+    }
+
+    // Só tentar Redis no ambiente do servidor
+    if (this.isBrowser()) {
+      this.enabled = false;
       return;
     }
 
@@ -101,87 +108,103 @@ class CacheService {
         console.log("[Cache Service] ✅ Redis configurado - cache habilitado");
       } catch (error) {
         console.error("[Cache Service] ❌ Erro ao configurar Redis:", error);
-        console.warn(
-          "[Cache Service] ⚠️ Usando cache em memória como fallback",
-        );
         this.enabled = false;
-        // Even if Redis setup fails, we consider the service "enabled" for the sake of using memory cache?
-        // Or we treat "enabled" as "Redis enabled"? The logic below uses !this.redis to fallback.
       }
     } else {
-      if (process.env.NODE_ENV === "development") {
-        console.debug(
-          "[Cache Service] ⚠️ Redis não configurado - usando cache em memória",
-        );
-      }
-      this.enabled = false; // Redis is disabled, but we will use memory
+      this.enabled = false;
     }
   }
 
   /**
-   * Helper to set in memory
+   * Helper to set in memory or localStorage
    */
-  private setInMemory(key: string, value: any, ttlSeconds: number) {
-    this.memoryCache.set(key, {
-      value,
-      expiresAt: Date.now() + ttlSeconds * 1000,
-    });
+  private setInLocal(key: string, value: any, ttlSeconds: number) {
+    const expiresAt = Date.now() + ttlSeconds * 1000;
+    const cacheEntry = { value, expiresAt };
+
+    // 1. Memory Cache (Always)
+    this.memoryCache.set(key, cacheEntry);
+
+    // 2. LocalStorage (If Browser)
+    if (this.isBrowser()) {
+      try {
+        localStorage.setItem(
+          `${this.storagePrefix}${key}`,
+          JSON.stringify(cacheEntry),
+        );
+      } catch (e) {
+        // LocalStorage might be full or private mode
+      }
+    }
   }
 
   /**
-   * Helper to get from memory
+   * Helper to get from memory or localStorage
    */
-  private getInMemory<T>(key: string): T | null {
-    const item = this.memoryCache.get(key);
-    if (!item) return null;
+  private getFromLocal<T>(key: string): T | null {
+    // 1. Try Memory First
+    let entry = this.memoryCache.get(key);
 
-    if (Date.now() > item.expiresAt) {
-      this.memoryCache.delete(key);
+    // 2. Try LocalStorage if Memory miss
+    if (!entry && this.isBrowser()) {
+      try {
+        const stored = localStorage.getItem(`${this.storagePrefix}${key}`);
+        if (stored) {
+          entry = JSON.parse(stored);
+          if (entry) {
+            this.memoryCache.set(key, entry); // Hydrate memory
+          }
+        }
+      } catch (e) {
+        return null;
+      }
+    }
+
+    if (!entry) return null;
+
+    if (Date.now() > entry.expiresAt) {
+      this.delLocal(key);
       return null;
     }
 
-    return item.value as T;
+    return entry.value as T;
+  }
+
+  private delLocal(key: string) {
+    this.memoryCache.delete(key);
+    if (this.isBrowser()) {
+      try {
+        localStorage.removeItem(`${this.storagePrefix}${key}`);
+      } catch (e) {}
+    }
   }
 
   /**
    * Obter valor do cache
    */
   async get<T>(key: string): Promise<T | null> {
-    // 1. Tentar Redis se disponível
+    // 1. Tentar Redis se disponível e não estiver no browser
     if (this.shouldAttemptRedis() && this.redis) {
       try {
         const data = await this.redis.get<T>(key);
         if (data !== null) {
-          console.log(`[Cache] ✅ Hit (Redis): ${key}`);
           this.recordMetric("hit");
           return data;
         }
-        // Se não achou no Redis, não temos, ok.
         this.recordMetric("miss");
       } catch (error) {
         if (this.isNetworkLikeError(error)) {
           this.recordMetric("error");
           this.temporarilyDisableRedis(error);
-          // Fallback para memória após erro de rede?
-          return this.getInMemory<T>(key);
+          return this.getFromLocal<T>(key);
         }
-
-        console.error(`[Cache] ❌ Erro ao ler chave ${key}:`, error);
         this.recordMetric("error");
-        // Fallback on unexpected error too? Safer to return null usually, but for consistency maybe memory?
-        // Let's stick to null for non-network errors to be safe, or just return null.
         return null;
       }
     }
 
-    // 2. Fallback: Memória (se Redis não configurado ou temporariamente desabilitado)
-    const memData = this.getInMemory<T>(key);
-    if (memData !== null) {
-      console.log(`[Cache] ✅ Hit (Memória): ${key}`);
-      return memData;
-    }
-
-    return null;
+    // 2. Fallback ou principal: Local (Memória ou LocalStorage)
+    return this.getFromLocal<T>(key);
   }
 
   /**
@@ -192,59 +215,43 @@ class CacheService {
     value: unknown,
     ttlSeconds: number = 3600,
   ): Promise<void> {
-    // Sempre salvar em memória também (write-through) ou apenas como fallback?
-    // Como é fallback, salvamos na memória APENAS se Redis não for usado.
-    // Mas se o Redis cair, é bom ter os dados mais recentes?
-    // Vamos simplificar: Se Redis OK -> Redis. Se Redis Ruim -> Memória.
-
     if (this.shouldAttemptRedis() && this.redis) {
       try {
         await this.redis.setex(key, ttlSeconds, value);
-        console.log(`[Cache] 💾 Set (Redis): ${key} (TTL: ${ttlSeconds}s)`);
         this.recordMetric("set");
-        return;
       } catch (error) {
         if (this.isNetworkLikeError(error)) {
           this.recordMetric("error");
           this.temporarilyDisableRedis(error);
-          // Fallback to memory write
         } else {
-          console.error(`[Cache] ❌ Erro ao escrever chave ${key}:`, error);
           this.recordMetric("error");
-          return;
         }
       }
     }
 
-    // Fallback or No Redis
-    this.setInMemory(key, value, ttlSeconds);
-    console.log(`[Cache] 💾 Set (Memória): ${key} (TTL: ${ttlSeconds}s)`);
+    // Sempre salvar localmente (browser -> localStorage, server -> memory)
+    this.setInLocal(key, value, ttlSeconds);
   }
 
   /**
    * Deletar chave do cache
    */
   async del(key: string): Promise<void> {
-    this.memoryCache.delete(key); // Sempre limpar da memória local
+    this.delLocal(key);
 
     if (this.shouldAttemptRedis() && this.redis) {
       try {
         await this.redis.del(key);
-        console.log(`[Cache] 🗑️ Del (Redis): ${key}`);
         this.recordMetric("del");
       } catch (error) {
         if (this.isNetworkLikeError(error)) {
           this.recordMetric("error");
           this.temporarilyDisableRedis(error);
         } else {
-          console.error(`[Cache] ❌ Erro ao deletar chave ${key}:`, error);
           this.recordMetric("error");
         }
       }
-      return;
     }
-
-    console.log(`[Cache] 🗑️ Del (Memória): ${key}`);
   }
 
   /**
@@ -253,19 +260,15 @@ class CacheService {
   async delMany(keys: string[]): Promise<void> {
     if (keys.length === 0) return;
 
-    // Limpar memória
-    keys.forEach((k) => this.memoryCache.delete(k));
+    keys.forEach((k) => this.delLocal(k));
 
     if (this.shouldAttemptRedis() && this.redis) {
       try {
         await Promise.all(keys.map((key) => this.redis!.del(key)));
-        console.log(`[Cache] 🗑️ Del Many (Redis): ${keys.length} chaves`);
       } catch (error) {
         if (this.isNetworkLikeError(error)) {
           this.recordMetric("error");
           this.temporarilyDisableRedis(error);
-        } else {
-          console.error(`[Cache] ❌ Erro ao deletar múltiplas chaves:`, error);
         }
       }
     }
@@ -275,7 +278,7 @@ class CacheService {
    * Verificar se cache está habilitado (Redis ou Memória)
    */
   isEnabled(): boolean {
-    return this.enabled || true; // Agora sempre "ativo" via memória, a menos que explicitamente disabled via env? Use isExplicitlyDisabled check logic again if needed, but initialize handles it.
+    return true; // Local cache sempre disponível
   }
 
   /**
@@ -291,14 +294,13 @@ class CacheService {
       return cached;
     }
 
-    console.log(`[Cache] ❌ Miss: ${key}`);
     const value = await fetcher();
     await this.set(key, value, ttlSeconds);
     return value;
   }
 
   private async recordMetric(type: "hit" | "miss" | "set" | "del" | "error") {
-    if (typeof window === "undefined") {
+    if (!this.isBrowser()) {
       try {
         const { cacheMonitorService } = await import("./cache-monitor.service");
         switch (type) {

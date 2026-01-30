@@ -28,7 +28,7 @@ interface NavItem {
 const alunoNavItems: NavItem[] = [
   { name: 'Início', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Estudos', href: '/sala-de-estudos', icon: School },
-  { name: 'TobIAs', href: '/tobias', icon: MessageSquare },
+  { name: 'TobIAs', href: '/tobias', icon: MessageSquare }, // TOBIAS-LEGACY: Remover quando TobIAs for deletado
   { name: 'Flashcards', href: '/flashcards', icon: BrainCircuit },
   { name: 'Perfil', href: '/perfil', icon: User },
 ]

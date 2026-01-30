@@ -7,6 +7,8 @@
 export class SimpleCache<T> {
   private cache = new Map<string, { data: T; expires: number }>();
 
+  private readonly storageKey = "aluminify:v1:branding";
+
   /**
    * Get value from cache
    * Returns null if not found or expired
@@ -14,18 +16,33 @@ export class SimpleCache<T> {
   get(key: string): T | null {
     const entry = this.cache.get(key);
 
-    // Check if exists
-    if (!entry) {
-      return null;
+    if (entry) {
+      if (Date.now() > entry.expires) {
+        this.invalidate(key);
+        return null;
+      }
+      return entry.data;
     }
 
-    // Check expiration
-    if (Date.now() > entry.expires) {
-      this.cache.delete(key);
-      return null;
+    // Try LocalStorage if missing in memory
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem(`${this.storageKey}:${key}`);
+        if (stored) {
+          const storedEntry = JSON.parse(stored);
+          if (Date.now() > storedEntry.expires) {
+            this.invalidate(key);
+            return null;
+          }
+          this.cache.set(key, storedEntry); // Hydrate memory
+          return storedEntry.data;
+        }
+      } catch (e) {
+        return null;
+      }
     }
 
-    return entry.data;
+    return null;
   }
 
   /**
@@ -33,10 +50,19 @@ export class SimpleCache<T> {
    * @param ttl Time to live in milliseconds (default: 5 minutes)
    */
   set(key: string, data: T, ttl = 300000) {
-    this.cache.set(key, {
-      data,
-      expires: Date.now() + ttl,
-    });
+    const expires = Date.now() + ttl;
+    const entry = { data, expires };
+
+    this.cache.set(key, entry);
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(
+          `${this.storageKey}:${key}`,
+          JSON.stringify(entry),
+        );
+      } catch (e) {}
+    }
   }
 
   /**
@@ -44,6 +70,11 @@ export class SimpleCache<T> {
    */
   invalidate(key: string) {
     this.cache.delete(key);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(`${this.storageKey}:${key}`);
+      } catch (e) {}
+    }
   }
 
   /**
@@ -51,5 +82,16 @@ export class SimpleCache<T> {
    */
   clear() {
     this.cache.clear();
+    if (typeof window !== "undefined") {
+      try {
+        // Clear all keys starting with prefix
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k?.startsWith(this.storageKey)) {
+            localStorage.removeItem(k);
+          }
+        }
+      } catch (e) {}
+    }
   }
 }
