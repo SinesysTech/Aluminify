@@ -150,7 +150,7 @@ INSERT INTO public.ai_agents (
     is_active,
     is_default
 ) VALUES (
-    'cf93a7a5-afbe-4e99-ac66-9d312a4fc140',  -- CDF empresa_id
+    '585fa4af-d81d-4bbc-9c33-9219a09f6301',  -- CDF empresa_id
     'tobias',
     'TobIAs',
     'Assistente de IA do CDF - Monitoria do curso',

@@ -1,11 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/app/shared/components/forms/input"
-import { Label } from "@/app/shared/components/forms/label"
 import { Badge } from "@/components/ui/badge"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/app/shared/components/ui/collapsible"
 import {
   Alert,
   AlertDescription,
@@ -18,7 +22,7 @@ import {
   updateConfiguracoesProfessor,
 } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
 import type { ProfessorIntegracao, ConfiguracoesProfessor } from "@/app/[tenant]/(modules)/agendamentos/types"
-import { Loader2, Video, Link2, Check, X, ExternalLink, AlertCircle, Settings2 } from "lucide-react"
+import { Loader2, Link2, Check, X, ExternalLink, AlertCircle, ChevronDown, Save } from "lucide-react"
 import { toast } from "sonner"
 
 interface IntegracaoManagerProps {
@@ -32,6 +36,8 @@ export function IntegracaoManager({ professorId }: IntegracaoManagerProps) {
   const [_configuracoes, setConfiguracoes] = useState<ConfiguracoesProfessor | null>(null)
   const [defaultLink, setDefaultLink] = useState("")
   const [selectedProvider, setSelectedProvider] = useState<"google" | "zoom" | "default">("default")
+  const [showGoogleDetails, setShowGoogleDetails] = useState(false)
+  const [showZoomDetails, setShowZoomDetails] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -78,7 +84,6 @@ export function IntegracaoManager({ professorId }: IntegracaoManagerProps) {
   }
 
   const handleConnectGoogle = async () => {
-    // Redirect to Google OAuth
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
     if (!clientId) {
       toast.error("Google OAuth não configurado. Configure NEXT_PUBLIC_GOOGLE_CLIENT_ID.")
@@ -102,7 +107,6 @@ export function IntegracaoManager({ professorId }: IntegracaoManagerProps) {
   }
 
   const handleConnectZoom = async () => {
-    // Redirect to Zoom OAuth
     const clientId = process.env.NEXT_PUBLIC_ZOOM_CLIENT_ID
     if (!clientId) {
       toast.error("Zoom OAuth não configurado. Configure NEXT_PUBLIC_ZOOM_CLIENT_ID.")
@@ -155,197 +159,223 @@ export function IntegracaoManager({ professorId }: IntegracaoManagerProps) {
 
   return (
     <div className="space-y-6">
-      {/* Current Status */}
+      {/* Link Padrão */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings2 className="h-5 w-5" />
-            Status da Integracao
-          </CardTitle>
-          <CardDescription>
-            Provedor de reuniao atualmente configurado
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <Badge variant={selectedProvider === "default" ? "secondary" : "default"} className="text-sm">
-              {selectedProvider === "google" && "Google Meet"}
-              {selectedProvider === "zoom" && "Zoom"}
-              {selectedProvider === "default" && "Link Padrao"}
-            </Badge>
-            {(isGoogleConnected || isZoomConnected) && (
-              <span className="flex items-center gap-1 text-sm text-green-600">
-                <Check className="h-4 w-4" />
-                Conectado
-              </span>
+        <CardContent className="pt-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Link2 className="h-4 w-4 text-muted-foreground" />
+                <h3 className="section-title">Link de Reunião Padrão</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Link fixo usado automaticamente ao confirmar agendamentos
+              </p>
+            </div>
+            {selectedProvider === "default" && defaultLink && (
+              <Badge variant="secondary" className="shrink-0">Em uso</Badge>
             )}
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Default Link */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Link2 className="h-5 w-5" />
-            Link de Reuniao Padrao
-          </CardTitle>
-          <CardDescription>
-            Configure um link fixo para suas reunioes (Google Meet, Zoom, ou outro)
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="defaultLink">URL da reuniao</Label>
+          <div className="flex gap-2">
             <Input
-              id="defaultLink"
               type="url"
               placeholder="https://meet.google.com/sua-sala"
               value={defaultLink}
               onChange={(e) => setDefaultLink(e.target.value)}
+              className="flex-1"
             />
-            <p className="text-xs text-muted-foreground">
-              Este link sera usado em todos os agendamentos confirmados
-            </p>
+            <Button onClick={handleSaveDefaultLink} disabled={saving} size="sm">
+              {saving ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              Salvar
+            </Button>
           </div>
-          <Button onClick={handleSaveDefaultLink} disabled={saving}>
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Salvar e Usar Link Padrao
-          </Button>
         </CardContent>
       </Card>
 
-      {/* Google Calendar Integration */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Video className="h-5 w-5 text-red-500" />
-            Google Calendar / Meet
-          </CardTitle>
-          <CardDescription>
-            Crie eventos no Google Calendar com links do Google Meet automaticamente
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {!hasGoogleConfig && (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Configuração necessária</AlertTitle>
-              <AlertDescription>
-                Para habilitar a integração com Google, configure as variáveis de ambiente:
-                <ul className="mt-2 list-disc list-inside text-sm">
-                  <li>NEXT_PUBLIC_GOOGLE_CLIENT_ID</li>
-                  <li>GOOGLE_CLIENT_SECRET</li>
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
+      {/* Integrações de Provedores */}
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <h3 className="section-title">Integrações Automáticas</h3>
+          <p className="text-sm text-muted-foreground">
+            Conecte um provedor para gerar links de reunião automaticamente
+          </p>
+        </div>
 
-          {hasGoogleConfig && (
-            <>
-              {isGoogleConnected ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span>Google Calendar conectado</span>
+        <div className="grid gap-3 md:grid-cols-2">
+          {/* Google Calendar / Meet */}
+          <Card className={`transition-colors ${selectedProvider === "google" ? "border-primary/40 bg-primary/2" : ""}`}>
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
+                    <svg className="h-5 w-5 text-red-600" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0C5.372 0 0 5.373 0 12s5.372 12 12 12 12-5.373 12-12S18.628 0 12 0zm6.804 16.18a.598.598 0 01-.822.206l-5.388-3.304A.6.6 0 0112.3 12.6V5.4a.6.6 0 011.2 0v6.78l5.098 3.178a.598.598 0 01.206.822z"/>
+                    </svg>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleDisconnect}
-                      disabled={saving}
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Desconectar
-                    </Button>
+                  <div>
+                    <h4 className="text-sm font-semibold">Google Calendar</h4>
+                    <p className="text-xs text-muted-foreground">Meet</p>
                   </div>
                 </div>
-              ) : (
-                <Button onClick={handleConnectGoogle} disabled={saving}>
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Conectar Google Calendar
-                </Button>
-              )}
-
-              <div className="text-sm text-muted-foreground">
-                <p className="font-medium mb-1">O que acontece ao conectar:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Eventos serao criados no seu Google Calendar</li>
-                  <li>Links do Google Meet serao gerados automaticamente</li>
-                  <li>Alunos recebem convites do calendario</li>
-                </ul>
+                {isGoogleConnected ? (
+                  <Badge variant="default" className="bg-green-600 shrink-0">Conectado</Badge>
+                ) : (
+                  <Badge variant="secondary" className="shrink-0">Desconectado</Badge>
+                )}
               </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Zoom Integration */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Video className="h-5 w-5 text-blue-500" />
-            Zoom
-          </CardTitle>
-          <CardDescription>
-            Crie reunioes Zoom automaticamente para cada agendamento
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {!hasZoomConfig && (
-            <Alert>
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Configuração necessária</AlertTitle>
-              <AlertDescription>
-                Para habilitar a integração com Zoom, configure as variáveis de ambiente:
-                <ul className="mt-2 list-disc list-inside text-sm">
-                  <li>NEXT_PUBLIC_ZOOM_CLIENT_ID</li>
-                  <li>ZOOM_CLIENT_SECRET</li>
-                </ul>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {hasZoomConfig && (
-            <>
-              {isZoomConnected ? (
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Check className="h-5 w-5 text-green-500" />
-                    <span>Zoom conectado</span>
+              {!hasGoogleConfig ? (
+                <Alert variant="default" className="mt-3">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Configuração necessária</AlertTitle>
+                  <AlertDescription className="text-xs">
+                    Configure NEXT_PUBLIC_GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <>
+                  <div className="mt-3">
+                    {isGoogleConnected ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDisconnect}
+                        disabled={saving}
+                        className="w-full"
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        Desconectar
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleConnectGoogle}
+                        disabled={saving}
+                        size="sm"
+                        className="w-full"
+                      >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Conectar
+                      </Button>
+                    )}
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleDisconnect}
-                      disabled={saving}
-                    >
-                      <X className="mr-2 h-4 w-4" />
-                      Desconectar
-                    </Button>
+
+                  <Collapsible open={showGoogleDetails} onOpenChange={setShowGoogleDetails}>
+                    <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors cursor-pointer">
+                      <ChevronDown className={`h-3 w-3 transition-transform ${showGoogleDetails ? "rotate-180" : ""}`} />
+                      O que acontece ao conectar
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                        <li className="flex items-start gap-1.5">
+                          <Check className="h-3 w-3 mt-0.5 text-green-500 shrink-0" />
+                          Eventos criados no Google Calendar
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <Check className="h-3 w-3 mt-0.5 text-green-500 shrink-0" />
+                          Links do Google Meet gerados automaticamente
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <Check className="h-3 w-3 mt-0.5 text-green-500 shrink-0" />
+                          Alunos recebem convites do calendário
+                        </li>
+                      </ul>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Zoom */}
+          <Card className={`transition-colors ${selectedProvider === "zoom" ? "border-primary/40 bg-primary/2" : ""}`}>
+            <CardContent className="pt-6">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
+                    <svg className="h-5 w-5 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.4 16.2c-.3.3-.7.3-1 .1l-3-2.1v1.2c0 .8-.7 1.5-1.5 1.5H6.6c-.8 0-1.5-.7-1.5-1.5V8.6c0-.8.7-1.5 1.5-1.5h5.3c.8 0 1.5.7 1.5 1.5v1.2l3-2.1c.3-.2.7-.2 1 .1.1.1.2.3.2.5v7.4c0 .2-.1.4-.2.5z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold">Zoom</h4>
+                    <p className="text-xs text-muted-foreground">Reuniões</p>
                   </div>
                 </div>
-              ) : (
-                <Button onClick={handleConnectZoom} disabled={saving}>
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  Conectar Zoom
-                </Button>
-              )}
-
-              <div className="text-sm text-muted-foreground">
-                <p className="font-medium mb-1">O que acontece ao conectar:</p>
-                <ul className="list-disc list-inside space-y-1">
-                  <li>Reuniões Zoom serão criadas automaticamente</li>
-                  <li>Links de acesso enviados aos alunos</li>
-                  <li>Configurações de sala de espera e vídeo habilitadas</li>
-                </ul>
+                {isZoomConnected ? (
+                  <Badge variant="default" className="bg-green-600 shrink-0">Conectado</Badge>
+                ) : (
+                  <Badge variant="secondary" className="shrink-0">Desconectado</Badge>
+                )}
               </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+
+              {!hasZoomConfig ? (
+                <Alert variant="default" className="mt-3">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Configuração necessária</AlertTitle>
+                  <AlertDescription className="text-xs">
+                    Configure NEXT_PUBLIC_ZOOM_CLIENT_ID e ZOOM_CLIENT_SECRET.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <>
+                  <div className="mt-3">
+                    {isZoomConnected ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDisconnect}
+                        disabled={saving}
+                        className="w-full"
+                      >
+                        <X className="mr-2 h-4 w-4" />
+                        Desconectar
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleConnectZoom}
+                        disabled={saving}
+                        size="sm"
+                        className="w-full"
+                      >
+                        <ExternalLink className="mr-2 h-4 w-4" />
+                        Conectar
+                      </Button>
+                    )}
+                  </div>
+
+                  <Collapsible open={showZoomDetails} onOpenChange={setShowZoomDetails}>
+                    <CollapsibleTrigger className="flex items-center gap-1 text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors cursor-pointer">
+                      <ChevronDown className={`h-3 w-3 transition-transform ${showZoomDetails ? "rotate-180" : ""}`} />
+                      O que acontece ao conectar
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+                        <li className="flex items-start gap-1.5">
+                          <Check className="h-3 w-3 mt-0.5 text-green-500 shrink-0" />
+                          Reuniões Zoom criadas automaticamente
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <Check className="h-3 w-3 mt-0.5 text-green-500 shrink-0" />
+                          Links de acesso enviados aos alunos
+                        </li>
+                        <li className="flex items-start gap-1.5">
+                          <Check className="h-3 w-3 mt-0.5 text-green-500 shrink-0" />
+                          Sala de espera e vídeo habilitados
+                        </li>
+                      </ul>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }

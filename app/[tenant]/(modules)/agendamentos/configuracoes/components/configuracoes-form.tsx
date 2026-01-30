@@ -3,14 +3,15 @@
 import { useState } from "react"
 import { updateConfiguracoesProfessor } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
 import { ConfiguracoesProfessor } from "@/app/[tenant]/(modules)/agendamentos/types"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/app/shared/components/forms/input"
 import { Label } from "@/app/shared/components/forms/label"
 import { Textarea } from "@/app/shared/components/forms/textarea"
 import { Switch } from "@/app/shared/components/forms/switch"
+import { Separator } from "@/app/shared/components/ui/separator"
 import { toast } from "sonner"
-import { Loader2, Save, Clock, Video, MessageSquare, Zap } from "lucide-react"
+import { Loader2, Save } from "lucide-react"
 
 interface ConfiguracoesFormProps {
   professorId: string
@@ -53,24 +54,15 @@ export function ConfiguracoesForm({ professorId, initialData }: ConfiguracoesFor
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Auto-confirmação */}
+    <form onSubmit={handleSubmit}>
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5" />
-            Auto-confirmação
-          </CardTitle>
-          <CardDescription>
-            Configure se os agendamentos devem ser confirmados automaticamente
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label>Confirmar automaticamente</Label>
+        <CardContent className="pt-6 space-y-6">
+          {/* Auto-confirmação */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <Label className="text-sm font-medium">Auto-confirmação</Label>
               <p className="text-sm text-muted-foreground">
-                Os agendamentos serão confirmados assim que criados
+                Agendamentos confirmados automaticamente ao serem criados
               </p>
             </div>
             <Switch
@@ -78,69 +70,56 @@ export function ConfiguracoesForm({ professorId, initialData }: ConfiguracoesFor
               onCheckedChange={setAutoConfirmar}
             />
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Tempos */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Configurações de Tempo
-          </CardTitle>
-          <CardDescription>
-            Defina os prazos mínimos e lembretes
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="antecedencia">Antecedência mínima (minutos)</Label>
-              <Input
-                id="antecedencia"
-                type="number"
-                min="0"
-                value={tempoAntecedencia}
-                onChange={(e) => setTempoAntecedencia(e.target.value)}
-                placeholder="60"
-              />
+          <Separator />
+
+          {/* Configurações de Tempo */}
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-medium">Prazos e Lembretes</h3>
               <p className="text-xs text-muted-foreground">
-                Tempo mínimo de antecedência para agendar
+                Defina os tempos mínimos de antecedência e envio de lembretes
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="lembrete">Lembrete antes (minutos)</Label>
-              <Input
-                id="lembrete"
-                type="number"
-                min="0"
-                value={tempoLembrete}
-                onChange={(e) => setTempoLembrete(e.target.value)}
-                placeholder="1440"
-              />
-              <p className="text-xs text-muted-foreground">
-                1440 minutos = 24 horas antes do agendamento
-              </p>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="antecedencia">Antecedência mínima (minutos)</Label>
+                <Input
+                  id="antecedencia"
+                  type="number"
+                  min="0"
+                  value={tempoAntecedencia}
+                  onChange={(e) => setTempoAntecedencia(e.target.value)}
+                  placeholder="60"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Tempo mínimo para aceitar agendamentos
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lembrete">Lembrete antes (minutos)</Label>
+                <Input
+                  id="lembrete"
+                  type="number"
+                  min="0"
+                  value={tempoLembrete}
+                  onChange={(e) => setTempoLembrete(e.target.value)}
+                  placeholder="1440"
+                />
+                <p className="text-xs text-muted-foreground">
+                  1440 min = 24h antes do agendamento
+                </p>
+              </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Link de Reuniao */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Video className="h-5 w-5" />
-            Link de Reunião Padrão
-          </CardTitle>
-          <CardDescription>
-            Configure um link padrão para suas reuniões
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          <Separator />
+
+          {/* Link de Reunião */}
           <div className="space-y-2">
-            <Label htmlFor="link">Link da sala de reunião</Label>
+            <Label htmlFor="link">Link de Reunião Padrão</Label>
             <Input
               id="link"
               type="url"
@@ -149,51 +128,42 @@ export function ConfiguracoesForm({ professorId, initialData }: ConfiguracoesFor
               placeholder="https://meet.google.com/sua-sala"
             />
             <p className="text-xs text-muted-foreground">
-              Este link será usado automaticamente ao confirmar agendamentos
+              Usado automaticamente ao confirmar agendamentos
             </p>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Mensagem de Confirmação */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Mensagem de Confirmação
-          </CardTitle>
-          <CardDescription>
-            Personalize a mensagem enviada aos alunos ao confirmar
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+          <Separator />
+
+          {/* Mensagem de Confirmação */}
           <div className="space-y-2">
-            <Label htmlFor="mensagem">Mensagem personalizada</Label>
+            <Label htmlFor="mensagem">Mensagem de Confirmação</Label>
             <Textarea
               id="mensagem"
               value={mensagemConfirmacao}
               onChange={(e) => setMensagemConfirmacao(e.target.value)}
               placeholder="Ex: Olá! Seu agendamento foi confirmado. Nos vemos em breve!"
-              rows={4}
+              rows={3}
             />
             <p className="text-xs text-muted-foreground">
-              Esta mensagem será incluída no email de confirmação
+              Incluída no email de confirmação enviado aos alunos
             </p>
+          </div>
+
+          <Separator />
+
+          {/* Submit */}
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              Salvar Configurações
+            </Button>
           </div>
         </CardContent>
       </Card>
-
-      {/* Submit */}
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="mr-2 h-4 w-4" />
-          )}
-          Salvar Configurações
-        </Button>
-      </div>
     </form>
   )
 }
