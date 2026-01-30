@@ -121,20 +121,20 @@ export function StudentTable({ students, meta }: StudentTableProps) {
         <TooltipProvider>
             <div className="overflow-hidden flex-1">
                 <table className="w-full text-left text-sm">
-                <thead className="border-b border-[#E4E4E7]">
+                <thead className="border-b border-border">
                     <tr>
-                        <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs">Aluno / Email</th>
-                        <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs">Cursos</th>
-                        <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs w-[150px]">Status</th>
-                        <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs w-[200px]">Progresso</th>
-                        <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs text-right w-[60px]">Ações</th>
+                        <th className="h-10 px-4 font-medium text-muted-foreground uppercase tracking-wider text-xs">Aluno / Email</th>
+                        <th className="h-10 px-4 font-medium text-muted-foreground uppercase tracking-wider text-xs">Cursos</th>
+                        <th className="h-10 px-4 font-medium text-muted-foreground uppercase tracking-wider text-xs w-[150px]">Status</th>
+                        <th className="h-10 px-4 font-medium text-muted-foreground uppercase tracking-wider text-xs w-[200px]">Progresso</th>
+                        <th className="h-10 px-4 font-medium text-muted-foreground uppercase tracking-wider text-xs text-right w-[60px]">Ações</th>
                     </tr>
                 </thead>
 
                 <tbody className="divide-y divide-[#E4E4E7]">
                     {students.length === 0 ? (
                         <tr>
-                            <td colSpan={5} className="p-8 text-center text-zinc-500">
+                            <td colSpan={5} className="p-8 text-center text-muted-foreground">
                                 Nenhum aluno encontrado com esses filtros.
                             </td>
                         </tr>
@@ -147,15 +147,15 @@ export function StudentTable({ students, meta }: StudentTableProps) {
                             const progress = 0; // Mocked for now
 
                             return (
-                                <tr key={student.id} className="group hover:bg-zinc-50 transition-colors">
+                                <tr key={student.id} className="group hover:bg-muted/50 transition-colors">
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-xs font-bold text-zinc-600">
+                                            <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold text-muted-foreground">
                                                 {initials}
                                             </div>
                                             <div>
-                                                <div className="font-medium text-zinc-900">{student.fullName || 'Sem nome'}</div>
-                                                <div className="font-mono text-xs text-[#71717A]">{student.email}</div>
+                                                <div className="font-medium text-foreground">{student.fullName || 'Sem nome'}</div>
+                                                <div className="font-mono text-xs text-muted-foreground">{student.email}</div>
                                             </div>
                                         </div>
                                     </td>
@@ -165,14 +165,14 @@ export function StudentTable({ students, meta }: StudentTableProps) {
                                                 {student.courses.map((course) => (
                                                     <span
                                                         key={course.id}
-                                                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700 border border-zinc-200"
+                                                        className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground border border-border"
                                                     >
                                                         {course.name}
                                                     </span>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <span className="text-xs text-zinc-400">-</span>
+                                            <span className="text-xs text-muted-foreground">-</span>
                                         )}
                                     </td>
                                     <td className="p-4">
@@ -191,7 +191,7 @@ export function StudentTable({ students, meta }: StudentTableProps) {
                                                     style={{ width: `${progress}%` }}
                                                 ></div>
                                             </div>
-                                            <span className="font-mono text-xs text-[#71717A]">{progress}%</span>
+                                            <span className="font-mono text-xs text-muted-foreground">{progress}%</span>
                                         </div>
                                     </td>
                                     <td className="p-4 text-right">
@@ -261,8 +261,8 @@ export function StudentTable({ students, meta }: StudentTableProps) {
                     </tbody>
                 </table>
 
-                <div className="border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
-                    <span className="text-xs text-[#71717A]">
+                <div className="border-t border-border px-4 py-3 flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
                         {meta.total === 0 ? (
                             <>Mostrando <strong>0</strong> resultados</>
                         ) : (
@@ -278,14 +278,14 @@ export function StudentTable({ students, meta }: StudentTableProps) {
                     </span>
                     <div className="flex gap-2">
                         <button
-                            className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+                            className="px-3 py-1 border border-border bg-background rounded text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
                             disabled={meta.page <= 1}
                             onClick={() => goToPage(meta.page - 1)}
                         >
                             Anterior
                         </button>
                         <button
-                            className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+                            className="px-3 py-1 border border-border bg-background rounded text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
                             disabled={meta.page >= meta.totalPages}
                             onClick={() => goToPage(meta.page + 1)}
                         >

@@ -25,19 +25,19 @@ export function UserTable({ usuarios }: UserTableProps) {
     <TooltipProvider>
       <div className="overflow-hidden flex-1">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-[#E4E4E7]">
+          <thead className="border-b border-border">
             <tr>
-              <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs">Usuario / Email</th>
-              <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs">Papel</th>
-              <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs w-[150px]">Status</th>
-              <th className="h-10 px-4 font-medium text-[#71717A] uppercase tracking-wider text-xs text-right w-[80px]">Acoes</th>
+              <th className="h-10 px-4 font-medium text-muted-foreground uppercase tracking-wider text-xs">Usuario / Email</th>
+              <th className="h-10 px-4 font-medium text-muted-foreground uppercase tracking-wider text-xs">Papel</th>
+              <th className="h-10 px-4 font-medium text-muted-foreground uppercase tracking-wider text-xs w-[150px]">Status</th>
+              <th className="h-10 px-4 font-medium text-muted-foreground uppercase tracking-wider text-xs text-right w-[80px]">Acoes</th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-[#E4E4E7]">
             {usuarios.length === 0 ? (
               <tr>
-                <td colSpan={4} className="p-8 text-center text-zinc-500">
+                <td colSpan={4} className="p-8 text-center text-muted-foreground">
                   Nenhum usuario encontrado com esses filtros.
                 </td>
               </tr>
@@ -48,15 +48,15 @@ export function UserTable({ usuarios }: UserTableProps) {
                   : '??'
 
                 return (
-                  <tr key={usuario.id} className="group hover:bg-zinc-50 transition-colors">
+                  <tr key={usuario.id} className="group hover:bg-muted/50 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-xs font-bold text-zinc-600">
+                        <div className="w-8 h-8 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-bold text-muted-foreground">
                           {initials}
                         </div>
                         <div>
-                          <div className="font-medium text-zinc-900">{usuario.nomeCompleto || 'Sem nome'}</div>
-                          <div className="font-mono text-xs text-[#71717A]">{usuario.email}</div>
+                          <div className="font-medium text-foreground">{usuario.nomeCompleto || 'Sem nome'}</div>
+                          <div className="font-mono text-xs text-muted-foreground">{usuario.email}</div>
                         </div>
                       </div>
                     </td>
@@ -111,8 +111,8 @@ export function UserTable({ usuarios }: UserTableProps) {
           </tbody>
         </table>
 
-        <div className="border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
-          <span className="text-xs text-[#71717A]">
+        <div className="border-t border-border px-4 py-3 flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
             Mostrando <strong>{usuarios.length}</strong> resultado(s)
           </span>
         </div>

@@ -209,7 +209,7 @@ export function UserDetails({ user, empresaId, papeis, onUpdate }: UserDetailsPr
     <TooltipProvider>
       <div className="flex flex-col gap-6 h-full pb-10">
         {/* Header */}
-        <header className="flex flex-col gap-4 border-b border-[#E4E4E7] pb-4">
+        <header className="flex flex-col gap-4 border-b border-border pb-4">
           <Button
             variant="ghost"
             size="sm"
