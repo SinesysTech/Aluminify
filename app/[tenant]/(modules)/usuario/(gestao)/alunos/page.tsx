@@ -3,15 +3,17 @@ import { createClient } from '@/app/shared/core/server'
 import { createStudentService } from '@/app/[tenant]/(modules)/usuario/services/student.service'
 import { createCursoService } from '@/app/[tenant]/(modules)/curso/services'
 import { AlunosClientPage } from './components/client-page'
-import { requireUser } from '@/app/shared/core/auth'
+import { requireTenantUser } from '@/app/shared/core/tenant'
 
 export const metadata: Metadata = {
   title: 'Alunos'
 }
 
 export default async function AlunosPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ tenant: string }>
   searchParams: Promise<{
     page?: string
     query?: string
@@ -19,8 +21,9 @@ export default async function AlunosPage({
     turmaId?: string
   }>
 }) {
-  // Admins de empresa podem ver alunos (RLS filtra por empresa)
-  await requireUser({ allowedRoles: ['usuario'] })
+  const { tenant } = await params
+  // Valida que o usuário pertence ao tenant da URL
+  const { tenantId } = await requireTenantUser(tenant, { allowedRoles: ['usuario'] })
 
   const { page: pageStr, query: queryStr, courseId: courseIdStr, turmaId: turmaIdStr } =
     await searchParams
@@ -37,7 +40,7 @@ export default async function AlunosPage({
 
   const [studentsResult, coursesResult, allStudentsMetaResult] = await Promise.all([
     studentService.list({ page, perPage: 10, query, courseId, turmaId }),
-    cursoService.list({ perPage: 100, sortBy: 'name', sortOrder: 'asc' }),
+    cursoService.list({ perPage: 100, sortBy: 'name', sortOrder: 'asc' }, tenantId),
     // Para mostrar o total geral no topo (independente de filtros)
     studentService.list({ page: 1, perPage: 1 }),
   ])
