@@ -1054,6 +1054,7 @@ export function ScheduleWizard() {
         message?: string;
         details?: unknown;
         detalhes?: Record<string, unknown> | null;
+        cronograma?: { id?: string };
         [key: string]: unknown;
       }
       let result: ApiResponse = {}
