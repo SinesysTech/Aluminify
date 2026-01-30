@@ -116,14 +116,14 @@ function DataPagePagination({
         <button
           onClick={onPrevious}
           disabled={!canPreviousPage}
-          className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+          className="px-3 py-1 border border-input bg-background rounded text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
         >
           Anterior
         </button>
         <button
           onClick={onNext}
           disabled={!canNextPage}
-          className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50"
+          className="px-3 py-1 border border-input bg-background rounded text-xs font-medium text-muted-foreground hover:bg-muted"
         >
           Próximo
         </button>
@@ -158,7 +158,7 @@ function DataPageEmptyState({
         className
       )}
     >
-      <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] border border-[#E4E4E7]">
+      <div className="w-16 h-16 bg-card rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-border">
         <Icon className="w-8 h-8 text-zinc-400" strokeWidth={1} />
       </div>
 
@@ -246,7 +246,7 @@ function DataPageSecondaryButton({ children, className, ...props }: DataPageSeco
   return (
     <button
       className={cn(
-        "h-9 px-4 rounded-md border border-[#E4E4E7] bg-white text-sm font-medium hover:bg-zinc-50 transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center gap-2 text-zinc-900",
+        "h-9 px-4 rounded-md border border-input bg-background text-sm font-medium hover:bg-muted transition-colors shadow-sm flex items-center gap-2 text-foreground",
         className
       )}
       {...props}
@@ -288,7 +288,7 @@ function DataPageSearchInput({
         type="text"
         placeholder={placeholder}
         className={cn(
-          "w-full h-10 pr-4 rounded-md border border-[#E4E4E7] bg-white text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] transition-all",
+          "w-full h-10 pr-4 rounded-md border border-input bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all",
           icon ? "pl-9" : "pl-4"
         )}
         value={value}

@@ -1,11 +1,11 @@
-﻿'use client'
+'use client'
 
 import { Users, BookOpen, TrendingUp } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 
 export function LoginDecorativeCard() {
   return (
-    <Card className="w-full max-w-sm transform rounded-2xl border border-gray-100 bg-white p-6 shadow-xl transition-transform duration-500 hover:rotate-0 -rotate-2 gap-0">
+    <Card className="w-full max-w-sm transform rounded-2xl border border-border bg-card p-6 shadow-xl transition-transform duration-500 hover:rotate-0 -rotate-2 gap-0">
       {/* Header */}
       <div className="mb-4 flex items-center gap-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
