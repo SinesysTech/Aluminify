@@ -2,9 +2,24 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { Clock, CheckCircle2, Brain, RefreshCw, AlertCircle } from 'lucide-react'
-import type { DashboardData } from './types'
+import type {
+    DashboardData,
+    UserInfo,
+    Metrics,
+    HeatmapDay,
+    SubjectPerformance,
+    FocusEfficiencyDay,
+    StrategicDomain,
+    SubjectDistributionItem
+} from './types'
 import {
-    fetchDashboardData,
+    fetchDashboardUser,
+    fetchDashboardMetrics,
+    fetchDashboardHeatmap,
+    fetchDashboardSubjects,
+    fetchDashboardEfficiency,
+    fetchDashboardStrategic,
+    fetchDashboardDistribution,
     type DashboardServiceError,
 } from './services/dashboard.service'
 import { DashboardHeader } from '@/app/[tenant]/(modules)/dashboard/components/dashboard-header'
@@ -19,6 +34,7 @@ import {
 import { SubjectPerformanceList } from './components/subject-performance-list'
 import { FocusEfficiencyChart } from './components/focus-efficiency-chart'
 import { SubjectDistribution } from './components/subject-distribution'
+import type { StrategicDomain as StrategicDomainType } from './types'
 import { StrategicDomain } from './components/strategic-domain'
 import { DashboardSkeleton } from '@/app/[tenant]/(modules)/dashboard/components/dashboard-skeleton'
 import { Button } from '@/components/ui/button'
@@ -28,8 +44,23 @@ import { Alert, AlertDescription, AlertTitle } from '@/app/shared/components/fee
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000
 
 export default function StudentDashboardClientPage() {
-    const [data, setData] = useState<DashboardData | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
+    // Individual states for granular data
+    const [user, setUser] = useState<UserInfo | null>(null)
+    const [metrics, setMetrics] = useState<Metrics | null>(null)
+    const [heatmap, setHeatmap] = useState<HeatmapDay[]>([]);
+    const [subjects, setSubjects] = useState<SubjectPerformance[]>([]);
+    const [efficiency, setEfficiency] = useState<FocusEfficiencyDay[]>([]);
+    const [strategic, setStrategic] = useState<StrategicDomainType | null>(null)
+    const [distribution, setDistribution] = useState<SubjectDistributionItem[]>([]);
+
+    const [isLoadingUser, setIsLoadingUser] = useState(true)
+    const [isLoadingMetrics, setIsLoadingMetrics] = useState(true)
+    // We can track other loading states if we want detailed skeletons, 
+    // but for now we'll stick to a main loading state for the critical top part or a combined approach.
+
+    // Derived loading state for the main view
+    const isInitialLoading = isLoadingUser || isLoadingMetrics;
+
     const [error, setError] = useState<string | null>(null)
     const [, setIsRefreshing] = useState(false)
     const [, setLastRefresh] = useState<Date | null>(null)
@@ -40,112 +71,146 @@ export default function StudentDashboardClientPage() {
     const tenantContext = useOptionalTenantContext()
     const { activeOrganization } = useStudentOrganizations()
     const activeOrgId =
-      tenantContext?.empresaId ?? activeOrganization?.id ?? undefined
+        tenantContext?.empresaId ?? activeOrganization?.id ?? undefined
 
-    const loadDashboardData = useCallback(
+    // Helper to handle errors uniformly
+    const handleError = (err: unknown, context: string) => {
+        console.error(`Erro ao carregar ${context}:`, err)
+        let errorMessage = `Erro ao carregar ${context}`
+        if (err instanceof Error) {
+            errorMessage = err.message
+            if ((err as DashboardServiceError).isAuthError) {
+                return 'Sua sessão expirou. Por favor, faça login novamente.'
+            }
+        }
+        return errorMessage
+    }
+
+    const loadData = useCallback(
         async (showRefreshing = false, period?: HeatmapPeriod) => {
             const periodToUse = period ?? heatmapPeriod
+            if (showRefreshing) setIsRefreshing(true)
+
+            setError(null)
+
             try {
-                if (showRefreshing) {
-                    setIsRefreshing(true)
+                // Determine what needs to be fetched
+                // If fetching everything (initial or refresh), fetch User too.
+                // If just changing period, usually User info doesn't change based on period, 
+                // but we might want to refresh it if it's a "refresh" action.
+
+                const promises = []
+
+                // 1. User Info (only on initial load or full refresh, not period change)
+                if (!user || showRefreshing) {
+                    setIsLoadingUser(true)
+                    promises.push(
+                        fetchDashboardUser(activeOrgId)
+                            .then(setUser)
+                            .catch(e => {
+                                const msg = handleError(e, 'usuário')
+                                if (typeof msg === 'string' && msg.includes('sessão')) setError(msg)
+                            })
+                            .finally(() => setIsLoadingUser(false))
+                    )
                 } else {
-                    setIsLoading(true)
+                    setIsLoadingUser(false)
                 }
-                setError(null)
 
-                // Pass empresaId to filter data by organization (for multi-org students)
-                const dashboardData = await fetchDashboardData({
-                    period: periodToUse,
-                    empresaId: activeOrgId,
-                })
-                setData(dashboardData)
+                // 2. Metrics (Dependent on period)
+                setIsLoadingMetrics(true)
+                promises.push(
+                    fetchDashboardMetrics(periodToUse as any, activeOrgId)
+                        .then(setMetrics)
+                        .catch(e => setError(handleError(e, 'métricas')))
+                        .finally(() => setIsLoadingMetrics(false))
+                )
+
+                // 3. Heatmap
+                promises.push(
+                    fetchDashboardHeatmap(periodToUse, activeOrgId)
+                        .then(setHeatmap)
+                        .catch(e => console.warn(handleError(e, 'heatmap')))
+                )
+
+                // 4. Subjects
+                promises.push(
+                    fetchDashboardSubjects(periodToUse as any, activeOrgId)
+                        .then(setSubjects)
+                        .catch(e => console.warn(handleError(e, 'disciplinas')))
+                )
+
+                // 5. Efficiency
+                promises.push(
+                    fetchDashboardEfficiency(periodToUse as any, activeOrgId)
+                        .then(setEfficiency)
+                        .catch(e => console.warn(handleError(e, 'eficiência')))
+                )
+
+                // 6. Strategic
+                promises.push(
+                    fetchDashboardStrategic(periodToUse as any, activeOrgId)
+                        .then(setStrategic)
+                        .catch(e => console.warn(handleError(e, 'domínio estratégico')))
+                )
+
+                // 7. Distribution
+                promises.push(
+                    fetchDashboardDistribution(periodToUse as any, activeOrgId)
+                        .then(setDistribution)
+                        .catch(e => console.warn(handleError(e, 'distribuição')))
+                )
+
+                await Promise.all(promises)
                 setLastRefresh(new Date())
+
             } catch (err) {
-                console.error('Erro ao carregar dados do dashboard:', err)
-
-                let errorMessage = 'Erro ao carregar dados do dashboard'
-                if (err instanceof Error) {
-                    errorMessage = err.message
-
-                    // Tratamento específico para erros de autenticação
-                    if ((err as DashboardServiceError).isAuthError) {
-                        errorMessage = 'Sua sessão expirou. Por favor, faça login novamente.'
-                    } else if ((err as DashboardServiceError).isNetworkError) {
-                        errorMessage =
-                            'Erro de conexão. Verifique sua internet e tente novamente.'
-                    }
-                }
-
-                setError(errorMessage)
-
-                // Se for erro de autenticação, não mostrar dados mock
-                if ((err as DashboardServiceError).isAuthError) {
-                    setData(null)
-                }
+                // Fallback global error handler
+                const msg = handleError(err, 'dados')
+                setError(msg)
             } finally {
-                setIsLoading(false)
                 setIsRefreshing(false)
             }
         },
-        [heatmapPeriod, activeOrgId]
+        [heatmapPeriod, activeOrgId, user]
     )
 
     // Carregamento inicial
     useEffect(() => {
-        loadDashboardData()
-    }, [loadDashboardData])
+        loadData()
+    }, [activeOrgId]) // Dependency on activeOrgId ensures reload on tenant switch
 
     // Handler para mudança de período do heatmap
     const handleHeatmapPeriodChange = useCallback(
         (period: HeatmapPeriod) => {
             setHeatmapPeriod(period)
-            loadDashboardData(true, period)
+            loadData(true, period)
         },
-        [loadDashboardData]
+        [loadData]
     )
 
     // Refresh automático
     useEffect(() => {
-        // Limpar intervalo anterior se existir
-        if (refreshIntervalRef.current) {
-            clearInterval(refreshIntervalRef.current)
-        }
-
-        // Configurar novo intervalo
+        if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current)
         refreshIntervalRef.current = setInterval(() => {
-            loadDashboardData(true)
+            loadData(true)
         }, AUTO_REFRESH_INTERVAL)
-
-        // Cleanup
         return () => {
-            if (refreshIntervalRef.current) {
-                clearInterval(refreshIntervalRef.current)
-            }
+            if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current)
         }
-    }, [loadDashboardData])
+    }, [loadData])
 
-    // Subscription Realtime para atualizar dashboard quando aulas são concluídas
+    // Subscription Realtime
     useEffect(() => {
-        let channel:
-            | ReturnType<
-                ReturnType<typeof import('@/app/shared/core/client').createClient>['channel']
-            >
-            | null = null
-        let supabaseInstance:
-            | ReturnType<typeof import('@/app/shared/core/client').createClient>
-            | null = null
+        let channel: ReturnType<ReturnType<typeof import('@/app/shared/core/client').createClient>['channel']> | null = null
+        let supabaseInstance: ReturnType<typeof import('@/app/shared/core/client').createClient> | null = null
 
         async function setupRealtimeSubscription() {
             const { createClient } = await import('@/app/shared/core/client')
             supabaseInstance = createClient()
-
-            // Buscar ID do aluno atual
-            const {
-                data: { user },
-            } = await supabaseInstance.auth.getUser()
+            const { data: { user } } = await supabaseInstance.auth.getUser()
             if (!user) return
 
-            // Buscar cronograma ativo do aluno
             const { data: cronograma } = await supabaseInstance
                 .from('cronogramas')
                 .select('id')
@@ -156,7 +221,6 @@ export default function StudentDashboardClientPage() {
 
             if (!cronograma) return
 
-            // Subscription para mudanças em cronograma_itens
             channel = supabaseInstance
                 .channel(`dashboard-cronograma-itens-${cronograma.id}`)
                 .on(
@@ -167,18 +231,7 @@ export default function StudentDashboardClientPage() {
                         table: 'cronograma_itens',
                         filter: `cronograma_id=eq.${cronograma.id}`,
                     },
-                    (payload: {
-                        new: Record<string, unknown>
-                        old: Record<string, unknown>
-                        eventType: string
-                    }) => {
-                        console.log(
-                            '[Dashboard Realtime] Mudança detectada em cronograma_itens:',
-                            payload
-                        )
-                        // Recarregar dados do dashboard
-                        loadDashboardData(true)
-                    }
+                    () => loadData(true)
                 )
                 .subscribe()
         }
@@ -190,18 +243,17 @@ export default function StudentDashboardClientPage() {
                 supabaseInstance.removeChannel(channel)
             }
         }
-    }, [loadDashboardData])
+    }, [loadData])
 
-    // Função para refresh manual
     const handleManualRefresh = () => {
-        loadDashboardData(true)
+        loadData(true)
     }
 
-    if (isLoading) {
+    if (isInitialLoading) {
         return <DashboardSkeleton />
     }
 
-    if (error && !data) {
+    if (error && !user) {
         return (
             <div className="mx-auto max-w-7xl">
                 <Alert variant="destructive" className="mt-8">
@@ -224,7 +276,7 @@ export default function StudentDashboardClientPage() {
         )
     }
 
-    if (!data) {
+    if (!user || !metrics) {
         return (
             <div className="flex items-center justify-center min-h-100">
                 <p className="text-muted-foreground">Nenhum dado disponível</p>
@@ -237,12 +289,11 @@ export default function StudentDashboardClientPage() {
             {/* Topo: Header e Schedule Progress */}
             <div className="flex items-start justify-between gap-4 mb-4">
                 <div className="flex-1">
-                    <DashboardHeader user={data.user} />
+                    <DashboardHeader user={user} />
                 </div>
             </div>
 
-            {/* Mensagem de erro (se houver dados mas também erro) */}
-            {error && data && (
+            {error && (
                 <Alert variant="destructive" className="mb-4">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Aviso</AlertTitle>
@@ -250,17 +301,17 @@ export default function StudentDashboardClientPage() {
                 </Alert>
             )}
 
-            <ScheduleProgress value={data.metrics.scheduleProgress} />
+            <ScheduleProgress value={metrics.scheduleProgress} />
 
             {/* Linha 1: Grid de 4 Metric Cards */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-8">
                 <MetricCard
                     label="Tempo de Estudo"
-                    value={data.metrics.focusTime}
+                    value={metrics.focusTime}
                     icon={Clock}
                     trend={{
-                        value: data.metrics.focusTimeDelta,
-                        isPositive: data.metrics.focusTimeDelta.startsWith('+'),
+                        value: metrics.focusTimeDelta,
+                        isPositive: metrics.focusTimeDelta.startsWith('+'),
                     }}
                     tooltip={[
                         'Este é o tempo total de estudo no período, somando aulas que você marcou como assistidas no cronograma e o tempo registrado em listas de exercícios (sessões vinculadas a uma atividade).',
@@ -269,8 +320,8 @@ export default function StudentDashboardClientPage() {
                 />
                 <MetricCard
                     label="Questões Feitas"
-                    value={data.metrics.questionsAnswered}
-                    subtext={data.metrics.questionsAnsweredPeriod}
+                    value={metrics.questionsAnswered}
+                    subtext={metrics.questionsAnsweredPeriod}
                     icon={CheckCircle2}
                     tooltip={[
                         'Este número representa a quantidade total de questões que você já resolveu no período indicado.',
@@ -279,9 +330,9 @@ export default function StudentDashboardClientPage() {
                 />
                 <MetricCard
                     label="Aproveitamento"
-                    value={`${data.metrics.accuracy}%`}
+                    value={`${metrics.accuracy}%`}
                     showProgressCircle={true}
-                    progressValue={data.metrics.accuracy}
+                    progressValue={metrics.accuracy}
                     tooltip={[
                         'Seu aproveitamento mostra a porcentagem de acertos nas questões que você resolveu.',
                         'Quanto maior o percentual, melhor você está dominando o conteúdo.',
@@ -290,7 +341,7 @@ export default function StudentDashboardClientPage() {
                 />
                 <MetricCard
                     label="Flashcards"
-                    value={data.metrics.flashcardsReviewed}
+                    value={metrics.flashcardsReviewed}
                     subtext="Cartas revisadas"
                     icon={Brain}
                     tooltip={[
@@ -302,7 +353,7 @@ export default function StudentDashboardClientPage() {
 
             {/* Linha 2: Consistency Heatmap (largura total) */}
             <ConsistencyHeatmap
-                data={data.heatmap}
+                data={heatmap}
                 period={heatmapPeriod}
                 onPeriodChange={handleHeatmapPeriodChange}
             />
@@ -310,17 +361,17 @@ export default function StudentDashboardClientPage() {
             {/* Linha 3: 2 Colunas - Subject Performance List e Subject Distribution */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8 items-stretch">
                 <div className="lg:col-span-3 lg:h-111.5">
-                    <SubjectPerformanceList subjects={data.subjects} period={heatmapPeriod} />
+                    <SubjectPerformanceList subjects={subjects} period={heatmapPeriod} />
                 </div>
                 <div className="lg:col-span-2 lg:h-111.5">
-                    <SubjectDistribution data={data.subjectDistribution} period={heatmapPeriod} />
+                    <SubjectDistribution data={distribution} period={heatmapPeriod} />
                 </div>
             </div>
 
             {/* Linha 4: 2 Colunas - Focus Efficiency Chart e Strategic Domain */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <FocusEfficiencyChart data={data.focusEfficiency} />
-                <StrategicDomain data={data.strategicDomain} />
+                <FocusEfficiencyChart data={efficiency} />
+                {strategic && <StrategicDomain data={strategic} />}
             </div>
         </div>
     )

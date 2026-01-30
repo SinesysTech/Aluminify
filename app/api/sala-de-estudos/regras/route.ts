@@ -38,20 +38,7 @@ function handleError(error: unknown) {
   return NextResponse.json({ error: "Internal server error" }, { status: 500 });
 }
 
-async function ensureProfessor(request: AuthenticatedRequest) {
-  if (
-    request.user &&
-    request.user.role !== "usuario"
-  ) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-  return null;
-}
-
 async function getHandler(request: AuthenticatedRequest) {
-  const forbidden = await ensureProfessor(request);
-  if (forbidden) return forbidden;
-
   try {
     const { searchParams } = new URL(request.url);
     const cursoId = searchParams.get("curso_id");
@@ -71,9 +58,6 @@ async function getHandler(request: AuthenticatedRequest) {
 }
 
 async function postHandler(request: AuthenticatedRequest) {
-  const forbidden = await ensureProfessor(request);
-  if (forbidden) return forbidden;
-
   try {
     const body = await request.json();
     const regra = await regraAtividadeService.create({

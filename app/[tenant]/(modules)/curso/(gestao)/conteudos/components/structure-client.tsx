@@ -142,7 +142,7 @@ export default function StructureManagerClient() {
   const [frentes, setFrentes] = React.useState<Frente[]>([])
   const [frenteSelecionada, setFrenteSelecionada] = React.useState<string>('')
   const [modulos, setModulos] = React.useState<Modulo[]>([])
-  const [isProfessor, setIsProfessor] = React.useState<boolean | null>(null)
+  const [isAuthorized, setIsAuthorized] = React.useState<boolean | null>(null)
   const [modulosAbertos, setModulosAbertos] = React.useState<Set<string>>(new Set())
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
@@ -214,9 +214,9 @@ export default function StructureManagerClient() {
     [supabase],
   )
 
-  // Verificar se o usuário é professor
+  // Verificar se o usuário está autorizado
   React.useEffect(() => {
-    const checkProfessor = async () => {
+    const checkAuthorization = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) {
@@ -229,20 +229,19 @@ export default function StructureManagerClient() {
           .from('usuarios_empresas')
           .select('id')
           .eq('usuario_id', user.id)
-          .eq('papel_base', 'professor')
           .eq('ativo', true)
           .is('deleted_at', null)
           .maybeSingle()
 
         if (error) {
-          console.error('Erro ao verificar professor:', error)
-          setIsProfessor(false)
+          console.error('Erro ao verificar autorização:', error)
+          setIsAuthorized(false)
           return
         }
 
-        setIsProfessor(!!data)
+        setIsAuthorized(!!data)
         if (!data) {
-          setError('Acesso negado. Apenas professores podem acessar esta página.')
+          setError('Acesso negado. Você não tem associação ativa com esta instituição.')
         }
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
@@ -254,11 +253,11 @@ export default function StructureManagerClient() {
         console.error('Código:', errorObj?.code);
         console.error('Tipo:', typeof err);
         console.error('-------------------------------------------');
-        setIsProfessor(false)
+        setIsAuthorized(false)
       }
     }
 
-    checkProfessor()
+    checkAuthorization()
   }, [supabase, router, tenant])
 
   // Carregar disciplinas (todas - usado para outros propósitos)
@@ -286,10 +285,10 @@ export default function StructureManagerClient() {
       }
     }
 
-    if (isProfessor) {
+    if (isAuthorized) {
       fetchDisciplinas()
     }
-  }, [supabase, isProfessor])
+  }, [supabase, isAuthorized])
 
   // Carregar disciplinas do curso selecionado
   React.useEffect(() => {
@@ -360,7 +359,7 @@ export default function StructureManagerClient() {
 
   React.useEffect(() => {
     const fetchCursos = async () => {
-      if (!isProfessor || !userId) {
+      if (!isAuthorized || !userId) {
         setCursos([])
         return
       }
@@ -449,7 +448,7 @@ export default function StructureManagerClient() {
     }
 
     fetchCursos()
-  }, [supabase, isProfessor, userId])
+  }, [supabase, isAuthorized, userId])
 
   React.useEffect(() => {
     const fetchRegras = async () => {
@@ -478,10 +477,10 @@ export default function StructureManagerClient() {
       }
     }
 
-    if (isProfessor) {
+    if (isAuthorized) {
       fetchRegras()
     }
-  }, [cursoSelecionado, fetchWithAuth, isProfessor])
+  }, [cursoSelecionado, fetchWithAuth, isAuthorized])
 
   const loadAtividadesForModulos = React.useCallback(
     async (moduloIds: string[]) => {
@@ -1802,7 +1801,7 @@ export default function StructureManagerClient() {
 
 
 
-  if (isProfessor === null) {
+  if (isAuthorized === null) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-muted-foreground">Verificando permissões...</div>
@@ -1810,7 +1809,7 @@ export default function StructureManagerClient() {
     )
   }
 
-  if (isProfessor === false) {
+  if (isAuthorized === false) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="max-w-md rounded-xl border bg-card text-card-foreground shadow-sm">
@@ -1820,7 +1819,7 @@ export default function StructureManagerClient() {
               Acesso Negado
             </h3>
             <p className="text-sm text-muted-foreground">
-              {error || 'Apenas professores podem acessar esta página.'}
+              {error || 'Você não tem permissão para acessar esta página.'}
             </p>
           </div>
         </div>

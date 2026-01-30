@@ -30,20 +30,6 @@ async function patchHandler(
 
     const client = getDatabaseClient();
 
-    // Verificar se o usuário é professor
-    const { data: professorData } = await client
-      .from("usuarios")
-      .select("id")
-      .eq("id", request.user!.id)
-      .maybeSingle();
-
-    if (!professorData) {
-      return NextResponse.json(
-        { error: "Acesso negado. Apenas professores podem editar módulos." },
-        { status: 403 },
-      );
-    }
-
     // Verificar se o módulo existe (RLS já valida permissões)
     const { data: modulo, error: moduloError } = await client
       .from("modulos")

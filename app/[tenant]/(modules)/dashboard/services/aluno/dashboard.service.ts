@@ -22,7 +22,7 @@ export interface DashboardServiceError extends Error {
  * Mapeia: semestral -> anual
  */
 function mapHeatmapPeriodToDashboardPeriod(
-  period: HeatmapPeriod
+  period: HeatmapPeriod,
 ): DashboardPeriod {
   switch (period) {
     case "mensal":
@@ -69,7 +69,7 @@ export async function fetchDashboardData(
     }
 
     const response = await apiClient.get<{ data: DashboardData }>(
-      `/api/dashboard/analytics?${params.toString()}`,
+      `/api/dashboard/metrics?${params.toString()}`,
     );
 
     if (response && "data" in response && response.data) {
@@ -120,7 +120,9 @@ export interface DashboardCourse {
   empresaLogoUrl: string | null;
 }
 
-export async function fetchDashboardCourses(empresaId?: string | null): Promise<DashboardCourse[]> {
+export async function fetchDashboardCourses(
+  empresaId?: string | null,
+): Promise<DashboardCourse[]> {
   const params = new URLSearchParams();
   if (empresaId) params.set("empresa_id", empresaId);
   const qs = params.toString();

@@ -120,7 +120,10 @@ export class DashboardAnalyticsService {
    * - Aluno: cursos matriculados
    * - Professor/usuario: todos os cursos
    */
-  async getAvailableCourses(alunoId: string, empresaId?: string): Promise<
+  async getAvailableCourses(
+    alunoId: string,
+    empresaId?: string,
+  ): Promise<
     Array<{
       id: string;
       nome: string;
@@ -130,7 +133,11 @@ export class DashboardAnalyticsService {
     }>
   > {
     const client = getDatabaseClient();
-    const { cursoIds } = await this.resolveCursoScope(alunoId, client, empresaId);
+    const { cursoIds } = await this.resolveCursoScope(
+      alunoId,
+      client,
+      empresaId,
+    );
     if (cursoIds.length === 0) return [];
     let query = client
       .from("cursos")
@@ -1236,7 +1243,10 @@ export class DashboardAnalyticsService {
       .select("id, modulo_id")
       .in("modulo_id", strategicModuleIds);
     if (opts.empresaId) {
-      atividadesScopeQuery = atividadesScopeQuery.eq("empresa_id", opts.empresaId);
+      atividadesScopeQuery = atividadesScopeQuery.eq(
+        "empresa_id",
+        opts.empresaId,
+      );
     }
     const { data: atividadesInScope, error: atividadesScopeErr } =
       await atividadesScopeQuery;
@@ -1443,7 +1453,7 @@ export class DashboardAnalyticsService {
   /**
    * Busca informações do usuário (aluno ou professor)
    */
-  private async getUserInfo(
+  public async getUserInfo(
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
   ) {
@@ -1537,12 +1547,14 @@ export class DashboardAnalyticsService {
       let insertClient = client;
       let insertError = null;
 
-      const { error: normalInsertError } = await client.from("usuarios").insert({
-        id: alunoId,
-        email: userEmail,
-        nome_completo: fullName,
-        empresa_id: empresaId,
-      });
+      const { error: normalInsertError } = await client
+        .from("usuarios")
+        .insert({
+          id: alunoId,
+          email: userEmail,
+          nome_completo: fullName,
+          empresa_id: empresaId,
+        });
 
       if (normalInsertError) {
         console.log(
@@ -1690,7 +1702,7 @@ export class DashboardAnalyticsService {
   /**
    * Busca métricas principais
    */
-  private async getMetrics(
+  public async getMetrics(
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: DashboardPeriod,
@@ -1716,12 +1728,7 @@ export class DashboardAnalyticsService {
       empresaId,
     );
 
-    const accuracy = await this.getAccuracy(
-      alunoId,
-      client,
-      period,
-      empresaId,
-    );
+    const accuracy = await this.getAccuracy(alunoId, client, period, empresaId);
 
     const flashcardsReviewed = await this.getFlashcardsReviewed(
       alunoId,
@@ -1949,7 +1956,7 @@ export class DashboardAnalyticsService {
   /**
    * Gera dados do heatmap (365 dias)
    */
-  private async getHeatmapData(
+  public async getHeatmapData(
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: "semanal" | "mensal" | "anual" = "anual",
@@ -2039,14 +2046,18 @@ export class DashboardAnalyticsService {
    * Calcula performance por disciplina/frente
    * Retorna todas as frentes dos cursos do aluno, mesmo sem progresso
    */
-  private async getSubjectPerformance(
+  public async getSubjectPerformance(
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: DashboardPeriod,
     empresaId?: string,
   ) {
     // 1. Buscar cursos no escopo (respeita empresaId para alunos multi-org)
-    const { cursoIds } = await this.resolveCursoScope(alunoId, client, empresaId);
+    const { cursoIds } = await this.resolveCursoScope(
+      alunoId,
+      client,
+      empresaId,
+    );
 
     if (cursoIds.length === 0) return [];
 
@@ -2115,7 +2126,8 @@ export class DashboardAnalyticsService {
       .gte("data_conclusao", inicioPeriodo.toISOString())
       .not("questoes_totais", "is", null)
       .gt("questoes_totais", 0);
-    if (empresaId) progressosQuery = progressosQuery.eq("empresa_id", empresaId);
+    if (empresaId)
+      progressosQuery = progressosQuery.eq("empresa_id", empresaId);
     const { data: progressos } = await progressosQuery;
 
     // 6. Se houver progressos, calcular performance por frente
@@ -2133,7 +2145,8 @@ export class DashboardAnalyticsService {
         .from("atividades")
         .select("id, modulo_id")
         .in("id", atividadeIds);
-      if (empresaId) atividadesQuery = atividadesQuery.eq("empresa_id", empresaId);
+      if (empresaId)
+        atividadesQuery = atividadesQuery.eq("empresa_id", empresaId);
       const { data: atividades } = await atividadesQuery;
 
       if (atividades && atividades.length > 0) {
@@ -2236,7 +2249,7 @@ export class DashboardAnalyticsService {
   /**
    * Calcula eficiência de foco por dia da semana
    */
-  private async getFocusEfficiency(
+  public async getFocusEfficiency(
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: DashboardPeriod,
@@ -2292,7 +2305,7 @@ export class DashboardAnalyticsService {
   /**
    * Distribuição por disciplina (wrapper para filtered)
    */
-  private async getSubjectDistribution(
+  public async getSubjectDistribution(
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: DashboardPeriod,
@@ -2311,7 +2324,7 @@ export class DashboardAnalyticsService {
   /**
    * Calcula domínio estratégico
    */
-  private async getStrategicDomain(
+  public async getStrategicDomain(
     alunoId: string,
     client: ReturnType<typeof getDatabaseClient>,
     period: DashboardPeriod,

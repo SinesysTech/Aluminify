@@ -32,14 +32,6 @@ async function deleteHandler(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Verificar se o usuário é professor/usuario
-  if (request.user.role !== "usuario") {
-    return NextResponse.json(
-      { error: "Forbidden. Only professors can delete fronts." },
-      { status: 403 },
-    );
-  }
-
   const client = getDatabaseClient();
   const frenteId = params.id;
   const userId = request.user.id;
