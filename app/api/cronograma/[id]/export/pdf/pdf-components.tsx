@@ -540,6 +540,7 @@ export function LogoBlock({ logoUrl }: { logoUrl: string | null }) {
     return (
       <Image
         src={logoUrl}
+        alt=""
         style={{ width: 140, height: 44, objectFit: 'contain' }}
       />
     )
