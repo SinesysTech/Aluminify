@@ -240,7 +240,6 @@ export default function EmpresaClientPage() {
             inputMode="numeric"
             maxLength={18}
             placeholder="00.000.000/0000-00"
-            pattern="^[0-9./\-]*$"
           />
         </div>
 
@@ -263,7 +262,6 @@ export default function EmpresaClientPage() {
             inputMode="numeric"
             maxLength={15}
             placeholder="(11) 99999-9999"
-            pattern="^[0-9()\\s+\-]*$"
           />
         </div>
 

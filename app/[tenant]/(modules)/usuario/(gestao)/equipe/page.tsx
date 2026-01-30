@@ -10,10 +10,11 @@ export const metadata: Metadata = {
 }
 
 interface PageProps {
-  searchParams: { papelTipo?: string }
+  searchParams: Promise<{ papelTipo?: string }>
 }
 
-export default async function EquipePage({ searchParams }: PageProps) {
+export default async function EquipePage(props: PageProps) {
+  const searchParams = await props.searchParams
   const user = await requireUser()
 
   if (!user.empresaId) {
