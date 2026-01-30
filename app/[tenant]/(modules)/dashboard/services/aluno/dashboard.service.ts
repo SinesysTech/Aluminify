@@ -120,9 +120,12 @@ export interface DashboardCourse {
   empresaLogoUrl: string | null;
 }
 
-export async function fetchDashboardCourses(): Promise<DashboardCourse[]> {
+export async function fetchDashboardCourses(empresaId?: string | null): Promise<DashboardCourse[]> {
+  const params = new URLSearchParams();
+  if (empresaId) params.set("empresa_id", empresaId);
+  const qs = params.toString();
   const response = await apiClient.get<{ data: DashboardCourse[] }>(
-    `/api/dashboard/courses`,
+    `/api/dashboard/courses${qs ? `?${qs}` : ""}`,
   );
   return response.data ?? [];
 }
@@ -132,6 +135,7 @@ export async function fetchSubjectDistribution(params: {
   scope: DashboardScopeLevel;
   scopeId?: string;
   period?: DashboardPeriod;
+  empresaId?: string | null;
 }): Promise<SubjectDistributionResponse> {
   const period = params.period ?? "mensal";
   const qs = new URLSearchParams({
@@ -139,6 +143,7 @@ export async function fetchSubjectDistribution(params: {
     scope: params.scope,
     ...(params.scopeId ? { scope_id: params.scopeId } : {}),
     period,
+    ...(params.empresaId ? { empresa_id: params.empresaId } : {}),
   });
   const response = await apiClient.get<{ data: SubjectDistributionResponse }>(
     `/api/dashboard/subject-distribution?${qs.toString()}`,
@@ -151,12 +156,14 @@ export async function fetchPerformance(params: {
   scope: DashboardScopeLevel;
   scopeId?: string;
   period?: DashboardPeriod;
+  empresaId?: string | null;
 }): Promise<PerformanceItem[]> {
   const qs = new URLSearchParams({
     group_by: params.groupBy,
     scope: params.scope,
     ...(params.scopeId ? { scope_id: params.scopeId } : {}),
     ...(params.period ? { period: params.period } : {}),
+    ...(params.empresaId ? { empresa_id: params.empresaId } : {}),
   });
   const response = await apiClient.get<{ data: PerformanceItem[] }>(
     `/api/dashboard/performance?${qs.toString()}`,
@@ -168,11 +175,13 @@ export async function fetchStrategicDomain(params: {
   scope: DashboardScopeLevel;
   scopeId?: string;
   period?: DashboardPeriod;
+  empresaId?: string | null;
 }): Promise<StrategicDomainResponse> {
   const qs = new URLSearchParams({
     scope: params.scope,
     ...(params.scopeId ? { scope_id: params.scopeId } : {}),
     ...(params.period ? { period: params.period } : {}),
+    ...(params.empresaId ? { empresa_id: params.empresaId } : {}),
   });
   const response = await apiClient.get<{ data: StrategicDomainResponse }>(
     `/api/dashboard/strategic-domain?${qs.toString()}`,

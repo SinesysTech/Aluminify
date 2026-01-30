@@ -14,7 +14,10 @@ async function getHandler(request: AuthenticatedRequest) {
       )
     }
 
-    const data = await dashboardAnalyticsService.getAvailableCourses(userId)
+    const { searchParams } = new URL(request.url)
+    const empresaId = searchParams.get('empresa_id') || undefined
+
+    const data = await dashboardAnalyticsService.getAvailableCourses(userId, empresaId)
     return NextResponse.json({ data })
   } catch (error) {
     console.error('Dashboard Courses API Error:', error)

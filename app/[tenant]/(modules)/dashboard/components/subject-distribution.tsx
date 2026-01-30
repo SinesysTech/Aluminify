@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/app/shared/components/overlay/tooltip'
 import { Info } from 'lucide-react'
 import { fetchDashboardCourses, fetchPerformance, fetchSubjectDistribution } from '../services/dashboard.service'
+import { useTenantContext } from '@/app/[tenant]/tenant-context'
+import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
 
 interface SubjectDistributionProps {
   data: SubjectDistributionItem[]
@@ -21,6 +23,10 @@ export function SubjectDistribution({
   totalHours = 42,
   period = 'anual',
 }: SubjectDistributionProps) {
+  const { empresaId: tenantEmpresaId } = useTenantContext()
+  const { activeOrganization } = useStudentOrganizations()
+  const effectiveEmpresaId = activeOrganization?.id ?? tenantEmpresaId
+
   const [groupBy, setGroupBy] = useState<DashboardGroupBy>('disciplina')
 
   const [courses, setCourses] = useState<Array<{ id: string; nome: string }>>([])
@@ -47,7 +53,7 @@ export function SubjectDistribution({
     let cancelled = false
     async function loadCourses() {
       try {
-        const c = await fetchDashboardCourses()
+        const c = await fetchDashboardCourses(effectiveEmpresaId)
         if (!cancelled) {
           setCourses(c)
           if (c.length === 1) setSelectedCourseId(c[0].id)
@@ -60,7 +66,7 @@ export function SubjectDistribution({
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [effectiveEmpresaId])
 
   // Resetar seleções dependentes quando subir no nível
   useEffect(() => {
@@ -98,6 +104,7 @@ export function SubjectDistribution({
           groupBy: 'disciplina',
           scope: 'curso',
           scopeId: selectedCourseId ?? undefined,
+          empresaId: effectiveEmpresaId,
         })
         if (cancelled) return
         const filtered = res.filter((i) => i.id && i.id !== '__unknown__')
@@ -112,7 +119,7 @@ export function SubjectDistribution({
     return () => {
       cancelled = true
     }
-  }, [groupBy, selectedDisciplineId, selectedCourseId, period])
+  }, [groupBy, selectedDisciplineId, selectedCourseId, period, effectiveEmpresaId])
 
   // Garantir frente selecionada quando necessário (groupBy=modulo)
   useEffect(() => {
@@ -128,6 +135,7 @@ export function SubjectDistribution({
           groupBy: 'frente',
           scope: 'disciplina',
           scopeId: selectedDisciplineId,
+          empresaId: effectiveEmpresaId,
         })
         if (cancelled) return
         const filtered = res.filter((i) => i.id && i.id !== '__unknown__')
@@ -142,7 +150,7 @@ export function SubjectDistribution({
     return () => {
       cancelled = true
     }
-  }, [groupBy, selectedDisciplineId, selectedFrontId, period])
+  }, [groupBy, selectedDisciplineId, selectedFrontId, period, effectiveEmpresaId])
 
   // Carregar dados do card
   useEffect(() => {
@@ -159,6 +167,7 @@ export function SubjectDistribution({
           scope: scopeParams.scope,
           scopeId: scopeParams.scopeId,
           period,
+          empresaId: effectiveEmpresaId,
         })
         if (cancelled) return
         setItems(res.items)
@@ -171,7 +180,7 @@ export function SubjectDistribution({
     return () => {
       cancelled = true
     }
-  }, [groupBy, scopeParams.scope, scopeParams.scopeId, period])
+  }, [groupBy, scopeParams.scope, scopeParams.scopeId, period, effectiveEmpresaId])
 
   const renderItems = items ?? data
   const centerHours = computedTotalHours ?? totalHours

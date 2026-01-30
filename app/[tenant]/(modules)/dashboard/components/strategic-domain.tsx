@@ -11,6 +11,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/app/shared/components/forms/select'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { fetchDashboardCourses, fetchPerformance, fetchStrategicDomain } from '../services/dashboard.service'
+import { useTenantContext } from '@/app/[tenant]/tenant-context'
+import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
 
 interface StrategicDomainProps {
   data: StrategicDomain
@@ -58,6 +60,10 @@ function ProgressBar({
 }
 
 export function StrategicDomain({ data }: StrategicDomainProps) {
+  const { empresaId: tenantEmpresaId } = useTenantContext()
+  const { activeOrganization } = useStudentOrganizations()
+  const effectiveEmpresaId = activeOrganization?.id ?? tenantEmpresaId
+
   // Domínio Estratégico não tem escopo por módulo (evita redundância com "Performance por Módulo")
   const [scope, setScope] = useState<Extract<DashboardScopeLevel, 'curso' | 'disciplina' | 'frente'>>('curso')
   const [courses, setCourses] = useState<Array<{ id: string; nome: string }>>([])
@@ -83,7 +89,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     let cancelled = false
     async function loadCourses() {
       try {
-        const c = await fetchDashboardCourses()
+        const c = await fetchDashboardCourses(effectiveEmpresaId)
         if (!cancelled) {
           setCourses(c)
           if (c.length === 1) setSelectedCourseId(c[0].id)
@@ -96,7 +102,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [effectiveEmpresaId])
 
   // Resetar seleções dependentes
   useEffect(() => {
@@ -126,6 +132,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
           groupBy: 'disciplina',
           scope: 'curso',
           scopeId: selectedCourseId ?? undefined,
+          empresaId: effectiveEmpresaId,
         })
         if (cancelled) return
         setDisciplineOptions(res.filter((r) => r.id !== '__unknown__'))
@@ -139,7 +146,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     return () => {
       cancelled = true
     }
-  }, [scope, selectedDisciplineId, selectedCourseId])
+  }, [scope, selectedDisciplineId, selectedCourseId, effectiveEmpresaId])
 
   // Garantir frente selecionada quando necessário (frente/modulo)
   useEffect(() => {
@@ -154,6 +161,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
           groupBy: 'frente',
           scope: 'disciplina',
           scopeId: selectedDisciplineId,
+          empresaId: effectiveEmpresaId,
         })
         if (cancelled) return
         setFrontOptions(res.filter((r) => r.id !== '__unknown__'))
@@ -167,7 +175,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     return () => {
       cancelled = true
     }
-  }, [scope, selectedDisciplineId, selectedFrontId])
+  }, [scope, selectedDisciplineId, selectedFrontId, effectiveEmpresaId])
 
   // Carregar dados do card
   useEffect(() => {
@@ -178,7 +186,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
 
       setIsLoading(true)
       try {
-        const res = await fetchStrategicDomain({ scope, scopeId: effectiveScopeId })
+        const res = await fetchStrategicDomain({ scope, scopeId: effectiveScopeId, empresaId: effectiveEmpresaId })
         if (cancelled) return
         setFocusedData(res.data)
         setModulesRanking(res.modules)
@@ -190,7 +198,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
     return () => {
       cancelled = true
     }
-  }, [scope, effectiveScopeId, selectedDisciplineId, selectedFrontId])
+  }, [scope, effectiveScopeId, selectedDisciplineId, selectedFrontId, effectiveEmpresaId])
 
   const display = focusedData ?? data
 

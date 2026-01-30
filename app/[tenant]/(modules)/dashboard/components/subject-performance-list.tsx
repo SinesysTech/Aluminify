@@ -23,6 +23,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { fetchDashboardCourses, fetchPerformance, type DashboardCourse } from '../services/dashboard.service'
 import { OrganizationBadge } from '@/app/[tenant]/(modules)/dashboard/components/organization-switcher'
 import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
+import { useTenantContext } from '@/app/[tenant]/tenant-context'
 
 interface SubjectPerformanceListProps {
   subjects: SubjectPerformance[] // usado como fallback inicial
@@ -38,6 +39,8 @@ export function SubjectPerformanceList({
   const [sortOption, setSortOption] = useState<SortOption>('worst-best')
   const [groupBy, setGroupBy] = useState<DashboardGroupBy>('frente')
   const { isMultiOrg, activeOrganization } = useStudentOrganizations()
+  const { empresaId: tenantEmpresaId } = useTenantContext()
+  const effectiveEmpresaId = activeOrganization?.id ?? tenantEmpresaId
 
   const [courses, setCourses] = useState<DashboardCourse[]>([])
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null)
@@ -78,7 +81,7 @@ export function SubjectPerformanceList({
     let cancelled = false
     async function loadCourses() {
       try {
-        const c = await fetchDashboardCourses()
+        const c = await fetchDashboardCourses(effectiveEmpresaId)
         if (!cancelled) {
           setCourses(c)
           if (c.length === 1) setSelectedCourseId(c[0].id)
@@ -91,7 +94,7 @@ export function SubjectPerformanceList({
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [effectiveEmpresaId])
 
   useEffect(() => {
     if (groupBy === 'curso') {
@@ -122,7 +125,7 @@ export function SubjectPerformanceList({
       if (selectedDisciplineId) return
       setIsLoading(true)
       try {
-        const res = await fetchPerformance({ groupBy: 'disciplina', scope: 'curso', scopeId: selectedCourseId ?? undefined, period })
+        const res = await fetchPerformance({ groupBy: 'disciplina', scope: 'curso', scopeId: selectedCourseId ?? undefined, period, empresaId: effectiveEmpresaId })
         if (cancelled) return
         setDisciplineOptions(res)
         const first = res.find((i) => i.id && i.id !== '__unknown__')?.id ?? null
@@ -135,7 +138,7 @@ export function SubjectPerformanceList({
     return () => {
       cancelled = true
     }
-  }, [groupBy, selectedDisciplineId, selectedCourseId, period])
+  }, [groupBy, selectedDisciplineId, selectedCourseId, period, effectiveEmpresaId])
 
   // Garantir frente selecionada quando necessário (groupBy=modulo)
   useEffect(() => {
@@ -146,7 +149,7 @@ export function SubjectPerformanceList({
       if (selectedFrontId) return
       setIsLoading(true)
       try {
-        const res = await fetchPerformance({ groupBy: 'frente', scope: 'disciplina', scopeId: selectedDisciplineId, period })
+        const res = await fetchPerformance({ groupBy: 'frente', scope: 'disciplina', scopeId: selectedDisciplineId, period, empresaId: effectiveEmpresaId })
         if (cancelled) return
         setFrontOptions(res)
         const first = res.find((i) => i.id && i.id !== '__unknown__')?.id ?? null
@@ -159,7 +162,7 @@ export function SubjectPerformanceList({
     return () => {
       cancelled = true
     }
-  }, [groupBy, selectedDisciplineId, selectedFrontId, period])
+  }, [groupBy, selectedDisciplineId, selectedFrontId, period, effectiveEmpresaId])
 
   // Carregar dados do card
   useEffect(() => {
@@ -170,7 +173,7 @@ export function SubjectPerformanceList({
       }
       setIsLoading(true)
       try {
-        const res = await fetchPerformance({ groupBy, scope: scopeParams.scope, scopeId: scopeParams.scopeId, period })
+        const res = await fetchPerformance({ groupBy, scope: scopeParams.scope, scopeId: scopeParams.scopeId, period, empresaId: effectiveEmpresaId })
         if (cancelled) return
         setItems(res)
       } finally {
@@ -181,7 +184,7 @@ export function SubjectPerformanceList({
     return () => {
       cancelled = true
     }
-  }, [groupBy, scopeParams.scope, scopeParams.scopeId, period])
+  }, [groupBy, scopeParams.scope, scopeParams.scopeId, period, effectiveEmpresaId])
 
   // Função para ordenar os dados
   const renderItems: PerformanceItem[] = items ?? subjects.map((s) => ({

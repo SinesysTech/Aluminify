@@ -120,7 +120,7 @@ export class DashboardAnalyticsService {
    * - Aluno: cursos matriculados
    * - Professor/usuario: todos os cursos
    */
-  async getAvailableCourses(alunoId: string): Promise<
+  async getAvailableCourses(alunoId: string, empresaId?: string): Promise<
     Array<{
       id: string;
       nome: string;
@@ -130,12 +130,16 @@ export class DashboardAnalyticsService {
     }>
   > {
     const client = getDatabaseClient();
-    const { cursoIds } = await this.resolveCursoScope(alunoId, client);
+    const { cursoIds } = await this.resolveCursoScope(alunoId, client, empresaId);
     if (cursoIds.length === 0) return [];
-    const { data: cursos, error } = await client
+    let query = client
       .from("cursos")
       .select("id, nome, empresa_id, empresas:empresa_id(nome, logo_url)")
       .in("id", cursoIds);
+    if (empresaId) {
+      query = query.eq("empresa_id", empresaId);
+    }
+    const { data: cursos, error } = await query;
     if (error) throw new Error(`Erro ao buscar cursos: ${error.message}`);
     return (
       (cursos ?? []) as Array<{

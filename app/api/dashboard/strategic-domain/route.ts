@@ -29,10 +29,13 @@ async function getHandler(request: AuthenticatedRequest) {
       return NextResponse.json({ error: 'period inválido' }, { status: 400 })
     }
 
+    const empresaId = searchParams.get('empresa_id') || undefined
+
     const data = await dashboardAnalyticsService.getStrategicDomainFiltered(userId, {
       scope,
       scopeId,
       period,
+      empresaId,
     })
 
     return NextResponse.json({ data })

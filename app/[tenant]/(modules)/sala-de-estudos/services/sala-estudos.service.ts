@@ -111,10 +111,14 @@ export class SalaEstudosService {
     if (!session) throw new Error("No session");
 
     if (role === "professor" || role === "usuario") {
-      const { data, error } = await this.supabase
+      let query = this.supabase
         .from("cursos")
         .select("id, nome")
         .order("nome");
+      if (activeOrgId) {
+        query = query.eq("empresa_id", activeOrgId);
+      }
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     } else {
