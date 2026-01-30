@@ -76,32 +76,30 @@ export function FocusEfficiencyChart({ data }: FocusEfficiencyChartProps) {
                 tick={{ fill: axisColor }}
               />
               <Tooltip
-                content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="rounded-lg border bg-background p-2 shadow-sm">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="flex flex-col">
-                            <span className="text-[0.70rem] uppercase text-muted-foreground">
-                              Tempo Bruto
-                            </span>
-                            <span className="font-bold text-muted-foreground">
-                              {payload[0].value} min
-                            </span>
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-[0.70rem] uppercase text-muted-foreground">
-                              Tempo Líquido
-                            </span>
-                            <span className="font-bold text-primary">
-                              {payload[1].value} min
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )
+                return (
+              <div className="rounded-lg border bg-background p-2 shadow-sm">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex flex-col">
+                    <span className="text-[0.70rem] uppercase text-muted-foreground">
+                      Tempo Bruto
+                    </span>
+                    <span className="font-bold text-muted-foreground">
+                      {payload[0].value} min
+                    </span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[0.70rem] uppercase text-muted-foreground">
+                      Tempo Líquido
+                    </span>
+                    <span className="font-bold text-primary">
+                      {payload[1].value} min
+                    </span>
+                  </div>
+                </div>
+              </div>
+              )
                   }
-                  return null
+              return null
                 }}
               />
               <Bar

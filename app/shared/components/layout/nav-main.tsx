@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { ChevronRight, type LucideIcon } from "lucide-react"
 
 import {
@@ -37,6 +38,7 @@ export function NavMain({
   }[]
   label?: string
 }) {
+  const pathname = usePathname()
   // Prevent hydration mismatch by only rendering collapsible items after mount
   const [mounted, setMounted] = useState(false)
 
@@ -69,7 +71,7 @@ export function NavMain({
                   <SidebarMenuSub>
                     {item.items.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild>
+                        <SidebarMenuSubButton asChild isActive={pathname === subItem.url}>
                           <Link href={subItem.url}>
                             <span>{subItem.title}</span>
                           </Link>

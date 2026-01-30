@@ -76,8 +76,10 @@ export default function StudentDashboardClientPage() {
     const activeOrgId =
         tenantContext?.empresaId ?? activeOrganization?.id ?? undefined
 
-    // Use a ref to track the latest abort controller to cancel pending requests
+    // Use refs to track request status and prevent loops
     const abortControllerRef = useRef<AbortController | null>(null)
+    const isFetchingRef = useRef(false)
+    const hasLoadedUserRef = useRef(false)
 
     // Helper to handle errors uniformly
     const handleError = (err: unknown, context: string) => {
@@ -94,6 +96,9 @@ export default function StudentDashboardClientPage() {
 
     const loadData = useCallback(
         async (showRefreshing = false, period?: HeatmapPeriod) => {
+            // Prevent overlapping calls for the same params unless forced
+            if (isFetchingRef.current && !showRefreshing) return;
+
             // Cancelar requisição anterior se houver
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort()
@@ -101,6 +106,7 @@ export default function StudentDashboardClientPage() {
 
             const controller = new AbortController()
             abortControllerRef.current = controller
+            isFetchingRef.current = true
 
             const periodToUse = period ?? heatmapPeriod
             if (showRefreshing) setIsRefreshing(true)
@@ -111,12 +117,18 @@ export default function StudentDashboardClientPage() {
                 // Determine what needs to be fetched
                 const promises = []
 
-                // 1. User Info (only on initial load or full refresh, not period change)
-                if (!user || showRefreshing) {
+                // 1. User Info (only on initial load or full refresh)
+                // Usamos a Ref para garantir que só buscamos o usuário uma vez ou se for refresh forçado
+                if (!hasLoadedUserRef.current || showRefreshing) {
                     setIsLoadingUser(true)
                     promises.push(
                         fetchDashboardUser(activeOrgId)
-                            .then(setUser)
+                            .then(fetchedUser => {
+                                if (!controller.signal.aborted) {
+                                    setUser(fetchedUser)
+                                    hasLoadedUserRef.current = true
+                                }
+                            })
                             .catch(e => {
                                 if (controller.signal.aborted) return
                                 const msg = handleError(e, 'usuário')
@@ -205,14 +217,17 @@ export default function StudentDashboardClientPage() {
                 if (!controller.signal.aborted) {
                     setIsRefreshing(false)
                     abortControllerRef.current = null
+                    isFetchingRef.current = false
                 }
             }
         },
-        [heatmapPeriod, activeOrgId, user]
+        [heatmapPeriod, activeOrgId] // REMOVED 'user' dependency
     )
 
     // Carregamento inicial
     useEffect(() => {
+        // Reset user loaded ref when activeOrgId changes to allow re-fetching user context if needed
+        hasLoadedUserRef.current = false
         loadData()
 
         return () => {
@@ -226,7 +241,8 @@ export default function StudentDashboardClientPage() {
     const handleHeatmapPeriodChange = useCallback(
         (period: HeatmapPeriod) => {
             setHeatmapPeriod(period)
-            loadData(true, period)
+            // Passe 'true' para o segundo argumento, loadData trata internamente
+            loadData(false, period)
         },
         [loadData]
     )
