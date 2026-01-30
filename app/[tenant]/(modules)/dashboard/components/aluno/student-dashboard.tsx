@@ -348,7 +348,7 @@ export default function StudentDashboardClientPage() {
             )}
 
             {/* Progresso do Cronograma */}
-            <ScheduleProgress value={metrics.scheduleProgress} />
+            <ScheduleProgress value={metrics.scheduleProgress} streakDays={user.streakDays} />
 
             {/* Grid de 4 Metric Cards */}
             <div className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4">

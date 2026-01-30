@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/app/shared/core/server'
 import { resolveEmpresaIdFromTenant } from '@/app/shared/core/resolve-empresa-from-tenant'
-import { ScheduleDashboard } from '../components/schedule-dashboard'
+import { CronogramaLandingPage } from '../components/cronograma-landing-page'
 
 export default async function CronogramaPage({
   params,
@@ -17,19 +17,58 @@ export default async function CronogramaPage({
   const empresaId = await resolveEmpresaIdFromTenant(tenant || '')
   if (!empresaId) redirect(`/${tenant}/dashboard`)
 
-  const query = supabase
+  // Fetch all cronogramas for this user with progress counts
+  const { data: cronogramas } = await supabase
     .from('cronogramas')
-    .select('id')
+    .select('id, nome, data_inicio, data_fim, modalidade_estudo, created_at')
     .eq('usuario_id', user.id)
     .eq('empresa_id', empresaId)
     .order('created_at', { ascending: false })
-    .limit(1)
 
-  const { data: cronograma } = await query.maybeSingle()
+  // Get item counts for each cronograma
+  const cronogramaIds = (cronogramas || []).map(c => c.id)
 
-  if (!cronograma) {
-    redirect(`/${tenant}/cronograma/novo`)
+  let itemCounts: Record<string, { total: number; done: number }> = {}
+  if (cronogramaIds.length > 0) {
+    const { data: items } = await supabase
+      .from('cronograma_itens')
+      .select('cronograma_id, concluido')
+      .in('cronograma_id', cronogramaIds)
+
+    if (items) {
+      itemCounts = items.reduce((acc, item) => {
+        const cid = item.cronograma_id as string
+        if (!acc[cid]) acc[cid] = { total: 0, done: 0 }
+        acc[cid].total++
+        if (item.concluido) acc[cid].done++
+        return acc
+      }, {} as Record<string, { total: number; done: number }>)
+    }
   }
 
-  return <ScheduleDashboard cronogramaId={cronograma.id} />
+  const cronogramaSummaries = (cronogramas || []).map(c => ({
+    id: c.id,
+    nome: c.nome,
+    data_inicio: c.data_inicio,
+    data_fim: c.data_fim,
+    modalidade_estudo: c.modalidade_estudo,
+    created_at: c.created_at,
+    total_itens: itemCounts[c.id]?.total ?? 0,
+    itens_concluidos: itemCounts[c.id]?.done ?? 0,
+  }))
+
+  // Check if institution has base content (cursos linked to empresa)
+  const { count: cursosCount } = await supabase
+    .from('cursos')
+    .select('id', { count: 'exact', head: true })
+    .eq('empresa_id', empresaId)
+
+  const hasBaseContent = (cursosCount ?? 0) > 0
+
+  return (
+    <CronogramaLandingPage
+      cronogramas={cronogramaSummaries}
+      hasBaseContent={hasBaseContent}
+    />
+  )
 }

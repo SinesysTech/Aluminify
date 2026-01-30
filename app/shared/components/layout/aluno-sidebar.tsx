@@ -102,14 +102,9 @@ const DEFAULT_NAV_ITEMS: NavItem[] = [
     icon: BookOpen,
   },
   {
-    title: "Cronograma",
+    title: "Cronograma de Estudo",
     url: "/cronograma",
     icon: CalendarCheck,
-  },
-  {
-    title: "Calendário",
-    url: "/cronograma/calendario",
-    icon: CalendarDays,
   },
   {
     title: "Modo Foco",

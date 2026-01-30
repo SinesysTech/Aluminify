@@ -314,9 +314,9 @@ body {
     @variant dark {
         --background: var(--base-950);
         --foreground: var(--base-200);
-        --card: var(--base-950);
+        --card: var(--base-900);
         --card-foreground: var(--base-200);
-        --popover: var(--base-950);
+        --popover: var(--base-900);
         --popover-foreground: var(--base-200);
         --primary: var(--primary-600);
         --primary-foreground: var(--color-white);
@@ -533,9 +533,9 @@ body {
     @variant dark {
         --background: var(--base-950);
         --foreground: var(--base-200);
-        --card: var(--base-950);
+        --card: var(--base-900);
         --card-foreground: var(--base-200);
-        --popover: var(--base-950);
+        --popover: var(--base-900);
         --popover-foreground: var(--base-200);
         --primary: var(--primary-600);
         --primary-foreground: var(--color-white);
@@ -752,9 +752,9 @@ body {
     @variant dark {
         --background: var(--base-950);
         --foreground: var(--base-200);
-        --card: var(--base-950);
+        --card: var(--base-900);
         --card-foreground: var(--base-200);
-        --popover: var(--base-950);
+        --popover: var(--base-900);
         --popover-foreground: var(--base-200);
         --primary: var(--primary-600);
         --primary-foreground: var(--color-white);

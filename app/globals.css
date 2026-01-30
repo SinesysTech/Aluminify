@@ -370,7 +370,7 @@
 
   /* Títulos principais de páginas (H1) */
   .page-title {
-    @apply text-2xl font-bold tracking-tight text-foreground;
+    @apply text-2xl md:text-3xl font-bold tracking-tight text-foreground;
   }
 
   /* Subtítulos/descrições de páginas */
