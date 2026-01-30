@@ -58,7 +58,7 @@ export function EquipeClientPage({ usuarios, initialFilter }: EquipeClientPagePr
       {/* SECTION: POPULATED STATE */}
       {!isEmpty && (
         <section id="populated-state" className="flex flex-col gap-4 h-full min-h-[600px]">
-          <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E4E4E7] pb-4">
+          <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
             <div>
               <h1 className="page-title">Equipe</h1>
               <p className="page-subtitle">
@@ -86,8 +86,8 @@ export function EquipeClientPage({ usuarios, initialFilter }: EquipeClientPagePr
       {/* SECTION: EMPTY STATE */}
       {isEmpty && (
         <section id="empty-state" className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
-          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] border border-[#E4E4E7]">
-            <Users className="w-8 h-8 text-zinc-400" strokeWidth={1} />
+          <div className="w-16 h-16 bg-card rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-border">
+            <Users className="w-8 h-8 text-muted-foreground" strokeWidth={1} />
           </div>
 
           <h3 className="empty-state-title mb-2">Nenhum membro na equipe</h3>

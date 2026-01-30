@@ -353,7 +353,7 @@ export function ScheduleList({
                       </Badge>
                     )}
                     {!temAulas && isAposTermino && (
-                      <Badge variant="outline" className="text-xs bg-green-50 text-black dark:text-black border-green-200">
+                      <Badge variant="outline" className="text-xs bg-green-50 text-green-900 border-green-200 dark:bg-green-950/40 dark:text-green-100 dark:border-green-800">
                         Já acabou? Então bora pra revisão!
                       </Badge>
                     )}

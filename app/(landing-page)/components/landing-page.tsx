@@ -45,7 +45,7 @@ export function LandingPage() {
                 {/* Hero Section */}
                 <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-gray-50">
                     {/* Background Grid - mesma estrutura do login */}
-                    <div className="absolute inset-0 bg-grid-pattern opacity-60" />
+                    <div className="absolute inset-0 bg-grid-pattern dark:bg-grid-pattern-dark opacity-60" />
 
                     {/* Ambient Glow */}
                     <div className="absolute left-0 right-0 top-0 m-auto h-[310px] w-[310px] rounded-full bg-primary/20 opacity-20 blur-[100px]" />

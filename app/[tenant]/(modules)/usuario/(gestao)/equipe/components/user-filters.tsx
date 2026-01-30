@@ -29,13 +29,13 @@ export function UserFilters({
     <div className="flex flex-col sm:flex-row gap-3">
       {/* Search Input */}
       <div className="relative flex-1 max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <input
           type="text"
           placeholder="Buscar por nome ou email..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="w-full h-9 pl-9 pr-4 rounded-md border border-[#E4E4E7] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-zinc-200"
+          className="w-full h-9 pl-9 pr-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 

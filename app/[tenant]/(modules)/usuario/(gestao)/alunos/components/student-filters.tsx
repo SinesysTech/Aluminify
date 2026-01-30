@@ -99,18 +99,18 @@ export function StudentFilters() {
     return (
         <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-2.5 top-2.5 w-5 h-5 text-zinc-400" strokeWidth={1.5} />
+                <Search className="absolute left-2.5 top-2.5 w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
                 <input
                     type="text"
                     placeholder="Buscar por nome, email ou ID..."
-                    className="w-full h-10 pl-9 pr-4 rounded-md border border-[#E4E4E7] bg-white text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] transition-all"
+                    className="w-full h-10 pl-9 pr-4 rounded-md border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
                     onChange={(e) => handleSearch(e.target.value)}
                     defaultValue={searchParams.get('query')?.toString()}
                 />
             </div>
             <div className="flex items-center gap-2">
                 <select
-                    className="h-10 px-3 rounded-md border border-[#E4E4E7] bg-white text-sm text-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-400 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] cursor-pointer"
+                    className="h-10 px-3 rounded-md border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
                     value={selectedCourseId}
                     onChange={(e) => handleCourseChange(e.target.value)}
                 >
@@ -122,7 +122,7 @@ export function StudentFilters() {
                     ))}
                 </select>
                 <select
-                    className="h-10 px-3 rounded-md border border-[#E4E4E7] bg-white text-sm text-zinc-700 focus:outline-none focus:ring-1 focus:ring-zinc-400 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-10 px-3 rounded-md border border-border bg-background text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     value={selectedTurmaId}
                     onChange={(e) => handleTurmaChange(e.target.value)}
                     disabled={loadingTurmas || filteredTurmas.length === 0}

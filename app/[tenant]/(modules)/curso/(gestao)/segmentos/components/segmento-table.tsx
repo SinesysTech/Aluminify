@@ -366,7 +366,7 @@ export function SegmentoTable() {
   return (
     <TooltipProvider>
     <div className="flex flex-col gap-8 h-full pb-10">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E4E4E7] pb-4">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
           <h1 className="page-title">Segmentos</h1>
           <p className="page-subtitle">Gerencie os segmentos do sistema</p>
@@ -375,7 +375,7 @@ export function SegmentoTable() {
           {mounted ? (
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
               <DialogTrigger asChild>
-                <button className="h-9 px-4 rounded-md bg-[#09090B] text-white text-sm font-medium hover:bg-[#27272A] transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center gap-2">
+                <button className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-2">
                   <Plus className="w-5 h-5" strokeWidth={1.5} />
                   Novo Segmento
                 </button>
@@ -441,7 +441,7 @@ export function SegmentoTable() {
           ) : (
             <button
               onClick={() => setCreateDialogOpen(true)}
-              className="h-9 px-4 rounded-md bg-[#09090B] text-white text-sm font-medium hover:bg-[#27272A] transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center gap-2"
+              className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-2"
             >
               <Plus className="w-5 h-5" strokeWidth={1.5} />
               Novo Segmento
@@ -463,11 +463,11 @@ export function SegmentoTable() {
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 w-5 h-5 text-zinc-400" strokeWidth={1.5} />
+          <Search className="absolute left-2.5 top-2.5 w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
           <input
             type="text"
             placeholder="Filtrar por nome..."
-            className="w-full h-10 pl-9 pr-4 rounded-md border border-[#E4E4E7] bg-white text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] transition-all"
+            className="w-full h-10 pl-9 pr-4 rounded-md border border-border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-all"
             value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
             onChange={(event) =>
               table.getColumn('name')?.setFilterValue(event.target.value)
@@ -485,7 +485,7 @@ export function SegmentoTable() {
             {table.getRowModel().rows.map((row) => {
               const segmento = row.original
               return (
-                <div key={row.id} className="rounded-lg border border-[#E4E4E7] bg-white p-4 shadow-sm">
+                <div key={row.id} className="rounded-lg border border-border bg-card p-4 shadow-sm">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -534,12 +534,12 @@ export function SegmentoTable() {
           {/* Desktop Table View */}
           <div className="hidden md:block overflow-hidden flex-1">
             <Table className="w-full text-left text-sm">
-              <TableHeader className="border-b border-[#E4E4E7]">
+              <TableHeader className="border-b border-border">
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id} className="hover:bg-transparent">
                     {headerGroup.headers.map((header) => {
                       return (
-                        <TableHead key={header.id} className="h-10 px-4 font-mono text-xs font-medium text-[#71717A] uppercase tracking-wider">
+                        <TableHead key={header.id} className="h-10 px-4 font-mono text-xs font-medium text-muted-foreground uppercase tracking-wider">
                           {header.isPlaceholder
                             ? null
                             : flexRender(
@@ -552,12 +552,12 @@ export function SegmentoTable() {
                   </TableRow>
                 ))}
               </TableHeader>
-              <TableBody className="divide-y divide-[#E4E4E7]">
+              <TableBody className="divide-y divide-border">
                 {table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
-                    className="group hover:bg-zinc-50 transition-colors"
+                    className="group hover:bg-muted/50 transition-colors"
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="p-4">
@@ -572,8 +572,8 @@ export function SegmentoTable() {
         </>
       ) : (
         <section id="empty-state" className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
-          <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] border border-[#E4E4E7]">
-            <Layers className="w-8 h-8 text-zinc-400" strokeWidth={1} />
+          <div className="w-16 h-16 bg-card rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-border">
+            <Layers className="w-8 h-8 text-muted-foreground" strokeWidth={1} />
           </div>
 
           <h3 className="empty-state-title mb-2">Nenhum segmento cadastrado</h3>
@@ -584,7 +584,7 @@ export function SegmentoTable() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setCreateDialogOpen(true)}
-              className="h-10 px-6 rounded-md bg-[#09090B] text-white text-sm font-medium hover:bg-[#27272A] transition-colors shadow-[0_1px_2px_0_rgba(0,0,0,0.05)] flex items-center gap-2"
+              className="h-10 px-6 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm flex items-center gap-2"
             >
               <Plus className="w-5 h-5" strokeWidth={1.5} />
               Adicionar Segmento
@@ -594,22 +594,22 @@ export function SegmentoTable() {
       )}
 
       {table.getRowModel().rows?.length > 0 && (
-        <div className="border-t border-[#E4E4E7] px-4 py-3 flex items-center justify-between">
-          <span className="text-xs text-[#71717A]">
+        <div className="border-t border-border px-4 py-3 flex items-center justify-between">
+          <span className="text-xs text-muted-foreground">
             Mostrando <strong>{table.getFilteredRowModel().rows.length}</strong> resultados
           </span>
           <div className="flex gap-2">
             <button
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+              className="px-3 py-1 border border-border bg-background rounded text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-50"
             >
               Anterior
             </button>
             <button
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="px-3 py-1 border border-[#E4E4E7] bg-white rounded text-xs font-medium text-zinc-600 hover:bg-zinc-50"
+              className="px-3 py-1 border border-border bg-background rounded text-xs font-medium text-muted-foreground hover:bg-muted"
             >
               Próximo
             </button>

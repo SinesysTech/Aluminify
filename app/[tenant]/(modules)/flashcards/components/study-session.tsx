@@ -536,28 +536,28 @@ export function StudySession({
                                             icon={<XCircle className="h-5 w-5" />}
                                             label="Errei"
                                             shortcut="1"
-                                            colorClass="bg-red-500/20 hover:bg-red-500/30 text-slate-100 border-red-500/30"
+                                            colorClass="bg-red-600 hover:bg-red-500 text-white border-red-500/30 shadow-sm shadow-red-500/10"
                                         />
                                         <FeedbackButton
                                             onClick={() => onFeedback(2)}
                                             icon={<CircleDot className="h-5 w-5" />}
                                             label="Parcial"
                                             shortcut="2"
-                                            colorClass="bg-amber-500/20 hover:bg-amber-500/30 text-slate-100 border-amber-500/30"
+                                            colorClass="bg-amber-600 hover:bg-amber-500 text-white border-amber-500/30 shadow-sm shadow-amber-500/10"
                                         />
                                         <FeedbackButton
                                             onClick={() => onFeedback(3)}
                                             icon={<CircleHelp className="h-5 w-5" />}
                                             label="Inseguro"
                                             shortcut="3"
-                                            colorClass="bg-sky-500/20 hover:bg-sky-500/30 text-slate-100 border-sky-500/30"
+                                            colorClass="bg-sky-600 hover:bg-sky-500 text-white border-sky-500/30 shadow-sm shadow-sky-500/10"
                                         />
                                         <FeedbackButton
                                             onClick={() => onFeedback(4)}
                                             icon={<CircleCheck className="h-5 w-5" />}
                                             label="Acertei"
                                             shortcut="4"
-                                            colorClass="bg-emerald-500/20 hover:bg-emerald-500/30 text-slate-100 border-emerald-500/30"
+                                            colorClass="bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500/30 shadow-sm shadow-emerald-500/10"
                                         />
                                     </div>
                                 </div>
@@ -693,7 +693,7 @@ function FeedbackButton({
             onClick={onClick}
             className={cn(
                 'flex flex-col items-center justify-center gap-2 py-4 px-3 rounded-xl',
-                'border transition-all duration-200',
+                'border transition-all duration-300',
                 'hover:scale-[1.02] active:scale-[0.98]',
                 'focus:outline-none focus:ring-2 focus:ring-white/20',
                 'w-full h-full',
