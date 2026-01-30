@@ -17,6 +17,7 @@ export default function FlashcardsClient() {
     // Empresa ativa: para alunos multi-org usa activeOrganization, senão tenant da URL
     const empresaId = activeOrganization?.id ?? tenantContext?.empresaId ?? undefined
     const supabase = createClient()
+
     const [modo, setModo] = React.useState<string | null>(null)
     const [scope, setScope] = React.useState<'all' | 'completed'>('all')
     const [cards, setCards] = React.useState<Flashcard[]>([])
@@ -44,6 +45,22 @@ export default function FlashcardsClient() {
     const [sessaoCompleta, setSessaoCompleta] = React.useState(false)
 
     const SESSION_SIZE = 10
+
+    // Reset completo ao trocar de organização (multi-tenant)
+    React.useEffect(() => {
+        setModo(null)
+        setCards([])
+        setIdx(0)
+        setCardsVistos(new Set())
+        setFeedbacks([])
+        setSessaoCompleta(false)
+        setCursoSelecionado('')
+        setDisciplinaSelecionada('')
+        setFrenteSelecionada('')
+        setModuloSelecionado('')
+        setShowAnswer(false)
+        setError(null)
+    }, [empresaId])
 
     const fetchCards = React.useCallback(
         async (
@@ -74,7 +91,7 @@ export default function FlashcardsClient() {
                     frenteId,
                     moduloId,
                     excludeIds,
-                    empresaId
+                    empresaId,
                 )
 
                 setCards(newCards)
@@ -88,7 +105,7 @@ export default function FlashcardsClient() {
                 setLoading(false)
             }
         },
-        [empresaId]
+        [empresaId],
     )
 
     // Auto-refresh ao trocar escopo

@@ -10,7 +10,7 @@ async function handler(request: AuthenticatedRequest) {
     const frenteId = searchParams.get('frenteId') || undefined;
     const moduloId = searchParams.get('moduloId') || undefined;
     const empresaId =
-      searchParams.get('empresa_id') || request.user?.empresaId || undefined;
+      searchParams.get('empresa_id') || searchParams.get('empresaId') || request.user?.empresaId || undefined;
     const scopeParam = searchParams.get('scope') || undefined;
     const scope: FlashcardsReviewScope = scopeParam === 'completed' ? 'completed' : 'all';
 
@@ -28,6 +28,7 @@ async function handler(request: AuthenticatedRequest) {
       { cursoId, frenteId, moduloId, empresaId },
       excludeIds,
       scope,
+      empresaId,
     );
     console.log(`[flashcards/revisao] Retornando ${data.length} flashcards`);
     return NextResponse.json({ data });

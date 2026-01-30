@@ -8,15 +8,42 @@ import { validateUploadedFile, sanitizeFilename } from '@/app/shared/core/middle
 
 // Mock the database client
 const mockMaybeSingle = jest.fn();
-const mockEq2 = jest.fn(() => ({ maybeSingle: mockMaybeSingle }));
-const mockEq1 = jest.fn(() => ({ eq: mockEq2 }));
-const mockSelect = jest.fn(() => ({ eq: mockEq1 }));
-const mockFrom = jest.fn(() => ({ select: mockSelect }));
+
+// Recursive mock builder to handle arbitrary chaining
+const createChainableMock = () => {
+  const mock: any = {
+    maybeSingle: mockMaybeSingle,
+    single: mockMaybeSingle,
+    select: jest.fn(() => mock),
+    eq: jest.fn(() => mock),
+    neq: jest.fn(() => mock),
+    is: jest.fn(() => mock),
+    in: jest.fn(() => mock),
+    gt: jest.fn(() => mock),
+    lt: jest.fn(() => mock),
+    gte: jest.fn(() => mock),
+    lte: jest.fn(() => mock),
+    like: jest.fn(() => mock),
+    ilike: jest.fn(() => mock),
+    contains: jest.fn(() => mock),
+    limit: jest.fn(() => mock),
+    order: jest.fn(() => mock),
+    insert: jest.fn(() => mock),
+    update: jest.fn(() => mock),
+    delete: jest.fn(() => mock),
+  };
+  return mock;
+};
+
+const mockQueryBuilder = createChainableMock();
+const mockFrom = jest.fn(() => mockQueryBuilder);
+
 const mockDbClient = {
   from: mockFrom,
   auth: {
     getUser: jest.fn(),
   },
+  rpc: jest.fn(),
 };
 
 jest.mock('@/app/shared/core/database/database', () => ({
@@ -94,8 +121,6 @@ describe('Brand Customization Access Control Middleware', () => {
 
   describe('verifyEmpresaAdminAccess', () => {
     it('should return true for valid admin user', async () => {
-      const mockClient = require('@/app/shared/core/database/database').getDatabaseClient();
-      const mockMaybeSingle = mockClient.from().select().eq().eq().maybeSingle;
       mockMaybeSingle.mockResolvedValue({
         data: { id: 'user1', empresa_id: 'empresa1', is_admin: true },
         error: null,
@@ -107,21 +132,8 @@ describe('Brand Customization Access Control Middleware', () => {
     });
 
     it('should return false for non-admin user', async () => {
-      const mockClient = require('@/app/shared/core/database/database').getDatabaseClient();
-      const mockMaybeSingle = mockClient.from().select().eq().eq().maybeSingle;
-      mockMaybeSingle.mockResolvedValue({
-        data: { id: 'user1', empresa_id: 'empresa1', is_admin: false },
-        error: null,
-      });
-
-      const result = await verifyEmpresaAdminAccess('user1', 'empresa1');
-      expect(result.isAdmin).toBe(false);
-      expect(result.error).toContain('does not have admin privileges');
-    });
-
-    it('should return false for user not in empresa', async () => {
-      const mockClient = require('@/app/shared/core/database/database').getDatabaseClient();
-      const mockMaybeSingle = mockClient.from().select().eq().eq().maybeSingle;
+      // First query (usuarios) checks for role - return null (no admin role)
+      // Second query (usuarios_empresas) filters by is_admin=true - return null (no match)
       mockMaybeSingle.mockResolvedValue({
         data: null,
         error: null,
@@ -129,7 +141,18 @@ describe('Brand Customization Access Control Middleware', () => {
 
       const result = await verifyEmpresaAdminAccess('user1', 'empresa1');
       expect(result.isAdmin).toBe(false);
-      expect(result.error).toContain('not a professor in the specified empresa');
+      expect(result.error).toContain('does not have admin privileges'); // Updated expected message
+    });
+
+    it('should return false for user not in empresa', async () => {
+      mockMaybeSingle.mockResolvedValue({
+        data: null,
+        error: null,
+      });
+
+      const result = await verifyEmpresaAdminAccess('user1', 'empresa1');
+      expect(result.isAdmin).toBe(false);
+      expect(result.error).toContain('User does not have admin privileges in the empresa');
     });
   });
 
@@ -179,8 +202,7 @@ describe('Brand Customization Access Control Middleware', () => {
       });
 
       // Mock successful admin verification
-      const mockClient = require('@/app/shared/core/database/database').getDatabaseClient();
-      mockClient.from().select().eq().eq().maybeSingle.mockResolvedValue({
+      mockMaybeSingle.mockResolvedValue({
         data: { id: 'user1', empresa_id: 'empresa1', is_admin: true },
         error: null,
       });
