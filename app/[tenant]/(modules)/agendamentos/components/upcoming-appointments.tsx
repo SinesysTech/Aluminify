@@ -33,7 +33,7 @@ function getStatusBadge(status: UpcomingAppointment['status']) {
       )
     case 'pendente':
       return (
-        <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-[10px]">
+        <Badge variant="secondary" className="bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 text-[10px]">
           Pendente
         </Badge>
       )

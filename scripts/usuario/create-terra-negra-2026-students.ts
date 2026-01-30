@@ -88,6 +88,24 @@ const students: StudentInput[] = [
     cpf: "44074639882",
     phone: "16991703993",
   },
+  {
+    fullName: "Jordan Medeiros",
+    email: "jsmdan@gmail.com",
+    cpf: "11536816680",
+    phone: "31992692951",
+  },
+  {
+    fullName: "Rita Barbosa",
+    email: "ritaclbarbosa@gmail.com",
+    cpf: "098.906.524-39",
+    phone: "+55(83) 987167023",
+  },
+  {
+    fullName: "Letícia Satie Yatabe",
+    email: "yatabeleticia@gmail.com",
+    cpf: "130.232.067-08",
+    phone: "+55(21)965774587",
+  },
 ];
 
 function normalizeEmail(email: string): string {

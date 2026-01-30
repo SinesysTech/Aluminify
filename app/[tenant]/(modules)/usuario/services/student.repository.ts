@@ -194,10 +194,43 @@ export class StudentRepositoryImpl implements StudentRepository {
       }
 
       studentIdsToFilter = (courseLinks ?? []).map((link) => link.usuario_id);
+    } else if (params?.empresaId) {
+      // Listar apenas alunos matriculados em algum curso da empresa (alunos_cursos).
+      // Assim usuários que só têm usuarios.empresa_id = X mas nenhuma matrícula não aparecem.
+      const { data: cursos, error: cursosError } = await this.client
+        .from(COURSES_TABLE)
+        .select("id")
+        .eq("empresa_id", params.empresaId);
+
+      if (cursosError) {
+        throw new Error(
+          `Failed to fetch courses by empresa: ${cursosError.message}`,
+        );
+      }
+
+      const cursoIds = (cursos ?? []).map((c: { id: string }) => c.id);
+      if (cursoIds.length === 0) {
+        studentIdsToFilter = [];
+      } else {
+        const { data: alunosCursos, error: acError } = await this.client
+          .from(COURSE_LINK_TABLE)
+          .select("usuario_id")
+          .in("curso_id", cursoIds);
+
+        if (acError) {
+          throw new Error(
+            `Failed to fetch students by empresa: ${acError.message}`,
+          );
+        }
+
+        studentIdsToFilter = Array.from(
+          new Set(
+            (alunosCursos ?? []).map((ac: { usuario_id: string }) => ac.usuario_id),
+          ),
+        );
+      }
     } else {
-      // Sem turma/course: não aplicar filtro por IDs. O RLS em alunos já restringe
-      // (admins veem apenas alunos matriculados em cursos da empresa).
-      // Evita .in("id", [...]) com milhares de UUIDs, que causa 400 Bad Request por limite de URL.
+      // Sem turma/course/empresa: não aplicar filtro por IDs. O RLS em usuarios já restringe.
       studentIdsToFilter = null;
     }
 
