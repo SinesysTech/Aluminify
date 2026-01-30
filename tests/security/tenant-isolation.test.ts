@@ -7,6 +7,7 @@
  * - Users cannot write data to other tenants
  * - Helper functions return correct tenant context
  * - Cross-tenant joins are blocked
+ * - Multi-org: userBelongsToTenant and getEffectiveEmpresaId
  *
  * Prerequisites:
  * - SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars must be set
@@ -15,6 +16,11 @@
 
 import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import {
+  userBelongsToTenant,
+  getEffectiveEmpresaId,
+} from "@/app/shared/core/effective-empresa";
+import type { AuthUser } from "@/app/[tenant]/auth/types";
 
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -24,7 +30,13 @@ const SUPABASE_ANON_KEY =
 
 const hasEnv = SUPABASE_URL && SUPABASE_SERVICE_KEY && SUPABASE_ANON_KEY;
 
-const describeIfEnv = hasEnv ? describe : describe.skip;
+// Skip DB-dependent tests when using placeholder env (setup.ts fallbacks)
+const hasRealSupabase =
+  hasEnv &&
+  !SUPABASE_URL!.includes("example.supabase.co") &&
+  SUPABASE_SERVICE_KEY !== "test-service-role-key";
+
+const describeIfEnv = hasRealSupabase ? describe : describe.skip;
 
 interface TestTenant {
   empresaId: string;
@@ -55,10 +67,9 @@ describeIfEnv("Tenant Isolation Security", () => {
       .limit(2);
 
     if (!empresas || empresas.length < 2) {
-      console.warn(
-        "Need at least 2 active empresas for tenant isolation tests. Skipping.",
+      throw new Error(
+        "Need at least 2 active empresas for tenant isolation tests. Add more empresas to your test database.",
       );
-      return;
     }
 
     // 2. Create Test User A (Tenant A)
@@ -145,11 +156,13 @@ describeIfEnv("Tenant Isolation Security", () => {
   });
 
   afterAll(async () => {
-    // Cleanup users
-    if (tenantA?.userId)
-      await serviceClient.auth.admin.deleteUser(tenantA.userId);
-    if (tenantB?.userId)
-      await serviceClient.auth.admin.deleteUser(tenantB.userId);
+    if (!tenantA && !tenantB) return;
+    if (serviceClient) {
+      if (tenantA?.userId)
+        await serviceClient.auth.admin.deleteUser(tenantA.userId);
+      if (tenantB?.userId)
+        await serviceClient.auth.admin.deleteUser(tenantB.userId);
+    }
   });
 
   describe("Helper Functions", () => {
@@ -306,6 +319,167 @@ describeIfEnv("Tenant Isolation Security", () => {
       }
 
       expect(criticalTables.length).toBeGreaterThan(0);
+    });
+  });
+});
+
+describeIfEnv("Multi-Org Effective Empresa", () => {
+  let serviceClient: SupabaseClient;
+  let empresaAId: string;
+  let empresaBId: string;
+  let multiOrgUserId: string;
+  let multiOrgUserEmail: string;
+  const testPassword = "test-multiorg-123!";
+
+  beforeAll(async () => {
+    serviceClient = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    const { data: empresas } = await serviceClient
+      .from("empresas")
+      .select("id, slug")
+      .eq("ativo", true)
+      .limit(2);
+
+    if (!empresas || empresas.length < 2) {
+      throw new Error(
+        "Need at least 2 empresas for multi-org tests. Add more empresas to your test database.",
+      );
+    }
+
+    empresaAId = empresas[0].id;
+    empresaBId = empresas[1].id;
+
+    multiOrgUserEmail = `test_multiorg_${Date.now()}@example.com`;
+    const { data: authUser, error: authErr } =
+      await serviceClient.auth.admin.createUser({
+        email: multiOrgUserEmail,
+        password: testPassword,
+        email_confirm: true,
+      });
+
+    if (authErr || !authUser.user) throw new Error("Failed to create multi-org user");
+    multiOrgUserId = authUser.user.id;
+
+    await serviceClient.from("usuarios").insert({
+      id: multiOrgUserId,
+      email: multiOrgUserEmail,
+      empresa_id: empresaAId,
+      nome: "Test Multi-Org Student",
+      ativo: true,
+    });
+
+    await serviceClient.from("usuarios_empresas").insert([
+      {
+        usuario_id: multiOrgUserId,
+        empresa_id: empresaAId,
+        papel_base: "aluno",
+        ativo: true,
+        is_admin: false,
+        is_owner: false,
+      },
+      {
+        usuario_id: multiOrgUserId,
+        empresa_id: empresaBId,
+        papel_base: "aluno",
+        ativo: true,
+        is_admin: false,
+        is_owner: false,
+      },
+    ]);
+  });
+
+  afterAll(async () => {
+    if (multiOrgUserId) {
+      await serviceClient
+        .from("usuarios_empresas")
+        .delete()
+        .eq("usuario_id", multiOrgUserId);
+      await serviceClient.from("usuarios").delete().eq("id", multiOrgUserId);
+      await serviceClient.auth.admin.deleteUser(multiOrgUserId);
+    }
+  });
+
+  describe("userBelongsToTenant", () => {
+    it("returns true when user belongs to tenant (empresa A)", async () => {
+      const result = await userBelongsToTenant(multiOrgUserId, empresaAId);
+      expect(result).toBe(true);
+    });
+
+    it("returns true when user belongs to tenant (empresa B)", async () => {
+      const result = await userBelongsToTenant(multiOrgUserId, empresaBId);
+      expect(result).toBe(true);
+    });
+
+    it("returns false when user does not belong to tenant", async () => {
+      const fakeEmpresaId = "00000000-0000-0000-0000-000000000001";
+      const result = await userBelongsToTenant(multiOrgUserId, fakeEmpresaId);
+      expect(result).toBe(false);
+    });
+
+    it("returns false for non-existent user", async () => {
+      const fakeUserId = "00000000-0000-0000-0000-000000000002";
+      const result = await userBelongsToTenant(fakeUserId, empresaAId);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe("getEffectiveEmpresaId", () => {
+    const baseUser: AuthUser = {
+      id: multiOrgUserId,
+      email: multiOrgUserEmail,
+      role: "aluno",
+      isAdmin: false,
+      empresaId: empresaAId,
+      name: "Test Multi-Org",
+    };
+
+    function createRequest(tenantId: string | null): Request {
+      const headers = new Headers();
+      if (tenantId) headers.set("x-tenant-id", tenantId);
+      return new Request("http://localhost/api/test", { headers });
+    }
+
+    it("returns x-tenant-id when header present and user belongs to tenant", async () => {
+      const req = createRequest(empresaBId);
+      const result = await getEffectiveEmpresaId(
+        req as unknown as import("next/server").NextRequest,
+        { ...baseUser, empresaId: empresaAId },
+      );
+      expect(result).toBe(empresaBId);
+    });
+
+    it("returns user.empresaId when no x-tenant-id header", async () => {
+      const req = createRequest(null);
+      const result = await getEffectiveEmpresaId(
+        req as unknown as import("next/server").NextRequest,
+        { ...baseUser, empresaId: empresaAId },
+      );
+      expect(result).toBe(empresaAId);
+    });
+
+    it("fallbacks to user.empresaId when x-tenant-id is invalid (user does not belong)", async () => {
+      const req = createRequest("00000000-0000-0000-0000-000000000001");
+      const result = await getEffectiveEmpresaId(
+        req as unknown as import("next/server").NextRequest,
+        { ...baseUser, empresaId: empresaAId },
+      );
+      expect(result).toBe(empresaAId);
+    });
+
+    it("returns header value when staff user belongs to tenant via usuarios", async () => {
+      const staffUser: AuthUser = {
+        ...baseUser,
+        role: "usuario",
+        empresaId: empresaAId,
+      };
+      const req = createRequest(empresaAId);
+      const result = await getEffectiveEmpresaId(
+        req as unknown as import("next/server").NextRequest,
+        staffUser,
+      );
+      expect(result).toBe(empresaAId);
     });
   });
 });

@@ -186,11 +186,13 @@ export async function updateSession(request: NextRequest) {
   });
 
   // --- 2. TENANT RESOLUTION (VIA SERVICE) ---
+  const referer = request.headers.get("referer");
   const tenantContext = await resolveTenantContext(
     supabase,
     host,
     pathname,
     isLikelyPublic,
+    { referer },
   );
 
   if (tenantContext.empresaId) {

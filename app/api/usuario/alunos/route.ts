@@ -175,8 +175,18 @@ async function postHandler(request: AuthenticatedRequest) {
       );
     }
 
-    // Obter empresaId do usuário autenticado ou do body
-    const empresaId = body?.empresaId || request.user?.empresaId;
+    // Obter empresaId: priorizar o tenant ativo (effective) do request; validar body se fornecido
+    const effectiveEmpresaId = request.user?.empresaId;
+    const bodyEmpresaId = body?.empresaId;
+
+    if (bodyEmpresaId && effectiveEmpresaId && bodyEmpresaId !== effectiveEmpresaId) {
+      return NextResponse.json(
+        { error: "empresaId do body não corresponde ao tenant ativo" },
+        { status: 403 },
+      );
+    }
+
+    const empresaId = effectiveEmpresaId || bodyEmpresaId;
 
     if (!empresaId) {
       return NextResponse.json(

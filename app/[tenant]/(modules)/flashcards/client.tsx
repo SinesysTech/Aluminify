@@ -2,6 +2,8 @@
 
 import React from 'react'
 import { createClient } from '@/app/shared/core/client'
+import { useOptionalTenantContext } from '@/app/[tenant]/tenant-context'
+import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
 import { Flashcard, Curso, Disciplina, Frente, Modulo } from './types'
 import * as flashcardsService from './actions'
 import { ModeSelector } from './components/mode-selector'
@@ -10,6 +12,10 @@ import { StudySession } from './components/study-session'
 import { SessionSummary } from './components/session-summary'
 
 export default function FlashcardsClient() {
+    const tenantContext = useOptionalTenantContext()
+    const { activeOrganization } = useStudentOrganizations()
+    // Empresa ativa: para alunos multi-org usa activeOrganization, senão tenant da URL
+    const empresaId = activeOrganization?.id ?? tenantContext?.empresaId ?? undefined
     const supabase = createClient()
     const [modo, setModo] = React.useState<string | null>(null)
     const [scope, setScope] = React.useState<'all' | 'completed'>('all')
@@ -67,7 +73,8 @@ export default function FlashcardsClient() {
                     cursoId,
                     frenteId,
                     moduloId,
-                    excludeIds
+                    excludeIds,
+                    empresaId
                 )
 
                 setCards(newCards)
@@ -81,7 +88,7 @@ export default function FlashcardsClient() {
                 setLoading(false)
             }
         },
-        []
+        [empresaId]
     )
 
     // Auto-refresh ao trocar escopo
@@ -103,7 +110,7 @@ export default function FlashcardsClient() {
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) return
 
-                const cursosData = await flashcardsService.getCursos()
+                const cursosData = await flashcardsService.getCursos(empresaId)
                 setCursos(cursosData)
             } catch (err) {
                 console.error('Erro ao carregar cursos:', err)
@@ -114,7 +121,7 @@ export default function FlashcardsClient() {
         }
 
         loadCursos()
-    }, [supabase])
+    }, [supabase, empresaId])
 
     // Carregar disciplinas
     React.useEffect(() => {

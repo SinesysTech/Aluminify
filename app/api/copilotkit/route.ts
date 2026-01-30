@@ -31,6 +31,7 @@ import type { Parameter } from "@copilotkit/shared";
 import { MastraAgent } from "@ag-ui/mastra";
 import OpenAI from "openai";
 import { getAuthUser } from "@/app/[tenant]/auth/middleware";
+import { getEffectiveEmpresaId } from "@/app/shared/core/effective-empresa";
 import { createCopilotKitActions } from "@/app/shared/lib/copilotkit/actions";
 import { createMastraWithContext } from "@/app/shared/lib/mastra";
 import { getDatabaseClient } from "@/app/shared/core/database/database";
@@ -67,14 +68,20 @@ const DEFAULT_AGENT_CONFIG: AIAgentChatConfig = {
 
 export const POST = async (req: NextRequest) => {
   // Authenticate the user
-  const user = await getAuthUser(req);
+  const authUser = await getAuthUser(req);
 
-  if (!user) {
+  if (!authUser) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  // Use effective empresa (from x-tenant-id when valid) for tenant-scoped context
+  const user = {
+    ...authUser,
+    empresaId: (await getEffectiveEmpresaId(req, authUser)) ?? authUser.empresaId,
+  };
 
   // Log the authenticated user context
   if (process.env.NODE_ENV === "development") {

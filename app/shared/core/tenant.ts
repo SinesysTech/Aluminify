@@ -14,6 +14,7 @@ import { redirect } from "next/navigation";
 
 import { requireUser } from "@/app/shared/core/auth";
 import { getDatabaseClient } from "@/app/shared/core/database/database";
+import { userBelongsToTenant } from "@/app/shared/core/effective-empresa";
 import type { AppUser, AppUserRole } from "@/app/shared/types";
 
 type LegacyAppUserRole = "professor" | "empresa";
@@ -103,8 +104,15 @@ export async function requireTenantUser(
     redirect(fallback);
   }
 
-  if (user.empresaId && user.empresaId !== tenant.empresaId) {
-    // User doesn't belong to this tenant - redirect to their own
+  // Staff: must have empresaId matching tenant. Alunos: can access any tenant they're enrolled in
+  if (user.role === "aluno") {
+    const belongs = await userBelongsToTenant(user.id, tenant.empresaId);
+    if (!belongs) {
+      const fallback = user.empresaSlug ? `/${user.empresaSlug}` : "/auth";
+      redirect(fallback);
+    }
+  } else if (user.empresaId && user.empresaId !== tenant.empresaId) {
+    // Staff doesn't belong to this tenant
     const fallback = user.empresaSlug ? `/${user.empresaSlug}` : "/auth";
     redirect(fallback);
   }

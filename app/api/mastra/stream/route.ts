@@ -7,6 +7,7 @@
 
 import { NextRequest } from "next/server";
 import { getAuthUser } from "@/app/[tenant]/auth/middleware";
+import { getEffectiveEmpresaId } from "@/app/shared/core/effective-empresa";
 import { createStudyAssistantAgent } from "@/app/shared/lib/mastra";
 import { AIAgentsService } from "@/app/shared/services/ai-agents";
 import { getDatabaseClient } from "@/app/shared/core/database/database";
@@ -21,14 +22,19 @@ interface ChatMessage {
 export async function POST(req: NextRequest) {
   try {
     // Authenticate the user
-    const user = await getAuthUser(req);
+    const authUser = await getAuthUser(req);
 
-    if (!user) {
+    if (!authUser) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { "Content-Type": "application/json" },
       });
     }
+
+    // Use effective empresa (from x-tenant-id when valid) for tenant-scoped context
+    const effectiveEmpresaId =
+      (await getEffectiveEmpresaId(req, authUser)) ?? authUser.empresaId;
+    const user = { ...authUser, empresaId: effectiveEmpresaId };
 
     // Parse request body
     const body = await req.json();

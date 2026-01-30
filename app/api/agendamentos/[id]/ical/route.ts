@@ -64,6 +64,12 @@ async function getHandler(
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  // Multi-tenant: agendamento must belong to active tenant
+  const activeEmpresaId = request.user?.empresaId
+  if (activeEmpresaId && typedAgendamento.empresa_id !== activeEmpresaId) {
+    return NextResponse.json({ error: 'Agendamento não pertence à organização ativa' }, { status: 403 })
+  }
+
   try {
     // Create calendar
     const calendar = ical({

@@ -9,19 +9,23 @@ async function handler(request: AuthenticatedRequest) {
     const cursoId = searchParams.get('cursoId') || undefined;
     const frenteId = searchParams.get('frenteId') || undefined;
     const moduloId = searchParams.get('moduloId') || undefined;
+    const empresaId =
+      searchParams.get('empresa_id') || request.user?.empresaId || undefined;
     const scopeParam = searchParams.get('scope') || undefined;
     const scope: FlashcardsReviewScope = scopeParam === 'completed' ? 'completed' : 'all';
-    
+
     // Parâmetro para excluir cards já vistos na sessão
     const excludeIdsParam = searchParams.get('excludeIds');
     const excludeIds = excludeIdsParam ? excludeIdsParam.split(',').filter(Boolean) : undefined;
 
-    console.log(`[flashcards/revisao] Requisição recebida - modo: ${modo}, alunoId: ${request.user!.id}`);
+    console.log(
+      `[flashcards/revisao] Requisição recebida - modo: ${modo}, alunoId: ${request.user!.id}, empresaId: ${empresaId || '(todas)'}`,
+    );
     const flashcardsService = createFlashcardsService();
     const data = await flashcardsService.listForReview(
       request.user!.id,
       modo,
-      { cursoId, frenteId, moduloId },
+      { cursoId, frenteId, moduloId, empresaId },
       excludeIds,
       scope,
     );

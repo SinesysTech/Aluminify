@@ -33,12 +33,19 @@ async function getAuthToken(): Promise<string | null> {
   }
 }
 
+export interface ApiRequestOptions extends Omit<RequestInit, 'headers'> {
+  headers?: Record<string, string>
+  /** Tenant (empresa) ID - adds x-tenant-id header for proper multi-tenant filtering */
+  tenantId?: string
+}
+
 async function apiRequest<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: ApiRequestOptions = {}
 ): Promise<T> {
   const token = await getAuthToken()
-  
+  const { tenantId, ...requestInit } = options
+
   const headers: Record<string, string> = {
     'Content-Type': 'application/json; charset=utf-8',
     ...(options.headers as Record<string, string>),
@@ -46,6 +53,9 @@ async function apiRequest<T>(
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`
+  }
+  if (tenantId) {
+    headers['x-tenant-id'] = tenantId
   }
 
   // Log da requisição em desenvolvimento
@@ -58,7 +68,7 @@ async function apiRequest<T>(
   }
 
   const response = await fetch(endpoint, {
-    ...options,
+    ...requestInit,
     headers,
     // Garantir que cookies de sessão (mesma origem) sejam enviados,
     // permitindo o fallback de auth por cookie no server.
@@ -255,26 +265,28 @@ async function apiRequest<T>(
 }
 
 export const apiClient = {
-  async get<T>(endpoint: string): Promise<T> {
-    return apiRequest<T>(endpoint, { method: 'GET' })
+  async get<T>(endpoint: string, options?: ApiRequestOptions): Promise<T> {
+    return apiRequest<T>(endpoint, { ...options, method: 'GET' })
   },
 
-  async post<T>(endpoint: string, data?: unknown): Promise<T> {
+  async post<T>(endpoint: string, data?: unknown, options?: ApiRequestOptions): Promise<T> {
     return apiRequest<T>(endpoint, {
+      ...options,
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
     })
   },
 
-  async put<T>(endpoint: string, data?: unknown): Promise<T> {
+  async put<T>(endpoint: string, data?: unknown, options?: ApiRequestOptions): Promise<T> {
     return apiRequest<T>(endpoint, {
+      ...options,
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
     })
   },
 
-  async delete<T>(endpoint: string): Promise<T> {
-    return apiRequest<T>(endpoint, { method: 'DELETE' })
+  async delete<T>(endpoint: string, options?: ApiRequestOptions): Promise<T> {
+    return apiRequest<T>(endpoint, { ...options, method: 'DELETE' })
   },
 }
 

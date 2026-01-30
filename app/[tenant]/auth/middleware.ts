@@ -3,6 +3,7 @@ import { getDatabaseClient } from "@/app/shared/core/database/database";
 import { AuthUser, UserRole, ApiKeyAuth } from "./types";
 import { apiKeyService } from "@/app/shared/core/services/api-key";
 import { getImpersonationContext } from "@/app/shared/core/auth-impersonate";
+import { getEffectiveEmpresaId } from "@/app/shared/core/effective-empresa";
 import type {
   RoleTipo,
   RolePermissions,
@@ -227,6 +228,14 @@ export function requireAuth<TContext = unknown>(
     const authenticatedRequest = request as AuthenticatedRequest;
     if ("user" in auth) {
       authenticatedRequest.user = auth.user;
+      // Override empresaId with effective tenant (from x-tenant-id when user belongs to that tenant)
+      const effectiveEmpresaId = await getEffectiveEmpresaId(
+        request,
+        auth.user,
+      );
+      if (effectiveEmpresaId) {
+        authenticatedRequest.user = { ...auth.user, empresaId: effectiveEmpresaId };
+      }
     } else {
       authenticatedRequest.apiKey = auth.apiKey;
     }
@@ -268,11 +277,17 @@ export function requireUserAuth(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Override empresaId with effective tenant (from x-tenant-id when user belongs to that tenant)
+    const effectiveEmpresaId = await getEffectiveEmpresaId(request, user);
+    const userWithEffectiveEmpresa = effectiveEmpresaId
+      ? { ...user, empresaId: effectiveEmpresaId }
+      : user;
+
     // Verificar contexto de impersonação
     const impersonationContext = await getImpersonationContext();
 
     const authenticatedRequest = request as AuthenticatedRequest;
-    authenticatedRequest.user = user;
+    authenticatedRequest.user = userWithEffectiveEmpresa;
     if (impersonationContext && impersonationContext.realUserId === user.id) {
       authenticatedRequest.impersonationContext = impersonationContext;
     }

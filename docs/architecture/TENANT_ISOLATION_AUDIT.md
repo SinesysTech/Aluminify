@@ -181,3 +181,44 @@ alunos_turmas (junction via turmas + usuarios)
 - **Global config tables**: `module_definitions` and `submodule_definitions` use `USING(true)` which is correct for system-wide configuration data.
 - **Superadmin removed**: The superadmin role was entirely removed (migration 20260129). Cross-tenant admin will be handled by a separate application using the service role key.
 - **Quota enforcement**: The `tenant_quotas` table supports both hard limits (e.g. max users, max storage) and windowed rate limits (e.g. API requests per minute). Use `check_tenant_quota()` for atomic DB-level enforcement, or `rateLimitService.setQuotaOverride()` for in-memory rate limiting with DB-sourced configs.
+
+---
+
+## 6. Varredura MCP Supabase (2026-01-30)
+
+### 6.1 Políticas RLS com `aluno_matriculado_empresa`
+
+As políticas abaixo permitem acesso tanto para staff (`get_user_empresa_id()`) quanto para alunos matriculados na empresa (`aluno_matriculado_empresa(empresa_id)`). Isso é correto como rede de segurança; a camada de aplicação deve filtrar por `empresa_id` do tenant ativo (via `getEffectiveEmpresaId`).
+
+| Tabela | Política | Uso |
+|--------|----------|-----|
+| agendamento_disponibilidade | Disponibilidade visivel por empresa | SELECT |
+| agendamentos | Criar agendamentos na empresa | INSERT |
+| atividades | Atividades visiveis por empresa | SELECT |
+| aulas | Aulas visiveis por empresa | SELECT |
+| cursos | Cursos visiveis por empresa | SELECT |
+| cursos_disciplinas | Relacoes curso-disciplina visiveis | SELECT |
+| flashcards | flashcards_select_policy | SELECT |
+| frentes | Frentes visiveis por empresa | SELECT |
+| materiais_curso | Materiais visiveis por empresa | SELECT |
+| modulos | Modulos visiveis por empresa | SELECT |
+| regras_atividades | Regras visiveis por empresa | SELECT |
+| segmentos | Segmentos visiveis por empresa | SELECT |
+
+### 6.2 Funções SECURITY DEFINER
+
+Confirmado que as funções auxiliares críticas estão com SECURITY DEFINER:
+
+| Função | SECURITY DEFINER |
+|--------|------------------|
+| `aluno_matriculado_empresa` | Sim |
+| `get_aluno_empresas` | Sim |
+| `get_user_empresa_id` | Sim |
+
+### 6.3 Tabelas com `empresa_id` e RLS
+
+**Resultado:** Todas as 44 tabelas com coluna `empresa_id` possuem RLS habilitado (`relrowsecurity = true`).
+
+### 6.4 Advisory de Segurança (Supabase)
+
+- **Leaked Password Protection Disabled**: Supabase Auth pode verificar senhas comprometidas via HaveIBeenPwned.org. Considerar habilitar em: https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection

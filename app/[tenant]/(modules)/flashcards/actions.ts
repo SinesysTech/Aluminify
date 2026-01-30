@@ -4,13 +4,13 @@ import { createClient } from '@/app/shared/core/server'
 import { flashcardsService } from './services/flashcards.service'
 import { FlashcardsReviewScope } from './services/flashcards.service'
 
-export async function getCursos() {
+export async function getCursos(empresaId?: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) throw new Error('Unauthorized')
 
-    return flashcardsService.getCursos(user.id)
+    return flashcardsService.getCursos(user.id, empresaId)
 }
 
 export async function getDisciplinas(cursoId: string) {
@@ -40,20 +40,22 @@ export async function getFlashcards(
     cursoId?: string,
     frenteId?: string,
     moduloId?: string,
-    excludeIds?: string[]
+    excludeIds?: string[],
+    empresaId?: string
 ) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     if (!user) throw new Error('Unauthorized')
-    
+
     // Adapting parameters to listForReview
     // listForReview(alunoId, modo, filters, excludeIds, scope)
     const filters = {
         cursoId,
         frenteId,
-        moduloId
+        moduloId,
+        empresaId,
     }
-    
+
     return flashcardsService.listForReview(user.id, modo, filters, excludeIds, scope)
 }

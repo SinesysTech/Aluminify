@@ -489,7 +489,7 @@ export class FlashcardsService {
     return moduloIds;
   }
 
-  async getCursos(userId: string): Promise<CursoRow[]> {
+  async getCursos(userId: string, empresaId?: string): Promise<CursoRow[]> {
     // Buscar apenas cursos em que o aluno está matriculado
     const { data, error } = await this.client
       .from("alunos_cursos")
@@ -498,10 +498,17 @@ export class FlashcardsService {
 
     if (error) throw new Error(error.message);
 
-    // Extrair os cursos do resultado do join
-    return (data || [])
+    let cursos = (data || [])
       .map((row: { curso: CursoRow | null }) => row.curso)
       .filter((curso): curso is CursoRow => curso !== null);
+
+    if (empresaId) {
+      cursos = cursos.filter(
+        (c) => (c as CursoRow & { empresa_id?: string }).empresa_id === empresaId,
+      );
+    }
+
+    return cursos;
   }
 
   async getDisciplinas(cursoId: string): Promise<{id: string; nome: string}[]> {
@@ -553,7 +560,7 @@ export class FlashcardsService {
   async listForReview(
     alunoId: string,
     modo: string,
-    filters?: { cursoId?: string; frenteId?: string; moduloId?: string },
+    filters?: { cursoId?: string; frenteId?: string; moduloId?: string; empresaId?: string },
     excludeIds?: string[],
     scope: FlashcardsReviewScope = "all",
   ): Promise<FlashcardReviewItem[]> {
@@ -783,11 +790,18 @@ export class FlashcardsService {
         `[flashcards] Professor tem acesso a ${cursoIds.length} cursos da empresa`,
       );
     } else {
-      // Alunos: buscar cursos matriculados
-      console.log(`[flashcards] Usuário é aluno, buscando cursos matriculados`);
+      // Alunos: buscar cursos matriculados, filtrados por empresa quando empresaId fornecido
+      const empresaIdFilter = filters?.empresaId;
+      console.log(
+        `[flashcards] Usuário é aluno, buscando cursos matriculados${empresaIdFilter ? ` (empresa: ${empresaIdFilter})` : ""}`,
+      );
+
+      const cursoIdSet = new Set<string>();
+
+      // 1. alunos_cursos (legacy) -> cursos.empresa_id
       const { data: alunosCursos, error: alunosCursosError } = await this.client
         .from("alunos_cursos")
-        .select("curso_id")
+        .select("curso_id, cursos!inner(empresa_id)")
         .eq("usuario_id", alunoId);
 
       if (alunosCursosError) {
@@ -796,14 +810,41 @@ export class FlashcardsService {
         );
       }
 
-      if (!alunosCursos || alunosCursos.length === 0) {
-        console.warn(`[flashcards] Aluno sem cursos matriculados`);
-        return []; // Aluno sem cursos matriculados
+      for (const ac of alunosCursos ?? []) {
+        const row = ac as { curso_id: string; cursos?: { empresa_id?: string } };
+        const empId = row.cursos?.empresa_id;
+        if (!empresaIdFilter || empId === empresaIdFilter) {
+          cursoIdSet.add(row.curso_id);
+        }
       }
 
-      cursoIds = alunosCursos.map((ac: { curso_id: string }) => ac.curso_id);
+      // 2. matriculas (nova estrutura) - tem empresa_id direto
+      const matriculasQuery = this.client
+        .from("matriculas")
+        .select("curso_id, empresa_id")
+        .eq("usuario_id", alunoId)
+        .eq("ativo", true);
+
+      const { data: matriculas } = await matriculasQuery;
+
+      for (const m of matriculas ?? []) {
+        const row = m as { curso_id?: string; empresa_id?: string };
+        if (row.curso_id && (!empresaIdFilter || row.empresa_id === empresaIdFilter)) {
+          cursoIdSet.add(row.curso_id);
+        }
+      }
+
+      cursoIds = Array.from(cursoIdSet);
+
+      if (cursoIds.length === 0) {
+        console.warn(
+          `[flashcards] Aluno sem cursos matriculados${empresaIdFilter ? " nesta empresa" : ""}`,
+        );
+        return [];
+      }
+
       console.log(
-        `[flashcards] Aluno matriculado em ${cursoIds.length} cursos`,
+        `[flashcards] Aluno matriculado em ${cursoIds.length} cursos${empresaIdFilter ? " da empresa ativa" : ""}`,
       );
     }
 

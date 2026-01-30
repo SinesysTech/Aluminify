@@ -133,20 +133,46 @@ export function extractTenantFromPath(pathname: string): string | null {
 }
 
 /**
+ * Extract tenant slug from Referer URL (e.g. for API requests from tenant pages)
+ */
+function extractTenantFromReferer(referer: string | null): string | null {
+  if (!referer) return null;
+  try {
+    const url = new URL(referer);
+    const segments = url.pathname.split("/").filter(Boolean);
+    if (segments.length > 0 && /^[a-z0-9-]+$/.test(segments[0])) {
+      const first = segments[0].toLowerCase();
+      if (!["api", "auth", "admin", "static", "_next"].includes(first)) {
+        return segments[0];
+      }
+    }
+  } catch {
+    // Invalid URL
+  }
+  return null;
+}
+
+/**
  * Resolve tenant context based on host and pathname.
  * Uses caching and database lookups.
+ * For API routes, also tries Referer header to get tenant from originating page.
  */
 export async function resolveTenantContext(
   supabase: SupabaseClient<Database>,
   host: string,
   pathname: string,
   isLikelyPublic: boolean,
+  options?: { referer?: string | null },
 ): Promise<TenantContext> {
   let tenantContext: TenantContext = {};
 
+  // For /api/* and similar, pathname doesn't have tenant - try Referer from client navigation
+  let potentialSlug = extractTenantFromPath(pathname) || "";
+  if (!potentialSlug && pathname.startsWith("/api/") && options?.referer) {
+    potentialSlug = extractTenantFromReferer(options.referer) || "";
+  }
+
   // Cache key combines host and the first path segment (potential slug)
-  // This handles both subdomain/custom domain calls and path-based slug calls
-  const potentialSlug = pathname.split("/")[1] || "";
   const cacheKey = `tenant:${host}:${potentialSlug}`;
 
   const cachedTenant = getCachedTenant(cacheKey);
@@ -207,13 +233,11 @@ export async function resolveTenantContext(
       }
     }
 
-    if (!tenantContext.empresaId) {
-      const tenantSlug = extractTenantFromPath(pathname);
-      if (tenantSlug) {
-        const { data: empresaData } = await supabase
+    if (!tenantContext.empresaId && potentialSlug) {
+      const { data: empresaData } = await supabase
           .from("empresas")
           .select("id, slug, nome")
-          .eq("slug", tenantSlug)
+          .eq("slug", potentialSlug)
           .eq("ativo", true)
           .maybeSingle();
 
@@ -225,7 +249,6 @@ export async function resolveTenantContext(
             resolutionType: "slug",
           };
         }
-      }
     }
 
     if (tenantContext.empresaId) {
