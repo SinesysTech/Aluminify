@@ -9,10 +9,11 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { createClient } from '@supabase/supabase-js';
 import fc from 'fast-check';
-import { BrandCustomizationManager } from '@/app/shared/core/services/brand-customization';
+import { BrandCustomizationManager } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization-manager';
 import { getDatabaseClient } from '@/app/shared/core/database/database';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 
 describe('Brand Customization State Management', () => {

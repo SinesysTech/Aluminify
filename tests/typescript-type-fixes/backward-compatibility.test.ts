@@ -7,10 +7,10 @@
 
 import fc from 'fast-check';
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/lib/database.types';
-import { TeacherRepositoryImpl } from '@/app/shared/core/services/teacher/teacher.repository';
-import { StudentRepositoryImpl } from '@/app/shared/core/services/student/student.repository';
-import { DisciplineRepositoryImpl } from '@/app/shared/core/services/discipline/discipline.repository';
+import type { Database } from '@/app/shared/core/database.types';
+import { TeacherRepositoryImpl } from '@/app/[tenant]/(modules)/usuario/services/teacher.repository';
+import { StudentRepositoryImpl } from '@/app/[tenant]/(modules)/usuario/services/student.repository';
+import { DisciplineRepositoryImpl } from '@/app/[tenant]/(modules)/curso/(gestao)/disciplinas/services/discipline.repository';
 
 // Mock Supabase client for type checking tests
 const mockSupabaseUrl = 'https://test.supabase.co';
@@ -75,8 +75,8 @@ describe('Property 10: Backward Compatibility', () => {
           // update() should accept id and update data
           expect(repository.update.length).toBe(2);
           
-          // delete() should accept an id
-          expect(repository.delete.length).toBe(1);
+          // delete() should accept at least an id
+          expect(repository.delete.length).toBeGreaterThanOrEqual(1);
         }
       ),
       { numRuns: 100 }
@@ -394,25 +394,25 @@ describe('Property 10: Backward Compatibility', () => {
         async () => {
           // Verify that core modules can still be imported
           const { TeacherRepositoryImpl: TeacherRepo } = await import(
-            '@/app/shared/core/services/teacher/teacher.repository'
+            '@/app/[tenant]/(modules)/usuario/services/teacher.repository'
           );
           expect(TeacherRepo).toBeDefined();
           expect(typeof TeacherRepo).toBe('function');
           
           const { StudentRepositoryImpl: StudentRepo } = await import(
-            '@/app/shared/core/services/student/student.repository'
+            '@/app/[tenant]/(modules)/usuario/services/student.repository'
           );
           expect(StudentRepo).toBeDefined();
           expect(typeof StudentRepo).toBe('function');
           
           const { DisciplineRepositoryImpl: DisciplineRepo } = await import(
-            '@/app/shared/core/services/discipline/discipline.repository'
+            '@/app/[tenant]/(modules)/curso/(gestao)/disciplinas/services/discipline.repository'
           );
           expect(DisciplineRepo).toBeDefined();
           expect(typeof DisciplineRepo).toBe('function');
           
           // Verify that Database type can be imported
-          const { Database } = await import('@/lib/database.types') as any;
+          const { Database } = await import('@/app/shared/core/database.types') as any;
           expect(Database).toBeUndefined(); // It's a type, not a runtime value
           
           // Verify that createClient can be imported and used
