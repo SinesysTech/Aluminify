@@ -291,8 +291,10 @@ export async function createBloqueio(
 
   // Use atomic stored procedure to create bloqueio and cancel conflicts
   // This prevents race condition where appointments could be created during bloqueio creation
-  const { data: bloqueioId, error: rpcError } = await supabase.rpc(
-    "create_bloqueio_and_cancel_conflicts",
+  // Using type casting since custom RPC function is not in generated types yet
+  const { data: bloqueioId, error: rpcError } = (await supabase.rpc(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    "create_bloqueio_and_cancel_conflicts" as any,
     {
       p_professor_id: data.professor_id || null,
       p_empresa_id: data.empresa_id,
@@ -302,11 +304,16 @@ export async function createBloqueio(
       p_motivo: data.motivo || null,
       p_criado_por: user.id,
     },
-  );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  )) as { data: string | null; error: any };
 
   if (rpcError) {
     console.error("Error creating bloqueio:", rpcError);
     throw new Error("Failed to create bloqueio");
+  }
+
+  if (!bloqueioId || typeof bloqueioId !== "string") {
+    throw new Error("Failed to create bloqueio: invalid response");
   }
 
   // Fetch the created bloqueio to return
