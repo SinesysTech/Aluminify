@@ -44,7 +44,6 @@ export function WorkspaceSwitcher() {
   const {
     organizations,
     activeOrganization,
-    setActiveOrganization,
     isMultiOrg,
     loading,
   } = useStudentOrganizations()

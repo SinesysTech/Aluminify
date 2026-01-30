@@ -551,7 +551,7 @@ describeIfEnv("Tenant Quotas", () => {
   });
 
   it("tenant_quotas table exists and has RLS enabled", async () => {
-    const { data, error } = await serviceClient
+    const { error } = await serviceClient
       .from("tenant_quotas")
       .select("id")
       .limit(0);
@@ -601,7 +601,7 @@ describeIfEnv("Audit Logging", () => {
   });
 
   it("tenant_access_log table exists and has RLS enabled", async () => {
-    const { data, error } = await serviceClient
+    const { error } = await serviceClient
       .from("tenant_access_log")
       .select("id")
       .limit(0);
