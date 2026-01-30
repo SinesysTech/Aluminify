@@ -17,21 +17,21 @@ function getPerformanceColor(score: number): string {
 }
 
 function getPerformanceTextColor(score: number): string {
-  if (score >= 80) return 'text-emerald-600'
-  if (score >= 60) return 'text-yellow-600'
-  if (score >= 40) return 'text-orange-600'
-  return 'text-red-600'
+  if (score >= 80) return 'text-emerald-600 dark:text-emerald-400'
+  if (score >= 60) return 'text-yellow-600 dark:text-yellow-400'
+  if (score >= 40) return 'text-orange-600 dark:text-orange-400'
+  return 'text-red-600 dark:text-red-400'
 }
 
 export function DisciplinaPerformanceList({ disciplinas }: DisciplinaPerformanceListProps) {
   return (
     <Card>
-      <CardHeader className="pb-3 pt-4 px-4">
+      <CardHeader className="pb-3 pt-4 px-4 md:px-5">
         <CardTitle className="text-sm font-semibold">
           Performance por Disciplina
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0 px-4 pb-4">
+      <CardContent className="pt-0 px-4 md:px-5 pb-4">
         {disciplinas.length === 0 ? (
           <div className="flex items-center justify-center min-h-[100px]">
             <p className="text-sm text-muted-foreground">
@@ -40,23 +40,26 @@ export function DisciplinaPerformanceList({ disciplinas }: DisciplinaPerformance
           </div>
         ) : (
           <ScrollArea className="h-52 pr-3">
-            <div className="space-y-3">
+            <div className="space-y-4">
               {disciplinas.map((disciplina) => (
-                <div key={disciplina.id} className="space-y-1.5">
-                  <div className="flex items-center justify-between">
+                <div key={disciplina.id} className="space-y-2">
+                  <div className="flex items-center justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{disciplina.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {disciplina.totalQuestoes} questões · {disciplina.alunosAtivos} alunos
                       </p>
                     </div>
-                    <span className={cn('text-sm font-bold ml-3', getPerformanceTextColor(disciplina.aproveitamento))}>
+                    <span className={cn('text-sm font-bold tabular-nums ml-3', getPerformanceTextColor(disciplina.aproveitamento))}>
                       {disciplina.aproveitamento}%
                     </span>
                   </div>
                   <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className={cn('h-full transition-all', getPerformanceColor(disciplina.aproveitamento))}
+                      className={cn(
+                        'h-full rounded-full transition-all duration-500 ease-out',
+                        getPerformanceColor(disciplina.aproveitamento)
+                      )}
                       style={{ width: `${disciplina.aproveitamento}%` }}
                     />
                   </div>
