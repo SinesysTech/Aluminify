@@ -1,4 +1,7 @@
 /**
+ * @jest-environment jsdom
+ */
+/**
  * Property-Based Tests - Logo Application Consistency
  * 
  * Tests logo application consistency for the brand customization system.
