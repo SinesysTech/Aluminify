@@ -295,7 +295,7 @@ export function CoverPage({
         </View>
       )}
 
-      <PdfFooter cronogramaNome={cronograma.nome} alunoNome={cronograma.aluno_nome} />
+      <PdfFooter cronogramaNome={cronograma.nome} alunoNome={cronograma.aluno_nome} cursoNome={cronograma.curso_nome} />
     </Page>
   )
 }
@@ -308,12 +308,14 @@ export function WeekPage({
   week,
   cronogramaNome,
   alunoNome,
+  cursoNome,
   colorMap,
   velocidade,
 }: {
   week: WeekGroup
   cronogramaNome: string
   alunoNome?: string
+  cursoNome?: string
   colorMap: Map<string, import('./pdf-theme').DisciplineColor>
   velocidade: number
 }) {
@@ -478,7 +480,7 @@ export function WeekPage({
         </View>
       )}
 
-      <PdfFooter cronogramaNome={cronogramaNome} alunoNome={alunoNome} />
+      <PdfFooter cronogramaNome={cronogramaNome} alunoNome={alunoNome} cursoNome={cursoNome} />
     </Page>
   )
 }
@@ -490,10 +492,12 @@ export function WeekPage({
 export function SummaryPage({
   cronogramaNome,
   alunoNome,
+  cursoNome,
   stats,
 }: {
   cronogramaNome: string
   alunoNome?: string
+  cursoNome?: string
   stats: OverallStats
 }) {
   return (
@@ -648,7 +652,7 @@ export function SummaryPage({
       {/* Mensagem motivacional */}
       <MotivationalMessage percent={stats.percent} />
 
-      <PdfFooter cronogramaNome={cronogramaNome} alunoNome={alunoNome} />
+      <PdfFooter cronogramaNome={cronogramaNome} alunoNome={alunoNome} cursoNome={cursoNome} />
     </Page>
   )
 }

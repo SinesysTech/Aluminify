@@ -187,6 +187,7 @@ async function getHandler(
           week={week}
           cronogramaNome={cronogramaExport.nome}
           alunoNome={alunoNome}
+          cursoNome={cursoNome}
           colorMap={stats.disciplineColorMap}
           velocidade={velocidade}
         />
@@ -194,6 +195,7 @@ async function getHandler(
       <SummaryPage
         cronogramaNome={cronogramaExport.nome}
         alunoNome={alunoNome}
+        cursoNome={cursoNome}
         stats={stats}
       />
     </Document>
