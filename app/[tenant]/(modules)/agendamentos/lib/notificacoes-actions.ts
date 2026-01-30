@@ -1,39 +1,51 @@
-'use server'
+"use server";
 
-import { createClient } from '@/app/shared/core/server'
-import { revalidatePath } from 'next/cache'
+import { createClient } from "@/app/shared/core/server";
+import { revalidatePath } from "next/cache";
 
 export type NotificacaoAgendamento = {
-  id: string
-  agendamento_id: string
-  tipo: 'criacao' | 'confirmacao' | 'cancelamento' | 'lembrete' | 'alteracao' | 'rejeicao' | 'bloqueio_criado' | 'recorrencia_alterada' | 'substituicao_solicitada'
-  destinatario_id: string
-  enviado: boolean
-  enviado_em: string | null
-  erro: string | null
-  created_at: string
+  id: string;
+  agendamento_id: string;
+  tipo:
+    | "criacao"
+    | "confirmacao"
+    | "cancelamento"
+    | "lembrete"
+    | "alteracao"
+    | "rejeicao"
+    | "bloqueio_criado"
+    | "recorrencia_alterada"
+    | "substituicao_solicitada";
+  destinatario_id: string;
+  enviado: boolean;
+  enviado_em: string | null;
+  erro: string | null;
+  created_at: string;
   agendamento?: {
-    id: string
-    professor_id: string
-    aluno_id: string
-    data_inicio: string
-    data_fim: string
-    status: string
+    id: string;
+    professor_id: string;
+    aluno_id: string;
+    data_inicio: string;
+    data_fim: string;
+    status: string;
     professor?: {
-      nome_completo: string
-    }
+      nome_completo: string;
+    };
     aluno?: {
-      nome_completo: string
-    }
-  }
-}
+      nome_completo: string;
+    };
+  };
+};
 
-export async function getNotificacoesUsuario(userId: string): Promise<NotificacaoAgendamento[]> {
-  const supabase = await createClient()
+export async function getNotificacoesUsuario(
+  userId: string,
+): Promise<NotificacaoAgendamento[]> {
+  const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('agendamento_notificacoes')
-    .select(`
+    .from("agendamento_notificacoes")
+    .select(
+      `
       *,
       agendamento:agendamentos(
         id,
@@ -45,62 +57,82 @@ export async function getNotificacoesUsuario(userId: string): Promise<Notificaca
         professor:usuarios!agendamentos_professor_id_fkey(nome_completo),
         aluno:usuarios!agendamentos_aluno_id_fkey(nome_completo)
       )
-    `)
-    .eq('destinatario_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(50)
+    `,
+    )
+    .eq("destinatario_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(50);
 
   if (error) {
-    console.error('Error fetching notifications:', error)
-    return []
+    console.error("Error fetching notifications:", error);
+    return [];
   }
 
   // Mapear os dados para garantir que o tipo seja correto
-  const validTipos: NotificacaoAgendamento['tipo'][] = ['criacao', 'confirmacao', 'cancelamento', 'lembrete', 'alteracao', 'rejeicao', 'bloqueio_criado', 'recorrencia_alterada', 'substituicao_solicitada']
+  const validTipos: NotificacaoAgendamento["tipo"][] = [
+    "criacao",
+    "confirmacao",
+    "cancelamento",
+    "lembrete",
+    "alteracao",
+    "rejeicao",
+    "bloqueio_criado",
+    "recorrencia_alterada",
+    "substituicao_solicitada",
+  ];
 
   type NotificacaoRow = {
-    id: string
-    agendamento_id: string
-    tipo: string
-    destinatario_id: string
-    enviado: boolean | null
-    enviado_em: string | null
-    erro: string | null
-    created_at: string | null
+    id: string;
+    agendamento_id: string;
+    tipo: string;
+    destinatario_id: string;
+    enviado: boolean | null;
+    enviado_em: string | null;
+    erro: string | null;
+    created_at: string | null;
     agendamento?: {
-      id: string
-      professor_id: string
-      aluno_id: string
-      data_inicio: string
-      data_fim: string
-      status: string
+      id: string;
+      professor_id: string;
+      aluno_id: string;
+      data_inicio: string;
+      data_fim: string;
+      status: string;
       // Tipos do Supabase podem retornar SelectQueryError quando a relation não está no `Database` gerado
-      professor?: unknown
-      aluno?: unknown
-    } | null
-  }
+      professor?: unknown;
+      aluno?: unknown;
+    } | null;
+  };
 
-  const rows = (data || []) as unknown as NotificacaoRow[]
+  const rows = (data || []) as unknown as NotificacaoRow[];
   return rows.map((item) => {
-    const agendamentoRaw = item.agendamento && typeof item.agendamento === 'object' ? item.agendamento : null
+    const agendamentoRaw =
+      item.agendamento && typeof item.agendamento === "object"
+        ? item.agendamento
+        : null;
 
-    const professorRaw = agendamentoRaw?.professor
-    const alunoRaw = agendamentoRaw?.aluno
+    const professorRaw = agendamentoRaw?.professor;
+    const alunoRaw = agendamentoRaw?.aluno;
 
     const professor =
-      professorRaw && typeof professorRaw === 'object' && !('code' in (professorRaw as Record<string, unknown>))
+      professorRaw &&
+      typeof professorRaw === "object" &&
+      !("code" in (professorRaw as Record<string, unknown>))
         ? (professorRaw as { nome_completo: string })
-        : undefined
+        : undefined;
     const aluno =
-      alunoRaw && typeof alunoRaw === 'object' && !('code' in (alunoRaw as Record<string, unknown>))
+      alunoRaw &&
+      typeof alunoRaw === "object" &&
+      !("code" in (alunoRaw as Record<string, unknown>))
         ? (alunoRaw as { nome_completo: string })
-        : undefined
+        : undefined;
 
     return {
       ...item,
-      tipo: (validTipos as string[]).includes(item.tipo) ? item.tipo : 'criacao',
+      tipo: (validTipos as string[]).includes(item.tipo)
+        ? item.tipo
+        : "criacao",
       enviado: item.enviado ?? false,
-      created_at: item.created_at || '1970-01-01T00:00:00.000Z',
+      created_at: item.created_at || "1970-01-01T00:00:00.000Z",
       agendamento: agendamentoRaw
         ? {
             ...agendamentoRaw,
@@ -108,94 +140,103 @@ export async function getNotificacoesUsuario(userId: string): Promise<Notificaca
             aluno,
           }
         : undefined,
-    }
-  }) as NotificacaoAgendamento[]
+    };
+  }) as NotificacaoAgendamento[];
 }
 
 export async function getNotificacoesNaoLidas(userId: string): Promise<number> {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   const { count, error } = await supabase
-    .from('agendamento_notificacoes')
-    .select('*', { count: 'exact', head: true })
-    .eq('destinatario_id', userId)
-    .eq('enviado', true)
+    .from("agendamento_notificacoes")
+    .select("*", { count: "exact", head: true })
+    .eq("destinatario_id", userId)
+    .eq("enviado", true);
 
   if (error) {
-    console.error('Error counting notifications:', error)
-    return 0
+    console.error("Error counting notifications:", error);
+    return 0;
   }
 
   // For in-app notifications, we use a separate "lido" concept
   // Since we don't have that column yet, we return all sent notifications
-  return count || 0
+  return count || 0;
 }
 
 export async function marcarComoLida() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error('Unauthorized')
+    throw new Error("Unauthorized");
   }
 
   // We would add a "lido" column to track read status
   // For now, this is a placeholder that could be extended
 
-  revalidatePath('/notificacoes')
-  return { success: true }
+  revalidatePath("/notificacoes");
+  return { success: true };
 }
 
 export async function marcarTodasComoLidas(userId: string) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   if (!user || user.id !== userId) {
-    throw new Error('Unauthorized')
+    throw new Error("Unauthorized");
   }
 
   // Placeholder for marking all as read
   // Would require adding a "lido" column to the table
 
-  revalidatePath('/notificacoes')
-  return { success: true }
+  revalidatePath("/notificacoes");
+  return { success: true };
 }
 
 // Helper to get notification message
-export function getNotificacaoMessage(notificacao: NotificacaoAgendamento, userId: string): string {
-  const isProfessor = notificacao.agendamento?.professor_id === userId
+export function getNotificacaoMessage(
+  notificacao: NotificacaoAgendamento,
+  userId: string,
+): string {
+  const isProfessor = notificacao.agendamento?.professor_id === userId;
   const outraParteNome = isProfessor
-    ? notificacao.agendamento?.aluno?.nome_completo || 'Aluno'
-    : notificacao.agendamento?.professor?.nome_completo || 'Professor'
+    ? notificacao.agendamento?.aluno?.nome_completo || "Aluno"
+    : notificacao.agendamento?.professor?.nome_completo || "Professor";
 
   const messages: Record<string, string> = {
     criacao: `Novo pedido de agendamento de ${outraParteNome}`,
     confirmacao: `Seu agendamento com ${outraParteNome} foi confirmado`,
     cancelamento: `Agendamento com ${outraParteNome} foi cancelado`,
     rejeicao: `Seu pedido de agendamento foi recusado`,
-    lembrete: `Lembrete: Mentoria com ${outraParteNome} em breve`,
+    lembrete: `Lembrete: Plantão com ${outraParteNome} em breve`,
     alteracao: `Agendamento com ${outraParteNome} foi atualizado`,
     bloqueio_criado: `Seu agendamento foi afetado por um bloqueio de agenda`,
     recorrencia_alterada: `Disponibilidade do professor ${outraParteNome} foi alterada`,
-    substituicao_solicitada: `Foi solicitada uma substituição para seu agendamento com ${outraParteNome}`
-  }
+    substituicao_solicitada: `Foi solicitada uma substituição para seu agendamento com ${outraParteNome}`,
+  };
 
-  return messages[notificacao.tipo] || 'Nova notificação'
+  return messages[notificacao.tipo] || "Nova notificação";
 }
 
 // Helper to get notification icon
-export function getNotificacaoIcon(tipo: NotificacaoAgendamento['tipo']): string {
+export function getNotificacaoIcon(
+  tipo: NotificacaoAgendamento["tipo"],
+): string {
   const icons: Record<string, string> = {
-    criacao: 'calendar-plus',
-    confirmacao: 'check-circle',
-    cancelamento: 'x-circle',
-    rejeicao: 'ban',
-    lembrete: 'bell',
-    alteracao: 'edit',
-    bloqueio_criado: 'shield-x',
-    recorrencia_alterada: 'calendar-range',
-    substituicao_solicitada: 'refresh-cw'
-  }
+    criacao: "calendar-plus",
+    confirmacao: "check-circle",
+    cancelamento: "x-circle",
+    rejeicao: "ban",
+    lembrete: "bell",
+    alteracao: "edit",
+    bloqueio_criado: "shield-x",
+    recorrencia_alterada: "calendar-range",
+    substituicao_solicitada: "refresh-cw",
+  };
 
-  return icons[tipo] || 'bell'
+  return icons[tipo] || "bell";
 }

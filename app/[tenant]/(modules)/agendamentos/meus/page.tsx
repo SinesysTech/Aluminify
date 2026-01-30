@@ -51,7 +51,7 @@ export default async function MeusAgendamentosPage({ params }: MeusAgendamentosP
         <div className="flex flex-col gap-2">
           <h1 className="page-title">Meus Agendamentos</h1>
           <p className="page-subtitle">
-            Visualize e gerencie suas sessões de mentoria agendadas.
+            Visualize e gerencie suas sessões de plantão agendadas.
           </p>
         </div>
         <Button asChild>

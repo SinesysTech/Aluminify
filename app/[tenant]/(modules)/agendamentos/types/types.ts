@@ -77,7 +77,7 @@ export type AgendamentoStatus =
   | "confirmado"
   | "cancelado"
   | "concluido";
-export type TipoServico = "plantao" | "mentoria";
+export type TipoServico = "plantao";
 export type TipoBloqueio = "feriado" | "recesso" | "imprevisto" | "outro";
 export type IntegrationProvider = "google" | "zoom" | "default";
 export type TipoNotificacao =

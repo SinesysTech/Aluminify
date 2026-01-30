@@ -78,7 +78,7 @@ interface RecorrenciaManagerProps {
 }
 
 type RecorrenciaFormData = {
-  tipo_servico: "plantao" | "mentoria"
+  tipo_servico: "plantao"
   data_inicio: string
   data_fim: string
   dia_semana: number
@@ -89,7 +89,7 @@ type RecorrenciaFormData = {
 }
 
 const defaultFormData: RecorrenciaFormData = {
-  tipo_servico: "mentoria",
+  tipo_servico: "plantao",
   data_inicio: format(new Date(), "yyyy-MM-dd"),
   data_fim: "",
   dia_semana: 1,

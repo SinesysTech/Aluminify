@@ -25,9 +25,9 @@ export default async function AgendamentosPage() {
   return (
     <main className="flex min-h-screen flex-col py-8 px-4 md:py-16 md:px-5 gap-6 max-w-5xl mx-auto">
       <div className="flex flex-col gap-2 items-center lg:px-10">
-        <h1 className="page-title">Agendar Mentoria</h1>
+        <h1 className="page-title">Agendar Plantão</h1>
         <p className="page-subtitle text-center px-4 md:px-10">
-          Escolha um professor para agendar sua sessão de mentoria ou dúvidas.
+          Escolha um professor para agendar sua sessão de plantão ou dúvidas.
         </p>
       </div>
 

@@ -30,7 +30,7 @@ const DAYS = [
 const SLOT_DURATIONS = [15, 30, 45, 60]
 
 interface RecorrenciaData {
-  tipo_servico: 'plantao' | 'mentoria'
+  tipo_servico: 'plantao'
   data_inicio: Date | null
   data_fim: Date | null
   dias_semana: number[]
@@ -92,7 +92,7 @@ export function RecorrenciaWizard({ professorId, empresaId, onSuccess }: Recorre
 
     try {
       const supabase = createClient()
-      
+
       // Criar um padrão de recorrência para cada dia selecionado
       const recorrencias: Database['public']['Tables']['agendamento_recorrencia']['Insert'][] = data.dias_semana.map(dia => ({
         professor_id: professorId,
@@ -142,8 +142,8 @@ export function RecorrenciaWizard({ professorId, empresaId, onSuccess }: Recorre
                   s === step
                     ? "bg-primary text-primary-foreground"
                     : s < step
-                    ? "bg-primary/20 text-primary"
-                    : "bg-muted text-muted-foreground"
+                      ? "bg-primary/20 text-primary"
+                      : "bg-muted text-muted-foreground"
                 )}
               >
                 {s}
@@ -168,7 +168,7 @@ export function RecorrenciaWizard({ professorId, empresaId, onSuccess }: Recorre
               <Select
                 value={data.tipo_servico}
                 onValueChange={(value) =>
-                  setData({ ...data, tipo_servico: value as 'plantao' | 'mentoria' })
+                  setData({ ...data, tipo_servico: value as 'plantao' })
                 }
               >
                 <SelectTrigger>
@@ -176,7 +176,7 @@ export function RecorrenciaWizard({ professorId, empresaId, onSuccess }: Recorre
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="plantao">Plantão</SelectItem>
-                  <SelectItem value="mentoria">Mentoria</SelectItem>
+
                 </SelectContent>
               </Select>
             </div>

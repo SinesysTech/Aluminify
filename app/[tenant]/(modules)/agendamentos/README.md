@@ -1,13 +1,16 @@
 # Módulo de Agendamentos
 
 ## Visão Geral
-Responsável por gerenciar todo o ciclo de vida de mentorias e reuniões entre alunos e professores. Permite a verificação de disponibilidade, bloqueio de horários e agendamento de sessões.
+
+Responsável por gerenciar todo o ciclo de vida de plantões e reuniões entre alunos e professores. Permite a verificação de disponibilidade, bloqueio de horários e agendamento de sessões.
 
 ## Atores
-- **Aluno:** Busca professores, visualiza disponibilidade e agenda mentorias.
+
+- **Aluno:** Busca professores, visualiza disponibilidade e agenda plantões.
 - **Professor:** Define disponibilidade, bloqueia horários e gerencia seus agendamentos.
 
 ## Organização Interna
+
 - `(aluno)`: Fluxo de agendamento do aluno.
 - `(gestao)`: Painel do professor e configurações de disponibilidade.
 - `components`: Componentes visuais como Calendário e Cards de Agendamento.

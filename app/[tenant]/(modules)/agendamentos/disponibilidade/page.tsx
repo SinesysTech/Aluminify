@@ -23,7 +23,7 @@ export default async function DisponibilidadePage() {
       <div className="flex flex-col gap-2">
         <h1 className="page-title">Disponibilidade</h1>
         <p className="page-subtitle">
-          Configure seus horários de atendimento para mentoria.
+          Configure seus horários de atendimento para plantão.
         </p>
       </div>
 
