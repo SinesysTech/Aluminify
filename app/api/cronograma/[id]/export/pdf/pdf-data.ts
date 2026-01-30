@@ -14,7 +14,7 @@ import {
   MODALIDADES_LABEL,
   formatTipoEstudo,
 } from './pdf-types'
-import { buildDisciplineColorMap, type DisciplineColor } from './pdf-theme'
+import { buildDisciplineColorMap, DISCIPLINE_PALETTE, type DisciplineColor } from './pdf-theme'
 
 // ---------------------------------------------------------------------------
 // Tipos de agrupamento
@@ -281,8 +281,8 @@ function groupByDisciplina(
     frente.modulosMap.get(mId)!.itens.push(it)
   })
 
-  // Fallback color
-  const defaultColor = { bg: '#F3F4F6', text: '#374151', accent: '#6B7280' } as DisciplineColor
+  // Fallback color - use first color from palette
+  const defaultColor = DISCIPLINE_PALETTE[0]
 
   return Array.from(discMap.entries()).map(([dId, d]) => ({
     disciplinaId: dId,

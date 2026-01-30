@@ -151,14 +151,14 @@ async function getHandler(
   const client = getDatabaseClientAsUser(token)
   const { data: owner } = await client
     .from('cronogramas')
-    .select('aluno_id')
+    .select('usuario_id')
     .eq('id', cronogramaId)
     .single()
   
   // Type assertion: Query result properly typed (cronogramas table exists in schema)
-  const typedOwner = owner as { aluno_id: string } | null;
+  const typedOwner = owner as { usuario_id: string } | null;
   
-  if (!typedOwner || typedOwner.aluno_id !== request.user.id) {
+  if (!typedOwner || typedOwner.usuario_id !== request.user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

@@ -33,12 +33,12 @@ async function getHandler(
   const client = getDatabaseClientAsUser(token)
   const { data: owner } = await client
     .from('cronogramas')
-    .select('aluno_id')
+    .select('usuario_id')
     .eq('id', cronogramaId)
     .single()
 
-  const typedOwner = owner as { aluno_id: string } | null
-  if (!typedOwner || typedOwner.aluno_id !== request.user.id) {
+  const typedOwner = owner as { usuario_id: string } | null
+  if (!typedOwner || typedOwner.usuario_id !== request.user.id) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
