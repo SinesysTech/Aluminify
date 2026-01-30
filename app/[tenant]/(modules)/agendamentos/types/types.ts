@@ -44,6 +44,7 @@ export type VAgendamentosEmpresa = {
 export type DbProfessorIntegracao = {
   id: string;
   professor_id: string;
+  empresa_id: string;
   provider: "google" | "zoom" | "default";
   access_token: string | null;
   refresh_token: string | null;
