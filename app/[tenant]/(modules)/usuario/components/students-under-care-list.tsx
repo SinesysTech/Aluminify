@@ -30,10 +30,10 @@ function getProgressColor(progress: number): string {
 }
 
 function getAproveitamentoColor(aproveitamento: number): string {
-  if (aproveitamento >= 80) return 'bg-emerald-100 text-emerald-800'
-  if (aproveitamento >= 60) return 'bg-yellow-100 text-yellow-800'
-  if (aproveitamento >= 40) return 'bg-orange-100 text-orange-800'
-  return 'bg-red-100 text-red-800'
+  if (aproveitamento >= 80) return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+  if (aproveitamento >= 60) return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400'
+  if (aproveitamento >= 40) return 'bg-orange-500/10 text-orange-700 dark:text-orange-400'
+  return 'bg-red-500/10 text-red-700 dark:text-red-400'
 }
 
 export function StudentsUnderCareList({ students }: StudentsUnderCareListProps) {
