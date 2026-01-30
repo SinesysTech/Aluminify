@@ -135,15 +135,22 @@ async function putHandler(
   }
 }
 
-// DELETE - RLS verifica se é o próprio aluno ou admin
+// DELETE - Revoga acesso do aluno aos cursos da empresa do usuário logado (não soft-delete global)
 async function deleteHandler(
-  _request: AuthenticatedRequest,
+  request: AuthenticatedRequest,
   params: { id: string },
 ) {
   try {
+    const empresaId = request.user?.empresaId;
+    if (!empresaId) {
+      return NextResponse.json(
+        { error: "Usuário não está associado a uma empresa" },
+        { status: 400 }
+      );
+    }
     const supabase = await createClient();
     const service = createStudentService(supabase);
-    await service.delete(params.id);
+    await service.delete(params.id, empresaId);
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleError(error);

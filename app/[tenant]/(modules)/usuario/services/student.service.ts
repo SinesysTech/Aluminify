@@ -439,9 +439,9 @@ export class StudentService extends UserBaseService {
     return this.repository.update(id, updateData);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string, empresaId: string): Promise<void> {
     await this.ensureExists(id);
-    await this.repository.delete(id);
+    await this.repository.delete(id, empresaId);
   }
 
   async getById(id: string): Promise<Student> {

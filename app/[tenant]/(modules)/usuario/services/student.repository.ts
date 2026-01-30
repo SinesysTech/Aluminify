@@ -30,7 +30,8 @@ export interface StudentRepository {
   ): Promise<Student | null>;
   create(payload: CreateStudentInput): Promise<Student>;
   update(id: string, payload: UpdateStudentInput): Promise<Student>;
-  delete(id: string): Promise<void>;
+  /** Revoga o acesso do aluno aos cursos da empresa (remove matrículas). Não faz soft delete em usuarios. */
+  delete(id: string, empresaId: string): Promise<void>;
   findByEmpresa(empresaId: string): Promise<Student[]>;
   addCourses(studentId: string, courseIds: string[]): Promise<void>;
 }
@@ -792,15 +793,49 @@ export class StudentRepositoryImpl implements StudentRepository {
     return student;
   }
 
-  async delete(id: string): Promise<void> {
-    const { error } = await this.client
-      .from(TABLE)
-      .update({ deleted_at: new Date().toISOString() })
-      .eq("id", id)
-      .is("deleted_at", null);
+  async delete(id: string, empresaId: string): Promise<void> {
+    // Revogar por empresa: remover apenas matrículas nos cursos dessa empresa; não soft-delete em usuarios
+    const { data: cursoIds, error: cursosError } = await this.client
+      .from(COURSES_TABLE)
+      .select("id")
+      .eq("empresa_id", empresaId);
 
-    if (error) {
-      throw new Error(`Failed to delete student: ${error.message}`);
+    if (cursosError) {
+      throw new Error(`Failed to fetch courses for empresa: ${cursosError.message}`);
+    }
+
+    const ids = (cursoIds ?? []).map((c) => c.id);
+    if (ids.length > 0) {
+      const { error: deleteError } = await this.client
+        .from(COURSE_LINK_TABLE)
+        .delete()
+        .eq("usuario_id", id)
+        .in("curso_id", ids);
+
+      if (deleteError) {
+        throw new Error(`Failed to revoke student enrollments: ${deleteError.message}`);
+      }
+    }
+
+    // Se o usuário não tiver mais nenhuma matrícula e a empresa revogada era a "primária" dele, limpar empresa_id
+    const { data: remaining } = await this.client
+      .from(COURSE_LINK_TABLE)
+      .select("usuario_id")
+      .eq("usuario_id", id)
+      .limit(1);
+
+    if (!remaining || remaining.length === 0) {
+      const { data: usuario } = await this.client
+        .from(TABLE)
+        .select("empresa_id")
+        .eq("id", id)
+        .single();
+      if (usuario?.empresa_id === empresaId) {
+        await this.client
+          .from(TABLE)
+          .update({ empresa_id: null })
+          .eq("id", id);
+      }
     }
   }
 

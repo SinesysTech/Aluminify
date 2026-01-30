@@ -11,11 +11,12 @@ async function getEnrollmentsCountHandler(request: AuthenticatedRequest) {
       return NextResponse.json({ error: 'Empresa não identificada' }, { status: 400 });
     }
 
-    // Get enrollment counts grouped by curso_id
+    // Contagem por curso: usar alunos_cursos (fonte das matrículas) com cursos da empresa.
+    // A tabela matriculas não é usada para matrículas vindas de Hotmart/UI principal.
     const { data, error } = await db
-      .from('matriculas')
-      .select('curso_id')
-      .eq('empresa_id', empresaId);
+      .from('alunos_cursos')
+      .select('curso_id, cursos!inner(empresa_id)')
+      .eq('cursos.empresa_id', empresaId);
 
     if (error) {
       console.error('[Enrollments Count API] Error:', error);
