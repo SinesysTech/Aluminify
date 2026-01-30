@@ -132,7 +132,14 @@ export async function updateSession(request: NextRequest) {
     );
   }
 
-  const isLikelyPublic = isBasePublicPath || isTenantPublicPattern;
+  // Check for public branding API
+  // Pattern: /api/empresa/personalizacao/[empresaId]/public
+  const isPublicBrandingApi =
+    pathname.startsWith("/api/empresa/personalizacao/") &&
+    pathname.endsWith("/public");
+
+  const isLikelyPublic =
+    isBasePublicPath || isTenantPublicPattern || isPublicBrandingApi;
 
   let supabaseResponse = NextResponse.next({
     request,
@@ -247,15 +254,20 @@ export async function updateSession(request: NextRequest) {
     // logando Error [AuthApiError] desnecessariamente no console do servidor.
     const authCookiePrefix = projectRef ? `sb-${projectRef}-auth-token` : null;
     const hasAuthCookies = authCookiePrefix
-      ? request.cookies.getAll().some((c) => c.name.startsWith(authCookiePrefix))
+      ? request.cookies
+          .getAll()
+          .some((c) => c.name.startsWith(authCookiePrefix))
       : true; // Se não conseguimos determinar o prefixo, prosseguir normalmente
 
     if (hasAuthCookies) {
       const result = await supabase.auth.getUser();
       // Se o erro for refresh_token_not_found, trata como usuário não autenticado (não é erro fatal)
-      if (result.error &&
-          (result.error.code === 'refresh_token_not_found' ||
-           result.error.message?.toLowerCase().includes('refresh token not found'))
+      if (
+        result.error &&
+        (result.error.code === "refresh_token_not_found" ||
+          result.error.message
+            ?.toLowerCase()
+            .includes("refresh token not found"))
       ) {
         user = null;
         error = null;
