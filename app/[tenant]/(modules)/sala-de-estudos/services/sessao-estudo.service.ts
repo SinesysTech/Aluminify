@@ -111,6 +111,7 @@ export class SessaoEstudoService {
       atividadeRelacionadaId: input.atividadeRelacionadaId ?? undefined,
       metodoEstudo: input.metodoEstudo,
       inicioIso: input.inicioIso,
+      empresaId: input.empresaId ?? undefined,
     });
   }
 

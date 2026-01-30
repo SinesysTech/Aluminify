@@ -36,6 +36,7 @@ async function handler(request: AuthenticatedRequest) {
       atividadeRelacionadaId: body?.atividade_relacionada_id ?? undefined,
       metodoEstudo: body?.metodo_estudo ?? undefined,
       inicioIso: body?.inicio ?? undefined,
+      empresaId: request.user!.empresaId ?? undefined,
     });
 
     return NextResponse.json({ data: serialize(sessao) }, { status: 201 });
