@@ -54,16 +54,17 @@ function formatSupabaseError(error: unknown): string {
           : typeof e.details === "string" && e.details.trim()
             ? e.details
             : "";
-    const details = e.details && typeof e.details === "string" && e.details !== message
-      ? ` Detalhes: ${e.details}`
-      : "";
+    const details =
+      e.details && typeof e.details === "string" && e.details !== message
+        ? ` Detalhes: ${e.details}`
+        : "";
     const hint = e.hint ? ` Hint: ${String(e.hint)}` : "";
 
     // Se ainda não temos mensagem, tentar serializar o objeto inteiro
     if (!code && !message && !details && !hint) {
       try {
         const serialized = JSON.stringify(error, null, 2);
-        return serialized.length > 500 
+        return serialized.length > 500
           ? `Erro do Supabase (objeto grande): ${serialized.substring(0, 500)}...`
           : `Erro do Supabase: ${serialized}`;
       } catch {
@@ -71,13 +72,14 @@ function formatSupabaseError(error: unknown): string {
         const keys = Object.keys(e);
         const values = keys
           .slice(0, 5)
-          .map(k => `${k}: ${String(e[k])}`)
+          .map((k) => `${k}: ${String(e[k])}`)
           .join(", ");
         return `Erro do Supabase (${keys.length} propriedades): ${values}${keys.length > 5 ? "..." : ""}`;
       }
     }
 
-    const result = `${[code, message].filter(Boolean).join(" ")}${details}${hint}`.trim();
+    const result =
+      `${[code, message].filter(Boolean).join(" ")}${details}${hint}`.trim();
     return result || "Erro do Supabase (sem mensagem legível)";
   }
   return String(error);
@@ -148,9 +150,7 @@ function mapRow(
     temporaryPassword: row.senha_temporaria,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
-    deletedAt: row.deleted_at
-      ? new Date(row.deleted_at)
-      : null,
+    deletedAt: row.deleted_at ? new Date(row.deleted_at) : null,
   };
 }
 
@@ -226,7 +226,7 @@ export class StudentRepositoryImpl implements StudentRepository {
       if (studentIdsToFilter.length > 10000) {
         console.warn(
           `Large studentIdsToFilter list (${studentIdsToFilter.length} items). ` +
-          `This may cause performance issues.`
+            `This may cause performance issues.`,
         );
       }
       queryBuilder = queryBuilder.in("id", studentIdsToFilter);
@@ -243,7 +243,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     // Get total count
     let total = 0;
     let countError: unknown = null;
-    
+
     try {
       const countResult = await queryBuilder;
       total = countResult.count ?? 0;
@@ -263,7 +263,10 @@ export class StudentRepositoryImpl implements StudentRepository {
       if (isEmptyError) {
         console.warn(
           "Count query failed (unclear error), using fallback count from data.",
-          { studentIdsToFilterLength: studentIdsToFilter?.length ?? null, hasQuery: !!searchTerm }
+          {
+            studentIdsToFilterLength: studentIdsToFilter?.length ?? null,
+            hasQuery: !!searchTerm,
+          },
         );
         total = -1;
       } else {
@@ -300,7 +303,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     // Se a contagem falhou, usar fallback: tentar diferentes estratégias
     if (total === -1) {
       let fallbackSuccess = false;
-      
+
       // Estratégia 1: Tentar count sem head (retorna dados + count)
       try {
         let fallbackCountQuery = this.client
@@ -320,24 +323,37 @@ export class StudentRepositoryImpl implements StudentRepository {
           );
         }
 
-        const { count: fallbackCount, error: fallbackError } = await fallbackCountQuery;
-        
-        if (!fallbackError && fallbackCount !== null && fallbackCount !== undefined) {
+        const { count: fallbackCount, error: fallbackError } =
+          await fallbackCountQuery;
+
+        if (
+          !fallbackError &&
+          fallbackCount !== null &&
+          fallbackCount !== undefined
+        ) {
           total = fallbackCount;
           fallbackSuccess = true;
-          console.info(`Fallback count (strategy 1) successful: ${total} students`);
+          console.info(
+            `Fallback count (strategy 1) successful: ${total} students`,
+          );
         }
       } catch (fallbackErr) {
-        console.warn(`Fallback count strategy 1 failed: ${formatSupabaseError(fallbackErr)}`);
+        console.warn(
+          `Fallback count strategy 1 failed: ${formatSupabaseError(fallbackErr)}`,
+        );
       }
 
       // Estratégia 2: Se studentIdsToFilter existe, usar seu tamanho como aproximação
-      if (!fallbackSuccess && studentIdsToFilter !== null && studentIdsToFilter.length > 0) {
+      if (
+        !fallbackSuccess &&
+        studentIdsToFilter !== null &&
+        studentIdsToFilter.length > 0
+      ) {
         total = studentIdsToFilter.length;
         fallbackSuccess = true;
         console.warn(
           `Using studentIdsToFilter length as count approximation: ${total}. ` +
-          `This assumes all filtered students are visible.`
+            `This assumes all filtered students are visible.`,
         );
       }
 
@@ -354,7 +370,7 @@ export class StudentRepositoryImpl implements StudentRepository {
         }
         console.warn(
           `Using estimated count based on returned data: ${total} (page ${page}, ` +
-          `${dataLength} items returned). This is an approximation and may not be accurate.`
+            `${dataLength} items returned). This is an approximation and may not be accurate.`,
         );
       }
     }
@@ -438,7 +454,9 @@ export class StudentRepositoryImpl implements StudentRepository {
       .eq("id", id);
 
     if (error) {
-      throw new Error(`Failed to restore soft-deleted student: ${error.message}`);
+      throw new Error(
+        `Failed to restore soft-deleted student: ${error.message}`,
+      );
     }
   }
 
@@ -504,14 +522,15 @@ export class StudentRepositoryImpl implements StudentRepository {
     // Verificar se aluno já existe por ID (incluindo soft deleted)
     // Primeiro verifica sem soft delete
     let existingById = await this.findById(payload.id);
-    
+
     // Se não encontrou, verifica incluindo soft deleted
     if (!existingById) {
-      const { data: softDeletedData, error: softDeletedError } = await this.client
-        .from(TABLE)
-        .select("*")
-        .eq("id", payload.id)
-        .maybeSingle();
+      const { data: softDeletedData, error: softDeletedError } =
+        await this.client
+          .from(TABLE)
+          .select("*")
+          .eq("id", payload.id)
+          .maybeSingle();
 
       if (softDeletedError) {
         throw new Error(
@@ -618,13 +637,13 @@ export class StudentRepositoryImpl implements StudentRepository {
       // Verificar se é erro de constraint única (incluindo primary key)
       const errorMessage = error.message?.toLowerCase() || "";
       const errorCode = error.code || "";
-      
+
       // PostgreSQL error codes: 23505 = unique_violation, 23503 = foreign_key_violation
       const isPrimaryKeyError =
         errorCode === "23505" &&
         (errorMessage.includes("usuarios_pkey") ||
-         errorMessage.includes("primary key") ||
-         errorMessage.includes("chave primária"));
+          errorMessage.includes("primary key") ||
+          errorMessage.includes("chave primária"));
 
       if (
         isPrimaryKeyError ||
@@ -636,7 +655,7 @@ export class StudentRepositoryImpl implements StudentRepository {
         // Se for erro de primary key, pode ser race condition - tentar buscar o aluno existente
         // Primeiro tenta sem soft delete
         let existingStudent = await this.findById(payload.id);
-        
+
         // Se não encontrou, tenta incluindo soft deleted
         if (!existingStudent) {
           const { data: softDeletedData } = await this.client
@@ -644,7 +663,7 @@ export class StudentRepositoryImpl implements StudentRepository {
             .select("*")
             .eq("id", payload.id)
             .maybeSingle();
-          
+
           if (softDeletedData) {
             // Restaurar soft deleted
             const { data: restoredData } = await this.client
@@ -653,14 +672,14 @@ export class StudentRepositoryImpl implements StudentRepository {
               .eq("id", payload.id)
               .select("*")
               .single();
-            
+
             if (restoredData) {
               const [restored] = await this.attachCourses([restoredData]);
               existingStudent = restored ?? null;
             }
           }
         }
-        
+
         if (existingStudent) {
           // Aluno existe, apenas vincular cursos
           if (payload.courseIds && payload.courseIds.length > 0) {
@@ -669,9 +688,11 @@ export class StudentRepositoryImpl implements StudentRepository {
           const updated = await this.findById(payload.id);
           return updated ?? existingStudent;
         }
-        
+
         // Se não encontrou, lançar erro com mensagem clara
-        throw new Error(`Failed to create student: valor duplicado viola restrição única "chave primária de usuarios"`);
+        throw new Error(
+          `Failed to create student: valor duplicado viola restrição única "chave primária de usuarios"`,
+        );
       }
       if (
         errorMessage.includes("usuarios_numero_matricula_key") ||
@@ -694,7 +715,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     const updateData: StudentUpdate = {};
 
     if (payload.fullName !== undefined) {
-      updateData.nome_completo = payload.fullName;
+      updateData.nome_completo = payload.fullName ?? undefined;
     }
 
     if (payload.email !== undefined) {
@@ -960,7 +981,9 @@ export class StudentRepositoryImpl implements StudentRepository {
   }
 
   async addCourses(studentId: string, courseIds: string[]): Promise<void> {
-    const uniqueCourseIds = Array.from(new Set(courseIds ?? [])).filter(Boolean);
+    const uniqueCourseIds = Array.from(new Set(courseIds ?? [])).filter(
+      Boolean,
+    );
     if (!uniqueCourseIds.length) {
       return;
     }
@@ -972,7 +995,10 @@ export class StudentRepositoryImpl implements StudentRepository {
 
     const { error } = await this.client
       .from(COURSE_LINK_TABLE)
-      .upsert(rows, { onConflict: "usuario_id,curso_id", ignoreDuplicates: true });
+      .upsert(rows, {
+        onConflict: "usuario_id,curso_id",
+        ignoreDuplicates: true,
+      });
 
     if (error) {
       throw new Error(`Failed to link student to courses: ${error.message}`);
