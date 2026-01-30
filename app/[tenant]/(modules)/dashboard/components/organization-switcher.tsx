@@ -118,7 +118,7 @@ export function OrganizationSwitcher({
       <Button
         variant="outline"
         role="combobox"
-            className={cn("justify-between gap-2 min-w-50 max-w-75", className)}
+          className={cn("justify-between gap-2 min-w-50 max-w-75", className)}
       >
         <div className="flex items-center gap-2 min-w-0">
           {activeOrganization ? (
@@ -157,7 +157,7 @@ export function OrganizationSwitcher({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{triggerContent()}</DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className="w-[280px]">
+      <DropdownMenuContent align={align} className="w-70">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           Suas Organizações
         </DropdownMenuLabel>
@@ -249,7 +249,7 @@ export function OrganizationBadge({
       ) : (
         <Building2 className="h-3 w-3" />
       )}
-      <span className="truncate max-w-[120px]">{organization.nome}</span>
+      <span className="truncate max-w-30">{organization.nome}</span>
     </div>
   );
 }

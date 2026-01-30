@@ -195,7 +195,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
             <h4 className="text-sm font-medium">Foco Recomendado</h4>
           </div>
           
-          <ScrollArea className="flex-1 min-h-[200px] pr-4">
+          <ScrollArea className="flex-1 min-h-50 pr-4">
               <div className="space-y-3 min-h-50">
               {data.recommendations.length > 0 ? (
                 data.recommendations.map((rec) => (
