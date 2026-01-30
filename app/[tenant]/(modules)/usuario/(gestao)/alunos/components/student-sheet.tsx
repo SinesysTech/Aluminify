@@ -124,9 +124,9 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
             ></div>
 
             {/* Sheet Content */}
-            <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-white border-l border-[#E4E4E7] shadow-[-4px_0_24px_rgba(0,0,0,0.05)] z-50 flex flex-col transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className={`fixed top-0 right-0 h-full w-full max-w-md bg-card border-l border-border shadow-lg z-50 flex flex-col transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
 
-                <div className="px-6 py-5 border-b border-[#E4E4E7] flex items-center justify-between bg-zinc-50/50">
+                <div className="px-6 py-5 border-b border-border flex items-center justify-between bg-muted/50">
                     <div>
                         <h2 className="text-lg font-bold text-zinc-900">Novo Registro</h2>
                         <p className="text-xs text-[#71717A] mt-0.5">Criar credencial de acesso para aluno.</p>
@@ -155,7 +155,7 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
                                 placeholder="Ex: João da Silva"
                                 value={formData.fullName}
                                 onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                className="w-full h-9 px-3 rounded-md border border-[#E4E4E7] bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#09090B] focus:border-[#09090B] transition-all font-sans"
+                                className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all font-sans"
                             />
                         </div>
 
@@ -166,7 +166,7 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
                                 placeholder="aluno@email.com"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="w-full h-9 px-3 rounded-md border border-[#E4E4E7] bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#09090B] focus:border-[#09090B] transition-all font-mono"
+                                className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all font-mono"
                             />
                         </div>
 
@@ -178,7 +178,7 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
                                     placeholder="000.000.000-00"
                                     value={formData.cpf}
                                     onChange={(e) => setFormData({ ...formData, cpf: e.target.value })}
-                                    className="w-full h-9 px-3 rounded-md border border-[#E4E4E7] bg-white text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#09090B] focus:border-[#09090B]"
+                                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring"
                                 />
                             </div>
                             <div className="space-y-1.5">
@@ -188,7 +188,7 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
                                     placeholder="(00) 00000-0000"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    className="w-full h-9 px-3 rounded-md border border-[#E4E4E7] bg-white text-sm font-mono focus:outline-none focus:ring-1 focus:ring-[#09090B] focus:border-[#09090B]"
+                                    className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm font-mono focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring"
                                 />
                             </div>
                         </div>
@@ -202,7 +202,7 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
                         <div className="space-y-1.5">
                             <label className="text-xs font-medium text-zinc-700">Curso</label>
                             <select
-                                className="w-full h-9 px-3 rounded-md border border-[#E4E4E7] bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#09090B] focus:border-[#09090B]"
+                                className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring"
                                 onChange={(e) => handleCourseChange(e.target.value)}
                                 value={formData.courseId}
                             >
@@ -228,7 +228,7 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
                                     </div>
                                 ) : (
                                     <select
-                                        className="w-full h-9 px-3 rounded-md border border-[#E4E4E7] bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#09090B] focus:border-[#09090B]"
+                                        className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring"
                                         onChange={(e) => setFormData({ ...formData, turmaId: e.target.value })}
                                         value={formData.turmaId}
                                     >
@@ -243,7 +243,7 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
 
                         <div className="space-y-1.5">
                             <label className="text-xs font-medium text-zinc-700">Plano de Acesso</label>
-                            <select className="w-full h-9 px-3 rounded-md border border-[#E4E4E7] bg-white text-sm focus:outline-none focus:ring-1 focus:ring-[#09090B] focus:border-[#09090B]">
+                            <select className="w-full h-9 px-3 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring">
                                 <option>Acesso Completo</option>
                                 <option>Apenas Matérias Exatas</option>
                             </select>
@@ -251,11 +251,11 @@ export function StudentSheet({ isOpen, onClose, courses }: StudentSheetProps) {
                     </div>
                 </div>
 
-                <div className="p-6 border-t border-[#E4E4E7] bg-zinc-50 flex items-center justify-end gap-3">
+                <div className="p-6 border-t border-border bg-muted/50 flex items-center justify-end gap-3">
                     <button
                         onClick={onClose}
                         disabled={loading}
-                        className="px-4 py-2 rounded-md border border-[#E4E4E7] bg-white text-sm font-medium hover:bg-zinc-100 transition-colors text-zinc-700"
+                        className="px-4 py-2 rounded-md border border-input bg-background text-sm font-medium hover:bg-zinc-100 transition-colors text-zinc-700"
                     >
                         Cancelar
                     </button>

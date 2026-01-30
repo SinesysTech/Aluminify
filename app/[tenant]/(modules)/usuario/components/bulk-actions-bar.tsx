@@ -26,7 +26,7 @@ export function BulkActionsBar({
         variant="secondary"
         size="sm"
         onClick={onTransfer}
-        className="bg-white text-zinc-900 hover:bg-zinc-100"
+        className="bg-card text-foreground hover:bg-muted"
       >
         <ArrowRightLeft className="w-4 h-4 mr-2" />
         Transferir

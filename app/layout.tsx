@@ -29,6 +29,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
+  const themeMode = (cookieStore.get("theme_mode")?.value ?? "light") as "light" | "dark" | "system";
   const themeSettings = {
     preset: cookieStore.get("theme_preset")?.value ?? DEFAULT_THEME.preset,
     scale: cookieStore.get("theme_scale")?.value ?? DEFAULT_THEME.scale,
@@ -55,7 +56,7 @@ export default async function RootLayout({
         {...bodyAttributes}>
         <NextThemesProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme={themeMode === "system" ? "light" : themeMode}
           enableSystem
           disableTransitionOnChange>
           <ThemeProvider>

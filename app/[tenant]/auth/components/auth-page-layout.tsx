@@ -36,7 +36,7 @@ export function AuthPageLayout({
       {/* Form Area */}
       <Card
         className={cn(
-          'relative z-10 flex w-full flex-col justify-between gap-0 overflow-y-auto bg-white p-8 md:w-1/2 md:p-12 lg:flex-none lg:w-(--form-width) lg:min-w-(--form-width) lg:max-w-(--form-width) rounded-none border-0 shadow-none',
+          'relative z-10 flex w-full flex-col justify-between gap-0 overflow-y-auto bg-card p-8 md:w-1/2 md:p-12 lg:flex-none lg:w-(--form-width) lg:min-w-(--form-width) lg:max-w-(--form-width) rounded-none border-0 shadow-none',
           formSide === 'left'
             ? 'border-r border-gray-200'
             : 'border-l border-gray-200'

@@ -2739,7 +2739,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                   if (diasSemItens.length > 0 && diasSelecionados.length < 7) {
                     const nomesDiasSemItens = diasSemItens.map(d => ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'][d])
                     return (
-                      <div className="mt-1.5 p-1.5 bg-white dark:bg-white border border-red-200 dark:border-red-300 rounded text-xs text-red-700 dark:text-red-700 leading-tight">
+                      <div className="mt-1.5 p-1.5 bg-card border border-red-200 dark:border-red-300 rounded text-xs text-red-700 dark:text-red-700 leading-tight">
                         <p className="font-medium">Atenção:</p>
                         <p className="wrap-break-word">
                           Os dias {nomesDiasSemItens.join(', ')} estão selecionados mas não têm aulas ainda. Clique em &quot;Salvar e Atualizar Calendário&quot; para recalcular as datas.
