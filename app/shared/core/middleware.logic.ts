@@ -448,17 +448,27 @@ export async function updateSession(request: NextRequest) {
   let error = null;
 
   if (!isPublicPath) {
-    const result = await supabase.auth.getUser();
-    // Se o erro for refresh_token_not_found, trata como usuário não autenticado (não é erro fatal)
-    if (result.error &&
-        (result.error.code === 'refresh_token_not_found' ||
-         result.error.message?.toLowerCase().includes('refresh token not found'))
-    ) {
-      user = null;
-      error = null;
-    } else {
-      user = result.data.user;
-      error = result.error;
+    // Verificar se existem cookies de auth do Supabase antes de chamar getUser().
+    // Sem cookies, o SDK tentaria refresh e falharia com "refresh_token_not_found",
+    // logando Error [AuthApiError] desnecessariamente no console do servidor.
+    const authCookiePrefix = projectRef ? `sb-${projectRef}-auth-token` : null;
+    const hasAuthCookies = authCookiePrefix
+      ? request.cookies.getAll().some((c) => c.name.startsWith(authCookiePrefix))
+      : true; // Se não conseguimos determinar o prefixo, prosseguir normalmente
+
+    if (hasAuthCookies) {
+      const result = await supabase.auth.getUser();
+      // Se o erro for refresh_token_not_found, trata como usuário não autenticado (não é erro fatal)
+      if (result.error &&
+          (result.error.code === 'refresh_token_not_found' ||
+           result.error.message?.toLowerCase().includes('refresh token not found'))
+      ) {
+        user = null;
+        error = null;
+      } else {
+        user = result.data.user;
+        error = result.error;
+      }
     }
   }
 
