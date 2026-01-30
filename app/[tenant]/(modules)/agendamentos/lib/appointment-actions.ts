@@ -377,10 +377,10 @@ export async function confirmarAgendamento(id: string, linkReuniao?: string) {
         const meetingLink = await generateMeetingLink(
           validIntegration.provider as "google" | "zoom" | "default",
           {
-            title: `Mentoria com ${aluno?.nome_completo || "Aluno"}`,
+            title: `Plantão com ${aluno?.nome_completo || "Aluno"}`,
             startTime: new Date(agendamento.data_inicio),
             endTime: new Date(agendamento.data_fim),
-            description: "Sessão de mentoria agendada via Aluminify",
+            description: "Sessão de plantão agendada via Aluminify",
             attendees: aluno?.email ? [aluno.email] : [],
           },
           {
