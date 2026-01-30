@@ -65,6 +65,8 @@ export async function updateSession(request: NextRequest) {
   const accept = request.headers.get("accept") || "";
   const isNextInternalPath =
     pathname === "/favicon.ico" ||
+    pathname === "/icon" ||
+    pathname.startsWith("/icon?") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/static") ||
     pathname === "/robots.txt" ||

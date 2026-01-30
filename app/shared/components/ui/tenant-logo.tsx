@@ -121,11 +121,10 @@ function ConnectedTenantLogo({
           src={logoUrl}
           alt={`Logo ${logoType}`}
           fill
-          priority // Ensure logos load fast
-          sizes={`${width}px`} // Optimization hint
+          sizes={`${width}px`}
           className="object-contain"
           onError={() => setImageError(true)}
-          unoptimized // Allow external URLs from Supabase
+          unoptimized
         />
       </div>
     );
@@ -230,11 +229,10 @@ function StandaloneTenantLogo({
           src={logoUrl}
           alt={`Logo ${logoType}`}
           fill
-          priority
           sizes={`${width}px`}
           className="object-contain"
           onError={() => setError(true)}
-          unoptimized // Allow external URLs from Supabase
+          unoptimized
         />
       </div>
     );
