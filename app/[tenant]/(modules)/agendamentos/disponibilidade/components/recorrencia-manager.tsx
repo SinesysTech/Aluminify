@@ -69,7 +69,6 @@ const SLOT_DURATIONS = [
 
 const TIPO_SERVICO_OPTIONS = [
   { value: "plantao", label: "Plantão de Dúvidas" },
-  { value: "mentoria", label: "Mentoria" },
 ]
 
 interface RecorrenciaManagerProps {
@@ -321,7 +320,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
               <Label htmlFor="tipo_servico">Tipo de Servico</Label>
               <Select
                 value={formData.tipo_servico}
-                onValueChange={(value: "plantao" | "mentoria") =>
+                onValueChange={(value: "plantao") =>
                   setFormData({ ...formData, tipo_servico: value })
                 }
               >
@@ -479,7 +478,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
               Nenhuma disponibilidade configurada
             </h3>
             <p className="text-muted-foreground max-w-md mb-4">
-              Configure seus horários de atendimento para que alunos possam agendar mentorias.
+              Configure seus horários de atendimento para que alunos possam agendar plantões.
             </p>
             <Button onClick={() => handleOpenDialog()}>
               <Plus className="mr-2 h-4 w-4" />

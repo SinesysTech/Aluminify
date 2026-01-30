@@ -167,7 +167,7 @@ export async function updateRecorrencia(
     id: typedResult.id,
     professor_id: typedResult.professor_id,
     empresa_id: typedResult.empresa_id,
-    tipo_servico: typedResult.tipo_servico,
+    tipo_servico: typedResult.tipo_servico as "plantao",
     data_inicio: typedResult.data_inicio,
     data_fim: typedResult.data_fim,
     dia_semana: typedResult.dia_semana,
