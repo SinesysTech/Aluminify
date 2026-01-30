@@ -24,10 +24,17 @@ export async function deleteStudentAction(studentId: string) {
       };
     }
 
+    if (!user.empresaId) {
+      return {
+        success: false,
+        error: "Usuário não está associado a uma empresa.",
+      };
+    }
+
     const supabase = getServiceRoleClient();
     const studentService = createStudentService(supabase);
 
-    await studentService.delete(studentId);
+    await studentService.delete(studentId, user.empresaId);
 
     revalidatePath("/usuario/alunos");
 
