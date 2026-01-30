@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
         email_confirm: true,
         user_metadata: {
           role: "usuario",
-          role_type: "professor_admin", // Define papel como Professor Administrador
+          role_type: "professor_admin", // Define papel como Professor Admin
           full_name: fullName,
           empresa_id: empresa.id,
           is_admin: true,

@@ -8,7 +8,7 @@ export const ROLE_TIPO_LABELS: Record<RoleTipo, string> = {
   professor: 'Professor',
   professor_admin: 'Professor Admin',
   staff: 'Equipe',
-  admin: 'Administrador',
+  admin: 'Admin',
   monitor: 'Monitor',
 }
 
@@ -32,7 +32,7 @@ export const ROLE_TIPO_OPTIONS = [
   { value: 'todos', label: 'Todos' },
   { value: 'professor', label: 'Professores' },
   { value: 'professor_admin', label: 'Professores Admin' },
-  { value: 'admin', label: 'Administradores' },
+  { value: 'admin', label: 'Admins' },
   { value: 'staff', label: 'Equipe' },
   { value: 'monitor', label: 'Monitores' },
 ] as const
@@ -42,7 +42,7 @@ export const EQUIPE_FILTER_OPTIONS = [
   { value: 'todos', label: 'Todos' },
   { value: 'professor', label: 'Professores' },
   { value: 'usuario', label: 'Usuarios' },
-  { value: 'admin', label: 'Administradores' },
+  { value: 'admin', label: 'Admins' },
 ] as const
 
 export const PAPEL_BASE_LABELS: Record<string, string> = {

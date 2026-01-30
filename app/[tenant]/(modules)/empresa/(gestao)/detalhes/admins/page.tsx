@@ -175,9 +175,9 @@ export default function EmpresaAdminsPage() {
       <div className="container mx-auto py-8 space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="page-title">Administradores da Empresa</h1>
+            <h1 className="page-title">Admins da Empresa</h1>
             <p className="page-subtitle">
-              Gerencie os administradores da sua empresa
+              Gerencie os admins da sua empresa
             </p>
           </div>
           {canManageAdmins ? (
@@ -187,9 +187,9 @@ export default function EmpresaAdminsPage() {
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Adicionar Administrador</DialogTitle>
+                  <DialogTitle>Adicionar Admin</DialogTitle>
                   <DialogDescription>
-                    Selecione um professor para promover a administrador
+                    Selecione um professor para promover a admin
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">

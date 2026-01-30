@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Administradores'
+  title: 'Admins'
 }
 
 export default function AdminsLayout({

@@ -122,7 +122,7 @@ function getRoleBadgeVariant(tipo: string): 'default' | 'secondary' | 'outline' 
 function getRoleLabel(tipo: string): string {
   switch (tipo) {
     case 'admin':
-      return 'Administrador'
+      return 'Admin'
     case 'professor_admin':
       return 'Professor Admin'
     case 'professor':

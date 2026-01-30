@@ -189,7 +189,7 @@ export default function EmpresaUsuariosPage() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Administradores</CardDescription>
+            <CardDescription>Admins</CardDescription>
             <CardTitle className="text-2xl">{stats.admins}</CardTitle>
           </CardHeader>
         </Card>
@@ -222,7 +222,7 @@ export default function EmpresaUsuariosPage() {
                 <SelectItem value="todos">Todos</SelectItem>
                 <SelectItem value="professores">Professores</SelectItem>
                 <SelectItem value="alunos">Alunos</SelectItem>
-                <SelectItem value="admins">Administradores</SelectItem>
+                <SelectItem value="admins">Admins</SelectItem>
               </SelectContent>
             </Select>
           </div>
