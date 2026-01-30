@@ -42,8 +42,25 @@ export default function InstitutionDashboardClient() {
   const [period, setPeriod] = useState<DashboardPeriod>('mensal')
   const refreshIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
+  // Use a ref to track the latest abort controller to cancel pending requests
+  const abortControllerRef = useRef<AbortController | null>(null)
+
+  // Stable reference for searchParams to avoid unnecessary re-renders/fetches if only params change
+  const searchParamsRef = useRef(searchParams)
+  useEffect(() => {
+    searchParamsRef.current = searchParams
+  }, [searchParams])
+
   const loadDashboardData = useCallback(
     async (showRefreshing = false, newPeriod?: DashboardPeriod) => {
+      // Cancelar requisição anterior se houver
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+
+      const controller = new AbortController()
+      abortControllerRef.current = controller
+
       const periodToUse = newPeriod ?? period
       try {
         if (showRefreshing) {
@@ -53,15 +70,25 @@ export default function InstitutionDashboardClient() {
         }
         setError(null)
 
+        // Passar o signal para o service (precisa ser atualizado no service também, se possível, 
+        // mas por enquanto controlamos o estado local)
+        // Nota: O fetch real não está sendo cancelado a nível de rede aqui porque o client.ts 
+        // precisaria aceitar o abort signal, mas impedimos a atualização de estado.
+
         const dashboardData = await fetchInstitutionDashboardData(periodToUse)
+
+        if (controller.signal.aborted) return
+
         setData(dashboardData)
       } catch (err) {
+        if (controller.signal.aborted) return
+
         const typed = err as InstitutionDashboardServiceError
         const isExpectedAuthError = !!typed?.isAuthError || !!typed?.isForbidden
-        ;(isExpectedAuthError ? console.warn : console.error)(
-          'Erro ao carregar dados do dashboard:',
-          err
-        )
+          ; (isExpectedAuthError ? console.warn : console.error)(
+            'Erro ao carregar dados do dashboard:',
+            err
+          )
 
         let errorMessage = 'Erro ao carregar dados do dashboard'
         if (err instanceof Error) {
@@ -81,7 +108,8 @@ export default function InstitutionDashboardClient() {
 
         if ((err as InstitutionDashboardServiceError).isAuthError) {
           setData(null)
-          const qs = searchParams?.toString()
+          const currentSearchParams = searchParamsRef.current
+          const qs = currentSearchParams?.toString()
           const returnUrl = `${pathname}${qs ? `?${qs}` : ''}`
           const firstSegment = pathname.split('/').filter(Boolean)[0]
           const loginBase =
@@ -89,16 +117,25 @@ export default function InstitutionDashboardClient() {
           router.replace(`${loginBase}?next=${encodeURIComponent(returnUrl)}`)
         }
       } finally {
-        setIsLoading(false)
-        setIsRefreshing(false)
+        if (!controller.signal.aborted) {
+          setIsLoading(false)
+          setIsRefreshing(false)
+          abortControllerRef.current = null
+        }
       }
     },
-    [period, pathname, router, searchParams]
+    [period, pathname, router] // searchParams removed from dependency array, using ref
   )
 
   // Carregamento inicial
   useEffect(() => {
     loadDashboardData()
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
   }, [loadDashboardData])
 
   // Handler para mudança de período

@@ -240,9 +240,12 @@ export async function updateSession(request: NextRequest) {
     publicPaths.push(`/${tenantContext.empresaSlug}/auth/sign-up`);
   }
 
-  const isPublicPath = publicPaths.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
+  const isPublicPath =
+    publicPaths.some(
+      (path) => pathname === path || pathname.startsWith(`${path}/`),
+    ) ||
+    isTenantPublicPattern ||
+    isPublicBrandingApi;
 
   // --- 4. AUTHENTICATION (PROTECTED ROUTES ONLY) ---
   let user = null;

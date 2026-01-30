@@ -76,6 +76,9 @@ export default function StudentDashboardClientPage() {
     const activeOrgId =
         tenantContext?.empresaId ?? activeOrganization?.id ?? undefined
 
+    // Use a ref to track the latest abort controller to cancel pending requests
+    const abortControllerRef = useRef<AbortController | null>(null)
+
     // Helper to handle errors uniformly
     const handleError = (err: unknown, context: string) => {
         console.error(`Erro ao carregar ${context}:`, err)
@@ -91,6 +94,14 @@ export default function StudentDashboardClientPage() {
 
     const loadData = useCallback(
         async (showRefreshing = false, period?: HeatmapPeriod) => {
+            // Cancelar requisição anterior se houver
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+            }
+
+            const controller = new AbortController()
+            abortControllerRef.current = controller
+
             const periodToUse = period ?? heatmapPeriod
             if (showRefreshing) setIsRefreshing(true)
 
@@ -98,10 +109,6 @@ export default function StudentDashboardClientPage() {
 
             try {
                 // Determine what needs to be fetched
-                // If fetching everything (initial or refresh), fetch User too.
-                // If just changing period, usually User info doesn't change based on period, 
-                // but we might want to refresh it if it's a "refresh" action.
-
                 const promises = []
 
                 // 1. User Info (only on initial load or full refresh, not period change)
@@ -111,10 +118,13 @@ export default function StudentDashboardClientPage() {
                         fetchDashboardUser(activeOrgId)
                             .then(setUser)
                             .catch(e => {
+                                if (controller.signal.aborted) return
                                 const msg = handleError(e, 'usuário')
                                 if (typeof msg === 'string' && msg.includes('sessão')) setError(msg)
                             })
-                            .finally(() => setIsLoadingUser(false))
+                            .finally(() => {
+                                if (!controller.signal.aborted) setIsLoadingUser(false)
+                            })
                     )
                 } else {
                     setIsLoadingUser(false)
@@ -124,55 +134,78 @@ export default function StudentDashboardClientPage() {
                 setIsLoadingMetrics(true)
                 promises.push(
                     fetchDashboardMetrics(mapHeatmapPeriod(periodToUse), activeOrgId)
-                        .then(setMetrics)
-                        .catch(e => setError(handleError(e, 'métricas')))
-                        .finally(() => setIsLoadingMetrics(false))
+                        .then(data => {
+                            if (!controller.signal.aborted) setMetrics(data)
+                        })
+                        .catch(e => {
+                            if (!controller.signal.aborted) setError(handleError(e, 'métricas'))
+                        })
+                        .finally(() => {
+                            if (!controller.signal.aborted) setIsLoadingMetrics(false)
+                        })
                 )
 
                 // 3. Heatmap
                 promises.push(
                     fetchDashboardHeatmap(periodToUse, activeOrgId)
-                        .then(setHeatmap)
+                        .then(data => {
+                            if (!controller.signal.aborted) setHeatmap(data)
+                        })
                         .catch(e => console.warn(handleError(e, 'heatmap')))
                 )
 
                 // 4. Subjects
                 promises.push(
                     fetchDashboardSubjects(mapHeatmapPeriod(periodToUse), activeOrgId)
-                        .then(setSubjects)
+                        .then(data => {
+                            if (!controller.signal.aborted) setSubjects(data)
+                        })
                         .catch(e => console.warn(handleError(e, 'disciplinas')))
                 )
 
                 // 5. Efficiency
                 promises.push(
                     fetchDashboardEfficiency(mapHeatmapPeriod(periodToUse), activeOrgId)
-                        .then(setEfficiency)
+                        .then(data => {
+                            if (!controller.signal.aborted) setEfficiency(data)
+                        })
                         .catch(e => console.warn(handleError(e, 'eficiência')))
                 )
 
                 // 6. Strategic
                 promises.push(
                     fetchDashboardStrategic(mapHeatmapPeriod(periodToUse), activeOrgId)
-                        .then(setStrategic)
+                        .then(data => {
+                            if (!controller.signal.aborted) setStrategic(data)
+                        })
                         .catch(e => console.warn(handleError(e, 'domínio estratégico')))
                 )
 
                 // 7. Distribution
                 promises.push(
                     fetchDashboardDistribution(mapHeatmapPeriod(periodToUse), activeOrgId)
-                        .then(setDistribution)
+                        .then(data => {
+                            if (!controller.signal.aborted) setDistribution(data)
+                        })
                         .catch(e => console.warn(handleError(e, 'distribuição')))
                 )
 
                 await Promise.all(promises)
-                setLastRefresh(new Date())
+
+                if (!controller.signal.aborted) {
+                    setLastRefresh(new Date())
+                }
 
             } catch (err) {
+                if (controller.signal.aborted) return
                 // Fallback global error handler
                 const msg = handleError(err, 'dados')
                 setError(msg)
             } finally {
-                setIsRefreshing(false)
+                if (!controller.signal.aborted) {
+                    setIsRefreshing(false)
+                    abortControllerRef.current = null
+                }
             }
         },
         [heatmapPeriod, activeOrgId, user]
@@ -181,6 +214,12 @@ export default function StudentDashboardClientPage() {
     // Carregamento inicial
     useEffect(() => {
         loadData()
+
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+            }
+        }
     }, [activeOrgId, loadData]) // Dependency on activeOrgId ensures reload on tenant switch
 
     // Handler para mudança de período do heatmap
