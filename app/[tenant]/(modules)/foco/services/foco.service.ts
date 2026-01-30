@@ -5,50 +5,56 @@ import { MetodoEstudo, LogPausa } from "@/app/[tenant]/(modules)/sala-de-estudos
 export class FocoService {
   private supabase = createClient();
 
-  async getCursos(): Promise<Option[]> {
+  async getCursos(empresaId?: string | null): Promise<Option[]> {
     const {
       data: { user },
       error,
     } = await this.supabase.auth.getUser();
-    // During logout, user may be null - return empty array gracefully
     if (error || !user) return [];
 
     const role = (user.user_metadata?.role as string) || "aluno";
 
     if (role === "professor" || role === "usuario") {
-      const { data, error: cursosError } = await this.supabase
+      let query = this.supabase
         .from("cursos")
         .select("id, nome")
         .eq("created_by", user.id)
         .order("nome", { ascending: true });
+      if (empresaId) query = query.eq("empresa_id", empresaId);
+      const { data, error: cursosError } = await query;
 
       if (cursosError) throw cursosError;
       return (data || []).map((c) => ({ id: c.id, nome: c.nome }));
     } else {
       const { data, error: acError } = await this.supabase
         .from("alunos_cursos")
-        .select("curso_id, cursos(id, nome)")
+        .select("curso_id, cursos(id, nome, empresa_id)")
         .eq("usuario_id", user.id)
         .returns<
           Array<{
             curso_id: string;
-            cursos: { id: string; nome: string } | null;
+            cursos: { id: string; nome: string; empresa_id?: string } | null;
           }>
         >();
 
       if (acError) throw acError;
-      return (data || [])
+      let list = (data || [])
         .map((ac) => ac.cursos)
-        .filter((c): c is { id: string; nome: string } => !!c)
-        .map((c) => ({ id: c.id, nome: c.nome }));
+        .filter((c): c is { id: string; nome: string; empresa_id?: string } => !!c);
+      if (empresaId) {
+        list = list.filter((c) => c.empresa_id === empresaId);
+      }
+      return list.map((c) => ({ id: c.id, nome: c.nome }));
     }
   }
 
-  async getDisciplinas(): Promise<Option[]> {
-    const { data, error } = await this.supabase
+  async getDisciplinas(empresaId?: string | null): Promise<Option[]> {
+    let query = this.supabase
       .from("disciplinas")
       .select("id, nome")
       .order("nome", { ascending: true });
+    if (empresaId) query = query.eq("empresa_id", empresaId);
+    const { data, error } = await query;
 
     if (error) throw error;
     return (data || []).map((d) => ({ id: d.id, nome: d.nome }));
@@ -89,8 +95,30 @@ export class FocoService {
     return Array.from(listaMap.values());
   }
 
-  async getAtividades(moduloId: string): Promise<Option[]> {
-    const resp = await fetch(`/api/sala-de-estudos/atividades?modulo_id=${moduloId}`);
+  private async fetchWithAuth(
+    url: string,
+    init: RequestInit,
+    empresaId?: string | null,
+  ): Promise<Response> {
+    const {
+      data: { session },
+      error,
+    } = await this.supabase.auth.getSession();
+    if (error || !session) throw new Error("Sessão expirada");
+
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${session.access_token}`,
+      ...(init.headers as Record<string, string>),
+    };
+    if (empresaId) headers["x-tenant-id"] = empresaId;
+
+    return fetch(url, { ...init, headers });
+  }
+
+  async getAtividades(moduloId: string, empresaId?: string | null): Promise<Option[]> {
+    const url = `/api/sala-de-estudos/atividades?modulo_id=${moduloId}`;
+    const resp = await this.fetchWithAuth(url, { method: "GET" }, empresaId);
     if (!resp.ok) throw new Error("Falha ao carregar atividades");
     const { data } = await resp.json();
     return (data || []).map((a: { id: string; titulo: string }) => ({
@@ -105,13 +133,8 @@ export class FocoService {
     moduloId: string | null,
     atividadeId: string | null,
     metodo: MetodoEstudo,
+    empresaId?: string | null,
   ): Promise<{ id: string; inicio: string }> {
-    const {
-      data: { session },
-      error,
-    } = await this.supabase.auth.getSession();
-    if (error || !session) throw new Error("Sessão expirada");
-
     const body = {
       disciplina_id: disciplinaId,
       frente_id: frenteId,
@@ -121,14 +144,11 @@ export class FocoService {
       inicio: new Date().toISOString(),
     };
 
-    const resp = await fetch("/api/sala-de-estudos/sessao/iniciar", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify(body),
-    });
+    const resp = await this.fetchWithAuth(
+      "/api/sala-de-estudos/sessao/iniciar",
+      { method: "POST", body: JSON.stringify(body) },
+      empresaId,
+    );
 
     if (!resp.ok) {
       const data = await resp.json().catch(() => ({}));
@@ -146,27 +166,22 @@ export class FocoService {
     nivelFoco: number,
     concluiuAtividade: boolean,
     atividadeId: string,
+    empresaId?: string | null,
   ): Promise<void> {
-    const {
-      data: { session },
-      error,
-    } = await this.supabase.auth.getSession();
-    if (error || !session) throw new Error("Sessão expirada");
-
-    const resp = await fetch("/api/sala-de-estudos/sessao/finalizar", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session.access_token}`,
+    const resp = await this.fetchWithAuth(
+      "/api/sala-de-estudos/sessao/finalizar",
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          sessao_id: sessaoId,
+          log_pausas: logPausas,
+          fim: lastTickAt ?? new Date().toISOString(),
+          nivel_foco: nivelFoco,
+          status: "concluido",
+        }),
       },
-      body: JSON.stringify({
-        sessao_id: sessaoId,
-        log_pausas: logPausas,
-        fim: lastTickAt ?? new Date().toISOString(),
-        nivel_foco: nivelFoco,
-        status: "concluido",
-      }),
-    });
+      empresaId,
+    );
 
     if (!resp.ok) {
       const data = await resp.json().catch(() => ({}));
@@ -175,36 +190,30 @@ export class FocoService {
 
     if (concluiuAtividade && atividadeId) {
       try {
-        await fetch(`/api/sala-de-estudos/progresso/atividade/${atividadeId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
+        await this.fetchWithAuth(
+          `/api/sala-de-estudos/progresso/atividade/${atividadeId}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify({ status: "Concluido" }),
           },
-          body: JSON.stringify({ status: "Concluido" }),
-        });
+          empresaId,
+        );
       } catch (err) {
         console.warn("[foco-service] Falha ao marcar atividade concluída", err);
       }
     }
   }
 
-  async sendHeartbeat(sessaoId: string): Promise<void> {
-    const {
-      data: { session },
-      error,
-    } = await this.supabase.auth.getSession();
-    if (error || !session) return;
-
+  async sendHeartbeat(sessaoId: string, empresaId?: string | null): Promise<void> {
     try {
-      await fetch("/api/sala-de-estudos/sessao/heartbeat", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.access_token}`,
+      await this.fetchWithAuth(
+        "/api/sala-de-estudos/sessao/heartbeat",
+        {
+          method: "PATCH",
+          body: JSON.stringify({ sessao_id: sessaoId }),
         },
-        body: JSON.stringify({ sessao_id: sessaoId }),
-      });
+        empresaId,
+      );
     } catch (err) {
       console.warn("[foco-service] heartbeat falhou", err);
     }

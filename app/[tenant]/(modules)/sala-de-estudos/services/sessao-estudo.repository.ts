@@ -68,6 +68,7 @@ export class SessaoEstudoRepository {
     atividadeRelacionadaId?: string;
     metodoEstudo?: MetodoEstudo;
     inicioIso?: string;
+    empresaId?: string;
   }): Promise<SessaoEstudo> {
     const client = getDatabaseClient();
 
@@ -93,6 +94,7 @@ export class SessaoEstudoRepository {
       atividade_relacionada_id: input.atividadeRelacionadaId ?? null,
       metodo_estudo: input.metodoEstudo ?? null,
       inicio: input.inicioIso ?? new Date().toISOString(),
+      empresa_id: input.empresaId ?? null,
     };
 
     // Observação: alguns ambientes ainda não aplicaram a migration de `modulo_id`.

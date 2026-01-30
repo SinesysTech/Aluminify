@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useRouter, useSearchParams as useNextSearchParams } from 'next/navigation'
 import { useStudyTimer } from '@/hooks/use-study-timer'
 import { createClient } from '@/app/shared/core/client'
+import { useOptionalTenantContext } from '@/app/[tenant]/tenant-context'
 import { MetodoEstudo } from '@/app/[tenant]/(modules)/sala-de-estudos/types'
 import {
     Option,
@@ -39,6 +40,8 @@ export default function FocoClient() {
     const params = useParams()
     const tenant = params?.tenant as string
     const nextSearchParams = useNextSearchParams()
+    const tenantContext = useOptionalTenantContext()
+    const empresaId = tenantContext?.empresaId ?? null
     const supabase = useMemo(() => createClient(), [])
 
     // -- Timer Hook --
@@ -141,19 +144,19 @@ export default function FocoClient() {
         } catch { /* ignore */ }
     }, [cursoId, disciplinaId, frenteId, moduloId, atividadeId])
 
-    // Load Cursos
+    // Load Cursos (filtrados pelo tenant ativo)
     useEffect(() => {
         setLoadingCursos(true)
-        focoService.getCursos()
+        focoService.getCursos(empresaId)
             .then(setCursos)
             .catch(console.error)
             .finally(() => setLoadingCursos(false))
-    }, [])
+    }, [empresaId])
 
-    // Load Disciplinas
+    // Load Disciplinas (filtradas pelo tenant ativo)
     useEffect(() => {
         setLoadingDisciplinas(true)
-        focoService.getDisciplinas()
+        focoService.getDisciplinas(empresaId)
             .then((data) => {
                 setDisciplinas(data)
                 // Update lastContext with names after loading
@@ -166,7 +169,7 @@ export default function FocoClient() {
             })
             .catch(console.error)
             .finally(() => setLoadingDisciplinas(false))
-    }, [lastContext?.disciplinaId])
+    }, [empresaId, lastContext?.disciplinaId])
 
     // Update lastContext with curso name
     useEffect(() => {
@@ -208,20 +211,20 @@ export default function FocoClient() {
             .finally(() => setLoadingModulos(false))
     }, [frenteId, moduloId])
 
-    // Load Atividades
+    // Load Atividades (filtradas pelo tenant)
     useEffect(() => {
         if (!moduloId) {
             setAtividades([]); setAtividadeId(''); return
         }
         setLoadingAtividades(true)
-        focoService.getAtividades(moduloId)
+        focoService.getAtividades(moduloId, empresaId)
             .then(data => {
                 setAtividades(data)
                 if (atividadeId && !data.some(a => a.id === atividadeId)) setAtividadeId('')
             })
             .catch(console.error)
             .finally(() => setLoadingAtividades(false))
-    }, [moduloId, atividadeId])
+    }, [moduloId, atividadeId, empresaId])
 
     // -- Realtime Presence --
     useEffect(() => {
@@ -321,11 +324,11 @@ export default function FocoClient() {
     useEffect(() => {
         let timer: NodeJS.Timeout | null = null
         if (state.running && !state.paused && sessaoId) {
-            focoService.sendHeartbeat(sessaoId)
-            timer = setInterval(() => focoService.sendHeartbeat(sessaoId), 30000)
+            focoService.sendHeartbeat(sessaoId, empresaId)
+            timer = setInterval(() => focoService.sendHeartbeat(sessaoId, empresaId), 30000)
         }
         return () => { if (timer) clearInterval(timer) }
-    }, [state.running, state.paused, sessaoId])
+    }, [state.running, state.paused, sessaoId, empresaId])
 
     // Quick start handler
     const handleQuickStart = useCallback(() => {
@@ -348,7 +351,8 @@ export default function FocoClient() {
                 frenteId || null,
                 moduloId || null,
                 atividadeId || null,
-                metodo
+                metodo,
+                empresaId
             )
 
             setSessaoId(sessionData.id)
@@ -386,7 +390,8 @@ export default function FocoClient() {
                 snapshot.lastTickAt,
                 nivelFoco,
                 concluiuAtividade,
-                atividadeId
+                atividadeId,
+                empresaId
             )
 
             router.push(tenant ? `/${tenant}/sala-de-estudos` : '/sala-de-estudos')

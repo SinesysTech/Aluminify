@@ -355,6 +355,8 @@ export interface IniciarSessaoInput {
   atividadeRelacionadaId?: string | null;
   metodoEstudo: MetodoEstudo;
   inicioIso?: string;
+  /** Tenant/empresa para isolamento multi-org; sessão é criada com empresa_id */
+  empresaId?: string | null;
 }
 
 export interface FinalizarSessaoInput {
