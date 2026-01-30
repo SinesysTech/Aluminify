@@ -518,7 +518,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
                 <div className="flex items-center gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded bg-primary/40" />
-                    <span>Mentoria</span>
+                    <span>Plantão</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-4 h-4 rounded bg-secondary/40" />
@@ -615,7 +615,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
                       <TableCell>{rec.duracao_slot_minutos} min</TableCell>
                       <TableCell>
                         <Badge variant={rec.tipo_servico === "mentoria" ? "default" : "secondary"}>
-                          {rec.tipo_servico === "mentoria" ? "Mentoria" : "Plantão"}
+                          {rec.tipo_servico === "plantao" ? "Plantão" : "Plantão"}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
