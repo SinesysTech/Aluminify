@@ -246,7 +246,7 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
 
   // 2. Verificar status de impersonação
   const impersonationStatus = await getImpersonationStatus(user);
-  const { isImpersonating, targetUserId, context } = impersonationStatus;
+  const { isImpersonating, context } = impersonationStatus;
 
   // 3. Checar cache de sessão (Redis)
   const cacheKey =

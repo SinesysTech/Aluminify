@@ -13,14 +13,14 @@
  * - At least 2 tenants (empresas) must exist in the database
  */
 
-import { describe, it, expect, beforeAll } from "@jest/globals";
+import { describe, it, expect, beforeAll, afterAll } from "@jest/globals";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 const SUPABASE_ANON_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 const hasEnv = SUPABASE_URL && SUPABASE_SERVICE_KEY && SUPABASE_ANON_KEY;
 
@@ -30,18 +30,24 @@ interface TestTenant {
   empresaId: string;
   userId: string;
   email: string;
-  accessToken: string;
+  client: SupabaseClient; // Authenticated client for this user
 }
 
 describeIfEnv("Tenant Isolation Security", () => {
   let serviceClient: SupabaseClient;
   let tenantA: TestTenant;
   let tenantB: TestTenant;
+  const testPassword = "test-password-123!";
 
   beforeAll(async () => {
-    serviceClient = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!);
+    serviceClient = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
 
-    // Find two existing tenants with active users
+    // 1. Find two existing tenants
     const { data: empresas } = await serviceClient
       .from("empresas")
       .select("id, slug")
@@ -55,138 +61,220 @@ describeIfEnv("Tenant Isolation Security", () => {
       return;
     }
 
-    // Find a user for tenant A
-    const { data: userA } = await serviceClient
-      .from("usuarios")
-      .select("id, email, empresa_id")
-      .eq("empresa_id", empresas[0].id)
-      .eq("ativo", true)
-      .is("deleted_at", null)
-      .limit(1)
-      .single();
+    // 2. Create Test User A (Tenant A)
+    const emailA = `test_security_a_${Date.now()}@example.com`;
+    const { data: authA, error: errA } =
+      await serviceClient.auth.admin.createUser({
+        email: emailA,
+        password: testPassword,
+        email_confirm: true,
+        user_metadata: {
+          empresa_id: empresas[0].id, // Some setups use metadata
+        },
+      });
 
-    // Find a user for tenant B
-    const { data: userB } = await serviceClient
-      .from("usuarios")
-      .select("id, email, empresa_id")
-      .eq("empresa_id", empresas[1].id)
-      .eq("ativo", true)
-      .is("deleted_at", null)
-      .limit(1)
-      .single();
+    if (errA || !authA.user) throw new Error("Failed to create user A");
 
-    if (!userA || !userB) {
-      console.warn(
-        "Need active users in both tenants for isolation tests. Skipping.",
-      );
-      return;
-    }
+    // Link User A to Tenant A in 'usuarios' table (if your app logic requires it)
+    await serviceClient.from("usuarios").insert({
+      id: authA.user.id,
+      email: emailA,
+      empresa_id: empresas[0].id,
+      nome: "Test User A",
+      ativo: true,
+    });
+
+    // Create Authenticated Client for A
+    const clientA = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+    await clientA.auth.signInWithPassword({
+      email: emailA,
+      password: testPassword,
+    });
 
     tenantA = {
       empresaId: empresas[0].id,
-      userId: userA.id,
-      email: userA.email,
-      accessToken: "", // Will be set after auth
+      userId: authA.user.id,
+      email: emailA,
+      client: clientA,
     };
+
+    // 3. Create Test User B (Tenant B)
+    const emailB = `test_security_b_${Date.now()}@example.com`;
+    const { data: authB, error: errB } =
+      await serviceClient.auth.admin.createUser({
+        email: emailB,
+        password: testPassword,
+        email_confirm: true,
+        user_metadata: {
+          empresa_id: empresas[1].id,
+        },
+      });
+
+    if (errB || !authB.user) throw new Error("Failed to create user B");
+
+    await serviceClient.from("usuarios").insert({
+      id: authB.user.id,
+      email: emailB,
+      empresa_id: empresas[1].id,
+      nome: "Test User B",
+      ativo: true,
+    });
+
+    const clientB = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+    await clientB.auth.signInWithPassword({
+      email: emailB,
+      password: testPassword,
+    });
 
     tenantB = {
       empresaId: empresas[1].id,
-      userId: userB.id,
-      email: userB.email,
-      accessToken: "", // Will be set after auth
+      userId: authB.user.id,
+      email: emailB,
+      client: clientB,
     };
+  });
+
+  afterAll(async () => {
+    // Cleanup users
+    if (tenantA?.userId)
+      await serviceClient.auth.admin.deleteUser(tenantA.userId);
+    if (tenantB?.userId)
+      await serviceClient.auth.admin.deleteUser(tenantB.userId);
   });
 
   describe("Helper Functions", () => {
     it("get_user_empresa_id() returns correct empresa for each user", async () => {
-      if (!tenantA?.empresaId) return;
+      // User A should see Tenant A
+      const { data: dataA } = await tenantA.client.rpc("get_user_empresa_id");
+      expect(dataA).toBe(tenantA.empresaId);
 
-      // Use service client to validate the function directly
-      const { data } = await serviceClient.rpc("get_user_empresa_id");
-
-      // Service role has no auth context, should return null
-      expect(data).toBeNull();
-    });
-
-    it("validate_user_tenant_access() rejects wrong tenant", async () => {
-      if (!tenantA?.empresaId || !tenantB?.empresaId) return;
-
-      // Service role call — no auth context, should return false
-      const { data } = await serviceClient.rpc(
-        "validate_user_tenant_access",
-        { tenant_id_param: tenantB.empresaId },
-      );
-
-      expect(data).toBe(false);
-    });
-
-    it("get_user_empresa_ids() returns array", async () => {
-      const { data } = await serviceClient.rpc("get_user_empresa_ids");
-
-      // Service role has no auth context, should return empty array
-      expect(data).toEqual([]);
+      // User B should see Tenant B
+      const { data: dataB } = await tenantB.client.rpc("get_user_empresa_id");
+      expect(dataB).toBe(tenantB.empresaId);
     });
   });
 
   describe("Cross-Tenant READ Isolation", () => {
-    it("cursos from tenant B should not be visible to tenant A user", async () => {
-      if (!tenantA?.empresaId || !tenantB?.empresaId) return;
-
-      // Count cursos in tenant B using service client
-      const { count: totalB } = await serviceClient
+    it("Tenant A User CANNOT see Tenant B's courses", async () => {
+      // 1. Setup: Ensure Tenant B has a course
+      const { data: courseB } = await serviceClient
         .from("cursos")
-        .select("id", { count: "exact", head: true })
-        .eq("empresa_id", tenantB.empresaId);
+        .insert({
+          empresa_id: tenantB.empresaId,
+          nome: "Secret Course B",
+          slug: `secret-course-b-${Date.now()}`,
+          ativo: true,
+          created_by: tenantB.userId,
+        })
+        .select()
+        .single();
 
-      if (!totalB || totalB === 0) {
-        console.warn("Tenant B has no cursos. Skipping cross-tenant read test.");
-        return;
-      }
+      expect(courseB).toBeDefined();
 
-      // This validates the RLS policy logic:
-      // If we had user A's token, querying cursos with empresa_id = tenantB
-      // should return 0 results due to RLS
-      expect(totalB).toBeGreaterThan(0);
+      // 2. Attack: User A tries to fetch ALL courses (should not see B)
+      const { data: coursesVisibleToA } = await tenantA.client
+        .from("cursos")
+        .select("id, nome, empresa_id");
+
+      const hasLeakedCourse = coursesVisibleToA?.some(
+        (c) => c.id === courseB?.id,
+      );
+      expect(hasLeakedCourse).toBe(false);
+
+      // 3. Attack: User A tries to fetch specifically Course B by ID
+      const { data: directAccess } = await tenantA.client
+        .from("cursos")
+        .select("id")
+        .eq("id", courseB?.id)
+        .maybeSingle();
+
+      expect(directAccess).toBeNull();
     });
 
-    it("usuarios from tenant B should not be visible to tenant A user", async () => {
-      if (!tenantA?.empresaId || !tenantB?.empresaId) return;
-
-      // Service client can see both tenants
-      const { count: totalA } = await serviceClient
+    it("Tenant A User CANNOT see Tenant B's users", async () => {
+      // Attack: User A tries to list users. Should only see users in Tenant A.
+      const { data: usersVisibleToA } = await tenantA.client
         .from("usuarios")
-        .select("id", { count: "exact", head: true })
-        .eq("empresa_id", tenantA.empresaId)
-        .eq("ativo", true)
-        .is("deleted_at", null);
+        .select("id, empresa_id");
 
-      const { count: totalB } = await serviceClient
-        .from("usuarios")
-        .select("id", { count: "exact", head: true })
-        .eq("empresa_id", tenantB.empresaId)
-        .eq("ativo", true)
-        .is("deleted_at", null);
+      // Verify no user from Tenant B is in the list
+      const leakedUsers = usersVisibleToA?.filter(
+        (u) => u.empresa_id === tenantB.empresaId,
+      );
+      expect(leakedUsers).toHaveLength(0);
 
-      // Both tenants should have users
-      expect(totalA).toBeGreaterThan(0);
-      expect(totalB).toBeGreaterThan(0);
-
-      // They should be different sets
-      expect(tenantA.empresaId).not.toBe(tenantB.empresaId);
+      // Should verify we can at least see ourselves (or others in our tenant)
+      const myUser = usersVisibleToA?.find((u) => u.id === tenantA.userId);
+      expect(myUser).toBeDefined();
     });
   });
 
   describe("Cross-Tenant WRITE Protection", () => {
-    it("validate_empresa_id trigger blocks cross-tenant INSERT", async () => {
-      if (!tenantA?.empresaId || !tenantB?.empresaId) return;
+    it("Tenant A User CANNOT insert data into Tenant B", async () => {
+      // Attack: User A tries to insert a course into Tenant B
+      const { error } = await tenantA.client.from("cursos").insert({
+        empresa_id: tenantB.empresaId, // <--- Malicious payload
+        nome: "Hacked Course",
+        slug: "hacked-course",
+        ativo: true,
+        created_by: tenantA.userId,
+      });
 
-      // The validate_empresa_id() trigger should block INSERTs with wrong empresa_id
-      // This test verifies the trigger exists on critical tables
-      const { data: triggers } = await serviceClient.rpc("get_user_empresa_id");
+      // RLS should reject this either via specific policy or because the
+      // 'WITH CHECK' clause prevents inserting rows that don't match the user's tenant.
+      expect(error).toBeDefined();
+      // Error code 42501 is "insufficient_privilege" (Postgres RLS violation)
+      // Sometimes it might be a check constraint violation depending on implementation
+      expect(error?.code).toMatch(/42501|23514|PGRST/);
+    });
 
-      // Trigger existence is verified by migration success
-      // The actual INSERT blocking requires an authenticated context
-      expect(true).toBe(true); // Placeholder — full test requires auth tokens
+    it("Tenant A User CANNOT update Tenant B's data", async () => {
+      // 1. Setup: Ensure Tenant B has a course
+      const { data: courseB } = await serviceClient
+        .from("cursos")
+        .insert({
+          empresa_id: tenantB.empresaId,
+          nome: "Integrity Course B",
+          slug: `integrity-course-b-${Date.now()}`,
+          ativo: true,
+          created_by: tenantB.userId,
+        })
+        .select()
+        .single();
+
+      // 2. Attack: User A tries to rename it
+      const { data, error } = await tenantA.client
+        .from("cursos")
+        .update({ nome: "Hacked Name" })
+        .eq("id", courseB?.id) // Target ID
+        .select();
+
+      // Should update 0 rows or throw error
+      // If RLS completely hides the row, update finds 0 rows -> success with empty data
+      // If RLS allows seeing but not writing -> error
+      if (error) {
+        expect(error.code).toBe("42501");
+      } else {
+        expect(data).toHaveLength(0);
+      }
+
+      // Verify it didn't change
+      const { data: check } = await serviceClient
+        .from("cursos")
+        .select("nome")
+        .eq("id", courseB?.id)
+        .single();
+      expect(check?.nome).toBe("Integrity Course B");
     });
   });
 
@@ -200,14 +288,6 @@ describeIfEnv("Tenant Isolation Security", () => {
       expect(count).toBe(0);
     });
 
-    it("all usuarios_empresas bindings reference valid empresas", async () => {
-      const { data } = await serviceClient.rpc("get_user_empresa_ids");
-
-      // Service role returns empty array (no auth context)
-      // The actual data integrity is validated by foreign key constraints
-      expect(Array.isArray(data)).toBe(true);
-    });
-
     it("empresa_id indexes exist on all critical tables", async () => {
       const criticalTables = [
         "cursos",
@@ -219,8 +299,8 @@ describeIfEnv("Tenant Isolation Security", () => {
         "flashcards",
       ];
 
-      for (const table of criticalTables) {
-        const { data } = await serviceClient.rpc("get_user_empresa_id");
+      for (const _table of criticalTables) {
+        const { data: _data } = await serviceClient.rpc("get_user_empresa_id");
         // Index existence is verified by migration success
         // Performance impact is validated by explain plans
       }

@@ -77,7 +77,7 @@ export function WorkspaceSwitcher() {
 
     router.push(nextPath)
     router.refresh()
-  }, [tenantSlug, pathname, router, setActiveOrganization])
+  }, [tenantSlug, pathname, router])
 
   // Active workspace display name (from selected org or tenant context)
   const activeDisplayName = useMemo(() => {

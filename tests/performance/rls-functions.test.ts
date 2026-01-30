@@ -88,11 +88,11 @@ describeIfEnv("RLS Function Performance", () => {
 
   describe("Index Usage", () => {
     it("cursos empresa_id index is used in filtered queries", async () => {
-      const { data } = await serviceClient.rpc("get_user_empresa_id");
+      const { data: _data } = await serviceClient.rpc("get_user_empresa_id");
 
       // Verify index exists by checking it was created in migration
       // Actual EXPLAIN ANALYZE requires direct SQL access
-      const { data: indexes, error } = await serviceClient
+      const { data: _indexes, error } = await serviceClient
         .from("cursos")
         .select("id")
         .limit(1);

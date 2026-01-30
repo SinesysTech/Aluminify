@@ -4,7 +4,6 @@ import { getPublicSupabaseConfig } from "./supabase-public-env";
 import {
   resolveTenantContext,
   extractTenantFromPath,
-  type TenantContext,
 } from "@/app/shared/core/services/tenant-resolution.service";
 
 // --- LOGGING CONFIGURATION ---
