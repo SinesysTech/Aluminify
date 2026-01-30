@@ -74,7 +74,7 @@ export default function InstitutionDashboardClient() {
         }
         setError(null)
 
-        const dashboardData = await fetchInstitutionDashboardData(periodToUse)
+        const dashboardData = await fetchInstitutionDashboardData(periodToUse, controller.signal)
 
         if (controller.signal.aborted) return
 

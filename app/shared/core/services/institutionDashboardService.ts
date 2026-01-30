@@ -19,12 +19,13 @@ type DashboardPeriod = "semanal" | "mensal" | "anual";
  */
 export async function fetchInstitutionDashboardData(
   period: DashboardPeriod = "mensal",
+  signal?: AbortSignal,
 ): Promise<InstitutionDashboardData> {
   try {
     const response = await apiClient.get<{
       success: boolean;
       data: InstitutionDashboardData;
-    }>(`/api/dashboard/institution?period=${period}`);
+    }>(`/api/dashboard/institution?period=${period}`, { signal });
 
     if (response && response.success && response.data) {
       return response.data;
