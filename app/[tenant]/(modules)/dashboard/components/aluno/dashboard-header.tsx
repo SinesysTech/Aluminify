@@ -97,7 +97,7 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
   }
 
   return (
-    <header className="mb-6 md:mb-8">
+    <header>
       {/* Mobile Layout */}
       <div className="flex flex-col gap-4 md:hidden">
         {/* Greeting */}

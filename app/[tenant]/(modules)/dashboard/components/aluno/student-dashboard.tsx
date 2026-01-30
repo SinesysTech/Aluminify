@@ -284,27 +284,24 @@ export default function StudentDashboardClientPage() {
     }
 
     return (
-        <div className="mx-auto max-w-7xl">
-            {/* Topo: Header e Schedule Progress */}
-            <div className="flex items-start justify-between gap-4 mb-4">
-                <div className="flex-1">
-                    <DashboardHeader user={data.user} />
-                </div>
-            </div>
+        <div className="mx-auto max-w-7xl space-y-6 md:space-y-8">
+            {/* Topo: Header */}
+            <DashboardHeader user={data.user} />
 
             {/* Mensagem de erro (se houver dados mas também erro) */}
             {error && data && (
-                <Alert variant="destructive" className="mb-4">
+                <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Aviso</AlertTitle>
                     <AlertDescription>{error}. Dados podem estar desatualizados.</AlertDescription>
                 </Alert>
             )}
 
+            {/* Progresso do Cronograma */}
             <ScheduleProgress value={data.metrics.scheduleProgress} />
 
-            {/* Linha 1: Grid de 4 Metric Cards */}
-            <div className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4 mb-6 md:mb-8">
+            {/* Grid de 4 Metric Cards */}
+            <div className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-4">
                 <MetricCard
                     label="Tempo de Estudo"
                     value={data.metrics.focusTime}
@@ -355,15 +352,15 @@ export default function StudentDashboardClientPage() {
                 />
             </div>
 
-            {/* Linha 2: Consistency Heatmap (largura total) */}
+            {/* Consistency Heatmap (largura total) */}
             <ConsistencyHeatmap
                 data={data.heatmap}
                 period={heatmapPeriod}
                 onPeriodChange={handleHeatmapPeriodChange}
             />
 
-            {/* Linha 3: 2 Colunas - Subject Performance List e Subject Distribution */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6 mb-6 md:mb-8 items-stretch">
+            {/* 2 Colunas - Subject Performance List e Subject Distribution */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6 items-stretch">
                 <div className="lg:col-span-3 lg:h-[446px]">
                     <SubjectPerformanceList subjects={data.subjects} period={mapHeatmapPeriodToDashboardPeriod(heatmapPeriod)} />
                 </div>
@@ -372,7 +369,7 @@ export default function StudentDashboardClientPage() {
                 </div>
             </div>
 
-            {/* Linha 4: 2 Colunas - Focus Efficiency Chart e Strategic Domain */}
+            {/* 2 Colunas - Focus Efficiency Chart e Strategic Domain */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 <FocusEfficiencyChart data={data.focusEfficiency} />
                 <StrategicDomain data={data.strategicDomain} />

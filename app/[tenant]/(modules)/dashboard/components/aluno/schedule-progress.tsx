@@ -24,7 +24,7 @@ export function ScheduleProgress({ value }: ScheduleProgressProps) {
 
   return (
     <Card className={cn(
-      'mb-6 overflow-hidden transition-all duration-300',
+      'overflow-hidden transition-all duration-300',
       isComplete
         ? 'bg-linear-to-r from-emerald-500/10 via-green-500/5 to-transparent border-emerald-500/30'
         : 'bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20'

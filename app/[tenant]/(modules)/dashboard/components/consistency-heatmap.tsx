@@ -99,7 +99,7 @@ export function ConsistencyHeatmap({
   const showDayLabels = period === 'anual' || period === 'mensal'
 
   return (
-    <Card className="mb-6 md:mb-8">
+    <Card>
       <CardContent className="p-4 md:p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
