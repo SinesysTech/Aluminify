@@ -10,11 +10,11 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals'
 import { createClient } from '@supabase/supabase-js'
 import fc from 'fast-check'
-import { BrandCustomizationManager } from '@/app/shared/core/services/brand-customization'
+import { BrandCustomizationManager } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization-manager'
 import { getDatabaseClient } from '@/app/shared/core/database/database'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   console.warn('Supabase environment variables not found. Skipping brand customization tests.')
