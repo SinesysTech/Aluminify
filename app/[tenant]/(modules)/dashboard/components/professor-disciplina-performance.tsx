@@ -18,10 +18,10 @@ function getPerformanceColor(score: number): string {
 }
 
 function getPerformanceTextColor(score: number): string {
-  if (score >= 80) return 'text-emerald-600'
-  if (score >= 60) return 'text-yellow-600'
-  if (score >= 40) return 'text-orange-600'
-  return 'text-red-600'
+  if (score >= 80) return 'text-emerald-600 dark:text-emerald-400'
+  if (score >= 60) return 'text-yellow-600 dark:text-yellow-400'
+  if (score >= 40) return 'text-orange-600 dark:text-orange-400'
+  return 'text-red-600 dark:text-red-400'
 }
 
 export function ProfessorDisciplinaPerformanceList({

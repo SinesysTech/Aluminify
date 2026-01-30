@@ -37,9 +37,9 @@ function getRankIcon(position: number) {
     case 0:
       return <Trophy className="h-3.5 w-3.5 text-yellow-500" />
     case 1:
-      return <Medal className="h-3.5 w-3.5 text-gray-400" />
+      return <Medal className="h-3.5 w-3.5 text-muted-foreground" />
     case 2:
-      return <Award className="h-3.5 w-3.5 text-amber-600" />
+      return <Award className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
     default:
       return null
   }
@@ -48,11 +48,11 @@ function getRankIcon(position: number) {
 function getRankBadgeColor(position: number): string {
   switch (position) {
     case 0:
-      return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/30'
+      return 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/30'
     case 1:
-      return 'bg-gray-50 text-gray-600 border-gray-200 dark:bg-gray-500/10 dark:text-gray-400 dark:border-gray-500/30'
+      return 'bg-muted text-muted-foreground border-border'
     case 2:
-      return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30'
+      return 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30'
     default:
       return 'bg-muted text-muted-foreground border-border'
   }
@@ -61,11 +61,11 @@ function getRankBadgeColor(position: number): string {
 function getRowHighlight(position: number): string {
   switch (position) {
     case 0:
-      return 'bg-yellow-50/50 dark:bg-yellow-500/5'
+      return 'bg-yellow-500/5'
     case 1:
-      return 'bg-gray-50/50 dark:bg-gray-500/5'
+      return 'bg-muted/50'
     case 2:
-      return 'bg-amber-50/50 dark:bg-amber-500/5'
+      return 'bg-amber-500/5'
     default:
       return ''
   }

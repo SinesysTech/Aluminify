@@ -23,4 +23,6 @@ export interface PaginationParams {
   query?: string;
   courseId?: string;
   turmaId?: string;
+  /** Quando informado, lista apenas alunos matriculados em algum curso da empresa (alunos_cursos). */
+  empresaId?: string;
 }
