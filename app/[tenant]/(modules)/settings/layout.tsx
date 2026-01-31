@@ -5,10 +5,9 @@ import { SidebarNav } from "./components/sidebar-nav";
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateMeta({
-    title: "Settings Page",
-    description:
-      "Example of settings page and form created using react-hook-form and Zod validator. Built with Tailwind CSS and React.",
-    canonical: "/pages/settings"
+    title: "Configurações",
+    description: "Gerencie as configurações da sua empresa.",
+    canonical: "/settings"
   });
 }
 
@@ -16,9 +15,9 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
   return (
     <div className="space-y-4 max-w-5xl mx-auto lg:space-y-6">
       <div className="space-y-0.5">
-        <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+        <h2 className="text-2xl font-bold tracking-tight">Configurações</h2>
         <p className="text-muted-foreground">
-          Manage your account settings and set e-mail preferences.
+          Gerencie as configurações da sua empresa.
         </p>
       </div>
       <div className="flex flex-col space-y-4 lg:flex-row lg:space-y-0 lg:space-x-4">

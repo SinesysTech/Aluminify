@@ -3,8 +3,8 @@ import type {
   FontScheme,
   CreateFontSchemeRequest,
   CSSCustomProperties,
-} from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
-import { FontLoadingError } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
+} from '@/app/[tenant]/(modules)/settings/personalizacao/services/brand-customization.types';
+import { FontLoadingError } from '@/app/[tenant]/(modules)/settings/personalizacao/services/brand-customization.types';
 
 /**
  * Font Scheme Manager Interface

@@ -6,8 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { createClient } from '@/app/shared/core/client';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { CardSkeleton } from '@/components/ui/card-skeleton';
-import { BrandCustomizationPanel } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/components';
-import type { CompleteBrandingConfig, SaveTenantBrandingRequest } from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
+import { BrandCustomizationPanel } from '@/app/[tenant]/(modules)/settings/personalizacao/components';
+import type { CompleteBrandingConfig, SaveTenantBrandingRequest } from '@/app/[tenant]/(modules)/settings/personalizacao/services/brand-customization.types';
 
 export default function BrandingPage() {
   const { toast } = useToast();

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     console.error("Zoom OAuth error:", error);
     return NextResponse.redirect(
       new URL(
-        `/empresa/integracoes?error=${encodeURIComponent(error)}`,
+        `/settings/integracoes?error=${encodeURIComponent(error)}`,
         request.url,
       ),
     );
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
   if (!code || !state) {
     return NextResponse.redirect(
       new URL(
-        "/empresa/integracoes?error=missing_params",
+        "/settings/integracoes?error=missing_params",
         request.url,
       ),
     );
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { clientId, clientSecret } = credentials;
-    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/empresa/integracoes/zoom/callback`;
+    const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin}/api/settings/integracoes/zoom/callback`;
 
     // Zoom uses Basic auth with client credentials
     const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString(
@@ -105,8 +105,8 @@ export async function GET(request: NextRequest) {
     }
 
     const redirectPath = tenantSlug
-      ? `/${tenantSlug}/empresa/integracoes?success=zoom`
-      : `/empresa/integracoes?success=zoom`;
+      ? `/${tenantSlug}/settings/integracoes?success=zoom`
+      : `/settings/integracoes?success=zoom`;
 
     return NextResponse.redirect(
       new URL(redirectPath, request.url),
@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
     console.error("Zoom OAuth callback error:", error);
     return NextResponse.redirect(
       new URL(
-        `/empresa/integracoes?error=${encodeURIComponent(String(error))}`,
+        `/settings/integracoes?error=${encodeURIComponent(String(error))}`,
         request.url,
       ),
     );

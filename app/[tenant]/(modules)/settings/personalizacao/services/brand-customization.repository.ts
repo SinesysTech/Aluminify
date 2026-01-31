@@ -9,7 +9,7 @@ import type {
   TenantBrandingInsert,
   TenantBrandingUpdate,
   LogoType,
-} from '@/app/[tenant]/(modules)/empresa/(gestao)/personalizacao/services/brand-customization.types';
+} from '@/app/[tenant]/(modules)/settings/personalizacao/services/brand-customization.types';
 
 export interface BrandCustomizationRepository {
   // Tenant Branding CRUD

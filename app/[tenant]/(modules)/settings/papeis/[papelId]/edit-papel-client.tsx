@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { PapelForm, PermissionsMatrix } from '@/app/[tenant]/(modules)/empresa/(gestao)/components'
+import { PapelForm, PermissionsMatrix } from '@/app/[tenant]/(modules)/settings/components'
 import type { Papel, RoleTipo, RolePermissions } from '@/app/shared/types/entities/papel'
 import { toast } from 'sonner'
 
@@ -46,7 +46,7 @@ export function EditPapelClient({ papel, empresaId }: EditPapelClientProps) {
       }
 
       toast.success('Papel atualizado com sucesso')
-      router.push(tenant ? `/${tenant}/empresa/detalhes/papeis` : '/empresa/detalhes/papeis')
+      router.push(tenant ? `/${tenant}/settings/papeis` : '/settings/papeis')
       router.refresh()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao atualizar papel')

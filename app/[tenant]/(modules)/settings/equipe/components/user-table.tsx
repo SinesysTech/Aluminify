@@ -92,8 +92,8 @@ export function UserTable({ usuarios }: UserTableProps) {
                               onClick={() =>
                                 router.push(
                                   tenant
-                                    ? `/${tenant}/usuario/equipe/${usuario.id}`
-                                    : `/usuario/equipe/${usuario.id}`
+                                    ? `/${tenant}/settings/equipe/${usuario.id}`
+                                    : `/settings/equipe/${usuario.id}`
                                 )
                               }
                             >

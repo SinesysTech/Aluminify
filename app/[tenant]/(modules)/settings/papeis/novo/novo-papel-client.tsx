@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { PapelForm } from '@/app/[tenant]/(modules)/empresa/(gestao)/components'
+import { PapelForm } from '@/app/[tenant]/(modules)/settings/components'
 import type { RoleTipo, RolePermissions } from '@/app/shared/types/entities/papel'
 import { toast } from 'sonner'
 
@@ -40,7 +40,7 @@ export function NovoPapelClient({ empresaId }: NovoPapelClientProps) {
       }
 
       toast.success('Papel criado com sucesso')
-      router.push(tenant ? `/${tenant}/empresa/detalhes/papeis` : '/empresa/detalhes/papeis')
+      router.push(tenant ? `/${tenant}/settings/papeis` : '/settings/papeis')
       router.refresh()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Erro ao criar papel')
