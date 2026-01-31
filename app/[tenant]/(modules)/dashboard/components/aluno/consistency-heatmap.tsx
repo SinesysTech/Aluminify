@@ -197,16 +197,16 @@ export function ConsistencyHeatmap({
         <div className="flex flex-col gap-2">
           {/* Heatmap Grid */}
           <div className="overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-            <div className="flex gap-1 min-w-fit">
+            <div className="flex gap-[3px] min-w-fit">
               {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-1">
+                <div key={weekIndex} className="flex flex-col gap-[3px]">
                   {week.map((day, dayIndex) => (
                     <TooltipProvider key={dayIndex} delayDuration={100}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div
                             className={cn(
-                              'w-3 h-3 rounded-sm transition-colors cursor-default',
+                              'size-3.5 rounded-sm transition-colors cursor-default',
                               getIntensityColor(day.intensity)
                             )}
                           />
@@ -236,11 +236,11 @@ export function ConsistencyHeatmap({
           <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground mt-2">
             <span>Menos</span>
             <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-sm bg-muted/40" />
-              <div className="w-3 h-3 rounded-sm bg-emerald-500/40 dark:bg-emerald-400/40" />
-              <div className="w-3 h-3 rounded-sm bg-emerald-500/60 dark:bg-emerald-400/60" />
-              <div className="w-3 h-3 rounded-sm bg-emerald-500/80 dark:bg-emerald-400/80" />
-              <div className="w-3 h-3 rounded-sm bg-emerald-500 dark:bg-emerald-400" />
+              <div className="size-3.5 rounded-sm bg-muted/40" />
+              <div className="size-3.5 rounded-sm bg-emerald-500/40 dark:bg-emerald-400/40" />
+              <div className="size-3.5 rounded-sm bg-emerald-500/60 dark:bg-emerald-400/60" />
+              <div className="size-3.5 rounded-sm bg-emerald-500/80 dark:bg-emerald-400/80" />
+              <div className="size-3.5 rounded-sm bg-emerald-500 dark:bg-emerald-400" />
             </div>
             <span>Mais</span>
           </div>

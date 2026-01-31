@@ -30,7 +30,7 @@ export function ProfessorDisciplinaPerformanceList({
   return (
     <Card className="h-full">
       <CardHeader className="pb-4">
-        <CardTitle className="text-base font-semibold flex items-center gap-2">
+        <CardTitle className="widget-title flex items-center gap-2">
           <BookOpen className="h-4 w-4" />
           Performance dos Alunos
         </CardTitle>
