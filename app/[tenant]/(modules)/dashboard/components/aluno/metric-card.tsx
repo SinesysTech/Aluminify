@@ -93,7 +93,7 @@ export function MetricCard({
   const config = variantConfig[variant]
 
   return (
-    <Card className="group overflow-hidden transition-all duration-200 hover:shadow-md">
+    <Card className="group overflow-hidden transition-all duration-200 hover:shadow-md py-0 gap-0">
       <CardContent className="p-4 md:p-5">
         {/* Header: Label + Icon */}
         <div className="flex items-start justify-between mb-2">

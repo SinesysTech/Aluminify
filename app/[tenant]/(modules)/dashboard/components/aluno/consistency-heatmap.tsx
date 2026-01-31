@@ -102,8 +102,7 @@ export function ConsistencyHeatmap({
   const getIntensityColor = (intensity: number) => {
     switch (intensity) {
       case 0:
-        // No modo claro: fundo mais escuro e borda para visibilidade; modo escuro usa cores mais claras
-        return 'bg-muted/60 border border-border/30 hover:bg-muted/80'
+        return 'bg-muted/40 hover:bg-muted/60'
       case 1:
         return 'bg-emerald-500/40 hover:bg-emerald-500/50 dark:bg-emerald-400/40 dark:hover:bg-emerald-400/50'
       case 2:
@@ -113,7 +112,7 @@ export function ConsistencyHeatmap({
       case 4:
         return 'bg-emerald-500 hover:bg-emerald-500/90 dark:bg-emerald-400 dark:hover:bg-emerald-400/90'
       default:
-        return 'bg-muted/60 border border-border/30'
+        return 'bg-muted/40'
     }
   }
 
@@ -130,7 +129,7 @@ export function ConsistencyHeatmap({
 
   return (
     <Card className="overflow-hidden transition-all duration-300">
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-2">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Title + Info */}
           <div className="flex items-center gap-2">
@@ -237,7 +236,7 @@ export function ConsistencyHeatmap({
           <div className="flex items-center justify-end gap-2 text-xs text-muted-foreground mt-2">
             <span>Menos</span>
             <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-sm bg-muted/60 border border-border/30" />
+              <div className="w-3 h-3 rounded-sm bg-muted/40" />
               <div className="w-3 h-3 rounded-sm bg-emerald-500/40 dark:bg-emerald-400/40" />
               <div className="w-3 h-3 rounded-sm bg-emerald-500/60 dark:bg-emerald-400/60" />
               <div className="w-3 h-3 rounded-sm bg-emerald-500/80 dark:bg-emerald-400/80" />
