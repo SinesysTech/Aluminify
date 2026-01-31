@@ -440,24 +440,10 @@ export function ScheduleList({
                         <p>Nenhuma aula agendada para esta semana</p>
                       )}
                     </div>
-                  ) : modalidade === 'sequencial' ? (
-                    // Modo sequencial: lista simples sem divisões de frentes
-                    <SortableContext
-                      items={itensOrdenados.map((item) => item.id)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <div className="space-y-2">
-                        {itensOrdenados.map((item) => (
-                          <AulaItem
-                            key={item.id}
-                            item={item}
-                            onToggleConcluido={onToggleConcluido}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
                   ) : (
-                    // Modo paralelo: agrupar por frente
+                    // Ambos os modos (paralelo e sequencial): agrupar por frente
+                    // No paralelo, várias frentes por disciplina aparecem em paralelo
+                    // No sequencial, apenas 1 frente por disciplina por semana (mas disciplinas em paralelo)
                     (() => {
                       const itensPorFrente = itensOrdenados.reduce((acc, item) => {
                         const frenteId = item.aulas?.modulos?.frentes?.id || 'sem-frente'
@@ -481,10 +467,10 @@ export function ScheduleList({
                           {frentes.map((frente, frenteIndex) => (
                             <Card key={frenteIndex} className="border rounded-lg p-4 bg-card overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
                               <div className="mb-3 pb-2 border-b">
-                                <h4 className="font-semibold text-sm">{frente.nome}</h4>
                                 {frente.disciplina && (
-                                  <p className="text-xs text-muted-foreground">{frente.disciplina}</p>
+                                  <h4 className="font-semibold text-sm">{frente.disciplina}</h4>
                                 )}
+                                <p className="text-xs text-muted-foreground">{frente.nome}</p>
                               </div>
                               <SortableContext
                                 items={frente.itens.map((item) => item.id)}

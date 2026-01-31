@@ -23,6 +23,7 @@ import {
   AulaRow,
   WeekTimeBar,
   MotivationalMessage,
+  Watermark,
 } from './pdf-components'
 import type { OverallStats, WeekGroup } from './pdf-data'
 import { buildInfoGridItems, getWeekDisciplineTime } from './pdf-data'
@@ -76,6 +77,7 @@ export function CoverPage({
 
   return (
     <Page size="A4" style={s.page}>
+      <Watermark logoUrl={logoUrl} />
       {/* Header: Logo + marca */}
       <View style={[s.row, { justifyContent: 'space-between', alignItems: 'flex-start' }]}>
         <LogoBlock logoUrl={logoUrl} />
@@ -311,6 +313,7 @@ export function WeekPage({
   cursoNome,
   colorMap,
   velocidade,
+  logoUrl,
 }: {
   week: WeekGroup
   cronogramaNome: string
@@ -318,11 +321,13 @@ export function WeekPage({
   cursoNome?: string
   colorMap: Map<string, import('./pdf-theme').DisciplineColor>
   velocidade: number
+  logoUrl?: string | null
 }) {
   const timeData = getWeekDisciplineTime(week.itens, colorMap, velocidade)
 
   return (
     <Page size="A4" style={s.page} wrap>
+      <Watermark logoUrl={logoUrl ?? null} />
       <MiniHeader
         cronogramaNome={cronogramaNome}
         rightText={`Semana ${week.semanaNumero}`}
@@ -400,6 +405,20 @@ export function WeekPage({
         </View>
       </View>
 
+      {/* Barra de distribuicao de tempo (logo apos o header da semana) */}
+      {timeData.length > 1 && (
+        <View
+          style={{
+            marginTop: 8,
+            paddingTop: 6,
+            borderTopWidth: 1,
+            borderTopColor: PDF_COLORS.border,
+          }}
+        >
+          <WeekTimeBar disciplines={timeData} />
+        </View>
+      )}
+
       {/* Dias da semana */}
       {week.days.map((day) => (
         <View key={day.date}>
@@ -410,7 +429,7 @@ export function WeekPage({
 
           {/* Disciplinas do dia */}
           {day.disciplinas.map((disc) => (
-            <View key={`${day.date}-${disc.disciplinaId}`}>
+            <View key={`${day.date}-${disc.disciplinaId}`} wrap={false}>
               <DisciplinaHeader nome={disc.disciplinaNome} color={disc.color} />
 
               {disc.frentes.map((frente) => (
@@ -466,20 +485,6 @@ export function WeekPage({
         </View>
       ))}
 
-      {/* Barra de distribuicao de tempo */}
-      {timeData.length > 1 && (
-        <View
-          style={{
-            marginTop: 12,
-            paddingTop: 8,
-            borderTopWidth: 1,
-            borderTopColor: PDF_COLORS.border,
-          }}
-        >
-          <WeekTimeBar disciplines={timeData} />
-        </View>
-      )}
-
       <PdfFooter cronogramaNome={cronogramaNome} alunoNome={alunoNome} cursoNome={cursoNome} />
     </Page>
   )
@@ -494,14 +499,17 @@ export function SummaryPage({
   alunoNome,
   cursoNome,
   stats,
+  logoUrl,
 }: {
   cronogramaNome: string
   alunoNome?: string
   cursoNome?: string
   stats: OverallStats
+  logoUrl?: string | null
 }) {
   return (
     <Page size="A4" style={s.page}>
+      <Watermark logoUrl={logoUrl ?? null} />
       <MiniHeader cronogramaNome={cronogramaNome} rightText="Resumo" />
 
       <Text

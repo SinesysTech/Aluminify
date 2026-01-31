@@ -190,6 +190,7 @@ async function getHandler(
           cursoNome={cursoNome}
           colorMap={stats.disciplineColorMap}
           velocidade={velocidade}
+          logoUrl={logoUrl}
         />
       ))}
       <SummaryPage
@@ -197,6 +198,7 @@ async function getHandler(
         alunoNome={alunoNome}
         cursoNome={cursoNome}
         stats={stats}
+        logoUrl={logoUrl}
       />
     </Document>
   )

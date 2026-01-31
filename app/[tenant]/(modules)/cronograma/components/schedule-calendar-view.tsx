@@ -322,11 +322,12 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
             }
 
             const todasAulas: AulaData[] = []
-            for (const _lote of lotes) {
+            for (const lote of lotes) {
               // Type assertion needed because database types are currently out of sync with actual schema
               const { data: loteData, error: loteError } = await supabase
                 .from('aulas')
-                .select('id, nome, numero_aula, tempo_estimado_minutos, curso_id, modulo_id') as unknown as { data: AulaData[] | null; error: unknown }
+                .select('id, nome, numero_aula, tempo_estimado_minutos, curso_id, modulo_id')
+                .in('id', lote) as unknown as { data: AulaData[] | null; error: unknown }
 
               if (!loteError && loteData) {
                 todasAulas.push(...loteData)
@@ -1310,11 +1311,12 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
           }
 
           const todasAulas: AulaData[] = []
-          for (const _lote of lotes) {
+          for (const lote of lotes) {
             // Type assertion needed because database types are currently out of sync with actual schema
             const { data: loteData, error: loteError } = await supabase
               .from('aulas')
-              .select('id, nome, numero_aula, tempo_estimado_minutos, curso_id, modulo_id') as unknown as { data: AulaData[] | null; error: unknown }
+              .select('id, nome, numero_aula, tempo_estimado_minutos, curso_id, modulo_id')
+              .in('id', lote) as unknown as { data: AulaData[] | null; error: unknown }
 
             if (!loteError && loteData) {
               todasAulas.push(...loteData)

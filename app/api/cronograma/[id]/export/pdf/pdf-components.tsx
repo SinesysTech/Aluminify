@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { View, Text, Image } from '@react-pdf/renderer'
+import { View, Text, Image, type ViewProps } from '@react-pdf/renderer'
 import { PDF_COLORS, PDF_FONTS, PDF_SPACING, type DisciplineColor } from './pdf-theme'
 import { formatTempo, truncateText } from './pdf-types'
 
@@ -830,6 +830,40 @@ export function MiniHeader({
           {rightText}
         </Text>
       )}
+    </View>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Watermark - marca d'agua com logo do tenant em todas as paginas
+// ---------------------------------------------------------------------------
+
+export function Watermark({ logoUrl }: { logoUrl: string | null }) {
+  if (!logoUrl) return null
+
+  return (
+    <View
+      fixed
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {/* eslint-disable-next-line jsx-a11y/alt-text */}
+      <Image
+        src={logoUrl}
+        style={{
+          width: 300,
+          height: 300,
+          opacity: 0.06,
+          objectFit: 'contain',
+        }}
+      />
     </View>
   )
 }
