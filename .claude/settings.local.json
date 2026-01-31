@@ -109,7 +109,8 @@
       "Bash(powershell -Command:*)",
       "Bash(findstr:*)",
       "Bash(npx next lint)",
-      "mcp__supabase__search_docs"
+      "mcp__supabase__search_docs",
+      "Bash(npm run type-check:*)"
     ],
     "deny": [],
     "ask": []
