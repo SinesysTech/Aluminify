@@ -396,7 +396,7 @@ export function ModuleVisibilityPanel({
                   </div>
 
                   {/* Icon */}
-                  <div className="flex-shrink-0">
+                  <div className="shrink-0">
                     <IconComponent className="h-5 w-5 text-muted-foreground" />
                   </div>
 
