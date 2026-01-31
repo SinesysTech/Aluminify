@@ -57,9 +57,10 @@ export function TenantLoginPageClient({
           if (result.success && result.data) {
             const branding = result.data
 
-            // Set Logo
-            if (branding.logos?.login?.logoUrl) {
-              setBrandingLogo(branding.logos.login.logoUrl)
+            // Set Logo with fallback (login -> sidebar)
+            const resolvedLogo = branding.logos?.login?.logoUrl || branding.logos?.sidebar?.logoUrl
+            if (resolvedLogo) {
+              setBrandingLogo(resolvedLogo)
             }
 
             // Apply Colors
