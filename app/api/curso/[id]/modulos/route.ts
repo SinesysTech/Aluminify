@@ -4,17 +4,17 @@ import { CursoModulosService } from "@/app/[tenant]/(modules)/curso/services/cur
 import { ModuleVisibilityService } from "@/app/[tenant]/(modules)/empresa/services/module-visibility.service";
 
 interface RouteContext {
-  params: Promise<{ cursoId: string }>;
+  params: Promise<{ id: string }>;
 }
 
 /**
- * GET /api/curso/[cursoId]/modulos
+ * GET /api/curso/[id]/modulos
  * Returns module IDs bound to this course.
  * With ?full=true, also returns tenant-visible modules and empresaId for admin UI.
  */
 export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
-    const { cursoId } = await params;
+    const { id: cursoId } = await params;
     const isFull = request.nextUrl.searchParams.get("full") === "true";
     const supabase = await createAuthenticatedClient();
 
@@ -58,13 +58,13 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 }
 
 /**
- * POST /api/curso/[cursoId]/modulos
+ * POST /api/curso/[id]/modulos
  * Sets module IDs for this course (replaces all)
  * Body: { moduleIds: string[], empresaId: string }
  */
 export async function POST(request: NextRequest, { params }: RouteContext) {
   try {
-    const { cursoId } = await params;
+    const { id: cursoId } = await params;
     const body = await request.json();
 
     if (!body || !Array.isArray(body.moduleIds) || !body.empresaId) {

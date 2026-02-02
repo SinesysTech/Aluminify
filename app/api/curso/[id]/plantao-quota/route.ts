@@ -4,16 +4,16 @@ import { PlantaoQuotaService } from "@/app/[tenant]/(modules)/agendamentos/servi
 import { ModuleVisibilityService } from "@/app/[tenant]/(modules)/empresa/services/module-visibility.service";
 
 interface RouteContext {
-  params: Promise<{ cursoId: string }>;
+  params: Promise<{ id: string }>;
 }
 
 /**
- * GET /api/curso/[cursoId]/plantao-quota
+ * GET /api/curso/[id]/plantao-quota
  * Returns the plantao quota for a course
  */
 export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
-    const { cursoId } = await params;
+    const { id: cursoId } = await params;
     const supabase = await createAuthenticatedClient();
 
     const service = new PlantaoQuotaService(supabase);
@@ -41,13 +41,13 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
 }
 
 /**
- * POST /api/curso/[cursoId]/plantao-quota
+ * POST /api/curso/[id]/plantao-quota
  * Sets the plantao quota for a course
  * Body: { quotaMensal: number, empresaId: string }
  */
 export async function POST(request: NextRequest, { params }: RouteContext) {
   try {
-    const { cursoId } = await params;
+    const { id: cursoId } = await params;
     const body = await request.json();
 
     if (!body || typeof body.quotaMensal !== "number" || !body.empresaId) {

@@ -120,7 +120,8 @@
       "Bash(docker rmi:*)",
       "WebFetch(domain:aluminify.service.sinesys.app)",
       "WebFetch(domain:aluminify.sinesys.app)",
-      "Bash(docker logs:*)"
+      "Bash(docker logs:*)",
+      "Bash(head:*)"
     ],
     "deny": [],
     "ask": []
