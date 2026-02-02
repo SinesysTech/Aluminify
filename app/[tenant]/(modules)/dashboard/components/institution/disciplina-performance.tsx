@@ -34,7 +34,7 @@ export function DisciplinaPerformanceList({ disciplinas }: DisciplinaPerformance
       </CardHeader>
       <CardContent className="pt-0 px-4 md:px-5 pb-4">
         {disciplinas.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[100px] gap-3 py-8">
+          <div className="flex flex-col items-center justify-center min-h-25 gap-3 py-8">
             <GraduationCap className="h-12 w-12 text-muted-foreground/40" />
             <div className="text-center space-y-1">
               <p className="text-sm font-medium text-muted-foreground">Nenhuma disciplina com dados de performance</p>

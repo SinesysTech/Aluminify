@@ -300,7 +300,7 @@ export function TenantLoginPageClient({
         <div className="pointer-events-none absolute inset-0 bg-linear-to-br from-white/0 via-white/3 to-black/10" />
 
         {/* Radial glow behind logo area */}
-        <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/5 blur-3xl" />
+        <div className="pointer-events-none absolute left-1/2 top-1/2 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/5 blur-3xl" />
 
         {/* Decorative circles (staggered entrance) */}
         <div

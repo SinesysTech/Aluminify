@@ -150,7 +150,7 @@ export function ConsistencyHeatmap({
         {period === 'anual' && monthPositions.length > 0 && (
           <div className="overflow-x-auto overflow-y-hidden mb-1">
             <div className="relative min-w-max" style={{ paddingLeft: showDayLabels ? '2rem' : 0 }}>
-              <div className="grid grid-cols-53 gap-[3px]">
+              <div className="grid grid-cols-53 gap-0.75">
                 {Array.from({ length: 53 }).map((_, colIdx) => {
                   const match = monthPositions.find((m) => m.col === colIdx)
                   return (
@@ -169,7 +169,7 @@ export function ConsistencyHeatmap({
           <div className="flex min-w-max">
             {/* Day-of-week labels */}
             {showDayLabels && (
-              <div className="flex flex-col gap-[3px] mr-1.5 pt-0">
+              <div className="flex flex-col gap-0.75 mr-1.5 pt-0">
                 {DAY_LABELS.map((label, i) => (
                   <div
                     key={i}
@@ -183,7 +183,7 @@ export function ConsistencyHeatmap({
             )}
 
             {/* Grid cells */}
-            <div className={cn('grid gap-[3px] flex-1', getGridCols())}>
+            <div className={cn('grid gap-0.75 flex-1', getGridCols())}>
               {data.map((day, index) => (
                 <TooltipProvider key={`${day.date}-${index}`} delayDuration={100}>
                   <Tooltip>

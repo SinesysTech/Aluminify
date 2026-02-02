@@ -71,7 +71,7 @@ export function ChartMostActivity({
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent className="flex-1">
-        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
+        <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-62.5">
           <PieChart>
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
             <Pie

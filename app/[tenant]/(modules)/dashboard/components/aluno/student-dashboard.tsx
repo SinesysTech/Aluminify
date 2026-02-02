@@ -538,10 +538,10 @@ export default function StudentDashboardClientPage() {
 
             {/* 2 Colunas - Subject Performance List e Subject Distribution */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6 items-stretch">
-                <div className="lg:col-span-3 h-[450px]">
+                <div className="lg:col-span-3 h-112.5">
                     <SubjectPerformanceList subjects={subjects} period={mapHeatmapPeriodToDashboardPeriod(heatmapPeriod)} />
                 </div>
-                <div className="lg:col-span-2 h-[450px]">
+                <div className="lg:col-span-2 h-">
                     <SubjectDistribution data={distribution} period={mapHeatmapPeriodToDashboardPeriod(heatmapPeriod)} />
                 </div>
             </div>

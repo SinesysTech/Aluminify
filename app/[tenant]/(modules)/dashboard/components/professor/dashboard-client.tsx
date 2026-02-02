@@ -125,7 +125,7 @@ export default function ProfessorDashboardClient() {
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <p className="text-muted-foreground">Nenhum dado disponível</p>
       </div>
     )
