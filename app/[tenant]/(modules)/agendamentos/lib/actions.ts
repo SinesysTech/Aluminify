@@ -116,3 +116,16 @@ export {
   getProfessoresDisponiveis,
   getProfessorById,
 };
+
+// Admin helpers
+import {
+  getAdminContext,
+  getTeachersForAdminSelector,
+  canManageProfessorSchedule,
+} from "./admin-helpers";
+
+export {
+  getAdminContext,
+  getTeachersForAdminSelector,
+  canManageProfessorSchedule,
+};

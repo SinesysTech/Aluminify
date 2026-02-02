@@ -1,9 +1,17 @@
 
 import { RecorrenciaManager } from "./components/recorrencia-manager"
 import { requireUser } from "@/app/shared/core/auth"
+import { isAdminRoleTipo, isTeachingRoleTipo } from "@/app/shared/core/roles"
+import { getTeachersForAdminSelector } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
+import { AdminProfessorSelector } from "@/app/[tenant]/(modules)/agendamentos/components/admin-professor-selector"
 
-export default async function DisponibilidadePage() {
+export default async function DisponibilidadePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const user = await requireUser({ allowedRoles: ["usuario"] })
+  const { professorId: searchProfessorId } = await searchParams
 
   if (!user.empresaId) {
     return (
@@ -18,16 +26,58 @@ export default async function DisponibilidadePage() {
     )
   }
 
+  const isAdmin = user.roleType ? isAdminRoleTipo(user.roleType) : false
+  const isTeacher = user.roleType ? isTeachingRoleTipo(user.roleType) : false
+
+  let professorId = user.id
+  let professorsList: { id: string; fullName: string }[] = []
+
+  if (isAdmin) {
+    professorsList = await getTeachersForAdminSelector(user.empresaId)
+
+    if (searchProfessorId && typeof searchProfessorId === "string") {
+      professorId = searchProfessorId
+    } else if (!isTeacher && professorsList.length > 0) {
+      professorId = professorsList[0].id
+    }
+  }
+
+  if (!isAdmin && !isTeacher) {
+    return (
+      <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col gap-2">
+          <h1 className="page-title">Disponibilidade</h1>
+          <p className="page-subtitle">
+            Você não tem permissão para configurar disponibilidade.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  const selectedProfessorName = professorsList.find(p => p.id === professorId)?.fullName
+
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="flex flex-col gap-2">
         <h1 className="page-title">Disponibilidade</h1>
         <p className="page-subtitle">
-          Configure seus horários de atendimento para plantão.
+          {isAdmin && professorId !== user.id
+            ? `Configure os horários de atendimento de ${selectedProfessorName || "professor selecionado"}.`
+            : "Configure seus horários de atendimento para plantão."}
         </p>
       </div>
 
-      <RecorrenciaManager professorId={user.id} empresaId={user.empresaId} />
+      {isAdmin && (
+        <AdminProfessorSelector
+          professors={professorsList}
+          selectedProfessorId={professorId}
+          currentUserId={user.id}
+          isTeacher={isTeacher}
+        />
+      )}
+
+      <RecorrenciaManager professorId={professorId} empresaId={user.empresaId} />
     </div>
   )
 }
