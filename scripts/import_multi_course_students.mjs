@@ -45,24 +45,79 @@ async function main() {
     byProduct: {},
   };
 
-  // Parse Excel
+  // Parse Excel - using eachCell which is 1-indexed
   worksheet.eachRow((row, rowNumber) => {
     if (rowNumber === 1) return; // Skip header
 
-    const values = row.values;
-    const productName = values[1]?.toString().trim();
-    const name = values[7];
-    const document = values[8];
-    const emailObj = values[9];
-    const email = emailObj && emailObj.text ? emailObj.text : emailObj;
-    const ddd = values[10];
-    const phone = values[11];
-    const fullPhone = ddd && phone ? `${ddd}${phone}` : phone;
+    let productName,
+      name,
+      document,
+      email,
+      ddd,
+      phone,
+      cep,
+      cidade,
+      estado,
+      bairro,
+      pais,
+      endereco,
+      numero,
+      complemento;
+
+    row.eachCell((cell, colNumber) => {
+      const value = cell.value;
+      switch (colNumber) {
+        case 1:
+          productName = value?.toString().trim();
+          break;
+        case 6:
+          name = value;
+          break;
+        case 7:
+          document = value;
+          break;
+        case 8:
+          email = value && value.text ? value.text : value;
+          break;
+        case 9:
+          ddd = value;
+          break;
+        case 10:
+          phone = value;
+          break;
+        case 11:
+          cep = value;
+          break;
+        case 12:
+          cidade = value;
+          break;
+        case 13:
+          estado = value;
+          break;
+        case 14:
+          bairro = value;
+          break;
+        case 15:
+          pais = value;
+          break;
+        case 16:
+          endereco = value;
+          break;
+        case 17:
+          numero = value;
+          break;
+        case 18:
+          complemento = value;
+          break;
+      }
+    });
 
     if (!productName || !PRODUCT_TO_COURSE[productName]) {
       console.warn(`Row ${rowNumber}: Unknown product "${productName}"`);
       return;
     }
+
+    const fullPhone = ddd && phone ? `${ddd}${phone}` : phone;
 
     students.push({
       rowNumber,
@@ -72,14 +127,14 @@ async function main() {
       email: email ? email.toString().trim().toLowerCase() : "",
       cpf: document ? document.toString().replace(/\D/g, "") : "",
       telefone: fullPhone ? fullPhone.toString().replace(/\D/g, "") : "",
-      cep: values[12] ? values[12].toString() : "",
-      cidade: values[13],
-      estado: values[14],
-      bairro: values[15],
-      pais: values[16],
-      endereco: values[17],
-      numero_endereco: values[18] ? values[18].toString() : "",
-      complemento: values[19] ? values[19].toString() : "",
+      cep: cep ? cep.toString() : "",
+      cidade,
+      estado,
+      bairro,
+      pais,
+      endereco,
+      numero_endereco: numero ? numero.toString() : "",
+      complemento: complemento ? complemento.toString() : "",
     });
   });
 
@@ -130,7 +185,7 @@ async function main() {
 
           if (publicUser) {
             userId = publicUser.id;
-            console.log(`  User exists: ${userId}`);
+            console.log(`  User exists: ${userId.substring(0, 8)}...`);
           } else {
             console.error(
               `  Could not find existing user for ${student.email}`,
@@ -145,7 +200,7 @@ async function main() {
         }
       } else {
         userId = newUser.user.id;
-        console.log(`  Created new user: ${userId}`);
+        console.log(`  Created new user: ${userId.substring(0, 8)}...`);
       }
 
       // Upsert public.usuarios
