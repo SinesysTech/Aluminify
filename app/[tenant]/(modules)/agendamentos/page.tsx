@@ -5,6 +5,7 @@ import { requireUser } from "@/app/shared/core/auth"
 import { getProfessoresDisponiveis, getTeachersForAdminSelector } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
 import { isAdminRoleTipo, isTeachingRoleTipo } from "@/app/shared/core/roles"
 import { AdminProfessorSelector } from "./components/admin-professor-selector"
+import { PlantaoQuotaBanner } from "./components/plantao-quota-banner"
 import { Suspense } from "react"
 import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 
@@ -32,6 +33,8 @@ export default async function AgendamentosPage({
             Escolha um professor para agendar sua sessão de plantão ou dúvidas.
           </p>
         </div>
+
+        <PlantaoQuotaBanner empresaId={user.empresaId ?? null} />
 
         <div>
           <Suspense fallback={<ProfessorSelectorSkeleton />}>

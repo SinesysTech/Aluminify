@@ -13,14 +13,10 @@ export type OAuthCredentialConfig = {
   active: boolean;
 };
 
+import { env } from "@/app/shared/core/env";
+
 function getEncryptionKey(): string {
-  const key = process.env.OAUTH_ENCRYPTION_KEY;
-  if (!key) {
-    throw new Error(
-      "OAUTH_ENCRYPTION_KEY not configured. Required for OAuth credential encryption.",
-    );
-  }
-  return key;
+  return env.OAUTH_ENCRYPTION_KEY;
 }
 
 /**
@@ -75,7 +71,12 @@ export async function getOAuthCredentials(
   }
 
   const row = Array.isArray(data) ? data[0] : data;
-  if (!row || typeof row !== 'object' || !('client_id' in row) || !('client_secret' in row)) {
+  if (
+    !row ||
+    typeof row !== "object" ||
+    !("client_id" in row) ||
+    !("client_secret" in row)
+  ) {
     return null;
   }
 
@@ -119,7 +120,10 @@ export async function getOAuthClientId(
  */
 export async function getTenantOAuthStatus(
   empresaId: string,
-): Promise<{ google: OAuthCredentialConfig | null; zoom: OAuthCredentialConfig | null }> {
+): Promise<{
+  google: OAuthCredentialConfig | null;
+  zoom: OAuthCredentialConfig | null;
+}> {
   const db = getDatabaseClient();
   const { data, error } = await db
     .from("empresa_oauth_credentials" as never)
