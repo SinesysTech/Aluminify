@@ -66,6 +66,7 @@ export interface Student {
   hotmartId: string | null;
   origemCadastro: string | null;
   ativo: boolean;
+  progress: number;
   courses: StudentCourseSummary[];
   mustChangePassword: boolean;
   temporaryPassword: string | null;

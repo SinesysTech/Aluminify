@@ -147,6 +147,7 @@ function mapRow(
     hotmartId: row.hotmart_id ?? null,
     origemCadastro: row.origem_cadastro ?? null,
     ativo: row.ativo,
+    progress: 0,
     courses,
     mustChangePassword: row.must_change_password,
     temporaryPassword: row.senha_temporaria,
@@ -416,9 +417,10 @@ export class StudentRepositoryImpl implements StudentRepository {
     const totalPages = Math.ceil(total / perPage);
 
     const students = await this.attachCourses(data ?? []);
+    const studentsWithProgress = await this.attachProgress(students);
 
     return {
-      data: students,
+      data: studentsWithProgress,
       meta: {
         page,
         perPage,
@@ -965,6 +967,73 @@ export class StudentRepositoryImpl implements StudentRepository {
     });
 
     return map;
+  }
+
+  private async attachProgress(students: Student[]): Promise<Student[]> {
+    if (!students.length) {
+      return students;
+    }
+
+    const studentIds = students.map((s) => s.id);
+    const allCourseIds = Array.from(
+      new Set(students.flatMap((s) => s.courses.map((c) => c.id))),
+    );
+
+    if (!allCourseIds.length) {
+      return students;
+    }
+
+    // Count total aulas per course
+    const { data: aulasPerCourse, error: aulasError } = await this.client
+      .from("aulas")
+      .select("curso_id")
+      .in("curso_id", allCourseIds);
+
+    if (aulasError) {
+      console.warn(`Failed to fetch aulas for progress: ${aulasError.message}`);
+      return students;
+    }
+
+    const totalAulasByCourse = new Map<string, number>();
+    (aulasPerCourse ?? []).forEach((a) => {
+      totalAulasByCourse.set(
+        a.curso_id,
+        (totalAulasByCourse.get(a.curso_id) ?? 0) + 1,
+      );
+    });
+
+    // Count completed aulas per student
+    const { data: completions, error: completionsError } = await this.client
+      .from("aulas_concluidas")
+      .select("usuario_id")
+      .in("usuario_id", studentIds);
+
+    if (completionsError) {
+      console.warn(
+        `Failed to fetch aulas_concluidas for progress: ${completionsError.message}`,
+      );
+      return students;
+    }
+
+    const completedByStudent = new Map<string, number>();
+    (completions ?? []).forEach((c) => {
+      completedByStudent.set(
+        c.usuario_id,
+        (completedByStudent.get(c.usuario_id) ?? 0) + 1,
+      );
+    });
+
+    return students.map((student) => {
+      const totalAulas = student.courses.reduce(
+        (sum, course) => sum + (totalAulasByCourse.get(course.id) ?? 0),
+        0,
+      );
+      const completed = completedByStudent.get(student.id) ?? 0;
+      const progress =
+        totalAulas > 0 ? Math.round((completed / totalAulas) * 100) : 0;
+
+      return { ...student, progress };
+    });
   }
 
   async findByEmpresa(empresaId: string): Promise<Student[]> {

@@ -144,7 +144,7 @@ export function StudentTable({ students, meta }: StudentTableProps) {
                                 ? student.fullName.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase()
                                 : '??';
                             const status = student.ativo ? 'Ativo' : 'Inativo';
-                            const progress = 0; // TODO: implement real progress tracking
+                            const progress = student.progress;
 
                             return (
                                 <tr key={student.id} className="group hover:bg-muted/50 transition-colors">
