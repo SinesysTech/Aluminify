@@ -44,6 +44,8 @@ const nextConfig: NextConfig = {
       "@radix-ui/react-select",
       "lucide-react",
     ],
+    // Reduzir tamanho dos chunks
+    optimizeCss: true,
   },
 
   // Configuração do Turbopack para tratar dependências opcionais
@@ -79,6 +81,25 @@ const nextConfig: NextConfig = {
       ...(config.ignoreWarnings || []),
       { module: /node_modules\/unzipper/ },
     ];
+
+    // Otimização de chunks para reduzir tamanho de assets e evitar buffering no Nginx
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        chunks: "all",
+        cacheGroups: {
+          vendor: {
+            name: "vendors",
+            test: /node_modules/,
+            priority: 10,
+          },
+          commons: {
+            name: "commons",
+            minChunks: 2,
+          },
+        },
+      },
+    };
 
     return config;
   },

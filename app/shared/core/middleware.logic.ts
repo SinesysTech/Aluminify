@@ -5,6 +5,13 @@ import {
   resolveTenantContext,
   extractTenantFromPath,
 } from "@/app/shared/core/services/tenant-resolution.service";
+import {
+  compressCookieValue,
+  decompressCookieValue,
+  shouldCompressCookie,
+  isCompressedCookie,
+  buildCookieHeader,
+} from "@/app/shared/core/cookie-compression";
 
 // --- LOGGING CONFIGURATION ---
 type LogLevel = "debug" | "info" | "warn" | "error" | "none";
@@ -151,6 +158,18 @@ export async function updateSession(request: NextRequest) {
 
   // Cookie cleaning logic (Cross-project safety)
   const projectRef = getSupabaseProjectRefFromUrl(url);
+
+  // Descompressão transparente: browser → middleware (para consumo do Supabase/server)
+  // Isso reduz tamanho de headers trafegados para o Nginx sem quebrar o SDK.
+  let didDecompressRequestCookies = false;
+  for (const c of request.cookies.getAll()) {
+    if (isCompressedCookie(c.value)) {
+      const inflated = decompressCookieValue(c.value);
+      request.cookies.set(c.name, inflated);
+      didDecompressRequestCookies = true;
+    }
+  }
+  let cookiesModified = didDecompressRequestCookies;
   if (projectRef) {
     const expectedPrefix = `sb-${projectRef}-auth-token`;
     const allCookies = request.cookies.getAll();
@@ -166,6 +185,7 @@ export async function updateSession(request: NextRequest) {
         expectedPrefix,
         foreign: foreignCookies.map((c) => c.name),
       });
+      cookiesModified = true;
 
       for (const c of foreignCookies) {
         request.cookies.delete(c.name);
@@ -178,7 +198,12 @@ export async function updateSession(request: NextRequest) {
   const supabase = createServerClient(url, anonKey, {
     cookies: {
       getAll() {
-        return request.cookies.getAll();
+        return request.cookies.getAll().map((c) => {
+          if (isCompressedCookie(c.value)) {
+            return { ...c, value: decompressCookieValue(c.value) };
+          }
+          return c;
+        });
       },
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) =>
@@ -187,9 +212,14 @@ export async function updateSession(request: NextRequest) {
         supabaseResponse = NextResponse.next({
           request,
         });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options),
-        );
+
+        cookiesToSet.forEach(({ name, value, options }) => {
+          const cookieValue =
+            typeof value === "string" && shouldCompressCookie(name, value)
+              ? compressCookieValue(value)
+              : value;
+          supabaseResponse.cookies.set(name, cookieValue, options);
+        });
       },
     },
   });
@@ -217,16 +247,9 @@ export async function updateSession(request: NextRequest) {
     });
     if (tenantContext.empresaId) {
       target.headers.set("x-tenant-id", tenantContext.empresaId);
-      target.headers.set("x-tenant-slug", tenantContext.empresaSlug!);
-      if (tenantContext.empresaNome) {
-        target.headers.set(
-          "x-tenant-name",
-          encodeURIComponent(tenantContext.empresaNome),
-        );
-      }
-      if (tenantContext.resolutionType) {
-        target.headers.set("x-tenant-resolution", tenantContext.resolutionType);
-      }
+    }
+    if (tenantContext.empresaSlug) {
+      target.headers.set("x-tenant-slug", tenantContext.empresaSlug);
     }
     return target;
   };
@@ -293,13 +316,11 @@ export async function updateSession(request: NextRequest) {
       logInfo(`rewrite /auth → ${url.pathname}`);
 
       const response = NextResponse.rewrite(url);
-      response.headers.set("x-tenant-id", tenantContext.empresaId);
-      response.headers.set("x-tenant-slug", tenantContext.empresaSlug!);
-      if (tenantContext.empresaNome) {
-        response.headers.set(
-          "x-tenant-name",
-          encodeURIComponent(tenantContext.empresaNome),
-        );
+      if (tenantContext.empresaId) {
+        response.headers.set("x-tenant-id", tenantContext.empresaId);
+      }
+      if (tenantContext.empresaSlug) {
+        response.headers.set("x-tenant-slug", tenantContext.empresaSlug);
       }
 
       supabaseResponse.cookies.getAll().forEach((cookie) => {
@@ -343,19 +364,9 @@ export async function updateSession(request: NextRequest) {
   // Add headers
   if (tenantContext.empresaId) {
     supabaseResponse.headers.set("x-tenant-id", tenantContext.empresaId);
-    supabaseResponse.headers.set("x-tenant-slug", tenantContext.empresaSlug!);
-    if (tenantContext.empresaNome) {
-      supabaseResponse.headers.set(
-        "x-tenant-name",
-        encodeURIComponent(tenantContext.empresaNome),
-      );
-    }
-    if (tenantContext.resolutionType) {
-      supabaseResponse.headers.set(
-        "x-tenant-resolution",
-        tenantContext.resolutionType,
-      );
-    }
+  }
+  if (tenantContext.empresaSlug) {
+    supabaseResponse.headers.set("x-tenant-slug", tenantContext.empresaSlug);
   }
 
   // --- 6. FINALIZE RESPONSE ---
@@ -363,18 +374,21 @@ export async function updateSession(request: NextRequest) {
   // The original 'supabaseResponse' has the cookies set by createServerClient, so we must copy them.
 
   const requestHeaders = new Headers(request.headers);
+  // Importante: mudanças em `request.cookies.set(...)` não garantem que o header
+  // `cookie` repassado para Server Components seja atualizado. Reconstituímos aqui.
+  if (cookiesModified) {
+    requestHeaders.set(
+      "cookie",
+      buildCookieHeader(
+        request.cookies.getAll().map((c) => ({ name: c.name, value: c.value })),
+      ),
+    );
+  }
   if (tenantContext.empresaId) {
     requestHeaders.set("x-tenant-id", tenantContext.empresaId);
-    requestHeaders.set("x-tenant-slug", tenantContext.empresaSlug!);
-    if (tenantContext.empresaNome) {
-      requestHeaders.set(
-        "x-tenant-name",
-        encodeURIComponent(tenantContext.empresaNome),
-      );
-    }
-    if (tenantContext.resolutionType) {
-      requestHeaders.set("x-tenant-resolution", tenantContext.resolutionType);
-    }
+  }
+  if (tenantContext.empresaSlug) {
+    requestHeaders.set("x-tenant-slug", tenantContext.empresaSlug);
   }
 
   const finalResponse = NextResponse.next({
@@ -388,10 +402,30 @@ export async function updateSession(request: NextRequest) {
     finalResponse.cookies.set(cookie.name, cookie.value, cookie);
   });
 
-  // Copy output headers (like x-tenant-id for client) from supabaseResponse
+  // Copy output headers (x-tenant-id, x-tenant-slug, etc.) from supabaseResponse
   supabaseResponse.headers.forEach((value, key) => {
     finalResponse.headers.set(key, value);
   });
+
+  // --- 7. MONITORAMENTO: TAMANHO DOS HEADERS ---
+  const headerSize =
+    JSON.stringify(Object.fromEntries(finalResponse.headers)).length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (globalThis as any).__headerSizeTotalBytes =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ((globalThis as any).__headerSizeTotalBytes ?? 0) + headerSize;
+  if (headerSize > 4096) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).__headerSizeWarnings =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((globalThis as any).__headerSizeWarnings ?? 0) + 1;
+  }
+  if (process.env.NODE_ENV === "development") {
+    console.log(`[MW] Header size: ${headerSize} bytes`);
+    if (headerSize > 4096) {
+      console.warn(`[MW] WARNING: Headers exceeding 4KB (${headerSize} bytes)`);
+    }
+  }
 
   return finalResponse;
 }

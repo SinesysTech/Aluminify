@@ -141,9 +141,9 @@ function SchedulerSkeleton() {
   return (
     <div className="w-full bg-background px-4 py-4 md:px-8 md:py-6 rounded-md border">
       <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-        <Skeleton className="h-[280px] w-full lg:w-[280px]" />
-        <Skeleton className="h-[280px] w-full lg:w-[320px]" />
-        <Skeleton className="hidden lg:block h-[280px] w-[280px]" />
+        <Skeleton className="h-70 w-full lg:w-70" />
+        <Skeleton className="h-70 w-full lg:w-70" />
+        <Skeleton className="hidden lg:block h-70 w-70" />
       </div>
     </div>
   )

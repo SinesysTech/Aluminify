@@ -6,12 +6,21 @@ import { NextResponse } from "next/server";
  */
 export async function GET() {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const headerSizeWarnings = (globalThis as any).__headerSizeWarnings ?? 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const headerSizeTotalBytes = (globalThis as any).__headerSizeTotalBytes ?? 0;
+
     // Basic health check - application is running
     const health = {
       status: "ok",
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),
       environment: process.env.NODE_ENV,
+      metrics: {
+        headerSizeWarnings,
+        headerSizeTotalBytes,
+      },
     };
 
     return NextResponse.json(health, { status: 200 });

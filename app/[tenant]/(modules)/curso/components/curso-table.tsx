@@ -126,7 +126,7 @@ export type Modalidade = {
 const cursoSchema = z.object({
   segmentId: z.string().optional().nullable(),
   disciplineId: z.string().optional().nullable(), // Mantido para compatibilidade
-  disciplineIds: z.array(z.string()).optional().default([]), // Nova propriedade para múltiplas disciplinas
+  disciplineIds: z.array(z.string()), // Nova propriedade para múltiplas disciplinas
   name: z.string().min(1, 'Nome é obrigatório'),
   modality: z.enum(['EAD', 'LIVE']).optional(), // Deprecated but kept for compatibility logic helper
   modalityId: z.string({ required_error: 'Modalidade é obrigatória' }).min(1, 'Modalidade é obrigatória'),
@@ -138,12 +138,19 @@ const cursoSchema = z.object({
   startDate: z.string().optional().nullable(),
   endDate: z.string().optional().nullable(),
   accessMonths: z.number().optional().nullable(),
-  planningUrl: z.string().url('URL inválida').optional().nullable().or(z.literal('')),
-  coverImageUrl: z.string().url('URL inválida').optional().nullable().or(z.literal('')),
-  usaTurmas: z.boolean().optional().default(false),
+  planningUrl: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
+    z.string().url('URL inválida').optional().nullable()
+  ) as z.ZodType<string | null | undefined>,
+  coverImageUrl: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
+    z.string().url('URL inválida').optional().nullable()
+  ) as z.ZodType<string | null | undefined>,
+  usaTurmas: z.boolean(),
 })
 
-type CursoFormValues = z.infer<typeof cursoSchema>
+type CursoFormInput = z.input<typeof cursoSchema>
+type CursoFormValues = z.output<typeof cursoSchema>
 
 export function CursoTable() {
   const router = useRouter()
@@ -174,7 +181,7 @@ export function CursoTable() {
     setMounted(true)
   }, [])
 
-  const createForm = useForm<CursoFormValues>({
+  const createForm = useForm<CursoFormInput, undefined, CursoFormValues>({
     resolver: zodResolver(cursoSchema),
     defaultValues: {
       segmentId: null,
@@ -195,7 +202,7 @@ export function CursoTable() {
     },
   })
 
-  const editForm = useForm<CursoFormValues>({
+  const editForm = useForm<CursoFormInput, undefined, CursoFormValues>({
     resolver: zodResolver(cursoSchema),
     defaultValues: {
       segmentId: null,
@@ -1084,7 +1091,7 @@ export function CursoTable() {
             </div>
           </>
         ) : (
-          <section id="empty-state" className="flex-1 flex flex-col items-center justify-center min-h-[400px]">
+          <section id="empty-state" className="flex-1 flex flex-col items-center justify-center min-h-100">
             <div className="w-16 h-16 bg-card rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-border">
               <BookOpen className="w-8 h-8 text-muted-foreground" strokeWidth={1} />
             </div>
