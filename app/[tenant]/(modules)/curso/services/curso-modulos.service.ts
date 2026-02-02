@@ -1,4 +1,4 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from "@supabase/supabase-js";
 
 // ============================================
 // Types
@@ -34,9 +34,9 @@ export class CursoModulosService {
    */
   async getModulesForCourse(cursoId: string): Promise<string[]> {
     const { data, error } = await this.client
-      .from('curso_modulos')
-      .select('module_id')
-      .eq('curso_id', cursoId);
+      .from("curso_modulos")
+      .select("module_id")
+      .eq("curso_id", cursoId);
 
     if (error) {
       throw new Error(`Failed to fetch modules for course: ${error.message}`);
@@ -48,47 +48,43 @@ export class CursoModulosService {
   /**
    * Get the UNION of all module IDs from a student's enrolled courses
    */
-  async getModulesForStudentCourses(usuarioId: string, empresaId: string): Promise<string[]> {
-    const { data, error } = await this.client
-      .from('curso_modulos')
-      .select('module_id, curso_id!inner(id)')
-      .eq('empresa_id', empresaId)
-      .in('curso_id',
-        this.client
-          .from('alunos_cursos')
-          .select('curso_id')
-          .eq('usuario_id', usuarioId)
-      );
+  async getModulesForStudentCourses(
+    usuarioId: string,
+    empresaId: string,
+  ): Promise<string[]> {
+    // Use a two-step approach to avoid type errors and ensure compatibility
+    const { data: enrollments, error: enrollError } = await this.client
+      .from("alunos_cursos")
+      .select("curso_id")
+      .eq("usuario_id", usuarioId);
 
-    // Fallback: use a raw RPC call if the subquery approach doesn't work
-    if (error) {
-      // Use a two-step approach instead
-      const { data: enrollments, error: enrollError } = await this.client
-        .from('alunos_cursos')
-        .select('curso_id')
-        .eq('usuario_id', usuarioId);
-
-      if (enrollError || !enrollments?.length) {
-        return [];
+    if (enrollError || !enrollments?.length) {
+      if (enrollError) {
+        console.error("Error fetching enrollments:", enrollError);
       }
-
-      const cursoIds = enrollments.map((e: { curso_id: string }) => e.curso_id);
-
-      const { data: modules, error: modError } = await this.client
-        .from('curso_modulos')
-        .select('module_id')
-        .eq('empresa_id', empresaId)
-        .in('curso_id', cursoIds);
-
-      if (modError) {
-        throw new Error(`Failed to fetch student course modules: ${modError.message}`);
-      }
-
-      // Return unique module IDs
-      return [...new Set((modules ?? []).map((row: { module_id: string }) => row.module_id))];
+      return [];
     }
 
-    return [...new Set((data ?? []).map((row: { module_id: string }) => row.module_id))];
+    const cursoIds = enrollments.map((e: { curso_id: string }) => e.curso_id);
+
+    const { data: modules, error: modError } = await this.client
+      .from("curso_modulos")
+      .select("module_id")
+      .eq("empresa_id", empresaId)
+      .in("curso_id", cursoIds);
+
+    if (modError) {
+      throw new Error(
+        `Failed to fetch student course modules: ${modError.message}`,
+      );
+    }
+
+    // Return unique module IDs
+    return [
+      ...new Set(
+        (modules ?? []).map((row: { module_id: string }) => row.module_id),
+      ),
+    ];
   }
 
   /**
@@ -98,13 +94,13 @@ export class CursoModulosService {
     cursoId: string,
     empresaId: string,
     moduleIds: string[],
-    userId: string
+    userId: string,
   ): Promise<void> {
     // Delete existing bindings
     const { error: deleteError } = await this.client
-      .from('curso_modulos')
+      .from("curso_modulos")
       .delete()
-      .eq('curso_id', cursoId);
+      .eq("curso_id", cursoId);
 
     if (deleteError) {
       throw new Error(`Failed to clear course modules: ${deleteError.message}`);
@@ -112,7 +108,7 @@ export class CursoModulosService {
 
     // Insert new bindings
     if (moduleIds.length > 0) {
-      const rows = moduleIds.map(moduleId => ({
+      const rows = moduleIds.map((moduleId) => ({
         curso_id: cursoId,
         module_id: moduleId,
         empresa_id: empresaId,
@@ -120,7 +116,7 @@ export class CursoModulosService {
       }));
 
       const { error: insertError } = await this.client
-        .from('curso_modulos')
+        .from("curso_modulos")
         .insert(rows);
 
       if (insertError) {
@@ -135,9 +131,9 @@ export class CursoModulosService {
    */
   async hasAnyCourseModuleBindings(empresaId: string): Promise<boolean> {
     const { count, error } = await this.client
-      .from('curso_modulos')
-      .select('id', { count: 'exact', head: true })
-      .eq('empresa_id', empresaId);
+      .from("curso_modulos")
+      .select("id", { count: "exact", head: true })
+      .eq("empresa_id", empresaId);
 
     if (error) {
       return false;
