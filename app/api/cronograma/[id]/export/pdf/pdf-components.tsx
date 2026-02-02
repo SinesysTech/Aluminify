@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { View, Text, Image, type ViewProps } from '@react-pdf/renderer'
+import { View, Text, Image } from '@react-pdf/renderer'
 import { PDF_COLORS, PDF_FONTS, PDF_SPACING, type DisciplineColor } from './pdf-theme'
 import { formatTempo, truncateText } from './pdf-types'
 

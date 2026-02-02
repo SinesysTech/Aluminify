@@ -171,7 +171,7 @@ export function ScheduleList({
   dataInicio,
   dataFim,
   periodosFerias,
-  modalidade,
+  modalidade: _modalidade,
   cronogramaId: _cronogramaId,
   onToggleConcluido,
   onUpdate,
@@ -212,11 +212,11 @@ export function ScheduleList({
   // Verificar se uma semana é período de férias
   const isSemanaFerias = (semanaNumero: number): boolean => {
     const { inicioSemana, fimSemana } = getSemanaDates(semanaNumero)
-    
+
     for (const periodo of periodosFerias || []) {
       const inicioFerias = new Date(periodo.inicio)
       const fimFerias = new Date(periodo.fim)
-      
+
       // Verificar se a semana se sobrepõe ao período de férias
       if (
         (inicioSemana >= inicioFerias && inicioSemana <= fimFerias) ||
@@ -233,9 +233,9 @@ export function ScheduleList({
   const semanasComAulas = Object.keys(itensPorSemana)
     .map(Number)
     .filter(semana => (itensPorSemana[semana] || []).length > 0)
-  
-  const ultimaSemanaComAulas = semanasComAulas.length > 0 
-    ? Math.max(...semanasComAulas) 
+
+  const ultimaSemanaComAulas = semanasComAulas.length > 0
+    ? Math.max(...semanasComAulas)
     : 0
 
   // Verificar se o cronograma terminou antes do tempo disponível
@@ -315,8 +315,8 @@ export function ScheduleList({
 
   const activeItem = activeId
     ? Object.values(itensPorSemana)
-        .flat()
-        .find((item) => item.id === activeId)
+      .flat()
+      .find((item) => item.id === activeId)
     : null
 
   return (
@@ -359,7 +359,7 @@ export function ScheduleList({
                     )}
                   </div>
                   {temAulas && (
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex flex-col items-end gap-1">
                         <span>
                           {concluidos} de {itens.length} aulas
@@ -372,7 +372,7 @@ export function ScheduleList({
                           const tempoTotal = tempoAulas + tempoAnotacoesExercicios
                           return (
                             <span className="text-xs">
-                                {formatTempo(tempoTotal)}
+                              {formatTempo(tempoTotal)}
                             </span>
                           )
                         })()}

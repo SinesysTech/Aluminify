@@ -257,7 +257,7 @@ export function ScheduleWizard() {
   const [error, setError] = useState<string | null>(null)
   const [cursos, setCursos] = useState<CursoData[]>([])
   const [disciplinasDoCurso, setDisciplinasDoCurso] = useState<DisciplinaData[]>([]) // Disciplinas do curso selecionado
-  const [frentes, setFrentes] = useState<FrenteData[]>([])
+  const [_frentes, setFrentes] = useState<FrenteData[]>([])
   const [loadingData, setLoadingData] = useState(true)
   const [showTempoInsuficienteDialog, setShowTempoInsuficienteDialog] = useState(false)
   const [tempoInsuficienteDetalhes, setTempoInsuficienteDetalhes] = useState<{

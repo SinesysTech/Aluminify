@@ -1,16 +1,16 @@
 /**
  * Cria vínculos faltantes em usuarios_empresas para usuários que estão matriculados
  * via alunos_cursos mas não têm registro na tabela usuarios_empresas.
- * 
+ *
  * Mantém a coerência: vincula à empresa do curso em que estão matriculados.
- * 
+ *
  * Uso: npx tsx scripts/usuario/fix-missing-usuarios-empresas.ts
  *      npx tsx scripts/usuario/fix-missing-usuarios-empresas.ts --dry-run
- * 
+ *
  * Requisitos: .env.local com NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY
  */
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import * as dotenv from "dotenv";
 import path from "path";
 
@@ -30,10 +30,13 @@ interface MissingLink {
 async function main() {
   const dryRun = process.argv.includes("--dry-run");
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const secretKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const secretKey =
+    process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !secretKey) {
-    console.error("Defina NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY (ou SUPABASE_SERVICE_ROLE_KEY) em .env.local");
+    console.error(
+      "Defina NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SECRET_KEY (ou SUPABASE_SERVICE_ROLE_KEY) em .env.local",
+    );
     process.exit(1);
   }
 
@@ -49,15 +52,17 @@ async function main() {
   }
 
   // 1) Buscar usuários matriculados via alunos_cursos sem vínculo em usuarios_empresas
-  const { data: missing, error: missingError } = await supabase.rpc("get_missing_usuarios_empresas_links");
+  const { data: missing, error: missingError } = await supabase.rpc(
+    "get_missing_usuarios_empresas_links",
+  );
 
   if (missingError) {
     // Se a função RPC não existe, fazer a query manualmente
     console.log("Função RPC não encontrada, usando query SQL direta...\n");
 
-    const { data: manualData, error: manualError } = await supabase
-      .from("alunos_cursos")
-      .select(`
+    const { data: manualData, error: manualError } = await supabase.from(
+      "alunos_cursos",
+    ).select(`
         usuario_id,
         curso_id,
         cursos!inner(id, nome, empresa_id, empresas!inner(id, nome)),
@@ -74,9 +79,16 @@ async function main() {
     const missingLinks: MissingLink[] = [];
 
     for (const link of allLinks) {
-      const usuario = link.usuarios as any;
-      const curso = link.cursos as any;
-      const empresa = curso.empresas as any;
+      const usuario = link.usuarios as unknown as {
+        email: string;
+        nome_completo: string;
+      };
+      const curso = link.cursos as unknown as {
+        id: string;
+        nome: string;
+        empresas: { id: string; nome: string };
+      };
+      const empresa = curso.empresas;
 
       // Verificar se já existe vínculo
       const { data: existing } = await supabase
@@ -106,12 +118,14 @@ async function main() {
 }
 
 async function processMissingLinks(
-  supabase: any,
+  supabase: SupabaseClient,
   missing: MissingLink[],
-  dryRun: boolean
+  dryRun: boolean,
 ) {
   if (!missing || missing.length === 0) {
-    console.log("✅ Nenhum vínculo faltante encontrado. Todos os alunos matriculados já têm registro em usuarios_empresas.\n");
+    console.log(
+      "✅ Nenhum vínculo faltante encontrado. Todos os alunos matriculados já têm registro em usuarios_empresas.\n",
+    );
     return;
   }
 
@@ -124,9 +138,11 @@ async function processMissingLinks(
     byEmpresa.get(link.empresa_nome)!.push(link);
   }
 
-  console.log(`📋 Encontrados ${missing.length} vínculos faltantes em ${byEmpresa.size} empresa(s):\n`);
+  console.log(
+    `📋 Encontrados ${missing.length} vínculos faltantes em ${byEmpresa.size} empresa(s):\n`,
+  );
 
-  for (const [empresaNome, links] of byEmpresa.entries()) {
+  for (const [empresaNome, links] of Array.from(byEmpresa.entries())) {
     console.log(`\n${"=".repeat(80)}`);
     console.log(`Empresa: ${empresaNome} (${links.length} vínculos)`);
     console.log("=".repeat(80));
@@ -140,13 +156,13 @@ async function processMissingLinks(
     }
 
     console.log(`\nUsuários únicos a vincular: ${uniqueUsers.size}`);
-    
+
     let count = 0;
-    for (const [userId, link] of uniqueUsers.entries()) {
+    for (const [userId, link] of Array.from(uniqueUsers.entries())) {
       count++;
       const cursos = links
-        .filter(l => l.usuario_id === userId)
-        .map(l => l.curso_nome)
+        .filter((l) => l.usuario_id === userId)
+        .map((l) => l.curso_nome)
         .join(", ");
 
       console.log(`  ${count}. ${link.email} (${link.nome_completo})`);
@@ -154,9 +170,11 @@ async function processMissingLinks(
     }
 
     if (!dryRun) {
-      console.log(`\n⏳ Criando ${uniqueUsers.size} vínculo(s) em usuarios_empresas...`);
+      console.log(
+        `\n⏳ Criando ${uniqueUsers.size} vínculo(s) em usuarios_empresas...`,
+      );
 
-      const toInsert = Array.from(uniqueUsers.values()).map(link => ({
+      const toInsert = Array.from(uniqueUsers.values()).map((link) => ({
         usuario_id: link.usuario_id,
         empresa_id: link.empresa_id,
         papel_base: "aluno",
@@ -171,9 +189,14 @@ async function processMissingLinks(
         });
 
       if (insertError) {
-        console.error(`❌ Erro ao criar vínculos para ${empresaNome}:`, insertError.message);
+        console.error(
+          `❌ Erro ao criar vínculos para ${empresaNome}:`,
+          insertError.message,
+        );
       } else {
-        console.log(`✅ ${uniqueUsers.size} vínculo(s) criado(s) com sucesso para ${empresaNome}`);
+        console.log(
+          `✅ ${uniqueUsers.size} vínculo(s) criado(s) com sucesso para ${empresaNome}`,
+        );
       }
     }
   }
@@ -183,7 +206,9 @@ async function processMissingLinks(
     console.log(`\n⚠️  DRY-RUN: ${missing.length} vínculo(s) seriam criados.`);
     console.log("Execute sem --dry-run para aplicar as alterações.");
   } else {
-    console.log(`\n✅ Concluído! Total de vínculos processados: ${missing.length}`);
+    console.log(
+      `\n✅ Concluído! Total de vínculos processados: ${missing.length}`,
+    );
   }
   console.log("=".repeat(80) + "\n");
 }
