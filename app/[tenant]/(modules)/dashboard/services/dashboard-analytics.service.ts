@@ -3316,6 +3316,7 @@ export class DashboardAnalyticsService {
 
     // Agregar dados
     for (const row of data ?? []) {
+      if (!row.created_at) continue;
       const d = new Date(row.created_at);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
       if (monthMap.has(key)) {
@@ -3436,6 +3437,7 @@ export class DashboardAnalyticsService {
     // Agregar por aluno
     const pointsMap = new Map<string, number>();
     for (const s of sessoes ?? []) {
+      if (!s.usuario_id) continue;
       const current = pointsMap.get(s.usuario_id) ?? 0;
       pointsMap.set(s.usuario_id, current + (s.tempo_total_liquido_segundos ?? 0));
     }
