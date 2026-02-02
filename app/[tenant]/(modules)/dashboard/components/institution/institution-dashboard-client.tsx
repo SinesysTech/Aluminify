@@ -24,6 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/app/shared/components/forms/select'
+import {
+  WelcomeCard,
+  StudentSuccessCard,
+  ProgressStatisticsCard,
+  LeaderboardCard,
+  ChartMostActivity,
+} from '../cards'
 
 // Intervalo de refresh automático (5 minutos)
 const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000
