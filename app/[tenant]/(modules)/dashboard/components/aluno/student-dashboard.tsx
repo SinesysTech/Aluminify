@@ -27,7 +27,6 @@ import {
     fetchLeaderboard,
     type DashboardServiceError,
 } from '../../services/aluno/dashboard.service'
-import { DashboardHeader } from './dashboard-header'
 import { useStudentOrganizations } from '@/components/providers/student-organizations-provider'
 import { useOptionalTenantContext } from '@/app/[tenant]/tenant-context'
 import { ScheduleProgress } from './schedule-progress'

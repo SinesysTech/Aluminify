@@ -7,7 +7,6 @@ import {
   fetchProfessorDashboardData,
   type ProfessorDashboardServiceError,
 } from '@/app/shared/core/services/professorDashboardService'
-import { ProfessorHeader } from '../professor-header'
 import { ProfessorMetrics } from '../professor-metrics'
 import { StudentsUnderCareList } from '@/app/[tenant]/(modules)/usuario/components/students-under-care-list'
 import { UpcomingAppointments } from '@/app/[tenant]/(modules)/agendamentos/components/upcoming-appointments'

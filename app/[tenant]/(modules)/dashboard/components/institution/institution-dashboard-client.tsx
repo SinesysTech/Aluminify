@@ -8,7 +8,6 @@ import {
   fetchInstitutionDashboardData,
   type InstitutionDashboardServiceError,
 } from '@/app/shared/core/services/institutionDashboardService'
-import { InstitutionHeader } from './institution-header'
 import { InstitutionMetrics } from './institution-metrics'
 import { StudentRankingList } from './student-ranking-list'
 import { ProfessorRankingList } from './professor-ranking-list'
