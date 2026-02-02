@@ -257,7 +257,7 @@ export function ScheduleWizard() {
   const [error, setError] = useState<string | null>(null)
   const [cursos, setCursos] = useState<CursoData[]>([])
   const [disciplinasDoCurso, setDisciplinasDoCurso] = useState<DisciplinaData[]>([]) // Disciplinas do curso selecionado
-  const [frentes, setFrentes] = useState<FrenteData[]>([])
+  const [_frentes, setFrentes] = useState<FrenteData[]>([])
   const [loadingData, setLoadingData] = useState(true)
   const [showTempoInsuficienteDialog, setShowTempoInsuficienteDialog] = useState(false)
   const [tempoInsuficienteDetalhes, setTempoInsuficienteDetalhes] = useState<{
@@ -1339,7 +1339,7 @@ export function ScheduleWizard() {
 
   return (
     <div className="container mx-auto py-6 max-w-4xl">
-      <Card className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
+      <Card className="overflow-hidden">
         <CardHeader className="space-y-4">
           <div>
             <CardTitle>Criar Cronograma de Estudos</CardTitle>
@@ -1960,7 +1960,7 @@ export function ScheduleWizard() {
 
                 {/* Exibir tempos recalculados baseados na velocidade */}
                 {form.watch('disciplinas_ids').length > 0 && (
-                  <Card className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
+                  <Card className="overflow-hidden">
                     <CardHeader>
                       <CardTitle className="text-base">Tempos Recalculados</CardTitle>
                       <CardDescription className="text-xs">
@@ -2055,7 +2055,7 @@ export function ScheduleWizard() {
                   )}
                 </div>
 
-                <Card className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
+                <Card className="overflow-hidden">
                   <CardHeader>
                     <CardTitle>Resumo da Configuração</CardTitle>
                     <Separator className="mt-2" />

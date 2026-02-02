@@ -8,6 +8,7 @@ import {
   DbProfessorIntegracao,
 } from "../types";
 import type { Database } from "@/app/shared/core/database.types";
+import { canManageProfessorSchedule } from "./admin-helpers";
 
 export async function getConfiguracoesProfessor(
   professorId: string,
@@ -60,8 +61,13 @@ export async function updateConfiguracoesProfessor(
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || user.id !== professorId) {
+  if (!user) {
     throw new Error("Unauthorized");
+  }
+
+  if (user.id !== professorId) {
+    const canManage = await canManageProfessorSchedule(professorId);
+    if (!canManage) throw new Error("Unauthorized");
   }
 
   const {
@@ -154,8 +160,13 @@ export async function updateIntegracaoProfessor(
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || user.id !== professorId) {
+  if (!user) {
     throw new Error("Unauthorized");
+  }
+
+  if (user.id !== professorId) {
+    const canManage = await canManageProfessorSchedule(professorId);
+    if (!canManage) throw new Error("Unauthorized");
   }
 
   const {

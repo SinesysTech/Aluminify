@@ -19,6 +19,21 @@ const envSchema = z.object({
   SUPABASE_ANON_KEY: z.string().optional(),
   SUPABASE_PUBLISHABLE_KEY: z.string().optional(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY: z.string().optional(),
+
+  // OAuth
+  OAUTH_ENCRYPTION_KEY: z
+    .string()
+    .min(32, "Encryption key must be at least 32 characters"),
+
+  // Google Analytics
+  NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().optional(),
+
+  // Sentry
+  SENTRY_AUTH_TOKEN: z.string().optional(),
+
+  // Build & CI
+  DOCKER_BUILD: z.enum(["true", "false"]).optional(),
+  CI: z.string().optional(),
 });
 
 // Validação refinada para garantir que temos chaves suficientes

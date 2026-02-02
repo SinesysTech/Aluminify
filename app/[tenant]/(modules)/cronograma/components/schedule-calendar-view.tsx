@@ -2015,7 +2015,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
   return (
     <div className="container mx-auto py-4 md:py-6 space-y-4 md:space-y-6 px-2 md:px-4">
       {/* Header com Resumo */}
-      <Card className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
+      <Card className="overflow-hidden">
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
@@ -2076,7 +2076,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
       </Card>
 
       {/* Calendário */}
-      <Card className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
+      <Card className="overflow-hidden">
         <CardHeader>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -2467,7 +2467,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                       {estatisticasSemanas.semanas
                         .sort((a, b) => a.semana_numero - b.semana_numero)
                         .map((semana) => (
-                          <Card key={semana.semana_numero} className="border overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
+                          <Card key={semana.semana_numero} className="border overflow-hidden">
                             <CardHeader className="pb-2">
                               <div className="flex justify-between items-start">
                                 <div>
@@ -3083,7 +3083,7 @@ export function ScheduleCalendarView({ cronogramaId }: ScheduleCalendarViewProps
                     const cardKey = `${dataKey}-${concluidasCount}-${itens.length}`
 
                     return (
-                      <Card key={cardKey} className="overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
+                      <Card key={cardKey} className="overflow-hidden">
                         <CardHeader>
                           <div className="flex items-center justify-between gap-2">
                             <CardTitle className="text-base">

@@ -210,8 +210,27 @@ export function FirstAccessForm({ userId, role, empresaSlug }: FirstAccessFormPr
         ? `/${empresaSlug}${defaultRoute}`
         : defaultRoute
 
-      router.push(redirectUrl)
+      console.log('[FirstAccessForm] Fluxo finalizado. Iniciando redirect...', {
+        role,
+        redirectUrl,
+        mustChangePassword: false, // expected state
+      })
+
+      // Force a router refresh to re-run server components (like layout/page checks)
+      // This is critical because `requireUser` needs to re-evaluate `mustChangePassword`
       router.refresh()
+
+      // Wait a bit to allow the refresh to propagate the redirect from the server
+      // If the server doesn't redirect, we try client-side push as fallback
+      // setTimeout(() => {
+      //   console.log('[FirstAccessForm] Server redirect timeout. Attempting client-side push to:', redirectUrl)
+      //   router.push(redirectUrl)
+      // }, 1000)
+
+      // Actually, relying purely on server-side redirect (via page.tsx) usually works best 
+      // when we just changed auth state. But if page.tsx logic is conditional, 
+      // the refresh should trigger the `redirect()` call in `PrimeiroAcessoPage`.
+
     } catch (err) {
       const errorMessage = resolveErrorMessage(err)
       // Evitar poluir o console em erros esperados do Auth (ex.: same_password).

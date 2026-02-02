@@ -1,7 +1,6 @@
 import React from 'react'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { UserProvider } from '@/components/providers/user-provider'
-import { CopilotKitProvider } from '@/components/providers/copilotkit-provider'
 import { BrandingProvider } from "@/app/[tenant]/(modules)/settings/personalizacao/providers/branding-provider"
 import { StudentOrganizationsProvider } from '@/components/providers/student-organizations-provider'
 import { ModuleVisibilityProvider } from '@/components/providers/module-visibility-provider'
@@ -43,38 +42,36 @@ export async function DashboardLayout({
 
     return (
         <UserProvider user={user}>
-            <CopilotKitProvider user={user} tenantEmpresaId={tenantEmpresaId || null}>
-                <BrandingProvider empresaId={tenantEmpresaId}>
-                    <StudentOrganizationsProvider user={user}>
-                        <ModuleVisibilityProvider
-                            empresaId={tenantEmpresaId || null}
-                            userRole={user.role}
+            <BrandingProvider empresaId={tenantEmpresaId}>
+                <StudentOrganizationsProvider user={user}>
+                    <ModuleVisibilityProvider
+                        empresaId={tenantEmpresaId || null}
+                        userRole={user.role}
+                    >
+                        <StudentBrandingCoordinator />
+                        <StudentTenantCoordinator />
+                        <SidebarProvider
+                            // 3. Aplicação das variáveis de fonte e classes base no Provider
+                            className={cn(
+                                "font-sans antialiased",
+                                fontSans.variable,
+                                fontMono.variable
+                            )}
                         >
-                            <StudentBrandingCoordinator />
-                            <StudentTenantCoordinator />
-                            <SidebarProvider
-                                // 3. Aplicação das variáveis de fonte e classes base no Provider
-                                className={cn(
-                                    "font-sans antialiased",
-                                    fontSans.variable,
-                                    fontMono.variable
-                                )}
-                            >
-                                <AppSidebar />
-                                <SidebarInset>
-                                    <DashboardHeader />
-                                    <ImpersonationBanner />
-                                    {/* Main content - scroll nativo do body */}
-                                    <div className="p-4 md:px-8 md:py-6 pb-20 md:pb-8 bg-background">
-                                        {children}
-                                    </div>
-                                    <BottomNavigation />
-                                </SidebarInset>
-                            </SidebarProvider>
-                        </ModuleVisibilityProvider>
-                    </StudentOrganizationsProvider>
-                </BrandingProvider>
-            </CopilotKitProvider>
+                            <AppSidebar />
+                            <SidebarInset>
+                                <DashboardHeader />
+                                <ImpersonationBanner />
+                                {/* Main content - scroll nativo do body */}
+                                <div className="p-4 md:px-8 md:py-6 pb-20 md:pb-8 bg-background">
+                                    {children}
+                                </div>
+                                <BottomNavigation />
+                            </SidebarInset>
+                        </SidebarProvider>
+                    </ModuleVisibilityProvider>
+                </StudentOrganizationsProvider>
+            </BrandingProvider>
         </UserProvider>
     )
 }

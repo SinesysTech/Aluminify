@@ -4,6 +4,7 @@ import { createClient } from "@/app/shared/core/server";
 import { revalidatePath } from "next/cache";
 import { Recorrencia, DbAgendamentoRecorrencia, Bloqueio } from "../types";
 import type { Database } from "@/app/shared/core/database.types";
+import { canManageProfessorSchedule } from "./admin-helpers";
 
 export async function getRecorrencias(
   professorId: string,
@@ -13,8 +14,13 @@ export async function getRecorrencias(
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || user.id !== professorId) {
+  if (!user) {
     throw new Error("Unauthorized");
+  }
+
+  if (user.id !== professorId) {
+    const canManage = await canManageProfessorSchedule(professorId);
+    if (!canManage) throw new Error("Unauthorized");
   }
 
   const { data, error } = await supabase
@@ -56,8 +62,13 @@ export async function createRecorrencia(
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user || user.id !== data.professor_id) {
+  if (!user) {
     throw new Error("Unauthorized");
+  }
+
+  if (user.id !== data.professor_id) {
+    const canManage = await canManageProfessorSchedule(data.professor_id);
+    if (!canManage) throw new Error("Unauthorized");
   }
 
   const payload = {
@@ -131,8 +142,13 @@ export async function updateRecorrencia(
     .eq("id", id)
     .single();
 
-  if (!existing || existing.professor_id !== user.id) {
-    throw new Error("Unauthorized");
+  if (!existing) {
+    throw new Error("Recorrencia not found");
+  }
+
+  if (existing.professor_id !== user.id) {
+    const canManage = await canManageProfessorSchedule(existing.professor_id);
+    if (!canManage) throw new Error("Unauthorized");
   }
 
   const updateData: Record<string, unknown> = {};
@@ -198,8 +214,13 @@ export async function deleteRecorrencia(
     .eq("id", id)
     .single();
 
-  if (!existing || existing.professor_id !== user.id) {
-    throw new Error("Unauthorized");
+  if (!existing) {
+    throw new Error("Recorrencia not found");
+  }
+
+  if (existing.professor_id !== user.id) {
+    const canManage = await canManageProfessorSchedule(existing.professor_id);
+    if (!canManage) throw new Error("Unauthorized");
   }
 
   const { error } = await supabase
@@ -277,7 +298,8 @@ export async function createBloqueio(
   }
 
   if (data.professor_id && data.professor_id !== user.id) {
-    throw new Error("Unauthorized");
+    const canManage = await canManageProfessorSchedule(data.professor_id);
+    if (!canManage) throw new Error("Unauthorized");
   }
 
   const dataInicio =
@@ -374,7 +396,8 @@ export async function updateBloqueio(
   }
 
   if (existing.professor_id && existing.professor_id !== user.id) {
-    throw new Error("Unauthorized");
+    const canManage = await canManageProfessorSchedule(existing.professor_id);
+    if (!canManage) throw new Error("Unauthorized");
   }
 
   const updateData: Record<string, unknown> = {};
@@ -447,7 +470,8 @@ export async function deleteBloqueio(
   }
 
   if (existing.professor_id && existing.professor_id !== user.id) {
-    throw new Error("Unauthorized");
+    const canManage = await canManageProfessorSchedule(existing.professor_id);
+    if (!canManage) throw new Error("Unauthorized");
   }
 
   const { error } = await supabase

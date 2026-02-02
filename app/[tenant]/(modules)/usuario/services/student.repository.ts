@@ -146,6 +146,8 @@ function mapRow(
     twitter: row.twitter,
     hotmartId: row.hotmart_id ?? null,
     origemCadastro: row.origem_cadastro ?? null,
+    ativo: row.ativo,
+    progress: 0,
     courses,
     mustChangePassword: row.must_change_password,
     temporaryPassword: row.senha_temporaria,
@@ -225,7 +227,9 @@ export class StudentRepositoryImpl implements StudentRepository {
 
         studentIdsToFilter = Array.from(
           new Set(
-            (alunosCursos ?? []).map((ac: { usuario_id: string }) => ac.usuario_id),
+            (alunosCursos ?? []).map(
+              (ac: { usuario_id: string }) => ac.usuario_id,
+            ),
           ),
         );
       }
@@ -254,9 +258,6 @@ export class StudentRepositoryImpl implements StudentRepository {
     let queryBuilder = this.client
       .from(TABLE)
       .select("id", { count: "exact", head: true });
-    if (studentIdsToFilter === null) {
-      queryBuilder = queryBuilder.is("deleted_at", null);
-    }
 
     if (studentIdsToFilter !== null) {
       // PostgreSQL tem limites práticos para cláusulas IN com muitos valores
@@ -320,9 +321,6 @@ export class StudentRepositoryImpl implements StudentRepository {
       .select("*")
       .order(sortBy, { ascending: sortOrder })
       .range(from, to);
-    if (studentIdsToFilter === null) {
-      dataQuery = dataQuery.is("deleted_at", null);
-    }
     if (studentIdsToFilter !== null) {
       dataQuery = dataQuery.in("id", studentIdsToFilter);
     }
@@ -419,9 +417,10 @@ export class StudentRepositoryImpl implements StudentRepository {
     const totalPages = Math.ceil(total / perPage);
 
     const students = await this.attachCourses(data ?? []);
+    const studentsWithProgress = await this.attachProgress(students);
 
     return {
-      data: students,
+      data: studentsWithProgress,
       meta: {
         page,
         perPage,
@@ -436,7 +435,6 @@ export class StudentRepositoryImpl implements StudentRepository {
       .from(TABLE)
       .select("*")
       .eq("id", id)
-      .is("deleted_at", null)
       .maybeSingle();
 
     if (error) {
@@ -456,7 +454,6 @@ export class StudentRepositoryImpl implements StudentRepository {
       .from(TABLE)
       .select("*")
       .eq("email", email.toLowerCase())
-      .is("deleted_at", null)
       .maybeSingle();
 
     if (error) {
@@ -506,7 +503,6 @@ export class StudentRepositoryImpl implements StudentRepository {
       .from(TABLE)
       .select("*")
       .eq("cpf", cpf)
-      .is("deleted_at", null)
       .maybeSingle();
 
     if (error) {
@@ -528,8 +524,7 @@ export class StudentRepositoryImpl implements StudentRepository {
     let query = this.client
       .from(TABLE)
       .select("*")
-      .eq("numero_matricula", enrollmentNumber)
-      .is("deleted_at", null);
+      .eq("numero_matricula", enrollmentNumber);
 
     // Se empresaId foi fornecido, filtrar por empresa também
     if (empresaId) {
@@ -869,7 +864,9 @@ export class StudentRepositoryImpl implements StudentRepository {
       .eq("empresa_id", empresaId);
 
     if (cursosError) {
-      throw new Error(`Failed to fetch courses for empresa: ${cursosError.message}`);
+      throw new Error(
+        `Failed to fetch courses for empresa: ${cursosError.message}`,
+      );
     }
 
     const ids = (cursoIds ?? []).map((c) => c.id);
@@ -881,7 +878,9 @@ export class StudentRepositoryImpl implements StudentRepository {
         .in("curso_id", ids);
 
       if (deleteError) {
-        throw new Error(`Failed to revoke student enrollments: ${deleteError.message}`);
+        throw new Error(
+          `Failed to revoke student enrollments: ${deleteError.message}`,
+        );
       }
     }
 
@@ -899,10 +898,7 @@ export class StudentRepositoryImpl implements StudentRepository {
         .eq("id", id)
         .single();
       if (usuario?.empresa_id === empresaId) {
-        await this.client
-          .from(TABLE)
-          .update({ empresa_id: null })
-          .eq("id", id);
+        await this.client.from(TABLE).update({ empresa_id: null }).eq("id", id);
       }
     }
   }
@@ -971,6 +967,73 @@ export class StudentRepositoryImpl implements StudentRepository {
     });
 
     return map;
+  }
+
+  private async attachProgress(students: Student[]): Promise<Student[]> {
+    if (!students.length) {
+      return students;
+    }
+
+    const studentIds = students.map((s) => s.id);
+    const allCourseIds = Array.from(
+      new Set(students.flatMap((s) => s.courses.map((c) => c.id))),
+    );
+
+    if (!allCourseIds.length) {
+      return students;
+    }
+
+    // Count total aulas per course
+    const { data: aulasPerCourse, error: aulasError } = await this.client
+      .from("aulas")
+      .select("curso_id")
+      .in("curso_id", allCourseIds);
+
+    if (aulasError) {
+      console.warn(`Failed to fetch aulas for progress: ${aulasError.message}`);
+      return students;
+    }
+
+    const totalAulasByCourse = new Map<string, number>();
+    (aulasPerCourse ?? []).forEach((a) => {
+      totalAulasByCourse.set(
+        a.curso_id,
+        (totalAulasByCourse.get(a.curso_id) ?? 0) + 1,
+      );
+    });
+
+    // Count completed aulas per student
+    const { data: completions, error: completionsError } = await this.client
+      .from("aulas_concluidas")
+      .select("usuario_id")
+      .in("usuario_id", studentIds);
+
+    if (completionsError) {
+      console.warn(
+        `Failed to fetch aulas_concluidas for progress: ${completionsError.message}`,
+      );
+      return students;
+    }
+
+    const completedByStudent = new Map<string, number>();
+    (completions ?? []).forEach((c) => {
+      completedByStudent.set(
+        c.usuario_id,
+        (completedByStudent.get(c.usuario_id) ?? 0) + 1,
+      );
+    });
+
+    return students.map((student) => {
+      const totalAulas = student.courses.reduce(
+        (sum, course) => sum + (totalAulasByCourse.get(course.id) ?? 0),
+        0,
+      );
+      const completed = completedByStudent.get(student.id) ?? 0;
+      const progress =
+        totalAulas > 0 ? Math.round((completed / totalAulas) * 100) : 0;
+
+      return { ...student, progress };
+    });
   }
 
   async findByEmpresa(empresaId: string): Promise<Student[]> {
@@ -1076,12 +1139,10 @@ export class StudentRepositoryImpl implements StudentRepository {
       curso_id: courseId,
     }));
 
-    const { error } = await this.client
-      .from(COURSE_LINK_TABLE)
-      .upsert(rows, {
-        onConflict: "usuario_id,curso_id",
-        ignoreDuplicates: true,
-      });
+    const { error } = await this.client.from(COURSE_LINK_TABLE).upsert(rows, {
+      onConflict: "usuario_id,curso_id",
+      ignoreDuplicates: true,
+    });
 
     if (error) {
       throw new Error(`Failed to link student to courses: ${error.message}`);

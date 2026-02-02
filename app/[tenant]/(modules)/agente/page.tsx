@@ -3,8 +3,6 @@
 import React from 'react'
 import { useEffect, useState } from 'react'
 import { useCurrentUser } from '@/components/providers/user-provider'
-import { CopilotChatSection } from './components/copilot-chat-section'
-import { MastraChatSection } from './components/mastra-chat-section'
 import { N8nChatSection } from '@/app/tobias/components/n8n-chat-section'
 import { Loader2, AlertCircle } from 'lucide-react'
 import type { AIAgentChatConfig } from '@/app/shared/services/ai-agents'
@@ -65,47 +63,6 @@ export default function AgentePage() {
     )
   }
 
-  // Use CopilotKit integration
-  if (agentConfig.integrationType === 'copilotkit') {
-    return (
-      <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-8rem)] flex-col overflow-hidden">
-        <div className="mb-2 md:mb-4 flex items-center gap-2 shrink-0">
-          <div>
-            <h1 className="page-title">{agentConfig.name}</h1>
-            <p className="page-subtitle">
-              Tire suas dúvidas e receba ajuda personalizada
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-1 min-h-0 overflow-hidden rounded-lg border">
-          <CopilotChatSection className="h-full w-full" />
-        </div>
-      </div>
-    )
-  }
-
-  // Use Mastra integration
-  if (agentConfig.integrationType === 'mastra') {
-    return (
-      <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-8rem)] flex-col overflow-hidden">
-        <div className="mb-2 md:mb-4 flex items-center gap-2 shrink-0">
-          <div>
-            <h1 className="page-title">{agentConfig.name}</h1>
-            <p className="page-subtitle">
-              Tire suas dúvidas e receba ajuda personalizada
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-1 min-h-0 overflow-hidden rounded-lg border">
-          <MastraChatSection agentConfig={agentConfig} className="h-full w-full" />
-        </div>
-      </div>
-    )
-  }
-
-  // TOBIAS-LEGACY: N8N/legacy integration (TobIAs para CDF)
-  // Remover este bloco quando TobIAs for deletado — basta remover o import e este return
+  // N8N integration (TobIAs)
   return <N8nChatSection agentConfig={agentConfig} />
 }

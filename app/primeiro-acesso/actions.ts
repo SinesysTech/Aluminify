@@ -37,13 +37,22 @@ export async function finalizeFirstAccessAction(): Promise<FinalizeFirstAccessRe
       must_change_password: false,
     };
 
-    const { error: metaError } = await adminClient.auth.admin.updateUserById(user.id, {
-      user_metadata: nextMeta,
-    });
+    const { error: metaError } = await adminClient.auth.admin.updateUserById(
+      user.id,
+      {
+        user_metadata: nextMeta,
+      },
+    );
 
     if (metaError) {
-      console.error("[finalizeFirstAccessAction] erro ao atualizar metadata:", metaError);
-      return { success: false, error: metaError.message || "Falha ao finalizar primeiro acesso" };
+      console.error(
+        "[finalizeFirstAccessAction] erro ao atualizar metadata:",
+        metaError,
+      );
+      return {
+        success: false,
+        error: metaError.message || "Falha ao finalizar primeiro acesso",
+      };
     }
 
     // Se for aluno, tentar limpar também na tabela usuarios (se existir).
@@ -56,7 +65,15 @@ export async function finalizeFirstAccessAction(): Promise<FinalizeFirstAccessRe
         .maybeSingle();
 
       if (alunoIdError) {
-        console.warn("[finalizeFirstAccessAction] erro ao buscar aluno por id:", alunoIdError);
+        console.warn(
+          "[finalizeFirstAccessAction] erro ao buscar aluno por id:",
+          alunoIdError,
+        );
+      } else {
+        console.log(
+          "[finalizeFirstAccessAction] aluno encontrado para atualização:",
+          alunoById?.id,
+        );
       }
 
       if (alunoById?.id) {
@@ -66,7 +83,10 @@ export async function finalizeFirstAccessAction(): Promise<FinalizeFirstAccessRe
           .eq("id", user.id);
 
         if (alunoUpdateError) {
-          console.warn("[finalizeFirstAccessAction] erro ao atualizar aluno:", alunoUpdateError);
+          console.warn(
+            "[finalizeFirstAccessAction] erro ao atualizar aluno:",
+            alunoUpdateError,
+          );
         }
       } else if (user.email) {
         // Fallback por email (bases legadas podem ter divergência id/email)
@@ -78,7 +98,7 @@ export async function finalizeFirstAccessAction(): Promise<FinalizeFirstAccessRe
         if (alunoUpdateByEmailError) {
           console.warn(
             "[finalizeFirstAccessAction] erro ao atualizar aluno por email:",
-            alunoUpdateByEmailError
+            alunoUpdateByEmailError,
           );
         }
       }
@@ -88,7 +108,9 @@ export async function finalizeFirstAccessAction(): Promise<FinalizeFirstAccessRe
     return { success: true };
   } catch (error) {
     console.error("[finalizeFirstAccessAction] erro inesperado:", error);
-    return { success: false, error: "Erro interno ao finalizar primeiro acesso" };
+    return {
+      success: false,
+      error: "Erro interno ao finalizar primeiro acesso",
+    };
   }
 }
-

@@ -65,6 +65,8 @@ export interface Student {
   twitter: string | null;
   hotmartId: string | null;
   origemCadastro: string | null;
+  ativo: boolean;
+  progress: number;
   courses: StudentCourseSummary[];
   mustChangePassword: boolean;
   temporaryPassword: string | null;

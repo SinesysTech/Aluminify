@@ -25,18 +25,24 @@ function normalize(s: string) {
   return (s ?? "").trim().toLowerCase();
 }
 
-function findColumnValue(row: Record<string, string>, possibleHeaders: string[]): string {
+function findColumnValue(
+  row: Record<string, string>,
+  possibleHeaders: string[],
+): string {
   const headers = Object.keys(row);
   for (const h of headers) {
     const n = normalize(h).replace(/\s+/g, " ");
     for (const p of possibleHeaders) {
-      if (normalize(p).replace(/\s+/g, " ") === n) return String(row[h] ?? "").trim();
+      if (normalize(p).replace(/\s+/g, " ") === n)
+        return String(row[h] ?? "").trim();
     }
   }
   return "";
 }
 
-async function readEmailsFromExcel(filePath: string): Promise<{ email: string; nome: string; linha: number }[]> {
+async function readEmailsFromExcel(
+  filePath: string,
+): Promise<{ email: string; nome: string; linha: number }[]> {
   if (!fs.existsSync(filePath)) {
     throw new Error(`Arquivo não encontrado: ${filePath}`);
   }
@@ -48,7 +54,9 @@ async function readEmailsFromExcel(filePath: string): Promise<{ email: string; n
   const result: { email: string; nome: string; linha: number }[] = [];
   const headerRow = sheet.getRow(1);
   const headers: string[] = [];
-  headerRow.eachCell({ includeEmpty: false }, (c) => headers.push(String(c.value ?? "").trim()));
+  headerRow.eachCell({ includeEmpty: false }, (c) =>
+    headers.push(String(c.value ?? "").trim()),
+  );
 
   function cellToString(val: unknown): string {
     if (val == null) return "";
@@ -72,7 +80,11 @@ async function readEmailsFromExcel(filePath: string): Promise<{ email: string; n
       rowData["email"] ||
       "";
     const email = emailRaw.includes("@") ? emailRaw.toLowerCase() : "";
-    const nome = findColumnValue(rowData, COLUNAS_NOME) || rowData["Nome"] || rowData["Nome Completo"] || "";
+    const nome =
+      findColumnValue(rowData, COLUNAS_NOME) ||
+      rowData["Nome"] ||
+      rowData["Nome Completo"] ||
+      "";
     if (!email && !nome) continue;
     if (!email) {
       result.push({ email: "", nome, linha: rowNum });
@@ -86,12 +98,20 @@ async function readEmailsFromExcel(filePath: string): Promise<{ email: string; n
 async function main() {
   const excelPath =
     process.argv[2] ||
-    path.join("c:", "Cronogramas - 2026 - CDF", "Química Online", "Alunos - Química Online.xlsx");
+    path.join(
+      "c:",
+      "Cronogramas - 2026 - CDF",
+      "Química Online",
+      "Alunos - Química Online.xlsx",
+    );
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
   if (!supabaseUrl || !key) {
-    console.error("Defina NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (ou SUPABASE_SECRET_KEY) em .env.local");
+    console.error(
+      "Defina NEXT_PUBLIC_SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY (ou SUPABASE_SECRET_KEY) em .env.local",
+    );
     process.exit(1);
   }
 
@@ -99,21 +119,34 @@ async function main() {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  console.log("=== Verificação: Alunos da planilha vs curso Química Online ===\n");
+  console.log(
+    "=== Verificação: Alunos da planilha vs curso Química Online ===\n",
+  );
   console.log("Planilha:", excelPath);
 
   const planilha = await readEmailsFromExcel(excelPath);
   const emailsPlanilha = planilha.map((p) => p.email).filter(Boolean);
-  const emailsUnicos = [...new Set(emailsPlanilha)];
+  const emailsUnicos = Array.from(new Set(emailsPlanilha));
 
   const semEmail = planilha.filter((p) => !p.email);
   if (semEmail.length) {
-    console.log("\n⚠️  Linhas na planilha sem e-mail (serão ignoradas na verificação de matrícula):", semEmail.length);
-    semEmail.slice(0, 5).forEach((s) => console.log(`   Linha ${s.linha}: ${s.nome || "(vazio)"}`));
-    if (semEmail.length > 5) console.log(`   ... e mais ${semEmail.length - 5}`);
+    console.log(
+      "\n⚠️  Linhas na planilha sem e-mail (serão ignoradas na verificação de matrícula):",
+      semEmail.length,
+    );
+    semEmail
+      .slice(0, 5)
+      .forEach((s) =>
+        console.log(`   Linha ${s.linha}: ${s.nome || "(vazio)"}`),
+      );
+    if (semEmail.length > 5)
+      console.log(`   ... e mais ${semEmail.length - 5}`);
   }
 
-  console.log("\nTotal de linhas com e-mail na planilha:", planilha.filter((p) => p.email).length);
+  console.log(
+    "\nTotal de linhas com e-mail na planilha:",
+    planilha.filter((p) => p.email).length,
+  );
   console.log("E-mails únicos na planilha:", emailsUnicos.length);
 
   const { data: empresa, error: errEmpresa } = await supabase
@@ -145,9 +178,15 @@ async function main() {
     console.error("\n❌ Erro ao ler matrículas:", errAc.message);
     process.exit(1);
   }
-  const userIdsMatriculados = [...new Set((matriculas ?? []).map((m) => m.usuario_id))];
+  const userIdsMatriculados = Array.from(
+    new Set((matriculas ?? []).map((m) => m.usuario_id)),
+  );
 
-  let usuariosByEmail: { id: string; email: string | null; nome_completo: string | null }[] = [];
+  let usuariosByEmail: {
+    id: string;
+    email: string | null;
+    nome_completo: string | null;
+  }[] = [];
   if (emailsUnicos.length > 0) {
     const { data: usuarios, error: errU } = await supabase
       .from("usuarios")
@@ -161,8 +200,9 @@ async function main() {
     usuariosByEmail = usuarios ?? [];
   }
 
-  const usuarioById = new Map(usuariosByEmail.map((u) => [u.id, u]));
-  const emailToUsuario = new Map(usuariosByEmail.map((u) => [u.email?.toLowerCase() ?? "", u]));
+  const emailToUsuario = new Map(
+    usuariosByEmail.map((u) => [u.email?.toLowerCase() ?? "", u]),
+  );
   const matriculadosSet = new Set(userIdsMatriculados);
 
   const cadastradosEMatriculados: string[] = [];
@@ -185,12 +225,24 @@ async function main() {
   console.log("\n--- Resultado ---");
   console.log("Empresa:", empresa.nome);
   console.log("Curso:", curso.nome);
-  console.log("Total de matrículas no curso (banco):", userIdsMatriculados.length);
+  console.log(
+    "Total de matrículas no curso (banco):",
+    userIdsMatriculados.length,
+  );
   console.log("");
   console.log("Da planilha (e-mails únicos):");
-  console.log("  ✅ Cadastrados e matriculados no curso:", cadastradosEMatriculados.length);
-  console.log("  ⚠️  Cadastrados mas NÃO matriculados no curso:", cadastradosNaoMatriculados.length);
-  console.log("  ❌ Não cadastrados (usuário não existe):", naoCadastrados.length);
+  console.log(
+    "  ✅ Cadastrados e matriculados no curso:",
+    cadastradosEMatriculados.length,
+  );
+  console.log(
+    "  ⚠️  Cadastrados mas NÃO matriculados no curso:",
+    cadastradosNaoMatriculados.length,
+  );
+  console.log(
+    "  ❌ Não cadastrados (usuário não existe):",
+    naoCadastrados.length,
+  );
 
   if (cadastradosNaoMatriculados.length) {
     console.log("\n  Lista (cadastrados mas não matriculados):");
@@ -201,14 +253,23 @@ async function main() {
     naoCadastrados.forEach((e) => console.log("   -", e));
   }
 
-  const todosOk = naoCadastrados.length === 0 && cadastradosNaoMatriculados.length === 0;
+  const todosOk =
+    naoCadastrados.length === 0 && cadastradosNaoMatriculados.length === 0;
   console.log("\n=== Conclusão ===");
   if (todosOk) {
-    console.log("Todos os alunos da planilha estão cadastrados e matriculados no curso Química Online.");
+    console.log(
+      "Todos os alunos da planilha estão cadastrados e matriculados no curso Química Online.",
+    );
   } else {
     console.log("Há divergências:");
-    if (naoCadastrados.length) console.log(`  - ${naoCadastrados.length} e-mail(s) da planilha não possuem usuário cadastrado.`);
-    if (cadastradosNaoMatriculados.length) console.log(`  - ${cadastradosNaoMatriculados.length} usuário(s) cadastrado(s) mas não matriculados no curso Química Online.`);
+    if (naoCadastrados.length)
+      console.log(
+        `  - ${naoCadastrados.length} e-mail(s) da planilha não possuem usuário cadastrado.`,
+      );
+    if (cadastradosNaoMatriculados.length)
+      console.log(
+        `  - ${cadastradosNaoMatriculados.length} usuário(s) cadastrado(s) mas não matriculados no curso Química Online.`,
+      );
   }
   console.log("");
 }

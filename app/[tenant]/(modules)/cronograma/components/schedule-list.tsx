@@ -110,19 +110,22 @@ function AulaItem({
     opacity: isDragging ? 0.5 : 1,
   }
 
+  const disciplinaNome = item.aulas?.modulos?.frentes?.disciplinas?.nome
+  const frenteNome = item.aulas?.modulos?.frentes?.nome
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-start gap-3 p-2 border rounded hover:bg-muted/50 transition-colors",
+        "flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors",
         item.concluido && "opacity-60"
       )}
     >
       <div
         {...attributes}
         {...listeners}
-        className="mt-1 cursor-grab active:cursor-grabbing"
+        className="cursor-grab active:cursor-grabbing shrink-0"
       >
         <GripVertical className="h-4 w-4 text-muted-foreground" />
       </div>
@@ -131,36 +134,45 @@ function AulaItem({
         onCheckedChange={(checked) =>
           onToggleConcluido(item.id, checked as boolean)
         }
-        className="mt-1"
+        className="shrink-0"
         onClick={(e) => e.stopPropagation()}
       />
       <div className="flex-1 min-w-0">
         {item.aulas ? (
-          <>
-            <div className="flex flex-col gap-1 mb-1 min-w-0">
-              {item.aulas.modulos?.numero_modulo && (
-                <Badge variant="secondary" className="text-xs whitespace-nowrap shrink-0 w-fit">
-                  Módulo {item.aulas.modulos.numero_modulo}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3">
+            <div className="flex items-center gap-1.5 shrink-0">
+              {disciplinaNome && (
+                <Badge variant="default" className="text-xs whitespace-nowrap">
+                  {disciplinaNome}
                 </Badge>
               )}
-              <Badge variant="outline" className="text-xs whitespace-nowrap shrink-0 w-fit">
-                Aula {item.aulas.numero_aula || 'N/A'}
-              </Badge>
+              {frenteNome && (
+                <Badge variant="secondary" className="text-xs whitespace-nowrap">
+                  {frenteNome}
+                </Badge>
+              )}
             </div>
-            <div className="font-medium text-sm mb-1">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground shrink-0">
+              {item.aulas.modulos?.numero_modulo && (
+                <span>M{item.aulas.modulos.numero_modulo}</span>
+              )}
+              <span className="font-medium">Aula {item.aulas.numero_aula || 'N/A'}</span>
+            </div>
+            <span className="hidden sm:inline text-muted-foreground/40">·</span>
+            <span className={cn("text-sm truncate", item.concluido && "line-through")}>
               {item.aulas.nome}
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {item.aulas.tempo_estimado_minutos && item.aulas.tempo_estimado_minutos > 0
-                ? formatTempo(item.aulas.tempo_estimado_minutos)
-                : 'Duração não informada'}
-            </div>
-          </>
+            </span>
+          </div>
         ) : (
           <div className="text-sm text-muted-foreground">
             Aula não disponível (ID: {item.aula_id})
           </div>
         )}
+      </div>
+      <div className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+        {item.aulas?.tempo_estimado_minutos && item.aulas.tempo_estimado_minutos > 0
+          ? formatTempo(item.aulas.tempo_estimado_minutos)
+          : '--'}
       </div>
     </div>
   )
@@ -171,7 +183,7 @@ export function ScheduleList({
   dataInicio,
   dataFim,
   periodosFerias,
-  modalidade,
+  modalidade: _modalidade,
   cronogramaId: _cronogramaId,
   onToggleConcluido,
   onUpdate,
@@ -212,11 +224,11 @@ export function ScheduleList({
   // Verificar se uma semana é período de férias
   const isSemanaFerias = (semanaNumero: number): boolean => {
     const { inicioSemana, fimSemana } = getSemanaDates(semanaNumero)
-    
+
     for (const periodo of periodosFerias || []) {
       const inicioFerias = new Date(periodo.inicio)
       const fimFerias = new Date(periodo.fim)
-      
+
       // Verificar se a semana se sobrepõe ao período de férias
       if (
         (inicioSemana >= inicioFerias && inicioSemana <= fimFerias) ||
@@ -233,9 +245,9 @@ export function ScheduleList({
   const semanasComAulas = Object.keys(itensPorSemana)
     .map(Number)
     .filter(semana => (itensPorSemana[semana] || []).length > 0)
-  
-  const ultimaSemanaComAulas = semanasComAulas.length > 0 
-    ? Math.max(...semanasComAulas) 
+
+  const ultimaSemanaComAulas = semanasComAulas.length > 0
+    ? Math.max(...semanasComAulas)
     : 0
 
   // Verificar se o cronograma terminou antes do tempo disponível
@@ -315,8 +327,8 @@ export function ScheduleList({
 
   const activeItem = activeId
     ? Object.values(itensPorSemana)
-        .flat()
-        .find((item) => item.id === activeId)
+      .flat()
+      .find((item) => item.id === activeId)
     : null
 
   return (
@@ -359,7 +371,7 @@ export function ScheduleList({
                     )}
                   </div>
                   {temAulas && (
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex flex-col items-end gap-1">
                         <span>
                           {concluidos} de {itens.length} aulas
@@ -372,7 +384,7 @@ export function ScheduleList({
                           const tempoTotal = tempoAulas + tempoAnotacoesExercicios
                           return (
                             <span className="text-xs">
-                                {formatTempo(tempoTotal)}
+                              {formatTempo(tempoTotal)}
                             </span>
                           )
                         })()}
@@ -441,56 +453,20 @@ export function ScheduleList({
                       )}
                     </div>
                   ) : (
-                    // Ambos os modos (paralelo e sequencial): agrupar por frente
-                    // No paralelo, várias frentes por disciplina aparecem em paralelo
-                    // No sequencial, apenas 1 frente por disciplina por semana (mas disciplinas em paralelo)
-                    (() => {
-                      const itensPorFrente = itensOrdenados.reduce((acc, item) => {
-                        const frenteId = item.aulas?.modulos?.frentes?.id || 'sem-frente'
-                        const frenteNome = item.aulas?.modulos?.frentes?.nome || 'Sem Frente'
-
-                        if (!acc[frenteId]) {
-                          acc[frenteId] = {
-                            nome: frenteNome,
-                            disciplina: item.aulas?.modulos?.frentes?.disciplinas?.nome || '',
-                            itens: [],
-                          }
-                        }
-                        acc[frenteId].itens.push(item)
-                        return acc
-                      }, {} as Record<string, { nome: string; disciplina: string; itens: CronogramaItem[] }>)
-
-                      const frentes = Object.values(itensPorFrente)
-
-                      return (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                          {frentes.map((frente, frenteIndex) => (
-                            <Card key={frenteIndex} className="border rounded-lg p-4 bg-card overflow-hidden transition-all duration-300 bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
-                              <div className="mb-3 pb-2 border-b">
-                                {frente.disciplina && (
-                                  <h4 className="font-semibold text-sm">{frente.disciplina}</h4>
-                                )}
-                                <p className="text-xs text-muted-foreground">{frente.nome}</p>
-                              </div>
-                              <SortableContext
-                                items={frente.itens.map((item) => item.id)}
-                                strategy={verticalListSortingStrategy}
-                              >
-                                <div className="space-y-2">
-                                  {frente.itens.map((item) => (
-                                    <AulaItem
-                                      key={item.id}
-                                      item={item}
-                                      onToggleConcluido={onToggleConcluido}
-                                    />
-                                  ))}
-                                </div>
-                              </SortableContext>
-                            </Card>
-                          ))}
-                        </div>
-                      )
-                    })()
+                    <SortableContext
+                      items={itensOrdenados.map((item) => item.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <div className="space-y-1">
+                        {itensOrdenados.map((item) => (
+                          <AulaItem
+                            key={item.id}
+                            item={item}
+                            onToggleConcluido={onToggleConcluido}
+                          />
+                        ))}
+                      </div>
+                    </SortableContext>
                   )}
                 </div>
               </AccordionContent>
