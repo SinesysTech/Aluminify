@@ -9,17 +9,45 @@ interface RouteContext {
 
 /**
  * GET /api/curso/[cursoId]/modulos
- * Returns module IDs bound to this course
+ * Returns module IDs bound to this course.
+ * With ?full=true, also returns tenant-visible modules and empresaId for admin UI.
  */
 export async function GET(request: NextRequest, { params }: RouteContext) {
   try {
     const { cursoId } = await params;
+    const isFull = request.nextUrl.searchParams.get("full") === "true";
     const supabase = await createAuthenticatedClient();
 
     const service = new CursoModulosService(supabase);
     const moduleIds = await service.getModulesForCourse(cursoId);
 
-    return NextResponse.json({ success: true, moduleIds });
+    if (!isFull) {
+      return NextResponse.json({ success: true, moduleIds });
+    }
+
+    // Full mode: include tenant-visible modules and empresaId for admin UI
+    const { data: curso, error: cursoError } = await supabase
+      .from("cursos")
+      .select("empresa_id")
+      .eq("id", cursoId)
+      .single();
+
+    if (cursoError || !curso) {
+      return NextResponse.json(
+        { error: "Curso não encontrado" },
+        { status: 404 }
+      );
+    }
+
+    const visibilityService = new ModuleVisibilityService(supabase);
+    const tenantModules = await visibilityService.getVisibleModules(curso.empresa_id);
+
+    return NextResponse.json({
+      success: true,
+      moduleIds,
+      tenantModules,
+      empresaId: curso.empresa_id,
+    });
   } catch (error) {
     console.error("Error fetching course modules:", error);
     return NextResponse.json(

@@ -19,7 +19,18 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     const service = new PlantaoQuotaService(supabase);
     const quotaMensal = await service.getQuotaForCourse(cursoId);
 
-    return NextResponse.json({ success: true, quotaMensal });
+    // Include empresaId for admin UI convenience
+    const { data: curso } = await supabase
+      .from("cursos")
+      .select("empresa_id")
+      .eq("id", cursoId)
+      .single();
+
+    return NextResponse.json({
+      success: true,
+      quotaMensal,
+      empresaId: curso?.empresa_id ?? null,
+    });
   } catch (error) {
     console.error("Error fetching plantao quota:", error);
     return NextResponse.json(

@@ -37,6 +37,8 @@ import { BulkActionsBar } from '@/app/[tenant]/(modules)/usuario/components/bulk
 import { TransferStudentsDialog } from '@/app/[tenant]/(modules)/usuario/components/transfer-students-dialog'
 import type { CourseOption, Aluno } from '@/app/[tenant]/(modules)/usuario/components/aluno-table'
 import { TurmasList } from './components/turmas-list'
+import { CourseModulesPanel } from './components/course-modules-panel'
+import { CourseQuotaPanel } from './components/course-quota-panel'
 
 interface Student {
   id: string
@@ -299,6 +301,12 @@ export default function CourseDetailPage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Course Configuration Panels */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <CourseModulesPanel courseId={courseId} />
+          <CourseQuotaPanel courseId={courseId} />
         </div>
 
         {/* Turmas Section - Only shown when usaTurmas is enabled */}
