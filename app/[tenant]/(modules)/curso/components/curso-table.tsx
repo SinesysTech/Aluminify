@@ -138,8 +138,14 @@ const cursoSchema = z.object({
   startDate: z.string().optional().nullable(),
   endDate: z.string().optional().nullable(),
   accessMonths: z.number().optional().nullable(),
-  planningUrl: z.string().url('URL inválida').optional().nullable().or(z.literal('')),
-  coverImageUrl: z.string().url('URL inválida').optional().nullable().or(z.literal('')),
+  planningUrl: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
+    z.string().url('URL inválida').optional().nullable()
+  ) as z.ZodType<string | null | undefined>,
+  coverImageUrl: z.preprocess(
+    (value) => (typeof value === 'string' && value.trim() === '' ? null : value),
+    z.string().url('URL inválida').optional().nullable()
+  ) as z.ZodType<string | null | undefined>,
   usaTurmas: z.boolean(),
 })
 
@@ -175,7 +181,7 @@ export function CursoTable() {
     setMounted(true)
   }, [])
 
-  const createForm = useForm<CursoFormValues>({
+  const createForm = useForm<CursoFormInput, undefined, CursoFormValues>({
     resolver: zodResolver(cursoSchema),
     defaultValues: {
       segmentId: null,
@@ -196,7 +202,7 @@ export function CursoTable() {
     },
   })
 
-  const editForm = useForm<CursoFormValues>({
+  const editForm = useForm<CursoFormInput, undefined, CursoFormValues>({
     resolver: zodResolver(cursoSchema),
     defaultValues: {
       segmentId: null,
