@@ -143,7 +143,8 @@ const cursoSchema = z.object({
   usaTurmas: z.boolean().optional().default(false),
 })
 
-type CursoFormValues = z.infer<typeof cursoSchema>
+type CursoFormInput = z.input<typeof cursoSchema>
+type CursoFormValues = z.output<typeof cursoSchema>
 
 export function CursoTable() {
   const router = useRouter()
@@ -174,7 +175,7 @@ export function CursoTable() {
     setMounted(true)
   }, [])
 
-  const createForm = useForm<CursoFormValues, any, CursoFormValues>({
+  const createForm = useForm<CursoFormInput, any, CursoFormValues>({
     resolver: zodResolver(cursoSchema),
     defaultValues: {
       segmentId: null,
@@ -195,7 +196,7 @@ export function CursoTable() {
     },
   })
 
-  const editForm = useForm<CursoFormValues, any, CursoFormValues>({
+  const editForm = useForm<CursoFormInput, any, CursoFormValues>({
     resolver: zodResolver(cursoSchema),
     defaultValues: {
       segmentId: null,
