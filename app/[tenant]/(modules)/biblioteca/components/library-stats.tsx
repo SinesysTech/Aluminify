@@ -137,10 +137,8 @@ export function LibraryStats({
             {/* Progress Banner */}
             <Card
                 className={cn(
-                    'overflow-hidden transition-all duration-300',
-                    isComplete
-                        ? 'bg-linear-to-r from-emerald-500/10 via-green-500/5 to-transparent border-emerald-500/30'
-                        : 'bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20',
+                    'overflow-hidden',
+                    isComplete && 'border-emerald-500/30',
                 )}
             >
                 <CardContent className="p-4 md:p-5">

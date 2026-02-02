@@ -29,7 +29,7 @@ export function InstitutionHeader({
   }
 
   return (
-    <Card className="overflow-hidden bg-linear-to-r from-primary/5 via-primary/3 to-transparent border-primary/20">
+    <Card className="overflow-hidden">
       <CardContent className="p-4 md:p-6">
         <div className="flex flex-col gap-4">
           {/* Top: Greeting + Controls */}

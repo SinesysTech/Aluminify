@@ -22,7 +22,10 @@ import { User } from "@supabase/supabase-js";
 import { createClient } from "@/app/shared/core/server";
 import { getDatabaseClient } from "@/app/shared/core/database/database";
 import type { AppUser, AppUserRole } from "@/app/shared/types";
-import type { RoleTipo, RolePermissions } from "@/app/shared/types/entities/papel";
+import type {
+  RoleTipo,
+  RolePermissions,
+} from "@/app/shared/types/entities/papel";
 import { getImpersonationContext } from "@/app/shared/core/auth-impersonate";
 import { getDefaultRouteForRole } from "@/app/shared/core/roles";
 import { cacheService } from "@/app/shared/core/services/cache/cache.service";
@@ -35,7 +38,9 @@ const AUTH_SESSION_CACHE_TTL = 1800; // 30 minutos
  * Invalida o cache de sessão de um usuário.
  * Chamar quando: logout, troca de senha, alteração de papel/permissões, impersonação.
  */
-export async function invalidateAuthSessionCache(userId: string): Promise<void> {
+export async function invalidateAuthSessionCache(
+  userId: string,
+): Promise<void> {
   await cacheService.del(`auth:session:${userId}`);
 }
 
@@ -76,14 +81,17 @@ async function getImpersonationStatus(
 async function hydrateUserProfile(
   user: User,
   impersonation: ImpersonationStatus,
-): Promise<AppUser & { _impersonationContext?: ImpersonationStatus["context"] }> {
+): Promise<
+  AppUser & { _impersonationContext?: ImpersonationStatus["context"] }
+> {
   // 1. Determine base role and initial metadata
   const { isImpersonating, context, targetUserId } = impersonation;
 
   const metadataRole =
     isImpersonating && context
       ? context.impersonatedUserRole
-      : (user.user_metadata?.role as AppUserRole | LegacyAppUserRole) || "aluno";
+      : (user.user_metadata?.role as AppUserRole | LegacyAppUserRole) ||
+        "aluno";
 
   let role: AppUserRole =
     metadataRole === "professor" || metadataRole === "empresa"
@@ -204,7 +212,7 @@ async function hydrateUserProfile(
 
     const alunoEmpresaId =
       alunoData?.empresa_id || user.user_metadata?.empresa_id;
-      
+
     if (alunoEmpresaId && !empresaSlug) {
       const { data: empresaRow } = await adminClient
         .from("empresas")
@@ -257,7 +265,10 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
   const cached = await cacheService.get<AppUser>(cacheKey);
   if (cached) {
     if (process.env.NODE_ENV === "development") {
-      console.log("[AUTH DEBUG] getAuthenticatedUser: session cache hit");
+      console.log("[AUTH DEBUG] getAuthenticatedUser: session cache hit", {
+        userId: user.id,
+        mustChangePassword: cached.mustChangePassword,
+      });
     }
     return cached;
   }
@@ -272,6 +283,12 @@ async function _getAuthenticatedUser(): Promise<AppUser | null> {
   const appUser = await hydrateUserProfile(user, impersonationStatus);
 
   // 5. Cachear e retornar
+  if (process.env.NODE_ENV === "development") {
+    console.log("[AUTH DEBUG] getAuthenticatedUser: caching user", {
+      userId: user.id,
+      mustChangePassword: appUser.mustChangePassword,
+    });
+  }
   await cacheService.set(cacheKey, appUser, AUTH_SESSION_CACHE_TTL);
   return appUser;
 }
