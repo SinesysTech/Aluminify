@@ -126,7 +126,7 @@ export type Modalidade = {
 const cursoSchema = z.object({
   segmentId: z.string().optional().nullable(),
   disciplineId: z.string().optional().nullable(), // Mantido para compatibilidade
-  disciplineIds: z.array(z.string()).optional().default([]), // Nova propriedade para múltiplas disciplinas
+  disciplineIds: z.array(z.string()), // Nova propriedade para múltiplas disciplinas
   name: z.string().min(1, 'Nome é obrigatório'),
   modality: z.enum(['EAD', 'LIVE']).optional(), // Deprecated but kept for compatibility logic helper
   modalityId: z.string({ required_error: 'Modalidade é obrigatória' }).min(1, 'Modalidade é obrigatória'),
@@ -140,7 +140,7 @@ const cursoSchema = z.object({
   accessMonths: z.number().optional().nullable(),
   planningUrl: z.string().url('URL inválida').optional().nullable().or(z.literal('')),
   coverImageUrl: z.string().url('URL inválida').optional().nullable().or(z.literal('')),
-  usaTurmas: z.boolean().optional().default(false),
+  usaTurmas: z.boolean(),
 })
 
 type CursoFormInput = z.input<typeof cursoSchema>
@@ -175,7 +175,7 @@ export function CursoTable() {
     setMounted(true)
   }, [])
 
-  const createForm = useForm<CursoFormInput, any, CursoFormValues>({
+  const createForm = useForm<CursoFormValues>({
     resolver: zodResolver(cursoSchema),
     defaultValues: {
       segmentId: null,
@@ -196,7 +196,7 @@ export function CursoTable() {
     },
   })
 
-  const editForm = useForm<CursoFormInput, any, CursoFormValues>({
+  const editForm = useForm<CursoFormValues>({
     resolver: zodResolver(cursoSchema),
     defaultValues: {
       segmentId: null,

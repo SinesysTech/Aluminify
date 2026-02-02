@@ -215,7 +215,7 @@ export default function EmpresaUsuariosPage() {
               />
             </div>
             <Select value={filterType} onValueChange={(v) => setFilterType(v as UserType)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
+              <SelectTrigger className="w-full sm:w-45">
                 <SelectValue placeholder="Filtrar por tipo" />
               </SelectTrigger>
               <SelectContent>
