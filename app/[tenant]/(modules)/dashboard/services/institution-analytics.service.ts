@@ -401,16 +401,59 @@ export class InstitutionAnalyticsService {
 
     const usuarioMap = new Map(usuarios?.map(u => [u.id, u]) ?? []);
 
-    // 4. Calculate detailed metrics only for the winners
-    // Run in parallel
-    const rankingPromises = rankedStudents.map(async (student) => {
+    // 4. Calculate detailed metrics only for the winners (Bulk Fetch)
+
+    // Fetch sessions for streak calculation (approx last 365 days for all top students)
+    const oneYearAgo = new Date();
+    oneYearAgo.setDate(oneYearAgo.getDate() - 365);
+
+    const { data: allSessoes } = await client
+        .from("sessoes_estudo")
+        .select("usuario_id, created_at")
+        .in("usuario_id", topStudentIds)
+        .gte("created_at", oneYearAgo.toISOString());
+
+    // Group sessions by student
+    const sessionsMap = new Map<string, string[]>();
+    for (const s of allSessoes ?? []) {
+        if (!s.usuario_id || !s.created_at) continue;
+        if (!sessionsMap.has(s.usuario_id)) {
+            sessionsMap.set(s.usuario_id, []);
+        }
+        sessionsMap.get(s.usuario_id)!.push(s.created_at);
+    }
+
+    // Fetch progress for aproveitamento
+    const { data: allProgressos } = await client
+        .from("progresso_atividades")
+        .select("usuario_id, questoes_totais, questoes_acertos")
+        .in("usuario_id", topStudentIds);
+
+    // Group progress by student
+    const progressMap = new Map<string, { total: number; acertos: number }>();
+    for (const p of allProgressos ?? []) {
+        if (!p.usuario_id) continue;
+        if (!progressMap.has(p.usuario_id)) {
+            progressMap.set(p.usuario_id, { total: 0, acertos: 0 });
+        }
+        const stats = progressMap.get(p.usuario_id)!;
+        stats.total += p.questoes_totais ?? 0;
+        stats.acertos += p.questoes_acertos ?? 0;
+    }
+
+    const ranking: StudentRankingItem[] = rankedStudents.map((student) => {
         const usuario = usuarioMap.get(student.id);
         const name = usuario?.nome_completo ?? "Aluno";
 
-        const [streak, aproveitamento] = await Promise.all([
-            this.getStudentStreak(student.id, client),
-            this.getStudentAproveitamento(student.id, client)
-        ]);
+        // Calculate Streak
+        const sessoesDates = sessionsMap.get(student.id) ?? [];
+        const streak = this.calculateStreakFromDates(sessoesDates);
+
+        // Calculate Aproveitamento
+        const pStats = progressMap.get(student.id) || { total: 0, acertos: 0 };
+        const aproveitamento = pStats.total > 0
+            ? Math.round((pStats.acertos / pStats.total) * 100)
+            : 0;
 
         const segundos = student.time;
         const horas = Math.floor(segundos / 3600);
@@ -424,39 +467,24 @@ export class InstitutionAnalyticsService {
             horasEstudoMinutos: Math.floor(segundos / 60),
             aproveitamento,
             streakDays: streak
-        } as StudentRankingItem;
+        };
     });
 
-    const ranking = await Promise.all(rankingPromises);
-
-    // Sort again because Promise.all order is preserved but good to be safe if logic changes
     ranking.sort((a, b) => b.horasEstudoMinutos - a.horasEstudoMinutos);
 
     return ranking;
   }
 
   /**
-   * Calcula streak de um aluno
+   * Helper para calcular streak a partir de uma lista de datas
    */
-  private async getStudentStreak(
-    alunoId: string,
-    client: ReturnType<typeof getDatabaseClient>,
-  ): Promise<number> {
-    const { data: sessoes } = await client
-      .from("sessoes_estudo")
-      .select("created_at")
-      .eq("usuario_id", alunoId)
-      .order("created_at", { ascending: false })
-      .limit(365);
-
-    if (!sessoes || sessoes.length === 0) return 0;
+  private calculateStreakFromDates(datesIso: string[]): number {
+    if (datesIso.length === 0) return 0;
 
     // Extrair datas únicas
     const datas = [
       ...new Set(
-        sessoes
-          .filter((s): s is { created_at: string } => s.created_at !== null)
-          .map((s) => new Date(s.created_at).toISOString().split("T")[0]),
+        datesIso.map((d) => new Date(d).toISOString().split("T")[0]),
       ),
     ]
       .sort()
@@ -490,32 +518,6 @@ export class InstitutionAnalyticsService {
     }
 
     return streak;
-  }
-
-  /**
-   * Calcula aproveitamento de um aluno
-   */
-  private async getStudentAproveitamento(
-    alunoId: string,
-    client: ReturnType<typeof getDatabaseClient>,
-  ): Promise<number> {
-    // Use progresso_atividades instead of respostas_questoes (which doesn't exist)
-    const { data: progressos } = await client
-      .from("progresso_atividades")
-      .select("questoes_totais, questoes_acertos")
-      .eq("usuario_id", alunoId);
-
-    if (!progressos || progressos.length === 0) return 0;
-
-    let totalQuestoes = 0;
-    let totalAcertos = 0;
-    for (const p of progressos) {
-      totalQuestoes += p.questoes_totais ?? 0;
-      totalAcertos += p.questoes_acertos ?? 0;
-    }
-
-    if (totalQuestoes === 0) return 0;
-    return Math.round((totalAcertos / totalQuestoes) * 100);
   }
 
   /**
