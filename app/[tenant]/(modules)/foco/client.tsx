@@ -265,7 +265,7 @@ export default function FocoClient() {
             mounted = false
             if (channelCleanup) channelCleanup()
         }
-    }, [supabase, empresaId])
+    }, [supabase, empresaId, atividadeId, disciplinaId, frenteId])
 
     // -- Fullscreen Helpers --
     useEffect(() => {
