@@ -84,16 +84,40 @@ export async function getRelatorios(
 
 export async function getRelatorioById(id: string): Promise<Relatorio | null> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    console.error("Unauthorized access attempt to getRelatorioById");
+    return null;
+  }
+
+  // Get user's empresa_id
+  const { data: userData } = await supabase
+    .from("usuarios")
+    .select("empresa_id")
+    .eq("id", user.id)
+    .single();
+
+  if (!userData?.empresa_id) {
+    console.error("User has no associated company");
+    return null;
+  }
 
   const { data, error } = await supabase
     // @ts-expect-error - Table not in types
     .from("agendamento_relatorios")
     .select("*")
     .eq("id", id)
+    .eq("empresa_id", userData.empresa_id) // Filter by user's company
     .single();
 
   if (error) {
-    console.error("Error fetching report:", error);
+    // If fetching fails because of company mismatch, it will return PGRST116 (0 rows)
+    if (error.code !== "PGRST116") {
+      console.error("Error fetching report:", error);
+    }
     return null;
   }
 

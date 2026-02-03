@@ -358,9 +358,24 @@ export async function bulkUpsertDisponibilidade(items: Disponibilidade[]) {
     throw new Error("Unauthorized");
   }
 
+  // Fetch professor's empresa_id to ensure tenant scoping
+  const { data: professor } = await supabase
+    .from("usuarios")
+    .select("empresa_id")
+    .eq("id", user.id)
+    .single();
+
+  const empresaId = professor?.empresa_id;
+
+  if (!empresaId) {
+    throw new Error("Professor company not found");
+  }
+
   const payload = items.map((item) => ({
     ...item,
-    professor_id: user.id,
+    professor_id: user.id, // Enforce current user
+    empresa_id: empresaId, // Enforce user's company
+    ativo: item.ativo ?? true, // Default to true if missing, or respect input? Comment says "consider enforcing ativo defaults". Let's use ?? true as safe default but respect false.
   }));
 
   const { error } = await supabase

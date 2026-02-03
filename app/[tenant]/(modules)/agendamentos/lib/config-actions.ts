@@ -103,6 +103,18 @@ export async function getIntegracaoProfessor(
   empresaId?: string,
 ): Promise<ProfessorIntegracao | null> {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  if (user.id !== professorId) {
+    const canManage = await canManageProfessorSchedule(professorId);
+    if (!canManage) throw new Error("Unauthorized");
+  }
 
   let query = supabase
     .from("professor_integracoes" as never)
