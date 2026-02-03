@@ -3213,59 +3213,83 @@ export class DashboardAnalyticsService {
 
     const { data: cursos, error: cursosError } = await client
       .from("cursos")
-      .select("id, nome, imagem_capa_url, disciplinas:disciplina_id(nome)")
+      .select("id, nome, imagem_capa_url, disciplinas:disciplina_id(nome), aulas(count)")
       .in("id", cursoIds);
 
     if (cursosError) throw new Error(`Erro ao buscar cursos: ${cursosError.message}`);
     if (!cursos || cursos.length === 0) return [];
 
-    const results = await Promise.all(
-      (cursos as Array<{
+    // Buscar aulas concluídas em lote
+    const { data: aulasConcluidasData, error: aulasConcluidasError } =
+      await client
+        .from("aulas_concluidas")
+        .select("curso_id")
+        .eq("usuario_id", alunoId)
+        .in("curso_id", cursoIds);
+
+    if (aulasConcluidasError) {
+      console.error(
+        "[dashboard-analytics] Erro ao buscar aulas concluídas:",
+        aulasConcluidasError,
+      );
+    }
+
+    const completedMap = new Map<string, number>();
+    (aulasConcluidasData ?? []).forEach((row) => {
+      if (row.curso_id) {
+        completedMap.set(
+          row.curso_id,
+          (completedMap.get(row.curso_id) || 0) + 1,
+        );
+      }
+    });
+
+    // Calcular score global (baseado em aproveitamento de atividades do aluno)
+    // Nota: A implementação original calculava o mesmo score para todos os cursos
+    const { data: atividades } = await client
+      .from("progresso_atividades")
+      .select("questoes_totais, questoes_acertos")
+      .eq("usuario_id", alunoId)
+      .eq("status", "Concluido");
+
+    let globalScore = 0;
+    if (atividades && atividades.length > 0) {
+      const totalQ = atividades.reduce(
+        (sum, a) => sum + (a.questoes_totais || 0),
+        0,
+      );
+      const acertos = atividades.reduce(
+        (sum, a) => sum + (a.questoes_acertos || 0),
+        0,
+      );
+      globalScore =
+        totalQ > 0 ? Math.round((acertos / totalQ) * 50) / 10 : 0; // Scale to 0-5
+    }
+
+    const results = (
+      cursos as unknown as Array<{
         id: string;
         nome: string;
         imagem_capa_url: string | null;
         disciplinas: { nome: string } | null;
-      }>).map(async (curso) => {
-        const { count: totalAulas } = await client
-          .from("aulas")
-          .select("id", { count: "exact", head: true })
-          .eq("curso_id", curso.id);
+        aulas: { count: number }[] | null;
+      }>
+    ).map((curso) => {
+      const totalAulas = curso.aulas?.[0]?.count ?? 0;
+      const concluidas = completedMap.get(curso.id) ?? 0;
+      const progress = totalAulas > 0 ? Math.round((concluidas / totalAulas) * 100) : 0;
 
-        const { count: aulasConcluidas } = await client
-          .from("aulas_concluidas")
-          .select("aula_id", { count: "exact", head: true })
-          .eq("curso_id", curso.id)
-          .eq("usuario_id", alunoId);
-
-        const total = totalAulas ?? 0;
-        const concluidas = aulasConcluidas ?? 0;
-        const progress = total > 0 ? Math.round((concluidas / total) * 100) : 0;
-
-        // Calcular score baseado em aproveitamento de atividades do curso
-        const { data: atividades } = await client
-          .from("progresso_atividades")
-          .select("questoes_totais, questoes_acertos")
-          .eq("usuario_id", alunoId)
-          .eq("status", "Concluido");
-
-        let score = 0;
-        if (atividades && atividades.length > 0) {
-          const totalQ = atividades.reduce((sum, a) => sum + (a.questoes_totais || 0), 0);
-          const acertos = atividades.reduce((sum, a) => sum + (a.questoes_acertos || 0), 0);
-          score = totalQ > 0 ? Math.round((acertos / totalQ) * 50) / 10 : 0; // Scale to 0-5
-        }
-
-        return {
-          id: curso.id,
-          name: curso.nome,
-          category: (curso.disciplinas as { nome: string } | null)?.nome ?? "Geral",
-          imageUrl: curso.imagem_capa_url,
-          score: Math.min(score, 5),
-          progress,
-          started: concluidas > 0,
-        };
-      }),
-    );
+      return {
+        id: curso.id,
+        name: curso.nome,
+        category:
+          (curso.disciplinas as { nome: string } | null)?.nome ?? "Geral",
+        imageUrl: curso.imagem_capa_url,
+        score: Math.min(globalScore, 5),
+        progress,
+        started: concluidas > 0,
+      };
+    });
 
     return results.sort((a, b) => b.progress - a.progress);
   }
