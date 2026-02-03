@@ -152,6 +152,9 @@
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "supabase"
+    "supabase",
+    "mastra",
+    "playwright",
+    "gemini-cli-prompt-library"
   ]
 }
