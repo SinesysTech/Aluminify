@@ -73,7 +73,7 @@ export function CourseProgressByMonth({
           </CardAction>
         )}
       </CardHeader>
-      <ChartContainer className="w-full lg:h-[430px]" config={chartConfig}>
+      <ChartContainer className="w-full lg:h-107.5" config={chartConfig}>
         <AreaChart
           accessibilityLayer
           data={data}

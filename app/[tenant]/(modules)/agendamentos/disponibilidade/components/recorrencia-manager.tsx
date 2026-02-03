@@ -295,7 +295,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
   return (
     <>
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent fullScreenMobile className="sm:max-w-[500px]">
+        <DialogContent fullScreenMobile className="sm:max-w-125">
           <DialogHeader>
             <DialogTitle>
               {editingId ? "Editar Disponibilidade" : "Nova Disponibilidade"}
@@ -588,7 +588,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
                     <TableHead>Tipo</TableHead>
                     <TableHead>Periodo</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead className="w-[100px]">Acoes</TableHead>
+                    <TableHead className="w-25">Acoes</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
