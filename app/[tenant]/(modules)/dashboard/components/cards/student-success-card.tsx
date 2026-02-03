@@ -19,9 +19,9 @@ export function StudentSuccessCard({
   previousSuccessRate,
   totalStudents,
   passingStudents,
-  title = "Taxa de Sucesso dos Alunos",
+  title = "Desempenho dos Alunos",
   totalLabel = "Total de Alunos",
-  passingLabel = "Alunos Aprovados",
+  passingLabel = "Alunos Destaque",
   onViewDetails,
 }: StudentSuccessCardProps) {
   const successRateChange = currentSuccessRate - previousSuccessRate

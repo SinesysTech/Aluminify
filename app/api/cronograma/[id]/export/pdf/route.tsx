@@ -145,7 +145,7 @@ async function getHandler(
     const { data: logoData } = await client
       .from('tenant_logos')
       .select('logo_url')
-      .eq('tipo', 'sidebar')
+      .eq('logo_type', 'sidebar')
       .maybeSingle<{ logo_url: string }>()
     if (logoData?.logo_url) logoUrl = logoData.logo_url
   } catch {

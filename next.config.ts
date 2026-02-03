@@ -4,6 +4,8 @@ import path from "path";
 import "./app/shared/core/env";
 
 const projectRoot = path.resolve(process.cwd());
+const isWindows = process.platform === "win32";
+const buildStandalone = process.env.DOCKER_BUILD === "true" && !isWindows;
 
 const nextConfig: NextConfig = {
   // Otimizações para produção
@@ -16,7 +18,9 @@ const nextConfig: NextConfig = {
   // Configuração de output
   // Para Docker: usar 'standalone' para build otimizado
   // Para Vercel: usar undefined (SSR por padrão)
-  output: process.env.DOCKER_BUILD === "true" ? "standalone" : undefined,
+  // Observação (Windows): o modo standalone tenta copiar arquivos traceados e pode falhar
+  // com nomes como `node:inspector` (caractere ':' inválido no Windows), gerando warnings.
+  output: buildStandalone ? "standalone" : undefined,
 
   // Otimizações de imagens
   images: {

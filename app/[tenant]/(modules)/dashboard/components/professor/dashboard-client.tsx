@@ -136,10 +136,10 @@ export default function ProfessorDashboardClient() {
     avatarUrl: s.avatarUrl ?? undefined,
   }))
 
-  // Calcular taxa de sucesso dos alunos (alunos com aproveitamento >= 60%)
+  // Calcular taxa de desempenho dos alunos (alunos com aproveitamento >= 60%)
   const totalAlunos = data.alunos?.length || 0
-  const alunosAprovados = (data.alunos ?? []).filter((a) => a.aproveitamento >= 60).length
-  const currentSuccessRate = totalAlunos > 0 ? Math.round((alunosAprovados / totalAlunos) * 100) : 0
+  const alunosAcimaDaMeta = (data.alunos ?? []).filter((a) => a.aproveitamento >= 60).length
+  const currentSuccessRate = totalAlunos > 0 ? Math.round((alunosAcimaDaMeta / totalAlunos) * 100) : 0
 
   // Preparar dados de disciplinas para ChartMostActivity
   const disciplinaChartData = (data.performanceAlunos ?? []).slice(0, 5).map((d, i) => {
@@ -199,10 +199,10 @@ export default function ProfessorDashboardClient() {
           currentSuccessRate={currentSuccessRate}
           previousSuccessRate={Math.max(0, currentSuccessRate - 2)}
           totalStudents={totalAlunos}
-          passingStudents={alunosAprovados}
-          title="Taxa de Sucesso dos Alunos"
+          passingStudents={alunosAcimaDaMeta}
+          title="Desempenho dos Alunos"
           totalLabel="Total de Alunos"
-          passingLabel="Alunos Aprovados"
+          passingLabel="Alunos Destaque"
         />
         <ProgressStatisticsCard
           totalActivityPercent={taxaConclusaoAgendamentos}

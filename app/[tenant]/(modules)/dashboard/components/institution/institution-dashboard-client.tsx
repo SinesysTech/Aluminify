@@ -259,7 +259,8 @@ export default function InstitutionDashboardClient() {
             previousSuccessRate={Math.max(0, data.engagement.taxaConclusao - 2)} // Hardcoded delta per design spec trade-off
             totalStudents={data.summary.totalAlunos}
             passingStudents={data.summary.alunosAtivos}
-            title="Taxa de Sucesso"
+            title="Engajamento dos Alunos"
+            passingLabel="Alunos Ativos"
           />
           <ProgressStatisticsCard
             totalActivityPercent={data.engagement.taxaConclusao}
