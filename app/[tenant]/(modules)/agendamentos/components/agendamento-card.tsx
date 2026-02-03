@@ -9,6 +9,12 @@ import { format, formatDistanceToNow, isFuture, differenceInHours } from "date-f
 import { ptBR } from "date-fns/locale"
 import { Calendar, Clock, Video, MessageSquare } from "lucide-react"
 import Link from "next/link"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/app/shared/components/overlay/tooltip"
 
 interface AgendamentoCardProps {
   agendamento: AgendamentoComDetalhes
@@ -98,6 +104,7 @@ export function AgendamentoCard({ agendamento, showActions = true }: Agendamento
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 text-sm text-primary hover:underline"
+              aria-label="Entrar na reunião"
             >
               <Video className="h-4 w-4" />
               <span className="hidden md:inline">Entrar</span>
@@ -106,7 +113,16 @@ export function AgendamentoCard({ agendamento, showActions = true }: Agendamento
 
           {/* Observacoes indicator */}
           {agendamento.observacoes && (
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <MessageSquare className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-sm">{agendamento.observacoes}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
 
           {/* Actions */}
