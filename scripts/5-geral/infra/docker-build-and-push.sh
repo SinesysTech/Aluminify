@@ -62,7 +62,8 @@ if [ -f .env.local ]; then
         if [[ $key =~ ^NEXT_PUBLIC_ ]] || \
            [[ $key =~ ^SUPABASE_ ]] || \
            [[ $key =~ ^OAUTH_ ]] || \
-           [[ $key =~ ^SENTRY_ ]]; then
+           [[ $key =~ ^SENTRY_ ]] || \
+           [[ $key =~ ^DOCKER_ ]]; then
             BUILD_ARGS="$BUILD_ARGS --build-arg $key=$value"
             echo "  ✓ Loaded: $key"
         fi
