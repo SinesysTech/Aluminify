@@ -150,7 +150,7 @@ export function PapelForm({ papel, onSubmit, onCancel, isLoading }: PapelFormPro
                          <FormItem className="flex flex-row items-center space-x-2 space-y-0">
                            <FormControl>
                              <Checkbox
-                               checked={field.value}
+                               checked={Boolean(field.value)}
                                onCheckedChange={field.onChange}
                              />
                            </FormControl>
