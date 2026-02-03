@@ -74,7 +74,7 @@ export function AgendamentoActions({ agendamento }: AgendamentoActionsProps) {
       {/* Confirm Dialog */}
       <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" variant="default" className="gap-1">
+          <Button size="sm" variant="default" className="gap-1" aria-label="Confirmar agendamento">
             <Check className="h-4 w-4" />
             <span className="hidden md:inline">Confirmar</span>
           </Button>
@@ -119,7 +119,7 @@ export function AgendamentoActions({ agendamento }: AgendamentoActionsProps) {
       {/* Reject Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogTrigger asChild>
-          <Button size="sm" variant="outline" className="gap-1 text-destructive hover:text-destructive">
+          <Button size="sm" variant="outline" className="gap-1 text-destructive hover:text-destructive" aria-label="Rejeitar agendamento">
             <X className="h-4 w-4" />
             <span className="hidden md:inline">Rejeitar</span>
           </Button>
