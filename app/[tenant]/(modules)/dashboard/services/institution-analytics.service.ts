@@ -385,102 +385,134 @@ export class InstitutionAnalyticsService {
 
     // 2. Identify top students based on time
     const rankedStudents = Array.from(tempoMap.entries())
-        .map(([id, time]) => ({ id, time }))
-        .sort((a, b) => b.time - a.time)
-        .slice(0, limit);
+      .map(([id, time]) => ({ id, time }))
+      .sort((a, b) => b.time - a.time)
+      .slice(0, limit);
 
     if (rankedStudents.length === 0) return [];
 
-    const topStudentIds = rankedStudents.map(s => s.id);
+    const topStudentIds = rankedStudents.map((s) => s.id);
 
     // 3. Fetch details ONLY for top students
-    const { data: usuarios } = await client
-      .from("usuarios")
-      .select("id, nome_completo")
-      .in("id", topStudentIds);
+    const yearAgo = new Date();
+    yearAgo.setDate(yearAgo.getDate() - 365);
 
-    const usuarioMap = new Map(usuarios?.map(u => [u.id, u]) ?? []);
+    const [usuariosRes, sessoesStreakRes, progressosRes] = await Promise.all([
+      client
+        .from("usuarios")
+        .select("id, nome_completo")
+        .in("id", topStudentIds),
+      client
+        .from("sessoes_estudo")
+        .select("usuario_id, created_at")
+        .in("usuario_id", topStudentIds)
+        .gte("created_at", yearAgo.toISOString())
+        .order("created_at", { ascending: false }),
+      client
+        .from("progresso_atividades")
+        .select("usuario_id, questoes_totais, questoes_acertos")
+        .in("usuario_id", topStudentIds),
+    ]);
 
-    // 4. Calculate detailed metrics only for the winners
-    // Run in parallel
-    const rankingPromises = rankedStudents.map(async (student) => {
-        const usuario = usuarioMap.get(student.id);
-        const name = usuario?.nome_completo ?? "Aluno";
+    const usuarioMap = new Map(usuariosRes.data?.map((u) => [u.id, u]) ?? []);
 
-        const [streak, aproveitamento] = await Promise.all([
-            this.getStudentStreak(student.id, client),
-            this.getStudentAproveitamento(student.id, client)
-        ]);
+    // Group sessions by user for streak
+    const sessionsByUser = new Map<string, string[]>();
+    for (const s of sessoesStreakRes.data ?? []) {
+      if (!s.usuario_id || !s.created_at) continue;
+      if (!sessionsByUser.has(s.usuario_id)) {
+        sessionsByUser.set(s.usuario_id, []);
+      }
+      sessionsByUser.get(s.usuario_id)!.push(s.created_at);
+    }
 
-        const segundos = student.time;
-        const horas = Math.floor(segundos / 3600);
-        const minutos = Math.floor((segundos % 3600) / 60);
+    // Group progress by user
+    const progressByUser = new Map<
+      string,
+      { total: number; acertos: number }
+    >();
+    for (const p of progressosRes.data ?? []) {
+      if (!p.usuario_id) continue;
+      if (!progressByUser.has(p.usuario_id)) {
+        progressByUser.set(p.usuario_id, { total: 0, acertos: 0 });
+      }
+      const acc = progressByUser.get(p.usuario_id)!;
+      acc.total += p.questoes_totais ?? 0;
+      acc.acertos += p.questoes_acertos ?? 0;
+    }
 
-        return {
-            id: student.id,
-            name,
-            avatarUrl: null,
-            horasEstudo: `${horas}h ${minutos}m`,
-            horasEstudoMinutos: Math.floor(segundos / 60),
-            aproveitamento,
-            streakDays: streak
-        } as StudentRankingItem;
+    // 4. Calculate detailed metrics only for the winners in memory
+    const ranking: StudentRankingItem[] = rankedStudents.map((student) => {
+      const usuario = usuarioMap.get(student.id);
+      const name = usuario?.nome_completo ?? "Aluno";
+
+      // Calculate Streak
+      const dates = sessionsByUser.get(student.id) ?? [];
+      const streak = this.calculateStreakFromDates(dates);
+
+      // Calculate Aproveitamento
+      const prog = progressByUser.get(student.id) ?? {
+        total: 0,
+        acertos: 0,
+      };
+      const aproveitamento =
+        prog.total > 0
+          ? Math.round((prog.acertos / prog.total) * 100)
+          : 0;
+
+      const segundos = student.time;
+      const horas = Math.floor(segundos / 3600);
+      const minutos = Math.floor((segundos % 3600) / 60);
+
+      return {
+        id: student.id,
+        name,
+        avatarUrl: null,
+        horasEstudo: `${horas}h ${minutos}m`,
+        horasEstudoMinutos: Math.floor(segundos / 60),
+        aproveitamento,
+        streakDays: streak,
+      };
     });
 
-    const ranking = await Promise.all(rankingPromises);
-
-    // Sort again because Promise.all order is preserved but good to be safe if logic changes
+    // Sort again
     ranking.sort((a, b) => b.horasEstudoMinutos - a.horasEstudoMinutos);
 
     return ranking;
   }
 
   /**
-   * Calcula streak de um aluno
+   * Helper function to calculate streak from a list of date strings
    */
-  private async getStudentStreak(
-    alunoId: string,
-    client: ReturnType<typeof getDatabaseClient>,
-  ): Promise<number> {
-    const { data: sessoes } = await client
-      .from("sessoes_estudo")
-      .select("created_at")
-      .eq("usuario_id", alunoId)
-      .order("created_at", { ascending: false })
-      .limit(365);
+  private calculateStreakFromDates(datesRaw: string[]): number {
+    if (datesRaw.length === 0) return 0;
 
-    if (!sessoes || sessoes.length === 0) return 0;
-
-    // Extrair datas únicas
-    const datas = [
+    // Extract unique dates
+    const uniqueDates = [
       ...new Set(
-        sessoes
-          .filter((s): s is { created_at: string } => s.created_at !== null)
-          .map((s) => new Date(s.created_at).toISOString().split("T")[0]),
+        datesRaw.map((d) => new Date(d).toISOString().split("T")[0]),
       ),
     ]
       .sort()
       .reverse();
 
-    // Contar dias consecutivos a partir de hoje
     let streak = 0;
     const today = new Date().toISOString().split("T")[0];
 
-    for (let i = 0; i < datas.length; i++) {
+    for (let i = 0; i < uniqueDates.length; i++) {
       const expectedDate = new Date();
       expectedDate.setDate(expectedDate.getDate() - i);
       const expectedDateStr = expectedDate.toISOString().split("T")[0];
 
-      if (datas.includes(expectedDateStr)) {
+      if (uniqueDates.includes(expectedDateStr)) {
         streak++;
-      } else if (i === 0 && datas[0] !== today) {
-        // Hoje não estudou, verificar se ontem estudou
+      } else if (i === 0 && uniqueDates[0] !== today) {
+        // Today not studied, check yesterday
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = yesterday.toISOString().split("T")[0];
 
-        if (datas[0] === yesterdayStr) {
-          // Continuar contando a partir de ontem
+        if (uniqueDates[0] === yesterdayStr) {
           continue;
         }
         break;
@@ -490,32 +522,6 @@ export class InstitutionAnalyticsService {
     }
 
     return streak;
-  }
-
-  /**
-   * Calcula aproveitamento de um aluno
-   */
-  private async getStudentAproveitamento(
-    alunoId: string,
-    client: ReturnType<typeof getDatabaseClient>,
-  ): Promise<number> {
-    // Use progresso_atividades instead of respostas_questoes (which doesn't exist)
-    const { data: progressos } = await client
-      .from("progresso_atividades")
-      .select("questoes_totais, questoes_acertos")
-      .eq("usuario_id", alunoId);
-
-    if (!progressos || progressos.length === 0) return 0;
-
-    let totalQuestoes = 0;
-    let totalAcertos = 0;
-    for (const p of progressos) {
-      totalQuestoes += p.questoes_totais ?? 0;
-      totalAcertos += p.questoes_acertos ?? 0;
-    }
-
-    if (totalQuestoes === 0) return 0;
-    return Math.round((totalAcertos / totalQuestoes) * 100);
   }
 
   /**
