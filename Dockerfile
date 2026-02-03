@@ -10,8 +10,8 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install dependencies (ci for deterministic builds, production + dev for build step)
-RUN npm ci
+# Install dependencies
+RUN npm install --no-audit
 
 # Stage 2: Builder - Build the application
 FROM node:22-alpine AS builder
