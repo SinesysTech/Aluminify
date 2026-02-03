@@ -31,12 +31,15 @@ async function getProfessorById(supabase: Awaited<ReturnType<typeof createClient
     return null
   }
 
-  // Check if professor has availability configured
-  const { data: disponibilidade } = await supabase
-    .from("agendamento_disponibilidade")
+  // Check if professor has availability configured (recorrencias)
+  const todayStr = new Date().toISOString().split("T")[0]
+  const { data: recorrencias } = await supabase
+    .from("agendamento_recorrencia")
     .select("id")
     .eq("professor_id", professorId)
     .eq("ativo", true)
+    .lte("data_inicio", todayStr)
+    .or(`data_fim.is.null,data_fim.gte.${todayStr}`)
     .limit(1)
 
   return {
@@ -44,7 +47,7 @@ async function getProfessorById(supabase: Awaited<ReturnType<typeof createClient
     nome: professor.nome_completo,
     foto_url: professor.foto_url,
     especialidade: professor.especialidade,
-    tem_disponibilidade: (disponibilidade?.length ?? 0) > 0
+    tem_disponibilidade: (recorrencias?.length ?? 0) > 0
   }
 }
 

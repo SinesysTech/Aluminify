@@ -1,7 +1,7 @@
 "use client";
 
 import { usePlantaoQuota } from "@/app/shared/hooks/use-plantao-quota";
-import { CalendarCheck, AlertTriangle } from "lucide-react";
+import { CalendarCheck } from "lucide-react";
 
 interface PlantaoQuotaBannerProps {
   empresaId: string | null;
@@ -24,20 +24,7 @@ export function PlantaoQuotaBanner({ empresaId }: PlantaoQuotaBannerProps) {
   }
 
   if (totalQuota === 0) {
-    return (
-      <div className="flex items-center gap-3 rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-        <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
-        <div>
-          <p className="text-sm font-medium text-destructive">
-            Sem plantões disponíveis
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Seu curso não inclui plantões. Entre em contato com a administração
-            para mais informações.
-          </p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const isExhausted = remaining <= 0;
@@ -74,12 +61,12 @@ export function PlantaoQuotaBanner({ empresaId }: PlantaoQuotaBannerProps) {
         >
           {isExhausted
             ? "Cota mensal atingida"
-            : `${remaining} de ${totalQuota} plantões disponíveis`}
+            : `${remaining} de ${totalQuota} atendimentos disponíveis`}
         </p>
         <p className="text-xs text-muted-foreground">
           {isExhausted
-            ? `Você já utilizou todos os ${totalQuota} plantões deste mês. Aguarde o próximo mês.`
-            : `Você utilizou ${usedThisMonth} de ${totalQuota} plantões este mês.`}
+            ? `Você já utilizou todos os ${totalQuota} atendimentos deste mês. Aguarde o próximo mês.`
+            : `Você utilizou ${usedThisMonth} de ${totalQuota} atendimentos este mês.`}
         </p>
       </div>
     </div>

@@ -142,7 +142,8 @@
       "Bash(cmd /c \"set PYTHONIOENCODING=utf-8 && python .claude/skills/ui-ux-pro-max/scripts/search.py \"education student study platform dashboard sidebar\" --design-system -p \"Area do Aluno\"\")",
       "Bash(PYTHONIOENCODING=utf-8 python:*)",
       "Bash(npm run test:*)",
-      "Bash(npx jest:*)"
+      "Bash(npx jest:*)",
+      "mcp__supabase__get_project_url"
     ],
     "deny": [],
     "ask": []
