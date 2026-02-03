@@ -52,6 +52,7 @@ const empresaNavItems: NavItem[] = [
       { title: "Disciplinas", url: "/curso/disciplinas" },
       { title: "Segmentos", url: "/curso/segmentos" },
       { title: "Conteúdo Programático", url: "/curso/conteudos" },
+      { title: "Cotas de Atendimento", url: "/curso/cotas" },
       { title: "Relatórios", url: "/curso/relatorios" },
     ],
   },

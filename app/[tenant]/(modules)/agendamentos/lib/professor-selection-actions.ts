@@ -53,14 +53,14 @@ export async function getProfessoresDisponiveis(
   }
 
   // Query professores usando o padrão correto de join com papeis
-  // Isso garante que apenas usuários com papel "professor" sejam retornados
+  // Inclui todos os papéis com função de ensino (professor, professor_admin, monitor)
   const { data: professores, error } = await supabase
     .from("usuarios")
     .select(
       "id, nome_completo, email, foto_url, especialidade, biografia, empresa_id, papeis!inner(tipo)",
     )
     .eq("empresa_id", targetEmpresaId)
-    .eq("papeis.tipo", "professor")
+    .in("papeis.tipo", ["professor", "professor_admin", "monitor"])
     .order("nome_completo", { ascending: true });
 
   if (error || !professores) {

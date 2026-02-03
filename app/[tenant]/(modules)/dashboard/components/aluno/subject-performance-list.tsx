@@ -17,7 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/app/shared/components/overlay/tooltip'
-import { Info } from 'lucide-react'
+import { Info, TrendingUp } from 'lucide-react'
 import { cn } from '@/app/shared/library/utils'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { fetchDashboardCourses, fetchPerformance, type DashboardCourse } from '../../services/dashboard.service'
@@ -231,53 +231,59 @@ export function SubjectPerformanceList({
 
   return (
     <Card className="h-full overflow-hidden transition-all duration-300">
-      <CardContent className="px-6 h-full flex flex-col min-h-0">
-        <div className="flex flex-col gap-3 mb-4 md:mb-6">
-          <div className="flex items-center gap-2">
-            <h2 className="widget-title">
-              Performance por {groupBy === 'curso' ? 'Curso' : groupBy === 'disciplina' ? 'Disciplina' : groupBy === 'frente' ? 'Frente' : 'Módulo'}
-            </h2>
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
-                    aria-label="Informações sobre as classificações de performance"
+      <CardContent className="p-4 md:p-5 h-full flex flex-col min-h-0">
+        <div className="flex items-center gap-3 mb-4 md:mb-6">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <TrendingUp className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h2 className="widget-title">
+                Performance por {groupBy === 'curso' ? 'Curso' : groupBy === 'disciplina' ? 'Disciplina' : groupBy === 'frente' ? 'Frente' : 'Módulo'}
+              </h2>
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded"
+                      aria-label="Informações sobre as classificações de performance"
+                    >
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    align="start"
+                    className="max-w-xs bg-popover text-popover-foreground border-border p-3 z-50"
+                    sideOffset={8}
                   >
-                    <Info className="h-4 w-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="right"
-                  align="start"
-                  className="max-w-xs bg-popover text-popover-foreground border-border p-3 z-50"
-                  sideOffset={8}
-                >
-                  <div className="space-y-2">
-                    <p className="font-semibold text-sm">Classificações:</p>
-                    <ul className="space-y-1.5 text-xs">
-                      <li className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-green-500 shrink-0" />
-                        <span>≥ 80%: Excelente</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-yellow-500 shrink-0" />
-                        <span>≥ 50%: Regular</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-red-500 shrink-0" />
-                        <span>&lt; 50%: Precisa melhorar</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0" />
-                        <span>Não iniciada: Sem atividades concluídas</span>
-                      </li>
-                    </ul>
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+                    <div className="space-y-2">
+                      <p className="font-semibold text-sm">Classificações:</p>
+                      <ul className="space-y-1.5 text-xs">
+                        <li className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-green-500 shrink-0" />
+                          <span>≥ 80%: Excelente</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-yellow-500 shrink-0" />
+                          <span>≥ 50%: Regular</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-red-500 shrink-0" />
+                          <span>&lt; 50%: Precisa melhorar</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-slate-400 dark:bg-slate-500 shrink-0" />
+                          <span>Não iniciada: Sem atividades concluídas</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <p className="text-xs text-muted-foreground">Seu desempenho em cada área de estudo</p>
           </div>
         </div>
 
