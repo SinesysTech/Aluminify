@@ -54,15 +54,15 @@ export function TenantLoginPageClient({
         const response = await fetch(`/api/empresa/personalizacao/${empresaId}/public`)
         if (response.ok) {
           const result = await response.json()
-          if (result.success && result.data) {
-            console.log('[tenant-login] Loaded branding data for empresaId:', empresaId)
-            const branding = result.data
+            if (result.success && result.data) {
+              const branding = result.data
 
-            // Set Logo with fallback (login -> sidebar)
-            const resolvedLogo = branding.logos?.login?.logoUrl || branding.logos?.sidebar?.logoUrl
-            if (resolvedLogo) {
-              setBrandingLogo(resolvedLogo)
-            }
+              // Set Logo with fallback (login -> sidebar)
+              const resolvedLogo = branding.logos?.login?.logoUrl || branding.logos?.sidebar?.logoUrl
+              if (resolvedLogo) {
+                setBrandingLogo(resolvedLogo)
+              }
+
 
             // Apply Colors
             if (branding.colorPalette) {
@@ -130,7 +130,6 @@ export function TenantLoginPageClient({
         console.warn('[tenant-login] Failed to load branding:', error)
       } finally {
         setLoadingLogo(false)
-        console.log('[tenant-login] Branding load complete. Transitioning to ready state.')
         // Give browser a moment to paint CSS variables
         setBrandingReady(true)
       }
