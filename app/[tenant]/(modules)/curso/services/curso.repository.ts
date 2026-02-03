@@ -28,6 +28,7 @@ export interface CursoRepository {
   findByEmpresa(empresaId: string): Promise<Curso[]>;
   segmentExists(segmentId: string): Promise<boolean>;
   disciplineExists(disciplineId: string): Promise<boolean>;
+  getExistingDisciplineIds(disciplineIds: string[]): Promise<string[]>;
   setCourseDisciplines(
     courseId: string,
     disciplineIds: string[],
@@ -62,14 +63,14 @@ type CourseRow = {
 };
 
 async function mapRow(row: CourseRow, client: SupabaseClient): Promise<Curso> {
-  // Buscar disciplinas relacionadas
+  // Buscar IDs de disciplinas relacionadas
   const disciplineIds = await getCourseDisciplinesFromDb(row.id, client);
 
   return {
     id: row.id,
     empresaId: row.empresa_id,
-    segmentId: row.segmento_id,
-    disciplineId: row.disciplina_id, // Mantido para compatibilidade
+    segmentId: row.segmento_id ?? undefined,
+    disciplineId: row.disciplina_id ?? undefined, // Mantido para compatibilidade
     disciplineIds, // Nova propriedade
     name: row.nome,
     modality: row.modalidade,
@@ -366,6 +367,23 @@ export class CursoRepositoryImpl implements CursoRepository {
     }
 
     return !!data;
+  }
+
+  async getExistingDisciplineIds(disciplineIds: string[]): Promise<string[]> {
+    if (disciplineIds.length === 0) return [];
+
+    const { data, error } = await this.client
+      .from(DISCIPLINE_TABLE)
+      .select("id")
+      .in("id", disciplineIds);
+
+    if (error) {
+      throw new Error(
+        `Failed to check disciplines existence: ${error.message}`,
+      );
+    }
+
+    return (data ?? []).map((row) => row.id);
   }
 
   async setCourseDisciplines(

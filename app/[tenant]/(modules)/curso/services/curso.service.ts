@@ -6,16 +6,11 @@ import {
   CourseType,
 } from "./curso.types";
 import { CursoRepository, PaginatedResult } from "./curso.repository";
-import { CourseNotFoundError, CourseValidationError } from "./errors";
-import type { PaginationParams } from "@/app/shared/types/dtos/api-responses";
-
-const NAME_MIN_LENGTH = 3;
-const NAME_MAX_LENGTH = 200;
-const DESCRIPTION_MAX_LENGTH = 2000;
-const YEAR_MIN = 2000;
-const YEAR_MAX = 2100;
-const ACCESS_MONTHS_MIN = 1;
-const ACCESS_MONTHS_MAX = 120;
+import {
+  CourseValidationError,
+  CourseNotFoundError,
+} from "./errors";
+import { PaginationParams } from "@/app/shared/types/dtos/api-responses";
 
 const VALID_MODALITIES: Modality[] = ["EAD", "LIVE"];
 const VALID_COURSE_TYPES: CourseType[] = [
@@ -26,6 +21,14 @@ const VALID_COURSE_TYPES: CourseType[] = [
   "Revisão",
 ];
 
+const NAME_MIN_LENGTH = 3;
+const NAME_MAX_LENGTH = 255;
+const DESCRIPTION_MAX_LENGTH = 1000;
+const YEAR_MIN = 2000;
+const YEAR_MAX = 2100;
+const ACCESS_MONTHS_MIN = 1;
+const ACCESS_MONTHS_MAX = 36;
+
 export class CursoService {
   constructor(private readonly repository: CursoRepository) {}
 
@@ -33,52 +36,11 @@ export class CursoService {
     params?: PaginationParams,
     empresaId?: string,
   ): Promise<PaginatedResult<Curso>> {
-    const empresaSegment = empresaId ? `empresa:${empresaId}:` : "";
-
-    // Cache apenas para listagem completa sem paginação ou primeira página sem ordenação customizada
-    // Se houver parâmetros de paginação/ordenação, não usar cache para garantir dados corretos
-    if (
-      !params ||
-      (params.page === 1 &&
-        !params.sortBy &&
-        !params.sortOrder &&
-        !params.perPage)
-    ) {
-      const { cacheService } = await import("@/app/shared/core/services/cache");
-      const cacheKey = `courses:list:${empresaSegment}all`;
-      const cached = await cacheService.get<PaginatedResult<Curso>>(cacheKey);
-
-      if (cached) {
-        return cached;
-      }
-
-      const result = await this.repository.list(params, empresaId);
-
-      // Cache por 1 hora (cursos raramente mudam)
-      await cacheService.set(cacheKey, result, 3600);
-
-      return result;
-    }
-
-    // Se houver parâmetros de paginação/ordenação, incluir na chave do cache ou pular cache
-    // Para garantir que dados corretos sejam retornados, vamos incluir na chave do cache
-    const { cacheService } = await import("@/app/shared/core/services/cache");
-    const page = params?.page ?? 1;
-    const perPage = params?.perPage ?? 50;
-    const sortBy = params?.sortBy ?? "nome";
-    const sortOrder = params?.sortOrder ?? "asc";
-
-    const cacheKey = `courses:list:${empresaSegment}page:${page}:perPage:${perPage}:sortBy:${sortBy}:sortOrder:${sortOrder}`;
-    const cached = await cacheService.get<PaginatedResult<Curso>>(cacheKey);
-
-    if (cached) {
-      return cached;
-    }
-
     const result = await this.repository.list(params, empresaId);
 
-    // Cache por 1 hora (cursos raramente mudam)
-    await cacheService.set(cacheKey, result, 3600);
+    // Invalidar cache de estrutura se necessário (embora listagem geralmente use cache próprio)
+    // Aqui não invalidamos, apenas retornamos
+    // O cache é gerenciado nos métodos de mutação (create, update, delete)
 
     return result;
   }
@@ -120,8 +82,21 @@ export class CursoService {
     const disciplineIds =
       payload.disciplineIds ??
       (payload.disciplineId ? [payload.disciplineId] : []);
-    for (const disciplineId of disciplineIds) {
-      await this.ensureDisciplineExists(disciplineId);
+
+    if (disciplineIds.length > 0) {
+      const uniqueIds = Array.from(new Set(disciplineIds));
+      const existingIds = await this.repository.getExistingDisciplineIds(uniqueIds);
+
+      if (existingIds.length !== uniqueIds.length) {
+        const existingSet = new Set(existingIds);
+        for (const id of uniqueIds) {
+           if (!existingSet.has(id)) {
+             throw new CourseValidationError(
+               `Discipline with id "${id}" does not exist`,
+             );
+           }
+        }
+      }
     }
 
     const course = await this.repository.create({
@@ -216,8 +191,20 @@ export class CursoService {
 
     // Validar disciplinas se fornecidas
     if (payload.disciplineIds !== undefined) {
-      for (const disciplineId of payload.disciplineIds) {
-        await this.ensureDisciplineExists(disciplineId);
+      if (payload.disciplineIds.length > 0) {
+        const uniqueIds = Array.from(new Set(payload.disciplineIds));
+        const existingIds = await this.repository.getExistingDisciplineIds(uniqueIds);
+
+        if (existingIds.length !== uniqueIds.length) {
+          const existingSet = new Set(existingIds);
+          for (const id of uniqueIds) {
+             if (!existingSet.has(id)) {
+               throw new CourseValidationError(
+                 `Discipline with id "${id}" does not exist`,
+               );
+             }
+          }
+        }
       }
       updateData.disciplineIds = payload.disciplineIds;
     } else if (payload.disciplineId !== undefined) {
