@@ -120,7 +120,7 @@ export class ProfessorAnalyticsService {
     if (!agendamentos || agendamentos.length === 0) return [];
 
     // Extrair IDs únicos de alunos
-    const alunoIdsUnicos = [...new Set(agendamentos.map((a) => a.aluno_id))];
+    const alunoIdsUnicos = [...new Set(agendamentos.map((a) => a.aluno_id))].slice(0, limit);
 
     // Buscar dados dos alunos
     const { data: alunos } = await client
@@ -131,71 +131,75 @@ export class ProfessorAnalyticsService {
 
     if (!alunos || alunos.length === 0) return [];
 
-    // Extrair alunos únicos
-    const alunosMap = new Map<
-      string,
-      {
-        id: string;
-        name: string;
-        avatarUrl: string | null;
-      }
-    >();
+    // Bulk fetch courses
+    const { data: alunosCursos } = await client
+      .from("alunos_cursos")
+      .select(`
+        usuario_id,
+        cursos!inner(nome)
+      `)
+      .in("usuario_id", alunoIdsUnicos);
 
-    for (const aluno of alunos) {
-      if (!alunosMap.has(aluno.id)) {
-        alunosMap.set(aluno.id, {
-          id: aluno.id,
-          name: aluno.nome_completo ?? "Aluno",
-          avatarUrl: null,
-        });
-      }
-    }
+    const cursosMap = new Map();
+    // @ts-expect-error - Supabase join result type
+    alunosCursos?.forEach((ac) => {
+        cursosMap.set(ac.usuario_id, ac.cursos?.nome ?? "Sem curso");
+    });
+
+    // Bulk fetch progress metrics (Aproveitamento)
+    const { data: progressos } = await client
+      .from("progresso_atividades")
+      .select("usuario_id, questoes_totais, questoes_acertos")
+      .in("usuario_id", alunoIdsUnicos);
+
+    const aprovStats = new Map<string, { total: number; acertos: number }>();
+    progressos?.forEach(p => {
+        if (!p.usuario_id) return;
+        if (!aprovStats.has(p.usuario_id)) aprovStats.set(p.usuario_id, { total: 0, acertos: 0 });
+        const s = aprovStats.get(p.usuario_id)!;
+        s.total += p.questoes_totais ?? 0;
+        s.acertos += p.questoes_acertos ?? 0;
+    });
+
+    // Bulk fetch Last Session (max created_at)
+    // We fetch sessions from last 60 days to be safe
+    const lookbackDate = new Date();
+    lookbackDate.setDate(lookbackDate.getDate() - 60);
+    const { data: sessions } = await client
+        .from("sessoes_estudo")
+        .select("usuario_id, created_at")
+        .in("usuario_id", alunoIdsUnicos)
+        .gte("created_at", lookbackDate.toISOString());
+
+    const lastSessionMap = new Map<string, string>();
+    sessions?.forEach(s => {
+        if (!s.usuario_id || !s.created_at) return;
+        const current = lastSessionMap.get(s.usuario_id);
+        if (!current || new Date(s.created_at) > new Date(current)) {
+            lastSessionMap.set(s.usuario_id, s.created_at);
+        }
+    });
 
     const result: StudentUnderCare[] = [];
 
-    for (const [alunoId, alunoInfo] of alunosMap) {
-      // Buscar curso do aluno
-      const { data: alunoCurso } = await client
-        .from("alunos_cursos")
-        .select(
-          `
-          cursos!inner (
-            nome
-          )
-        `,
-        )
-        .eq("usuario_id", alunoId)
-        .limit(1)
-        .maybeSingle();
+    for (const aluno of alunos) {
+        const cursoNome = cursosMap.get(aluno.id) ?? "Sem curso";
+        const stats = aprovStats.get(aluno.id);
+        const aproveitamento = stats && stats.total > 0 ? Math.round((stats.acertos / stats.total) * 100) : 0;
+        const ultimaAtividade = lastSessionMap.get(aluno.id) ?? null;
 
-      // Buscar progresso do aluno (baseado em cronograma)
-      const progresso = await this.getStudentProgress(alunoId, client);
+        // Still using per-student query for this complex metric, but others are bulked
+        const progresso = await this.getStudentProgress(aluno.id, client);
 
-      // Buscar última atividade
-      const { data: ultimaSessao } = await client
-        .from("sessoes_estudo")
-        .select("created_at")
-        .eq("usuario_id", alunoId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      // Buscar aproveitamento
-      const aproveitamento = await this.getStudentAproveitamento(
-        alunoId,
-        client,
-      );
-
-      result.push({
-        id: alunoInfo.id,
-        name: alunoInfo.name,
-        avatarUrl: alunoInfo.avatarUrl,
-        cursoNome:
-          (alunoCurso?.cursos as { nome: string })?.nome ?? "Sem curso",
-        progresso,
-        ultimaAtividade: ultimaSessao?.created_at ?? null,
-        aproveitamento,
-      });
+        result.push({
+            id: aluno.id,
+            name: aluno.nome_completo ?? "Aluno",
+            avatarUrl: null,
+            cursoNome,
+            progresso,
+            ultimaAtividade,
+            aproveitamento
+        });
     }
 
     // Ordenar por última atividade (mais recente primeiro)
@@ -209,7 +213,7 @@ export class ProfessorAnalyticsService {
       );
     });
 
-    return result.slice(0, limit);
+    return result;
   }
 
   /**
@@ -355,45 +359,88 @@ export class ProfessorAnalyticsService {
       .limit(10);
 
     if (!disciplinas || disciplinas.length === 0) return [];
+    const disciplinaMap = new Map(disciplines.map(d => [d.id, d.nome]));
 
-    const performance: ProfessorDisciplinaPerformance[] = [];
-
-    for (const disciplina of disciplinas) {
-      // Buscar sessões de estudo para esta disciplina
-      const { data: sessoes } = await client
+    // Bulk fetch sessions
+    const { data: sessoes } = await client
         .from("sessoes_estudo")
-        .select("usuario_id")
+        .select("usuario_id, disciplina_id")
         .in("usuario_id", alunoIds)
-        .eq("disciplina_id", disciplina.id);
+        .in("disciplina_id", disciplines.map(d => d.id));
 
-      if (!sessoes || sessoes.length === 0) continue;
-
-      // Buscar aproveitamento agregado dos alunos (usando progresso_atividades)
-      const { data: progressos } = await client
-        .from("progresso_atividades")
-        .select("usuario_id, questoes_totais, questoes_acertos")
-        .in("usuario_id", alunoIds);
-
-      let totalQuestoes = 0;
-      let totalAcertos = 0;
-      const alunosSet = new Set<string>();
-
-      for (const p of progressos ?? []) {
-        if (p.usuario_id) alunosSet.add(p.usuario_id);
-        totalQuestoes += p.questoes_totais ?? 0;
-        totalAcertos += p.questoes_acertos ?? 0;
-      }
-
-      const aproveitamentoMedio =
-        totalQuestoes > 0 ? Math.round((totalAcertos / totalQuestoes) * 100) : 0;
-
-      performance.push({
-        id: disciplina.id,
-        name: disciplina.nome,
-        aproveitamentoMedio,
-        totalAlunos: alunosSet.size,
-      });
+    // Group sessions
+    const sessionsByDisc = new Map<string, Set<string>>();
+    for (const s of sessoes ?? []) {
+        if (!s.disciplina_id || !s.usuario_id) continue;
+        if (!sessionsByDisc.has(s.disciplina_id)) {
+            sessionsByDisc.set(s.disciplina_id, new Set());
+        }
+        sessionsByDisc.get(s.disciplina_id)!.add(s.usuario_id);
     }
+
+    // Bulk fetch progress with deep linking
+    const { data: progressos } = await client
+        .from("progresso_atividades")
+        .select(`
+            usuario_id,
+            questoes_totais,
+            questoes_acertos,
+            atividades!inner (
+                modulos!inner (
+                    frentes!inner (
+                        disciplina_id
+                    )
+                )
+            )
+        `)
+        .in("usuario_id", alunoIds)
+        .not("atividade_id", "is", null);
+
+    // Group progress
+    const progressByDisc = new Map<string, { total: number; acertos: number }>();
+
+    // Type casting for deep response
+    type DeepProgress = {
+        usuario_id: string;
+        questoes_totais: number | null;
+        questoes_acertos: number | null;
+        atividades: {
+            modulos: {
+                frentes: {
+                    disciplina_id: string;
+                } | null
+            } | null
+        } | null
+    };
+
+    for (const p of (progressos as unknown as DeepProgress[]) ?? []) {
+        const discId = p.atividades?.modulos?.frentes?.disciplina_id;
+        if (!discId || !disciplinaMap.has(discId)) continue;
+
+        if (!progressByDisc.has(discId)) {
+            progressByDisc.set(discId, { total: 0, acertos: 0 });
+        }
+        const stats = progressByDisc.get(discId)!;
+        stats.total += p.questoes_totais ?? 0;
+        stats.acertos += p.questoes_acertos ?? 0;
+    }
+
+    const performance: ProfessorDisciplinaPerformance[] = disciplines.map(d => {
+        const activeStudents = sessionsByDisc.get(d.id)?.size ?? 0;
+        if (activeStudents === 0) return null;
+
+        const pStats = progressByDisc.get(d.id) || { total: 0, acertos: 0 };
+        const aproveitamentoMedio = pStats.total > 0
+            ? Math.round((pStats.acertos / pStats.total) * 100)
+            : 0;
+
+        return {
+            id: d.id,
+            name: d.nome,
+            aproveitamentoMedio,
+            totalAlunos: activeStudents
+        };
+    }).filter((p): p is ProfessorDisciplinaPerformance => p !== null);
 
     // Ordenar por aproveitamento (maior primeiro)
     performance.sort((a, b) => b.aproveitamentoMedio - a.aproveitamentoMedio);
