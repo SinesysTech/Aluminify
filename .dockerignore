@@ -68,6 +68,13 @@ codebase-cleanup
 Dockerfile
 .dockerignore
 docker-compose*.yml
+captain-definition
 
-# Scripts (optional, uncomment if not needed in container)
-# scripts
+# Scripts (not needed in container)
+scripts
+
+# CI/CD
+.github
+
+# OpenSpec
+openspec

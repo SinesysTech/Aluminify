@@ -2,17 +2,24 @@
 # Next.js (port 3000)
 # Optimized for production with security best practices
 
-# Stage 1: Builder - Build the application
-FROM node:24-alpine AS builder
+# Stage 1: Dependencies - Install and cache node_modules
+FROM node:22-alpine AS deps
 
 WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json ./
 
-# Install all dependencies (including dev dependencies)
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN npm install --no-audit --prefer-offline --ignore-scripts
+# Install dependencies (ci for deterministic builds, production + dev for build step)
+RUN npm ci
+
+# Stage 2: Builder - Build the application
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Copy dependencies from deps stage
+COPY --from=deps /app/node_modules ./node_modules
 
 # Copy source code
 COPY . .
@@ -31,7 +38,7 @@ ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
 ARG SENTRY_AUTH_TOKEN
 ARG DOCKER_BUILD=true
 
-# Set environment variables
+# Set environment variables for build
 ENV SUPABASE_URL=$SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV SUPABASE_SECRET_KEY=$SUPABASE_SECRET_KEY
@@ -44,11 +51,14 @@ ENV DOCKER_BUILD=$DOCKER_BUILD
 # Skip env validation at build time (validated at runtime)
 ENV SKIP_ENV_VALIDATION=true
 
+# Increase memory for Next.js build
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
 # Build Next.js application
 RUN npm run build
 
-# Stage 2: Runner - Production runtime
-FROM node:24-alpine AS runner
+# Stage 3: Runner - Production runtime
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
@@ -57,20 +67,15 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-# Build-time environment variables (repeated for Runner stage to bake them in)
-# Supabase
+# Build-time environment variables (repeated for Runner stage — bakes NEXT_PUBLIC_* into client bundle)
 ARG SUPABASE_URL
 ARG NEXT_PUBLIC_SUPABASE_URL
 ARG SUPABASE_SECRET_KEY
 ARG NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY
-# Auth
 ARG OAUTH_ENCRYPTION_KEY
-# Analytics
 ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
-# Sentry
 ARG SENTRY_AUTH_TOKEN
 
-# Set environment variables in Runner stage
 ENV SUPABASE_URL=$SUPABASE_URL
 ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
 ENV SUPABASE_SECRET_KEY=$SUPABASE_SECRET_KEY
@@ -79,21 +84,20 @@ ENV OAUTH_ENCRYPTION_KEY=$OAUTH_ENCRYPTION_KEY
 ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
 ENV SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN
 
+# Install sharp for Next.js image optimization in standalone mode
+RUN npm install --global sharp@0.33.5 && npm cache clean --force
+ENV NEXT_SHARP_PATH=/usr/local/lib/node_modules/sharp
+
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy dependencies and assets
+# Copy public assets
 COPY --from=builder /app/public ./public
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
+# Copy standalone output (includes server.js and minimal node_modules)
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-
-# Copy startup script and fix Windows CRLF line endings
-COPY --from=builder /app/start.sh ./start.sh
-RUN sed -i 's/\r$//' ./start.sh && chmod +x ./start.sh
 
 # Set ownership to non-root user
 RUN chown -R nextjs:nodejs /app
@@ -101,12 +105,12 @@ RUN chown -R nextjs:nodejs /app
 # Switch to non-root user
 USER nextjs
 
-# Expose ports: Next.js (3000)
+# Expose port
 EXPOSE 3000
 
 # Health check for Next.js
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start service
-CMD ["./start.sh"]
+# Start Next.js standalone server directly (no need for start.sh)
+CMD ["node", "server.js"]
