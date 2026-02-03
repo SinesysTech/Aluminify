@@ -38,7 +38,6 @@ const supabase = SUPABASE_URL && SUPABASE_SERVICE_KEY
 let querySelectorAllSpy: jest.SpiedFunction<typeof document.querySelectorAll>;
 let querySelectorSpy: jest.SpiedFunction<typeof document.querySelector>;
 let createElementSpy: jest.SpiedFunction<typeof document.createElement>;
-let setPropertySpy: jest.SpiedFunction<typeof document.documentElement.style.setProperty>;
 
 
 // Test data generators
@@ -65,7 +64,6 @@ describe('Logo Application Consistency', () => {
     querySelectorAllSpy = jest.spyOn(document, 'querySelectorAll');
     querySelectorSpy = jest.spyOn(document, 'querySelector');
     createElementSpy = jest.spyOn(document, 'createElement');
-    setPropertySpy = jest.spyOn(document.documentElement.style, 'setProperty');
 
     // Default implementations
     querySelectorAllSpy.mockReturnValue([] as any);
@@ -157,7 +155,7 @@ describe('Logo Application Consistency', () => {
           const createdEmpresaIds: string[] = []
 
           // Generate mock IDs instead of inserting into DB
-          for (const empresaData of empresas) {
+          for (const _empresaData of empresas) {
              const mockId = `mock-empresa-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
              createdEmpresaIds.push(mockId)
           }
@@ -208,9 +206,10 @@ describe('Logo Application Consistency', () => {
                 // Apply logo using LogoManager
                 logoManager!.applyLogo(empresaId, logoUrl, logoType)
 
-                if (console.error.mock.calls.length > 0) {
+                const errorCalls = (console.error as jest.MockedFunction<typeof console.error>).mock.calls;
+                if (errorCalls.length > 0) {
                    // If error occurred, fail explicitly with the error message
-                   const lastError = console.error.mock.calls[0];
+                   const lastError = errorCalls[0];
                    throw new Error(`LogoManager.applyLogo logged error: ${lastError}`);
                 }
 

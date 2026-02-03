@@ -11,7 +11,6 @@ import { describe, it, expect, beforeAll, afterAll } from '@jest/globals'
 import { createClient } from '@supabase/supabase-js'
 import fc from 'fast-check'
 import { BrandCustomizationManager } from '@/app/[tenant]/(modules)/settings/personalizacao/services/brand-customization-manager'
-import { getDatabaseClient } from '@/app/shared/core/database/database'
 
 // Polyfill fetch for JSDOM
 global.fetch = global.fetch || require('cross-fetch');
@@ -102,7 +101,7 @@ describe('Brand Customization Default Branding Fallback', () => {
             // Create test empresas without any custom branding
             for (const empresaData of empresas) {
               const uniqueSlug = `${empresaData.slug}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-              const { data: empresa } = await supabase!
+              const { data: empresa, error: insertError } = await supabase!
                 .from('empresas')
                 .insert({
                   ...empresaData,
@@ -111,7 +110,7 @@ describe('Brand Customization Default Branding Fallback', () => {
                 .select()
                 .single()
 
-              const { data: empresaCheck, error: insertError } = await supabase!.from('empresas').select().eq('slug', uniqueSlug).maybeSingle()
+              const _empresaCheck = await supabase!.from('empresas').select().eq('slug', uniqueSlug).maybeSingle()
 
               if (!empresa) {
                 console.error('Failed to create empresa. Data:', empresaData, 'Slug:', uniqueSlug, 'Error:', insertError);
@@ -308,7 +307,7 @@ describe('Brand Customization Default Branding Fallback', () => {
 
               // Reset to default (should work even if no custom branding exists)
               const resetResult = await brandCustomizationManager!.resetToDefault({
-                empresaId: createdEmpresaId,
+                empresaId: empresa.id,
                 preserveLogos: false,
               })
 
@@ -319,14 +318,14 @@ describe('Brand Customization Default Branding Fallback', () => {
               if (resetResult.data) {
                 // Should return default branding configuration
                 expect(resetResult.data.tenantBranding.id).toBe('default')
-                expect(resetResult.data.tenantBranding.empresaId).toBe(createdEmpresaId)
+                expect(resetResult.data.tenantBranding.empresaId).toBe(empresa.id)
                 expect(resetResult.data.colorPalette?.id).toBe('default')
                 expect(resetResult.data.fontScheme?.id).toBe('default')
               }
 
               // Load branding after reset should also return default
               const loadResult = await brandCustomizationManager!.loadTenantBranding({
-                empresaId: createdEmpresaId,
+                empresaId: empresa.id,
               })
 
               expect(loadResult.success).toBe(true)

@@ -12,7 +12,7 @@ import { createClient } from '@supabase/supabase-js'
 import fc from 'fast-check'
 import { LogoManagerImpl } from '@/app/[tenant]/(modules)/settings/personalizacao/services/logo-manager'
 import { getDatabaseClient } from '@/app/shared/core/database/database'
-import type { LogoType } from '@/types/brand-customization'
+import type { LogoType } from '@/app/[tenant]/(modules)/settings/personalizacao/services/brand-customization.types'
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -204,7 +204,7 @@ describe('Secure File Processing', () => {
           expect(validation.errors.length).toBeGreaterThan(0)
 
           // Should contain filename security error
-          const securityError = validation.errors.find(error => 
+          const securityError = validation.errors.find((error: string) => 
             error.toLowerCase().includes('filename') || 
             error.toLowerCase().includes('unsafe') ||
             error.toLowerCase().includes('characters')
@@ -246,7 +246,7 @@ describe('Secure File Processing', () => {
           expect(validation.errors.length).toBeGreaterThan(0)
 
           // Should contain filename security error
-          const securityError = validation.errors.find(error => 
+          const securityError = validation.errors.find((error: string) => 
             error.toLowerCase().includes('filename') || 
             error.toLowerCase().includes('unsafe') ||
             error.toLowerCase().includes('characters')
@@ -288,7 +288,7 @@ describe('Secure File Processing', () => {
           expect(validation.errors.length).toBeGreaterThan(0)
 
           // Should contain filename security error
-          const securityError = validation.errors.find(error => 
+          const securityError = validation.errors.find((error: string) => 
             error.toLowerCase().includes('filename') || 
             error.toLowerCase().includes('unsafe') ||
             error.toLowerCase().includes('characters')
@@ -330,7 +330,7 @@ describe('Secure File Processing', () => {
           expect(validation.errors.length).toBeGreaterThan(0)
 
           // Should contain extension error
-          const extensionError = validation.errors.find(error => 
+          const extensionError = validation.errors.find((error: string) => 
             error.toLowerCase().includes('extension') || 
             error.toLowerCase().includes('supported')
           )
@@ -361,7 +361,7 @@ describe('Secure File Processing', () => {
           expect(validation.errors.length).toBeGreaterThan(0)
 
           // Should contain content validation error
-          const contentError = validation.errors.find(error => 
+          const contentError = validation.errors.find((error: string) => 
             error.toLowerCase().includes('content') || 
             error.toLowerCase().includes('validation') ||
             error.toLowerCase().includes('format')
@@ -427,7 +427,7 @@ describe('Secure File Processing', () => {
       expect(validation.errors.length).toBeGreaterThan(0)
 
       // Should contain filename security error
-      const securityError = validation.errors.find(error => 
+      const securityError = validation.errors.find((error: string) => 
         error.toLowerCase().includes('filename') || 
         error.toLowerCase().includes('unsafe') ||
         error.toLowerCase().includes('characters')
@@ -507,7 +507,7 @@ describe('Secure File Processing', () => {
 
       // If rejected, should be due to filename issues
       if (!validation.isValid) {
-        const filenameError = validation.errors.find(error => 
+        const filenameError = validation.errors.find((error: string) => 
           error.toLowerCase().includes('filename') || 
           error.toLowerCase().includes('unsafe') ||
           error.toLowerCase().includes('characters')
@@ -537,7 +537,7 @@ describe('Secure File Processing', () => {
           expect(validation.errors.length).toBeGreaterThan(0)
 
           // Should contain content validation error
-          const contentError = validation.errors.find(error => 
+          const contentError = validation.errors.find((error: string) => 
             error.toLowerCase().includes('content') || 
             error.toLowerCase().includes('validation') ||
             error.toLowerCase().includes('format')
