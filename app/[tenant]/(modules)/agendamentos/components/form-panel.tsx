@@ -52,7 +52,7 @@ export function FormPanel({ professorId, timeZone, durationMinutes }: FormPanelP
         status: "pendente" // Initial status, may be auto-confirmed by server
       })
       toast.success("Agendamento solicitado com sucesso!")
-      router.push(tenant ? `/${tenant}/meus-agendamentos` : "/meus-agendamentos")
+      router.push(tenant ? `/${tenant}/agendamentos/meus` : "/agendamentos/meus")
       router.refresh()
     } catch (error) {
       console.error(error)

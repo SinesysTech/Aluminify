@@ -6,6 +6,7 @@ import { getProfessoresDisponiveis, getTeachersForAdminSelector } from "@/app/[t
 import { isAdminRoleTipo, isTeachingRoleTipo } from "@/app/shared/core/roles"
 import { AdminProfessorSelector } from "./components/admin-professor-selector"
 import { PlantaoQuotaBanner } from "./components/plantao-quota-banner"
+import { resolveEmpresaIdFromTenant } from "@/app/shared/core/resolve-empresa-from-tenant"
 import { Suspense } from "react"
 import { Skeleton } from "@/app/shared/components/feedback/skeleton"
 
@@ -14,16 +15,22 @@ export const metadata: Metadata = {
 }
 
 export default async function AgendamentosPage({
+  params,
   searchParams,
 }: {
+  params: Promise<{ tenant: string }>
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+  const { tenant } = await params
   const user = await requireUser()
   const { professorId: searchProfessorId } = await searchParams
 
+  // Always resolve empresa from the current tenant URL to ensure tenant isolation
+  const empresaId = await resolveEmpresaIdFromTenant(tenant || '') ?? user.empresaId
+
   // Student View
   if (user.role === 'aluno') {
-    const professors = await getProfessoresDisponiveis()
+    const professors = await getProfessoresDisponiveis(empresaId ?? undefined)
 
     return (
       <div className="flex flex-col gap-6 max-w-5xl mx-auto">
@@ -34,7 +41,7 @@ export default async function AgendamentosPage({
           </p>
         </div>
 
-        <PlantaoQuotaBanner empresaId={user.empresaId ?? null} />
+        <PlantaoQuotaBanner empresaId={empresaId ?? null} />
 
         <div>
           <Suspense fallback={<ProfessorSelectorSkeleton />}>

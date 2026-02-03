@@ -38,12 +38,16 @@ export async function createAgendamento(
   const data_fim =
     data.data_fim instanceof Date ? data.data_fim.toISOString() : data.data_fim;
 
-  // Validar que professor e aluno são da mesma empresa
+  // Validar que aluno pertence à mesma empresa do professor (diretamente ou via matrícula)
   const { data: professorData } = await supabase
     .from("usuarios")
     .select("empresa_id")
     .eq("id", data.professor_id)
     .single();
+
+  if (!professorData?.empresa_id) {
+    throw new Error("Professor não encontrado");
+  }
 
   const { data: alunoData } = await supabase
     .from("usuarios")
@@ -51,28 +55,35 @@ export async function createAgendamento(
     .eq("id", user.id)
     .single();
 
-  if (!professorData || !alunoData) {
+  if (!alunoData) {
     throw new Error("Usuário não encontrado");
   }
 
+  // Allow if same empresa OR if student has enrollment in professor's empresa
   if (professorData.empresa_id !== alunoData.empresa_id) {
-    throw new Error("Você só pode agendar com professores da sua instituição");
+    const { data: enrollment } = await supabase
+      .from("alunos_cursos")
+      .select("usuario_id, cursos!inner(empresa_id)")
+      .eq("usuario_id", user.id)
+      .eq("cursos.empresa_id", professorData.empresa_id)
+      .limit(1);
+
+    if (!enrollment || enrollment.length === 0) {
+      throw new Error("Você só pode agendar com professores da sua instituição");
+    }
   }
 
-  // Check plantao quota
+  // Check plantao quota using the professor's empresa (the tenant context)
+  // Quotas are opt-in: only enforce if curso_plantao_quotas is configured for this tenant
+  const targetEmpresaId = professorData.empresa_id;
   const plantaoQuotaService = new PlantaoQuotaService(supabase);
   const quotaInfo = await plantaoQuotaService.getStudentQuotaInfo(
     user.id,
-    alunoData.empresa_id,
+    targetEmpresaId,
   );
   if (quotaInfo.totalQuota > 0 && quotaInfo.remaining <= 0) {
     throw new Error(
       "Sua cota mensal de plantões foi atingida. Você não pode agendar mais plantões este mês.",
-    );
-  }
-  if (quotaInfo.totalQuota === 0) {
-    throw new Error(
-      "Seu curso não inclui plantões. Entre em contato com a administração.",
     );
   }
 
@@ -113,14 +124,14 @@ export async function createAgendamento(
 
   // Increment plantao usage after successful booking
   try {
-    await plantaoQuotaService.incrementUsage(user.id, alunoData.empresa_id);
+    await plantaoQuotaService.incrementUsage(user.id, targetEmpresaId);
   } catch (incError) {
     console.error("Error incrementing plantao usage:", incError);
     // Don't fail the booking if usage tracking fails
   }
 
   revalidatePath("/agendamentos");
-  revalidatePath("/meus-agendamentos");
+  revalidatePath("/agendamentos/meus");
   revalidatePath("/agendamentos");
   return result;
 }
@@ -236,8 +247,12 @@ export async function getAgendamentosAluno(
     return [];
   }
 
-  let query = supabase.from("agendamentos").select("*").eq("aluno_id", alunoId);
-  if (empresaId) query = query.eq("empresa_id", empresaId);
+  if (!empresaId) {
+    console.error("empresa_id is required for tenant isolation in getAgendamentosAluno");
+    return [];
+  }
+
+  const query = supabase.from("agendamentos").select("*").eq("aluno_id", alunoId).eq("empresa_id", empresaId);
   const { data: agendamentos, error } = await query.order("data_inicio", {
     ascending: false,
   });
@@ -452,7 +467,7 @@ export async function confirmarAgendamento(id: string, linkReuniao?: string) {
   }
 
   revalidatePath("/agendamentos");
-  revalidatePath("/meus-agendamentos");
+  revalidatePath("/agendamentos/meus");
   return data;
 }
 
@@ -508,7 +523,7 @@ export async function rejeitarAgendamento(id: string, motivo: string) {
   }
 
   revalidatePath("/agendamentos");
-  revalidatePath("/meus-agendamentos");
+  revalidatePath("/agendamentos/meus");
   return data;
 }
 
@@ -574,7 +589,7 @@ export async function cancelAgendamentoWithReason(id: string, motivo?: string) {
   }
 
   revalidatePath("/agendamentos");
-  revalidatePath("/meus-agendamentos");
+  revalidatePath("/agendamentos/meus");
   revalidatePath("/agendamentos");
   return { success: true };
 }
@@ -655,7 +670,7 @@ export async function updateAgendamento(
   }
 
   revalidatePath("/agendamentos");
-  revalidatePath("/meus-agendamentos");
+  revalidatePath("/agendamentos/meus");
   return result;
 }
 

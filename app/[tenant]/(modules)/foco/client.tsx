@@ -234,10 +234,12 @@ export default function FocoClient() {
 
         const join = async () => {
             try {
+                if (!empresaId) return
+
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) return
 
-                const room = `modo-foco:${disciplinaId || 'geral'}`
+                const room = `modo-foco:empresa-${empresaId}`
                 const channel = supabase.channel(room, { config: { presence: { key: user.id } } })
 
                 channel.on('presence', { event: 'sync' }, () => {
@@ -263,7 +265,7 @@ export default function FocoClient() {
             mounted = false
             if (channelCleanup) channelCleanup()
         }
-    }, [supabase, disciplinaId, frenteId, atividadeId])
+    }, [supabase, empresaId])
 
     // -- Fullscreen Helpers --
     useEffect(() => {

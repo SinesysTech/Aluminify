@@ -15,6 +15,7 @@ import {
   RefreshCw
 } from "lucide-react"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 
 interface NotificationItemProps {
   notificacao: NotificacaoAgendamento
@@ -54,10 +55,13 @@ export function NotificationItem({ notificacao, userId }: NotificationItemProps)
     locale: ptBR
   })
 
+  const params = useParams()
+  const tenant = params?.tenant as string
+  const basePath = tenant ? `/${tenant}` : ""
   const isProfessor = notificacao.agendamento?.professor_id === userId
   const link = isProfessor
-    ? `/agendamentos/detalhes/${notificacao.agendamento_id}`
-    : `/meus-agendamentos`
+    ? `${basePath}/agendamentos/detalhes/${notificacao.agendamento_id}`
+    : `${basePath}/agendamentos/meus`
 
   return (
     <Link

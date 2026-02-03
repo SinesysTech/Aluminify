@@ -1,7 +1,9 @@
 "use server";
 
 import { createClient } from "@/app/shared/core/server";
+import { toZonedTime } from "date-fns-tz";
 import { getConfiguracoesProfessor } from "./config-actions";
+import { SCHEDULING_TIMEZONE } from "./constants";
 
 export async function checkConflitos(
   professorId: string,
@@ -60,7 +62,8 @@ export async function validateAgendamento(
   }
 
   // Check if within availability (using agendamento_recorrencia table)
-  const dayOfWeek = dataInicio.getUTCDay();
+  const localInicio = toZonedTime(dataInicio, SCHEDULING_TIMEZONE);
+  const dayOfWeek = localInicio.getDay();
   const dateStr = dataInicio.toISOString().split("T")[0];
 
   const { data: recorrencias } = await supabase
@@ -84,9 +87,10 @@ export async function validateAgendamento(
     return h * 60 + m;
   };
 
+  const localFim = toZonedTime(dataFim, SCHEDULING_TIMEZONE);
   const startMinutes =
-    dataInicio.getUTCHours() * 60 + dataInicio.getUTCMinutes();
-  const endMinutes = dataFim.getUTCHours() * 60 + dataFim.getUTCMinutes();
+    localInicio.getHours() * 60 + localInicio.getMinutes();
+  const endMinutes = localFim.getHours() * 60 + localFim.getMinutes();
 
   const isWithinAvailability = recorrencias.some((rec) => {
     const ruleStart = timeToMinutes(rec.hora_inicio);

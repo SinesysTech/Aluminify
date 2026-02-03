@@ -29,8 +29,8 @@ export default async function MeusAgendamentosPage({ params }: MeusAgendamentosP
     return <ProfessorAgendamentosView userId={user.id} />
   }
 
-  // If student (no empresa_id or explicitly student context), show student view
-  const empresaId = user.empresaId ?? await resolveEmpresaIdFromTenant(tenant || '')
+  // Always resolve empresa from the current tenant URL to ensure tenant isolation
+  const empresaId = await resolveEmpresaIdFromTenant(tenant || '') ?? user.empresaId
   const agendamentos = await getAgendamentosAluno(user.id, empresaId)
 
   // Stats do mês atual (para cards + gráfico)

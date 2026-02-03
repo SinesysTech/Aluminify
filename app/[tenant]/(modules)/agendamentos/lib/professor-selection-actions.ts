@@ -1,12 +1,14 @@
 "use server";
 
 import { createClient } from "@/app/shared/core/server";
+import { toZonedTime } from "date-fns-tz";
 import { generateAvailableSlots } from "./agendamento-validations";
 import {
   ProfessorDisponivel,
   DbAgendamentoRecorrencia,
   DbAgendamentoBloqueio,
 } from "../types";
+import { SCHEDULING_TIMEZONE } from "./constants";
 
 export async function getProfessoresDisponiveis(
   empresaId?: string,
@@ -20,37 +22,14 @@ export async function getProfessoresDisponiveis(
     throw new Error("Unauthorized");
   }
 
-  let targetEmpresaId = empresaId;
-  if (!targetEmpresaId) {
-    const { data: alunoData } = await supabase
-      .from("usuarios")
-      .select("empresa_id")
-      .eq("id", user.id)
-      .single();
-
-    if (alunoData?.empresa_id) {
-      targetEmpresaId = alunoData.empresa_id;
-    } else {
-      const { data: cursosData } = await supabase
-        .from("alunos_cursos")
-        .select("cursos(empresa_id)")
-        .eq("usuario_id", user.id)
-        .limit(1)
-        .single();
-
-      const cursoData = cursosData as unknown as {
-        cursos: { empresa_id: string } | null;
-      };
-      if (cursoData?.cursos?.empresa_id) {
-        targetEmpresaId = cursoData.cursos.empresa_id;
-      }
-    }
-  }
-
-  if (!targetEmpresaId) {
-    console.warn("No empresa_id found for user");
+  if (!empresaId) {
+    console.error("empresa_id is required for tenant isolation in getProfessoresDisponiveis");
     return [];
   }
+
+  // Access control is enforced by RLS via aluno_matriculado_empresa().
+  // If the student has no enrollment in this tenant, RLS will return empty results.
+  const targetEmpresaId = empresaId;
 
   // Query professores usando o padrão correto de join com papeis
   // Inclui todos os papéis com função de ensino (professor, professor_admin, monitor)
@@ -125,7 +104,7 @@ export async function getProfessoresDisponiveis(
       let daysChecked = 0;
 
       while (proximosSlots.length < 3 && daysChecked < 14) {
-        const dayOfWeek = checkDate.getUTCDay();
+        const dayOfWeek = toZonedTime(checkDate, SCHEDULING_TIMEZONE).getDay();
         const dateStr = checkDate.toISOString().split("T")[0];
 
         const dayRules = profRecorrencias.filter(
@@ -150,6 +129,7 @@ export async function getProfessoresDisponiveis(
             allBlockedSlots,
             slotDuration,
             60,
+            SCHEDULING_TIMEZONE,
           );
 
           for (const slot of slots) {

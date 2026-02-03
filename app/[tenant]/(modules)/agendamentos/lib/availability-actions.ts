@@ -2,6 +2,7 @@
 
 import { createClient } from "@/app/shared/core/server";
 import { revalidatePath } from "next/cache";
+import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { generateAvailableSlots } from "./agendamento-validations";
 import type { Database } from "@/app/shared/core/database.types";
 import {
@@ -10,6 +11,7 @@ import {
   DbAgendamentoBloqueio,
 } from "../types";
 import { getConfiguracoesProfessor } from "./config-actions";
+import { SCHEDULING_TIMEZONE } from "./constants";
 
 export async function getDisponibilidade(professorId: string) {
   const supabase = await createClient();
@@ -78,7 +80,8 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
   const supabase = await createClient();
 
   const date = new Date(dateStr);
-  const dayOfWeek = date.getUTCDay(); // 0-6
+  const localDate = toZonedTime(date, SCHEDULING_TIMEZONE);
+  const dayOfWeek = localDate.getDay(); // 0-6
   const dateOnly = dateStr.split("T")[0]; // YYYY-MM-DD format
 
   // Get professor configuration for minimum advance time
@@ -110,11 +113,9 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
     return [];
   }
 
-  // Get existing bookings
-  const startOfDay = new Date(dateStr);
-  startOfDay.setUTCHours(0, 0, 0, 0);
-  const endOfDay = new Date(dateStr);
-  endOfDay.setUTCHours(23, 59, 59, 999);
+  // Get existing bookings - use local day boundaries
+  const startOfDay = fromZonedTime(`${dateOnly}T00:00:00`, SCHEDULING_TIMEZONE);
+  const endOfDay = fromZonedTime(`${dateOnly}T23:59:59.999`, SCHEDULING_TIMEZONE);
 
   const { data: bookings } = await supabase
     .from("agendamentos")
@@ -169,6 +170,7 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
     allBlockedSlots,
     slotDuration,
     minAdvanceMinutes,
+    SCHEDULING_TIMEZONE,
   );
 
   return {
@@ -295,7 +297,7 @@ export async function getAvailabilityForMonth(
   for (let day = 1; day <= monthEnd.getDate(); day++) {
     const date = new Date(year, month - 1, day);
     const dateKey = date.toISOString().split("T")[0];
-    const dayOfWeek = date.getUTCDay();
+    const dayOfWeek = date.getDay();
 
     // Skip past dates
     if (date < today) {
@@ -400,7 +402,8 @@ export async function getProfessoresDisponibilidade(
 ) {
   const supabase = await createClient();
   const dateStr = date.toISOString().split("T")[0];
-  const dayOfWeek = date.getUTCDay();
+  const localDate = toZonedTime(date, SCHEDULING_TIMEZONE);
+  const dayOfWeek = localDate.getDay();
 
   // Get all professors from the company
   const { data: professores } = await supabase
@@ -424,11 +427,9 @@ export async function getProfessoresDisponibilidade(
     .lte("data_inicio", dateStr)
     .or(`data_fim.is.null,data_fim.gte.${dateStr}`);
 
-  // Get bloqueios for all professors
-  const startOfDay = new Date(date);
-  startOfDay.setUTCHours(0, 0, 0, 0);
-  const endOfDay = new Date(date);
-  endOfDay.setUTCHours(23, 59, 59, 999);
+  // Get bloqueios for all professors - use local day boundaries
+  const startOfDay = fromZonedTime(`${dateStr}T00:00:00`, SCHEDULING_TIMEZONE);
+  const endOfDay = fromZonedTime(`${dateStr}T23:59:59.999`, SCHEDULING_TIMEZONE);
 
   const { data: bloqueios } = await supabase
     .from("agendamento_bloqueios")
@@ -486,6 +487,7 @@ export async function getProfessoresDisponibilidade(
       allBlockedSlots,
       slotDuration,
       60, // min advance
+      SCHEDULING_TIMEZONE,
     );
 
     return {

@@ -4,6 +4,7 @@
  */
 
 import { addMinutes, isAfter, isBefore, differenceInMinutes } from 'date-fns'
+import { fromZonedTime, toZonedTime } from 'date-fns-tz'
 
 export interface TimeSlot {
   start: Date
@@ -80,17 +81,20 @@ export function validateMinimumAdvance(
  */
 export function isWithinAvailability(
   slot: TimeSlot,
-  rules: AvailabilityRule[]
+  rules: AvailabilityRule[],
+  timezone: string
 ): boolean {
-  const dayOfWeek = slot.start.getUTCDay()
+  const localStart = toZonedTime(slot.start, timezone)
+  const dayOfWeek = localStart.getDay()
   const dayRules = rules.filter(r => r.dia_semana === dayOfWeek && r.ativo)
 
   if (dayRules.length === 0) {
     return false
   }
 
-  const slotStartMinutes = slot.start.getUTCHours() * 60 + slot.start.getUTCMinutes()
-  const slotEndMinutes = slot.end.getUTCHours() * 60 + slot.end.getUTCMinutes()
+  const slotStartMinutes = localStart.getHours() * 60 + localStart.getMinutes()
+  const localEnd = toZonedTime(slot.end, timezone)
+  const slotEndMinutes = localEnd.getHours() * 60 + localEnd.getMinutes()
 
   return dayRules.some(rule => {
     const ruleStart = timeToMinutes(rule.hora_inicio)
@@ -104,9 +108,10 @@ export function isWithinAvailability(
  */
 export function validateAvailability(
   slot: TimeSlot,
-  rules: AvailabilityRule[]
+  rules: AvailabilityRule[],
+  timezone: string
 ): ValidationResult {
-  if (!isWithinAvailability(slot, rules)) {
+  if (!isWithinAvailability(slot, rules, timezone)) {
     return {
       valid: false,
       error: 'O horario selecionado esta fora da disponibilidade do professor.'
@@ -189,6 +194,7 @@ export function validateAppointment(
     minAdvanceMinutes: number
     minDurationMinutes?: number
     maxDurationMinutes?: number
+    timezone: string
   }
 ): ValidationResult {
   // Check minimum advance
@@ -204,7 +210,7 @@ export function validateAppointment(
   if (!durationResult.valid) return durationResult
 
   // Check availability
-  const availabilityResult = validateAvailability(slot, options.rules)
+  const availabilityResult = validateAvailability(slot, options.rules, options.timezone)
   if (!availabilityResult.valid) return availabilityResult
 
   // Check conflicts
@@ -226,9 +232,11 @@ export function generateAvailableSlots(
   rules: AvailabilityRule[],
   existingSlots: TimeSlot[],
   slotDurationMinutes: number = 30,
-  minAdvanceMinutes: number = 60
+  minAdvanceMinutes: number = 60,
+  timezone: string = "America/Sao_Paulo"
 ): Date[] {
-  const dayOfWeek = date.getUTCDay()
+  const localDate = toZonedTime(date, timezone)
+  const dayOfWeek = localDate.getDay()
   const dayRules = rules.filter(r => r.dia_semana === dayOfWeek && r.ativo)
 
   if (dayRules.length === 0) {
@@ -238,13 +246,20 @@ export function generateAvailableSlots(
   const slots: Date[] = []
   const minAllowedTime = addMinutes(new Date(), minAdvanceMinutes)
 
+  // Get date string in YYYY-MM-DD format for constructing local datetimes
+  const year = localDate.getFullYear()
+  const month = String(localDate.getMonth() + 1).padStart(2, '0')
+  const day = String(localDate.getDate()).padStart(2, '0')
+  const dateStr = `${year}-${month}-${day}`
+
   for (const rule of dayRules) {
     const startMins = timeToMinutes(rule.hora_inicio)
     const endMins = timeToMinutes(rule.hora_fim)
 
     for (let time = startMins; time + slotDurationMinutes <= endMins; time += slotDurationMinutes) {
-      const slotStart = new Date(date)
-      slotStart.setUTCHours(Math.floor(time / 60), time % 60, 0, 0)
+      const timeStr = minutesToTime(time)
+      // Convert local time to proper UTC by specifying the timezone
+      const slotStart = fromZonedTime(`${dateStr}T${timeStr}:00`, timezone)
 
       const slotEnd = addMinutes(slotStart, slotDurationMinutes)
 

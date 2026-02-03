@@ -155,7 +155,8 @@
       "mcp__sentry__find_organizations",
       "mcp__sentry__find_projects",
       "mcp__sentry__search_issues",
-      "mcp__sentry__search_events"
+      "mcp__sentry__search_events",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
