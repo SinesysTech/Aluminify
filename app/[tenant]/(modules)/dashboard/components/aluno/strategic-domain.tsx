@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   PolarRadiusAxis,
 } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
   Tooltip,
@@ -126,27 +126,32 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
 
   return (
     <Card className="h-full flex flex-col overflow-hidden transition-all duration-300">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-2">
-          <CardTitle className="widget-title">
-            Domínio Estratégico
-          </CardTitle>
-          <TooltipProvider delayDuration={200}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                <p>
-                  Analisa seu desempenho nos módulos mais importantes (Base e Alta Recorrência)
-                  cruzando dados de Flashcards e Questões.
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+      <CardContent className="p-4 md:p-5 flex-1 flex flex-col min-h-0 gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <Brain className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="widget-title">Domínio Estratégico</h3>
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>
+                      Analisa seu desempenho nos módulos mais importantes (Base e Alta Recorrência)
+                      cruzando dados de Flashcards e Questões.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <p className="text-xs text-muted-foreground">Desempenho em módulos de Base e Alta Recorrência</p>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col md:flex-row gap-6 min-h-0">
+        <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-0">
         {/* Gráfico Radar */}
           <div className="w-full md:w-1/2 h-62.5 relative">
           <ResponsiveContainer width="100%" height="100%">
@@ -212,6 +217,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
               )}
             </div>
           </ScrollArea>
+        </div>
         </div>
       </CardContent>
     </Card>

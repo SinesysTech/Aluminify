@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   PieChart,
   Pie,
@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts'
-import { Info } from 'lucide-react'
+import { Info, Clock } from 'lucide-react'
 import {
   Tooltip as UiTooltip,
   TooltipContent,
@@ -59,26 +59,30 @@ export function SubjectDistribution({ data, period }: SubjectDistributionProps) 
 
   return (
     <Card className="h-full flex flex-col overflow-hidden transition-all duration-300">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-2">
-          <CardTitle className="widget-title">
-            Distribuição de Tempo
-          </CardTitle>
-          <TooltipProvider delayDuration={200}>
-            <UiTooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                <p>
-                  Mostra como seu tempo de estudo foi distribuído entre as matérias {periodLabel}.
-                </p>
-              </TooltipContent>
-            </UiTooltip>
-          </TooltipProvider>
+      <CardContent className="p-4 md:p-5 flex-1 min-h-0 flex flex-col gap-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <Clock className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="widget-title">Distribuição de Tempo</h3>
+              <TooltipProvider delayDuration={200}>
+                <UiTooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>
+                      Mostra como seu tempo de estudo foi distribuído entre as matérias {periodLabel}.
+                    </p>
+                  </TooltipContent>
+                </UiTooltip>
+              </TooltipProvider>
+            </div>
+            <p className="text-xs text-muted-foreground">Proporção de tempo por matéria {periodLabel}</p>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent className="flex-1 min-h-0 flex flex-col">
         {sortedData.length > 0 ? (
           <>
             <div className="h-[200px] w-full shrink-0">
@@ -108,7 +112,7 @@ export function SubjectDistribution({ data, period }: SubjectDistributionProps) 
               </ResponsiveContainer>
             </div>
             
-            <div className="flex-1 overflow-y-auto mt-4 pr-2 space-y-3">
+            <div className="flex-1 overflow-y-auto pr-2 space-y-3">
               {sortedData.map((item, index) => (
                 <div key={index} className="flex items-center justify-between text-sm">
                   <div className="flex items-center gap-2">

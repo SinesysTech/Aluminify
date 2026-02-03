@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Bar,
   BarChart,
@@ -10,7 +10,7 @@ import {
   YAxis,
   Tooltip,
 } from 'recharts'
-import { Info } from 'lucide-react'
+import { Info, Timer } from 'lucide-react'
 import {
   Tooltip as UiTooltip,
   TooltipContent,
@@ -35,28 +35,32 @@ export function FocusEfficiencyChart({ data }: FocusEfficiencyChartProps) {
 
   return (
     <Card className="h-full overflow-hidden transition-all duration-300">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div className="flex items-center gap-2">
-          <CardTitle className="widget-title">
-            Eficiência de Foco
-          </CardTitle>
-          <TooltipProvider delayDuration={200}>
-            <UiTooltip>
-              <TooltipTrigger asChild>
-                <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                <p>
-                  Compara o tempo total da sessão (bruto) com o tempo real de estudo (líquido),
-                  descontando pausas. Barras mais próximas indicam maior eficiência.
-                </p>
-              </TooltipContent>
-            </UiTooltip>
-          </TooltipProvider>
+      <CardContent className="p-4 md:p-5 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <Timer className="h-5 w-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h3 className="widget-title">Eficiência de Foco</h3>
+              <TooltipProvider delayDuration={200}>
+                <UiTooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>
+                      Compara o tempo total da sessão (bruto) com o tempo real de estudo (líquido),
+                      descontando pausas. Barras mais próximas indicam maior eficiência.
+                    </p>
+                  </TooltipContent>
+                </UiTooltip>
+              </TooltipProvider>
+            </div>
+            <p className="text-xs text-muted-foreground">Tempo bruto vs. líquido por dia</p>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[300px] mt-4">
+        <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <XAxis
@@ -123,7 +127,7 @@ export function FocusEfficiencyChart({ data }: FocusEfficiencyChartProps) {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 mt-4 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-sm bg-muted shrink-0" />
             <span>Tempo Bruto (Sessão total)</span>
