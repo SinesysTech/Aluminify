@@ -43,44 +43,7 @@ services:
       timeout: 10s
       start_period: 40s
       retries: 3
-    depends_on:
-      redis:
-        condition: service_healthy
-
-  redis:
-    image: redis:7-alpine
-    container_name: aluminify-redis-prod
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - aluminify-network
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 256M
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
 networks:
   aluminify-network:
     driver: bridge
-
-volumes:
-  redis-data:
-    driver: local

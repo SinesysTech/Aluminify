@@ -10,8 +10,6 @@ services:
         - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
         - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY}
         - NEXT_PUBLIC_GA_MEASUREMENT_ID=${NEXT_PUBLIC_GA_MEASUREMENT_ID}
-        - UPSTASH_REDIS_REST_URL=${UPSTASH_REDIS_REST_URL}
-        - UPSTASH_REDIS_REST_TOKEN=${UPSTASH_REDIS_REST_TOKEN}
     container_name: aluminify-app-dev
     ports:
       - "3000:3000"   # Next.js
@@ -33,35 +31,8 @@ services:
     environment:
       - NODE_ENV=development
       - WATCHPACK_POLLING=true
-      - REDIS_URL=redis://redis:6379
-    command: npm run dev
-    depends_on:
-      - redis
-    networks:
-      - aluminify-network
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    container_name: aluminify-redis-dev
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - aluminify-network
-    restart: unless-stopped
 
 networks:
   aluminify-network:
     driver: bridge
 
-volumes:
-  redis-data:
-    driver: local

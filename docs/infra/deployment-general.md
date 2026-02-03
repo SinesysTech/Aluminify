@@ -6,7 +6,6 @@ Este documento descreve como fazer o deploy do projeto Área do Aluno na Vercel.
 
 - Conta na [Vercel](https://vercel.com)
 - Projeto no [Supabase](https://supabase.com) configurado
-- Instância do [Upstash Redis](https://upstash.com) (opcional, mas recomendado para produção)
 - Repositório Git (GitHub, GitLab ou Bitbucket)
 
 ## 🚀 Passo a Passo
@@ -41,14 +40,8 @@ SUPABASE_URL=https://seu-projeto.supabase.co
 SUPABASE_SECRET_KEY=sb_secret_sua_chave_secreta
 ```
 
-#### Variáveis Opcionais (mas recomendadas para produção)
-
-```
-UPSTASH_REDIS_REST_URL=https://sua-instancia-redis.upstash.io
-UPSTASH_REDIS_REST_TOKEN=seu_token_redis
-```
-
 **⚠️ IMPORTANTE:**
+
 - As variáveis que começam com `NEXT_PUBLIC_` são expostas ao cliente
 - `SUPABASE_SECRET_KEY` é sensível e NUNCA deve ser exposta no cliente
 - Configure todas as variáveis antes de fazer o deploy
@@ -56,6 +49,7 @@ UPSTASH_REDIS_REST_TOKEN=seu_token_redis
 ### 4. Configurações de Build
 
 A Vercel detectará automaticamente:
+
 - **Framework Preset:** Next.js
 - **Build Command:** `npm run build`
 - **Output Directory:** `.next`
@@ -76,7 +70,6 @@ Após o deploy, verifique:
 1. ✅ A aplicação carrega corretamente
 2. ✅ A autenticação funciona
 3. ✅ As rotas de API respondem corretamente
-4. ✅ O Redis está funcionando (se configurado)
 
 ## 🔧 Configurações Adicionais
 
@@ -95,6 +88,7 @@ Guia: [nginx-caprover-config.md](docs/infra/nginx-caprover-config.md)
 ### Variáveis de Ambiente por Ambiente
 
 Você pode configurar variáveis diferentes para:
+
 - **Production** (produção)
 - **Preview** (branches e PRs)
 - **Development** (local)
@@ -143,17 +137,7 @@ O arquivo `middleware.ts` na raiz gerencia a autenticação em todas as rotas us
 - Verifique se `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` estão corretos
 - Certifique-se de que as URLs de redirect estão configuradas no Supabase
 
-### Problemas com Redis
-
-- Se o Redis não estiver configurado, o sistema usará fallback em memória (não recomendado para produção)
-- Verifique se `UPSTASH_REDIS_REST_URL` e `UPSTASH_REDIS_REST_TOKEN` estão corretos
-
-## 📚 Recursos Adicionais
-
-- [Documentação da Vercel](https://vercel.com/docs)
-- [Documentação do Next.js](https://nextjs.org/docs)
 - [Documentação do Supabase](https://supabase.com/docs)
-- [Documentação do Upstash Redis](https://docs.upstash.com/redis)
 
 ## 🔐 Segurança
 
@@ -170,27 +154,8 @@ Antes de fazer o deploy, certifique-se de:
 - [ ] O projeto builda localmente sem erros (`npm run build`)
 - [ ] Os testes passam (se houver)
 - [ ] As URLs de redirect estão configuradas no Supabase
-- [ ] O Redis está configurado (recomendado)
 - [ ] O domínio customizado está configurado (se aplicável)
 
 ---
 
 **Última atualização:** Janeiro 2025
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

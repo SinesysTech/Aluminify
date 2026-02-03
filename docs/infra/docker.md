@@ -69,7 +69,6 @@ HOSTNAME=0.0.0.0
 | `NEXT_PUBLIC_SUPABASE_URL`                     | URL do projeto Supabase   | ✅          |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY` | Chave pública do Supabase | ✅          |
 | `SUPABASE_SECRET_KEY`                          | Chave secreta do Supabase | ✅          |
-| `UPSTASH_REDIS_REST_URL`                       | URL do Redis              | ✅          |
 | `N8N_WEBHOOK_URL`                              | URL do webhook N8N        | ❌          |
 | `NODE_ENV`                                     | Ambiente de execução      | ✅          |
 
@@ -288,11 +287,6 @@ O `docker-compose.prod.yml` define:
 - CPU: 1-2 cores
 - Memória: 1-2 GB
 
-**Redis:**
-
-- CPU: 0.25-0.5 cores
-- Memória: 256-512 MB
-
 Ajuste conforme necessário para seu ambiente.
 
 ## Troubleshooting
@@ -317,21 +311,6 @@ lsof -i :3000                 # Linux/Mac
 - Verifique as variáveis `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY`
 - Confirme que as URLs estão corretas
 - Teste a conexão manualmente
-
-### Problema: Redis não conecta
-
-**Solução:**
-
-```bash
-# Verificar se o Redis está rodando
-docker-compose ps redis
-
-# Ver logs do Redis
-docker-compose logs redis
-
-# Testar conexão
-docker exec -it aluminify-redis-dev redis-cli ping
-```
 
 ### Problema: Build falha
 

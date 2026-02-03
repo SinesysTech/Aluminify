@@ -83,8 +83,6 @@ Write-Host "Verificando variaveis opcionais..." -ForegroundColor Yellow
 Write-Host ""
 
 $optionalVars = @{
-    "UPSTASH_REDIS_REST_URL" = "URL do Redis Upstash"
-    "UPSTASH_REDIS_REST_TOKEN" = "Token do Redis Upstash"
     "N8N_WEBHOOK_URL" = "URL do webhook N8N"
     "NEXT_PUBLIC_API_URL" = "URL base da API"
 }
