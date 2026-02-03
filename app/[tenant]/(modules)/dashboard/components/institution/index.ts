@@ -1,7 +1,6 @@
 export { default as InstitutionDashboardClient } from './institution-dashboard-client'
 export { InstitutionHeader } from './institution-header'
 export { InstitutionMetrics } from './institution-metrics'
-export { StudentRankingList } from './student-ranking-list'
 export { ProfessorRankingList } from './professor-ranking-list'
 export { DisciplinaPerformanceList } from './disciplina-performance'
 export { DisciplineChart } from './discipline-chart'
