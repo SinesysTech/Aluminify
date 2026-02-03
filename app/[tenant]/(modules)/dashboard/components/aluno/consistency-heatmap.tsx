@@ -158,7 +158,7 @@ export function ConsistencyHeatmap({
                 key={p.value}
                 onClick={() => onPeriodChange(p.value)}
                 className={cn(
-                  'text-xs px-3 py-2 md:py-1.5 rounded-md transition-all font-medium touch-manipulation min-h-[36px]',
+                  'text-xs px-3 py-2 md:py-1.5 rounded-md transition-all font-medium touch-manipulation min-h-9',
                   period === p.value
                     ? 'bg-background text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
@@ -197,9 +197,9 @@ export function ConsistencyHeatmap({
         <div className="flex flex-col gap-2">
           {/* Heatmap Grid */}
           <div className="overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-            <div className="flex gap-[3px] min-w-fit">
+            <div className="flex gap- min-w-fit">
               {weeks.map((week, weekIndex) => (
-                <div key={weekIndex} className="flex flex-col gap-[3px]">
+                <div key={weekIndex} className="flex flex-col gap-0.75">
                   {week.map((day, dayIndex) => (
                     <TooltipProvider key={dayIndex} delayDuration={100}>
                       <Tooltip>

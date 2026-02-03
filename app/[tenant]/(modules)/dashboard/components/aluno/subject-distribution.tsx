@@ -85,7 +85,7 @@ export function SubjectDistribution({ data, period }: SubjectDistributionProps) 
         </div>
         {sortedData.length > 0 ? (
           <>
-            <div className="h-[200px] w-full shrink-0">
+            <div className="h-75 w-full shrink-0">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   {/* eslint-disable @typescript-eslint/no-explicit-any */}
@@ -120,7 +120,7 @@ export function SubjectDistribution({ data, period }: SubjectDistributionProps) 
                       className="w-3 h-3 rounded-full shrink-0" 
                       style={{ backgroundColor: item.color }} 
                     />
-                    <span className="truncate max-w-[120px]" title={item.name}>
+                    <span className="truncate max-w-30" title={item.name}>
                       {item.name}
                     </span>
                   </div>

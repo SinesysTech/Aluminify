@@ -128,11 +128,6 @@ const DEFAULT_NAV_ITEMS: NavItem[] = [
     url: "/agendamentos/meus",
     icon: Calendar,
   },
-  {
-    title: "Agendar Atendimento",
-    url: "/agendamentos",
-    icon: CalendarPlus,
-  },
 ]
 
 export function AlunoSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -165,7 +160,7 @@ export function AlunoSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
     }
 
     // Build nav items from module visibility config
-    return modules
+    const built = modules
       .filter(module => {
         // HIDE generic assistant for everyone
         if (module.id === 'agente') return false;
@@ -192,6 +187,36 @@ export function AlunoSidebar({ ...props }: React.ComponentProps<typeof Sidebar>)
             }))
           : undefined,
       }))
+
+    // Student UX: remove redundant "Agendar Atendimento" do menu.
+    // A ação de agendar fica como botão dentro de "Meus Agendamentos".
+    const stripTenantPrefix = (url: string) => {
+      if (!tenantSlug) return url
+      const prefix = `/${tenantSlug}`
+      return url.startsWith(prefix) ? url.slice(prefix.length) || "/" : url
+    }
+
+    const normalized = built.map((item) => {
+      const path = stripTenantPrefix(item.url)
+      if (path === "/agendamentos") {
+        // Prefer always routing students to the list page.
+        return {
+          ...item,
+          title: "Meus Agendamentos",
+          url: tenantSlug ? `/${tenantSlug}/agendamentos/meus` : "/agendamentos/meus",
+          icon: Calendar,
+          items: undefined,
+        }
+      }
+      return item
+    })
+
+    // In case both module and submodule render separately (custom configs), hide direct "Agendar" links.
+    return normalized.filter((item) => {
+      const path = stripTenantPrefix(item.url)
+      const isDirectAgendar = path === "/agendamentos"
+      return !isDirectAgendar
+    })
   }, [modules, loading, tenantSlug])
 
   // Only compute active state if we have nav items (not during loading)

@@ -60,8 +60,8 @@ export function FocusEfficiencyChart({ data }: FocusEfficiencyChartProps) {
             <p className="text-xs text-muted-foreground">Tempo bruto vs. líquido por dia</p>
           </div>
         </div>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-75">
+          <ResponsiveContainer width="100%" height={300} minWidth={0}>
             <BarChart data={data}>
               <XAxis
                 dataKey="day"

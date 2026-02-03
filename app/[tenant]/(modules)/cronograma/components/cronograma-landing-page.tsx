@@ -52,10 +52,10 @@ export function CronogramaLandingPage({ cronogramas, hasBaseContent }: Cronogram
       {!hasBaseContent && (
         <Alert variant="default" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
           <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-          <AlertTitle className="text-amber-800 dark:text-amber-300">Conteudo ainda nao disponivel</AlertTitle>
+          <AlertTitle className="text-amber-800 dark:text-amber-300">Conteúdo ainda não disponível</AlertTitle>
           <AlertDescription className="text-amber-700 dark:text-amber-400">
-            Sua instituicao ainda nao disponibilizou o conteudo programatico.
-            Assim que o conteudo for publicado, voce podera gerar seu cronograma de estudo.
+            Sua instituição ainda não disponibilizou o conteúdo programático.
+            Assim que o conteúdo for publicado, você poderá gerar seu cronograma de estudo.
           </AlertDescription>
         </Alert>
       )}
@@ -69,7 +69,7 @@ export function CronogramaLandingPage({ cronogramas, hasBaseContent }: Cronogram
             <h3 className="text-lg font-semibold mb-2">Nenhum cronograma criado</h3>
             <p className="text-sm text-muted-foreground mb-6 max-w-md">
               Crie seu primeiro cronograma de estudo personalizado.
-              O sistema distribui as aulas de forma inteligente de acordo com suas preferencias.
+              O sistema distribui as aulas de forma inteligente de acordo com suas preferências.
             </p>
             <Button onClick={() => navigateTo('/cronograma/novo')}>
               <Plus className="mr-2 h-4 w-4" />

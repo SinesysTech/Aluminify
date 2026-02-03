@@ -1839,7 +1839,7 @@ export default function StructureManagerClient() {
           <div>
             <h3 className="card-title">Upload de Arquivo</h3>
             <p className="text-xs text-muted-foreground">
-              Importe seu conteudo programatico via planilha
+              Importe seu conteúdo programático via planilha
             </p>
           </div>
         </div>
@@ -1919,7 +1919,7 @@ export default function StructureManagerClient() {
                   ) : disciplinasDoCurso.length === 0 ? (
                     <Input
                       id="disciplina"
-                      value="Este curso nao possui disciplinas cadastradas"
+                      value="Este curso não possui disciplinas cadastradas"
                       disabled
                       className="h-9 text-sm"
                     />
@@ -2101,9 +2101,9 @@ export default function StructureManagerClient() {
               <FileText className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h3 className="card-title">Conteudo Atual</h3>
+              <h3 className="card-title">Conteúdo Atual</h3>
               <p className="text-xs text-muted-foreground">
-                Visualize o conteudo programatico cadastrado para esta disciplina
+                Visualize o conteúdo programático cadastrado para esta disciplina
               </p>
             </div>
           </div>

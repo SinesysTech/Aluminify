@@ -123,6 +123,9 @@ export async function updateSession(request: NextRequest) {
     "/changelog",
     "/status",
     "/manifesto",
+    "/contato",
+    // Sentry tunnel route (next.config.ts tunnelRoute: "/monitoring")
+    "/monitoring",
   ];
 
   // Check if it matches a known public base path

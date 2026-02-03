@@ -150,7 +150,8 @@
       "Bash(docker run:*)",
       "Bash(git -C /Users/jordanmedeiros/Development/aluminify status package-lock.json)",
       "Bash(npm ci:*)",
-      "Bash(npm cache clean:*)"
+      "Bash(npm cache clean:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []

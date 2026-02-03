@@ -1,6 +1,6 @@
 /**
- * Transformacoes de dados para o PDF do cronograma.
- * Agrupamentos por semana, dia, disciplina. Calculos de progresso e estatisticas.
+ * Transformações de dados para o PDF do cronograma.
+ * Agrupamentos por semana, dia, disciplina. Cálculos de progresso e estatísticas.
  */
 
 import type { CronogramaExport, ItemExport } from './pdf-types'

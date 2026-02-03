@@ -87,7 +87,7 @@ export function DisciplineChart({ disciplinas }: DisciplineChartProps) {
       </CardHeader>
       <CardContent className="pt-2">
         <ChartContainer config={chartConfig} className="w-full" style={{ height: chartHeight }}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <BarChart
               data={chartData}
               layout="vertical"

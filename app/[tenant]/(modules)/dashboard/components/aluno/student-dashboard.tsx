@@ -39,12 +39,11 @@ import { FocusEfficiencyChart } from './focus-efficiency-chart'
 import { SubjectDistribution } from './subject-distribution'
 import { StrategicDomain as StrategicDomainComponent } from './strategic-domain'
 import { DashboardSkeleton } from './dashboard-skeleton'
+import { DashboardHeader } from './dashboard-header'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/app/shared/components/feedback/alert'
 import {
-    WelcomeCard,
     CourseProgressByMonth,
-    LeaderboardCard,
     LearningPathCard,
     type MonthlyProgressItem,
     type LearningPath,
@@ -88,7 +87,7 @@ export default function StudentDashboardClientPage() {
     // Estados para componentes complementares
     const [progressByMonth, setProgressByMonth] = useState<MonthlyProgressItem[]>([])
     const [learningPaths, setLearningPaths] = useState<LearningPath[]>([])
-    const [leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([])
+    const [_leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([])
 
     // Sincroniza o ref com o estado para uso em callbacks sem causar loops de dependência
     useEffect(() => {
@@ -382,7 +381,7 @@ export default function StudentDashboardClientPage() {
 
     return (
         <div className="mx-auto max-w-7xl space-y-4 md:space-y-6">
-            {/* Mensagem de erro (se houver dados mas tambem erro) */}
+            {/* Mensagem de erro (se houver dados mas também erro) */}
             {error && (
                 <Alert variant="destructive">
                     <AlertCircle className="h-4 w-4" />
@@ -391,31 +390,13 @@ export default function StudentDashboardClientPage() {
                 </Alert>
             )}
 
-            {/* 1. Boas-vindas + Ranking */}
-            <div className="grid gap-4 lg:grid-cols-12">
-                <div className="lg:col-span-12 xl:col-span-8">
-                    <WelcomeCard
-                        userName={user.name}
-                        streakDays={user.streakDays}
-                        subtitle="O que deseja aprender hoje?"
-                        description="Descubra cursos, acompanhe seu progresso e alcance seus objetivos de aprendizado."
-                        ctaLabel="Explorar Cursos"
-                        ctaHref={tenant ? `/${tenant}/cursos` : '#'}
-                    />
-                </div>
-                <div className="lg:col-span-12 xl:col-span-4">
-                    <LeaderboardCard
-                        students={leaderboard}
-                        title="Ranking"
-                        pointsLabel="hrs"
-                    />
-                </div>
-            </div>
+            {/* Header: Saudação + Modo Foco */}
+            <DashboardHeader user={user} />
 
-            {/* 2. Progresso do Cronograma */}
+            {/* 1. Progresso do Cronograma */}
             <ScheduleProgress value={metrics.scheduleProgress} streakDays={user.streakDays} />
 
-            {/* 3. KPIs principais */}
+            {/* 2. KPIs principais */}
             <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
                 <MetricCard
                     label="Tempo de Estudo"
@@ -427,19 +408,19 @@ export default function StudentDashboardClientPage() {
                         isPositive: metrics.focusTimeDelta.startsWith('+'),
                     }}
                     tooltip={[
-                        'Tempo total de estudo no periodo, somando aulas assistidas e sessoes de exercicios.',
-                        'O valor mostra a diferenca em relacao ao periodo anterior.',
+                        'Tempo total de estudo no período, somando aulas assistidas e sessões de exercícios.',
+                        'O valor mostra a diferença em relação ao período anterior.',
                     ]}
                 />
                 <MetricCard
-                    label="Questoes Feitas"
+                    label="Questões Feitas"
                     value={metrics.questionsAnswered}
                     subtext={metrics.questionsAnsweredPeriod}
                     icon={CheckCircle2}
                     variant="questions"
                     tooltip={[
-                        'Total de questoes resolvidas no periodo.',
-                        'Resolver questoes e fundamental para fixar o conteudo!',
+                        'Total de questões resolvidas no período.',
+                        'Resolver questões é fundamental para fixar o conteúdo!',
                     ]}
                 />
                 <MetricCard
@@ -450,8 +431,8 @@ export default function StudentDashboardClientPage() {
                     showProgressCircle={true}
                     progressValue={metrics.accuracy}
                     tooltip={[
-                        'Porcentagem de acertos nas questoes resolvidas.',
-                        'Quanto maior, melhor voce esta dominando o conteudo.',
+                        'Porcentagem de acertos nas questões resolvidas.',
+                        'Quanto maior, melhor você está dominando o conteúdo.',
                     ]}
                 />
                 <MetricCard
@@ -462,29 +443,29 @@ export default function StudentDashboardClientPage() {
                     variant="flashcards"
                     tooltip={[
                         'Cartas de flashcards revisadas.',
-                        'Tecnica eficaz para memorizacao e revisao rapida!',
+                        'Técnica eficaz para memorização e revisão rápida!',
                     ]}
                 />
             </div>
 
-            {/* 4. Tendencias: Progresso Mensal + Trilhas */}
+            {/* 3. Tendências: Progresso Mensal + Trilhas */}
             <div className="grid gap-4 lg:grid-cols-12">
                 <div className="lg:col-span-7">
-                    <CourseProgressByMonth data={progressByMonth} title="Aulas Concluidas por Mes" />
+                    <CourseProgressByMonth data={progressByMonth} title="Aulas Concluídas por Mês" />
                 </div>
                 <div className="lg:col-span-5">
                     <LearningPathCard paths={learningPaths} />
                 </div>
             </div>
 
-            {/* 5. Consistencia de Estudo */}
+            {/* 4. Consistência de Estudo */}
             <ConsistencyHeatmap
                 data={heatmap}
                 period={heatmapPeriod}
                 onPeriodChange={handleHeatmapPeriodChange}
             />
 
-            {/* 6. Desempenho por Disciplina */}
+            {/* 5. Desempenho por Disciplina */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 md:gap-6 items-stretch">
                 <div className="lg:col-span-3 h-112.5">
                     <SubjectPerformanceList subjects={subjects} period={mapHeatmapPeriodToDashboardPeriod(heatmapPeriod)} />
@@ -494,7 +475,7 @@ export default function StudentDashboardClientPage() {
                 </div>
             </div>
 
-            {/* 7. Analises detalhadas */}
+            {/* 6. Análises detalhadas */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 <FocusEfficiencyChart data={efficiency} />
                 {strategic && <StrategicDomainComponent data={strategic} />}

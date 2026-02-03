@@ -149,7 +149,7 @@ async function getHandler(
       .maybeSingle<{ logo_url: string }>()
     if (logoData?.logo_url) logoUrl = logoData.logo_url
   } catch {
-    // Logo nao e critico
+    // Logo não é crítico
   }
 
   const cronogramaExport: CronogramaExport = {

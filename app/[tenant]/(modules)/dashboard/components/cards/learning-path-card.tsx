@@ -56,7 +56,7 @@ export function LearningPathCard({
               <div className="text-xl font-semibold">{path.name}</div>
               <Progress value={path.progress} indicatorColor={color} />
               <p className="text-muted-foreground text-xs">
-                {path.completedModules} de {path.totalModules} modulos concluidos
+                {path.completedModules} de {path.totalModules} módulos concluídos
               </p>
             </div>
           )

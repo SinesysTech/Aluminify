@@ -27,7 +27,7 @@ export interface CourseProgressByMonthProps {
 
 const chartConfig = {
   value: {
-    label: "Concluidas",
+    label: "Concluídas",
     color: "var(--chart-1)",
   },
 } satisfies ChartConfig
@@ -36,7 +36,7 @@ export function CourseProgressByMonth({
   data,
   comparisonValue,
   comparisonDelta,
-  title = "Progresso por Mes",
+  title = "Progresso por Mês",
   showDatePicker = false,
 }: CourseProgressByMonthProps) {
   if (data.length === 0) {
@@ -58,7 +58,7 @@ export function CourseProgressByMonth({
         <CardTitle>{title}</CardTitle>
         {comparisonValue != null && (
           <CardDescription className="flex items-center gap-2">
-            Comparado ao mes anterior {comparisonValue.toFixed(2)}%
+            Comparado ao mês anterior {comparisonValue.toFixed(2)}%
             {comparisonDelta != null && (
               <Badge>
                 {comparisonDelta >= 0 ? "+" : ""}

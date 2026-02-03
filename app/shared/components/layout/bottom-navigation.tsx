@@ -94,7 +94,7 @@ export function BottomNavigation() {
               aria-current={isActive ? 'page' : undefined}
               className={cn(
                 // Touch target >= 44px (parent h-16 = 64px, flex-1 distributes width)
-                'flex flex-col items-center justify-center gap-0.5 flex-1 min-w-[44px] min-h-[44px]',
+                'flex flex-col items-center justify-center gap-0.5 flex-1 min-w-11 min-h-11',
                 // Touch-optimized interactions (eliminates 300ms tap delay)
                 'transition-colors duration-150 touch-manipulation',
                 'active:bg-accent/80',

@@ -75,7 +75,7 @@ export async function validateAgendamento(
   if (!recorrencias || recorrencias.length === 0) {
     return {
       valid: false,
-      error: "O professor nao tem disponibilidade neste dia.",
+      error: "O professor não tem disponibilidade neste dia.",
     };
   }
 

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AgendamentosList } from "./agendamentos-list"
 import { CalendarDays, Clock, CheckCircle, XCircle } from "lucide-react"
+import { AgendamentosSituacaoChart } from "./agendamentos-situacao-chart"
 
 interface AgendamentosDashboardProps {
   agendamentos: AgendamentoComDetalhes[]
@@ -69,6 +70,12 @@ export function AgendamentosDashboard({
           variant="destructive"
         />
       </div>
+
+      <AgendamentosSituacaoChart
+        title="Situação gráfica"
+        description="Distribuição dos agendamentos no período atual."
+        stats={stats}
+      />
 
       {/* Tabs */}
       {isMounted ? (

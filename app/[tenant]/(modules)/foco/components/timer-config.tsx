@@ -138,18 +138,18 @@ export function TimerConfig({
     }
 
     return (
-        <Card className="overflow-hidden">
-            <CardContent className="p-4 md:p-5 space-y-4">
+        <Card className="overflow-hidden border-border/60">
+            <CardContent className="p-5 md:p-6 space-y-5">
                 {/* Section header */}
-                <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                        <Settings2 className="h-4 w-4 text-primary" />
+                <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+                        <Settings2 className="h-4.5 w-4.5 text-primary" />
                     </div>
-                    <h2 className="text-sm font-semibold">Como você quer estudar?</h2>
+                    <h2 className="text-base font-semibold tracking-tight">Como você quer estudar?</h2>
                 </div>
 
                 {/* Method Selection - Horizontal Cards */}
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-2.5">
                     {METHODS.map((method) => {
                         const Icon = method.icon
                         const isSelected = metodo === method.id
@@ -160,30 +160,30 @@ export function TimerConfig({
                                 type="button"
                                 onClick={() => onMetodoChange(method.id)}
                                 className={cn(
-                                    'relative flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border-2 transition-all cursor-pointer',
-                                    'hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/50',
+                                    'relative flex flex-col items-center gap-2 py-4 px-3 rounded-xl border-2 transition-all duration-200 cursor-pointer',
+                                    'hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary/50',
                                     isSelected
-                                        ? `${method.borderColor} ${method.bgColor} ring-2 ${method.ringColor}`
-                                        : 'border-muted hover:border-muted-foreground/30'
+                                        ? `${method.borderColor} ${method.bgColor} ring-2 ${method.ringColor} shadow-sm`
+                                        : 'border-muted hover:border-muted-foreground/30 hover:bg-muted/30'
                                 )}
                             >
                                 <div className={cn(
-                                    'flex h-9 w-9 items-center justify-center rounded-full transition-colors',
-                                    isSelected ? method.bgColor : 'bg-muted'
+                                    'flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200',
+                                    isSelected ? `${method.bgColor} scale-110` : 'bg-muted'
                                 )}>
                                     <Icon className={cn(
-                                        'h-4 w-4 transition-colors',
+                                        'h-4.5 w-4.5 transition-colors',
                                         isSelected ? method.color : 'text-muted-foreground'
                                     )} />
                                 </div>
                                 <div className="text-center">
                                     <p className={cn(
-                                        'font-medium text-xs',
-                                        isSelected && 'text-foreground'
+                                        'font-semibold text-sm',
+                                        isSelected ? 'text-foreground' : 'text-muted-foreground'
                                     )}>
                                         {method.label}
                                     </p>
-                                    <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">
+                                    <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
                                         {method.description}
                                     </p>
                                 </div>
@@ -193,15 +193,15 @@ export function TimerConfig({
                 </div>
 
                 {/* Configuration Panel */}
-                <div className="min-h-[88px]">
+                <div className="min-h-22">
                     {/* Cronômetro - No config needed */}
                     {metodo === 'cronometro' && (
-                        <div className="flex flex-col items-center justify-center h-[100px] text-center p-4 rounded-xl bg-muted/30 border border-dashed">
-                            <Timer className="h-5 w-5 text-muted-foreground mb-2" />
-                            <p className="text-xs text-muted-foreground">
+                        <div className="flex flex-col items-center justify-center h-25 text-center p-5 rounded-xl bg-muted/20 border border-dashed border-muted-foreground/20">
+                            <Timer className="h-5 w-5 text-muted-foreground/60 mb-2.5" />
+                            <p className="text-sm text-muted-foreground">
                                 O cronômetro livre não precisa de configuração.
                             </p>
-                            <p className="text-xs text-muted-foreground mt-0.5">Você controla quando parar.</p>
+                            <p className="text-xs text-muted-foreground/70 mt-1">Você controla quando parar.</p>
                         </div>
                     )}
 
@@ -372,36 +372,38 @@ export function TimerConfig({
                     )}
                 </div>
 
-                {/* Start Button - Prominent CTA matching dashboard style */}
-                <Button
-                    size="lg"
-                    className={cn(
-                        'w-full h-12 text-sm font-semibold gap-2 transition-all duration-200',
-                        'bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70',
-                        'shadow-lg hover:shadow-xl hover:scale-[1.01]',
-                        'disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100'
-                    )}
-                    onClick={onStart}
-                    disabled={iniciando || !disciplinaId}
-                >
-                    {iniciando ? (
-                        <>
-                            <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                            Iniciando...
-                        </>
-                    ) : (
-                        <>
-                            <Play className="h-4.5 w-4.5 fill-current" />
-                            Iniciar Sessão de Foco
-                        </>
-                    )}
-                </Button>
+                {/* Start Button - Prominent CTA */}
+                <div className="pt-1 space-y-2.5">
+                    <Button
+                        size="lg"
+                        className={cn(
+                            'w-full h-13 text-sm font-semibold gap-2.5 transition-all duration-200',
+                            'bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70',
+                            'shadow-lg hover:shadow-xl hover:scale-[1.01]',
+                            'disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100'
+                        )}
+                        onClick={onStart}
+                        disabled={iniciando || !disciplinaId}
+                    >
+                        {iniciando ? (
+                            <>
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                Iniciando...
+                            </>
+                        ) : (
+                            <>
+                                <Play className="h-4.5 w-4.5 fill-current" />
+                                Iniciar Sessão de Foco
+                            </>
+                        )}
+                    </Button>
 
-                {!disciplinaId && (
-                    <p className="text-center text-xs text-muted-foreground -mt-1">
-                        Selecione uma disciplina acima para começar
-                    </p>
-                )}
+                    {!disciplinaId && (
+                        <p className="text-center text-xs text-muted-foreground">
+                            Selecione uma disciplina acima para começar
+                        </p>
+                    )}
+                </div>
             </CardContent>
         </Card>
     )

@@ -21,7 +21,7 @@ interface AdminProfessorSelectorProps {
     selectedProfessorId: string
     /** ID do usuario logado */
     currentUserId: string
-    /** Se o admin logado tambem e professor/monitor */
+    /** Se o admin logado também é professor/monitor */
     isTeacher: boolean
 }
 
@@ -61,7 +61,7 @@ export function AdminProfessorSelector({
             <div className="shrink-0">
                 <Label className="text-sm font-medium">Gerenciar Agenda de:</Label>
             </div>
-            <div className="w-[300px]">
+            <div className="w-75">
                 <Select value={selectedValue} onValueChange={handleSelect}>
                     <SelectTrigger>
                         <SelectValue placeholder="Selecione um professor..." />

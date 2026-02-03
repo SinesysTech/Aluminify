@@ -803,7 +803,7 @@ export function ScheduleDashboard({ cronogramaId }: { cronogramaId: string }) {
       <div className="container mx-auto py-6">
         <Card>
           <CardHeader>
-            <CardTitle>Cronograma nao encontrado</CardTitle>
+            <CardTitle>Cronograma não encontrado</CardTitle>
           </CardHeader>
           <CardContent>
             <Button onClick={() => router.push(tenant ? `/${tenant}/cronograma` : '/cronograma')}>

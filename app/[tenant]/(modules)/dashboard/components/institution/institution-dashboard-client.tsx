@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { RefreshCw, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -36,6 +36,8 @@ type DashboardPeriod = 'semanal' | 'mensal' | 'anual'
 
 export default function InstitutionDashboardClient() {
   const router = useRouter()
+  const params = useParams()
+  const tenant = params?.tenant as string | undefined
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
@@ -219,7 +221,7 @@ export default function InstitutionDashboardClient() {
               </SelectContent>
             </Select>
             <Button asChild variant="outline" className="hidden sm:inline-flex">
-              <Link href={`${pathname?.split('/').slice(0, 2).join('/')}/alunos`}>
+              <Link href={tenant ? `/${tenant}/usuario/alunos` : '/usuario/alunos'}>
                 Gerenciar Alunos
               </Link>
             </Button>
@@ -276,7 +278,7 @@ export default function InstitutionDashboardClient() {
             }))}
             title="Top Alunos"
             pointsLabel="aprov."
-            onViewAll={() => router.push(`${pathname}/../alunos`)} // Navigate to students list
+            onViewAll={() => router.push(tenant ? `/${tenant}/usuario/alunos` : '/usuario/alunos')} // Navigate to students list
           />
         </div>
 
