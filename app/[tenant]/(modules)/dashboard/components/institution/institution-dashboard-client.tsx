@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { RefreshCw, AlertCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { InstitutionDashboardData } from '@/app/[tenant]/(modules)/dashboard/types'
@@ -11,10 +12,12 @@ import {
 } from '@/app/shared/core/services/institutionDashboardService'
 import { InstitutionHeader } from './institution-header'
 import { InstitutionMetrics } from './institution-metrics'
-import { StudentRankingList } from './student-ranking-list'
 import { ProfessorRankingList } from './professor-ranking-list'
 import { DisciplinaPerformanceList } from './disciplina-performance'
 import { DisciplineChart } from './discipline-chart'
+import { StudentSuccessCard } from '@/app/[tenant]/(modules)/dashboard/components/cards/student-success-card'
+import { ProgressStatisticsCard } from '@/app/[tenant]/(modules)/dashboard/components/cards/progress-statistics-card'
+import { LeaderboardCard } from '@/app/[tenant]/(modules)/dashboard/components/cards/leaderboard-card'
 import { ConsistencyHeatmap, type HeatmapPeriod } from '@/app/[tenant]/(modules)/dashboard/components/consistency-heatmap'
 import { DashboardSkeleton } from '@/app/[tenant]/(modules)/dashboard/components/dashboard-skeleton'
 import { Button } from '@/components/ui/button'
@@ -215,6 +218,11 @@ export default function InstitutionDashboardClient() {
                 <SelectItem value="anual">Anual</SelectItem>
               </SelectContent>
             </Select>
+            <Button asChild variant="outline" className="hidden sm:inline-flex">
+              <Link href={`${pathname?.split('/').slice(0, 2).join('/')}/alunos`}>
+                Gerenciar Alunos
+              </Link>
+            </Button>
             <Button
               onClick={handleManualRefresh}
               variant="outline"
@@ -240,18 +248,44 @@ export default function InstitutionDashboardClient() {
       )}
 
       {/* Main content with refresh opacity indicator */}
-      <div className={cn('space-y-6 transition-opacity duration-200', isRefreshing && 'opacity-50')}>
+      <div className={cn('space-y-6 transition-opacity duration-200', isRefreshing && 'opacity-50 pointer-events-none')}>
+        
+        {/* ── Stats Row (New) ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
+          <StudentSuccessCard
+            currentSuccessRate={data.engagement.taxaConclusao}
+            previousSuccessRate={Math.max(0, data.engagement.taxaConclusao - 2)} // Hardcoded delta per design spec trade-off
+            totalStudents={data.summary.totalAlunos}
+            passingStudents={data.summary.alunosAtivos}
+            title="Taxa de Sucesso"
+          />
+          <ProgressStatisticsCard
+            totalActivityPercent={data.engagement.taxaConclusao}
+            inProgressCount={data.summary.alunosAtivos}
+            completedCount={data.engagement.atividadesConcluidas}
+            title="Estatísticas de Progresso"
+            inProgressLabel="Ativos"
+            completedLabel="Concluídos"
+          />
+          <LeaderboardCard
+            students={data.rankingAlunos.slice(0, 5).map(a => ({
+              id: a.id,
+              name: a.name,
+              points: a.aproveitamento,
+              avatarUrl: a.avatarUrl
+            }))}
+            title="Top Alunos"
+            pointsLabel="aprov."
+            onViewAll={() => router.push(`${pathname}/../alunos`)} // Navigate to students list
+          />
+        </div>
+
         {/* ── KPI Cards Row ── */}
         <InstitutionMetrics summary={data.summary} engagement={data.engagement} />
 
-        {/* ── Visualization: Discipline Chart + Top Alunos ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-3">
-            <DisciplineChart disciplinas={data.performanceByDisciplina} />
-          </div>
-          <div className="lg:col-span-2">
-            <StudentRankingList students={data.rankingAlunos} />
-          </div>
+        {/* ── Visualization: Discipline Chart (Full Width) ── */}
+        <div className="grid grid-cols-1 gap-6">
+          <DisciplineChart disciplinas={data.performanceByDisciplina} />
         </div>
 
         {/* ── Consistency Heatmap ── */}

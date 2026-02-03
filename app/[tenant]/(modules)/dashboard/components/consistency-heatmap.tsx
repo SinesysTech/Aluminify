@@ -5,7 +5,7 @@ import type { HeatmapDay } from '../types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/app/shared/components/overlay/tooltip'
-import { Info } from 'lucide-react'
+import { Info, CalendarOff } from 'lucide-react'
 import { cn } from '@/app/shared/library/utils'
 
 export type HeatmapPeriod = 'semanal' | 'mensal' | 'anual'
@@ -146,78 +146,93 @@ export function ConsistencyHeatmap({
           )}
         </div>
 
-        {/* Month labels for annual view */}
-        {period === 'anual' && monthPositions.length > 0 && (
-          <div className="overflow-x-auto overflow-y-hidden mb-1">
-            <div className="relative min-w-max" style={{ paddingLeft: showDayLabels ? '2rem' : 0 }}>
-              <div className="grid grid-cols-53 gap-0.75">
-                {Array.from({ length: 53 }).map((_, colIdx) => {
-                  const match = monthPositions.find((m) => m.col === colIdx)
-                  return (
-                    <div key={colIdx} className="text-[10px] text-muted-foreground leading-none">
-                      {match?.label ?? ''}
-                    </div>
-                  )
-                })}
-              </div>
+        {/* Empty State */}
+        {data.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-3 min-h-[160px]">
+            <div className="flex items-center justify-center size-14 rounded-2xl bg-muted/50">
+              <CalendarOff className="h-7 w-7 text-muted-foreground/40" />
+            </div>
+            <div className="text-center space-y-1">
+              <p className="text-sm font-medium text-muted-foreground">Sem dados de atividade</p>
+              <p className="text-xs text-muted-foreground/70">O gráfico de calor mostrará sua constância de estudos.</p>
             </div>
           </div>
-        )}
-
-        {/* Heatmap grid */}
-        <div className="overflow-x-auto overflow-y-hidden">
-          <div className="flex min-w-max">
-            {/* Day-of-week labels */}
-            {showDayLabels && (
-              <div className="flex flex-col gap-0.75 mr-1.5 pt-0">
-                {DAY_LABELS.map((label, i) => (
-                  <div
-                    key={i}
-                    className="text-[10px] text-muted-foreground leading-none flex items-center justify-end"
-                    style={{ height: 14, width: '1.5rem' }}
-                  >
-                    {label}
+        ) : (
+          <>
+            {/* Month labels for annual view */}
+            {period === 'anual' && monthPositions.length > 0 && (
+              <div className="overflow-x-auto overflow-y-hidden mb-1">
+                <div className="relative min-w-max" style={{ paddingLeft: showDayLabels ? '2rem' : 0 }}>
+                  <div className="grid grid-cols-53 gap-0.75">
+                    {Array.from({ length: 53 }).map((_, colIdx) => {
+                      const match = monthPositions.find((m) => m.col === colIdx)
+                      return (
+                        <div key={colIdx} className="text-[10px] text-muted-foreground leading-none">
+                          {match?.label ?? ''}
+                        </div>
+                      )
+                    })}
                   </div>
-                ))}
+                </div>
               </div>
             )}
 
-            {/* Grid cells */}
-            <div className={cn('grid gap-0.75 flex-1', getGridCols())}>
-              {data.map((day, index) => (
-                <TooltipProvider key={`${day.date}-${index}`} delayDuration={100}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+            {/* Heatmap grid */}
+            <div className="overflow-x-auto overflow-y-hidden">
+              <div className="flex min-w-max">
+                {/* Day-of-week labels */}
+                {showDayLabels && (
+                  <div className="flex flex-col gap-0.75 mr-1.5 pt-0">
+                    {DAY_LABELS.map((label, i) => (
                       <div
-                        className={cn(
-                          'size-3.5 rounded-sm cursor-default transition-colors',
-                          getIntensityClass(day.intensity)
-                        )}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs">
-                      <p className="font-medium">{day.date}</p>
-                      <p className="text-muted-foreground">{getIntensityLabel(day.intensity)}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ))}
-            </div>
-          </div>
-        </div>
+                        key={i}
+                        className="text-[10px] text-muted-foreground leading-none flex items-center justify-end"
+                        style={{ height: 14, width: '1.5rem' }}
+                      >
+                        {label}
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-        {/* Legend */}
-        <div className="flex items-center justify-end gap-2 mt-3 text-xs text-muted-foreground">
-          <span>Menos</span>
-          <div className="flex gap-1">
-            <div className="size-3.5 rounded-sm bg-muted/40" />
-            <div className="size-3.5 rounded-sm bg-emerald-500/40 dark:bg-emerald-400/40" />
-            <div className="size-3.5 rounded-sm bg-emerald-500/60 dark:bg-emerald-400/60" />
-            <div className="size-3.5 rounded-sm bg-emerald-500/80 dark:bg-emerald-400/80" />
-            <div className="size-3.5 rounded-sm bg-emerald-500 dark:bg-emerald-400" />
-          </div>
-          <span>Mais</span>
-        </div>
+                {/* Grid cells */}
+                <div className={cn('grid gap-0.75 flex-1', getGridCols())}>
+                  {data.map((day, index) => (
+                    <TooltipProvider key={`${day.date}-${index}`} delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div
+                            className={cn(
+                              'size-3.5 rounded-sm cursor-default transition-colors',
+                              getIntensityClass(day.intensity)
+                            )}
+                          />
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="text-xs">
+                          <p className="font-medium">{day.date}</p>
+                          <p className="text-muted-foreground">{getIntensityLabel(day.intensity)}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="flex items-center justify-end gap-2 mt-3 text-xs text-muted-foreground">
+              <span>Menos</span>
+              <div className="flex gap-1">
+                <div className="size-3.5 rounded-sm bg-muted/40" />
+                <div className="size-3.5 rounded-sm bg-emerald-500/40 dark:bg-emerald-400/40" />
+                <div className="size-3.5 rounded-sm bg-emerald-500/60 dark:bg-emerald-400/60" />
+                <div className="size-3.5 rounded-sm bg-emerald-500/80 dark:bg-emerald-400/80" />
+                <div className="size-3.5 rounded-sm bg-emerald-500 dark:bg-emerald-400" />
+              </div>
+              <span>Mais</span>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   )
