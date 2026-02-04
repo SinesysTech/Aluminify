@@ -200,7 +200,9 @@ export function LoginPageClient() {
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
+              name="email"
               type="email"
+              autoComplete="username"
               placeholder="seu@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -217,7 +219,9 @@ export function LoginPageClient() {
             <Label htmlFor="password">Senha</Label>
             <Input
               id="password"
+              name="password"
               type="password"
+              autoComplete="current-password"
               placeholder="••••••••"
               value={password}
               onChange={(e) => {

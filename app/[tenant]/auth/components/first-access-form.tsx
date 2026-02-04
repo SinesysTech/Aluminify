@@ -252,7 +252,9 @@ export function FirstAccessForm({ userId, role, empresaSlug }: FirstAccessFormPr
         <Label htmlFor="password">Nova senha</Label>
         <Input
           id="password"
+          name="new-password"
           type="password"
+          autoComplete="new-password"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           placeholder="********"
@@ -262,7 +264,9 @@ export function FirstAccessForm({ userId, role, empresaSlug }: FirstAccessFormPr
         <Label htmlFor="confirm-password">Confirme a nova senha</Label>
         <Input
           id="confirm-password"
+          name="confirm-password"
           type="password"
+          autoComplete="new-password"
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
           placeholder="********"

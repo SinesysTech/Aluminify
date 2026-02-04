@@ -76,7 +76,9 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
+                    autoComplete="email"
                     placeholder="m@example.com"
                     required
                     value={email}
