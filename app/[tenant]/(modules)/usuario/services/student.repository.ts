@@ -255,12 +255,18 @@ export class StudentRepositoryImpl implements StudentRepository {
     // Quando filtramos por curso/empresa/turma (studentIdsToFilter), a lista vem de matrículas
     // (alunos_cursos). Não exigir deleted_at IS NULL para não esconder alunos que tiveram apenas
     // o vínculo de staff removido (soft delete em usuarios) mas continuam matriculados.
+    //
+    // Quando há studentIdsToFilter (lista por empresa/curso/turma), NÃO exigir usuarios_empresas:
+    // a matrícula em alunos_cursos/alunos_turmas já define "aluno" para essa listagem. Exigir
+    // papel_base = 'aluno' em usuarios_empresas esconderia alunos que só têm matrícula (ex.: importados).
 
-    // Filter only users with papel_base = 'aluno' via usuarios_empresas
-    let queryBuilder = this.client
-      .from(TABLE)
-      .select("id, usuarios_empresas!inner(papel_base)", { count: "exact", head: true })
-      .eq("usuarios_empresas.papel_base", "aluno");
+    const filterByEnrollment = studentIdsToFilter !== null;
+    let queryBuilder = filterByEnrollment
+      ? this.client.from(TABLE).select("id", { count: "exact", head: true })
+      : this.client
+          .from(TABLE)
+          .select("id, usuarios_empresas!inner(papel_base)", { count: "exact", head: true })
+          .eq("usuarios_empresas.papel_base", "aluno");
 
     if (params?.status === 'active') {
         queryBuilder = queryBuilder.eq('ativo', true);
@@ -325,12 +331,14 @@ export class StudentRepositoryImpl implements StudentRepository {
     }
 
     // Get paginated data (idem: quando lista é por matrícula, incluir mesmo com deleted_at set)
-    let dataQuery = this.client
-      .from(TABLE)
-      .select("*, usuarios_empresas!inner(papel_base)")
-      .eq("usuarios_empresas.papel_base", "aluno")
-      .order(sortBy, { ascending: sortOrder })
-      .range(from, to);
+    let dataQuery = filterByEnrollment
+      ? this.client.from(TABLE).select("*").order(sortBy, { ascending: sortOrder }).range(from, to)
+      : this.client
+          .from(TABLE)
+          .select("*, usuarios_empresas!inner(papel_base)")
+          .eq("usuarios_empresas.papel_base", "aluno")
+          .order(sortBy, { ascending: sortOrder })
+          .range(from, to);
 
     if (studentIdsToFilter !== null) {
       dataQuery = dataQuery.in("id", studentIdsToFilter);
@@ -361,11 +369,13 @@ export class StudentRepositoryImpl implements StudentRepository {
 
       // Estratégia 1: Tentar count sem head (retorna dados + count)
       try {
-        let fallbackCountQuery = this.client
-          .from(TABLE)
-          .select("id, usuarios_empresas!inner(papel_base)", { count: "exact", head: false })
-          .eq("usuarios_empresas.papel_base", "aluno")
-          .limit(1); // Apenas precisamos do count, não dos dados
+        let fallbackCountQuery = filterByEnrollment
+          ? this.client.from(TABLE).select("id", { count: "exact", head: false }).limit(1)
+          : this.client
+              .from(TABLE)
+              .select("id, usuarios_empresas!inner(papel_base)", { count: "exact", head: false })
+              .eq("usuarios_empresas.papel_base", "aluno")
+              .limit(1); // Apenas precisamos do count, não dos dados
 
         if (studentIdsToFilter !== null) {
             fallbackCountQuery = fallbackCountQuery.in("id", studentIdsToFilter);

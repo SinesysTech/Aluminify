@@ -191,7 +191,7 @@ export function LoginPageClient() {
     >
       <div className="space-y-6">
         <div>
-          <h1 className="font-sans text-3xl font-bold text-gray-900">Bem-vindo de volta</h1>
+          <h1 className="font-sans text-3xl font-bold text-foreground">Bem-vindo de volta</h1>
           <p className="mt-2 text-sm text-muted-foreground">Informe seus dados para acessar o sistema</p>
         </div>
 
