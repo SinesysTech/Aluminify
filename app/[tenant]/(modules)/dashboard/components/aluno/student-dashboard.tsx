@@ -21,8 +21,6 @@ import {
     fetchDashboardEfficiency,
     fetchDashboardStrategic,
     fetchDashboardDistribution,
-    fetchProgressByMonth,
-    fetchLearningPaths,
     fetchLeaderboard,
     type DashboardServiceError,
 } from '../../services/aluno/dashboard.service'
@@ -43,10 +41,6 @@ import { DashboardHeader } from './dashboard-header'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/app/shared/components/feedback/alert'
 import {
-    CourseProgressByMonth,
-    LearningPathCard,
-    type MonthlyProgressItem,
-    type LearningPath,
     type LeaderboardItem,
 } from '../cards'
 
@@ -84,9 +78,6 @@ export default function StudentDashboardClientPage() {
     const [strategic, setStrategic] = useState<StrategicDomain | null>(null)
     const [distribution, setDistribution] = useState<SubjectDistributionItem[]>([])
 
-    // Estados para componentes complementares
-    const [progressByMonth, setProgressByMonth] = useState<MonthlyProgressItem[]>([])
-    const [learningPaths, setLearningPaths] = useState<LearningPath[]>([])
     const [_leaderboard, setLeaderboard] = useState<LeaderboardItem[]>([])
 
     // Sincroniza o ref com o estado para uso em callbacks sem causar loops de dependência
@@ -222,21 +213,7 @@ export default function StudentDashboardClientPage() {
                         .catch(e => console.warn(handleError(e, 'distribuição')))
                 )
 
-                // 8. Progress By Month
-                promises.push(
-                    fetchProgressByMonth(activeOrgId)
-                        .then(setProgressByMonth)
-                        .catch(e => console.warn(handleError(e, 'progresso mensal')))
-                )
-
-                // 9. Learning Paths
-                promises.push(
-                    fetchLearningPaths()
-                        .then(setLearningPaths)
-                        .catch(e => console.warn(handleError(e, 'trilhas')))
-                )
-
-                // 10. Leaderboard
+                // 8. Leaderboard
                 if (activeOrgId) {
                     promises.push(
                         fetchLeaderboard(activeOrgId)
@@ -448,17 +425,7 @@ export default function StudentDashboardClientPage() {
                 />
             </div>
 
-            {/* 3. Tendências: Progresso Mensal + Trilhas */}
-            <div className="grid gap-4 lg:grid-cols-12">
-                <div className="lg:col-span-7">
-                    <CourseProgressByMonth data={progressByMonth} title="Aulas Concluídas por Mês" />
-                </div>
-                <div className="lg:col-span-5">
-                    <LearningPathCard paths={learningPaths} />
-                </div>
-            </div>
-
-            {/* 4. Consistência de Estudo */}
+            {/* 3. Consistência de Estudo */}
             <ConsistencyHeatmap
                 data={heatmap}
                 period={heatmapPeriod}

@@ -299,7 +299,5 @@ export async function fetchDashboardDistribution(
 
 // Re-exportar fetch functions do service principal
 export {
-  fetchProgressByMonth,
-  fetchLearningPaths,
   fetchLeaderboard,
 } from "../dashboard.service";

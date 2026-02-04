@@ -286,30 +286,8 @@ export async function fetchDashboardDistribution(
 // ============================================================
 
 import type {
-  MonthlyProgressItem,
-  LearningPath,
   LeaderboardItem,
 } from "../components/cards";
-
-export async function fetchProgressByMonth(
-  empresaId?: string | null,
-): Promise<MonthlyProgressItem[]> {
-  const params = new URLSearchParams();
-  if (empresaId) params.set("empresa_id", empresaId);
-
-  const response = await apiClient.get<{ data: MonthlyProgressItem[] }>(
-    `/api/dashboard/progress-by-month?${params.toString()}`,
-    empresaId ? { tenantId: empresaId } : undefined,
-  );
-  return response.data;
-}
-
-export async function fetchLearningPaths(): Promise<LearningPath[]> {
-  const response = await apiClient.get<{ data: LearningPath[] }>(
-    "/api/dashboard/learning-paths",
-  );
-  return response.data;
-}
 
 export async function fetchLeaderboard(
   empresaId?: string | null,
