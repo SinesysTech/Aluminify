@@ -19,6 +19,10 @@ import {
   BookOpen,
   Clock,
   Globe,
+  Plus,
+  X,
+  Loader2,
+  Check,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
@@ -42,6 +46,22 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/app/shared/components/overlay/tooltip'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/app/shared/components/overlay/dialog'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/app/shared/components/ui/command'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/shared/library/api-client'
 import { createClient } from '@/app/shared/core/client'
@@ -147,6 +167,98 @@ export function StudentDetails({ student, onUpdate }: StudentDetailsProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
   const [isDeleting, setIsDeleting] = React.useState(false)
   const [isImpersonating, setIsImpersonating] = React.useState(false)
+
+  // Course management state
+  const [removeCourseDialogOpen, setRemoveCourseDialogOpen] = React.useState(false)
+  const [courseToRemove, setCourseToRemove] = React.useState<{ id: string; name: string } | null>(null)
+  const [isRemovingCourse, setIsRemovingCourse] = React.useState(false)
+  const [addCourseDialogOpen, setAddCourseDialogOpen] = React.useState(false)
+  const [availableCourses, setAvailableCourses] = React.useState<{ id: string; name: string }[]>([])
+  const [isLoadingCourses, setIsLoadingCourses] = React.useState(false)
+  const [isAddingCourse, setIsAddingCourse] = React.useState(false)
+  const [selectedCourseToAdd, setSelectedCourseToAdd] = React.useState<string | null>(null)
+
+  const handleRemoveCourse = async () => {
+    if (!courseToRemove) return
+    try {
+      setIsRemovingCourse(true)
+      const updatedCourseIds = student.courseIds.filter(id => id !== courseToRemove.id)
+      await apiClient.put(`/api/usuario/alunos/${student.id}`, {
+        courseIds: updatedCourseIds,
+      })
+      toast({
+        title: 'Curso removido',
+        description: `O aluno foi removido do curso "${courseToRemove.name}".`,
+      })
+      onUpdate()
+    } catch (error) {
+      console.error('Error removing course:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao remover curso',
+        description: 'Não foi possível remover o aluno do curso. Tente novamente.',
+      })
+    } finally {
+      setIsRemovingCourse(false)
+      setRemoveCourseDialogOpen(false)
+      setCourseToRemove(null)
+    }
+  }
+
+  const handleOpenAddCourseDialog = async () => {
+    setAddCourseDialogOpen(true)
+    setSelectedCourseToAdd(null)
+    setIsLoadingCourses(true)
+    try {
+      const supabase = createClient()
+      let query = supabase
+        .from('cursos')
+        .select('id, nome')
+        .order('nome', { ascending: true })
+      if (student.empresaId) {
+        query = query.eq('empresa_id', student.empresaId)
+      }
+      const { data, error } = await query
+      if (error) throw error
+      setAvailableCourses((data ?? []).map(c => ({ id: c.id, name: c.nome })))
+    } catch (error) {
+      console.error('Error fetching courses:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao carregar cursos',
+        description: 'Não foi possível carregar a lista de cursos.',
+      })
+      setAddCourseDialogOpen(false)
+    } finally {
+      setIsLoadingCourses(false)
+    }
+  }
+
+  const handleAddCourse = async (courseId: string) => {
+    try {
+      setIsAddingCourse(true)
+      const updatedCourseIds = [...student.courseIds, courseId]
+      await apiClient.put(`/api/usuario/alunos/${student.id}`, {
+        courseIds: updatedCourseIds,
+      })
+      const addedCourse = availableCourses.find(c => c.id === courseId)
+      toast({
+        title: 'Curso adicionado',
+        description: `O aluno foi adicionado ao curso "${addedCourse?.name ?? 'selecionado'}".`,
+      })
+      setAddCourseDialogOpen(false)
+      onUpdate()
+    } catch (error) {
+      console.error('Error adding course:', error)
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao adicionar curso',
+        description: 'Não foi possível adicionar o aluno ao curso. Tente novamente.',
+      })
+    } finally {
+      setIsAddingCourse(false)
+    }
+  }
 
   const handleDelete = async () => {
     try {
@@ -396,10 +508,20 @@ export function StudentDetails({ student, onUpdate }: StudentDetailsProps) {
         {/* Cursos */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <BookOpen className="h-5 w-5" />
-              Cursos Matriculados
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BookOpen className="h-5 w-5" />
+                Cursos Matriculados
+              </CardTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleOpenAddCourseDialog}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Adicionar curso
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             {student.courses.length === 0 ? (
@@ -410,10 +532,25 @@ export function StudentDetails({ student, onUpdate }: StudentDetailsProps) {
                   <Badge
                     key={course.id}
                     variant="outline"
-                    className="cursor-pointer hover:bg-zinc-100"
-                    onClick={() => router.push(tenant ? `/${tenant}/curso/admin/${course.id}` : `/curso/admin/${course.id}`)}
+                    className="cursor-pointer hover:bg-zinc-100 pr-1 gap-1"
                   >
-                    {course.name}
+                    <span
+                      onClick={() => router.push(tenant ? `/${tenant}/curso/admin/${course.id}` : `/curso/admin/${course.id}`)}
+                    >
+                      {course.name}
+                    </span>
+                    <button
+                      type="button"
+                      className="ml-1 rounded-full p-0.5 hover:bg-zinc-200 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setCourseToRemove(course)
+                        setRemoveCourseDialogOpen(true)
+                      }}
+                      aria-label={`Remover ${course.name}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
                   </Badge>
                 ))}
               </div>
@@ -443,6 +580,86 @@ export function StudentDetails({ student, onUpdate }: StudentDetailsProps) {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Remove Course Dialog */}
+        <AlertDialog open={removeCourseDialogOpen} onOpenChange={setRemoveCourseDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Remover curso</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja remover o aluno <strong>{student.fullName || student.email}</strong> do curso <strong>{courseToRemove?.name}</strong>?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isRemovingCourse} onClick={() => setCourseToRemove(null)}>
+                Cancelar
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleRemoveCourse}
+                disabled={isRemovingCourse}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isRemovingCourse ? 'Removendo...' : 'Remover'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Add Course Dialog */}
+        <Dialog open={addCourseDialogOpen} onOpenChange={setAddCourseDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Adicionar curso</DialogTitle>
+              <DialogDescription>
+                Selecione um curso para matricular o aluno.
+              </DialogDescription>
+            </DialogHeader>
+            {isLoadingCourses ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : (
+              <Command className="rounded-lg border">
+                <CommandInput placeholder="Buscar curso..." />
+                <CommandList>
+                  <CommandEmpty>Nenhum curso disponível.</CommandEmpty>
+                  <CommandGroup>
+                    {availableCourses
+                      .filter(course => !student.courseIds.includes(course.id))
+                      .map((course) => (
+                        <CommandItem
+                          key={course.id}
+                          value={course.name}
+                          onSelect={() => setSelectedCourseToAdd(course.id)}
+                        >
+                          <Check className={`mr-2 h-4 w-4 ${selectedCourseToAdd === course.id ? 'opacity-100' : 'opacity-0'}`} />
+                          {course.name}
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setAddCourseDialogOpen(false)}>
+                Cancelar
+              </Button>
+              <Button
+                onClick={() => selectedCourseToAdd && handleAddCourse(selectedCourseToAdd)}
+                disabled={!selectedCourseToAdd || isAddingCourse}
+              >
+                {isAddingCourse ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Adicionando...
+                  </>
+                ) : (
+                  'Adicionar'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </TooltipProvider>
   )

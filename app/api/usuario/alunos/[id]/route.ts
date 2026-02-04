@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/app/shared/core/server";
+import { getServiceRoleClient } from "@/app/shared/core/database/database-auth";
 import {
   createStudentService,
   StudentConflictError,
@@ -105,14 +106,15 @@ async function getHandler(
   }
 }
 
-// PUT - RLS verifica se é o próprio aluno ou admin
+// PUT - Usa service role quando há courseIds (bypass RLS em alunos_cursos)
 async function putHandler(
   request: AuthenticatedRequest,
   params: { id: string },
 ) {
   try {
     const body = await request.json();
-    const supabase = await createClient();
+    // Operações em alunos_cursos exigem service role (RLS bloqueia insert/delete com anon key)
+    const supabase = body?.courseIds ? getServiceRoleClient() : await createClient();
     const service = createStudentService(supabase);
     const student = await service.update(params.id, {
       fullName: body?.fullName,

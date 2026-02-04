@@ -835,15 +835,31 @@ export class StudentRepositoryImpl implements StudentRepository {
       updateData.senha_temporaria = payload.temporaryPassword;
     }
 
-    const { data, error } = await this.client
-      .from(TABLE)
-      .update(updateData)
-      .eq("id", id)
-      .select("*")
-      .single();
+    let data;
 
-    if (error) {
-      throw new Error(`Failed to update student: ${error.message}`);
+    if (Object.keys(updateData).length > 0) {
+      const result = await this.client
+        .from(TABLE)
+        .update(updateData)
+        .eq("id", id)
+        .select("*")
+        .single();
+
+      if (result.error) {
+        throw new Error(`Failed to update student: ${result.error.message}`);
+      }
+      data = result.data;
+    } else {
+      const result = await this.client
+        .from(TABLE)
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (result.error) {
+        throw new Error(`Failed to fetch student: ${result.error.message}`);
+      }
+      data = result.data;
     }
 
     if (payload.courseIds) {
