@@ -43,6 +43,18 @@ import {
 const TEMPO_PADRAO_MINUTOS = 10;
 const FATOR_MULTIPLICADOR = 1.5;
 
+/**
+ * Converte string "YYYY-MM-DD" em Date à meia-noite LOCAL.
+ *
+ * `new Date("2026-02-12")` cria um instante em UTC midnight, o que no fuso
+ * do Brasil (UTC-3) vira 11/fev 21h – quebrando getDay()/getDate().
+ * Esta função garante que o Date represente meia-noite no fuso local.
+ */
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 // Helper para logs que só aparecem em desenvolvimento
 const logDebug = (...args: unknown[]) => {
   if (process.env.NODE_ENV === "development") {
@@ -115,9 +127,9 @@ export class CronogramaService {
       );
     }
 
-    // Validar datas
-    const dataInicio = new Date(input.data_inicio);
-    const dataFim = new Date(input.data_fim);
+    // Validar datas (parseLocalDate evita deslocamento UTC→local)
+    const dataInicio = parseLocalDate(input.data_inicio);
+    const dataFim = parseLocalDate(input.data_fim);
 
     if (isNaN(dataInicio.getTime()) || isNaN(dataFim.getTime())) {
       throw new CronogramaValidationError("Datas inválidas");
@@ -605,8 +617,8 @@ export class CronogramaService {
       // Verificar se a semana cai em período de férias
       let isFerias = false;
       for (const periodo of ferias || []) {
-        const inicioFerias = new Date(periodo.inicio);
-        const fimFerias = new Date(periodo.fim);
+        const inicioFerias = parseLocalDate(periodo.inicio);
+        const fimFerias = parseLocalDate(periodo.fim);
         if (
           (inicio >= inicioFerias && inicio <= fimFerias) ||
           (fimSemana >= inicioFerias && fimSemana <= fimFerias) ||
@@ -2737,7 +2749,7 @@ export class CronogramaService {
     }
 
     // Calcular datas agrupando por semana
-    const dataInicio = new Date(cronograma.data_inicio);
+    const dataInicio = parseLocalDate(cronograma.data_inicio);
     const atualizacoes: Array<{ id: string; data_prevista: string }> = [];
 
     // Ordenar dias da semana (0=domingo, 1=segunda, ..., 6=sábado)
@@ -2919,11 +2931,14 @@ export class CronogramaService {
           diasNaSemana.length > 0 ? diasNaSemana : diasOrdenados;
         const numDiasParaUsar = diasParaUsar.length;
 
-        // Ordenar os dias para usar na ordem correta
+        // Ordenar os dias para usar em ordem cronológica dentro da janela de 7 dias
+        // Isso garante que as primeiras aulas vão para o dia mais próximo da data base
         const diasParaUsarOrdenados = [...diasParaUsar].sort((a, b) => {
-          const indexA = diasOrdenados.indexOf(a);
-          const indexB = diasOrdenados.indexOf(b);
-          return indexA - indexB;
+          let offsetA = a - diaSemanaBase;
+          if (offsetA < 0) offsetA += 7;
+          let offsetB = b - diaSemanaBase;
+          if (offsetB < 0) offsetB += 7;
+          return offsetA - offsetB;
         });
 
         // Dividir itens da semana igualmente entre os dias selecionados desta semana
@@ -3234,8 +3249,8 @@ export class CronogramaService {
     }
 
     // Calcular semanas (mesma lógica do calcularSemanas)
-    const dataInicio = new Date(cronograma.data_inicio);
-    const dataFim = new Date(cronograma.data_fim);
+    const dataInicio = parseLocalDate(cronograma.data_inicio);
+    const dataFim = parseLocalDate(cronograma.data_fim);
     const ferias =
       (cronograma.periodos_ferias as unknown as FeriasPeriodo[]) || [];
     const horasDia = cronograma.horas_estudo_dia || 0;
@@ -3379,19 +3394,21 @@ export class CronogramaService {
     diasEstudoSemana: number,
   ): Promise<void> {
     // Calcular dias padrão baseado em dias_estudo_semana
-    // Se dias_estudo_semana = 5, usar segunda a sexta [1,2,3,4,5]
-    // Se dias_estudo_semana = 3, usar segunda, quarta, sexta [1,3,5]
-    // etc.
+    // 0=dom, 1=seg, 2=ter, 3=qua, 4=qui, 5=sex, 6=sab
     let diasPadrao: number[] = [];
 
-    if (diasEstudoSemana >= 5) {
+    if (diasEstudoSemana >= 7) {
+      diasPadrao = [0, 1, 2, 3, 4, 5, 6]; // Segunda a domingo (todos)
+    } else if (diasEstudoSemana === 6) {
+      diasPadrao = [1, 2, 3, 4, 5, 6]; // Segunda a sábado
+    } else if (diasEstudoSemana === 5) {
       diasPadrao = [1, 2, 3, 4, 5]; // Segunda a sexta
     } else if (diasEstudoSemana === 4) {
       diasPadrao = [1, 2, 4, 5]; // Segunda, terça, quinta, sexta
     } else if (diasEstudoSemana === 3) {
       diasPadrao = [1, 3, 5]; // Segunda, quarta, sexta
     } else if (diasEstudoSemana === 2) {
-      diasPadrao = [1, 4]; // Segunda e quinta
+      diasPadrao = [2, 4]; // Terça e quinta
     } else {
       diasPadrao = [1]; // Apenas segunda
     }

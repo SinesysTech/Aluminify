@@ -6,6 +6,15 @@ import ical from 'ical-generator'
 
 export const runtime = 'nodejs'
 
+/**
+ * Converte string "YYYY-MM-DD" em Date à meia-noite LOCAL.
+ * `new Date("2026-02-12")` cria UTC midnight → no Brasil (UTC-3) vira dia anterior.
+ */
+function parseLocalDate(dateStr: string): Date {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
 interface CronogramaExport {
   nome: string;
   data_inicio: string;
@@ -76,8 +85,8 @@ function buildIcs(cronograma: CronogramaExport, itens: ItemExport[]): string {
     }
 
     try {
-      // Parsear data_prevista (formato YYYY-MM-DD)
-      const dataPrevista = new Date(item.data_prevista)
+      // Parsear data_prevista (formato YYYY-MM-DD) como data local
+      const dataPrevista = parseLocalDate(item.data_prevista)
       if (isNaN(dataPrevista.getTime())) {
         console.warn(`Data inválida para item ${item.id}: ${item.data_prevista}`)
         return
