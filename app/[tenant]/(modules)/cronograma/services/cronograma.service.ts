@@ -164,8 +164,8 @@ export class CronogramaService {
       userName,
     );
 
-    // Deletar cronograma anterior do aluno (se existir)
-    await this.deletarCronogramaAnterior(client, userId);
+    // Deletar cronograma anterior do aluno NESTA EMPRESA (se existir)
+    await this.deletarCronogramaAnterior(client, userId, resolvedEmpresaId);
 
     const excluirConcluidas = input.excluir_aulas_concluidas !== false;
     const aulasConcluidas = excluirConcluidas
@@ -465,16 +465,19 @@ export class CronogramaService {
   private async deletarCronogramaAnterior(
     client: ReturnType<typeof getDatabaseClient>,
     userId: string,
+    empresaId: string,
   ): Promise<void> {
     console.log(
-      "[CronogramaService] Verificando e deletando cronograma anterior...",
+      "[CronogramaService] Verificando e deletando cronograma anterior para empresa:",
+      empresaId,
     );
 
-    // Buscar cronograma existente do aluno
+    // Buscar cronograma existente do aluno NESTA EMPRESA
     const { data: cronogramaExistente, error: selectError } = await client
       .from("cronogramas")
       .select("id")
       .eq("usuario_id", userId)
+      .eq("empresa_id", empresaId)
       .maybeSingle();
 
     if (selectError) {
@@ -490,6 +493,8 @@ export class CronogramaService {
       console.log(
         "[CronogramaService] Deletando cronograma anterior:",
         cronogramaExistente.id,
+        "da empresa:",
+        empresaId,
       );
 
       // Deletar cronograma (cascade vai deletar os itens automaticamente devido ao ON DELETE CASCADE)
@@ -512,7 +517,7 @@ export class CronogramaService {
         "[CronogramaService] Cronograma anterior deletado com sucesso",
       );
     } else {
-      console.log("[CronogramaService] Nenhum cronograma anterior encontrado");
+      console.log("[CronogramaService] Nenhum cronograma anterior encontrado para esta empresa");
     }
   }
 
