@@ -71,97 +71,95 @@ export function AgendamentoActions({ agendamento }: AgendamentoActionsProps) {
 
   return (
     <div className="flex items-center gap-2">
-      {/* Confirm Dialog */}
+      {/* Confirm Dialog Removed - Auto-confirmation implemented */}
+      {/* 
       <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
-        <DialogTrigger asChild>
-          <Button size="sm" variant="default" className="gap-1" aria-label="Confirmar agendamento">
-            <Check className="h-4 w-4" />
-            <span className="hidden md:inline">Confirmar</span>
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmar Agendamento</DialogTitle>
-            <DialogDescription>
-              Confirme o agendamento e opcionalmente adicione um link de reunião.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="link">Link da Reunião (opcional)</Label>
-              <Input
-                id="link"
-                placeholder="https://meet.google.com/..."
-                value={linkReuniao}
-                onChange={(e) => setLinkReuniao(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Cole o link do Google Meet, Zoom ou outra plataforma
-              </p>
-            </div>
+        ...
+      </Dialog> 
+      */}
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirmar Agendamento</DialogTitle>
+          <DialogDescription>
+            Confirme o agendamento e opcionalmente adicione um link de reunião.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="link">Link da Reunião (opcional)</Label>
+            <Input
+              id="link"
+              placeholder="https://meet.google.com/..."
+              value={linkReuniao}
+              onChange={(e) => setLinkReuniao(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Cole o link do Google Meet, Zoom ou outra plataforma
+            </p>
           </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmDialogOpen(false)}
-              disabled={isConfirming}
-            >
-              Cancelar
-            </Button>
-            <Button onClick={handleConfirm} disabled={isConfirming}>
-              {isConfirming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Confirmar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setConfirmDialogOpen(false)}
+            disabled={isConfirming}
+          >
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirm} disabled={isConfirming}>
+            {isConfirming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Confirmar
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
-      {/* Reject Dialog */}
-      <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
-        <DialogTrigger asChild>
-          <Button size="sm" variant="outline" className="gap-1 text-destructive hover:text-destructive" aria-label="Rejeitar agendamento">
-            <X className="h-4 w-4" />
-            <span className="hidden md:inline">Rejeitar</span>
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rejeitar Agendamento</DialogTitle>
-            <DialogDescription>
-              Informe o motivo da rejeição. O aluno será notificado.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="motivo">Motivo da Rejeição</Label>
-              <Textarea
-                id="motivo"
-                placeholder="Ex: Horário indisponível, preciso reagendar..."
-                value={motivoRejeicao}
-                onChange={(e) => setMotivoRejeicao(e.target.value)}
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setRejectDialogOpen(false)}
-              disabled={isRejecting}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleReject}
-              disabled={isRejecting || !motivoRejeicao.trim()}
-            >
-              {isRejecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Rejeitar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+      {/* Reject Dialog */ }
+  <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+    <DialogTrigger asChild>
+      <Button size="sm" variant="outline" className="gap-1 text-destructive hover:text-destructive" aria-label="Rejeitar agendamento">
+        <X className="h-4 w-4" />
+        <span className="hidden md:inline">Rejeitar</span>
+      </Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Rejeitar Agendamento</DialogTitle>
+        <DialogDescription>
+          Informe o motivo da rejeição. O aluno será notificado.
+        </DialogDescription>
+      </DialogHeader>
+      <div className="space-y-4 py-4">
+        <div className="space-y-2">
+          <Label htmlFor="motivo">Motivo da Rejeição</Label>
+          <Textarea
+            id="motivo"
+            placeholder="Ex: Horário indisponível, preciso reagendar..."
+            value={motivoRejeicao}
+            onChange={(e) => setMotivoRejeicao(e.target.value)}
+            rows={3}
+          />
+        </div>
+      </div>
+      <DialogFooter>
+        <Button
+          variant="outline"
+          onClick={() => setRejectDialogOpen(false)}
+          disabled={isRejecting}
+        >
+          Cancelar
+        </Button>
+        <Button
+          variant="destructive"
+          onClick={handleReject}
+          disabled={isRejecting || !motivoRejeicao.trim()}
+        >
+          {isRejecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Rejeitar
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+    </div >
   )
 }

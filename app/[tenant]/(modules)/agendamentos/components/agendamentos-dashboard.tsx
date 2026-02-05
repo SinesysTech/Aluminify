@@ -6,8 +6,9 @@ import type { AgendamentoComDetalhes } from "@/app/[tenant]/(modules)/agendament
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AgendamentosList } from "./agendamentos-list"
-import { CalendarDays, Clock, CheckCircle, XCircle } from "lucide-react"
+import { CalendarDays, Clock, CheckCircle, XCircle, Grid3X3 } from "lucide-react"
 import { AgendamentosSituacaoChart } from "./agendamentos-situacao-chart"
+import { AgendamentoWeeklyGrid } from "./agendamento-weekly-grid"
 
 interface AgendamentosDashboardProps {
   agendamentos: AgendamentoComDetalhes[]
@@ -24,10 +25,10 @@ interface AgendamentosDashboardProps {
 export function AgendamentosDashboard({
   agendamentos,
   stats,
-   
   professorId: _professorId
 }: AgendamentosDashboardProps) {
-  const [activeTab, setActiveTab] = useState("pendentes")
+  // Default to weekly view as it's the requested improvement
+  const [activeTab, setActiveTab] = useState("semana")
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -35,8 +36,7 @@ export function AgendamentosDashboard({
     setIsMounted(true)
   }, [])
 
-  const pendentes = agendamentos.filter(a => a.status === "pendente")
-  const confirmados = agendamentos.filter(a => a.status === "confirmado")
+  const ativos = agendamentos.filter(a => a.status === "confirmado" || a.status === "pendente")
   const historico = agendamentos.filter(a =>
     a.status === "cancelado" || a.status === "concluido"
   )
@@ -51,17 +51,18 @@ export function AgendamentosDashboard({
           icon={CalendarDays}
           variant="default"
         />
+        {/* Keeping "Pendentes" stat just in case some legacy data remains, but focusing on "Confirmados" */}
         <StatsCard
-          title="Pendentes"
+          title="Agendados"
+          value={stats.confirmados + stats.pendentes}
+          icon={CheckCircle}
+          variant="success"
+        />
+        <StatsCard
+          title="Pendentes (Legado)"
           value={stats.pendentes}
           icon={Clock}
           variant="warning"
-        />
-        <StatsCard
-          title="Confirmados"
-          value={stats.confirmados}
-          icon={CheckCircle}
-          variant="success"
         />
         <StatsCard
           title="Cancelados"
@@ -80,31 +81,30 @@ export function AgendamentosDashboard({
       {/* Tabs */}
       {isMounted ? (
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="pendentes">
-              Pendentes ({pendentes.length})
-            </TabsTrigger>
-            <TabsTrigger value="confirmados">
-              Confirmados ({confirmados.length})
-            </TabsTrigger>
-            <TabsTrigger value="historico">
-              Historico ({historico.length})
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between">
+            <TabsList>
+              <TabsTrigger value="semana" className="gap-2">
+                <Grid3X3 className="h-4 w-4" />
+                Visão Semanal
+              </TabsTrigger>
+              <TabsTrigger value="lista">
+                Lista ({ativos.length})
+              </TabsTrigger>
+              <TabsTrigger value="historico">
+                Histórico ({historico.length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="pendentes" className="mt-4">
-            <AgendamentosList
-              agendamentos={pendentes}
-              showActions={true}
-              emptyMessage="Nenhum agendamento pendente"
-            />
+          <TabsContent value="semana" className="mt-4">
+            <AgendamentoWeeklyGrid agendamentos={ativos} />
           </TabsContent>
 
-          <TabsContent value="confirmados" className="mt-4">
+          <TabsContent value="lista" className="mt-4">
             <AgendamentosList
-              agendamentos={confirmados}
+              agendamentos={ativos}
               showActions={true}
-              emptyMessage="Nenhum agendamento confirmado"
+              emptyMessage="Nenhum agendamento ativo"
             />
           </TabsContent>
 
@@ -112,43 +112,14 @@ export function AgendamentosDashboard({
             <AgendamentosList
               agendamentos={historico}
               showActions={false}
-              emptyMessage="Nenhum agendamento no historico"
+              emptyMessage="Nenhum agendamento no histórico"
             />
           </TabsContent>
         </Tabs>
       ) : (
         <div className="mt-4">
-          <div className="inline-flex h-9 items-center justify-center rounded-lg bg-gray-3 p-1 text-gray-11 ring-1 ring-gray-5">
-            <button
-              type="button"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all bg-gray-1 text-foreground shadow"
-              disabled
-            >
-              Pendentes ({pendentes.length})
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all opacity-50"
-              disabled
-            >
-              Confirmados ({confirmados.length})
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all opacity-50"
-              disabled
-            >
-              Historico ({historico.length})
-            </button>
-          </div>
-
-          <div className="mt-4">
-            <AgendamentosList
-              agendamentos={pendentes}
-              showActions={true}
-              emptyMessage="Nenhum agendamento pendente"
-            />
-          </div>
+          {/* Fallback for SSR */}
+          Carregando visualização...
         </div>
       )}
     </div>

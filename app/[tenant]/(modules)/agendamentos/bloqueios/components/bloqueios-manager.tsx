@@ -376,7 +376,7 @@ export function BloqueiosManager({ professorId, empresaId, isAdmin = false, curr
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="empresa">Toda a Empresa</SelectItem>
-                      <SelectItem value="pessoal">Apenas Eu</SelectItem>
+                      <SelectItem value="pessoal">Apenas Este Professor</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

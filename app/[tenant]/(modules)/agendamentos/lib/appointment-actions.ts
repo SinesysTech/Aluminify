@@ -69,7 +69,9 @@ export async function createAgendamento(
       .limit(1);
 
     if (!enrollment || enrollment.length === 0) {
-      throw new Error("Você só pode agendar com professores da sua instituição");
+      throw new Error(
+        "Você só pode agendar com professores da sua instituição",
+      );
     }
   }
 
@@ -105,10 +107,11 @@ export async function createAgendamento(
   const payload = {
     ...data,
     aluno_id: user.id, // Direct association to logged in student
-    status: autoConfirmar ? "confirmado" : "pendente",
+    aluno_id: user.id, // Direct association to logged in student
+    status: "confirmado", // Always confirmed per new business rule
     data_inicio,
     data_fim,
-    confirmado_em: autoConfirmar ? new Date().toISOString() : null,
+    confirmado_em: new Date().toISOString(),
   };
 
   const { data: result, error } = await supabase
@@ -248,11 +251,17 @@ export async function getAgendamentosAluno(
   }
 
   if (!empresaId) {
-    console.error("empresa_id is required for tenant isolation in getAgendamentosAluno");
+    console.error(
+      "empresa_id is required for tenant isolation in getAgendamentosAluno",
+    );
     return [];
   }
 
-  const query = supabase.from("agendamentos").select("*").eq("aluno_id", alunoId).eq("empresa_id", empresaId);
+  const query = supabase
+    .from("agendamentos")
+    .select("*")
+    .eq("aluno_id", alunoId)
+    .eq("empresa_id", empresaId);
   const { data: agendamentos, error } = await query.order("data_inicio", {
     ascending: false,
   });
@@ -516,7 +525,10 @@ export async function rejeitarAgendamento(id: string, motivo: string) {
   if (agendamento.aluno_id && agendamento.empresa_id) {
     try {
       const plantaoQuotaService = new PlantaoQuotaService(supabase);
-      await plantaoQuotaService.decrementUsage(agendamento.aluno_id, agendamento.empresa_id);
+      await plantaoQuotaService.decrementUsage(
+        agendamento.aluno_id,
+        agendamento.empresa_id,
+      );
     } catch (decError) {
       console.error("Error decrementing plantao usage on rejection:", decError);
     }
@@ -582,9 +594,15 @@ export async function cancelAgendamentoWithReason(id: string, motivo?: string) {
   if (agendamento.aluno_id && agendamento.empresa_id) {
     try {
       const plantaoQuotaService = new PlantaoQuotaService(supabase);
-      await plantaoQuotaService.decrementUsage(agendamento.aluno_id, agendamento.empresa_id);
+      await plantaoQuotaService.decrementUsage(
+        agendamento.aluno_id,
+        agendamento.empresa_id,
+      );
     } catch (decError) {
-      console.error("Error decrementing plantao usage on cancellation:", decError);
+      console.error(
+        "Error decrementing plantao usage on cancellation:",
+        decError,
+      );
     }
   }
 
