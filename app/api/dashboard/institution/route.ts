@@ -19,7 +19,6 @@ async function getHandler(request: AuthenticatedRequest) {
   try {
     const userId = request.user?.id;
     const empresaId = request.user?.empresaId;
-    const roleType = request.user?.roleType;
     if (!userId) {
       return NextResponse.json(
         { error: "Usuário não autenticado" },

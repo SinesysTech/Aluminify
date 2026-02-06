@@ -10,7 +10,7 @@ interface PageShellProps {
 
 export function PageShell({ title, subtitle, actions, children, className }: PageShellProps) {
   return (
-    <div className={cn("space-y-4 md:space-y-6", className)}>
+    <div className={cn("mx-auto max-w-7xl space-y-4 md:space-y-6", className)}>
       <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           {typeof title === "string" ? (

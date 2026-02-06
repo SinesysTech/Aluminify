@@ -454,7 +454,7 @@ export default function FocoClient() {
                 />
             )}
 
-            <div className="container mx-auto max-w-3xl" aria-hidden={isCleanView}>
+            <div aria-hidden={isCleanView}>
                 <PageShell
                     title="Modo Foco"
                     subtitle="Estudo imersivo para máxima concentração"

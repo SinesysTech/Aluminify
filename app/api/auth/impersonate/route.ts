@@ -10,7 +10,6 @@ import {
 } from "@/app/shared/core/auth-impersonate";
 import { invalidateAuthSessionCache } from "@/app/shared/core/auth";
 import type { PapelBase } from "@/app/shared/types";
-import type { Database } from "@/app/shared/core/database.types";
 
 async function postHandler(request: AuthenticatedRequest) {
   try {

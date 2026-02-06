@@ -9,9 +9,9 @@ import { ConversationsPanel } from './conversations-panel'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/app/shared/components/forms/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { MessageSquare, Paperclip, X, ArrowUp, Loader2, ChevronDown } from 'lucide-react'
 import { cn } from '@/shared/library/utils'
+import { Markdown } from '@/app/shared/components/ui/custom/prompt/markdown'
 import type { Conversation as ConversationType } from '@/app/tobias/services/conversation'
 import type { AIAgentChatConfig } from '@/app/shared/services/ai-agents'
 
@@ -520,26 +520,28 @@ export function N8nChatSection({ agentConfig }: N8nChatSectionProps) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-8rem)] flex-col overflow-hidden">
-      <div className="mb-2 md:mb-4 flex items-center gap-2 shrink-0">
+    <div className="mx-auto flex max-w-7xl h-[calc(100dvh-10rem)] md:h-[calc(100dvh-7.5rem)] flex-col">
+      {/* Header */}
+      <header className="flex items-center gap-3 shrink-0 pb-4 md:pb-6">
         <Button
           variant="outline"
           size="icon"
           onClick={() => setConversationsPanelOpen(!conversationsPanelOpen)}
-          className="h-10 w-10 md:h-9 md:w-9"
+          className="h-9 w-9 shrink-0"
         >
           <MessageSquare className="h-4 w-4" />
           <span className="sr-only">Toggle conversas</span>
         </Button>
-        <div>
+        <div className="min-w-0">
           <h1 className="page-title">{agentConfig.name}</h1>
           <p className="page-subtitle">
             Tire suas dúvidas e receba ajuda personalizada
           </p>
         </div>
-      </div>
+      </header>
 
-      <div className="flex flex-1 min-h-0 overflow-hidden rounded-lg border">
+      {/* Chat container */}
+      <div className="flex flex-1 min-h-0 overflow-hidden rounded-xl border dark:border-white/5">
         {/* Painel de conversas */}
         <ConversationsPanel
           selectedConversationId={selectedConversationId}
@@ -553,23 +555,24 @@ export function N8nChatSection({ agentConfig }: N8nChatSectionProps) {
         />
 
         {/* Área do chat */}
-        <div className="relative flex flex-1 flex-col min-h-0">
-          <ScrollArea
-            className="flex-1 p-4"
+        <div className="relative flex flex-1 flex-col min-h-0 min-w-0">
+          {/* Messages - scroll nativo para barra sempre visível */}
+          <div
+            className="flex-1 overflow-y-auto overscroll-contain p-4"
             ref={scrollAreaRef}
-            onScrollCapture={handleScroll}
+            onScroll={handleScroll}
           >
-            <div className="flex flex-col gap-4">
+            <div className="mx-auto flex max-w-3xl flex-col gap-4">
               {messages.length === 0 && (
                 <div className="group flex w-full items-end gap-2 py-4 justify-start">
-                  <Avatar className="ring-1 ring-border size-10 mr-2">
+                  <Avatar className="ring-1 ring-border size-10 shrink-0">
                     <AvatarImage alt={agentConfig.name} src={agentConfig.avatarUrl || undefined} />
                     <AvatarFallback>{agentConfig.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-foreground text-sm bg-secondary max-w-[80%]">
-                    <div className="whitespace-pre-wrap">
+                  <div className="flex flex-col gap-2 overflow-hidden rounded-2xl rounded-bl-md px-4 py-3 text-foreground text-sm bg-secondary max-w-[80%]">
+                    <Markdown className="prose prose-sm dark:prose-invert max-w-none wrap-break-word">
                       {agentConfig.greetingMessage || `Olá! Eu sou o ${agentConfig.name}. Como posso ajudá-lo hoje?`}
-                    </div>
+                    </Markdown>
                   </div>
                 </div>
               )}
@@ -578,32 +581,34 @@ export function N8nChatSection({ agentConfig }: N8nChatSectionProps) {
                 <div
                   key={message.id}
                   className={cn(
-                    'group flex w-full items-end gap-2 py-2',
+                    'group flex w-full items-end gap-2',
                     message.role === 'user' ? 'justify-end' : 'justify-start'
                   )}
                 >
                   {message.role === 'assistant' && (
-                    <Avatar className="ring-1 ring-border size-10 mr-2">
+                    <Avatar className="ring-1 ring-border size-10 shrink-0">
                       <AvatarImage alt={agentConfig.name} src={agentConfig.avatarUrl || undefined} />
                       <AvatarFallback>{agentConfig.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   )}
                   <div
                     className={cn(
-                      'flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-sm max-w-[80%]',
+                      'flex flex-col gap-2 overflow-hidden px-4 py-3 text-sm max-w-[80%]',
                       message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-foreground'
+                        ? 'rounded-2xl rounded-br-md bg-primary text-primary-foreground'
+                        : 'rounded-2xl rounded-bl-md bg-secondary text-foreground'
                     )}
                   >
                     {message.role === 'user' ? (
                       renderUserMessage(message.content)
                     ) : (
-                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      <Markdown className="prose prose-sm dark:prose-invert max-w-none wrap-break-word">
+                        {message.content}
+                      </Markdown>
                     )}
                   </div>
                   {message.role === 'user' && (
-                    <Avatar className="ring-1 ring-border size-8 ml-2">
+                    <Avatar className="ring-1 ring-border size-8 shrink-0">
                       <AvatarImage alt="Você" src="" />
                       <AvatarFallback>VO</AvatarFallback>
                     </Avatar>
@@ -612,53 +617,58 @@ export function N8nChatSection({ agentConfig }: N8nChatSectionProps) {
               ))}
 
               {isLoading && (
-                <div className="group flex w-full items-end gap-2 py-2 justify-start">
-                  <Avatar className="ring-1 ring-border size-10 mr-2">
+                <div className="group flex w-full items-end gap-2 justify-start">
+                  <Avatar className="ring-1 ring-border size-10 shrink-0">
                     <AvatarImage alt={agentConfig.name} src={agentConfig.avatarUrl || undefined} />
                     <AvatarFallback>{agentConfig.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
-                  <div className="flex flex-col gap-2 overflow-hidden rounded-lg px-4 py-3 text-foreground text-sm bg-secondary">
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                  <div className="flex items-center gap-1.5 overflow-hidden rounded-2xl rounded-bl-md px-4 py-3 text-foreground text-sm bg-secondary">
+                    <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.3s]" />
+                    <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground/60 [animation-delay:-0.15s]" />
+                    <span className="size-1.5 animate-bounce rounded-full bg-muted-foreground/60" />
                   </div>
                 </div>
               )}
 
               {error && (
-                <div className="bg-destructive/10 text-destructive rounded-lg p-4">
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-lg p-4 text-sm">
                   <p className="font-medium">Erro ao enviar mensagem</p>
-                  <p className="text-sm">{error}</p>
+                  <p className="mt-1">{error}</p>
                 </div>
               )}
 
               <div ref={messagesEndRef} />
             </div>
-          </ScrollArea>
+          </div>
 
+          {/* Scroll to bottom button */}
           {showScrollButton && (
             <Button
               variant="outline"
               size="icon"
-              className="absolute bottom-24 right-4 rounded-full shadow-md"
+              className="absolute bottom-24 left-1/2 -translate-x-1/2 rounded-full shadow-md z-10"
               onClick={scrollToBottom}
             >
               <ChevronDown className="h-4 w-4" />
             </Button>
           )}
 
-          <div className="bg-background p-2 md:p-4 sticky bottom-0">
-            <div className="space-y-2">
+          {/* Input area - fixo no rodapé */}
+          <div className="shrink-0 border-t bg-background p-2 md:p-4">
+            <div className="mx-auto max-w-3xl space-y-2">
               {attachments.length > 0 && (
-                <div className="flex flex-wrap gap-2 rounded-md border border-dashed border-muted-foreground/40 p-2 text-xs">
+                <div className="flex flex-wrap gap-2 rounded-lg border border-dashed border-muted-foreground/30 p-2 text-xs">
                   {attachments.map((file, index) => (
                     <div
                       key={`${file.name}-${index}`}
-                      className="flex items-center gap-2 rounded bg-muted px-2 py-1.5"
+                      className="flex items-center gap-2 rounded-md bg-muted px-2.5 py-1.5"
                     >
-                      <span className="truncate max-w-[120px] md:max-w-[150px] text-xs">{file.name}</span>
+                      <Paperclip className="h-3 w-3 shrink-0 text-muted-foreground" />
+                      <span className="truncate max-w-[120px] md:max-w-[180px] text-xs">{file.name}</span>
                       <button
                         type="button"
                         onClick={() => removeAttachment(index)}
-                        className="text-muted-foreground hover:text-foreground h-5 w-5 flex items-center justify-center"
+                        className="text-muted-foreground hover:text-foreground transition-colors"
                         aria-label="Remover anexo"
                       >
                         <X className="h-3.5 w-3.5" />
@@ -670,7 +680,7 @@ export function N8nChatSection({ agentConfig }: N8nChatSectionProps) {
 
               <form
                 onSubmit={handleSubmit}
-                className="w-full divide-y overflow-hidden rounded-xl border bg-background shadow-sm"
+                className="w-full divide-y overflow-hidden rounded-xl border bg-background shadow-sm transition-shadow focus-within:shadow-md focus-within:ring-1 focus-within:ring-ring/20"
               >
                 <Textarea
                   ref={inputRef}
@@ -696,7 +706,7 @@ export function N8nChatSection({ agentConfig }: N8nChatSectionProps) {
                       size="icon"
                       disabled={isLoading || !userId}
                       onClick={() => fileInputRef.current?.click()}
-                      className="h-10 w-10 md:h-9 md:w-9"
+                      className="h-9 w-9"
                     >
                       <Paperclip className="h-4 w-4" />
                       <span className="sr-only">Adicionar anexos</span>

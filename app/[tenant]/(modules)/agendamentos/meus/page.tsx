@@ -8,9 +8,11 @@ import { Plus } from "lucide-react"
 import { MeusAgendamentosList } from "../components/meus-agendamentos-list"
 import { ProfessorAgendamentosView } from "../components/agendamentos-professor-view"
 import { requireUser } from "@/app/shared/core/auth"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { CalendarDays, CheckCircle, XCircle } from "lucide-react"
 import { AgendamentosSituacaoChart } from "../components/agendamentos-situacao-chart"
+import { PageShell } from '@/app/shared/components/layout/page-shell'
+import { cn } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Meus Agendamentos'
@@ -52,64 +54,98 @@ export default async function MeusAgendamentosPage({ params }: MeusAgendamentosP
   }
 
   return (
-    <div className="flex flex-col gap-6 p-2 md:p-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="page-title">Meus Agendamentos</h1>
-          <p className="page-subtitle">
-            Acompanhe suas sessões agendadas e o status de cada atendimento.
-          </p>
-        </div>
+    <PageShell
+      title="Meus Agendamentos"
+      subtitle="Acompanhe suas sessões agendadas e o status de cada atendimento."
+      actions={
         <Button asChild>
           <Link href={`/${tenant}/agendamentos`}>
             <Plus className="mr-2 h-4 w-4" />
             Agendar atendimento
           </Link>
         </Button>
+      }
+    >
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-3">
+        <StatsCard title="Total do mês" value={stats.total} icon={CalendarDays} variant="default" />
+        <StatsCard title="Confirmados" value={stats.confirmados} icon={CheckCircle} variant="success" />
+        <StatsCard title="Cancelados" value={stats.cancelados} icon={XCircle} variant="destructive" />
       </div>
 
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <StatsCard title="Total do mês" value={stats.total} icon={CalendarDays} variant="default" />
-          <StatsCard title="Confirmados" value={stats.confirmados} icon={CheckCircle} variant="success" />
-          <StatsCard title="Cancelados" value={stats.cancelados} icon={XCircle} variant="destructive" />
-        </div>
+      <AgendamentosSituacaoChart
+        title="Situação gráfica"
+        description="Distribuição dos seus agendamentos neste mês."
+        stats={stats}
+      />
 
-        <AgendamentosSituacaoChart
-          title="Situação gráfica"
-          description="Distribuição dos seus agendamentos neste mês."
-          stats={stats}
-        />
-
-        <MeusAgendamentosList agendamentos={agendamentos} />
-      </div>
-    </div>
+      <MeusAgendamentosList agendamentos={agendamentos} />
+    </PageShell>
   )
 }
+
+type StatsCardVariant = "default" | "warning" | "success" | "destructive"
 
 type StatsCardProps = {
   title: string
   value: number
   icon: ElementType
-  variant: "default" | "warning" | "success" | "destructive"
+  variant: StatsCardVariant
+}
+
+const variantConfig: Record<StatsCardVariant, {
+  iconBg: string
+  accentFrom: string
+  accentTo: string
+  hoverShadow: string
+}> = {
+  default: {
+    iconBg: 'bg-linear-to-br from-blue-500 to-indigo-500',
+    accentFrom: 'from-blue-400',
+    accentTo: 'to-indigo-500',
+    hoverShadow: 'hover:shadow-blue-500/8',
+  },
+  warning: {
+    iconBg: 'bg-linear-to-br from-amber-500 to-orange-500',
+    accentFrom: 'from-amber-400',
+    accentTo: 'to-orange-500',
+    hoverShadow: 'hover:shadow-amber-500/8',
+  },
+  success: {
+    iconBg: 'bg-linear-to-br from-emerald-500 to-green-500',
+    accentFrom: 'from-emerald-400',
+    accentTo: 'to-green-500',
+    hoverShadow: 'hover:shadow-emerald-500/8',
+  },
+  destructive: {
+    iconBg: 'bg-linear-to-br from-rose-500 to-red-500',
+    accentFrom: 'from-rose-400',
+    accentTo: 'to-red-500',
+    hoverShadow: 'hover:shadow-rose-500/8',
+  },
 }
 
 function StatsCard({ title, value, icon: Icon, variant }: StatsCardProps) {
-  const variantStyles = {
-    default: "text-foreground",
-    warning: "text-amber-600 dark:text-amber-400",
-    success: "text-emerald-600 dark:text-emerald-400",
-    destructive: "text-red-600 dark:text-red-400",
-  }
+  const config = variantConfig[variant]
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <Icon className={`h-4 w-4 ${variantStyles[variant]}`} />
-      </CardHeader>
-      <CardContent>
-        <div className={`text-2xl font-bold ${variantStyles[variant]}`}>{value}</div>
+    <Card className={cn(
+      'group overflow-hidden transition-all duration-300 py-0 gap-0 rounded-2xl',
+      'dark:bg-card/80 dark:backdrop-blur-sm dark:border-white/5',
+      'hover:shadow-lg',
+      config.hoverShadow,
+    )}>
+      <div className={cn('h-0.5 bg-linear-to-r', config.accentFrom, config.accentTo)} />
+      <CardContent className="p-4 md:p-5">
+        <div className="flex items-start justify-between mb-2">
+          <span className="text-sm font-medium text-muted-foreground leading-tight">{title}</span>
+          <div className={cn(
+            'flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-110',
+            config.iconBg
+          )}>
+            <Icon className="h-4 w-4 md:h-[18px] md:w-[18px] text-white" />
+          </div>
+        </div>
+        <span className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">{value}</span>
       </CardContent>
     </Card>
   )
