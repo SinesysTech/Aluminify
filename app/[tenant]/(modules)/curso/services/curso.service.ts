@@ -6,10 +6,7 @@ import {
   CourseType,
 } from "./curso.types";
 import { CursoRepository, PaginatedResult } from "./curso.repository";
-import {
-  CourseValidationError,
-  CourseNotFoundError,
-} from "./errors";
+import { CourseValidationError, CourseNotFoundError } from "./errors";
 import { PaginationParams } from "@/app/shared/types/dtos/api-responses";
 
 const VALID_MODALITIES: Modality[] = ["EAD", "LIVE"];
@@ -85,16 +82,17 @@ export class CursoService {
 
     if (disciplineIds.length > 0) {
       const uniqueIds = Array.from(new Set(disciplineIds));
-      const existingIds = await this.repository.getExistingDisciplineIds(uniqueIds);
+      const existingIds =
+        await this.repository.getExistingDisciplineIds(uniqueIds);
 
       if (existingIds.length !== uniqueIds.length) {
         const existingSet = new Set(existingIds);
         for (const id of uniqueIds) {
-           if (!existingSet.has(id)) {
-             throw new CourseValidationError(
-               `Discipline with id "${id}" does not exist`,
-             );
-           }
+          if (!existingSet.has(id)) {
+            throw new CourseValidationError(
+              `Discipline with id "${id}" does not exist`,
+            );
+          }
         }
       }
     }
@@ -106,6 +104,7 @@ export class CursoService {
       disciplineIds: disciplineIds, // Nova propriedade
       name,
       modality,
+      modalityId: payload.modalityId ?? undefined,
       type,
       description,
       year,
@@ -194,16 +193,17 @@ export class CursoService {
     if (payload.disciplineIds !== undefined) {
       if (payload.disciplineIds.length > 0) {
         const uniqueIds = Array.from(new Set(payload.disciplineIds));
-        const existingIds = await this.repository.getExistingDisciplineIds(uniqueIds);
+        const existingIds =
+          await this.repository.getExistingDisciplineIds(uniqueIds);
 
         if (existingIds.length !== uniqueIds.length) {
           const existingSet = new Set(existingIds);
           for (const id of uniqueIds) {
-             if (!existingSet.has(id)) {
-               throw new CourseValidationError(
-                 `Discipline with id "${id}" does not exist`,
-               );
-             }
+            if (!existingSet.has(id)) {
+              throw new CourseValidationError(
+                `Discipline with id "${id}" does not exist`,
+              );
+            }
           }
         }
       }
