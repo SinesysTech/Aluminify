@@ -10,7 +10,7 @@ import { MeusAgendamentosList } from "../components/meus-agendamentos-list"
 import { ProfessorAgendamentosView } from "../components/agendamentos-professor-view"
 import { requireUser } from "@/app/shared/core/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CalendarDays, Clock, CheckCircle, XCircle } from "lucide-react"
+import { CalendarDays, CheckCircle, XCircle } from "lucide-react"
 import { AgendamentosSituacaoChart } from "../components/agendamentos-situacao-chart"
 
 export const metadata: Metadata = {
@@ -71,9 +71,8 @@ export default async function MeusAgendamentosPage({ params }: MeusAgendamentosP
       </div>
 
       <div className="space-y-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <StatsCard title="Total do mês" value={stats.total} icon={CalendarDays} variant="default" />
-          <StatsCard title="Pendentes" value={stats.pendentes} icon={Clock} variant="warning" />
           <StatsCard title="Confirmados" value={stats.confirmados} icon={CheckCircle} variant="success" />
           <StatsCard title="Cancelados" value={stats.cancelados} icon={XCircle} variant="destructive" />
         </div>

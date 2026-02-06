@@ -6,7 +6,7 @@ import type { AgendamentoComDetalhes } from "@/app/[tenant]/(modules)/agendament
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AgendamentosList } from "./agendamentos-list"
-import { CalendarDays, Clock, CheckCircle, XCircle, Grid3X3 } from "lucide-react"
+import { CalendarDays, CheckCircle, XCircle, Grid3X3 } from "lucide-react"
 import { AgendamentosSituacaoChart } from "./agendamentos-situacao-chart"
 import { AgendamentoWeeklyGrid } from "./agendamento-weekly-grid"
 
@@ -44,7 +44,7 @@ export function AgendamentosDashboard({
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <StatsCard
           title="Total do Mes"
           value={stats.total}
@@ -57,12 +57,6 @@ export function AgendamentosDashboard({
           value={stats.confirmados + stats.pendentes}
           icon={CheckCircle}
           variant="success"
-        />
-        <StatsCard
-          title="Pendentes (Legado)"
-          value={stats.pendentes}
-          icon={Clock}
-          variant="warning"
         />
         <StatsCard
           title="Cancelados"
