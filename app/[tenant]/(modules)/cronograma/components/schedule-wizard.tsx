@@ -1204,20 +1204,22 @@ export function ScheduleWizard() {
   }
 
   const nextStep = async () => {
+    // Step 2: validações manuais ANTES do Zod (pois campos podem estar ocultos)
+    if (currentStep === 2) {
+      if (cursos.length > 0 && !form.getValues('curso_alvo_id')) {
+        setError('Selecione um curso antes de continuar.')
+        return
+      }
+      if (cursoSelecionado && modulosCurso.length > 0 && modulosSelecionados.length === 0) {
+        setError('Selecione pelo menos um módulo do curso escolhido.')
+        return
+      }
+    }
+
     const fieldsToValidate = getFieldsForStep(currentStep)
     const isValid = await form.trigger(fieldsToValidate)
 
     if (isValid) {
-      if (currentStep === 2) {
-        if (cursos.length > 0 && !form.getValues('curso_alvo_id')) {
-          setError('Selecione um curso antes de continuar.')
-          return
-        }
-        if (cursoSelecionado && modulosCurso.length > 0 && modulosSelecionados.length === 0) {
-          setError('Selecione pelo menos um módulo do curso escolhido.')
-          return
-        }
-      }
       if (currentStep === 3) {
         if (form.getValues('disciplinas_ids').length === 0) {
           setError('Selecione pelo menos uma disciplina antes de continuar.')
@@ -2352,20 +2354,28 @@ export function ScheduleWizard() {
                   Próximo
                 </Button>
               ) : (
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={loading || !form.watch('nome') || form.watch('nome')?.trim().length === 0}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Gerando Cronograma...
-                    </>
-                  ) : (
-                    'Gerar Cronograma Inteligente'
+                <div className="flex flex-col items-end gap-1">
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={loading || !form.watch('nome') || form.watch('nome')?.trim().length === 0}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Gerando Cronograma...
+                      </>
+                    ) : (
+                      'Gerar Cronograma Inteligente'
+                    )}
+                  </Button>
+                  {!loading && (!form.watch('nome') || form.watch('nome')?.trim().length === 0) && (
+                    <p className="text-xs text-destructive flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      Preencha o nome do cronograma para continuar
+                    </p>
                   )}
-                </Button>
+                </div>
               )}
             </div>
           </form>

@@ -8,7 +8,7 @@ import {
     Home,
     Sparkles,
     XCircle,
-    CircleDot,
+    CircleMinus,
     CircleHelp,
     CircleCheck,
 } from 'lucide-react'
@@ -27,27 +27,68 @@ type SessionSummaryProps = {
     onStudyMore: () => void
 }
 
-// Mensagens de celebração baseadas no score
+// Mensagens de celebração baseadas no nível de domínio
 const CELEBRATION_MESSAGES = {
     excellent: [
         'Incrível! Você está dominando esse conteúdo!',
         'Performance excepcional! Continue assim!',
         'Excelente sessão! Seu esforço está valendo a pena!',
+        'Mandou muito bem! Esse conteúdo é seu!',
+        'Arrasou! Você está com tudo nesse tema!',
+        'Impressionante! Sua dedicação está dando resultado!',
     ],
     good: [
         'Muito bem! Você está no caminho certo!',
         'Bom trabalho! A prática leva à perfeição!',
         'Ótimo progresso! Continue se dedicando!',
+        'Você está evoluindo! Só falta consolidar alguns pontos.',
+        'Bom desempenho! Mais algumas revisões e você domina tudo.',
+        'Parabéns! Você já sabe bastante, falta pouco!',
     ],
     average: [
         'Continue praticando! A constância traz resultados!',
         'Cada revisão te deixa mais preparado!',
         'Não desanime! O aprendizado é um processo!',
+        'Você está progredindo! Cada sessão conta.',
+        'O caminho é de prática e revisão. Siga firme!',
+        'Normal ter dúvidas! A repetição vai fixar o conteúdo.',
     ],
     needsWork: [
         'Foque nos pontos que você errou!',
         'A repetição é a chave do aprendizado!',
         'Revise esses tópicos com mais atenção!',
+        'Esse conteúdo precisa de mais revisão. Você consegue!',
+        'Não desista! Todo aprendizado começa com dificuldade.',
+        'Hora de rever a teoria e voltar mais forte!',
+    ],
+}
+
+// Conselhos contextuais variados por categoria
+const CONTEXTUAL_ADVICE = {
+    highInsecurity: [
+        'Você acertou bastante, mas revise os temas que te deixaram inseguro.',
+        'Muitos acertos com insegurança — uma revisão rápida pode firmar tudo.',
+        'Seu conhecimento está lá, só precisa de mais confiança. Revise esses temas!',
+    ],
+    someInsecurity: [
+        'Alguns temas ainda geram insegurança. Continue revisando!',
+        'Você está quase lá! Reforce os pontos onde ainda tem dúvida.',
+        'Boa base, mas vale repassar os temas onde se sentiu inseguro.',
+    ],
+    highErrors: [
+        'Foque nos flashcards que você errou para solidificar o aprendizado.',
+        'Vários erros nessa sessão — reveja a teoria desses tópicos.',
+        'Não se preocupe com os erros, eles mostram onde focar seus estudos!',
+    ],
+    highPartial: [
+        'Revise os conceitos onde acertou apenas parcialmente.',
+        'Você está no caminho certo, mas precisa completar alguns raciocínios.',
+        'Quase lá! Reforce os conteúdos onde o acerto foi parcial.',
+    ],
+    mixed: [
+        'Revise os pontos onde teve dificuldade para consolidar o aprendizado.',
+        'Alguns acertos, alguns erros — faz parte! Foque nos gaps.',
+        'Boa sessão de diagnóstico! Agora você sabe onde focar.',
     ],
 }
 
@@ -65,58 +106,100 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
         facil: feedbacks.filter((f) => f === 4).length,
     }
 
-    // Calcular score: (Bom + Fácil) / Total
-    const total = feedbacks.length
-    const acertos = counts.dificil + counts.facil
-    const score = total > 0 ? Math.round((acertos / total) * 100) : 0
+    // Score de domínio ponderado:
+    // Errei=0, Parcial=0.50, Inseguro=0.75, Acertei=1.0
+    // Reflete domínio real: acertar com dúvida pesa menos que acertar com confiança
+    const WEIGHTS = { errei: 0, parcial: 0.50, inseguro: 0.75, acertei: 1.0 }
 
-    // Get color and message based on score
-    const getScoreConfig = (score: number) => {
-        if (score >= 80) return {
-            color: 'text-emerald-400',
-            ringColor: 'text-emerald-400',
+    const total = feedbacks.length
+    const corretas = counts.dificil + counts.facil // respostas corretas (binário)
+    const weightedSum =
+        counts.errei * WEIGHTS.errei +
+        counts.parcial * WEIGHTS.parcial +
+        counts.dificil * WEIGHTS.inseguro +
+        counts.facil * WEIGHTS.acertei
+    const score = total > 0 ? Math.round((weightedSum / total) * 100) : 0
+
+    // Get color and message based on weighted score (light/dark aware)
+    const getScoreConfig = (s: number) => {
+        if (s >= 80) return {
+            color: 'text-emerald-600 dark:text-emerald-400',
+            ringColor: 'text-emerald-600 dark:text-emerald-400',
             bgGlow: 'rgba(52, 211, 153, 0.15)',
             messages: CELEBRATION_MESSAGES.excellent,
         }
-        if (score >= 60) return {
-            color: 'text-sky-400',
-            ringColor: 'text-sky-400',
+        if (s >= 60) return {
+            color: 'text-sky-600 dark:text-sky-400',
+            ringColor: 'text-sky-600 dark:text-sky-400',
             bgGlow: 'rgba(56, 189, 248, 0.15)',
             messages: CELEBRATION_MESSAGES.good,
         }
-        if (score >= 40) return {
-            color: 'text-amber-400',
-            ringColor: 'text-amber-400',
+        if (s >= 40) return {
+            color: 'text-amber-600 dark:text-amber-400',
+            ringColor: 'text-amber-600 dark:text-amber-400',
             bgGlow: 'rgba(251, 191, 36, 0.15)',
             messages: CELEBRATION_MESSAGES.average,
         }
         return {
-            color: 'text-red-400',
-            ringColor: 'text-red-400',
+            color: 'text-red-600 dark:text-red-400',
+            ringColor: 'text-red-600 dark:text-red-400',
             bgGlow: 'rgba(248, 113, 113, 0.15)',
             messages: CELEBRATION_MESSAGES.needsWork,
         }
     }
 
+    // Seleciona mensagem variada de um array (determinística por sessão)
+    const pickMessage = (messages: string[]) =>
+        messages[(score + total + counts.errei) % messages.length]
+
+    // Conselho contextual baseado na distribuição
+    const getContextualAdvice = (): string | null => {
+        if (total === 0) return null
+        const inseguroRatio = counts.dificil / total
+        const erreiRatio = counts.errei / total
+        const parcialRatio = counts.parcial / total
+
+        if (inseguroRatio >= 0.5) {
+            return pickMessage(CONTEXTUAL_ADVICE.highInsecurity)
+        }
+        if (erreiRatio >= 0.3) {
+            return pickMessage(CONTEXTUAL_ADVICE.highErrors)
+        }
+        if (parcialRatio >= 0.3) {
+            return pickMessage(CONTEXTUAL_ADVICE.highPartial)
+        }
+        if (inseguroRatio >= 0.2) {
+            return pickMessage(CONTEXTUAL_ADVICE.someInsecurity)
+        }
+        if (erreiRatio > 0 || parcialRatio > 0) {
+            return pickMessage(CONTEXTUAL_ADVICE.mixed)
+        }
+        return null
+    }
+
     const scoreConfig = getScoreConfig(score)
     const celebrationMessage =
         scoreConfig.messages[(score + total) % scoreConfig.messages.length]
+    const contextualAdvice = getContextualAdvice()
 
-    // Stats data
+    // Stats data (theme-aware colors)
     const stats = [
-        { icon: XCircle, label: 'Errei', count: counts.errei, color: 'text-slate-100', bg: 'bg-red-500/20' },
-        { icon: CircleDot, label: 'Parcial', count: counts.parcial, color: 'text-slate-100', bg: 'bg-amber-500/20' },
-        { icon: CircleHelp, label: 'Inseguro', count: counts.dificil, color: 'text-slate-100', bg: 'bg-sky-500/20' },
-        { icon: CircleCheck, label: 'Acertei', count: counts.facil, color: 'text-slate-100', bg: 'bg-emerald-500/20' },
+        { icon: XCircle, label: 'Errei', subtitle: 'Não sabia', count: counts.errei, color: 'text-foreground', bg: 'bg-red-500/20' },
+        { icon: CircleMinus, label: 'Parcial', subtitle: 'Acertei em parte', count: counts.parcial, color: 'text-foreground', bg: 'bg-amber-500/20' },
+        { icon: CircleHelp, label: 'Inseguro', subtitle: 'Acertei com dúvida', count: counts.dificil, color: 'text-foreground', bg: 'bg-sky-500/20' },
+        { icon: CircleCheck, label: 'Acertei', subtitle: 'Sabia bem', count: counts.facil, color: 'text-foreground', bg: 'bg-emerald-500/20' },
     ]
 
     return (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-            {/* Aurora Background */}
-            <div className="absolute inset-0 bg-slate-950 pointer-events-none">
+        <div
+            className="fixed inset-0 z-50 overflow-hidden bg-background"
+            style={{ backgroundImage: 'none' }}
+        >
+            {/* Aurora Background - subtle in light, vibrant in dark */}
+            <div className="absolute inset-0 pointer-events-none">
                 {!reducedMotion && (
                     <>
-                        <div className="absolute inset-0 opacity-50 transition-opacity duration-1000">
+                        <div className="absolute inset-0 opacity-[0.06] dark:opacity-50 transition-opacity duration-1000">
                             <div
                                 className="absolute w-[200%] h-[200%] -left-1/2 -top-1/2 animate-aurora-slow"
                                 style={{
@@ -140,7 +223,7 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
                 )}
                 {reducedMotion && (
                     <div
-                        className="absolute inset-0"
+                        className="absolute inset-0 opacity-[0.04] dark:opacity-100"
                         style={{
                             background: `radial-gradient(ellipse at 50% 50%, ${scoreConfig.bgGlow} 0%, transparent 70%)`
                         }}
@@ -149,35 +232,35 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
             </div>
 
             {/* Main content */}
-            <div className="h-full w-full flex flex-col items-center justify-center px-6 relative z-10 overflow-y-auto py-8">
-                <div className="w-full max-w-lg space-y-6 my-auto">
+            <div className="h-full w-full flex flex-col items-center justify-center px-4 md:px-6 relative z-10 overflow-y-auto py-6 md:py-8">
+                <div className="w-full max-w-lg space-y-5 md:space-y-6 my-auto">
                     {/* Trophy and Score Ring */}
                     <div className="flex flex-col items-center">
                         {/* Trophy icon */}
-                        <div className="relative mb-4">
+                        <div className="relative mb-3 md:mb-4">
                             <div className={cn(
                                 'flex h-12 w-12 items-center justify-center rounded-full',
-                                'bg-violet-600 border border-violet-500/30',
-                                'shadow-lg shadow-violet-500/25'
+                                'bg-primary border border-primary/30',
+                                'shadow-lg'
                             )}>
-                                <Trophy className="h-6 w-6 text-slate-100" />
+                                <Trophy className="h-6 w-6 text-primary-foreground" />
                             </div>
                             {score >= 80 && (
-                                <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-slate-100 animate-pulse" />
+                                <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-foreground animate-pulse" />
                             )}
                         </div>
 
                         {/* Title */}
-                        <h1 className="text-xl md:text-2xl font-bold text-white mb-1">
+                        <h1 className="text-xl md:text-2xl font-bold text-foreground mb-1">
                             Sessão Concluída!
                         </h1>
-                        <p className="text-slate-400 text-xs md:text-sm mb-6">
+                        <p className="text-muted-foreground text-xs md:text-sm mb-4 md:mb-6">
                             Você revisou {total} flashcards
                         </p>
 
                         {/* Score Ring */}
                         <div className="relative">
-                            <svg width="140" height="140" className="-rotate-90">
+                            <svg width="120" height="120" className="-rotate-90 md:w-[140px] md:h-[140px]">
                                 <defs>
                                     <filter id="glow-summary" x="-50%" y="-50%" width="200%" height="200%">
                                         <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -188,39 +271,49 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
                                     </filter>
                                 </defs>
                                 <circle
-                                    cx="70"
-                                    cy="70"
-                                    r="55"
+                                    cx="60"
+                                    cy="60"
+                                    r="48"
                                     fill="none"
                                     stroke="currentColor"
                                     strokeWidth="6"
-                                    className="text-white/10"
+                                    className="text-muted-foreground/20 dark:text-white/10 md:[cx:70] md:[cy:70] md:[r:55]"
                                 />
                                 <circle
-                                    cx="70"
-                                    cy="70"
-                                    r="55"
+                                    cx="60"
+                                    cy="60"
+                                    r="48"
                                     fill="none"
                                     stroke="currentColor"
                                     strokeWidth="6"
                                     strokeLinecap="round"
                                     filter="url(#glow-summary)"
-                                    className={cn('transition-all duration-1000', scoreConfig.ringColor)}
-                                    strokeDasharray={2 * Math.PI * 55}
-                                    strokeDashoffset={(2 * Math.PI * 55) - ((score / 100) * 2 * Math.PI * 55)}
+                                    className={cn('transition-all duration-1000 md:[cx:70] md:[cy:70] md:[r:55]', scoreConfig.ringColor)}
+                                    strokeDasharray={2 * Math.PI * 48}
+                                    strokeDashoffset={(2 * Math.PI * 48) - ((score / 100) * 2 * Math.PI * 48)}
                                 />
                             </svg>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
                                 <span className={cn('text-2xl md:text-3xl font-bold tabular-nums', scoreConfig.color)}>
                                     {score}%
                                 </span>
-                                <span className="text-[9px] md:text-[10px] text-slate-400 mt-0.5">score</span>
+                                <span className="text-[9px] md:text-[10px] text-muted-foreground mt-0.5">domínio</span>
                             </div>
                         </div>
 
-                        {/* Celebration message */}
-                        <p className={cn('mt-4 text-sm md:text-base text-center font-medium', scoreConfig.color)}>
+                        {/* Celebration message + contextual advice */}
+                        <p className={cn('mt-3 md:mt-4 text-sm md:text-base text-center font-medium', scoreConfig.color)}>
                             {celebrationMessage}
+                        </p>
+                        {contextualAdvice && (
+                            <p className="mt-1.5 text-xs md:text-sm text-center text-muted-foreground">
+                                {contextualAdvice}
+                            </p>
+                        )}
+
+                        {/* Explanation of "domínio" */}
+                        <p className="mt-3 text-[10px] md:text-xs text-center text-muted-foreground/60 max-w-xs mx-auto leading-relaxed">
+                            O domínio considera seus acertos, erros, acertos parciais e sua confiança em cada resposta.
                         </p>
                     </div>
 
@@ -230,28 +323,28 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
                             <div
                                 key={stat.label}
                                 className={cn(
-                                    'flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl',
-                                    'bg-white/5 border border-white/10'
+                                    'flex flex-col items-center gap-1 md:gap-1.5 py-2.5 md:py-3 px-1.5 md:px-2 rounded-xl',
+                                    'bg-muted/50 dark:bg-white/5 border border-border dark:border-white/10'
                                 )}
                             >
-                                <div className={cn('p-1.5 rounded-lg', stat.bg)}>
-                                    <stat.icon className={cn('h-3.5 w-3.5', stat.color)} />
+                                <div className={cn('p-1 md:p-1.5 rounded-lg', stat.bg)}>
+                                    <stat.icon className={cn('h-3 w-3 md:h-3.5 md:w-3.5', stat.color)} />
                                 </div>
-                                <span className="text-xl md:text-2xl font-bold text-white tabular-nums">
+                                <span className="text-lg md:text-2xl font-bold text-foreground tabular-nums">
                                     {stat.count}
                                 </span>
-                                <span className="text-[10px] md:text-xs text-slate-400">{stat.label}</span>
+                                <span className="text-[9px] md:text-xs text-muted-foreground leading-tight text-center">{stat.label}</span>
                             </div>
                         ))}
                     </div>
 
                     {/* Distribution bar */}
                     <div className="space-y-1.5">
-                        <div className="flex justify-between text-[10px] md:text-xs text-slate-400">
+                        <div className="flex justify-between text-[10px] md:text-xs text-muted-foreground">
                             <span>Distribuição</span>
-                            <span>{acertos} de {total} acertos</span>
+                            <span>{corretas} de {total} corretas</span>
                         </div>
-                        <div className="h-2 md:h-2.5 rounded-full overflow-hidden bg-white/10 flex">
+                        <div className="h-2 md:h-2.5 rounded-full overflow-hidden bg-muted dark:bg-white/10 flex">
                             {counts.errei > 0 && (
                                 <div
                                     className="h-full bg-red-500 transition-all duration-500"
@@ -284,52 +377,31 @@ export function SessionSummary({ feedbacks, onFinish, onStudyMore }: SessionSumm
                         <Button
                             onClick={onFinish}
                             className={cn(
-                                'flex-1 h-10 md:h-11 text-sm md:text-base font-medium',
-                                'bg-violet-600 hover:bg-violet-500 text-white',
+                                'flex-1 h-11 md:h-12 text-sm md:text-base font-medium',
+                                'bg-primary hover:bg-primary/90 text-primary-foreground',
                                 'transition-all duration-300 hover:scale-[1.02]',
-                                'shadow-lg shadow-violet-500/25'
+                                'shadow-lg'
                             )}
                         >
-                            <Home className="mr-2 h-3.5 w-3.5 md:h-4 md:w-4" />
+                            <Home className="mr-2 h-4 w-4" />
                             Concluir
                         </Button>
                         <Button
                             onClick={onStudyMore}
                             variant="outline"
                             className={cn(
-                                'flex-1 h-10 md:h-11 text-sm md:text-base font-medium',
-                                'bg-white/5 border-white/20 text-white',
-                                'hover:bg-white/10 hover:border-white/30',
+                                'flex-1 h-11 md:h-12 text-sm md:text-base font-medium',
+                                'bg-muted/50 dark:bg-white/5 border-border dark:border-white/20 text-foreground',
+                                'hover:bg-muted dark:hover:bg-white/10 hover:border-border dark:hover:border-white/30',
                                 'transition-all duration-300 hover:scale-[1.02]'
                             )}
                         >
-                            <RefreshCw className="mr-2 h-3.5 w-3.5 md:h-4 md:w-4" />
+                            <RefreshCw className="mr-2 h-4 w-4" />
                             Estudar +10
                         </Button>
                     </div>
                 </div>
             </div>
-
-            {/* CSS for aurora animations */}
-            <style jsx>{`
-                @keyframes aurora-slow {
-                    0%, 100% { transform: translate(0%, 0%) rotate(0deg); }
-                    25% { transform: translate(5%, 5%) rotate(5deg); }
-                    50% { transform: translate(0%, 10%) rotate(0deg); }
-                    75% { transform: translate(-5%, 5%) rotate(-5deg); }
-                }
-                @keyframes aurora-medium {
-                    0%, 100% { transform: translate(0%, 0%) rotate(0deg); }
-                    33% { transform: translate(-8%, 8%) rotate(-8deg); }
-                    66% { transform: translate(8%, -4%) rotate(8deg); }
-                }
-                .animate-aurora-slow {
-                    animation: aurora-slow 30s ease-in-out infinite;
-                }
-                .animate-aurora-medium {
-                    animation: aurora-medium 20s ease-in-out infinite;
-                }
-            `}</style>
         </div>
     )
 }
