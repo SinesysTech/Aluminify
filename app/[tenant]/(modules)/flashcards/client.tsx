@@ -48,6 +48,16 @@ export default function FlashcardsClient() {
 
     const SESSION_SIZE = 10
 
+    // Compute current streak of consecutive correct answers (feedback === 4)
+    const currentStreak = React.useMemo(() => {
+        let streak = 0
+        for (let i = feedbacks.length - 1; i >= 0; i--) {
+            if (feedbacks[i] === 4) streak++
+            else break
+        }
+        return streak
+    }, [feedbacks])
+
     // Reset completo ao trocar de organização (multi-tenant)
     React.useEffect(() => {
         setModo(null)
@@ -314,6 +324,7 @@ export default function FlashcardsClient() {
                 showAnswer={showAnswer}
                 loading={loading}
                 error={error}
+                currentStreak={currentStreak}
                 onReveal={() => setShowAnswer(true)}
                 onFeedback={handleFeedback}
                 onReload={handleReload}
