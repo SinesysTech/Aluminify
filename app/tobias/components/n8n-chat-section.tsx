@@ -54,7 +54,12 @@ export function N8nChatSection({ agentConfig }: N8nChatSectionProps) {
   }
 
   const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: 'smooth',
+      })
+    }
   }, [])
 
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -520,7 +525,7 @@ export function N8nChatSection({ agentConfig }: N8nChatSectionProps) {
   }
 
   return (
-    <div className="mx-auto flex max-w-7xl h-[calc(100dvh-10rem)] md:h-[calc(100dvh-7.5rem)] flex-col">
+    <div className="mx-auto flex max-w-7xl h-[calc(100dvh-10rem)] md:h-[calc(100dvh-7.5rem)] flex-col overflow-hidden">
       {/* Header */}
       <header className="flex items-center gap-3 shrink-0 pb-4 md:pb-6">
         <Button

@@ -1,6 +1,12 @@
 import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "./database.types";
 import { getPublicSupabaseConfig } from "./supabase-public-env";
+import {
+  compressCookieValue,
+  decompressCookieValue,
+  isCompressedCookie,
+  shouldCompressCookie,
+} from "@/app/shared/core/cookie-compression";
 
 let browserClient: ReturnType<typeof createBrowserClient<Database>> | null =
   null;
@@ -8,6 +14,49 @@ let browserClient: ReturnType<typeof createBrowserClient<Database>> | null =
 // Evita flood no console quando o auth-js tenta refresh/retry.
 const SUPABASE_FETCH_LOG_THROTTLE_MS = 5_000;
 const supabaseFetchLogLastAt = new Map<string, number>();
+
+/**
+ * Lê todos os cookies do navegador (document.cookie) e retorna como array.
+ * Descomprime valores com prefixo "pako:" automaticamente.
+ */
+function getAllBrowserCookies(): Array<{ name: string; value: string }> {
+  if (typeof document === "undefined" || !document.cookie) return [];
+  return document.cookie.split(";").map((pair) => {
+    const trimmed = pair.trim();
+    const eqIdx = trimmed.indexOf("=");
+    if (eqIdx < 0) return { name: trimmed, value: "" };
+    const name = trimmed.slice(0, eqIdx);
+    const rawValue = trimmed.slice(eqIdx + 1);
+    // Descomprime cookies de auth que foram comprimidos pelo middleware/server
+    const value = isCompressedCookie(rawValue)
+      ? decompressCookieValue(rawValue)
+      : rawValue;
+    return { name, value };
+  });
+}
+
+/**
+ * Grava um cookie no navegador via document.cookie, comprimindo se necessário.
+ */
+function setBrowserCookie(
+  name: string,
+  value: string,
+  options?: Record<string, unknown>,
+): void {
+  if (typeof document === "undefined") return;
+  const cookieValue = shouldCompressCookie(name, value)
+    ? compressCookieValue(value)
+    : value;
+  let str = `${name}=${cookieValue}`;
+  if (options?.path) str += `; path=${String(options.path)}`;
+  if (options?.maxAge !== undefined) str += `; max-age=${options.maxAge}`;
+  if (options?.domain) str += `; domain=${String(options.domain)}`;
+  if (options?.sameSite) {
+    str += `; samesite=${String(options.sameSite).toLowerCase()}`;
+  }
+  if (options?.secure) str += `; secure`;
+  document.cookie = str;
+}
 
 export function createClient() {
   // No browser, reutilize um único client para evitar múltiplos auto-refresh concorrendo.
@@ -124,6 +173,16 @@ export function createClient() {
   };
 
   const client = createBrowserClient<Database>(url, anonKey, {
+    cookies: {
+      getAll() {
+        return getAllBrowserCookies();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          setBrowserCookie(name, value, options);
+        });
+      },
+    },
     auth: {
       autoRefreshToken:
         typeof window !== "undefined" &&
