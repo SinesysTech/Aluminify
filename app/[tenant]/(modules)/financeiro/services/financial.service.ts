@@ -126,10 +126,13 @@ function extractAddress(address?: HotmartAddress): HotmartAddress | undefined {
 }
 
 function generateTemporaryPassword(cpf?: string): string {
-  // Usar CPF (somente dígitos) como senha padrão, se disponível
+  // Usar CPF (somente dígitos) como senha padrão, se disponível.
+  // Observação: alguns cadastros podem vir sem os 11 dígitos (ex.: sem zeros à esquerda).
+  // Para manter o comportamento "sempre CPF" e garantir tamanho mínimo aceito pelo Auth,
+  // normalizamos para 11 dígitos com padStart.
   const cpfDigits = cpf?.replace(/\D/g, "");
-  if (cpfDigits && cpfDigits.length >= 11) {
-    return cpfDigits;
+  if (cpfDigits && cpfDigits.length > 0) {
+    return cpfDigits.padStart(11, "0");
   }
 
   // Fallback: senha aleatória
