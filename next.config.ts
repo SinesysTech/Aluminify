@@ -1,9 +1,21 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 import path from "path";
+import { fileURLToPath } from "url";
 import "./app/shared/core/env";
 
-const projectRoot = path.resolve(process.cwd());
+// Importante (Windows/Turbopack): `process.cwd()` pode variar dependendo de como o Next
+// inicializa workers/processos. Para resolução consistente de módulos, ancoramos na
+// pasta onde este arquivo (`next.config.ts`) está localizado.
+const projectRoot = (() => {
+  // CJS
+  if (typeof __dirname !== "undefined") {
+    return path.resolve(__dirname);
+  }
+
+  // ESM fallback
+  return path.resolve(path.dirname(fileURLToPath(import.meta.url)));
+})();
 const isWindows = process.platform === "win32";
 const buildStandalone = process.env.DOCKER_BUILD === "true" && !isWindows;
 

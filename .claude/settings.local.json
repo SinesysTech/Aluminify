@@ -159,7 +159,10 @@
       "Bash(cat:*)",
       "Bash(xargs:*)",
       "Bash(npm run check:*)",
-      "mcp__supabase__list_edge_functions"
+      "mcp__supabase__list_edge_functions",
+      "Bash(where /R \"c:\\\\areadoaluno\\\\areadoaluno\" \"middleware.ts\")",
+      "Bash(taskkill:*)",
+      "Bash(timeout //T 2 //NOBREAK)"
     ],
     "deny": [],
     "ask": []

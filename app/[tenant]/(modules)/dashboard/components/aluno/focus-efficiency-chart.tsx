@@ -62,7 +62,7 @@ export function FocusEfficiencyChart({ data }: FocusEfficiencyChartProps) {
           </div>
         </div>
         <div className="h-75">
-          <ResponsiveContainer width="100%" height={300} minWidth={0}>
+          <ResponsiveContainer width="100%" height={300} minWidth={0} minHeight={0}>
             <BarChart data={data}>
               <XAxis
                 dataKey="day"

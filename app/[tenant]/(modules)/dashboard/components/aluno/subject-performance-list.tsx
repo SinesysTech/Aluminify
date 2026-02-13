@@ -176,6 +176,13 @@ export function SubjectPerformanceList({
         const res = await fetchPerformance({ groupBy, scope: scopeParams.scope, scopeId: scopeParams.scopeId, period, empresaId: effectiveEmpresaId })
         if (cancelled) return
         setItems(res)
+      } catch (err) {
+        // 401 é tratado silenciosamente — o middleware/auth já redireciona para login se necessário.
+        if (err && typeof err === 'object' && 'status' in err && (err as { status: number }).status === 401) {
+          console.warn('[SubjectPerformanceList] Token expirado, aguardando refresh...')
+        } else {
+          console.error('[SubjectPerformanceList] Erro ao carregar performance:', err)
+        }
       } finally {
         if (!cancelled) setIsLoading(false)
       }

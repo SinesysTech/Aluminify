@@ -200,6 +200,15 @@ export async function updateSession(request: NextRequest) {
         });
       },
       setAll(cookiesToSet) {
+        // Diagnóstico: saber quando o proxy realmente define cookies na resposta
+        if (shouldLog("debug")) {
+          logDebug("setAll called", {
+            pathname,
+            count: cookiesToSet.length,
+            names: cookiesToSet.map((c) => c.name),
+          });
+        }
+
         cookiesToSet.forEach(({ name, value }) =>
           request.cookies.set(name, value),
         );
@@ -235,9 +244,43 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Helper to sync cookies/headers
+  type CookieLike = {
+    name: string;
+    value: string;
+    path?: string;
+    maxAge?: number;
+    expires?: Date;
+    httpOnly?: boolean;
+    secure?: boolean;
+    sameSite?: "lax" | "strict" | "none" | boolean;
+    domain?: string;
+    priority?: "low" | "medium" | "high";
+  };
+
+  const setCookiePreservingOptions = (res: NextResponse, cookie: CookieLike) => {
+    // Importante: não passar `name`/`value` dentro de options.
+    // Se `path` não vier, forçamos "/" para evitar cookies "duplicados" com path do request atual.
+    // httpOnly DEVE ser false para cookies de auth — o browser client precisa ler via document.cookie.
+    // Se httpOnly for undefined (parseSetCookie do Next.js remove propriedades falsy via compact()),
+    // forçamos false explicitamente para não depender do default do framework.
+    const isAuthCookie =
+      cookie.name.startsWith("sb-") && cookie.name.includes("auth-token");
+    const options = {
+      path: cookie.path ?? "/",
+      ...(cookie.maxAge !== undefined ? { maxAge: cookie.maxAge } : {}),
+      ...(cookie.expires !== undefined ? { expires: cookie.expires } : {}),
+      httpOnly: isAuthCookie ? false : (cookie.httpOnly ?? false),
+      ...(cookie.secure !== undefined ? { secure: cookie.secure } : {}),
+      ...(cookie.sameSite !== undefined ? { sameSite: cookie.sameSite } : {}),
+      ...(cookie.domain !== undefined ? { domain: cookie.domain } : {}),
+      ...(cookie.priority !== undefined ? { priority: cookie.priority } : {}),
+    };
+    res.cookies.set(cookie.name, cookie.value, options);
+  };
+
   const copyCookiesAndHeaders = (target: NextResponse) => {
     supabaseResponse.cookies.getAll().forEach((cookie) => {
-      target.cookies.set(cookie.name, cookie.value);
+      setCookiePreservingOptions(target, cookie as unknown as CookieLike);
     });
     if (tenantContext.empresaId) {
       target.headers.set("x-tenant-id", tenantContext.empresaId);
@@ -269,17 +312,68 @@ export async function updateSession(request: NextRequest) {
   // --- 4. AUTHENTICATION (PROTECTED ROUTES ONLY) ---
   let user = null;
   let error = null;
+  let authSignal_hasBearer = false;
+  let authSignal_cookieHeaderLen = 0;
+  let authSignal_hasAuthCookies: boolean | null = null;
+  let authSignal_authCookieCount: number | null = null;
+  let authSignal_totalCookieCount: number | null = null;
+  let authSignal_compressedCookieCount: number | null = null;
 
   if (!isPublicPath) {
+    // Suporte a Bearer token (ex.: fetch client-side com Authorization) —
+    // o middleware não pode depender exclusivamente de cookies, senão APIs
+    // autenticadas por header acabam recebendo 401 indevidamente.
+    const authHeader = request.headers.get("authorization") || "";
+    const bearerToken =
+      authHeader.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : null;
+    authSignal_hasBearer = !!bearerToken;
+
     // Verificar se existem cookies de auth do Supabase antes de chamar getUser().
     // Sem cookies, o SDK tentaria refresh e falharia com "refresh_token_not_found",
     // logando Error [AuthApiError] desnecessariamente no console do servidor.
     const authCookiePrefix = projectRef ? `sb-${projectRef}-auth-token` : null;
+    const allRequestCookies = request.cookies.getAll();
     const hasAuthCookies = authCookiePrefix
-      ? request.cookies
-          .getAll()
-          .some((c) => c.name.startsWith(authCookiePrefix))
+      ? allRequestCookies.some((c) => c.name.startsWith(authCookiePrefix))
       : true; // Se não conseguimos determinar o prefixo, prosseguir normalmente
+    authSignal_cookieHeaderLen = request.headers.get("cookie")?.length ?? 0;
+    authSignal_hasAuthCookies = hasAuthCookies;
+    authSignal_totalCookieCount = allRequestCookies.length;
+    authSignal_authCookieCount = authCookiePrefix
+      ? allRequestCookies.filter((c) => c.name.startsWith(authCookiePrefix)).length
+      : null;
+    authSignal_compressedCookieCount = allRequestCookies.filter((c) =>
+      isCompressedCookie(c.value),
+    ).length;
+
+    // Observabilidade: ajuda a diagnosticar "logout ao navegar" sem expor valores.
+    // Sinais úteis:
+    // - Bearer presente mas cookie ausente (client fetch)
+    // - Cookie header muito grande (proxy pode truncar/derrubar)
+    // - Cookies comprimidos presentes (pako:) mas ausentes do prefixo esperado
+    if (shouldLog("debug")) {
+      const cookieHeaderLen = request.headers.get("cookie")?.length ?? 0;
+      const authCookieCount = authCookiePrefix
+        ? allRequestCookies.filter((c) => c.name.startsWith(authCookiePrefix))
+            .length
+        : 0;
+      const compressedCount = allRequestCookies.filter((c) =>
+        isCompressedCookie(c.value),
+      ).length;
+      logDebug("auth signals", {
+        pathname,
+        isApiRoute,
+        hasBearer: !!bearerToken,
+        hasAuthCookies,
+        authCookiePrefix: authCookiePrefix ?? null,
+        authCookieCount,
+        totalCookieCount: allRequestCookies.length,
+        compressedCookieCount: compressedCount,
+        cookieHeaderLen,
+        tenant: tenantContext.empresaSlug ?? null,
+        tenantResolutionType: tenantContext.resolutionType ?? null,
+      });
+    }
 
     if (hasAuthCookies) {
       const result = await supabase.auth.getUser();
@@ -296,6 +390,21 @@ export async function updateSession(request: NextRequest) {
       } else {
         user = result.data.user;
         error = result.error;
+      }
+    }
+
+    // Fallback: se não achamos user via cookie (ou não havia cookies),
+    // tentamos via Authorization: Bearer <jwt>.
+    // Importante: fazemos isso só quando necessário para não pagar custo em toda request.
+    if ((!user || error) && bearerToken) {
+      const result = await supabase.auth.getUser(bearerToken);
+      if (!result.error && result.data.user) {
+        user = result.data.user;
+        error = null;
+      } else {
+        // Se o Bearer também falhar, mantemos o estado (user null / error existente)
+        // para o fluxo de 401/redirect abaixo.
+        // Não logamos o token por segurança.
       }
     }
   }
@@ -318,7 +427,7 @@ export async function updateSession(request: NextRequest) {
       }
 
       supabaseResponse.cookies.getAll().forEach((cookie) => {
-        response.cookies.set(cookie.name, cookie.value);
+        setCookiePreservingOptions(response, cookie as unknown as CookieLike);
       });
 
       return response;
@@ -332,7 +441,20 @@ export async function updateSession(request: NextRequest) {
     // APIs should receive 401 JSON. Page navigations (including RSC/NextData)
     // should redirect to login so the Next.js client can recover gracefully.
     if (isApiRoute || request.method !== "GET" || isServerAction) {
-      logWarn(`${request.method} ${pathname} → 401 unauthorized`);
+      logWarn(
+        `${request.method} ${pathname} → 401 unauthorized (hasBearer=${authSignal_hasBearer} cookieHeaderLen=${authSignal_cookieHeaderLen} hasAuthCookies=${String(authSignal_hasAuthCookies)} authCookieCount=${String(authSignal_authCookieCount)} totalCookies=${String(authSignal_totalCookieCount)} compressedCookies=${String(authSignal_compressedCookieCount)})`,
+      );
+      if (shouldLog("debug")) {
+        logDebug("unauthorized details", {
+          pathname,
+          isApiRoute,
+          method: request.method,
+          // Evitar logar error completo (pode conter detalhes do Supabase)
+          hasUser: !!user,
+          hasError: !!error,
+          tenant: tenantContext.empresaSlug ?? null,
+        });
+      }
       const response = NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 },
@@ -340,6 +462,21 @@ export async function updateSession(request: NextRequest) {
       response.headers.set("cache-control", "no-store");
       return copyCookiesAndHeaders(response);
     }
+
+    // === DIAGNÓSTICO TEMPORÁRIO: entender logout ao navegar ===
+    console.warn("[MW] AUTH REDIRECT DEBUG:", {
+      pathname,
+      hasUser: !!user,
+      hasError: !!error,
+      errorMsg: error?.message ?? null,
+      hasAuthCookies: authSignal_hasAuthCookies,
+      authCookieCount: authSignal_authCookieCount,
+      totalCookies: authSignal_totalCookieCount,
+      compressedCookies: authSignal_compressedCookieCount,
+      cookieHeaderLen: authSignal_cookieHeaderLen,
+      tenant: tenantContext.empresaSlug ?? null,
+    });
+    // === FIM DIAGNÓSTICO ===
 
     const url = request.nextUrl.clone();
     if (tenantContext.empresaSlug) {
@@ -389,7 +526,7 @@ export async function updateSession(request: NextRequest) {
 
   // Copy cookies from supabaseResponse (which has auth updates) to finalResponse
   supabaseResponse.cookies.getAll().forEach((cookie) => {
-    finalResponse.cookies.set(cookie.name, cookie.value, cookie);
+    setCookiePreservingOptions(finalResponse, cookie as unknown as CookieLike);
   });
 
   // Copy output headers (x-tenant-id, x-tenant-slug, etc.) from supabaseResponse

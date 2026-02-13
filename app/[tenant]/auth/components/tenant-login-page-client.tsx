@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/app/shared/components/forms/checkbox'
 import { Input } from '@/app/shared/components/forms/input'
 import { Label } from '@/app/shared/components/forms/label'
-import { createClient } from '@/app/shared/core/client'
+import { createClient, enableAuthCookieDeletion } from '@/app/shared/core/client'
 import { toast } from 'sonner'
 
 interface TenantLoginPageClientProps {
@@ -250,6 +250,7 @@ export function TenantLoginPageClient({
         const validateResult = await validateResponse.json()
 
         // Logout user since they don't belong to this tenant
+        enableAuthCookieDeletion()
         await supabase.auth.signOut()
 
         toast.error('Acesso negado', {
@@ -356,6 +357,7 @@ export function TenantLoginPageClient({
                 src={displayLogo}
                 alt={`Logo ${empresaNome}`}
                 fill
+                sizes="(max-width: 768px) 224px, 256px"
                 className="object-contain drop-shadow-lg"
                 priority
               />

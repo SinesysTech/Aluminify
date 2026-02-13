@@ -11,6 +11,22 @@ import {
 let browserClient: ReturnType<typeof createBrowserClient<Database>> | null =
   null;
 
+// Proteção contra deleção acidental de cookies de auth pelo auth-js.
+// O auth-js (GoTrueClient) chama _removeSession() internamente durante
+// _recoverAndRefresh() ou __loadSession() quando interpreta a sessão como
+// inválida. Isso apaga os cookies do browser e causa "logout" inesperado
+// na próxima navegação (server não encontra cookies → redirect login).
+// Só permitimos a deleção quando explicitamente habilitada (antes de signOut).
+let _allowAuthCookieDeletion = false;
+
+/**
+ * Permite que a próxima chamada de setAll delete cookies de auth.
+ * Chamar ANTES de supabase.auth.signOut() no logout.
+ */
+export function enableAuthCookieDeletion() {
+  _allowAuthCookieDeletion = true;
+}
+
 // Evita flood no console quando o auth-js tenta refresh/retry.
 const SUPABASE_FETCH_LOG_THROTTLE_MS = 5_000;
 const supabaseFetchLogLastAt = new Map<string, number>();
@@ -26,7 +42,16 @@ function getAllBrowserCookies(): Array<{ name: string; value: string }> {
     const eqIdx = trimmed.indexOf("=");
     if (eqIdx < 0) return { name: trimmed, value: "" };
     const name = trimmed.slice(0, eqIdx);
-    const rawValue = trimmed.slice(eqIdx + 1);
+    let rawValue = trimmed.slice(eqIdx + 1);
+    // URL-decode: o proxy (ResponseCookies.set) usa encodeURIComponent ao definir
+    // Set-Cookie headers, transformando "pako:..." em "pako%3A...". Sem o decode,
+    // isCompressedCookie() não reconhece o valor e o auth-js interpreta como sessão
+    // inválida, chamando _removeSession() e apagando todos os cookies de auth.
+    try {
+      rawValue = decodeURIComponent(rawValue);
+    } catch {
+      // Se o valor não for válido para decode (improvável), mantém o original
+    }
     // Descomprime cookies de auth que foram comprimidos pelo middleware/server
     const value = isCompressedCookie(rawValue)
       ? decompressCookieValue(rawValue)
@@ -48,13 +73,32 @@ function setBrowserCookie(
     ? compressCookieValue(value)
     : value;
   let str = `${name}=${cookieValue}`;
-  if (options?.path) str += `; path=${String(options.path)}`;
+  // Importante: default para "/" para evitar cookies presos ao path atual
+  // (ex.: /[tenant]/auth/login) e que não são enviados para /api/*,
+  // causando 401 e "logout" em navegações.
+  str += `; path=${String(options?.path ?? "/")}`;
   if (options?.maxAge !== undefined) str += `; max-age=${options.maxAge}`;
   if (options?.domain) str += `; domain=${String(options.domain)}`;
-  if (options?.sameSite) {
-    str += `; samesite=${String(options.sameSite).toLowerCase()}`;
+  const isHttps =
+    typeof window !== "undefined" && window.location?.protocol === "https:";
+
+  // SameSite=None exige Secure em navegadores modernos.
+  // Em HTTP (localhost/dev), isso faria o cookie ser rejeitado silenciosamente.
+  // Então, quando não é HTTPS, rebaixamos None → Lax.
+  const rawSameSite = options?.sameSite;
+  const normalizedSameSite =
+    rawSameSite === undefined || rawSameSite === null
+      ? null
+      : String(rawSameSite).toLowerCase();
+  const sameSiteToUse =
+    !isHttps && normalizedSameSite === "none" ? "lax" : normalizedSameSite;
+  if (sameSiteToUse) {
+    str += `; samesite=${sameSiteToUse}`;
   }
-  if (options?.secure) str += `; secure`;
+
+  // Em ambiente HTTP (ex.: localhost), cookies com `secure` não são enviados.
+  // Só aplicamos `secure` quando estamos em HTTPS.
+  if (options?.secure && isHttps) str += `; secure`;
   document.cookie = str;
 }
 
@@ -178,6 +222,45 @@ export function createClient() {
         return getAllBrowserCookies();
       },
       setAll(cookiesToSet) {
+        // Detectar se é uma deleção pura de cookies de auth (sem novos valores).
+        // Isso acontece quando auth-js chama _removeSession() internamente.
+        // Em caso de token refresh, o setAll inclui AMBOS: remoções de chunks
+        // antigos + novos cookies — isso é legítimo e não bloqueamos.
+        const isAuthCookie = (c: { name: string }) =>
+          c.name.startsWith("sb-") && c.name.includes("auth-token");
+        const isDeletion = (c: { value: string; options?: Record<string, unknown> }) =>
+          !c.value ||
+          (c.options &&
+            typeof c.options === "object" &&
+            "maxAge" in c.options &&
+            c.options.maxAge === 0);
+
+        const authDeletions = cookiesToSet.filter(
+          (c) => isAuthCookie(c) && isDeletion(c),
+        );
+        const authSets = cookiesToSet.filter(
+          (c) => isAuthCookie(c) && !isDeletion(c),
+        );
+
+        if (
+          authDeletions.length > 0 &&
+          authSets.length === 0 &&
+          !_allowAuthCookieDeletion
+        ) {
+          // Bloqueamos deleção acidental. Processamos apenas cookies não-auth.
+          cookiesToSet
+            .filter((c) => !isAuthCookie(c))
+            .forEach(({ name, value, options }) => {
+              setBrowserCookie(name, value, options);
+            });
+          return;
+        }
+
+        // Reset do flag após uso (permite apenas uma deleção intencional).
+        if (_allowAuthCookieDeletion && authDeletions.length > 0) {
+          _allowAuthCookieDeletion = false;
+        }
+
         cookiesToSet.forEach(({ name, value, options }) => {
           setBrowserCookie(name, value, options);
         });

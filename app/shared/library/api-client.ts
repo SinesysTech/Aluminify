@@ -18,19 +18,100 @@ export class ApiClientError extends Error {
   }
 }
 
+// Cache do token em memória para evitar releitura desnecessária dos cookies.
+// O token JWT é válido até expirar (normalmente 1h) — não precisamos reler cookies a cada chamada.
+// Isso resolve o bug onde cookies são deletados pelo auth-js durante _initialize(),
+// mas o token em memória ainda é válido por vários minutos.
+let authTokenInFlight: Promise<string | null> | null = null
+let lastAuthToken: string | null = null
+let lastAuthTokenExpiresAt = 0 // Unix timestamp em ms do token
+
+// Margem de segurança: considera o token expirado 60s antes do real
+const TOKEN_EXPIRY_MARGIN_MS = 60_000
+
+function isCachedTokenValid(): boolean {
+  if (!lastAuthToken || !lastAuthTokenExpiresAt) return false
+  return Date.now() < lastAuthTokenExpiresAt - TOKEN_EXPIRY_MARGIN_MS
+}
+
 async function getAuthToken(): Promise<string | null> {
+  // Retorna token em memória se ainda válido — não depende de cookies.
+  if (isCachedTokenValid()) {
+    return lastAuthToken
+  }
+  if (authTokenInFlight) {
+    return authTokenInFlight
+  }
+
   try {
-    const supabase = createClient()
-    const { data: { session }, error } = await supabase.auth.getSession()
-    if (error) {
-      console.warn('Error getting session:', error)
-      return null
-    }
-    return session?.access_token || null
+    authTokenInFlight = (async () => {
+      const supabase = createClient()
+
+      const {
+        data: { session },
+        error,
+      } = await supabase.auth.getSession()
+
+      if (error) {
+        console.warn('Error getting session:', error)
+        return null
+      }
+
+      if (session?.access_token) {
+        const expiresAt = session.expires_at // Unix timestamp em segundos
+        const expiresAtMs = expiresAt ? expiresAt * 1000 : 0
+        const isExpiredOrExpiring = expiresAtMs
+          ? expiresAtMs - Date.now() < 30_000
+          : false
+
+        if (!isExpiredOrExpiring) {
+          lastAuthToken = session.access_token
+          lastAuthTokenExpiresAt = expiresAtMs
+          return session.access_token
+        }
+        // Token expirado/expirando — cai no refresh abaixo
+      }
+
+      // Fallback: sessão pode estar expirada (ou storage ainda não hidratou).
+      // Tentamos um refresh best-effort para evitar 401 intermitente em requisições paralelas.
+      try {
+        const refreshed = await supabase.auth.refreshSession()
+        if (refreshed.error) {
+          if (
+            refreshed.error?.message &&
+            !refreshed.error.message.toLowerCase().includes('refresh token')
+          ) {
+            console.warn('Error refreshing session:', refreshed.error)
+          }
+        }
+        const refreshedSession = refreshed.data.session
+        if (refreshedSession?.access_token) {
+          lastAuthToken = refreshedSession.access_token
+          lastAuthTokenExpiresAt = refreshedSession.expires_at
+            ? refreshedSession.expires_at * 1000
+            : 0
+          return refreshedSession.access_token
+        }
+        return null
+      } catch (refreshErr) {
+        console.warn('Error in refreshSession:', refreshErr)
+        return null
+      }
+    })()
+
+    return await authTokenInFlight
   } catch (error) {
     console.warn('Error in getAuthToken:', error)
     return null
+  } finally {
+    authTokenInFlight = null
   }
+}
+
+/** Limpa o cache do token em memória. Chamar no logout. */
+export function clearAuthTokenCache() {
+  lastAuthToken = null
+  lastAuthTokenExpiresAt = 0
 }
 
 export interface ApiRequestOptions extends Omit<RequestInit, 'headers'> {

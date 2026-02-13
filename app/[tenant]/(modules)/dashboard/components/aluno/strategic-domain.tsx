@@ -150,7 +150,7 @@ export function StrategicDomain({ data }: StrategicDomainProps) {
         <div className="flex-1 flex flex-col md:flex-row gap-6 min-h-0">
         {/* Gráfico Radar */}
           <div className="w-full md:w-1/2 h-62.5 relative">
-          <ResponsiveContainer width="100%" height={260} minWidth={0}>
+          <ResponsiveContainer width="100%" height={260} minWidth={0} minHeight={0}>
             <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
               <PolarGrid 
                 stroke={chartColors.grid}

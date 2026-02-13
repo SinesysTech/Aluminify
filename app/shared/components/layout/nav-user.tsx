@@ -30,7 +30,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { createClient } from "@/app/shared/core/client"
+import { createClient, enableAuthCookieDeletion } from "@/app/shared/core/client"
+import { clearAuthTokenCache } from "@/app/shared/library/api-client"
 
 export function NavUser() {
   const { isMobile } = useSidebar()
@@ -129,6 +130,8 @@ export function NavUser() {
       } catch {
         // noop
       }
+      clearAuthTokenCache()
+      enableAuthCookieDeletion()
       await supabase.auth.signOut()
       router.push(tenantSlug ? `/${tenantSlug}/auth/login` : '/auth')
       router.refresh()

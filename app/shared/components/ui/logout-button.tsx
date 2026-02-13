@@ -1,6 +1,7 @@
 'use client'
 
-import { createClient } from '@/app/shared/core/client'
+import { createClient, enableAuthCookieDeletion } from '@/app/shared/core/client'
+import { clearAuthTokenCache } from '@/app/shared/library/api-client'
 import { Button } from '@/components/ui/button'
 import { useParams, useRouter } from 'next/navigation'
 
@@ -27,6 +28,8 @@ export function LogoutButton() {
     } catch {
       // noop
     }
+    clearAuthTokenCache()
+    enableAuthCookieDeletion()
     await supabase.auth.signOut()
     router.push(tenantSlug ? `/${tenantSlug}/auth/login` : '/auth')
   }

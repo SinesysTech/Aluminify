@@ -82,7 +82,7 @@ export function AgendamentosSituacaoChart({
         {total > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
             <div className="h-55 w-full">
-              <ResponsiveContainer width="100%" height={220} minWidth={0}>
+              <ResponsiveContainer width="100%" height={220} minWidth={0} minHeight={0}>
                 <PieChart>
                   {/* eslint-disable @typescript-eslint/no-explicit-any */}
                   <Pie
