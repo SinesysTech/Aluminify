@@ -171,7 +171,6 @@
   "enabledMcpjsonServers": [
     "supabase",
     "mastra",
-    "playwright",
-    "gemini-cli-prompt-library"
+    "playwright"
   ]
 }
