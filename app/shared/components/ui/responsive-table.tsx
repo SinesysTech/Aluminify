@@ -187,7 +187,7 @@ export function ResponsiveTable<T>({
               </th>
             ))}
             {renderActions && (
-              <th className="text-muted-foreground h-10 px-2 text-right align-middle font-medium whitespace-nowrap w-[100px]">
+              <th className="text-muted-foreground h-10 px-2 text-right align-middle font-medium whitespace-nowrap w-25">
                 Ações
               </th>
             )}

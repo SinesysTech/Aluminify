@@ -665,7 +665,7 @@ export function CursoTable() {
                     Novo Curso
                   </button>
                 </DialogTrigger>
-                <DialogContent fullScreenMobile className="md:max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent fullScreenMobile className="md:max-w-2xl max-h-[90vh]">
                   <DialogHeader className="pb-4 border-b">
                     <DialogTitle className="text-xl">Criar Curso</DialogTitle>
                     <DialogDescription>
@@ -673,7 +673,8 @@ export function CursoTable() {
                     </DialogDescription>
                   </DialogHeader>
                   <Form {...createForm}>
-                    <form onSubmit={createForm.handleSubmit(handleCreate)} className="space-y-6 py-4">
+                    <form onSubmit={createForm.handleSubmit(handleCreate)} className="flex flex-col flex-1 min-h-0">
+                    <div className="flex-1 overflow-y-auto space-y-6 py-4 pr-1">
                       {/* Seção: Identificação */}
                       <div className="space-y-4">
                         <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Identificação</h3>
@@ -1124,6 +1125,7 @@ export function CursoTable() {
                           )}
                         />
                       </div>
+                    </div>
 
                       <DialogFooter className="pt-4 border-t gap-2 sm:gap-0">
                         <Button
@@ -1343,7 +1345,7 @@ export function CursoTable() {
         {/* Edit Dialog */}
         {mounted && editingCurso && (
           <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-            <DialogContent fullScreenMobile className="md:max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent fullScreenMobile className="md:max-w-2xl max-h-[90vh]">
               <DialogHeader className="pb-4 border-b">
                 <DialogTitle className="text-xl">Editar Curso</DialogTitle>
                 <DialogDescription>
@@ -1351,7 +1353,8 @@ export function CursoTable() {
                 </DialogDescription>
               </DialogHeader>
               <Form {...editForm}>
-                <form onSubmit={editForm.handleSubmit(handleUpdate)} className="space-y-6 py-4">
+                <form onSubmit={editForm.handleSubmit(handleUpdate)} className="flex flex-col flex-1 min-h-0">
+                <div className="flex-1 overflow-y-auto space-y-6 py-4 pr-1">
                   {/* Seção: Identificação */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Identificação</h3>
@@ -1802,6 +1805,7 @@ export function CursoTable() {
                       )}
                     />
                   </div>
+                </div>
 
                   <DialogFooter className="pt-4 border-t gap-2 sm:gap-0">
                     <Button
