@@ -417,11 +417,11 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
                                 {meta.total !== totalAll ? ` • ${meta.total} encontrado(s) com os filtros` : ''}
                             </p>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
                             {mounted ? (
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
-                                        <button className="flex h-9 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-medium text-foreground shadow-sm transition-colors duration-200 hover:bg-muted hover:shadow-md">
+                                        <button className="flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-medium text-foreground shadow-sm transition-colors duration-200 hover:bg-muted hover:shadow-md sm:w-auto">
                                             <Upload className="w-5 h-5" strokeWidth={1.5} />
                                             Importar
                                             <ChevronDown className="w-4 h-4" strokeWidth={1.5} />
@@ -439,7 +439,7 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             ) : (
-                                <button className="flex h-9 items-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-medium text-foreground shadow-sm transition-colors duration-200 hover:bg-muted hover:shadow-md disabled:cursor-not-allowed" disabled>
+                                <button className="flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-4 text-sm font-medium text-foreground shadow-sm transition-colors duration-200 hover:bg-muted hover:shadow-md disabled:cursor-not-allowed sm:w-auto" disabled>
                                     <Upload className="w-5 h-5" strokeWidth={1.5} />
                                     Importar
                                     <ChevronDown className="w-4 h-4" strokeWidth={1.5} />
@@ -447,7 +447,7 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
                             )}
                             <button
                                 onClick={() => setIsSheetOpen(true)}
-                                className="flex h-9 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md"
+                                className="flex h-9 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md sm:w-auto"
                             >
                                 <Plus className="w-5 h-5" strokeWidth={1.5} />
                                 Novo Aluno
@@ -474,10 +474,10 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
                         Sua infraestrutura está pronta. Adicione alunos manualmente para gerar credenciais ou importe em massa.
                     </p>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex w-full max-w-sm flex-col items-center gap-3 sm:w-auto sm:flex-row">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <button className="flex h-10 items-center gap-2 rounded-xl border border-border bg-background px-6 text-sm font-medium text-foreground shadow-sm transition-colors duration-200 hover:bg-muted hover:shadow-md">
+                                <button className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background px-6 text-sm font-medium text-foreground shadow-sm transition-colors duration-200 hover:bg-muted hover:shadow-md sm:w-auto">
                                     <Upload className="w-5 h-5" strokeWidth={1.5} />
                                     Importar Planilha
                                     <ChevronDown className="w-4 h-4" strokeWidth={1.5} />
@@ -496,7 +496,7 @@ export function AlunosClientPage({ students, meta, courses, totalAll }: AlunosCl
                         </DropdownMenu>
                         <button
                             onClick={() => setIsSheetOpen(true)}
-                            className="flex h-10 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md"
+                            className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md sm:w-auto"
                         >
                             <Plus className="w-5 h-5" strokeWidth={1.5} />
                             Adicionar Manualmente

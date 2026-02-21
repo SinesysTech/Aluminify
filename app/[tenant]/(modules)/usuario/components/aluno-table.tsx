@@ -888,12 +888,12 @@ export function AlunoTable() {
           <h1 className="page-title">Alunos</h1>
           <p className="page-subtitle">Gerencie os alunos do sistema</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           {mounted ? (
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <button className="flex h-9 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md">
+                  <button className="flex h-9 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md sm:w-auto">
                     <Plus className="w-5 h-5" strokeWidth={1.5} />
                     Novo Aluno
                   </button>
@@ -1165,7 +1165,7 @@ export function AlunoTable() {
                 </Dialog>
                 <Dialog open={importDialogOpen} onOpenChange={handleImportDialogChange}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full sm:w-auto">
+                      <Button variant="outline" className="w-full justify-center sm:w-auto">
                       <UploadCloud className="mr-2 h-4 w-4" />
                       Importar planilha
                     </Button>
@@ -1263,7 +1263,7 @@ export function AlunoTable() {
           ) : (
             <button
               onClick={() => setCreateDialogOpen(true)}
-              className="flex h-9 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md"
+              className="flex h-9 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md sm:w-auto"
             >
               <Plus className="w-5 h-5" strokeWidth={1.5} />
               Novo Aluno
@@ -1283,8 +1283,8 @@ export function AlunoTable() {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
+        <div className="relative w-full lg:flex-1">
           <Search className="absolute left-2.5 top-2.5 w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
           <input
             type="text"
@@ -1300,7 +1300,7 @@ export function AlunoTable() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-10">
+            <Button variant="outline" size="sm" className="h-10 w-full justify-center lg:w-auto">
               Selecionar
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
@@ -1331,12 +1331,12 @@ export function AlunoTable() {
       ) : table.getRowModel().rows?.length ? (
         <>
           {/* Mobile Card View */}
-          <div className="block md:hidden space-y-4">
+          <div className="block md:hidden space-y-3">
             {table.getRowModel().rows.map((row) => {
               const aluno = row.original
               return (
-                <div key={row.id} className="rounded-xl border border-border/40 bg-card/80 p-4 shadow-sm transition-shadow duration-200 hover:shadow-md">
-                  <div className="space-y-3">
+                <div key={row.id} className="rounded-xl border border-border/40 bg-card/80 p-3 shadow-sm transition-shadow duration-200 hover:shadow-md">
+                  <div className="space-y-2">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className="font-semibold">{aluno.fullName || '-'}</h3>
@@ -1384,7 +1384,7 @@ export function AlunoTable() {
                         </Tooltip>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="grid grid-cols-2 gap-1.5 text-sm">
                       {aluno.cpf && (
                         <div>
                           <span className="text-muted-foreground">CPF: </span>

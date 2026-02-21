@@ -80,7 +80,7 @@ export function Nav({ transparent = false, activeLink }: NavProps) {
                     </div>
                     <div className="flex items-center gap-4">
                         <Link
-                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors hidden sm:block"
+                            className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-md hover:bg-muted/70 sm:px-0 sm:py-0 sm:rounded-none"
                             href="/auth/login"
                         >
                             Login
