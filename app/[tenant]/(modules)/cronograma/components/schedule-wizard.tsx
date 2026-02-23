@@ -47,6 +47,23 @@ import {
 } from '@/app/shared/components/overlay/tooltip'
 import { FrenteOrderDragDrop, type FrenteOrderItem } from './frente-order-drag-drop'
 
+/** Mapeia status HTTP para mensagens amigáveis quando a resposta não é JSON */
+function getHttpErrorMessage(status: number): string {
+  switch (status) {
+    case 502:
+    case 504:
+      return 'O servidor demorou demais para gerar o cronograma. Tente reduzir a quantidade de disciplinas/módulos ou tente novamente em alguns minutos.'
+    case 503:
+      return 'O servidor está temporariamente indisponível. Tente novamente em alguns minutos.'
+    case 413:
+      return 'A requisição é grande demais. Tente reduzir a quantidade de disciplinas selecionadas.'
+    case 429:
+      return 'Muitas requisições em pouco tempo. Aguarde um momento e tente novamente.'
+    default:
+      return `Erro inesperado do servidor (${status}). Tente novamente ou entre em contato com o suporte.`
+  }
+}
+
 const wizardSchema = z.object({
   data_inicio: z.date({ message: 'Data de início é obrigatória' }),
   data_fim: z.date({ message: 'Data de término é obrigatória' }),
@@ -1104,13 +1121,14 @@ export function ScheduleWizard() {
             console.log('JSON parseado:', result)
           } catch (jsonError) {
             console.error('Erro ao fazer parse do JSON:', jsonError)
-            result = { error: `Resposta inválida do servidor: ${responseText.substring(0, 100)}` }
+            result = { error: `Resposta inválida do servidor (${response.status})` }
           }
         } else if (responseText) {
-          console.error('Resposta não é JSON:', responseText)
-          result = { error: responseText || `Erro ${response.status}: ${response.statusText}` }
+          // Resposta não-JSON (ex: HTML de timeout do nginx) — mapear para mensagem amigável
+          console.error('Resposta não é JSON:', responseText.substring(0, 200))
+          result = { error: getHttpErrorMessage(response.status) }
         } else {
-          result = { error: `Erro ${response.status}: ${response.statusText || 'Resposta vazia do servidor'}` }
+          result = { error: getHttpErrorMessage(response.status) }
         }
       } catch (parseError) {
         console.error('Erro ao processar resposta:', parseError)
