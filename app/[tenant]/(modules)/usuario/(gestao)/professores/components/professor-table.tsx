@@ -451,7 +451,7 @@ export function ProfessorTable() {
           {mounted ? (
             <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
               <DialogTrigger asChild>
-                <button className="flex h-9 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md">
+                <button className="flex h-9 md:h-8 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md">
                   <Plus className="w-5 h-5" strokeWidth={1.5} />
                   Novo Professor
                 </button>
@@ -623,7 +623,7 @@ export function ProfessorTable() {
           ) : (
             <button
               onClick={() => setCreateDialogOpen(true)}
-              className="flex h-9 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md"
+              className="flex h-9 md:h-8 items-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md"
             >
               <Plus className="w-5 h-5" strokeWidth={1.5} />
               Novo Professor
@@ -789,7 +789,7 @@ export function ProfessorTable() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setCreateDialogOpen(true)}
-              className="flex h-10 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md"
+              className="flex h-9 md:h-8 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md"
             >
               <Plus className="w-5 h-5" strokeWidth={1.5} />
               Adicionar Professor

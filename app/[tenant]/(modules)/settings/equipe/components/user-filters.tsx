@@ -1,6 +1,7 @@
 "use client"
 
 import { Search } from 'lucide-react'
+import { Input } from '@/app/shared/components/forms/input'
 import {
   Select,
   SelectContent,
@@ -26,22 +27,22 @@ export function UserFilters({
   countByTipo,
 }: UserFiltersProps) {
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center w-full">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center w-full">
       {/* Search Input */}
-      <div className="relative w-full lg:flex-1">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <input
+      <div className="relative w-full sm:max-w-sm">
+        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" strokeWidth={1.5} />
+        <Input
           type="text"
           placeholder="Buscar por nome ou email..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="h-9 w-full pl-9 pr-4 rounded-md border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          className="h-9 md:h-8 pl-9"
         />
       </div>
 
       {/* Papel Type Filter */}
       <Select value={papelTipoFilter} onValueChange={onPapelTipoChange}>
-        <SelectTrigger className="h-9 w-full lg:w-50">
+        <SelectTrigger size="sm" className="w-full sm:w-50">
           <SelectValue placeholder="Filtrar por papel" />
         </SelectTrigger>
         <SelectContent>

@@ -893,7 +893,7 @@ export function AlunoTable() {
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
                 <DialogTrigger asChild>
-                  <button className="flex h-9 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md sm:w-auto">
+                  <button className="flex h-9 md:h-8 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md sm:w-auto">
                     <Plus className="w-5 h-5" strokeWidth={1.5} />
                     Novo Aluno
                   </button>
@@ -1263,7 +1263,7 @@ export function AlunoTable() {
           ) : (
             <button
               onClick={() => setCreateDialogOpen(true)}
-              className="flex h-9 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md sm:w-auto"
+              className="flex h-9 md:h-8 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md sm:w-auto"
             >
               <Plus className="w-5 h-5" strokeWidth={1.5} />
               Novo Aluno
@@ -1284,12 +1284,12 @@ export function AlunoTable() {
       )}
 
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-        <div className="relative w-full lg:flex-1">
-          <Search className="absolute left-2.5 top-2.5 w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
-          <input
+        <div className="relative w-full sm:max-w-sm">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" strokeWidth={1.5} />
+          <Input
             type="text"
             placeholder="Filtrar por nome ou email..."
-            className="w-full h-10 rounded-xl border border-border/40 bg-card/50 pl-9 pr-4 text-sm placeholder:text-muted-foreground shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="h-9 md:h-8 pl-9"
             value={(table.getColumn('fullName')?.getFilterValue() as string) ?? ''}
             onChange={(event) => {
               const value = event.target.value
@@ -1300,7 +1300,7 @@ export function AlunoTable() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-10 w-full justify-center lg:w-auto">
+            <Button variant="outline" size="sm" className="w-full justify-center lg:w-auto">
               Selecionar
               <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
@@ -1470,7 +1470,7 @@ export function AlunoTable() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setCreateDialogOpen(true)}
-              className="flex h-10 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md"
+              className="flex h-9 md:h-8 items-center gap-2 rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-colors duration-200 hover:bg-primary/90 hover:shadow-md"
             >
               <Plus className="w-5 h-5" strokeWidth={1.5} />
               Adicionar Aluno
