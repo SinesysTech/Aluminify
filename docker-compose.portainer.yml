@@ -9,7 +9,6 @@ version: "3.8"
 services:
   aluminify:
     image: sinesystec/aluminify:latest
-    container_name: aluminify-efic
     environment:
       # --- Next.js ---
       - NODE_ENV=production
@@ -32,29 +31,19 @@ services:
       - NEXT_PUBLIC_GA_MEASUREMENT_ID=
 
       # --- Logging ---
-      - LOG_LEVEL=info
+      - LOG_LEVEL=debug
     networks:
       - network_swarm_public
-    labels:
-      # Traefik
-      - "traefik.enable=true"
-      - "traefik.docker.network=network_swarm_public"
-      # HTTP Router
-      - "traefik.http.routers.aluminify.rule=Host(`aluminify.sinesys.app`)"
-      - "traefik.http.routers.aluminify.entrypoints=websecure"
-      - "traefik.http.routers.aluminify.tls=true"
-      - "traefik.http.routers.aluminify.tls.certresolver=letsencrypt"
-      # Service
-      - "traefik.http.services.aluminify.loadbalancer.server.port=3000"
-      # HTTP to HTTPS redirect
-      - "traefik.http.routers.aluminify-http.rule=Host(`aluminify.sinesys.app`)"
-      - "traefik.http.routers.aluminify-http.entrypoints=web"
-      - "traefik.http.routers.aluminify-http.middlewares=redirect-to-https"
-      # Middleware
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
-    restart: always
     deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 0
+        window: 120s
       resources:
         limits:
           cpus: "2"
@@ -62,6 +51,24 @@ services:
         reservations:
           cpus: "0.5"
           memory: 512M
+      labels:
+        # Traefik (em deploy.labels para Swarm mode)
+        - "traefik.enable=true"
+        - "traefik.docker.network=network_swarm_public"
+        # HTTP Router
+        - "traefik.http.routers.aluminify.rule=Host(`aluminify.sinesys.com.br`)"
+        - "traefik.http.routers.aluminify.entrypoints=websecure"
+        - "traefik.http.routers.aluminify.tls=true"
+        - "traefik.http.routers.aluminify.tls.certresolver=letsencrypt"
+        # Service
+        - "traefik.http.services.aluminify.loadbalancer.server.port=3000"
+        # HTTP to HTTPS redirect
+        - "traefik.http.routers.aluminify-http.rule=Host(`aluminify.sinesys.com.br`)"
+        - "traefik.http.routers.aluminify-http.entrypoints=web"
+        - "traefik.http.routers.aluminify-http.middlewares=redirect-to-https"
+        # Middleware
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+        - "traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true"
     logging:
       driver: "json-file"
       options:
