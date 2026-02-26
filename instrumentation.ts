@@ -1,6 +1,11 @@
-import * as Sentry from "@sentry/nextjs";
-
 export async function register() {
+  // Em desenvolvimento, evitar carregar o hook de instrumentation do Sentry.
+  // No modo webpack ele pode acabar puxando código "browser" (referência a `self`)
+  // para o bundle do server e quebrar o `next dev`.
+  if (process.env.NODE_ENV !== "production") {
+    return;
+  }
+
   if (process.env.NEXT_RUNTIME === "nodejs") {
     await import("./sentry.server.config");
   }
@@ -10,4 +15,12 @@ export async function register() {
   }
 }
 
-export const onRequestError = Sentry.captureRequestError;
+export async function onRequestError(...args: unknown[]) {
+  if (process.env.NODE_ENV !== "production") {
+    return;
+  }
+
+  const Sentry = await import("@sentry/nextjs");
+  return (Sentry as unknown as { captureRequestError: (...a: unknown[]) => unknown })
+    .captureRequestError(...args);
+}

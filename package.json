@@ -3,7 +3,7 @@
   "version": "0.1.2",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --webpack",
     "dev:all": "npm run dev",
     "dev:turbopack": "next dev --turbopack",
     "build": "next build --turbopack",
