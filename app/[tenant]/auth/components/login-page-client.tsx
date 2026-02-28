@@ -4,7 +4,7 @@ import React from 'react'
 
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
 import { AuthPageLayout } from './auth-page-layout'
 import { AuthDivider } from './auth-divider'
@@ -35,8 +35,11 @@ export function LoginPageClient() {
   const [password, setPassword] = useState('')
   const [rememberDevice, setRememberDevice] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const submitLockRef = useRef(false)
+  const magicLinkLockRef = useRef(false)
 
   const handleMagicLink = async () => {
+    if (magicLinkLockRef.current) return
     if (isLoading) return
     if (!email) {
       toast.error('Email obrigatório', {
@@ -45,6 +48,7 @@ export function LoginPageClient() {
       return
     }
 
+    magicLinkLockRef.current = true
     setIsLoading(true)
     try {
       const supabase = createClient()
@@ -72,12 +76,18 @@ export function LoginPageClient() {
       })
     } finally {
       setIsLoading(false)
+      magicLinkLockRef.current = false
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     console.log('[DEBUG] handleSubmit iniciado', { email, hasPassword: !!password, passwordLength: password.length })
+
+    if (submitLockRef.current) {
+      console.log('[DEBUG] handleSubmit cancelado: lock ativo')
+      return
+    }
 
     if (isLoading) {
       console.log('[DEBUG] handleSubmit cancelado: já está carregando')
@@ -92,6 +102,7 @@ export function LoginPageClient() {
       return
     }
 
+    submitLockRef.current = true
     setIsLoading(true)
     try {
       console.log('[DEBUG] Criando cliente Supabase...')
@@ -121,6 +132,12 @@ export function LoginPageClient() {
           errorDescription = 'Seu email ainda não foi confirmado. Verifique sua caixa de entrada.'
         } else if (error.message.includes('Too many requests')) {
           errorDescription = 'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.'
+        } else if (
+          error.status === 429 ||
+          error.message.toLowerCase().includes('rate limit')
+        ) {
+          errorDescription =
+            'Limite de tentativas atingido no provedor de autenticação. Aguarde alguns minutos e tente novamente.'
         }
 
         toast.error('Não foi possível entrar', {
@@ -176,6 +193,7 @@ export function LoginPageClient() {
     } finally {
       console.log('[DEBUG] handleSubmit finalizado, setIsLoading(false)')
       setIsLoading(false)
+      submitLockRef.current = false
     }
   }
 

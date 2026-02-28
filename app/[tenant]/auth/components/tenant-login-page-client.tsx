@@ -4,7 +4,7 @@ import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useRef, useState, useEffect } from 'react'
 import { cn } from '@/shared/library/utils'
 import { AuthDivider } from './auth-divider'
 import { MagicLinkButton } from './magic-link-button'
@@ -46,6 +46,8 @@ export function TenantLoginPageClient({
   const [brandingLogo, setBrandingLogo] = useState<string | null>(null)
   const [loadingLogo, setLoadingLogo] = useState(true)
   const [brandingReady, setBrandingReady] = useState(false)
+  const submitLockRef = useRef(false)
+  const magicLinkLockRef = useRef(false)
 
   // Load branding for this tenant (unauthenticated)
   useEffect(() => {
@@ -144,6 +146,7 @@ export function TenantLoginPageClient({
   }, [brandingLogo, logoUrl])
 
   const handleMagicLink = async () => {
+    if (magicLinkLockRef.current) return
     if (isLoading) return
     if (!email) {
       toast.error('Email obrigatório', {
@@ -152,6 +155,7 @@ export function TenantLoginPageClient({
       return
     }
 
+    magicLinkLockRef.current = true
     setIsLoading(true)
     try {
       const supabase = createClient()
@@ -179,11 +183,16 @@ export function TenantLoginPageClient({
       })
     } finally {
       setIsLoading(false)
+      magicLinkLockRef.current = false
     }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (submitLockRef.current) {
+      return
+    }
 
     if (isLoading) {
       return
@@ -196,6 +205,7 @@ export function TenantLoginPageClient({
       return
     }
 
+    submitLockRef.current = true
     setIsLoading(true)
     try {
       const supabase = createClient()
@@ -214,6 +224,12 @@ export function TenantLoginPageClient({
           errorDescription = 'Seu email ainda não foi confirmado. Verifique sua caixa de entrada.'
         } else if (error.message.includes('Too many requests')) {
           errorDescription = 'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.'
+        } else if (
+          error.status === 429 ||
+          error.message.toLowerCase().includes('rate limit')
+        ) {
+          errorDescription =
+            'Limite de tentativas atingido no provedor de autenticação. Aguarde alguns minutos e tente novamente.'
         }
 
         toast.error('Não foi possível entrar', {
@@ -279,6 +295,7 @@ export function TenantLoginPageClient({
       })
     } finally {
       setIsLoading(false)
+      submitLockRef.current = false
     }
   }
 

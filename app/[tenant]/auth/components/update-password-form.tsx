@@ -14,28 +14,70 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/app/shared/components/forms/input'
 import { Label } from '@/app/shared/components/forms/label'
-import { useParams, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 
 export function UpdatePasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isSessionReady, setIsSessionReady] = useState(false)
   const router = useRouter()
-  const params = useParams()
-  const tenant = params?.tenant as string
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  const supabase = useMemo(() => createClient(), [])
+
+  useEffect(() => {
+    let isMounted = true
+
+    async function ensureRecoverySession() {
+      try {
+        // Com `detectSessionInUrl: true`, isso também tenta capturar a sessão
+        // do fragmento (#access_token=...) quando o usuário vem do e-mail.
+        const { data, error: sessionError } = await supabase.auth.getSession()
+        if (!isMounted) return
+
+        if (sessionError) {
+          setError(sessionError.message)
+          setIsSessionReady(false)
+          return
+        }
+
+        if (!data.session) {
+          setError(
+            'Link inválido ou expirado. Solicite a recuperação de senha novamente.',
+          )
+          setIsSessionReady(false)
+          return
+        }
+
+        setError(null)
+        setIsSessionReady(true)
+      } catch (e: unknown) {
+        if (!isMounted) return
+        setError(e instanceof Error ? e.message : 'Não foi possível validar a sessão de recuperação.')
+        setIsSessionReady(false)
+      }
+    }
+
+    ensureRecoverySession()
+    return () => {
+      isMounted = false
+    }
+  }, [supabase])
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
-    const supabase = createClient()
     setIsLoading(true)
     setError(null)
 
     try {
+      if (!isSessionReady) {
+        throw new Error('Sessão de recuperação ainda não está pronta. Recarregue a página e tente novamente.')
+      }
       const { error } = await supabase.auth.updateUser({ password })
       if (error) throw error
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push(tenant ? `/${tenant}/protected` : '/protected')
+      // `/protected` resolve a rota final por role/tenant.
+      router.push('/protected')
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : 'An error occurred')
     } finally {
@@ -51,7 +93,7 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
           <CardDescription>Please enter your new password below.</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleForgotPassword}>
+          <form onSubmit={handleUpdatePassword}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="password">New password</Label>
@@ -62,10 +104,11 @@ export function UpdatePasswordForm({ className, ...props }: React.ComponentProps
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={!isSessionReady || isLoading}
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full" disabled={isLoading || !isSessionReady}>
                 {isLoading ? 'Saving...' : 'Save new password'}
               </Button>
             </div>
