@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 interface SubscriptionRow {
   id: string;
@@ -198,6 +199,12 @@ export function SubscriptionList({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2">
+                        <Link
+                          href={`/superadmin/assinaturas/${sub.id}`}
+                          className="text-sm text-primary hover:underline"
+                        >
+                          Detalhes
+                        </Link>
                         {sub.status === "active" && (
                           <button
                             onClick={() => handleAction("cancel", sub.id)}

@@ -193,8 +193,9 @@ export async function updateIntegracaoProfessor(
   void _updated_at;
   void _empresa_id;
 
+  // @ts-ignore - Type instantiation is excessively deep
   const { data, error } = await supabase
-    // @ts-expect-error - Table not in types
+    // @ts-ignore - Table not in types
     .from("professor_integracoes")
     .upsert(
       {

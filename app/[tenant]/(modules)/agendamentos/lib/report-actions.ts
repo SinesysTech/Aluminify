@@ -50,7 +50,6 @@ export async function getRelatorios(
   const supabase = await createClient();
 
   let query = supabase
-    // @ts-expect-error - Table not in types
     .from("agendamento_relatorios")
     .select("*")
     .eq("empresa_id", empresaId)
@@ -106,7 +105,6 @@ export async function getRelatorioById(id: string): Promise<Relatorio | null> {
   }
 
   const { data, error } = await supabase
-    // @ts-expect-error - Table not in types
     .from("agendamento_relatorios")
     .select("*")
     .eq("id", id)
