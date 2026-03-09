@@ -6,6 +6,7 @@ import {
   Receipt,
   FileText,
   BarChart3,
+  Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -52,6 +53,11 @@ const superadminNavItems: NavItem[] = [
     title: "Métricas",
     url: "/superadmin/metricas",
     icon: BarChart3,
+  },
+  {
+    title: "Usuários",
+    url: "/superadmin/usuarios",
+    icon: Users,
   },
 ];
 
