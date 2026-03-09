@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabaseClient } from "@/shared/core/database/database";
 import { getStripeClient } from "@/shared/core/services/stripe.service";
+import { requireSuperadminForAPI } from "@/shared/core/services/superadmin-auth.service";
 
 /**
  * Superadmin Subscription Management API
  *
  * GET /api/superadmin/assinaturas — List all subscriptions with tenant info
  * POST /api/superadmin/assinaturas — Execute admin actions (cancel, change plan)
+ *
+ * Auth: Requires superadmin authentication
  */
+
+const UNAUTHORIZED = NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
 export async function GET(request: NextRequest) {
   try {
+    const superadmin = await requireSuperadminForAPI();
+    if (!superadmin) return UNAUTHORIZED;
+
     const db = getDatabaseClient();
     const { searchParams } = request.nextUrl;
 
@@ -61,6 +69,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const superadmin = await requireSuperadminForAPI();
+    if (!superadmin) return UNAUTHORIZED;
+
     const body = await request.json();
     const { action, subscription_id, plan_id } = body as {
       action: "cancel" | "change_plan";

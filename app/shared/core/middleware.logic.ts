@@ -117,6 +117,9 @@ export async function updateSession(request: NextRequest) {
     "/contato",
     // Sentry tunnel route (next.config.ts tunnelRoute: "/monitoring")
     "/monitoring",
+    // Superadmin — auth handled at app layer (requireSuperadmin / requireSuperadminForAPI)
+    "/superadmin",
+    "/api/superadmin",
   ];
 
   // Check if it matches a known public base path

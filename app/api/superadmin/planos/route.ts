@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDatabaseClient } from "@/shared/core/database/database";
 import { getStripeClient } from "@/shared/core/services/stripe.service";
 import type { CreatePlanInput, UpdatePlanInput } from "@/shared/types/entities/subscription";
+import { requireSuperadminForAPI } from "@/shared/core/services/superadmin-auth.service";
 
 /**
  * Superadmin Plan Management API
@@ -11,14 +12,16 @@ import type { CreatePlanInput, UpdatePlanInput } from "@/shared/types/entities/s
  * PUT /api/superadmin/planos — Update an existing plan (syncs with Stripe)
  * PATCH /api/superadmin/planos — Toggle plan active status
  *
- * Auth: Requires superadmin (SUPABASE_SECRET_KEY bypasses RLS)
+ * Auth: Requires superadmin authentication
  */
 
-// TODO: Add proper superadmin authentication middleware
-// For now, these routes use service role client which bypasses RLS
+const UNAUTHORIZED = NextResponse.json({ error: "Não autorizado" }, { status: 401 });
 
 export async function GET() {
   try {
+    const superadmin = await requireSuperadminForAPI();
+    if (!superadmin) return UNAUTHORIZED;
+
     const db = getDatabaseClient();
     const { data: plans, error } = await db
       .from("subscription_plans")
@@ -36,6 +39,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    const superadmin = await requireSuperadminForAPI();
+    if (!superadmin) return UNAUTHORIZED;
+
     const body = (await request.json()) as CreatePlanInput;
 
     const { name, slug, description, features = [], price_monthly_cents, price_yearly_cents, currency = "BRL" } = body;
@@ -135,6 +141,9 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    const superadmin = await requireSuperadminForAPI();
+    if (!superadmin) return UNAUTHORIZED;
+
     const body = (await request.json()) as UpdatePlanInput & { id: string };
 
     if (!body.id) {
@@ -236,6 +245,9 @@ export async function PUT(request: NextRequest) {
 
 export async function PATCH(request: NextRequest) {
   try {
+    const superadmin = await requireSuperadminForAPI();
+    if (!superadmin) return UNAUTHORIZED;
+
     const { id, active } = (await request.json()) as { id: string; active: boolean };
 
     if (!id || active === undefined) {
