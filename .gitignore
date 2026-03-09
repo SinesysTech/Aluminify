@@ -28,6 +28,11 @@
 *.pem
 tmp/
 
+# python
+.venv/
+__pycache__/
+*.pyc
+
 # env (never commit secrets)
 .env
 .env.local
