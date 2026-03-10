@@ -2,11 +2,7 @@
 
 import { createClient } from "@/app/shared/core/server";
 import { revalidatePath } from "next/cache";
-import {
-  ConfiguracoesProfessor,
-  ProfessorIntegracao,
-  DbProfessorIntegracao,
-} from "../types";
+import { ConfiguracoesProfessor } from "../types";
 import type { Database } from "@/app/shared/core/database.types";
 import { canManageProfessorSchedule } from "./admin-helpers";
 
@@ -92,128 +88,6 @@ export async function updateConfiguracoesProfessor(
   if (error) {
     console.error("Error updating professor config:", error);
     throw new Error("Failed to update configuration");
-  }
-
-  revalidatePath("/agendamentos/configuracoes");
-  return data;
-}
-
-export async function getIntegracaoProfessor(
-  professorId: string,
-  empresaId?: string,
-): Promise<ProfessorIntegracao | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  if (user.id !== professorId) {
-    const canManage = await canManageProfessorSchedule(professorId);
-    if (!canManage) throw new Error("Unauthorized");
-  }
-
-  let query = supabase
-    .from("professor_integracoes" as never)
-    .select("*")
-    .eq("professor_id", professorId);
-
-  if (empresaId) {
-    query = query.eq("empresa_id", empresaId);
-  }
-
-  const { data, error } = await query.single();
-
-  if (error && error.code !== "PGRST116" && error.code !== "PGRST205") {
-    console.error("Error fetching professor integration:", error);
-    return null;
-  }
-
-  // Return defaults if no integration exists
-  if (!data) {
-    return {
-      id: "",
-      professor_id: professorId,
-      empresa_id: empresaId || "",
-      provider: "default",
-      access_token: null,
-      refresh_token: null,
-      token_expiry: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-  }
-
-  // Map database data to ProfessorIntegracao type
-  const row = data as unknown as DbProfessorIntegracao;
-  return {
-    id: row.id,
-    professor_id: row.professor_id,
-    empresa_id: row.empresa_id,
-    provider: row.provider,
-    access_token: row.access_token,
-    refresh_token: row.refresh_token,
-    token_expiry: row.token_expiry,
-    created_at: row.created_at ?? undefined,
-    updated_at: row.updated_at ?? undefined,
-  };
-}
-
-export async function updateIntegracaoProfessor(
-  professorId: string,
-  empresaId: string,
-  integration: Partial<ProfessorIntegracao>,
-) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-
-  if (user.id !== professorId) {
-    const canManage = await canManageProfessorSchedule(professorId);
-    if (!canManage) throw new Error("Unauthorized");
-  }
-
-  const {
-    id: _id,
-    created_at: _created_at,
-    updated_at: _updated_at,
-    empresa_id: _empresa_id,
-    ...integrationData
-  } = integration;
-  void _id;
-  void _created_at;
-  void _updated_at;
-  void _empresa_id;
-
-  // @ts-ignore - Type instantiation is excessively deep
-  const { data, error } = await supabase
-    // @ts-ignore - Table not in types
-    .from("professor_integracoes")
-    .upsert(
-      {
-        ...integrationData,
-        professor_id: professorId,
-        empresa_id: empresaId,
-        provider: integrationData.provider || "default",
-      } as Record<string, unknown>,
-      {
-        onConflict: "professor_id,empresa_id,provider",
-      },
-    )
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error updating professor integration:", error);
-    throw new Error("Failed to update integration");
   }
 
   revalidatePath("/agendamentos/configuracoes");

@@ -60,9 +60,16 @@ export default async function IntegracoesPage() {
             professorId={user.id}
             empresaId={user.empresaId}
             tenantSlug={user.empresaSlug || ""}
+            isAdmin={user.isAdmin}
             availableProviders={{
-              google: !!oauthConfig.google?.configured && !!oauthConfig.google?.active,
-              zoom: !!oauthConfig.zoom?.configured && !!oauthConfig.zoom?.active,
+              google: {
+                configured: !!oauthConfig.google?.configured && !!oauthConfig.google?.active,
+                connected: !!oauthConfig.google?.connected,
+              },
+              zoom: {
+                configured: !!oauthConfig.zoom?.configured && !!oauthConfig.zoom?.active,
+                connected: !!oauthConfig.zoom?.connected,
+              },
             }}
           />
         </TabsContent>

@@ -15,6 +15,10 @@ import {
   VAgendamentosEmpresa,
 } from "../types";
 import { getConfiguracoesProfessor } from "./config-actions";
+import {
+  getOAuthTokens,
+  getTenantOAuthStatus,
+} from "@/app/shared/core/services/oauth-credentials";
 import { validateAgendamento } from "./validation-actions";
 import { PlantaoQuotaService } from "../services/plantao-quota.service";
 
@@ -383,7 +387,7 @@ export async function confirmarAgendamento(id: string, linkReuniao?: string) {
 
   let linkToUse = linkReuniao;
 
-  if (!linkToUse) {
+  if (!linkToUse && agendamento.empresa_id) {
     try {
       const config = await getConfiguracoesProfessor(user.id);
 
@@ -393,50 +397,38 @@ export async function confirmarAgendamento(id: string, linkReuniao?: string) {
         .eq("id", agendamento.aluno_id)
         .single();
 
-      let integrationQuery = supabase
-        .from("professor_integracoes" as never)
-        .select("*")
-        .eq("professor_id", user.id);
-
-      if (agendamento.empresa_id) {
-        integrationQuery = integrationQuery.eq(
-          "empresa_id",
-          agendamento.empresa_id,
-        );
-      }
-
-      const { data: integration } = await integrationQuery.single();
-
-      const validIntegration =
-        integration && !("code" in integration)
-          ? (integration as unknown as {
-              provider: string;
-              access_token: string;
-            })
+      const oauthStatus = await getTenantOAuthStatus(agendamento.empresa_id);
+      const connectedProvider = oauthStatus.google?.connected
+        ? "google"
+        : oauthStatus.zoom?.connected
+          ? "zoom"
           : null;
 
-      if (
-        validIntegration &&
-        validIntegration.provider !== "default" &&
-        validIntegration.access_token
-      ) {
-        const meetingLink = await generateMeetingLink(
-          validIntegration.provider as "google" | "zoom" | "default",
-          {
-            title: `Plantão com ${aluno?.nome_completo || "Aluno"}`,
-            startTime: new Date(agendamento.data_inicio),
-            endTime: new Date(agendamento.data_fim),
-            description: "Sessão de plantão agendada via Aluminify",
-            attendees: aluno?.email ? [aluno.email] : [],
-          },
-          {
-            accessToken: validIntegration.access_token,
-            defaultLink: config?.link_reuniao_padrao || undefined,
-          },
+      if (connectedProvider) {
+        const tokens = await getOAuthTokens(
+          agendamento.empresa_id,
+          connectedProvider,
         );
 
-        if (meetingLink) {
-          linkToUse = meetingLink.url;
+        if (tokens?.accessToken) {
+          const meetingLink = await generateMeetingLink(
+            connectedProvider,
+            {
+              title: `Plantão com ${aluno?.nome_completo || "Aluno"}`,
+              startTime: new Date(agendamento.data_inicio),
+              endTime: new Date(agendamento.data_fim),
+              description: "Sessão de plantão agendada via Aluminify",
+              attendees: aluno?.email ? [aluno.email] : [],
+            },
+            {
+              accessToken: tokens.accessToken,
+              defaultLink: config?.link_reuniao_padrao || undefined,
+            },
+          );
+
+          if (meetingLink) {
+            linkToUse = meetingLink.url;
+          }
         }
       }
 

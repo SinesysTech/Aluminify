@@ -3,10 +3,10 @@
 import { requireUser } from "@/app/shared/core/auth";
 import {
   saveOAuthCredentials,
-  getOAuthCredentials,
   getOAuthClientId,
   getTenantOAuthStatus,
   deleteOAuthCredentials,
+  disconnectOAuthTokens,
 } from "@/app/shared/core/services/oauth-credentials";
 import type { OAuthProvider } from "@/app/shared/core/services/oauth-credentials";
 import { revalidatePath } from "next/cache";
@@ -61,20 +61,25 @@ export async function deleteTenantOAuthCredentials(
 }
 
 // =============================================
-// Professor Actions (OAuth Flow)
+// Admin Actions (OAuth Connection)
 // =============================================
 
 /**
- * Builds the OAuth authorization URL for a professor to connect their account.
+ * Builds the OAuth authorization URL for the tenant admin to connect their corporate account.
  * Fetches the tenant's client_id from the database.
  * Returns null if the provider is not configured for the tenant.
  */
 export async function getOAuthAuthorizationUrl(
-  professorId: string,
   empresaId: string,
   tenantSlug: string,
   provider: OAuthProvider,
 ): Promise<string | null> {
+  const user = await requireUser({ allowedRoles: ["usuario"] });
+
+  if (!user.isAdmin || user.empresaId !== empresaId) {
+    throw new Error("Apenas administradores podem conectar integrações OAuth");
+  }
+
   const clientId = await getOAuthClientId(empresaId, provider);
 
   if (!clientId) {
@@ -84,7 +89,7 @@ export async function getOAuthAuthorizationUrl(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "";
   const redirectUri = `${appUrl}/api/empresa/integracoes/${provider}/callback`;
   const state = encodeURIComponent(
-    JSON.stringify({ professorId, empresaId, tenantSlug }),
+    JSON.stringify({ empresaId, tenantSlug }),
   );
 
   if (provider === "google") {
@@ -117,12 +122,19 @@ export async function getOAuthAuthorizationUrl(
 }
 
 /**
- * Fetches full decrypted credentials for use in OAuth token exchange (callbacks).
- * Should only be called from server-side API routes.
+ * Disconnects OAuth tokens for a tenant + provider (keeps client_id/secret).
+ * Requires admin permissions.
  */
-export async function getOAuthCredentialsForCallback(
+export async function disconnectTenantOAuth(
   empresaId: string,
   provider: OAuthProvider,
 ) {
-  return getOAuthCredentials(empresaId, provider);
+  const user = await requireUser({ allowedRoles: ["usuario"] });
+
+  if (!user.isAdmin || user.empresaId !== empresaId) {
+    throw new Error("Sem permissão para desconectar integração OAuth");
+  }
+
+  await disconnectOAuthTokens(empresaId, provider);
+  revalidatePath(`/${user.empresaSlug}/settings/integracoes`);
 }

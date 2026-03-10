@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/app/shared/components/forms/input"
@@ -16,13 +16,14 @@ import {
   AlertTitle,
 } from "@/app/shared/components/feedback/alert"
 import {
-  getIntegracaoProfessor,
   getConfiguracoesProfessor,
-  updateIntegracaoProfessor,
   updateConfiguracoesProfessor,
 } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
-import { getOAuthAuthorizationUrl } from "@/app/[tenant]/(modules)/settings/integracoes/lib/oauth-actions"
-import type { ProfessorIntegracao, ConfiguracoesProfessor } from "@/app/[tenant]/(modules)/agendamentos/types"
+import {
+  getOAuthAuthorizationUrl,
+  disconnectTenantOAuth,
+} from "@/app/[tenant]/(modules)/settings/integracoes/lib/oauth-actions"
+import type { ConfiguracoesProfessor } from "@/app/[tenant]/(modules)/agendamentos/types"
 import { Loader2, Link2, Check, X, ExternalLink, AlertCircle, ChevronDown, Save } from "lucide-react"
 import { toast } from "sonner"
 
@@ -30,9 +31,10 @@ interface IntegracaoManagerProps {
   professorId: string
   empresaId: string
   tenantSlug: string
+  isAdmin: boolean
   availableProviders: {
-    google: boolean
-    zoom: boolean
+    google: { configured: boolean; connected: boolean }
+    zoom: { configured: boolean; connected: boolean }
   }
 }
 
@@ -40,40 +42,36 @@ export function IntegracaoManager({
   professorId,
   empresaId,
   tenantSlug,
+  isAdmin,
   availableProviders,
 }: IntegracaoManagerProps) {
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [integracao, setIntegracao] = useState<ProfessorIntegracao | null>(null)
   const [_configuracoes, setConfiguracoes] = useState<ConfiguracoesProfessor | null>(null)
   const [defaultLink, setDefaultLink] = useState("")
-  const [selectedProvider, setSelectedProvider] = useState<"google" | "zoom" | "default">("default")
   const [showGoogleDetails, setShowGoogleDetails] = useState(false)
   const [showZoomDetails, setShowZoomDetails] = useState(false)
+  const [dataLoaded, setDataLoaded] = useState(false)
 
-  useEffect(() => {
-    loadData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [professorId, empresaId])
-
-  async function loadData() {
-    try {
-      setLoading(true)
-      const [integracaoData, configData] = await Promise.all([
-        getIntegracaoProfessor(professorId, empresaId),
-        getConfiguracoesProfessor(professorId),
-      ])
-      setIntegracao(integracaoData)
-      setConfiguracoes(configData)
-      setDefaultLink(configData?.link_reuniao_padrao || "")
-      setSelectedProvider(integracaoData?.provider || "default")
-    } catch (error) {
-      console.error("Error loading integration data:", error)
-      toast.error("Erro ao carregar dados de integração")
-    } finally {
-      setLoading(false)
-    }
+  if (!dataLoaded) {
+    setDataLoaded(true)
+    setLoading(true)
+    getConfiguracoesProfessor(professorId)
+      .then((configData) => {
+        setConfiguracoes(configData)
+        setDefaultLink(configData?.link_reuniao_padrao || "")
+      })
+      .catch((error) => {
+        console.error("Error loading config data:", error)
+        toast.error("Erro ao carregar dados de configuração")
+      })
+      .finally(() => setLoading(false))
   }
+
+  const isGoogleConnected = availableProviders.google.connected
+  const isZoomConnected = availableProviders.zoom.connected
+  const hasGoogleConfig = availableProviders.google.configured
+  const hasZoomConfig = availableProviders.zoom.configured
 
   const handleSaveDefaultLink = async () => {
     setSaving(true)
@@ -81,12 +79,7 @@ export function IntegracaoManager({
       await updateConfiguracoesProfessor(professorId, {
         link_reuniao_padrao: defaultLink || null,
       })
-      await updateIntegracaoProfessor(professorId, empresaId, {
-        provider: "default",
-      })
-      setSelectedProvider("default")
       toast.success("Link padrão salvo!")
-      loadData()
     } catch (error) {
       console.error("Error saving default link:", error)
       toast.error("Erro ao salvar link padrão")
@@ -95,65 +88,30 @@ export function IntegracaoManager({
     }
   }
 
-  const handleConnectGoogle = async () => {
-    if (!availableProviders.google) {
-      toast.error("Google OAuth não configurado para esta empresa. Solicite ao administrador.")
-      return
-    }
-
+  const handleConnect = async (provider: "google" | "zoom") => {
     try {
       const authUrl = await getOAuthAuthorizationUrl(
-        professorId,
         empresaId,
         tenantSlug,
-        "google",
+        provider,
       )
       if (!authUrl) {
-        toast.error("Não foi possível gerar a URL de autorização do Google")
+        toast.error(`Não foi possível gerar a URL de autorização do ${provider === "google" ? "Google" : "Zoom"}`)
         return
       }
       window.location.href = authUrl
     } catch (err) {
-      console.error("Error getting Google OAuth URL:", err)
-      toast.error("Erro ao iniciar conexão com Google")
+      console.error(`Error getting ${provider} OAuth URL:`, err)
+      toast.error(`Erro ao iniciar conexão com ${provider === "google" ? "Google" : "Zoom"}`)
     }
   }
 
-  const handleConnectZoom = async () => {
-    if (!availableProviders.zoom) {
-      toast.error("Zoom OAuth não configurado para esta empresa. Solicite ao administrador.")
-      return
-    }
-
-    try {
-      const authUrl = await getOAuthAuthorizationUrl(
-        professorId,
-        empresaId,
-        tenantSlug,
-        "zoom",
-      )
-      if (!authUrl) {
-        toast.error("Não foi possível gerar a URL de autorização do Zoom")
-        return
-      }
-      window.location.href = authUrl
-    } catch (err) {
-      console.error("Error getting Zoom OAuth URL:", err)
-      toast.error("Erro ao iniciar conexão com Zoom")
-    }
-  }
-
-  const handleDisconnect = async () => {
+  const handleDisconnect = async (provider: "google" | "zoom") => {
     setSaving(true)
     try {
-      await updateIntegracaoProfessor(professorId, empresaId, {
-        provider: "default",
-        access_token: null,
-        refresh_token: null,
-        token_expiry: null,
-      })
+      await disconnectTenantOAuth(empresaId, provider)
       toast.success("Integração desconectada")
-      loadData()
+      window.location.reload()
     } catch (error) {
       console.error("Error disconnecting:", error)
       toast.error("Erro ao desconectar integração")
@@ -161,11 +119,6 @@ export function IntegracaoManager({
       setSaving(false)
     }
   }
-
-  const isGoogleConnected = integracao?.provider === "google" && !!integracao?.access_token
-  const isZoomConnected = integracao?.provider === "zoom" && !!integracao?.access_token
-  const hasGoogleConfig = availableProviders.google
-  const hasZoomConfig = availableProviders.zoom
 
   if (loading) {
     return (
@@ -190,7 +143,7 @@ export function IntegracaoManager({
                 Link fixo usado automaticamente ao confirmar agendamentos
               </p>
             </div>
-            {selectedProvider === "default" && defaultLink && (
+            {!isGoogleConnected && !isZoomConnected && defaultLink && (
               <Badge variant="secondary" className="shrink-0">Em uso</Badge>
             )}
           </div>
@@ -220,13 +173,15 @@ export function IntegracaoManager({
         <div className="space-y-1">
           <h3 className="section-title">Integrações Automáticas</h3>
           <p className="text-sm text-muted-foreground">
-            Conecte um provedor para gerar links de reunião automaticamente
+            {isAdmin
+              ? "Conecte a conta corporativa para gerar links de reunião automaticamente"
+              : "Integrações de videoconferência configuradas pelo administrador"}
           </p>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
           {/* Google Calendar / Meet */}
-          <Card className={`transition-colors ${selectedProvider === "google" ? "border-primary/40 bg-primary/2" : ""}`}>
+          <Card className={`transition-colors ${isGoogleConnected ? "border-primary/40 bg-primary/2" : ""}`}>
             <CardContent className="pt-6">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
@@ -252,17 +207,19 @@ export function IntegracaoManager({
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Configuração necessária</AlertTitle>
                   <AlertDescription className="text-xs">
-                    O administrador precisa configurar as credenciais Google OAuth para esta empresa.
+                    {isAdmin
+                      ? "Configure as credenciais Google OAuth acima para habilitar esta integração."
+                      : "O administrador precisa configurar as credenciais Google OAuth para esta empresa."}
                   </AlertDescription>
                 </Alert>
-              ) : (
+              ) : isAdmin ? (
                 <>
                   <div className="mt-3">
                     {isGoogleConnected ? (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={handleDisconnect}
+                        onClick={() => handleDisconnect("google")}
                         disabled={saving}
                         className="w-full"
                       >
@@ -271,13 +228,13 @@ export function IntegracaoManager({
                       </Button>
                     ) : (
                       <Button
-                        onClick={handleConnectGoogle}
+                        onClick={() => handleConnect("google")}
                         disabled={saving}
                         size="sm"
                         className="w-full"
                       >
                         <ExternalLink className="mr-2 h-4 w-4" />
-                        Conectar
+                        Conectar Conta Google
                       </Button>
                     )}
                   </div>
@@ -291,7 +248,7 @@ export function IntegracaoManager({
                       <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
                         <li className="flex items-start gap-1.5">
                           <Check className="h-3 w-3 mt-0.5 text-green-500 shrink-0" />
-                          Eventos criados no Google Calendar
+                          Eventos criados no Google Calendar da conta corporativa
                         </li>
                         <li className="flex items-start gap-1.5">
                           <Check className="h-3 w-3 mt-0.5 text-green-500 shrink-0" />
@@ -305,12 +262,18 @@ export function IntegracaoManager({
                     </CollapsibleContent>
                   </Collapsible>
                 </>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-3">
+                  {isGoogleConnected
+                    ? "Links do Google Meet são gerados automaticamente ao confirmar agendamentos."
+                    : "Aguardando o administrador conectar a conta Google corporativa."}
+                </p>
               )}
             </CardContent>
           </Card>
 
           {/* Zoom */}
-          <Card className={`transition-colors ${selectedProvider === "zoom" ? "border-primary/40 bg-primary/2" : ""}`}>
+          <Card className={`transition-colors ${isZoomConnected ? "border-primary/40 bg-primary/2" : ""}`}>
             <CardContent className="pt-6">
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3">
@@ -336,17 +299,19 @@ export function IntegracaoManager({
                   <AlertCircle className="h-4 w-4" />
                   <AlertTitle>Configuração necessária</AlertTitle>
                   <AlertDescription className="text-xs">
-                    O administrador precisa configurar as credenciais Zoom OAuth para esta empresa.
+                    {isAdmin
+                      ? "Configure as credenciais Zoom OAuth acima para habilitar esta integração."
+                      : "O administrador precisa configurar as credenciais Zoom OAuth para esta empresa."}
                   </AlertDescription>
                 </Alert>
-              ) : (
+              ) : isAdmin ? (
                 <>
                   <div className="mt-3">
                     {isZoomConnected ? (
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={handleDisconnect}
+                        onClick={() => handleDisconnect("zoom")}
                         disabled={saving}
                         className="w-full"
                       >
@@ -355,13 +320,13 @@ export function IntegracaoManager({
                       </Button>
                     ) : (
                       <Button
-                        onClick={handleConnectZoom}
+                        onClick={() => handleConnect("zoom")}
                         disabled={saving}
                         size="sm"
                         className="w-full"
                       >
                         <ExternalLink className="mr-2 h-4 w-4" />
-                        Conectar
+                        Conectar Conta Zoom
                       </Button>
                     )}
                   </div>
@@ -389,6 +354,12 @@ export function IntegracaoManager({
                     </CollapsibleContent>
                   </Collapsible>
                 </>
+              ) : (
+                <p className="text-xs text-muted-foreground mt-3">
+                  {isZoomConnected
+                    ? "Links do Zoom são gerados automaticamente ao confirmar agendamentos."
+                    : "Aguardando o administrador conectar a conta Zoom corporativa."}
+                </p>
               )}
             </CardContent>
           </Card>

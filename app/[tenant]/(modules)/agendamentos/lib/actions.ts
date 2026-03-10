@@ -64,15 +64,11 @@ export {
 import {
   getConfiguracoesProfessor,
   updateConfiguracoesProfessor,
-  getIntegracaoProfessor,
-  updateIntegracaoProfessor,
 } from "./config-actions";
 
 export {
   getConfiguracoesProfessor,
   updateConfiguracoesProfessor,
-  getIntegracaoProfessor,
-  updateIntegracaoProfessor,
 };
 
 // Recurrence actions

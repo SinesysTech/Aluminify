@@ -1659,6 +1659,7 @@ export type Database = {
       }
       empresa_oauth_credentials: {
         Row: {
+          access_token_encrypted: string | null
           active: boolean
           client_id: string
           client_secret_encrypted: string
@@ -1668,9 +1669,12 @@ export type Database = {
           extra_config: Json | null
           id: string
           provider: string
+          refresh_token_encrypted: string | null
+          token_expiry: string | null
           updated_at: string | null
         }
         Insert: {
+          access_token_encrypted?: string | null
           active?: boolean
           client_id: string
           client_secret_encrypted: string
@@ -1680,9 +1684,12 @@ export type Database = {
           extra_config?: Json | null
           id?: string
           provider: string
+          refresh_token_encrypted?: string | null
+          token_expiry?: string | null
           updated_at?: string | null
         }
         Update: {
+          access_token_encrypted?: string | null
           active?: boolean
           client_id?: string
           client_secret_encrypted?: string
@@ -1692,6 +1699,8 @@ export type Database = {
           extra_config?: Json | null
           id?: string
           provider?: string
+          refresh_token_encrypted?: string | null
+          token_expiry?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -3743,9 +3752,12 @@ export type Database = {
           p_provider: string
         }
         Returns: {
+          access_token: string
           client_id: string
           client_secret: string
           credential_id: string
+          refresh_token: string
+          token_expiry: string
         }[]
       }
       get_professor_disciplinas: { Args: never; Returns: string[] }
@@ -3839,17 +3851,43 @@ export type Database = {
         Args: { p_modulo_id: string }
         Returns: boolean
       }
-      upsert_oauth_credential: {
+      save_oauth_tokens: {
         Args: {
-          p_client_id: string
-          p_client_secret: string
-          p_configured_by?: string
+          p_access_token: string
           p_empresa_id: string
           p_encryption_key: string
           p_provider: string
+          p_refresh_token: string
+          p_token_expiry?: string
         }
-        Returns: string
+        Returns: boolean
       }
+      upsert_oauth_credential:
+        | {
+            Args: {
+              p_client_id: string
+              p_client_secret: string
+              p_configured_by?: string
+              p_empresa_id: string
+              p_encryption_key: string
+              p_provider: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_access_token?: string
+              p_client_id: string
+              p_client_secret: string
+              p_configured_by?: string
+              p_empresa_id: string
+              p_encryption_key: string
+              p_provider: string
+              p_refresh_token?: string
+              p_token_expiry?: string
+            }
+            Returns: string
+          }
       user_belongs_to_empresa: {
         Args: { empresa_id_param: string }
         Returns: boolean

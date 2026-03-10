@@ -41,20 +41,6 @@ export type VAgendamentosEmpresa = {
   [key: string]: unknown;
 };
 
-export type DbProfessorIntegracao = {
-  id: string;
-  professor_id: string;
-  empresa_id: string;
-  provider: "google" | "zoom" | "default";
-  access_token: string | null;
-  refresh_token: string | null;
-  token_expiry: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type ProfessorIntegracao = DbProfessorIntegracao;
-
 export type DbAgendamentoRelatorio = {
   id: string;
   empresa_id: string;
