@@ -150,6 +150,15 @@ export type Recorrencia = {
   updated_at?: string;
 };
 
+export type RecorrenciaTurma = {
+  turma_id: string;
+  turma_nome: string;
+};
+
+export type RecorrenciaWithTurmas = Recorrencia & {
+  turmas: RecorrenciaTurma[];
+};
+
 export type Bloqueio = {
   id?: string;
   professor_id?: string | null; // null = bloqueio para toda empresa

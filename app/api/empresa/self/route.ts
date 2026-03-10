@@ -6,6 +6,7 @@ import {
   EmpresaService,
 } from "@/app/[tenant]/(modules)/empresa/services";
 import type { Database } from "@/app/shared/core/database.types";
+import { registrarAceite } from "@/app/shared/core/services/termos/termos.service";
 
 /**
  * POST /api/empresa/self
@@ -40,6 +41,17 @@ export async function POST(request: NextRequest) {
       ? String(body.emailContato).trim()
       : undefined;
     const telefone = body?.telefone ? String(body.telefone).trim() : undefined;
+    const termosAceitos = body?.termos_aceitos === true;
+
+    if (!termosAceitos) {
+      return NextResponse.json(
+        {
+          error:
+            "Você deve aceitar os Termos de Uso, Política de Privacidade e DPA para criar sua empresa.",
+        },
+        { status: 400 },
+      );
+    }
 
     if (!nome) {
       return NextResponse.json(
@@ -157,7 +169,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 5) Atualizar metadata do usuário (melhora UX de contexto no frontend)
+    // 5) Registrar aceite dos termos legais
+    const ipAddress =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      request.headers.get("x-real-ip") ??
+      null;
+    const userAgent = request.headers.get("user-agent") ?? null;
+
+    try {
+      await registrarAceite({
+        usuarioId: user.id,
+        empresaId: empresa.id,
+        ipAddress,
+        userAgent,
+      });
+    } catch (termosError) {
+      console.error("Error registering terms acceptance:", termosError);
+      // Não falhar a criação da empresa se o registro de termos falhar
+    }
+
+    // 6) Atualizar metadata do usuário (melhora UX de contexto no frontend)
     try {
       await adminClient.auth.admin.updateUserById(user.id, {
         user_metadata: {

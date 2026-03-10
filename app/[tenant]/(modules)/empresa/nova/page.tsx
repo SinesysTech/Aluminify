@@ -9,6 +9,14 @@ import { Input } from '@/app/shared/components/forms/input';
 import { Label } from '@/app/shared/components/forms/label';
 import { useToast } from '@/hooks/use-toast';
 import { useCurrentUser } from '@/components/providers/user-provider';
+import { TERMOS_LABELS, type TipoDocumentoLegal } from '@/app/shared/types/entities/termos';
+import Link from 'next/link';
+
+const DOCUMENTOS_LEGAIS: { tipo: TipoDocumentoLegal; href: string }[] = [
+  { tipo: 'termos_uso', href: '/termos-de-uso' },
+  { tipo: 'politica_privacidade', href: '/politica-de-privacidade' },
+  { tipo: 'dpa', href: '/dpa' },
+];
 
 export default function ProfessorNovaEmpresaPage() {
   const router = useRouter();
@@ -24,6 +32,7 @@ export default function ProfessorNovaEmpresaPage() {
     emailContato: '',
     telefone: '',
   });
+  const [termosAceitos, setTermosAceitos] = useState<Record<string, boolean>>({});
 
   // Verificar se o professor já tem empresa ao carregar a página
   useEffect(() => {
@@ -113,11 +122,18 @@ export default function ProfessorNovaEmpresaPage() {
         throw new Error('CNPJ inválido');
       }
 
+      // Validar aceite dos termos
+      const todosTermosAceitos = DOCUMENTOS_LEGAIS.every((doc) => termosAceitos[doc.tipo]);
+      if (!todosTermosAceitos) {
+        throw new Error('Você deve aceitar todos os termos legais para continuar.');
+      }
+
       const payload = {
         nome: formData.nome.trim(),
         cnpj: cnpjToSend,
         emailContato: formData.emailContato?.trim() || undefined,
         telefone: formData.telefone?.trim() || undefined,
+        termos_aceitos: true,
       };
 
       console.log('[Criar Empresa] Enviando requisição...', payload);
@@ -252,6 +268,34 @@ export default function ProfessorNovaEmpresaPage() {
             />
           </div>
 
+          <div className="space-y-3 border border-border rounded-lg p-4">
+            <p className="text-sm font-medium">Termos Legais *</p>
+            {DOCUMENTOS_LEGAIS.map(({ tipo, href }) => (
+              <div key={tipo} className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id={`termos-${tipo}`}
+                  checked={!!termosAceitos[tipo]}
+                  onChange={() =>
+                    setTermosAceitos((prev) => ({ ...prev, [tipo]: !prev[tipo] }))
+                  }
+                  className="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                  disabled={loading}
+                />
+                <label htmlFor={`termos-${tipo}`} className="text-sm">
+                  Li e aceito{' '}
+                  <Link
+                    href={href}
+                    target="_blank"
+                    className="text-primary underline hover:no-underline"
+                  >
+                    {TERMOS_LABELS[tipo]}
+                  </Link>
+                </label>
+              </div>
+            ))}
+          </div>
+
           <Button
             onClick={(e) => {
               e.preventDefault();
@@ -259,7 +303,7 @@ export default function ProfessorNovaEmpresaPage() {
               handleCreateEmpresa();
             }}
             className="w-full"
-            disabled={loading || !formData.nome.trim()}
+            disabled={loading || !formData.nome.trim() || !DOCUMENTOS_LEGAIS.every((doc) => termosAceitos[doc.tipo])}
             type="button"
           >
             {loading ? 'Criando...' : 'Criar Empresa'}

@@ -30,7 +30,7 @@ export default async function AgendamentosPage({
 
   // Student View
   if (user.role === 'aluno') {
-    const professors = await getProfessoresDisponiveis(empresaId ?? undefined)
+    const professors = await getProfessoresDisponiveis(empresaId ?? undefined, user.id)
 
     return (
       <div className="flex flex-col gap-6 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">

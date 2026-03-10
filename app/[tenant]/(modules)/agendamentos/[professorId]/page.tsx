@@ -116,7 +116,7 @@ export default async function AgendamentoProfessorPage({ params }: AgendamentoPr
       <div>
         {professor.tem_disponibilidade ? (
           <Suspense fallback={<SchedulerSkeleton />}>
-            <AgendamentoScheduler professorId={professorId} />
+            <AgendamentoScheduler professorId={professorId} alunoId={user.id} />
           </Suspense>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center border rounded-lg bg-muted/50">

@@ -686,8 +686,8 @@ export async function getAgendamentosEmpresa(
 ) {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    // @ts-expect-error - Table not in types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
     .from("v_agendamentos_empresa")
     .select("*")
     .eq("empresa_id", empresaId)

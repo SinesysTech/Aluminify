@@ -287,6 +287,52 @@ export type Database = {
           },
         ]
       }
+      agendamento_recorrencia_turmas: {
+        Row: {
+          created_at: string
+          empresa_id: string
+          id: string
+          recorrencia_id: string
+          turma_id: string
+        }
+        Insert: {
+          created_at?: string
+          empresa_id: string
+          id?: string
+          recorrencia_id: string
+          turma_id: string
+        }
+        Update: {
+          created_at?: string
+          empresa_id?: string
+          id?: string
+          recorrencia_id?: string
+          turma_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agendamento_recorrencia_turmas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamento_recorrencia_turmas_recorrencia_id_fkey"
+            columns: ["recorrencia_id"]
+            isOneToOne: false
+            referencedRelation: "agendamento_recorrencia"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agendamento_recorrencia_turmas_turma_id_fkey"
+            columns: ["turma_id"]
+            isOneToOne: false
+            referencedRelation: "turmas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agendamento_relatorios: {
         Row: {
           created_at: string
@@ -3224,6 +3270,47 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "submodule_definitions"
             referencedColumns: ["module_id", "id"]
+          },
+        ]
+      }
+      termos_aceite: {
+        Row: {
+          accepted_at: string
+          empresa_id: string
+          id: string
+          ip_address: unknown
+          tipo_documento: string
+          user_agent: string | null
+          usuario_id: string
+          versao: string
+        }
+        Insert: {
+          accepted_at?: string
+          empresa_id: string
+          id?: string
+          ip_address?: unknown
+          tipo_documento: string
+          user_agent?: string | null
+          usuario_id: string
+          versao: string
+        }
+        Update: {
+          accepted_at?: string
+          empresa_id?: string
+          id?: string
+          ip_address?: unknown
+          tipo_documento?: string
+          user_agent?: string | null
+          usuario_id?: string
+          versao?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "termos_aceite_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
           },
         ]
       }

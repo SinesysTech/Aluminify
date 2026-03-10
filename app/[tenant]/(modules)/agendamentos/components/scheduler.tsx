@@ -11,9 +11,10 @@ import { getAvailabilityForMonth } from "@/app/[tenant]/(modules)/agendamentos/l
 
 interface AgendamentoSchedulerProps {
   professorId: string
+  alunoId?: string
 }
 
-export function AgendamentoScheduler({ professorId }: AgendamentoSchedulerProps) {
+export function AgendamentoScheduler({ professorId, alunoId }: AgendamentoSchedulerProps) {
   const router = useRouter()
 
   const searchParams = useSearchParams()
@@ -44,11 +45,11 @@ export function AgendamentoScheduler({ professorId }: AgendamentoSchedulerProps)
     const fetchAvailability = async () => {
       const year = viewMonth.getFullYear()
       const month = viewMonth.getMonth() + 1
-      const data = await getAvailabilityForMonth(professorId, year, month)
+      const data = await getAvailabilityForMonth(professorId, year, month, alunoId)
       setAvailability(data)
     }
     fetchAvailability()
-  }, [professorId, viewMonth])
+  }, [professorId, viewMonth, alunoId])
 
   // Create modifier for days with availability
   const availableDays = Object.entries(availability)
@@ -127,6 +128,7 @@ export function AgendamentoScheduler({ professorId }: AgendamentoSchedulerProps)
                 timeZone={timeZone}
                 handleChangeAvailableTime={handleChangeAvailableTime}
                 professorId={professorId}
+                alunoId={alunoId}
               />
             )}
           </>

@@ -8,6 +8,7 @@ export * from "./entities/papel";
 export * from "./entities/usuario";
 export * from "./entities/course";
 export * from "./entities/activity";
+export * from "./entities/termos";
 
 // DTOs
 export * from "./dtos/api-responses";

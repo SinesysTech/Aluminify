@@ -2,13 +2,13 @@
 
 import { createClient } from "@/app/shared/core/server";
 import { revalidatePath } from "next/cache";
-import { Recorrencia, DbAgendamentoRecorrencia, Bloqueio } from "../types";
+import { Recorrencia, RecorrenciaWithTurmas, DbAgendamentoRecorrencia, Bloqueio } from "../types";
 import type { Database } from "@/app/shared/core/database.types";
 import { canManageProfessorSchedule } from "./admin-helpers";
 
 export async function getRecorrencias(
   professorId: string,
-): Promise<Recorrencia[]> {
+): Promise<RecorrenciaWithTurmas[]> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -35,6 +35,27 @@ export async function getRecorrencias(
     throw new Error("Failed to fetch recorrencias");
   }
 
+  const recorrenciaIds = (data || []).map((item) => item.id);
+
+  // Fetch turma links for all recorrencias
+  const turmasMap: Record<string, Array<{ turma_id: string; turma_nome: string }>> = {};
+  if (recorrenciaIds.length > 0) {
+    const { data: turmasData } = await supabase
+      .from("agendamento_recorrencia_turmas")
+      .select("recorrencia_id, turma_id, turmas(nome)")
+      .in("recorrencia_id", recorrenciaIds);
+
+    for (const row of turmasData || []) {
+      if (!turmasMap[row.recorrencia_id]) {
+        turmasMap[row.recorrencia_id] = [];
+      }
+      turmasMap[row.recorrencia_id].push({
+        turma_id: row.turma_id,
+        turma_nome: (row.turmas as unknown as { nome: string })?.nome ?? "",
+      });
+    }
+  }
+
   return ((data || []) as unknown as DbAgendamentoRecorrencia[]).map(
     (item) => ({
       id: item.id,
@@ -50,12 +71,14 @@ export async function getRecorrencias(
       ativo: item.ativo,
       created_at: item.created_at ?? undefined,
       updated_at: item.updated_at ?? undefined,
+      turmas: turmasMap[item.id] || [],
     }),
   );
 }
 
 export async function createRecorrencia(
   data: Omit<Recorrencia, "id" | "created_at" | "updated_at">,
+  turmaIds?: string[],
 ): Promise<Recorrencia> {
   const supabase = await createClient();
   const {
@@ -97,10 +120,24 @@ export async function createRecorrencia(
     throw new Error("Failed to create recorrencia");
   }
 
+  // Insert turma links if provided
+  const typedResult = result as unknown as DbAgendamentoRecorrencia;
+  if (turmaIds && turmaIds.length > 0) {
+    const turmaPayload = turmaIds.map((turmaId) => ({
+      recorrencia_id: typedResult.id,
+      turma_id: turmaId,
+      empresa_id: data.empresa_id,
+    }));
+    const { error: turmaError } = await supabase
+      .from("agendamento_recorrencia_turmas")
+      .insert(turmaPayload);
+    if (turmaError) {
+      console.error("Error linking turmas to recorrencia:", turmaError);
+    }
+  }
+
   revalidatePath("/agendamentos/disponibilidade");
   revalidatePath("/agendamentos");
-
-  const typedResult = result as unknown as DbAgendamentoRecorrencia;
   return {
     id: typedResult.id,
     professor_id: typedResult.professor_id,
@@ -126,6 +163,7 @@ export async function updateRecorrencia(
       "id" | "professor_id" | "empresa_id" | "created_at" | "updated_at"
     >
   >,
+  turmaIds?: string[],
 ): Promise<Recorrencia> {
   const supabase = await createClient();
   const {
@@ -173,6 +211,37 @@ export async function updateRecorrencia(
   if (error) {
     console.error("Error updating recorrencia:", error);
     throw new Error("Failed to update recorrencia");
+  }
+
+  // Update turma links if turmaIds provided
+  if (turmaIds !== undefined) {
+    // Delete existing links
+    await supabase
+      .from("agendamento_recorrencia_turmas")
+      .delete()
+      .eq("recorrencia_id", id);
+
+    // Insert new links
+    if (turmaIds.length > 0) {
+      const { data: recForEmpresa } = await supabase
+        .from("agendamento_recorrencia")
+        .select("empresa_id")
+        .eq("id", id)
+        .single();
+      if (recForEmpresa) {
+        const turmaPayload = turmaIds.map((turmaId) => ({
+          recorrencia_id: id,
+          turma_id: turmaId,
+          empresa_id: recForEmpresa.empresa_id,
+        }));
+        const { error: turmaError } = await supabase
+          .from("agendamento_recorrencia_turmas")
+          .insert(turmaPayload);
+        if (turmaError) {
+          console.error("Error updating turma links:", turmaError);
+        }
+      }
+    }
   }
 
   revalidatePath("/agendamentos/disponibilidade");

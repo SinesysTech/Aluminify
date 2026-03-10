@@ -12,6 +12,11 @@ import {
 } from "../types";
 import { getConfiguracoesProfessor } from "./config-actions";
 import { SCHEDULING_TIMEZONE } from "./constants";
+import {
+  getRecorrenciaTurmas,
+  getAlunoTurmaIds,
+  filterRecorrenciasByTurma,
+} from "./turma-filter-helpers";
 
 export async function getDisponibilidade(professorId: string) {
   const supabase = await createClient();
@@ -76,7 +81,7 @@ export async function upsertDisponibilidade(data: Disponibilidade) {
   return { success: true };
 }
 
-export async function getAvailableSlots(professorId: string, dateStr: string) {
+export async function getAvailableSlots(professorId: string, dateStr: string, alunoId?: string) {
   const supabase = await createClient();
 
   const date = new Date(dateStr);
@@ -98,8 +103,26 @@ export async function getAvailableSlots(professorId: string, dateStr: string) {
     .lte("data_inicio", dateOnly)
     .or(`data_fim.is.null,data_fim.gte.${dateOnly}`);
 
+  // Filter by turma if alunoId is provided
+  let filteredRulesData = (rulesData || []) as DbAgendamentoRecorrencia[];
+  if (alunoId && filteredRulesData.length > 0) {
+    const recorrenciaIds = filteredRulesData.map((r) => r.id);
+    const { data: professor } = await supabase
+      .from("usuarios")
+      .select("empresa_id")
+      .eq("id", professorId)
+      .single();
+    if (professor?.empresa_id) {
+      const [turmasMap, alunoTurmaIds] = await Promise.all([
+        getRecorrenciaTurmas(recorrenciaIds),
+        getAlunoTurmaIds(alunoId, professor.empresa_id),
+      ]);
+      filteredRulesData = filterRecorrenciasByTurma(filteredRulesData, turmasMap, alunoTurmaIds);
+    }
+  }
+
   // Filter and map rules to ensure ativo is boolean
-  const rules = ((rulesData || []) as DbAgendamentoRecorrencia[])
+  const rules = filteredRulesData
     .filter((r) => r.ativo === true)
     .map((r) => ({
       dia_semana: r.dia_semana,
@@ -186,6 +209,7 @@ export async function getAvailabilityForMonth(
   professorId: string,
   year: number,
   month: number, // 1-12
+  alunoId?: string,
 ): Promise<{ [date: string]: { hasSlots: boolean; slotCount: number } }> {
   const supabase = await createClient();
   const {
@@ -225,9 +249,23 @@ export async function getAvailabilityForMonth(
     return {};
   }
 
+  // Filter recorrencias by turma if alunoId provided
+  let filteredRecorrencias = recorrencias;
+  if (alunoId) {
+    const recorrenciaIds = recorrencias.map((r) => r.id);
+    const [turmasMap, alunoTurmaIds] = await Promise.all([
+      getRecorrenciaTurmas(recorrenciaIds),
+      getAlunoTurmaIds(alunoId, professor.empresa_id),
+    ]);
+    filteredRecorrencias = filterRecorrenciasByTurma(recorrencias, turmasMap, alunoTurmaIds);
+    if (filteredRecorrencias.length === 0) {
+      return {};
+    }
+  }
+
   // Create a map of day of week -> recorrencias
   const dayRecorrencias: { [dayOfWeek: number]: boolean } = {};
-  for (const rec of recorrencias) {
+  for (const rec of filteredRecorrencias) {
     dayRecorrencias[rec.dia_semana] = true;
   }
 

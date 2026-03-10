@@ -9,9 +9,15 @@ import {
   DbAgendamentoBloqueio,
 } from "../types";
 import { SCHEDULING_TIMEZONE } from "./constants";
+import {
+  getRecorrenciaTurmas,
+  getAlunoTurmaIds,
+  filterRecorrenciasByTurma,
+} from "./turma-filter-helpers";
 
 export async function getProfessoresDisponiveis(
   empresaId?: string,
+  alunoId?: string,
 ): Promise<ProfessorDisponivel[]> {
   const supabase = await createClient();
   const {
@@ -77,11 +83,21 @@ export async function getProfessoresDisponiveis(
     .lte("data_inicio", nextWeek.toISOString())
     .gte("data_fim", today.toISOString());
 
+  // Filter recorrencias by turma if alunoId provided
+  let allRecorrencias = (recorrencias || []) as DbAgendamentoRecorrencia[];
+  if (alunoId && allRecorrencias.length > 0) {
+    const recorrenciaIds = allRecorrencias.map((r) => r.id);
+    const [turmasMap, alunoTurmaIds] = await Promise.all([
+      getRecorrenciaTurmas(recorrenciaIds),
+      getAlunoTurmaIds(alunoId, targetEmpresaId),
+    ]);
+    allRecorrencias = filterRecorrenciasByTurma(allRecorrencias, turmasMap, alunoTurmaIds);
+  }
+
   return professores
     .map((professor) => {
-      const profRecorrencias = (
-        (recorrencias || []) as DbAgendamentoRecorrencia[]
-      ).filter((r) => r.professor_id === professor.id);
+      const profRecorrencias = allRecorrencias
+        .filter((r) => r.professor_id === professor.id);
 
       const profAgendamentos = (agendamentos || [])
         .filter((a) => a.professor_id === professor.id)

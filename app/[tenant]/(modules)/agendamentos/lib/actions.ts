@@ -128,3 +128,8 @@ export {
   getTeachersForAdminSelector,
   canManageProfessorSchedule,
 };
+
+// Turma filter helpers
+import { getTurmasForSelector } from "./turma-filter-helpers";
+
+export { getTurmasForSelector };

@@ -11,6 +11,7 @@ interface RightPanelProps {
   timeZone: string
   handleChangeAvailableTime: (time: string, durationMinutes: number) => void
   professorId: string
+  alunoId?: string
 }
 
 export function RightPanel({
@@ -18,6 +19,7 @@ export function RightPanel({
   timeZone,
   handleChangeAvailableTime,
   professorId,
+  alunoId,
 }: RightPanelProps) {
   const locale = 'pt-BR'
 
@@ -35,7 +37,7 @@ export function RightPanel({
       setLoading(true)
       try {
         const dateStr = date.toISOString()
-        const result = await getAvailableSlots(professorId, dateStr)
+        const result = await getAvailableSlots(professorId, dateStr, alunoId)
         
         // Type guard para verificar se result tem a estrutura esperada
         if (result && typeof result === 'object' && 'slots' in result && Array.isArray(result.slots)) {
@@ -54,7 +56,7 @@ export function RightPanel({
       }
     }
     fetchSlots()
-  }, [date, professorId, timeZone])
+  }, [date, professorId, timeZone, alunoId])
 
   // Helper to format slot time range (HH:MM - HH:MM)
   const formatTimeRange = (isoString: string, durationMinutes: number) => {

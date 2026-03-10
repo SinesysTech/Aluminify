@@ -36,9 +36,10 @@ import {
   createRecorrencia,
   updateRecorrencia,
   deleteRecorrencia,
+  getTurmasForSelector,
 } from "@/app/[tenant]/(modules)/agendamentos/lib/actions"
-import type { Recorrencia } from "@/app/[tenant]/(modules)/agendamentos/types"
-import { Loader2, Plus, Pencil, Trash, Calendar, Clock, CalendarDays, List } from "lucide-react"
+import type { RecorrenciaWithTurmas } from "@/app/[tenant]/(modules)/agendamentos/types"
+import { Loader2, Plus, Pencil, Trash, Calendar, Clock, CalendarDays, List, Users } from "lucide-react"
 import { toast } from "@/app/shared/components/feedback/use-toast"
 import { TableSkeleton } from "@/app/shared/components/ui/table-skeleton"
 import { format } from "date-fns"
@@ -98,13 +99,17 @@ const defaultFormData: RecorrenciaFormData = {
   ativo: true,
 }
 
+type TurmaOption = { id: string; nome: string; cursoNome: string }
+
 export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManagerProps) {
-  const [recorrencias, setRecorrencias] = useState<Recorrencia[]>([])
+  const [recorrencias, setRecorrencias] = useState<RecorrenciaWithTurmas[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formData, setFormData] = useState<RecorrenciaFormData>(defaultFormData)
+  const [selectedTurmaIds, setSelectedTurmaIds] = useState<string[]>([])
+  const [turmasOptions, setTurmasOptions] = useState<TurmaOption[]>([])
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [showCalendarPreview, setShowCalendarPreview] = useState(false)
 
@@ -125,11 +130,21 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
     }
   }, [professorId])
 
+  const fetchTurmas = useCallback(async () => {
+    try {
+      const turmas = await getTurmasForSelector(empresaId)
+      setTurmasOptions(turmas)
+    } catch (error) {
+      console.error(error)
+    }
+  }, [empresaId])
+
   useEffect(() => {
     fetchRecorrencias()
-  }, [fetchRecorrencias])
+    fetchTurmas()
+  }, [fetchRecorrencias, fetchTurmas])
 
-  const handleOpenDialog = (recorrencia?: Recorrencia) => {
+  const handleOpenDialog = (recorrencia?: RecorrenciaWithTurmas) => {
     if (recorrencia) {
       setEditingId(recorrencia.id || null)
       setFormData({
@@ -142,9 +157,11 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
         duracao_slot_minutos: recorrencia.duracao_slot_minutos,
         ativo: recorrencia.ativo,
       })
+      setSelectedTurmaIds(recorrencia.turmas.map((t) => t.turma_id))
     } else {
       setEditingId(null)
       setFormData(defaultFormData)
+      setSelectedTurmaIds([])
     }
     setDialogOpen(true)
   }
@@ -180,7 +197,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
           hora_fim: formData.hora_fim,
           duracao_slot_minutos: formData.duracao_slot_minutos,
           ativo: formData.ativo,
-        })
+        }, selectedTurmaIds)
         toast({
           title: "Sucesso",
           description: "Disponibilidade atualizada!",
@@ -197,7 +214,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
           hora_fim: formData.hora_fim,
           duracao_slot_minutos: formData.duracao_slot_minutos,
           ativo: formData.ativo,
-        })
+        }, selectedTurmaIds)
         toast({
           title: "Sucesso",
           description: "Disponibilidade criada!",
@@ -236,7 +253,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
     }
   }
 
-  const handleToggleAtivo = async (recorrencia: Recorrencia) => {
+  const handleToggleAtivo = async (recorrencia: RecorrenciaWithTurmas) => {
     try {
       await updateRecorrencia(recorrencia.id!, { ativo: !recorrencia.ativo })
       toast({
@@ -443,6 +460,38 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
               />
               <Label htmlFor="ativo">Disponibilidade ativa</Label>
             </div>
+
+            {/* Turma Restriction */}
+            {turmasOptions.length > 0 && (
+              <div className="grid gap-2">
+                <Label>Restringir para turmas (opcional)</Label>
+                <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2">
+                  {turmasOptions.map((turma) => (
+                    <div key={turma.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`turma-${turma.id}`}
+                        checked={selectedTurmaIds.includes(turma.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedTurmaIds([...selectedTurmaIds, turma.id])
+                          } else {
+                            setSelectedTurmaIds(selectedTurmaIds.filter((id) => id !== turma.id))
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`turma-${turma.id}`} className="text-sm font-normal cursor-pointer">
+                        {turma.nome} <span className="text-muted-foreground">({turma.cursoNome})</span>
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {selectedTurmaIds.length === 0
+                    ? "Todos os alunos podem ver esta disponibilidade"
+                    : `Apenas alunos das ${selectedTurmaIds.length} turma(s) selecionada(s) podem ver`}
+                </p>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
@@ -586,6 +635,7 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
                     <TableHead>Horário</TableHead>
                     <TableHead>Duração</TableHead>
                     <TableHead>Tipo</TableHead>
+                    <TableHead>Turmas</TableHead>
                     <TableHead>Período</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-25">Ações</TableHead>
@@ -608,6 +658,16 @@ export function RecorrenciaManager({ professorId, empresaId }: RecorrenciaManage
                         <Badge variant="secondary">
                           Plantão
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {rec.turmas.length > 0 ? (
+                          <Badge variant="outline" className="gap-1">
+                            <Users className="h-3 w-3" />
+                            {rec.turmas.length} {rec.turmas.length === 1 ? "turma" : "turmas"}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Todas</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDateRange(rec.data_inicio, rec.data_fim ?? null)}

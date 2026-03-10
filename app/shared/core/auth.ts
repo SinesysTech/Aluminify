@@ -32,6 +32,7 @@ import {
   resolvePermissions,
 } from "@/app/shared/core/roles";
 import { cacheService } from "@/app/shared/core/services/cache/cache.service";
+import { verificarAceiteVigente } from "@/app/shared/core/services/termos/termos.service";
 
 const AUTH_SESSION_CACHE_TTL = 1800; // 30 minutos
 
@@ -360,6 +361,7 @@ export const getAuthenticatedUser = cache(_getAuthenticatedUser);
 type RequireUserOptions = {
   allowedRoles?: PapelBase[];
   ignorePasswordRequirement?: boolean;
+  ignoreTermsRequirement?: boolean;
 };
 
 export async function requireUser(
@@ -396,6 +398,23 @@ export async function requireUser(
       );
     }
     redirect("/primeiro-acesso");
+  }
+
+  // Verificar aceite de termos vigentes para admins/owners
+  if (
+    !options?.ignoreTermsRequirement &&
+    (user.isAdmin || user.isOwner) &&
+    user.empresaId &&
+    user.empresaSlug
+  ) {
+    const aceitouTermos = await verificarAceiteVigente(
+      user.id,
+      user.empresaId,
+    );
+
+    if (!aceitouTermos) {
+      redirect(`/${user.empresaSlug}/aceite-termos`);
+    }
   }
 
   return user;

@@ -4,6 +4,11 @@ import { createClient } from "@/app/shared/core/server";
 import { toZonedTime } from "date-fns-tz";
 import { getConfiguracoesProfessor } from "./config-actions";
 import { SCHEDULING_TIMEZONE } from "./constants";
+import {
+  getRecorrenciaTurmas,
+  getAlunoTurmaIds,
+  filterRecorrenciasByTurma,
+} from "./turma-filter-helpers";
 
 export async function checkConflitos(
   professorId: string,
@@ -34,6 +39,7 @@ export async function validateAgendamento(
   professorId: string,
   dataInicio: Date,
   dataFim: Date,
+  alunoId?: string,
 ): Promise<{ valid: boolean; error?: string }> {
   const supabase = await createClient();
 
@@ -82,6 +88,30 @@ export async function validateAgendamento(
     };
   }
 
+  // Filter by turma if alunoId provided
+  let filteredRecorrencias = recorrencias;
+  if (alunoId) {
+    const recorrenciaIds = recorrencias.map((r) => r.id);
+    const { data: professor } = await supabase
+      .from("usuarios")
+      .select("empresa_id")
+      .eq("id", professorId)
+      .single();
+    if (professor?.empresa_id) {
+      const [turmasMap, alunoTurmaIds] = await Promise.all([
+        getRecorrenciaTurmas(recorrenciaIds),
+        getAlunoTurmaIds(alunoId, professor.empresa_id),
+      ]);
+      filteredRecorrencias = filterRecorrenciasByTurma(recorrencias, turmasMap, alunoTurmaIds);
+    }
+    if (filteredRecorrencias.length === 0) {
+      return {
+        valid: false,
+        error: "O professor não tem disponibilidade neste horário.",
+      };
+    }
+  }
+
   const timeToMinutes = (timeStr: string) => {
     const [h, m] = timeStr.split(":").map(Number);
     return h * 60 + m;
@@ -92,7 +122,7 @@ export async function validateAgendamento(
     localInicio.getHours() * 60 + localInicio.getMinutes();
   const endMinutes = localFim.getHours() * 60 + localFim.getMinutes();
 
-  const isWithinAvailability = recorrencias.some((rec) => {
+  const isWithinAvailability = filteredRecorrencias.some((rec) => {
     const ruleStart = timeToMinutes(rec.hora_inicio);
     const ruleEnd = timeToMinutes(rec.hora_fim);
     return startMinutes >= ruleStart && endMinutes <= ruleEnd;

@@ -1,0 +1,56 @@
+import { requireUser } from "@/app/shared/core/auth";
+import { AceiteTermosForm } from "./components/aceite-termos-form";
+import { LegalDocumentViewer } from "@/app/shared/components/legal-document-viewer";
+import type { TipoDocumentoLegal } from "@/app/shared/types/entities/termos";
+
+const DOCUMENTOS: TipoDocumentoLegal[] = [
+  "termos_uso",
+  "politica_privacidade",
+  "dpa",
+];
+
+export default async function AceiteTermosPage({
+  params,
+}: {
+  params: Promise<{ tenant: string }>;
+}) {
+  const { tenant } = await params;
+  const user = await requireUser({
+    ignoreTermsRequirement: true,
+    ignorePasswordRequirement: true,
+  });
+
+  if (!user.empresaId) {
+    return null;
+  }
+
+  // Pre-render os documentos no servidor
+  const documentosHtml = await Promise.all(
+    DOCUMENTOS.map(async (tipo) => ({
+      tipo,
+      content: <LegalDocumentViewer tipo={tipo} />,
+    })),
+  );
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-3xl">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-bold">Aceite de Termos</h1>
+          <p className="text-muted-foreground mt-2">
+            Para continuar usando a plataforma, é necessário que você aceite os
+            documentos legais abaixo.
+          </p>
+        </div>
+        <AceiteTermosForm
+          empresaId={user.empresaId}
+          tenant={tenant}
+          documentos={documentosHtml.map(({ tipo, content }) => ({
+            tipo,
+            content,
+          }))}
+        />
+      </div>
+    </div>
+  );
+}
