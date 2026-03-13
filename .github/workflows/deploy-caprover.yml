@@ -58,6 +58,35 @@ jobs:
           echo "Testing connectivity to CapRover endpoint..."
           curl -I --max-time 20 "${{ secrets.CAPROVER_SERVER }}"
 
+      - name: Validate CapRover credentials input
+        run: |
+          set -euo pipefail
+
+          SERVER="${{ secrets.CAPROVER_SERVER }}"
+          APP="${{ secrets.CAPROVER_APP_NAME }}"
+          TOKEN="${{ secrets.CAPROVER_APP_TOKEN }}"
+
+          if [ -z "${SERVER}" ] || [ -z "${APP}" ] || [ -z "${TOKEN}" ]; then
+            echo "::error::CAPROVER_SERVER, CAPROVER_APP_NAME e CAPROVER_APP_TOKEN devem estar preenchidos."
+            exit 1
+          fi
+
+          if ! echo "${SERVER}" | grep -Eq '^https://'; then
+            echo "::error::CAPROVER_SERVER deve iniciar com https://"
+            exit 1
+          fi
+
+          if echo "${SERVER}" | grep -Eq '/$'; then
+            echo "::warning::CAPROVER_SERVER com barra final pode causar problemas. Use sem barra no final."
+          fi
+
+          if [ "${#TOKEN}" -lt 20 ]; then
+            echo "::error::CAPROVER_APP_TOKEN parece curto/inválido. Gere um novo App Token no CapRover."
+            exit 1
+          fi
+
+          echo "CapRover inputs parecem válidos. Seguindo para deploy."
+
       - name: Deploy to CapRover
         id: deploy_try_1
         continue-on-error: true
