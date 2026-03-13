@@ -53,10 +53,43 @@ jobs:
             NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_OR_ANON_KEY }}
             OAUTH_ENCRYPTION_KEY=${{ secrets.OAUTH_ENCRYPTION_KEY }}
 
+      - name: Check CapRover connectivity
+        run: |
+          echo "Testing connectivity to CapRover endpoint..."
+          curl -I --max-time 20 "${{ secrets.CAPROVER_SERVER }}"
+
       - name: Deploy to CapRover
+        id: deploy_try_1
+        continue-on-error: true
         uses: caprover/deploy-from-github@v1.1.2
         with:
           server: ${{ secrets.CAPROVER_SERVER }}
           app: ${{ secrets.CAPROVER_APP_NAME }}
           token: ${{ secrets.CAPROVER_APP_TOKEN }}
           image: ${{ steps.tag.outputs.image }}:${{ steps.tag.outputs.sha }}
+
+      - name: Retry deploy to CapRover (attempt 2)
+        id: deploy_try_2
+        if: steps.deploy_try_1.outcome == 'failure'
+        continue-on-error: true
+        uses: caprover/deploy-from-github@v1.1.2
+        with:
+          server: ${{ secrets.CAPROVER_SERVER }}
+          app: ${{ secrets.CAPROVER_APP_NAME }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN }}
+          image: ${{ steps.tag.outputs.image }}:${{ steps.tag.outputs.sha }}
+
+      - name: Retry deploy to CapRover (attempt 3)
+        if: steps.deploy_try_1.outcome == 'failure' && steps.deploy_try_2.outcome == 'failure'
+        uses: caprover/deploy-from-github@v1.1.2
+        with:
+          server: ${{ secrets.CAPROVER_SERVER }}
+          app: ${{ secrets.CAPROVER_APP_NAME }}
+          token: ${{ secrets.CAPROVER_APP_TOKEN }}
+          image: ${{ steps.tag.outputs.image }}:${{ steps.tag.outputs.sha }}
+
+      - name: Fail if all deploy attempts failed
+        if: steps.deploy_try_1.outcome == 'failure' && steps.deploy_try_2.outcome == 'failure' && failure()
+        run: |
+          echo "Deploy para CapRover falhou apos 3 tentativas."
+          exit 1
